@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { NativeSinglePanelContent } from "../components/DesktopPanelWorkspace";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
@@ -2392,7 +2391,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard detail={inDetail} preserveFeedLayout={inDetail} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2605,28 +2604,12 @@ export default function SquarePage() {
           <header className="square-desktop-detail-header">
             <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
             <strong className="native-panel-title">{t("square.statementDetail")}</strong>
-            <button
-              aria-label={activeCommentStatement.is_anonymous ? t("square.anonymousUser") : activeCommentStatement.user.name}
-              className="square-desktop-detail-author"
-              disabled={activeCommentStatement.is_anonymous}
-              onClick={() => { if (!activeCommentStatement.is_anonymous) openUserProfile(activeCommentStatement.user); }}
-              type="button"
-            >
-              {activeCommentStatement.is_anonymous ? <span className="square-anonymous-avatar square-desktop-detail-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-desktop-detail-avatar" frame={activeCommentStatement.user.avatar_frame_style} name={activeCommentStatement.user.name} uri={activeCommentStatement.user.avatar_uri} />}
-              <span>
-                <strong>{activeCommentStatement.is_anonymous ? t("square.anonymousUser") : activeCommentStatement.user.name}</strong>
-                <time>{formatRelativeTime(activeCommentStatement.created_at)}</time>
-              </span>
-            </button>
             <div className="square-desktop-detail-actions">
               <button aria-label={t("common.close")} className="native-panel-close" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">close</span></button>
-              <button aria-label={t("square.like")} className={activeCommentStatement.liked ? "is-liked" : ""} disabled={!canPublish} onClick={() => void toggleStatementLike(activeCommentStatement)} type="button"><span className="material-symbols-outlined">favorite</span></button>
-              <button aria-label={t("square.comment")} onClick={() => commentInputRef.current?.focus()} type="button"><span className="material-symbols-outlined">chat_bubble</span></button>
-              <button aria-label={t("square.share")} onClick={() => openStatementShare(activeCommentStatement)} type="button"><span className="material-symbols-outlined">send</span></button>
             </div>
           </header>
           <div className="square-desktop-detail-scroll">
-            <NativeSinglePanelContent><div className="native-current-statement">{renderFeedStatement(activeCommentStatement, true)}</div></NativeSinglePanelContent>
+            <div className="native-current-statement">{desktopWorkspace ? renderFeedStatement(activeCommentStatement, true) : null}</div>
             {discussionContent}
           </div>
           {commentComposer}

@@ -182,12 +182,15 @@
   .desktop-panel-workspace .native-panel-back { display: none; }
   .desktop-panel-workspace.native-detail-single .native-panel-back { display: grid; flex: 0 0 auto; }
   .native-detail-single .native-panel-close { display: none; }
-  .desktop-panel-workspace:not(.native-detail-single) .desktop-writing-desk-shortcut { display: none; }
-  .native-current-statement { display: none; }
-  .native-detail-single .native-current-statement { display: block; }
-  .native-panel-title { display: none; }
-  .native-detail-single .native-panel-title { display: block; flex: 1; }
-  .desktop-panel-workspace.native-detail-single > .square-desktop-workspace { --desktop-square-header-height: 65px; }
+  .desktop-panel-workspace .native-panel-title { display: block; flex: 1; }
+  .desktop-panel-workspace .square-desktop-detail-card { grid-template-rows: 65px minmax(0, 1fr) auto; }
+  .desktop-panel-workspace .native-current-statement .square-statement-card {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
   .native-detail-single .square-desktop-detail-header > :is(.square-desktop-detail-author, .square-desktop-detail-actions) { display: none; }
 
   .desktop-panel-workspace .square-desktop-detail-header { gap: 8px; padding-inline: 12px; }

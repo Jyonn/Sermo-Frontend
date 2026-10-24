@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.12",
+  "id": "2026.10.24.13",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "四个页面，同一套自适应面板",
+      "title": "列表收窄，内容展开",
       "items": [
-        "聊天、广场、通讯与菜单统一按可用空间调整面板，单面板不再限制手机宽度",
-        "平板使用紧凑左侧导航，分栏面板不再遮挡其他区域；广场单面板完整展示正文与评论"
+        "聊天和广场改为窄列表、宽详情，把更多空间留给会话与发言内容",
+        "广场右侧完整展示正文和评论；空间不足时，当前详情仍可充分展开"
       ]
     },
     "en": {
-      "title": "One adaptive workspace across four tabs",
+      "title": "Slim lists, roomier content",
       "items": [
-        "Chats, Square, contacts and menu now share adaptive panels; single panels expand beyond phone width",
-        "Tablets use compact side navigation, docked panels no longer mask other content, and single-pane Square details include the full post"
+        "Chats and Square now use narrow lists and wider details, giving conversations and posts more room",
+        "Square details include the full post and comments; single-pane details still expand to the available space"
       ]
     }
   }

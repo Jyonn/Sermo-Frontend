@@ -16,7 +16,7 @@ test("feed remains mounted and detail does not overwrite feed card refs", () => 
   assert.doesNotMatch(square, /inlineStatementExpanded && !desktopWorkspace \? null : \(\s*<VirtualDynamicList/);
   assert.match(square, /cardRef=\{inDetail \? undefined/);
   assert.match(square, /renderFeedStatement\(activeCommentStatement, true\)/);
-  assert.match(square, /preserveFeedLayout=\{inDetail\}/);
+  assert.match(square, /preserveFeedLayout=\{inDetail && !desktopWorkspace\}/);
 });
 test("detail media loads eagerly and cached video covers are checked before paint", () => {
   assert.match(square, /loading=\{detail \? "eager" : "lazy"\}/);

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useLayoutEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
-import { desktopPanelLayout, desktopPanelMode, panelSizing, topDesktopPanel, type DesktopPanelLayer } from "../lib/desktopPanels";
+import { conversationPanelLayout, desktopPanelLayout, desktopPanelMode, panelSizing, topDesktopPanel, type DesktopPanelLayer } from "../lib/desktopPanels";
 import "./DesktopPanelWorkspace.css";
 
 const query = "(min-width: 720px)";
@@ -18,16 +18,11 @@ interface PanelContext {
   topId?: string;
   single: boolean;
   floating: boolean;
-  nativeSingle: boolean;
   register: (layer: DesktopPanelLayer) => void;
   unregister: (id: string) => void;
 }
 const DesktopPanels = createContext<PanelContext | null>(null);
 export const useDesktopPanels = () => useContext(DesktopPanels);
-
-export function NativeSinglePanelContent({ children }: { children: ReactNode }) {
-  return useDesktopPanels()?.nativeSingle ? children : null;
-}
 
 export function DesktopPanelWorkspace({ children, className, selected = false }: { children: ReactNode; className: string; selected?: boolean }) {
   const { pathname } = useLocation();
@@ -57,7 +52,7 @@ export function DesktopPanelWorkspace({ children, className, selected = false }:
   const unregister = useCallback((id: string) => setLayers((current) => current.some((item) => item.id === id) ? current.filter((item) => item.id !== id) : current), []);
   const top = topDesktopPanel(layers);
   const active = enabled && layers.length > 0;
-  const layout = desktopPanelLayout(available);
+  const layout = mode === "floating" ? conversationPanelLayout(available) : desktopPanelLayout(available);
   const floating = enabled && mode === "floating" && selected && layout.presentation === "dual";
   const split = enabled && !floating && (mode === "split" || active);
   const single = split && active && layout.presentation === "single";
@@ -71,7 +66,7 @@ export function DesktopPanelWorkspace({ children, className, selected = false }:
       "--panel-gap": active && !single ? `${panelSizing.gap}px` : "0px",
     } : {}),
   } as CSSProperties;
-  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, floating, nativeSingle: enabled && selected && layout.presentation === "single", register, unregister }}>
+  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, floating, register, unregister }}>
     <main ref={setWorkspace} style={sizing} className={`${className} desktop-panel-workspace${enabled ? ` panel-mode-${split ? "split" : "floating"}` : ""}${active ? " has-desktop-panel" : ""}${single ? " panel-single" : ""}${selected && layout.presentation === "single" ? " native-detail-single" : ""}`}>
       {children}
       <div className={`desktop-panel-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!active} />

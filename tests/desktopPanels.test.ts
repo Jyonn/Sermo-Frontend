@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { desktopPanelLayout, desktopPanelMode, topDesktopPanel } from "../src/lib/desktopPanels.ts";
+import { conversationPanelLayout, desktopPanelLayout, desktopPanelMode, topDesktopPanel } from "../src/lib/desktopPanels.ts";
 
 test("desktop modes are limited to the four application workspaces", () => {
   for (const path of ["/app/menu", "/app/notifications", "/app/notifications/friends/42"]) assert.equal(desktopPanelMode(path), "split");
@@ -51,8 +51,25 @@ test("all four tabs use the same tablet boundary and native details retain compl
   assert.match(chats, /workspaceSelected=\{Boolean\(displayedChat\)\}/);
   assert.match(chats, /max-width: 719px/);
   assert.match(square, /min-width: 720px/);
-  assert.match(square, /className="native-current-statement">\{renderFeedStatement\(activeCommentStatement, true\)\}/);
+  assert.match(square, /className="native-current-statement">\{desktopWorkspace \? renderFeedStatement\(activeCommentStatement, true\) : null\}/);
+  assert.match(workspace, /mode === "floating" \? conversationPanelLayout\(available\) : desktopPanelLayout\(available\)/);
   assert.match(square, /className="native-panel-close" onClick=\{closeInlineStatement\}/);
+});
+
+test("chat and Square reserve a narrow list and prioritize detail space", () => {
+  assert.deepEqual(conversationPanelLayout(1440), { presentation: "dual", primary: 340, secondary: 960 });
+  assert.deepEqual(conversationPanelLayout(776), { presentation: "dual", primary: 280, secondary: 480 });
+  assert.deepEqual(conversationPanelLayout(775), { presentation: "single", primary: 0, secondary: 775 });
+  assert.deepEqual(conversationPanelLayout(660), { presentation: "single", primary: 0, secondary: 660 });
+  assert.deepEqual(conversationPanelLayout(0), { presentation: "single", primary: 0, secondary: 0 });
+  for (let width = 776; width <= 2000; width++) {
+    const layout = conversationPanelLayout(width);
+    assert.ok(layout.primary >= 280 && layout.primary <= 340);
+    assert.ok(layout.secondary >= 480 && layout.secondary <= 960);
+    assert.ok(layout.secondary > layout.primary);
+    assert.ok(layout.primary + layout.secondary + 16 <= width + 1e-9);
+  }
+  assert.equal(desktopPanelLayout(1440).secondary, 390);
 });
 
 test("navigation expansion can switch the same desktop from dual panels to a single detail", () => {
