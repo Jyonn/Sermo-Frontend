@@ -8,6 +8,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
@@ -440,7 +441,7 @@ export default function MenuPage() {
   const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { session, logout, patchSessionUser } = useAuth();
+  const { session, logout, patchSessionUser, setSession } = useAuth();
   const spaceFeatures = useSpaceFeatures();
   const { setSession: setAdminSession } = useAdminAuth();
   const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
@@ -573,8 +574,6 @@ export default function MenuPage() {
   const [qqIdentityExpiresIn, setQqIdentityExpiresIn] = useState(0);
   const [qqEmailBindConfirmOpen, setQqEmailBindConfirmOpen] = useState(false);
   const [basicEditSaving, setBasicEditSaving] = useState(false);
-  const [passwordCurrent, setPasswordCurrent] = useState("");
-  const [passwordNext, setPasswordNext] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [friendInviteLink, setFriendInviteLink] = useState("");
   const [friendInviteQrUri, setFriendInviteQrUri] = useState("");
@@ -1578,31 +1577,6 @@ export default function MenuPage() {
       showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.bindFailed"), "error");
     } finally {
       setQqIdentityAction("idle");
-    }
-  };
-
-  const savePassword = async () => {
-    if (!passwordNext.trim()) return;
-
-    try {
-      setPasswordSaving(true);
-      const payload = await api.updatePassword({
-        old_password: hasPassword ? passwordCurrent : undefined,
-        new_password: passwordNext.trim(),
-      });
-      const prefRows = payload.has_password ? await api.getNotificationPrefs() : [];
-      setMe((current) => (current ? { ...current, has_password: payload.has_password } : current));
-      setPrefs(mapPrefs(prefRows));
-      patchSessionUser({ has_password: payload.has_password });
-      setPasswordCurrent("");
-      setPasswordNext("");
-      setPasswordSheetOpen(false);
-      setSecurityDrawerOpen(false);
-      showToast(hasPassword ? t("password.updated") : t("password.set"));
-    } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : hasPassword ? t("password.updateFailed") : t("password.setFailed"), "error");
-    } finally {
-      setPasswordSaving(false);
     }
   };
 
@@ -3587,26 +3561,18 @@ export default function MenuPage() {
           setPasswordSheetOpen(false);
         }}
       >
-        <div className="simple-form menu-security-form">
-          {hasPassword ? (
-            <div className="menu-security-field">
-              <label className="field-label">{t("password.current")}</label>
-              <input className="input" type="password" value={passwordCurrent} onChange={(event) => setPasswordCurrent(event.target.value)} />
-            </div>
-          ) : null}
-          <div className="menu-security-field">
-            <label className="field-label">{hasPassword ? t("recovery.newPassword") : t("password.setup")}</label>
-            <input className="input" type="password" value={passwordNext} onChange={(event) => setPasswordNext(event.target.value)} />
-          </div>
-          <button
-            className="button"
-            disabled={passwordSaving || !passwordNext.trim() || (hasPassword && !passwordCurrent.trim())}
-            onClick={() => void savePassword()}
-            type="button"
-          >
-            {passwordSaving ? t("common.processing") : hasPassword ? t("password.confirmChange") : t("password.confirmSetup")}
-          </button>
-        </div>
+        {passwordSheetOpen ? <PasswordChangeForm onBusy={setPasswordSaving} onChanged={(payload) => {
+          if (payload.auth && session) {
+            setSession({ accessToken: payload.auth.auth, refreshToken: payload.auth.refresh,
+              user: { ...session.user, ...payload.auth.data, has_password: payload.has_password } });
+          } else patchSessionUser({ has_password: payload.has_password });
+          setMe((current) => current ? { ...current, has_password: payload.has_password } : current);
+          setPasswordSaving(false);
+          setPasswordSheetOpen(false);
+          setSecurityDrawerOpen(false);
+          showToast(hasPassword ? t("password.updated") : t("password.set"));
+          void api.getNotificationPrefs().then((rows) => setPrefs(mapPrefs(rows))).catch(() => {});
+        }} /> : null}
       </BottomSheet>
       {gestureSheetOpen ? (
         <GestureSetupPanel

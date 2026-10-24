@@ -582,6 +582,17 @@ export interface JoinResponseDTO {
   auth: LoginAuthDTO;
 }
 
+export interface PasswordChangeOptionsDTO {
+  has_password: boolean;
+  channels: Array<{ channel: number; type: "email" | "sms"; masked: string }>;
+  policy: { min_length: number; max_length: number; required_classes: number; official: boolean };
+}
+
+export interface PasswordChangeResultDTO {
+  has_password: boolean;
+  auth?: LoginAuthDTO;
+}
+
 export interface NotificationPreferenceDTO {
   channel: number;
   enabled: boolean;

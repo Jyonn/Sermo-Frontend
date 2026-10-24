@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.5",
+  "id": "2026.10.24.6",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "桌面上的友间",
+      "title": "更安心地修改密码",
       "items": [
-        "桌面安装图标改用不透明浅色底，避免出现黑色背景",
-        "安装提示与桌面应用名称统一为 Frienden 友间，不再附带空间名"
+        "修改密码支持旧密码、已验证邮箱或手机号验证",
+        "官方账户采用更严格的密码要求，改密后自动更新当前登录凭据"
       ]
     },
     "en": {
-      "title": "Frienden on your desktop",
+      "title": "Safer password changes",
       "items": [
-        "Desktop installation now uses opaque light-background icons instead of transparent artwork",
-        "Install prompts and app names consistently use Frienden 友间 without a space name"
+        "Change passwords using your current password, verified email or verified phone",
+        "Official accounts require stronger passwords; this device's credentials renew after a change"
       ]
     }
   }

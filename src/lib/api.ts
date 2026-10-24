@@ -3,6 +3,8 @@ import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import { decodeCompact, type CompactPayload } from "./compactTransport";
 import type {
   ApiEnvelope,
+  PasswordChangeOptionsDTO,
+  PasswordChangeResultDTO,
   AdminActivityDTO,
   AdminMemberDTO,
   AvatarUploadDTO,
@@ -1657,8 +1659,18 @@ export const api = {
     return request<Record<string, never>>("/stickers/", { method: "DELETE", auth: true, query: { sticker_id } });
   },
 
-  updatePassword(payload: { new_password: string; old_password?: string }) {
-    return request<{ has_password: boolean }>("/users/me/password", {
+  getPasswordChangeOptions(signal?: AbortSignal) {
+    return request<PasswordChangeOptionsDTO>("/users/me/password", { auth: true, signal });
+  },
+
+  sendPasswordChangeCode(channel: number) {
+    return request<{ challenge_id: number; expires_in: number }>("/users/me/password/code", {
+      method: "POST", auth: true, body: { channel },
+    });
+  },
+
+  updatePassword(payload: { new_password: string; old_password?: string; method?: "password" | "email" | "sms"; challenge_id?: number; code?: string }) {
+    return request<PasswordChangeResultDTO>("/users/me/password", {
       method: "POST",
       auth: true,
       body: payload,
