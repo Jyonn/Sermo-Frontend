@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.6",
+  "id": "2026.10.24.7",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
       "title": "更安心地修改密码",
       "items": [
-        "修改密码支持旧密码、已验证邮箱或手机号验证",
-        "官方账户采用更严格的密码要求，改密后自动更新当前登录凭据"
+        "修改密码分为身份验证和设置新密码两步，页面更简洁",
+        "官方账户密码调整为 10–32 位，仅在不满足规则时提示"
       ]
     },
     "en": {
       "title": "Safer password changes",
       "items": [
-        "Change passwords using your current password, verified email or verified phone",
-        "Official accounts require stronger passwords; this device's credentials renew after a change"
+        "Password changes now separate identity verification from setting a new password",
+        "Official passwords use 10–32 characters, with requirements shown only when needed"
       ]
     }
   }

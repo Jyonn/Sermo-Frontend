@@ -1370,6 +1370,13 @@ html[data-theme="dark"] .user-profile-panel {
   padding: 0 2px;
 }
 
+.password-step-heading {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .menu-security-field {
   display: grid;
   gap: 8px;

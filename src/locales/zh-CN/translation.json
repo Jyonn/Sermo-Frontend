@@ -1,4 +1,9 @@
 {
+  "password.stepVerify": "1 / 2 · 验证身份",
+  "password.stepSet": "2 / 2 · 设置新密码",
+  "password.next": "下一步",
+  "password.back": "上一步",
+  "password.verifyFailed": "验证未通过，请重试。",
   "password.verifyWith": "验证方式",
   "password.method.email": "邮件验证",
   "password.method.sms": "短信验证",
@@ -9,7 +14,7 @@
   "password.confirmNew": "确认新密码",
   "password.mismatch": "两次输入的密码不一致",
   "password.memberPolicy": "请设置 6–128 位密码。",
-  "password.officialPolicy": "官方账户需设置 10–128 位密码，包含大写字母、小写字母、数字、符号中的至少三类，且不能使用常见弱密码。",
+  "password.officialPolicy": "请使用 10–32 位密码，包含大小写字母、数字、符号中的至少三类，避免常见弱密码。",
   "password.sessionNotice": "当前设备保持登录，其他设备在会话续期时需重新登录。",
   "password.optionsFailed": "暂时无法读取验证方式，请重试。",
   "pwa.appName": "Frienden 友间",

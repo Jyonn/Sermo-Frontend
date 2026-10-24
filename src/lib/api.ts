@@ -1669,7 +1669,13 @@ export const api = {
     });
   },
 
-  updatePassword(payload: { new_password: string; old_password?: string; method?: "password" | "email" | "sms"; challenge_id?: number; code?: string }) {
+  verifyPasswordChange(payload: { method: "password" | "email" | "sms"; old_password?: string; challenge_id?: number; code?: string }) {
+    return request<{ verified?: boolean; reset_token?: string }>("/users/me/password/verify", {
+      method: "POST", auth: true, body: payload,
+    });
+  },
+
+  updatePassword(payload: { new_password: string; old_password?: string; method?: "password" | "email" | "sms"; challenge_id?: number; code?: string; reset_token?: string }) {
     return request<PasswordChangeResultDTO>("/users/me/password", {
       method: "POST",
       auth: true,

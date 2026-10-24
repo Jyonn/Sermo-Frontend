@@ -1,4 +1,9 @@
 {
+  "password.stepVerify": "1 / 2 · Verify identity",
+  "password.stepSet": "2 / 2 · Set new password",
+  "password.next": "Next",
+  "password.back": "Back",
+  "password.verifyFailed": "Verification failed. Please try again.",
   "password.verifyWith": "Verify with",
   "password.method.email": "Email verification",
   "password.method.sms": "SMS verification",
@@ -9,7 +14,7 @@
   "password.confirmNew": "Confirm new password",
   "password.mismatch": "The passwords do not match",
   "password.memberPolicy": "Use 6–128 characters.",
-  "password.officialPolicy": "Official accounts: 10–128 characters, using at least three of uppercase, lowercase, numbers and symbols. Common passwords are not allowed.",
+  "password.officialPolicy": "Use 10–32 characters with at least three of uppercase, lowercase, numbers and symbols. Avoid common passwords.",
   "password.sessionNotice": "This device stays signed in. Other devices will need to sign in again when their session renews.",
   "password.optionsFailed": "Could not load verification methods. Please try again.",
   "pwa.appName": "Frienden 友间",
