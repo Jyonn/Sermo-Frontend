@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.24.3",
+  "id": "2026.10.24.4",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "轻装上阵",
+      "title": "登录细节更舒适",
       "items": [
-        "清理已下线的小白主题及旧活动、旧标识素材，减轻发布包体积",
-        "旧主题配置安全回退，当前主题与活动资源保持完整"
+        "优化 PWA 登录其他账户时的访问密码按钮，宽度随文字收拢并增加内边距"
       ]
     },
     "en": {
-      "title": "Travel lighter",
+      "title": "A more comfortable sign-in",
       "items": [
-        "Removed the discontinued Xiaobai theme and obsolete event and logo assets to slim down releases",
-        "Legacy theme settings fall back safely while current themes and activities stay intact"
+        "The optional password button in PWA account sign-in now fits its label with comfortable padding"
       ]
     }
   }

@@ -91,3 +91,11 @@ test('embedded login shares password, new-user confirmation and recovery without
   assert.match(join, /lookupPasswordRecovery/);
   assert.match(join, /onCompositionEnd/);
 });
+test('optional password action hugs its label with comfortable padding instead of stretching in the form grid', () => {
+  const css = fs.readFileSync(new URL('../src/pages/PwaAccountEntryPage.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.pwa-space-login \.auth-form \.auth-toggle \{([^}]+)\}/)?.[1] ?? '';
+  assert.match(rule, /width:fit-content/);
+  assert.match(rule, /justify-self:start/);
+  assert.match(rule, /padding:8px 12px/);
+  assert.match(css, /\.auth-toggle:focus-visible/);
+});

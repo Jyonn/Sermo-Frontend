@@ -6,6 +6,9 @@
 .pwa-space-login .auth-form .auth-submit { width: 100%; min-height: 48px; border-radius: 15px; color: #f5fff9; background: var(--entry-accent); }
 .pwa-space-login .auth-form .auth-toggle,
 .pwa-space-login .auth-form .auth-forgot-button { padding: 0; justify-content: flex-start; color: var(--entry-accent); background: transparent; }
+.pwa-space-login .auth-form .auth-toggle { width:fit-content; max-width:100%; justify-self:start; padding:8px 12px; border:1px solid transparent; border-radius:10px; line-height:1.4; text-align:start; }
+.pwa-space-login .auth-form .auth-toggle:hover { background:color-mix(in srgb,var(--entry-accent) 8%,transparent); }
+.pwa-space-login .auth-form .auth-toggle:focus-visible { outline:2px solid var(--entry-accent); outline-offset:2px; }
 .pwa-space-login .field-label { color: var(--entry-ink); }
 html[data-theme="dark"] .pwa-space-login .auth-form { border: 0; background: transparent; }
 html[data-theme="dark"] .pwa-space-login .auth-form .auth-submit { color: #123c2e; }
