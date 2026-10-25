@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.25.12",
+  "id": "2026.10.25.13",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "广场搜索与提醒，更清晰",
+      "title": "更自然的日期筛选",
       "items": [
-        "统一顶部工具图标，搜索改为模态框并支持开始、结束日期筛选",
-        "互动额度区分近24小时与近7天用量，展示实际可用次数",
-        "统一广场消息与导航角标，修复新发言红点被清除或放大的问题"
+        "广场搜索以并排日期展示范围，默认从很久之前到很久之后",
+        "点击日期即可滚动选择年、月、日，支持单侧不限日期"
       ]
     },
     "en": {
-      "title": "Clearer Square search and notifications",
+      "title": "A more natural date filter",
       "items": [
-        "Consistent toolbar icons and a dedicated search dialog with optional start and end dates",
-        "Interaction quota shows both rolling windows and the actual remaining allowance",
-        "Consistent notification badges with stable new-post indicators"
+        "Side-by-side dates show the search range, with no limits by default",
+        "Scroll through year, month and day, or leave either end open"
       ]
     }
   }
