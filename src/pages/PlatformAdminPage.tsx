@@ -17,6 +17,7 @@ import { showToast } from "../lib/toast";
 import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformEmailReviewDetailDTO, PlatformEmailReviewRecordDTO, PlatformEmailReviewStateDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
 import { PlatformMemberPanel } from "../components/PlatformMemberPanel";
 import { PlatformAuditConversation } from "../components/PlatformAuditConversation";
+import { emailPreviewDocument } from "../lib/emailPreview";
 import { PlatformSpaceFeatures } from "../components/PlatformSpaceFeatures";
 import { spaceFeatureGrants, type SpaceFeatureKey } from "../lib/spaceFeatureGrants";
 import "../styles/platform-inspection.css";
@@ -155,11 +156,13 @@ function EmailReviewPanel({ busy, onOpen, onRefresh, onToggle, value }: {
 }
 
 function EmailReviewDetail({ value }: { value: PlatformEmailReviewDetailDTO | null }) {
+  const { t } = useI18n();
   if (!value) return <div className="platform-delivery-loading"><i /><strong>正在读取邮件正文</strong><span>正文访问会写入审计日志</span></div>;
   return <div className="platform-email-review-detail">
     <section className="platform-email-review-detail-head"><span>REVIEW #{String(value.sequence).padStart(2, "0")}</span><h2>{value.title || "无标题邮件"}</h2><div><span className={`platform-email-status is-${value.status}`}>{emailReviewStatusLabel[value.status]}</span><time>{new Date(value.created_at * 1000).toLocaleString()}</time></div></section>
     <section className="platform-email-review-facts"><div><span>收件人</span><strong>{value.recipient_name || "未提供称呼"}</strong><small>{value.recipient}</small></div><div><span>渲染参数</span><strong>{value.mail_format || "默认格式"}</strong><small>{value.locale || "默认语言"}</small></div><div><span>服务请求</span><strong>{value.request_id || "无请求 ID"}</strong><small>{value.status === "processing" ? "等待服务响应" : emailReviewStatusLabel[value.status]}</small></div></section>
-    <section className="platform-email-review-body"><header><span className="material-symbols-outlined">draft</span><strong>邮件正文</strong></header><pre>{value.body_text || "（正文为空）"}</pre>{value.footer_note ? <footer>{value.footer_note}</footer> : null}</section>
+    <section className="platform-email-review-body"><header><span className="material-symbols-outlined">draft</span><strong>{t("management.emailPreview")}</strong></header><iframe className="platform-email-rendered-preview" sandbox="" referrerPolicy="no-referrer" title={t("management.emailPreview")} srcDoc={emailPreviewDocument(value.mail_format, value.body_text || "")} />{value.footer_note ? <footer>{value.footer_note}</footer> : null}</section>
+    <details className="platform-email-review-response"><summary>{t("management.emailSource")}</summary><pre>{value.body_text}</pre></details>
     {value.action_url ? <a className="platform-email-review-link" href={value.action_url} rel="noreferrer" target="_blank"><span className="material-symbols-outlined">open_in_new</span><span><strong>邮件跳转链接</strong><small>{value.action_url}</small></span></a> : null}
     {value.detail ? <section className="platform-email-review-error"><strong>发送失败详情</strong><code>{value.detail}</code></section> : null}
     {value.provider_response != null ? <details className="platform-email-review-response"><summary>查看邮件服务原始响应</summary><pre>{JSON.stringify(value.provider_response, null, 2)}</pre></details> : null}

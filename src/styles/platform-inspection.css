@@ -1,4 +1,5 @@
 .platform-member-sheet { display: grid; gap: 24px; color: var(--text-primary); }
+.platform-email-rendered-preview { display: block; width: 100%; height: clamp(360px, 65vh, 760px); border: 0; background: #fffdf8; }
 .platform-member-identity { display: flex; align-items: center; gap: 14px; padding-block: 4px 18px; border-bottom: 1px solid var(--line-soft); }
 .platform-member-portrait { flex: 0 0 58px; width: 58px; height: 58px; border-radius: 17px; }
 .platform-member-identity > div:last-child { min-width: 0; }

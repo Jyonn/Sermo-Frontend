@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.5",
+  "id": "2026.10.25.6",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的档案与能力授权",
+      "title": "邮件提醒，更自然",
       "items": [
-        "优化成员档案与会话审计，适配横竖屏和深色模式",
-        "DEV 与 QQ 身份绑定统一由超管授权，再由空间管理员开启；DEV 不再限制空间标识"
+        "修复中文互动邮件出现英文的情况",
+        "聊天邮件采用头像与消息气泡，邮件审阅支持排版预览，并保留隐藏消息内容的隐私设置"
       ]
     },
     "en": {
-      "title": "Clearer profiles and capability grants",
+      "title": "More natural email reminders",
       "items": [
-        "Refined member profiles and conversation auditing across screen sizes and dark mode",
-        "Platform administrators grant DEV and QQ identity binding before space administrators enable them; DEV is no longer restricted by space slug"
+        "Fixed English text appearing in Chinese interaction emails",
+        "Chat emails now use avatars and message bubbles, with formatted review previews and content-hiding privacy settings preserved"
       ]
     }
   }

@@ -1,4 +1,6 @@
 {
+  "management.emailPreview": "Email preview",
+  "management.emailSource": "View message source",
   "management.unverified": "Unverified",
   "management.conversation": "Conversation",
   "management.conversations": "Conversations",

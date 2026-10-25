@@ -1,4 +1,6 @@
 {
+  "management.emailPreview": "邮件预览",
+  "management.emailSource": "查看正文源码",
   "management.unverified": "未认证",
   "management.conversation": "会话",
   "management.conversations": "会话",
