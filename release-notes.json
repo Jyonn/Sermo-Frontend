@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.13",
+  "id": "2026.10.25.14",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "更自然的日期筛选",
+      "title": "弹窗与消息角标优化",
       "items": [
-        "广场搜索以并排日期展示范围，默认从很久之前到很久之后",
-        "点击日期即可滚动选择年、月、日，支持单侧不限日期"
+        "修复桌面弹窗自定义标题的居中显示",
+        "广场未读数字使用完整包裹的红色圆角角标"
       ]
     },
     "en": {
-      "title": "A more natural date filter",
+      "title": "Better dialogs and notification badges",
       "items": [
-        "Side-by-side dates show the search range, with no limits by default",
-        "Scroll through year, month and day, or leave either end open"
+        "Custom desktop dialog headers are properly centered",
+        "Square unread counts fit neatly inside rounded red badges"
       ]
     }
   }

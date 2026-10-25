@@ -105,7 +105,7 @@ export function BottomSheet({
       <section
         ref={root}
         tabIndex={-1}
-        className={`bottom-sheet ${snapPoints && !desktopModal ? "has-detents" : ""} ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
+        className={`bottom-sheet ${showCloseButton ? "has-close-button" : ""} ${snapPoints && !desktopModal ? "has-detents" : ""} ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
         onClick={(event) => event.stopPropagation()}
         onPointerMove={desktopModal ? undefined : (event) => moveDrag(event.clientY)}
         onPointerUp={desktopModal ? undefined : endDrag}

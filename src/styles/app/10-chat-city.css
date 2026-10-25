@@ -3623,6 +3623,14 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
     display: none;
   }
 
+  .bottom-sheet:not(.has-close-button) .sheet-header {
+    padding-right: 0;
+  }
+
+  .bottom-sheet.has-close-button .custom-sheet-header {
+    padding-left: 52px;
+  }
+
   .bottom-sheet .sheet-body {
     max-height: calc(min(82dvh, 760px) - 104px);
     padding-top: 18px;
@@ -4521,10 +4529,13 @@ html[data-theme="dark"] .growth-scroll-score strong {
 
 .sheet-toolbar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
+
+.sheet-toolbar > :first-child { justify-self: start; }
+.sheet-toolbar > :last-child { justify-self: end; }
 
 .sheet-toolbar-title {
   text-align: center;
