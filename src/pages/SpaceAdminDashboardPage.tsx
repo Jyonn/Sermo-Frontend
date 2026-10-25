@@ -6,6 +6,7 @@ import { ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatMuteControls } from "../components/ChatMuteControls";
+import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -1025,8 +1026,10 @@ export default function SpaceAdminDashboardPage() {
             ) : null}
             <form className={`composer admin-broadcast-composer${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
               {broadcastRecording.phase === "idle" ? (
-                <div className="composer-row composer-row-text">
-                  <button
+                <ChatComposerTextRow
+                  canSend={Boolean(broadcastContent.trim())}
+                  disabled={broadcastState === "sending"}
+                  leadingAction={<button
                     aria-label={t("audio.record")}
                     className="composer-action-button"
                     disabled={broadcastState === "sending"}
@@ -1034,14 +1037,14 @@ export default function SpaceAdminDashboardPage() {
                     type="button"
                   >
                     <span className="admin-composer-svg"><AdminComposerIcon kind="mic" /></span>
-                  </button>
-                  <div className="composer-input-wrap">
-                    <textarea
-                      className="textarea composer-input"
+                  </button>}
+                  input={<textarea
+                      className="composer-input"
+                      disabled={broadcastState === "sending"}
                       enterKeyHint="send"
                       maxLength={512}
                       placeholder={t("chat.inputPlaceholder")}
-                      rows={1}
+                      rows={3}
                       value={broadcastContent}
                       onChange={(event) => setBroadcastContent(event.target.value)}
                       onKeyDown={(event) => {
@@ -1052,9 +1055,8 @@ export default function SpaceAdminDashboardPage() {
                           event.currentTarget.form?.requestSubmit();
                         }
                       }}
-                    />
-                  </div>
-                  <button
+                    />}
+                  trailingAction={<button
                     aria-expanded={broadcastMoreOpen}
                     aria-label={broadcastMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
                     className={`composer-plus ${broadcastMoreOpen ? "is-open" : ""}`}
@@ -1063,9 +1065,8 @@ export default function SpaceAdminDashboardPage() {
                     type="button"
                   >
                     <span className="material-symbols-outlined">add</span>
-                  </button>
-                  <button hidden disabled={!broadcastContent.trim()} type="submit" />
-                </div>
+                  </button>}
+                />
               ) : (
                 <div className="composer-row composer-row-recording">
                   <button

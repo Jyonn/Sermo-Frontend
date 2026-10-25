@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.17",
+  "id": "2026.10.25.18",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "从聊天打开我的名片",
+      "title": "更顺手的消息编辑",
       "items": [
-        "新账户默认显示自己的聊天头像，保留已有显示偏好",
-        "点击自己消息旁的头像，即可查看我的名片并切换好友或陌生人视角"
+        "修复桌面聊天语音浮层遮挡，优化文件与足迹工具布局",
+        "欢迎语编辑拥有更宽的桌面面板，输入样式与群发消息保持统一"
       ]
     },
     "en": {
-      "title": "Your profile, right from chat",
+      "title": "A smoother message editor",
       "items": [
-        "New accounts show their own chat avatar by default, while existing preferences are preserved",
-        "Tap your avatar beside a message to preview your profile as a friend or stranger"
+        "Fixed clipped desktop voice controls and refined file and footprint tools",
+        "A wider desktop welcome editor with consistent message inputs for welcome and broadcasts"
       ]
     }
   }

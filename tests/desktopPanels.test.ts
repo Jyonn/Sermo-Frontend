@@ -93,3 +93,13 @@ test("navigation expansion can switch the same desktop from dual panels to a sin
   assert.equal(desktopPanelLayout(1024 - 140).presentation, "dual");
   assert.equal(desktopPanelLayout(1024 - 252).presentation, "single");
 });
+
+test("wide editors expand instead of inheriting phone-width detail panels", () => {
+  assert.equal(desktopPanelLayout(1100, true).secondary, 660);
+  assert.equal(desktopPanelLayout(1100, true).presentation, "dual");
+  assert.deepEqual(desktopPanelLayout(900, true), {presentation:"single",primary:0,secondary:900});
+  for (let width = 0; width < 2200; width++) {
+    const layout = desktopPanelLayout(width, true);
+    assert.ok(layout.primary + layout.secondary + (layout.presentation === "dual" ? 16 : 0) <= width);
+  }
+});

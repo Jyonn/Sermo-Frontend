@@ -3744,12 +3744,8 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   gap: 14px;
 }
 
-.admin-broadcast-composer {
-  margin: 0;
-}
-
-.admin-broadcast-composer .composer-input {
-  padding: 12px 0;
+.admin-broadcast-form > .admin-broadcast-composer {
+  width:100%;margin:0;padding:0;border:0;background:transparent;box-shadow:none;
 }
 
 .admin-composer-svg,

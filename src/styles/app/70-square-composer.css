@@ -1218,6 +1218,7 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-writing-desk-toolbar {
     position: relative;
+    z-index: 6;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1314,15 +1315,15 @@ html[data-theme="dark"] .verification-banner-action {
     position: absolute;
     z-index: 70;
     bottom: calc(100% + 11px);
-    left: 50%;
+    left: 0;
     width: min(286px, calc(100vw - 48px));
     padding: 12px;
     border: 1px solid color-mix(in srgb, var(--line-soft) 86%, transparent);
     border-radius: 16px;
     color: var(--text-primary);
-    background: #f8f9f5;
+    background: var(--bg-elevated);
     box-shadow: 0 20px 52px rgba(18, 40, 31, .2);
-    transform: translateX(-24px);
+    transform: none;
     animation: desktop-tool-popover-in 180ms cubic-bezier(.16, 1, .3, 1) both;
   }
 
@@ -1339,12 +1340,8 @@ html[data-theme="dark"] .verification-banner-action {
     transform: rotate(45deg);
   }
 
-  .desktop-tool-popover.is-footprint {
-    right: -70px;
-  }
-
   .desktop-tool-popover.is-file {
-    padding: 9px;
+    padding: 8px;
   }
 
   .desktop-tool-popover.is-footprint::after,
@@ -1354,7 +1351,8 @@ html[data-theme="dark"] .verification-banner-action {
   }
 
   .desktop-tool-popover.is-footprint::after {
-    right: 74px;
+    right: auto;
+    left: 92px;
   }
 
   .desktop-tool-popover > header {
@@ -1379,8 +1377,8 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-choice-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
   }
 
   .desktop-tool-choice-grid > button,
@@ -1388,14 +1386,14 @@ html[data-theme="dark"] .verification-banner-action {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 7px;
+    gap: 12px;
     min-width: 0;
-    min-height: 44px;
-    padding: 8px 10px;
-    border: 1px solid color-mix(in srgb, var(--line-soft) 80%, transparent);
+    min-height: 52px;
+    padding: 10px 12px;
+    border: 0;
     border-radius: 12px;
     color: var(--text-primary);
-    background: color-mix(in srgb, var(--brand-primary) 4%, #f8f9f5);
+    background: transparent;
     text-align: left;
   }
 
@@ -1409,6 +1407,7 @@ html[data-theme="dark"] .verification-banner-action {
   .desktop-tool-wide-action > svg {
     color: var(--accent-ink, #087454);
     font-size: 22px;
+    flex: 0 0 22px;
   }
 
   .desktop-tool-choice-grid strong,
@@ -1420,8 +1419,8 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-choice-grid strong {
     overflow: hidden;
-    font-size: .72rem;
-    line-height: 1.25;
+    font-size: .84rem;
+    line-height: 1.45;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -1683,14 +1682,16 @@ html[data-theme="dark"] .verification-banner-action {
     from { opacity: 0; transform: translate(-24px, 8px) scale(.985); }
   }
 
-  .desktop-tool-popover.is-footprint,
-  .desktop-tool-popover.is-voice {
-    right: -44px;
-    left: auto;
+  .desktop-tool-popover.is-footprint {
+    right: auto;
+    left: -80px;
     width: min(286px, calc(100vw - 48px));
     transform: none;
     animation-name: desktop-tool-popover-left-in;
   }
+
+  .desktop-tool-popover.is-voice { right:auto;left:0;animation-name:desktop-tool-popover-left-in; }
+  .desktop-tool-popover.is-voice::after { right:auto;left:12px; }
 
   @keyframes desktop-tool-popover-left-in {
     from { opacity: 0; transform: translateY(8px) scale(.985); }

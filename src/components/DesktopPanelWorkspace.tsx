@@ -53,7 +53,7 @@ export function DesktopPanelWorkspace({ children, className, selected = false, s
   const unregister = useCallback((id: string) => setLayers((current) => current.some((item) => item.id === id) ? current.filter((item) => item.id !== id) : current), []);
   const top = topDesktopPanel(layers);
   const active = enabled && layers.length > 0;
-  const layout = mode === "floating" ? conversationPanelLayout(available, /^\/app\/square(?:\/|$)/.test(pathname)) : desktopPanelLayout(available);
+  const layout = mode === "floating" ? conversationPanelLayout(available, /^\/app\/square(?:\/|$)/.test(pathname)) : desktopPanelLayout(available, top?.wide);
   const floating = enabled && mode === "floating";
   const split = enabled && mode === "split";
   const single = split && active && layout.presentation === "single";

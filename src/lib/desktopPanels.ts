@@ -26,13 +26,14 @@ export function conversationPanelLayout(available: number, square = false) {
   return { presentation: "dual" as const, primary, secondary: total - primary - gap };
 }
 
-export function desktopPanelLayout(available: number) {
+export function desktopPanelLayout(available: number, wide = false) {
   const { phone, primaryMax, gap } = panelSizing;
-  const dual = available >= phone * 2 + gap;
+  const secondary = wide ? Math.min(720, Math.max(560, available * .6)) : phone;
+  const dual = available >= phone + secondary + gap;
   return {
     presentation: dual ? "dual" as const : "single" as const,
-    primary: dual ? Math.min(primaryMax, available - phone - gap) : 0,
-    secondary: Math.min(dual ? phone : primaryMax, Math.max(0, available)),
+    primary: dual ? Math.min(primaryMax, available - secondary - gap) : 0,
+    secondary: Math.min(dual ? secondary : primaryMax, Math.max(0, available)),
   };
 }
 

@@ -466,6 +466,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const selectedMessageIsText = messageMenu?.message.type === MESSAGE_TYPE_TEXT;
 
   return <SideDrawer
+    fullscreen
     className={`welcome-template-drawer chat-background-${backgroundTheme}`}
     historyKey="welcome-messages"
     onClose={onClose}
@@ -489,6 +490,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
         />}
         <form className={`composer welcome-template-composer${voiceComposer.open ? " is-recording-mode" : ""}`} onSubmit={(event) => void addText(event)} ref={composerRef}>
           {!voiceComposer.open ? <ChatComposerTextRow
+            canSend={Boolean(draft.trim())}
+            disabled={!state?.can_add || saving}
             input={<MentionComposerInput
               className="textarea composer-input composer-rich-input"
               members={[]}
