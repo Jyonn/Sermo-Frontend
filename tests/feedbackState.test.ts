@@ -32,7 +32,7 @@ test('all informational dashed state surfaces are removed without removing funct
     'src/styles/app/00-foundation.css': ['.feedback-state', '.feedback-state.error', '.feedback-state.success', '.feedback-state.loading'],
     'src/styles/app/10-chat-city.css': ['.empty-state'],
     'src/styles/app/20-profile-settings.css': ['.sticker-load-failed', '.travel-map-access-overview section > p'],
-    'src/styles/permission-workspace.css': ['.permission-empty-rules,.permission-matrix-placeholder'],
+    'src/styles/permission-workspace.css': ['.permission-empty-rules'],
   };
   for (const [file, selectors] of Object.entries(targets)) {
     const root = postcss.parse(read(file));

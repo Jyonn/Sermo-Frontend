@@ -5,6 +5,7 @@ import { useTheme } from "../lib/theme";
 import { DesktopPanelWorkspace } from "./DesktopPanelWorkspace";
 import { PageTabs } from "./PageTabs";
 import "./ManagementWorkspace.css";
+import "./ManagementContent.css";
 
 export interface ManagementDestination {
   id: string;

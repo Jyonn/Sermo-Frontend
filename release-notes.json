@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.3",
+  "id": "2026.10.25.4",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "管理，更有条理",
+      "title": "管理页面，更清爽",
       "items": [
-        "空间管理按成员、社区、运营、设置与访问控制重新分组，常用功能直接在面板中操作",
-        "超级管理员采用两级导航，拆分邮件投递、邮件审阅和诊断详情，适配横竖屏"
+        "成员管理整合搜索、筛选与统计，空间设置减少重复标题和多层卡片",
+        "权限编辑采用扁平布局，手机可收起能力目录，继承规则按需查看，并完善深色模式"
       ]
     },
     "en": {
-      "title": "A clearer administration workspace",
+      "title": "Cleaner administration pages",
       "items": [
-        "Space administration is organized around people, community, engagement, settings and access, with everyday tools directly in the main panel",
-        "Platform administration gains two-level navigation, separate delivery and review pages, and contextual diagnostics across portrait and landscape layouts"
+        "Member management combines search, filters and counts, while space settings lose repeated headings and nested cards",
+        "A flatter permission editor with a collapsible mobile directory, expandable inherited rules and consistent dark-mode styling"
       ]
     }
   }

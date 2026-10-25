@@ -1,0 +1,62 @@
+.management-workspace .admin-members-tab { container: management-members / inline-size; gap: 0; }
+.admin-members-toolbar { position: sticky; top: -1px; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 0 16px; border-bottom: 1px solid var(--line-soft); background: var(--bg-canvas); }
+.management-workspace .admin-member-search { display: flex; align-items: center; gap: 9px; flex: 1; max-width: 460px; min-width: 0; min-height: 42px; padding: 0 12px; border: 1px solid var(--line-soft); border-radius: 10px; color: var(--text-muted); background: var(--bg-elevated); }
+.admin-members-toolbar .app-page-tabs { flex: 0 0 auto; }
+.management-workspace .admin-member-list { border-block: 0; }
+.admin-member-columns { display: grid; grid-template-columns: minmax(0, 1fr) 72px 72px 80px 20px; align-items: center; gap: 16px; min-height: 40px; padding-inline: 10px; color: var(--text-muted); font-size: 11px; }
+.admin-member-columns > span:not(:first-child) { text-align: center; }
+.management-workspace .admin-member-row { grid-template-columns: 42px minmax(0, 1fr) 72px 72px 80px 20px; gap: 16px; min-height: 74px; padding: 12px 10px; }
+.management-workspace .admin-member-avatar-wrap, .management-workspace .admin-member-avatar { width: 42px; height: 42px; border-radius: 12px; }
+.management-workspace .admin-member-avatar-wrap i { border-color: var(--bg-canvas); }
+.management-workspace .admin-member-main > small { display: none; }
+.admin-member-number { color: var(--text-secondary); font-size: 13px; font-variant-numeric: tabular-nums; text-align: center; }
+.admin-member-presence { color: var(--text-muted); font-size: 12px; text-align: center; }
+.admin-member-presence.is-online { color: var(--brand-accent); }
+.management-space-identity { display: grid; grid-template-columns: 42px minmax(0, 1fr) 36px; align-items: center; gap: 12px; padding-block: 4px 16px; border-bottom: 1px solid var(--line-soft); }
+.management-space-identity > :first-child { width: 42px; height: 42px; border-radius: 12px; }
+.management-space-identity > span { display: grid; gap: 4px; min-width: 0; }
+.management-space-identity strong { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.management-space-identity a { overflow: hidden; color: var(--text-muted); font-size: 12px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.management-space-identity a:hover { color: var(--brand-accent); text-decoration: underline; }
+.management-space-identity > button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 9px; color: var(--text-secondary); background: var(--bg-elevated); }
+.management-space-identity > button > span { font-size: 18px; }
+.management-setting-fields { display: grid; }
+.management-setting-fields > .management-field:first-child { padding-top: 0; }
+.management-field { display: grid; grid-template-columns: minmax(150px, 32%) minmax(0, 1fr); align-items: center; gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--line-soft); }
+.management-field label { color: var(--text-primary); font-size: 14px; font-weight: 700; }
+.management-field small { display: block; margin-top: 5px; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+.management-field > .input { min-width: 0; min-height: 44px; background: var(--bg-elevated); }
+.management-field > .mono { width: min(100%, 180px); }
+.management-note { margin: 0; color: var(--text-muted); font-size: 12px; line-height: 1.7; }
+.management-workspace .management-form-page .admin-policy-drawer { gap: 20px; }
+.management-form-page .setting-group { overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.management-form-page .setting-row { min-height: 72px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); background: transparent; }
+.management-form-page .setting-row-copy small { max-width: 58ch; }
+.management-level-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 22px 16px; }
+.management-level-fields > label { display: grid; gap: 8px; min-width: 0; }
+.management-level-fields > label > span { color: var(--text-muted); font-size: 12px; }
+.management-level-fields .input { min-width: 0; min-height: 44px; background: var(--bg-elevated); }
+.management-verification-status { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px 20px; border-bottom: 1px solid var(--line-soft); }
+.management-verification-status > span { color: var(--brand-accent); font-size: 15px; font-weight: 750; }
+.management-verification-status > small { color: var(--text-muted); font-size: 12px; }
+.management-form-page .admin-policy-card { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.management-form-page .admin-policy-options { gap: 0; }
+.management-form-page .admin-policy-options > button { padding: 18px 0; border: 0; border-bottom: 1px solid var(--line-soft); border-radius: 0; background: transparent; }
+.management-form-page .admin-permission-matrix { border-inline: 0; border-radius: 0; background: transparent; }
+@container management-members (max-width: 650px) {
+  .admin-members-toolbar { flex-direction: column; align-items: stretch; gap: 6px; padding-bottom: 0; }
+  .management-workspace .admin-member-search { flex: 0 0 auto; max-width: none; }
+  .admin-members-toolbar .app-page-tabs { min-height: 44px; }
+  .admin-member-columns, .admin-member-number { display: none; }
+  .management-workspace .admin-member-row { grid-template-columns: 42px minmax(0, 1fr) 42px 16px; gap: 10px; padding-inline: 0; }
+  .management-workspace .admin-member-main > small { display: block; font-size: 11px; }
+  .management-workspace .admin-member-main > span { flex-wrap: wrap; gap: 5px; }
+  .management-workspace .admin-member-main strong { max-width: 100%; }
+  .admin-member-presence { font-size: 11px; }
+}
+@media (max-width: 719px) {
+  .management-field { grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 16px; }
+  .management-field > .mono { width: 100%; }
+  .management-verification-status { flex-wrap: wrap; gap: 8px; }
+  .management-form-actions { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+}

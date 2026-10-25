@@ -1,4 +1,12 @@
 {
+  "management.noMatchingMembers": "没有符合条件的成员",
+  "management.memberDirectory": "成员列表",
+  "management.memberName": "昵称",
+  "management.memberFilter": "筛选成员",
+  "management.memberStatus": "状态",
+  "permission.chooseCapability": "切换能力",
+  "permission.inheritedCount": "{{count}} 条继承规则",
+  "permission.removeCondition": "删除条件",
   "management.group.people": "成员",
   "management.group.community": "社区",
   "management.group.operations": "运营",

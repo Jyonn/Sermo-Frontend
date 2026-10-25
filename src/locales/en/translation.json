@@ -1,4 +1,12 @@
 {
+  "management.noMatchingMembers": "No matching members",
+  "management.memberDirectory": "Member directory",
+  "management.memberName": "Name",
+  "management.memberFilter": "Filter members",
+  "management.memberStatus": "Status",
+  "permission.chooseCapability": "Choose capability",
+  "permission.inheritedCount": "{{count}} inherited rules",
+  "permission.removeCondition": "Remove condition",
   "management.group.people": "People",
   "management.group.community": "Community",
   "management.group.operations": "Engagement",

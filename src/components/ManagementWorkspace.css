@@ -75,7 +75,7 @@
 .management-section-tabs .app-page-tabs-items { gap: 28px; }
 .management-section-tabs .app-page-tabs-items button { min-height: 48px; }
 .management-form-page { display: grid; gap: 24px; width: 100%; max-width: 800px; margin-inline: auto; }
-.management-form-actions { position: sticky; bottom: -1px; display: flex; justify-content: flex-end; padding: 16px 0; border-top: 1px solid var(--line-soft); background: var(--bg-canvas); }
+.management-form-actions { position: sticky; bottom: -1px; display: flex; justify-content: flex-end; padding: 16px 0; background: var(--bg-canvas); }
 .management-form-actions button { min-width: 112px; }
 .management-form-page .admin-policy-drawer { padding: 0; }
 .management-report-content { margin: 0; padding: 16px; border-radius: 14px; color: var(--text-secondary); background: var(--bg-canvas); font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -92,7 +92,7 @@
 .management-language-control select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .management-language-control:focus-within { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
 .management-body { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px clamp(18px, 3vw, 40px) max(28px, env(safe-area-inset-bottom)); scrollbar-gutter: stable; }
-.management-body.is-fill { overflow: hidden; padding-bottom: 18px; }
+.management-body.is-fill { overflow: hidden; padding: 0; }
 .management-workspace .admin-app-content,
 .management-workspace .platform-main { width: 100%; max-width: 1280px; min-height: 0; margin: 0 auto; padding: 0; }
 .management-workspace .admin-tab-page { padding-top: 0; }
@@ -123,15 +123,6 @@
 .management-workspace .platform-metric strong { color: var(--text-primary); }
 .management-workspace :is(.platform-search, .platform-debug-list button, .platform-review-card button, .platform-secondary) { color: var(--text-secondary); border-color: var(--line-soft); background: var(--bg-canvas); }
 .management-workspace .platform-review-card button.is-approve { color: var(--bg-elevated); background: var(--text-primary); }
-.management-workspace .permission-workspace { container: management-permissions / inline-size; height: 100%; min-height: 0; color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
-.management-workspace .permission-tree-panel { background: var(--bg-canvas); border-color: var(--line-soft); }
-.management-workspace :is(.permission-editor-header, .permission-search, .permission-rule-row, .permission-matrix, .permission-inherited-summary, .permission-limit-list label) { border-color: var(--line-soft); background: var(--bg-elevated); }
-.management-workspace :is(.permission-editor-header button, .permission-matrix-section header button, .permission-rule-row select, .permission-rule-row input, .permission-limit-presets button, .permission-limit-list input, .permission-not) { color: var(--text-secondary); border-color: var(--line-soft); background: var(--bg-canvas); }
-.management-workspace :is(.permission-tree-row.is-selected, .permission-segmented button.is-active, .permission-boolean button.is-active) { color: var(--brand-accent); background: var(--bg-elevated); }
-.management-workspace :is(.permission-inheritance, .permission-inherited-summary article, .permission-segmented, .permission-boolean, .permission-empty-rules, .permission-matrix-placeholder, .permission-space-preview, .permission-matrix-head) { color: var(--text-secondary); background: var(--bg-canvas); }
-.management-workspace .permission-editor-header button.is-primary { color: var(--bg-elevated); background: var(--brand-accent); }
-.management-workspace :is(.permission-rule-editor, .permission-rule-list, .permission-limit-editor) { min-width: 0; }
-.management-workspace .permission-workspace-loading { min-height: 200px; }
 .management-detail { --pa-ink: var(--text-primary); --pa-muted: var(--text-muted); --pa-line: var(--line-soft); --pa-accent: var(--brand-accent); }
 .management-detail .material-symbols-outlined { font-family: "Material Symbols Outlined"; letter-spacing: normal; }
 .management-detail :is(.platform-panel, .platform-member-row, .platform-chat-row, .platform-data-grid, .platform-email-review-facts > div) { color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
@@ -149,19 +140,8 @@
 .management-detail .platform-data-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .management-detail .platform-data-grid > span { padding: 12px; }
 .management-detail .platform-data-grid > span:nth-child(n) { border-color: var(--line-soft); }
-@container management-permissions (max-width: 1050px) {
-  .permission-editor-header { grid-template-columns: 42px minmax(0, 1fr); }
-  .permission-editor-header > div { grid-column: 1 / -1; justify-content: flex-end; }
-  .permission-editor-section { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .permission-limit-list { grid-template-columns: minmax(0, 1fr); }
-  .permission-rule-row { grid-template-columns: 42px minmax(0, 1fr) 34px; }
-  .permission-rule-row > label:nth-of-type(2), .permission-rule-row > .permission-boolean, .permission-rule-row > .permission-rule-value { grid-column: 2; }
-  .permission-remove-rule { grid-column: 3; grid-row: 1; }
-}
 @media (min-width: 720px) {
   .management-workspace > .desktop-panel-slot { position: absolute; top: calc(88px + var(--management-subnav-height)); bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
-  .management-workspace .permission-workspace { display: grid; grid-template-columns: minmax(180px, 26%) minmax(0, 1fr); }
-  .management-workspace .permission-tree-panel { max-height: none; border-right: 1px solid var(--line-soft); border-bottom: 0; }
 }
 @media (min-width: 720px) and (max-width: 1179px) {
   .management-workspace, .management-workspace.platform-console { --management-rail: 88px; }
@@ -185,17 +165,13 @@
   .management-nav .material-symbols-outlined { font-size: 19px; }
   .management-section-tabs { grid-row: 3; padding-inline: 16px; }
   .management-body { grid-row: 4; padding: 16px 14px max(22px, env(safe-area-inset-bottom)); }
-  .management-body.is-fill { padding: 12px 10px max(10px, env(safe-area-inset-bottom)); }
+  .management-body.is-fill { padding: 0 0 env(safe-area-inset-bottom); }
   .management-workspace .platform-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .management-workspace .platform-metric { min-height: 110px; padding: 13px 9px; }
   .management-workspace .platform-metric strong { font-size: clamp(21px, 6vw, 27px); }
   .management-workspace .platform-panel { padding: 16px; }
   .management-workspace .platform-hero { min-height: 180px; }
   .management-workspace .platform-hero h2 { font-size: clamp(25px, 7vw, 34px); }
-  .management-workspace .permission-tree-panel { flex: 0 0 auto; max-height: min(190px, 30dvh); padding: 10px 8px; }
-  .management-workspace .permission-search { flex: 0 0 38px; height: 38px; margin-bottom: 8px; }
-  .management-workspace .permission-editor-panel { flex: 1; min-height: 0; }
-  .management-workspace .permission-matrix { overflow-x: auto; }
 }
 @media (min-width: 720px) and (max-height: 560px) {
   .management-workspace, .management-workspace.platform-console { grid-template-rows: 64px minmax(0, 1fr); }
@@ -204,5 +180,4 @@
   .management-page-header { padding-block: 8px; }
   .management-body { padding-top: 16px; }
   .management-workspace > .desktop-panel-slot { top: calc(72px + var(--management-subnav-height)); bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
-  .management-workspace .permission-tree-panel { max-height: none; }
 }

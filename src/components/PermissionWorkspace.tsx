@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { showToast } from "../lib/toast";
 import { isChineseLanguage } from "../lib/i18n";
+import { FeedbackState } from "./FeedbackState";
 import type { CapabilityCatalogDTO, CapabilityNodeDTO, CapabilityPolicyDTO, CapabilitySimulationRowDTO, PolicyExpression } from "../types";
 import "../styles/permission-workspace.css";
 
@@ -109,7 +110,7 @@ function RuleEditor({ value, onChange, t }: { value: PolicyExpression; onChange:
     {model.rows.length ? <div className="permission-rule-list">{model.rows.map((row, index) => {
       const meta = FIELD_META[row.atom.field] ?? FIELD_META.growth_level;
       return <div className="permission-rule-row" key={`${row.atom.field}-${index}`}>
-        <button className={`permission-not ${row.negated ? "is-active" : ""}`} onClick={() => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, negated: !item.negated } : item))} title="NOT" type="button">NOT</button>
+        <button aria-pressed={row.negated} className={`permission-not ${row.negated ? "is-active" : ""}`} onClick={() => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, negated: !item.negated } : item))} title="NOT" type="button">NOT</button>
         <label><span>{t("permission.attribute")}</span><select value={row.atom.field} onChange={(event) => {
           const field = event.target.value;
           const nextMeta = FIELD_META[field];
@@ -117,9 +118,9 @@ function RuleEditor({ value, onChange, t }: { value: PolicyExpression; onChange:
           updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, atom } : item));
         }}>{Object.entries(FIELD_META).map(([field, item]) => <option key={field} value={field}>{t(item.label as "permission.field.growthLevel")}</option>)}</select></label>
         {meta.kind === "number" ? <><label><span>{t("permission.relation")}</span><select value={row.atom.op} onChange={(event) => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, atom: { ...item.atom, op: event.target.value } } : item))}><option value="gte">≥</option><option value="gt">&gt;</option><option value="eq">=</option><option value="lte">≤</option><option value="lt">&lt;</option></select></label><label className="permission-rule-value"><span>{t("permission.value")}</span><input max={meta.max} min={meta.min} type="number" value={Number(row.atom.value)} onChange={(event) => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, atom: { ...item.atom, value: Number(event.target.value) } } : item))} /></label></> : <div className="permission-boolean"><button className={row.atom.value === true ? "is-active" : ""} onClick={() => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, atom: { ...item.atom, op: "eq", value: true } } : item))} type="button">{t("common.yes")}</button><button className={row.atom.value === false ? "is-active" : ""} onClick={() => updateRows(model.rows.map((item, itemIndex) => itemIndex === index ? { ...item, atom: { ...item.atom, op: "eq", value: false } } : item))} type="button">{t("common.no")}</button></div>}
-        <button className="permission-remove-rule" onClick={() => updateRows(model.rows.filter((_, itemIndex) => itemIndex !== index))} type="button"><span className="material-symbols-outlined">close</span></button>
+        <button aria-label={t("permission.removeCondition")} className="permission-remove-rule" onClick={() => updateRows(model.rows.filter((_, itemIndex) => itemIndex !== index))} type="button"><span className="material-symbols-outlined">close</span></button>
       </div>;
-    })}</div> : <div className="permission-empty-rules"><span className="material-symbols-outlined">all_inclusive</span><span><strong>{t("permission.noExtraCondition")}</strong><small>{t("permission.inheritedStillApplies")}</small></span></div>}
+    })}</div> : <div className="permission-empty-rules"><span className="material-symbols-outlined">all_inclusive</span><span>{t("permission.noExtraCondition")}</span></div>}
   </div>;
 }
 
@@ -137,10 +138,12 @@ function InheritedPolicySummary({ entries, language, scope, selected, t }: { ent
     if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.requirement)) rows.push({ key: `${entry.key}:space:allow`, source: "space", title, type: "allow", expression: entry.space_policy.requirement });
     if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.denial)) rows.push({ key: `${entry.key}:space:deny`, source: "space", title, type: "deny", expression: entry.space_policy.denial });
   });
-  return <section className="permission-inherited-summary">
-    <header><span className="material-symbols-outlined">schema</span><span><strong>{t("permission.inheritedRules")}</strong><small>{t("permission.inheritedRulesHint")}</small></span></header>
+  if (!rows.length) return <p className="permission-no-inherited">{t("permission.noInheritedRules")}</p>;
+  return <details className="permission-inherited-summary">
+    <summary><span>{t("permission.inheritedCount", { count: rows.length })}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></summary>
+    <p className="permission-inherited-hint">{t("permission.inheritedRulesHint")}</p>
     {rows.length ? <div>{rows.map((row) => <article className={row.type === "deny" ? "is-denial" : ""} key={row.key}><span>{t(row.source === "platform" ? "permission.source.platform" : "permission.source.space")}</span><p><strong>{row.title}</strong><small>{row.type === "deny" ? t("permission.denyIf") : t("permission.allowIf")} · {formatExpression(row.expression, t)}</small></p></article>)}</div> : <p className="permission-no-inherited"><span className="material-symbols-outlined">check_circle</span>{t("permission.noInheritedRules")}</p>}
-  </section>;
+  </details>;
 }
 
 function policyFor(node: CapabilityNodeDTO, scope: Scope) {
@@ -151,6 +154,7 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
   const { i18n, t } = useTranslation();
   const language = i18n.resolvedLanguage ?? "en";
   const [catalog, setCatalog] = useState<CapabilityCatalogDTO | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState("");
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -158,6 +162,16 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
   const [vipPreview, setVipPreview] = useState(false);
   const [spaceVerificationPreview, setSpaceVerificationPreview] = useState<SpaceVerificationPreview>("email");
   const [busy, setBusy] = useState(false);
+  const [choosingCapability, setChoosingCapability] = useState(false);
+  const capabilityPicker = useRef<HTMLButtonElement>(null);
+  const editorPanel = useRef<HTMLElement>(null);
+  const capabilityDirectoryId = useId();
+  const chooseCapability = (key: string) => {
+    setSelectedKey(key);
+    setChoosingCapability(false);
+    if (capabilityPicker.current?.getClientRects().length) capabilityPicker.current.focus();
+  };
+  useLayoutEffect(() => { editorPanel.current?.scrollTo({ top: 0 }); }, [selectedKey]);
   const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(() => new Set());
 
   const load = async () => {
@@ -166,7 +180,11 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
     const first = flatten(result.catalog).find((item) => scope === "platform" || item.space_configurable);
     setSelectedKey((current) => current || first?.key || "");
   };
-  useEffect(() => { void load().catch((cause) => showToast(cause instanceof Error ? cause.message : t("permission.loadFailed"), "error")); }, [scope]);
+  const retryLoad = () => {
+    setLoadError(null);
+    void load().catch((cause) => setLoadError(cause instanceof Error ? cause.message : t("permission.loadFailed")));
+  };
+  useEffect(() => { retryLoad(); }, [scope]);
   const entries = useMemo(() => flatten(catalog?.catalog ?? []), [catalog]);
   const selected = entries.find((entry) => entry.key === selectedKey) ?? null;
   useEffect(() => {
@@ -273,30 +291,33 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
   };
 
   return <section className="permission-workspace">
-    <aside className="permission-tree-panel">
-      <label className="permission-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder={t("permission.search")} value={query} /></label>
+    <aside className={`permission-tree-panel ${choosingCapability ? "is-choosing" : ""}`}>
+      <button ref={capabilityPicker} className="permission-capability-picker" aria-controls={capabilityDirectoryId} aria-expanded={choosingCapability} onClick={() => setChoosingCapability((value) => !value)} type="button"><span aria-hidden="true" className="material-symbols-outlined">account_tree</span><span>{t("permission.chooseCapability")}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></button>
+      <div className="permission-tree-content" id={capabilityDirectoryId} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setChoosingCapability(false); capabilityPicker.current?.focus(); } }}>
+      <label className="permission-search"><span className="material-symbols-outlined">search</span><input aria-label={t("permission.search")} onChange={(event) => setQuery(event.target.value)} placeholder={t("permission.search")} value={query} /></label>
       <div className="permission-tree">{visibleEntries.map((entry) => {
         const hasOverride = Boolean(policyFor(entry, scope));
         const hasChildren = branchKeys.has(entry.key);
         const collapsed = !queryValue && collapsedKeys.has(entry.key);
         const title = isChineseLanguage(language) ? entry.title : entry.title_en;
         return <div className={`permission-tree-row ${selectedKey === entry.key ? "is-selected" : ""} ${hasOverride ? "has-override" : ""}`} key={entry.key} style={{ "--permission-depth": entry.depth } as CSSProperties}>
-          {hasChildren ? <button aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
-          <button className="permission-tree-select" onClick={() => setSelectedKey(entry.key)} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>
+          {hasChildren ? <button disabled={busy} aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
+          <button aria-pressed={selectedKey === entry.key} disabled={busy} className="permission-tree-select" onClick={() => chooseCapability(entry.key)} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>
         </div>;
       })}{!visibleEntries.length ? <div className="permission-tree-empty"><span className="material-symbols-outlined">search_off</span><small>{t("permission.noSearchResults")}</small></div> : null}</div>
+      </div>
     </aside>
-    <main className="permission-editor-panel">{selected ? <>
+    <main className="permission-editor-panel" ref={editorPanel}>{selected ? <>
       <header className="permission-editor-header"><span className="permission-editor-icon"><span className="material-symbols-outlined">{selected.icon}</span></span><span><small>{selected.key}</small><h2>{isChineseLanguage(language) ? selected.title : selected.title_en}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
-      <section className="permission-inheritance"><span className="material-symbols-outlined">account_tree</span><span><strong>{t(scope === "platform" ? "permission.platformBaseline" : "permission.spaceRestriction")}</strong><small>{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</small></span></section>
-      <InheritedPolicySummary entries={entries} language={language} scope={scope} selected={selected} t={t} />
+      <p className="permission-scope-note">{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</p>
+      <InheritedPolicySummary key={selected.key} entries={entries} language={language} scope={scope} selected={selected} t={t} />
       <section className="permission-editor-section"><div><h3>{t("permission.allowWhen")}</h3><p>{t("permission.allowWhenHint")}</p></div><RuleEditor onChange={(requirement) => setDraft((current) => ({ ...current, requirement }))} t={t} value={draft.requirement} /></section>
       <section className="permission-editor-section is-denial"><div><h3>{t("permission.denyWhen")}</h3><p>{t("permission.denyWhenHint")}</p></div><RuleEditor onChange={(denial) => setDraft((current) => ({ ...current, denial }))} t={t} value={draft.denial} /></section>
       <section className="permission-editor-section"><div><h3>{t("permission.usageLimits")}</h3><p>{t("permission.usageLimitsHint")}</p></div><div className="permission-limit-editor">
         <div className="permission-limit-presets">{["daily", "weekly"].map((key) => <button disabled={key in draft.limits} key={key} onClick={() => setDraft((current) => ({ ...current, limits: { ...current.limits, [key]: 1 } }))} type="button"><span className="material-symbols-outlined">add</span>{t(key === "daily" ? "permission.dailyLimit" : "permission.weeklyLimit")}</button>)}</div>
         {Object.entries(draft.limits).length ? <div className="permission-limit-list">{Object.entries(draft.limits).map(([key, value]) => <label key={key}><span>{key === "daily" || key === "weekly" ? t(key === "daily" ? "permission.dailyLimit" : "permission.weeklyLimit") : key}</span><input min="0" onChange={(event) => setDraft((current) => ({ ...current, limits: { ...current.limits, [key]: Number(event.target.value) } }))} type="number" value={value} /><button onClick={() => setDraft((current) => ({ ...current, limits: Object.fromEntries(Object.entries(current.limits).filter(([itemKey]) => itemKey !== key)) }))} type="button"><span className="material-symbols-outlined">close</span></button></label>)}</div> : <div className="permission-empty-rules"><span className="material-symbols-outlined">speed</span><span><strong>{t("permission.productDefaultLimits")}</strong><small>{t("permission.productDefaultLimitsHint")}</small></span></div>}
       </div></section>
-      <section className="permission-matrix-section"><header><span><h3>{t("permission.audiencePreview")}</h3><p>{t("permission.audiencePreviewHint")}</p></span><div className="permission-preview-actions">{scope === "platform" ? <div className="permission-space-preview"><small>{t("permission.spaceState")}</small><div>{(["email", "phone", "identity"] as const).map((value) => <button className={spaceVerificationPreview === value ? "is-active" : ""} key={value} onClick={() => { setSpaceVerificationPreview(value); setSimulation([]); }} type="button">{t(`permission.spaceVerification.${value}`)}</button>)}</div></div> : null}<button className={vipPreview ? "is-active" : ""} onClick={() => setVipPreview((value) => !value)} type="button">VIP</button><button disabled={busy} onClick={() => void preview()} type="button"><span className="material-symbols-outlined">play_arrow</span>{t("permission.runPreview")}</button></div></header>{simulation.length ? <div className="permission-matrix"><div className="permission-matrix-head"><span>LV</span>{(["none", "email", "phone", "dual"] as const).map((value) => <span key={value}>{t(`permission.verification.${value}`)}</span>)}</div>{Array.from({ length: 18 }, (_, index) => index + 1).map((level) => <div className="permission-matrix-row" key={level}><strong>{level}</strong>{(["none", "email", "phone", "dual"] as const).map((verification) => { const row = simulation.find((item) => item.growth_level === level && item.verification === verification && item.permanent_vip === vipPreview); return <span className={row?.allowed ? "is-allowed" : "is-denied"} key={verification}><span className="material-symbols-outlined">{row?.allowed ? "check" : "close"}</span></span>; })}</div>)}</div> : <button className="permission-matrix-placeholder" onClick={() => void preview()} type="button"><span className="material-symbols-outlined">grid_view</span><span><strong>{t("permission.previewBeforePublish")}</strong><small>{t("permission.previewNoChanges")}</small></span></button>}</section>
-    </> : <div className="permission-workspace-loading"><i /><span>{t("permission.loading")}</span></div>}</main>
+      <section className="permission-matrix-section"><header><span><h3>{t("permission.audiencePreview")}</h3><p>{t("permission.audiencePreviewHint")}</p></span><div className="permission-preview-actions">{scope === "platform" ? <div className="permission-space-preview"><small>{t("permission.spaceState")}</small><div>{(["email", "phone", "identity"] as const).map((value) => <button className={spaceVerificationPreview === value ? "is-active" : ""} key={value} onClick={() => { setSpaceVerificationPreview(value); setSimulation([]); }} type="button">{t(`permission.spaceVerification.${value}`)}</button>)}</div></div> : null}<button className={vipPreview ? "is-active" : ""} onClick={() => setVipPreview((value) => !value)} type="button">VIP</button><button disabled={busy} onClick={() => void preview()} type="button"><span className="material-symbols-outlined">play_arrow</span>{t("permission.runPreview")}</button></div></header>{simulation.length ? <div className="permission-matrix"><div className="permission-matrix-head"><span>LV</span>{(["none", "email", "phone", "dual"] as const).map((value) => <span key={value}>{t(`permission.verification.${value}`)}</span>)}</div>{Array.from({ length: 18 }, (_, index) => index + 1).map((level) => <div className="permission-matrix-row" key={level}><strong>{level}</strong>{(["none", "email", "phone", "dual"] as const).map((verification) => { const row = simulation.find((item) => item.growth_level === level && item.verification === verification && item.permanent_vip === vipPreview); return <span className={row?.allowed ? "is-allowed" : "is-denied"} key={verification}><span className="material-symbols-outlined">{row?.allowed ? "check" : "close"}</span></span>; })}</div>)}</div> : <p className="permission-preview-note">{t("permission.previewNoChanges")}</p>}</section>
+    </> : loadError ? <FeedbackState tone="error" title={t("permission.loadFailed")} description={loadError} action={<button className="ghost-button" onClick={retryLoad} type="button">{t("common.retry")}</button>} /> : catalog ? <FeedbackState tone="empty" icon="account_tree" title={t("permission.noSearchResults")} /> : <div className="permission-workspace-loading"><i /><span>{t("permission.loading")}</span></div>}</main>
   </section>;
 }

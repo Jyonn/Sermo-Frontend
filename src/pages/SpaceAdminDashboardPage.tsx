@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { managementSection, managementSettingsForSection, spaceManagementSections, type SpaceManagementSection } from "../lib/managementNavigation";
+import { PageTabs } from "../components/PageTabs";
 import { ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
@@ -186,7 +187,7 @@ export default function SpaceAdminDashboardPage() {
   const configuration = group("configuration", "tune");
   const access = group("access", "shield");
   const adminTabs = [
-    { id: "members", icon: "group", label: t("admin.members"), group: people },
+    { id: "members", icon: "group", label: t("management.memberDirectory"), group: people },
     { id: "operators", icon: "shield_person", label: t("admin.operators"), group: people },
     ...(communityEnabled ? [
       { id: "square", icon: "explore", label: t("nav.square"), group: community },
@@ -821,22 +822,24 @@ export default function SpaceAdminDashboardPage() {
         <div className={`admin-app-content ${activeTab === "permissions" ? "is-permissions" : ""}`}>
 
           {activeTab === "members" ? <section className="admin-tab-page admin-members-tab">
-            <div className="admin-members-overview">
-              <span><strong>{dashboard?.stats.members_count ?? 0}</strong>{t("admin.members")}</span>
-              <span><strong>{dashboard?.stats.online_count ?? 0}</strong>{t("presence.online")}</span>
-              <button onClick={openBroadcast} type="button"><span className="material-symbols-outlined">campaign</span>{t("admin.broadcast")}</button>
+            <div className="admin-members-toolbar">
+              <label className="admin-member-search"><span aria-hidden="true" className="material-symbols-outlined">search</span><input aria-label={t("admin.searchMembers")} placeholder={t("admin.searchMembers")} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+              <PageTabs label={t("management.memberFilter")} value={filter} onChange={setFilter} items={[
+                { value: "all", label: `${t("common.all")} · ${dashboard?.stats.members_count ?? 0}` },
+                { value: "online", label: `${t("presence.online")} · ${dashboard?.stats.online_count ?? 0}` },
+              ]} />
             </div>
-            <div className="admin-list-tools">
-              <label className="admin-member-search"><span className="material-symbols-outlined">search</span><input placeholder={t("admin.searchMembers")} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-              <div className="admin-filter-tabs"><button className={filter === "all" ? "is-active" : ""} onClick={() => setFilter("all")} type="button">{t("common.all")}</button><button className={filter === "online" ? "is-active" : ""} onClick={() => setFilter("online")} type="button">{t("presence.online")}</button></div>
-            </div>
+            <div aria-hidden="true" className="admin-member-columns"><span>{t("management.memberName")}</span><span>{t("admin.friends")}</span><span>{t("admin.statements")}</span><span>{t("management.memberStatus")}</span><span /></div>
             <div className="admin-member-list">
               {members.map((user) => <button className="admin-member-row" key={user.user_id} onClick={() => setSelectedMember(user)} type="button">
                 <span className="admin-member-avatar-wrap"><UserAvatar className="admin-member-avatar" name={user.name} uri={user.avatar_uri} />{user.is_alive && !user.is_deleted ? <i /> : null}</span>
                 <span className="admin-member-main"><span><strong>{user.name}</strong><b>LV.{user.growth_level ?? 1}</b>{user.verified ? <em>{t("admin.verified")}</em> : null}</span><small>{user.is_deleted ? t("admin.historicalResidual") : `${user.friend_count ?? 0} ${t("admin.friends")} · ${user.statement_count ?? 0} ${t("admin.statements")}`}</small></span>
+                <span className="admin-member-number" aria-label={`${t("admin.friends")} ${user.friend_count ?? 0}`}>{user.friend_count ?? 0}</span>
+                <span className="admin-member-number" aria-label={`${t("admin.statements")} ${user.statement_count ?? 0}`}>{user.statement_count ?? 0}</span>
+                <span className={`admin-member-presence ${user.is_alive && !user.is_deleted ? "is-online" : ""}`}>{t(user.is_alive && !user.is_deleted ? "presence.online" : "presence.offline")}</span>
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>)}
-              {!members.length && memberState === "ready" ? <FeedbackState tone="empty" icon={query.trim() ? "search_off" : "group"} title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
+              {!members.length && memberState === "ready" ? <FeedbackState tone="empty" icon={query.trim() ? "search_off" : "group"} title={t(query.trim() || filter === "online" ? "management.noMatchingMembers" : "admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
             </div>
           </section> : null}
 
@@ -898,7 +901,7 @@ export default function SpaceAdminDashboardPage() {
 
           {activeTab === "features" ? <section className="management-form-page">
         <div className="admin-policy-drawer">
-          <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
+          <p className="management-note">{t("admin.featureAccessHint")}</p>
           <SettingGroup>
             <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) setSettingsSpaceGroupEnabled(false); }} />} />
             <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
@@ -920,7 +923,7 @@ export default function SpaceAdminDashboardPage() {
 
           {activeTab === "access" ? <section className="management-form-page">
         <div className="admin-policy-drawer">
-          <section className="admin-policy-intro"><strong>{t("admin.unverifiedAccessTitle")}</strong><p>{t("admin.unverifiedAccessHint")}</p></section>
+          <p className="management-note">{t("admin.unverifiedAccessHint")}</p>
           <div className="admin-policy-options">
             {([2, 1, 0] as const).map((policy) => <button aria-pressed={settingsUnverifiedGroupPolicy === policy} className={settingsUnverifiedGroupPolicy === policy ? "is-selected" : ""} key={policy} onClick={() => setSettingsUnverifiedGroupPolicy(policy)} type="button"><span className="admin-policy-radio" /><span><strong>{t(`admin.unverifiedPolicy${policy}` as TranslationKey)}</strong><small>{t(`admin.unverifiedPolicy${policy}Hint` as TranslationKey)}</small></span></button>)}
           </div>
@@ -937,20 +940,28 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
 
           {activeTab === "basics" ? <section className="management-form-page">
-            <section className="admin-menu-profile"><SpaceAvatar className="admin-menu-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} /><span><strong>{currentSpace?.name}</strong><small>{PUBLIC_HOST}/{currentSpace?.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace?.effective_member_limit ?? currentSpace?.tier_member_limit}</b></section>
-        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label" htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label" htmlFor="admin-space-capacity">{t("admin.memberLimit")}</label><input id="admin-space-capacity" className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /><small>{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div></section></div>
-            <section className="admin-menu-section"><h2>{t("admin.spaceEntry")}</h2><div className="admin-menu-list"><button onClick={() => void copyEntryLink()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">link</span></span><span><strong>{t("admin.copyMemberEntry")}</strong></span><span className="material-symbols-outlined">content_copy</span></button><a href={entryHref}><span className="admin-policy-icon"><span className="material-symbols-outlined">open_in_new</span></span><span><strong>{t("admin.openMemberEntry")}</strong></span><span className="material-symbols-outlined">chevron_right</span></a></div></section>
+            <div className="management-space-identity">
+              <SpaceAvatar className="management-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />
+              <span><strong>{currentSpace?.name}</strong><a href={entryHref}>{PUBLIC_HOST}/{currentSpace?.slug}</a></span>
+              <button aria-label={t("admin.copyMemberEntry")} title={t("admin.copyMemberEntry")} onClick={() => void copyEntryLink()} type="button"><span aria-hidden="true" className="material-symbols-outlined">content_copy</span></button>
+            </div>
+            <div className="management-setting-fields">
+              <div className="management-field"><label htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div>
+              <div className="management-field"><div><label htmlFor="admin-space-capacity">{t("admin.memberLimit")}</label><small id="admin-space-capacity-hint">{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div><input id="admin-space-capacity" aria-describedby="admin-space-capacity-hint" className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /></div>
+            </div>
             <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
           </section> : null}
 
-          {activeTab === "levels" ? <section className="management-form-page"><div className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></div><footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer></section> : null}
+          {activeTab === "levels" ? <section className="management-form-page">
+            <div className="management-level-fields">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input aria-label={`Lv.${index + 1}`} className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div>
+            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+          </section> : null}
 
           {activeTab === "verification" ? <section className="management-form-page">
         <div className="admin-policy-drawer admin-verification-drawer">
-          <section className="admin-verification-tier">
+          <section className="management-verification-status">
             <span>{t(`admin.tier.${currentSpace?.verification_tier ?? "email"}` as TranslationKey)}</span>
-            <strong>{currentSpace?.tier_member_limit ?? 5}</strong>
-            <small>{t("admin.memberCapacity")}</small>
+            <small>{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small>
           </section>
           {currentSpace?.verification_tier === "email" ? <section className="admin-policy-card field-stack">
             <div><strong>{t("admin.verifyPhoneTitle")}</strong><small>{t("admin.verifyPhoneHint")}</small></div>

@@ -42,7 +42,7 @@ test("management adapts to portrait, compact rail and short landscape without du
   assert.match(css, /max-width: 1179px/);
   assert.match(css, /max-width: 719px/);
   assert.match(css, /max-height: 560px/);
-  assert.match(css, /@container management-permissions/);
+  assert.match(read("styles/permission-workspace.css"), /@container permission-editor/);
   assert.match(css, /\.management-nav[\s\S]*overflow: auto/);
   assert.match(css, /\.management-detail[\s\S]*var\(--line-soft\)/);
 });
