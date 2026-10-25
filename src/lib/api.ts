@@ -890,6 +890,14 @@ export const api = {
     }).then((payload) => decodeCompact<ChatMessageDTO[]>(payload, "messages"));
   },
 
+  getCopySuggestions(chat_id: number, signal?: AbortSignal) {
+    return request<{items: import("./groupCopy").CopySuggestion[]}>("/messages/copies", {auth:true, query:{chat_id}, signal});
+  },
+
+  recordMessageCopies(chat_id: number, message_ids: number[]) {
+    return request<{message_ids:number[]}>("/messages/copies", {method:"POST",auth:true,query:{chat_id},body:{message_ids}});
+  },
+
   searchMessages(params: { chat_id: number; limit: number; keyword?: string; type?: number; before?: number }, signal?: AbortSignal) {
     return request<MessageSearchResponseDTO>("/messages/search", {
       auth: true,

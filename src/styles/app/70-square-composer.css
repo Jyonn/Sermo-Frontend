@@ -3426,3 +3426,74 @@ html[data-theme="dark"] .verification-banner-action {
     font-size: 11px;
   }
 }
+.group-copy-shelf {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  z-index: 8;
+  max-width: calc(100% - 16px);
+}
+
+.group-copy-bookmark {
+  display: grid;
+  width: 30px;
+  height: 44px;
+  padding: 0 2px 4px 0;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-left: 0;
+  border-radius: 0 10px 12px 0;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  box-shadow: 3px 4px 14px rgba(18,40,31,.09);
+  cursor: pointer;
+}
+
+.group-copy-shelf.has-hint .group-copy-bookmark { background: color-mix(in srgb, var(--brand-primary) 20%, var(--bg-elevated)); border-color: var(--brand-primary); color: var(--text-primary); }
+.group-copy-hint {
+  position: absolute;
+  top: 7px;
+  left: 38px;
+  padding: 7px 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.group-copy-panel {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  width: min(320px, calc(100vw - 64px));
+  max-height: min(470px, calc(100dvh - 230px));
+  padding: 16px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 16px 48px rgba(10,32,23,.18);
+  animation: desktop-tool-popover-left-in 180ms ease-out both;
+}
+
+.group-copy-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.group-copy-eyebrow { color: var(--text-muted); font-size: 10px; letter-spacing: .08em; }
+.group-copy-panel h3 { margin: 4px 0 0; font-size: 16px; }
+.group-copy-panel > header > button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; color: var(--text-muted); background: var(--bg-canvas); cursor: pointer; }
+.group-copy-panel > header .material-symbols-outlined { font-size: 18px; }
+.group-copy-items { display: grid; gap: 8px; }
+.group-copy-item { display: grid; gap: 8px; width: 100%; padding: 12px; text-align: left; border: 1px solid transparent; border-radius: 12px; color: var(--text-primary); background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg-canvas)); cursor: pointer; }
+.group-copy-item:hover { border-color: var(--line-soft); background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-canvas)); }
+.group-copy-author { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--text-muted); font-size: 11px; }
+.group-copy-author .material-symbols-outlined, .group-copy-bookmark .material-symbols-outlined { flex: 0 0 auto; font-size: 15px; }
+.group-copy-text { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; white-space: pre-wrap; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 14px; line-height: 1.6; }
+.group-copy-item small { color: var(--text-secondary); font-size: 10px; }
+.group-copy-item.is-copied { color: var(--text-muted); background: var(--bg-canvas); }
+.group-copy-item.is-copied small { color: var(--text-muted); }
+.group-copy-shelf button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }

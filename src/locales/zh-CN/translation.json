@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "你可能想复制",
+  "copyShelf.popular": "大家都在复制",
+  "copyShelf.recent": "最近 24 小时",
+  "copyShelf.tap": "点击复制全文",
+  "copyShelf.copied": "你已复制",
   "oauth.step.identity": "基本信息",
   "oauth.step.connection": "回调连接",
   "oauth.step.permissions": "申请权限",

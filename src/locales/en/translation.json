@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "You might want to copy",
+  "copyShelf.popular": "Popular copies in this group",
+  "copyShelf.recent": "LAST 24 HOURS",
+  "copyShelf.tap": "Click to copy",
+  "copyShelf.copied": "Copied by you",
   "oauth.step.identity": "Identity",
   "oauth.step.connection": "Callbacks",
   "oauth.step.permissions": "Permissions",

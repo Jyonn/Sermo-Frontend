@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "Quizá quieras copiar",
+  "copyShelf.popular": "Mensajes que todos copian",
+  "copyShelf.recent": "ÚLTIMAS 24 HORAS",
+  "copyShelf.tap": "Pulsa para copiar todo",
+  "copyShelf.copied": "Ya lo has copiado",
   "oauth.unsaved": "Unsaved changes",
   "oauth.directory": "Applications",
   "oauth.add": "Add application",

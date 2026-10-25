@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.21",
+  "id": "2026.10.25.22",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "桌面录音体验统一",
+      "title": "群聊复制书签",
       "items": [
-        "欢迎语与群发使用和聊天相同的桌面录音浮层，支持停止、试听和发送",
-        "录音时保留输入区域，浮层不再被面板遮挡"
+        "群聊新增“你可能想复制”，收纳最近24小时大家常复制的消息",
+        "点击书签查看并复制全文，已复制内容自动变暗后移"
       ]
     },
     "en": {
-      "title": "Unified desktop voice recording",
+      "title": "Group copy bookmarks",
       "items": [
-        "Welcome and broadcast editors share chat's desktop recording studio with stop, preview, and send controls",
-        "Keep the text editor visible while recording, without clipped voice controls"
+        "A group bookmark surfaces popular messages copied in the last 24 hours",
+        "Copy the full text in one click; messages you copied are muted and moved down"
       ]
     }
   }

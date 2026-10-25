@@ -33,6 +33,8 @@ import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
 import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
+import { GroupCopyShelf, reportGroupCopies } from "../components/GroupCopyShelf";
+import { GROUP_COPY_REMOVED } from "../lib/groupCopy";
 import { EMOJI_PAGES } from "../lib/composerEmojis";
 import { StickerImage } from "../components/StickerImage";
 import { ChatMuteControls } from "../components/ChatMuteControls";
@@ -6898,6 +6900,9 @@ function LiveChatsPage({
       if (!value) return;
       const copied = await copyText(value);
       if (!copied) throw new Error(t("common.copyFailed"));
+      if (!linkOnly && selectedChat?.type === "group" && messageMenu.message.from !== "self" && typeof messageMenu.message.id === "number") {
+        reportGroupCopies(selectedChat.id,currentUserId,[messageMenu.message.id]);
+      }
       setMessageMenu(null);
       showToast(linkOnly ? t("common.linkCopied") : t("message.batchCopied", { count: 1 }));
     } catch (apiError) {
@@ -7029,6 +7034,7 @@ function LiveChatsPage({
           ? targets[0].text.trim()
           : targets.map((message) => `${message.name}: ${message.text.trim()}`).join("\n");
         if (!await copyText(copyValue)) throw new Error(t("common.copyFailed"));
+        if(selectedChat?.type === "group")reportGroupCopies(selectedChat.id,currentUserId,targets.filter(message=>message.kind==="text" && message.from!=="self" && typeof message.id==="number").map(message=>message.id as number));
         showToast(t("message.batchCopied", { count: targets.length }));
         finishMessageSelection();
         return;
@@ -7049,6 +7055,7 @@ function LiveChatsPage({
         .map((message) => message.id)
         .filter((messageId): messageId is number => typeof messageId === "number");
       for (const messageId of recalledIds) await api.deleteMessage(messageId, "everyone");
+      if(selectedChat)window.dispatchEvent(new CustomEvent(GROUP_COPY_REMOVED,{detail:{chatId:selectedChat.id,ids:recalledIds}}));
       targets.forEach((message) => purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]));
       const recalledClientIds = new Set(targets.map((message) => message.clientId));
       const nextThreadMessages = selectedMessages.filter((message) => !recalledClientIds.has(message.clientId));
@@ -7187,6 +7194,7 @@ function LiveChatsPage({
       setMessageDeleteState("deleting");
       const deletedMessage = messageMenu.message;
       await api.deleteMessage(deletedMessage.id as number, scope);
+      window.dispatchEvent(new CustomEvent(GROUP_COPY_REMOVED,{detail:{chatId:selectedChat.id,ids:[deletedMessage.id]}}));
       purgeCachedMedia([
         deletedMessage.payload?.uri,
         deletedMessage.payload?.thumbnail_uri,
@@ -7239,6 +7247,7 @@ function LiveChatsPage({
     try {
       setMessageDeleteState("deleting");
       if (remoteIds.length) await api.deleteMessages(remoteIds);
+      if(selectedChat)window.dispatchEvent(new CustomEvent(GROUP_COPY_REMOVED,{detail:{chatId:selectedChat.id,ids:remoteIds}}));
 
       targets.forEach((message) => {
         if (message.status === "pending") cancelledSendIdsRef.current.add(message.clientId);
@@ -7972,6 +7981,7 @@ function LiveChatsPage({
                 }}
               >
               {mobileComposerLayout ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
+              {selectedChat?.type === "group" && !submissionMode ? <GroupCopyShelf key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId}/> : null}
               <div
                 ref={messageScrollRef}
                 className="message-scroll"

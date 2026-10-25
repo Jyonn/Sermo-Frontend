@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "コピーしたいメッセージ",
+  "copyShelf.popular": "みんながコピーしています",
+  "copyShelf.recent": "過去24時間",
+  "copyShelf.tap": "クリックして全文をコピー",
+  "copyShelf.copied": "コピー済み",
   "oauth.unsaved": "Unsaved changes",
   "oauth.directory": "Applications",
   "oauth.add": "Add application",

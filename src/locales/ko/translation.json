@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "복사하고 싶은 메시지",
+  "copyShelf.popular": "다른 멤버들이 복사 중",
+  "copyShelf.recent": "최근 24시간",
+  "copyShelf.tap": "클릭하여 전체 복사",
+  "copyShelf.copied": "복사 완료",
   "oauth.unsaved": "Unsaved changes",
   "oauth.directory": "Applications",
   "oauth.add": "Add application",

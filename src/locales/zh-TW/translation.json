@@ -1,4 +1,9 @@
 {
+  "copyShelf.title": "你可能想複製",
+  "copyShelf.popular": "大家都在複製",
+  "copyShelf.recent": "最近 24 小時",
+  "copyShelf.tap": "點擊複製全文",
+  "copyShelf.copied": "你已複製",
   "oauth.unsaved": "Unsaved changes",
   "oauth.directory": "Applications",
   "oauth.add": "Add application",
