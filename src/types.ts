@@ -82,6 +82,7 @@ export interface SpaceDTO {
   qq_binding_available?: boolean;
   oauth_developer_available?: boolean;
   oauth_developer_eligible?: boolean;
+  oauth_developer_granted?: boolean;
   oauth_developer_enabled?: boolean;
   unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
@@ -343,6 +344,8 @@ export interface PlatformAdminSpaceDTO {
   square_enabled: boolean;
   qq_binding_granted: boolean;
   qq_binding_enabled: boolean;
+  oauth_developer_granted: boolean;
+  oauth_developer_enabled: boolean;
   identity_submitted_at: number | null;
   identity_verified_at: number | null;
   created_at: number;

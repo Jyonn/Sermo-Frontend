@@ -1,4 +1,5 @@
 import { mergeSessionUser } from "./sessionUser";
+import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import { decodeCompact, type CompactPayload } from "./compactTransport";
 import type {
@@ -1952,7 +1953,7 @@ export const api = {
   getPlatformMembers(spaceId: number, signal?: AbortSignal) {
     return request<PlatformAdminMemberDTO[]>(`/platform-admin/spaces/${spaceId}/members`, { platformAdminAuth: true, signal });
   },
-  setPlatformSpaceFeature(spaceId: number, featureKey: "qq_identity_binding", enabled: boolean) {
+  setPlatformSpaceFeature(spaceId: number, featureKey: SpaceFeatureKey, enabled: boolean) {
     return request<PlatformAdminSpaceDTO>(`/platform-admin/spaces/${spaceId}/features/${featureKey}`, {
       method: "POST", platformAdminAuth: true, body: { enabled },
     });

@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.4",
+  "id": "2026.10.25.5",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "管理页面，更清爽",
+      "title": "更清晰的档案与能力授权",
       "items": [
-        "成员管理整合搜索、筛选与统计，空间设置减少重复标题和多层卡片",
-        "权限编辑采用扁平布局，手机可收起能力目录，继承规则按需查看，并完善深色模式"
+        "优化成员档案与会话审计，适配横竖屏和深色模式",
+        "DEV 与 QQ 身份绑定统一由超管授权，再由空间管理员开启；DEV 不再限制空间标识"
       ]
     },
     "en": {
-      "title": "Cleaner administration pages",
+      "title": "Clearer profiles and capability grants",
       "items": [
-        "Member management combines search, filters and counts, while space settings lose repeated headings and nested cards",
-        "A flatter permission editor with a collapsible mobile directory, expandable inherited rules and consistent dark-mode styling"
+        "Refined member profiles and conversation auditing across screen sizes and dark mode",
+        "Platform administrators grant DEV and QQ identity binding before space administrators enable them; DEV is no longer restricted by space slug"
       ]
     }
   }

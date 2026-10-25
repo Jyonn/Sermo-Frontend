@@ -464,7 +464,7 @@ export default function SpaceAdminDashboardPage() {
         submission_enabled: currentSpace.submission_enabled ? 1 : 0,
         square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
         qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
-        ...(currentSpace.oauth_developer_eligible ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
+        ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
         unverified_group_policy: currentSpace.unverified_group_policy ?? 2,
         member_limit: currentSpace.member_limit ?? null,
         level_names: currentSpace.level_names?.length === 18 ? currentSpace.level_names : defaultLevelNames,
@@ -477,7 +477,7 @@ export default function SpaceAdminDashboardPage() {
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
-        ...(currentSpace.oauth_developer_eligible ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
+        ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
         unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
@@ -912,9 +912,9 @@ export default function SpaceAdminDashboardPage() {
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
           </SettingGroup>
-          {(currentSpace?.qq_binding_granted || (currentSpace?.slug === "dev" && currentSpace.oauth_developer_eligible)) ? <SettingGroup>
+          {(currentSpace?.qq_binding_granted || currentSpace?.oauth_developer_granted) ? <SettingGroup>
             {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
-            {currentSpace?.slug === "dev" && currentSpace.oauth_developer_eligible ? <SettingRow title={t("oauth.manage")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("oauth.manage")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
+            {currentSpace?.oauth_developer_granted ? <SettingRow title={t("management.devCapability")} description={t("management.devCapabilityHint")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("management.devCapability")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
           </SettingGroup> : null}
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>
