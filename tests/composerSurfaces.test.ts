@@ -46,3 +46,16 @@ test('voice opens inside the conversation instead of overflowing its left edge',
   assert.match(css,/\.desktop-writing-desk-toolbar \{\s+position: relative;\s+z-index: 6/);
   assert.doesNotMatch(css,/right: -44px/);
 });
+test('desktop voice uses one portaled studio without replacing the text editor',()=>{
+  for(const path of ['pages/ChatsPage.tsx','components/WelcomeMessageEditor.tsx','pages/SpaceAdminDashboardPage.tsx']) {
+    assert.match(read(path),/<DesktopVoiceStudio/);
+  }
+  assert.match(read('components/WelcomeMessageEditor.tsx'),/!mobileComposerLayout \|\| !voiceComposer.open/);
+  assert.match(read('pages/SpaceAdminDashboardPage.tsx'),/!mobileComposerLayout \|\| broadcastRecording.phase === "idle"/);
+  const studio=read('components/DesktopVoiceStudio.tsx');
+  assert.match(studio,/createPortal/);
+  assert.match(studio,/useModalFocus/);
+  assert.match(studio,/composer.startRecording/);
+  assert.match(studio,/audio.preview/);
+  assert.match(studio,/onClose/);
+});

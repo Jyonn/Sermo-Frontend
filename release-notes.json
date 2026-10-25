@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.20",
+  "id": "2026.10.25.21",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "语音与表情交互统一",
+      "title": "桌面录音体验统一",
       "items": [
-        "手机欢迎语与群发支持按住说话、松开发送和上滑取消",
-        "表情入口统一提供我的表情、发现表情和 Emoji 分类"
+        "欢迎语与群发使用和聊天相同的桌面录音浮层，支持停止、试听和发送",
+        "录音时保留输入区域，浮层不再被面板遮挡"
       ]
     },
     "en": {
-      "title": "Consistent voice and sticker controls",
+      "title": "Unified desktop voice recording",
       "items": [
-        "Hold to record, release to send, and slide up to cancel in mobile welcome and broadcast editors",
-        "The shared picker includes your stickers, sticker discovery, and Emoji categories"
+        "Welcome and broadcast editors share chat's desktop recording studio with stop, preview, and send controls",
+        "Keep the text editor visible while recording, without clipped voice controls"
       ]
     }
   }

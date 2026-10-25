@@ -7,6 +7,7 @@ import { copyText } from "../lib/presentation";
 import { showToast } from "../lib/toast";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, CloudResourceDTO, MessageMediaKind, StickerAssetDTO, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
 import { ChatPreview, ChatVoiceComposerRow, type VoiceComposerState } from "../pages/ChatsPage";
+import { DesktopVoiceStudio } from "./DesktopVoiceStudio";
 import { ComposerSvgIcon } from "./ComposerSvgIcon";
 import { ChatComposerLayout, useMobileComposerLayout } from "./ChatComposerLayout";
 import { CloudFilePickerSheet } from "./CloudFilePickerSheet";
@@ -87,6 +88,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [voiceInputReady,setVoiceInputReady] = useState(false);
+  const [desktopVoiceOpen, setDesktopVoiceOpen] = useState(false);
+  useEffect(() => { setDesktopVoiceOpen(false); }, [mobileComposerLayout]);
   const [holdBusy,setHoldBusy] = useState(false);
   const [voiceComposer, setVoiceComposer] = useState<VoiceComposerState>({
     open: false,
@@ -242,6 +245,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
 
   useEffect(() => {
     if (open) return;
+    setDesktopVoiceOpen(false);
     recordingAttemptRef.current += 1;
     recordingCancelledRef.current = true;
     if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
@@ -515,7 +519,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
           showDividers={false}
         />}
         <form className={`composer welcome-template-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${voiceComposer.open ? " is-recording-mode" : ""}`} onSubmit={(event) => void addText(event)} ref={composerRef}>
-          {!voiceComposer.open ? <ChatComposerLayout
+          {!mobileComposerLayout || !voiceComposer.open ? <ChatComposerLayout
             mobile={mobileComposerLayout}
             mobileInput={voiceInputReady ? <HoldToTalkInput disabled={!state?.can_add || saving} onBusyChange={setHoldBusy} onSend={(file,duration)=>addMedia(file,duration)}/> : undefined}
             toolCount={4}
@@ -532,7 +536,12 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
               value={draft}
             />}
             tools={<>
-              <button aria-label={t("audio.record")} aria-pressed={voiceInputReady} className={voiceInputReady ? "is-active" : ""} disabled={!state?.can_add || saving || holdBusy} onClick={() => {if(mobileComposerLayout){composerInputRef.current?.blur();setEmojiPickerOpen(false);setVoiceInputReady(value=>!value);}else void startVoiceRecording();}} type="button"><ComposerSvgIcon kind="mic"/></button>
+              <span className="desktop-tool-anchor">
+                <button aria-label={t("audio.record")} aria-expanded={!mobileComposerLayout && desktopVoiceOpen} aria-pressed={mobileComposerLayout ? voiceInputReady : desktopVoiceOpen} className={voiceInputReady || desktopVoiceOpen ? "is-active" : ""} disabled={!state?.can_add || saving || holdBusy} onClick={() => {composerInputRef.current?.blur();setEmojiPickerOpen(false);if(mobileComposerLayout)setVoiceInputReady(value=>!value);else setDesktopVoiceOpen(value=>!value);}} type="button"><ComposerSvgIcon kind="mic"/></button>
+                {!mobileComposerLayout && desktopVoiceOpen ? <DesktopVoiceStudio onClose={()=>setDesktopVoiceOpen(false)} phase={voiceComposer.phase} open={voiceComposer.open} bars={voiceComposer.bars} duration={voiceComposer.durationSeconds} previewPlaying={voicePreviewPlaying} onStart={()=>void startVoiceRecording()} onStop={stopVoiceRecording} onCancel={cancelVoiceRecording} onPreview={()=>void toggleVoicePreview()} onSend={()=>void sendRecordedVoice()}>
+                  <audio ref={voicePreviewAudioRef} hidden src={voicePreviewUri} preload="metadata" onEnded={()=>setVoicePreviewPlaying(false)} onPause={()=>setVoicePreviewPlaying(false)} onPlay={()=>setVoicePreviewPlaying(true)}/>
+                </DesktopVoiceStudio> : null}
+              </span>
               <button aria-label={t("emoji.choose")} aria-pressed={emojiPickerOpen} disabled={!state?.can_add || saving || holdBusy} onClick={() => {composerInputRef.current?.blur();setVoiceInputReady(false);setEmojiPickerOpen((value) => !value);}} type="button"><ComposerSvgIcon kind="emoji"/></button>
               <button aria-label={t("media.gallery")} disabled={!state?.can_add || saving || holdBusy} onClick={() => galleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
               <button aria-label={t("media.file")} disabled={!state?.can_add || saving || holdBusy} onClick={() => setComposerMoreOpen(true)} type="button"><ComposerSvgIcon kind="file"/></button>

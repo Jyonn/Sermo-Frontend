@@ -11,6 +11,7 @@ import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { ComposerEmojiPicker } from "../components/ComposerEmojiPicker";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
+import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -127,6 +128,14 @@ export default function SpaceAdminDashboardPage() {
   const [broadcastResult, setBroadcastResult] = useState<SpaceAdminBroadcastResultDTO | null>(null);
   const [broadcastMoreOpen, setBroadcastMoreOpen] = useState(false);
   const [voiceInputReady,setVoiceInputReady] = useState(false);
+  const [desktopVoiceOpen, setDesktopVoiceOpen] = useState(false);
+  useEffect(() => { setDesktopVoiceOpen(false); }, [mobileComposerLayout]);
+  const [broadcastPreviewUri, setBroadcastPreviewUri] = useState("");
+  const [broadcastPreviewPlaying, setBroadcastPreviewPlaying] = useState(false);
+  const broadcastPreviewRef = useRef<HTMLAudioElement | null>(null);
+  const broadcastRecordingAttemptRef = useRef(0);
+  const [broadcastVoicePending, setBroadcastVoicePending] = useState(false);
+  const [broadcastVoiceBars, setBroadcastVoiceBars] = useState<number[]>(Array(24).fill(.12));
   const [holdBusy,setHoldBusy] = useState(false);
   const [broadcastProgress, setBroadcastProgress] = useState(0);
   const [broadcastRecording, setBroadcastRecording] = useState<{
@@ -134,6 +143,12 @@ export default function SpaceAdminDashboardPage() {
     duration: number;
     file: File | null;
   }>({ phase: "idle", duration: 0, file: null });
+  useEffect(() => {
+    const uri = broadcastRecording.file ? URL.createObjectURL(broadcastRecording.file) : "";
+    setBroadcastPreviewUri(uri);
+    setBroadcastPreviewPlaying(false);
+    return () => { if (uri) URL.revokeObjectURL(uri); };
+  }, [broadcastRecording.file]);
   const broadcastIdRef = useRef("");
   const broadcastGalleryInputRef = useRef<HTMLInputElement | null>(null);
   const broadcastFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -241,6 +256,11 @@ export default function SpaceAdminDashboardPage() {
   }, [copied]);
 
   useEffect(() => () => {
+    broadcastRecordingAttemptRef.current++;
+    if (broadcastRecorderRef.current) {
+      broadcastRecorderRef.current.onstop = null;
+      if (broadcastRecorderRef.current.state === "recording") broadcastRecorderRef.current.stop();
+    }
     if (broadcastRecordingTimerRef.current !== null) window.clearInterval(broadcastRecordingTimerRef.current);
     broadcastAudioCaptureRef.current?.cleanup();
     broadcastAudioCaptureRef.current = null;
@@ -621,6 +641,7 @@ export default function SpaceAdminDashboardPage() {
     setBroadcastProgress(0);
     setBroadcastOpen(true);
     setVoiceInputReady(false);
+    setDesktopVoiceOpen(false);
     setBroadcastMoreOpen(false);
   };
 
@@ -635,6 +656,9 @@ export default function SpaceAdminDashboardPage() {
   };
 
   const cancelBroadcastRecording = () => {
+    broadcastRecordingAttemptRef.current++;
+    setBroadcastVoicePending(false);
+    broadcastPreviewRef.current?.pause();
     if (broadcastRecorderRef.current?.state === "recording") {
       broadcastRecorderRef.current.onstop = null;
       broadcastRecorderRef.current.stop();
@@ -645,14 +669,17 @@ export default function SpaceAdminDashboardPage() {
   };
 
   const startBroadcastRecording = async () => {
-    if (broadcastState === "sending" || broadcastRecording.phase !== "idle") return;
+    if (broadcastState === "sending" || broadcastRecording.phase !== "idle" || broadcastVoicePending) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setError(t("audio.unsupported"));
       return;
     }
 
+    const attempt = ++broadcastRecordingAttemptRef.current;
+    setBroadcastVoicePending(true);
     try {
       const capture = await createNoiseReducedAudioCapture();
+      if (attempt !== broadcastRecordingAttemptRef.current) { capture.cleanup(); return; }
       const mimeType = preferredAudioMimeType();
       broadcastAudioCaptureRef.current = capture;
       const recorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
@@ -661,6 +688,7 @@ export default function SpaceAdminDashboardPage() {
       broadcastRecordingStartedAtRef.current = Date.now();
       setBroadcastMoreOpen(false);
       setBroadcastRecording({ phase: "recording", duration: 0, file: null });
+      setBroadcastVoicePending(false);
 
       recorder.ondataavailable = (recordEvent) => {
         if (recordEvent.data.size) broadcastChunksRef.current.push(recordEvent.data);
@@ -676,11 +704,18 @@ export default function SpaceAdminDashboardPage() {
       };
       recorder.start(250);
       broadcastRecordingTimerRef.current = window.setInterval(() => {
+        if (capture.analyser) {
+          const values = new Uint8Array(capture.analyser.frequencyBinCount);
+          capture.analyser.getByteFrequencyData(values);
+          setBroadcastVoiceBars(Array.from({length:24},(_,index)=>Math.max(.12,(values[index % values.length] ?? 0)/255)));
+        }
         const duration = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - broadcastRecordingStartedAtRef.current) / 1000);
         setBroadcastRecording((current) => ({ ...current, duration }));
         if (duration >= AUDIO_MAX_DURATION_SECONDS && recorder.state === "recording") recorder.stop();
       }, 200);
     } catch {
+      if (attempt !== broadcastRecordingAttemptRef.current) return;
+      setBroadcastVoicePending(false);
       stopBroadcastRecordingResources();
       setBroadcastRecording({ phase: "idle", duration: 0, file: null });
       setError(t("audio.startFailed"));
@@ -996,7 +1031,7 @@ export default function SpaceAdminDashboardPage() {
               </div>
             ) : null}
             <form ref={broadcastComposerRef} className={`composer admin-broadcast-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
-              {broadcastRecording.phase === "idle" ? (
+              {!mobileComposerLayout || broadcastRecording.phase === "idle" ? (
                 <ChatComposerLayout mobile={mobileComposerLayout} toolCount={4}
                   mobileInput={voiceInputReady ? <HoldToTalkInput disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onSend={(file,duration)=>sendBroadcastMedia([{file,kind:"audio",duration}])}/> : undefined}
                   input={<MentionComposerInput ref={broadcastInputRef}
@@ -1009,7 +1044,12 @@ export default function SpaceAdminDashboardPage() {
                     placeholder={t("chat.inputPlaceholder")}
                   />}
                   tools={<>
-                    <button aria-label={t("audio.record")} aria-pressed={voiceInputReady} className={voiceInputReady ? "is-active" : ""} disabled={broadcastState === "sending" || holdBusy} onClick={() => {if(mobileComposerLayout){broadcastInputRef.current?.blur();setBroadcastMoreOpen(false);setVoiceInputReady(value=>!value);}else void startBroadcastRecording();}} type="button"><ComposerSvgIcon kind="mic"/></button>
+                    <span className="desktop-tool-anchor">
+                      <button aria-label={t("audio.record")} aria-expanded={!mobileComposerLayout && desktopVoiceOpen} aria-pressed={mobileComposerLayout ? voiceInputReady : desktopVoiceOpen} className={voiceInputReady || desktopVoiceOpen ? "is-active" : ""} disabled={broadcastState === "sending" || holdBusy} onClick={() => {broadcastInputRef.current?.blur();setBroadcastMoreOpen(false);if(mobileComposerLayout)setVoiceInputReady(value=>!value);else setDesktopVoiceOpen(value=>!value);}} type="button"><ComposerSvgIcon kind="mic"/></button>
+                      {!mobileComposerLayout && desktopVoiceOpen ? <DesktopVoiceStudio onClose={()=>setDesktopVoiceOpen(false)} phase={broadcastState === "sending" ? "sending" : broadcastVoicePending ? "requesting" : broadcastRecording.phase} open={broadcastVoicePending || broadcastRecording.phase !== "idle"} bars={broadcastVoiceBars} duration={broadcastRecording.duration} previewPlaying={broadcastPreviewPlaying} onStart={()=>void startBroadcastRecording()} onStop={stopBroadcastRecording} onCancel={cancelBroadcastRecording} onPreview={()=>{const audio=broadcastPreviewRef.current;if(!audio)return;if(audio.paused)void audio.play().catch(()=>setError(t("audio.startFailed")));else audio.pause();}} onSend={()=>{if(broadcastRecording.file){broadcastPreviewRef.current?.pause();void sendBroadcastMedia([{file:broadcastRecording.file,kind:"audio",duration:broadcastRecording.duration}]);}}}>
+                        <audio ref={broadcastPreviewRef} hidden src={broadcastPreviewUri} preload="metadata" onEnded={()=>setBroadcastPreviewPlaying(false)} onPause={()=>setBroadcastPreviewPlaying(false)} onPlay={()=>setBroadcastPreviewPlaying(true)}/>
+                      </DesktopVoiceStudio> : null}
+                    </span>
                     <button aria-label={t("emoji.choose")} aria-pressed={broadcastMoreOpen} disabled={broadcastState === "sending" || holdBusy} onClick={() => {broadcastInputRef.current?.blur();setVoiceInputReady(false);setBroadcastMoreOpen((value) => !value);}} type="button"><ComposerSvgIcon kind="emoji"/></button>
                     <button aria-label={t("media.gallery")} disabled={broadcastState === "sending" || holdBusy} onClick={() => broadcastGalleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
                     <button aria-label={t("media.file")} disabled={broadcastState === "sending" || holdBusy} onClick={() => broadcastFileInputRef.current?.click()} type="button"><ComposerSvgIcon kind="file"/></button>

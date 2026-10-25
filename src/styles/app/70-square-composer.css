@@ -1910,7 +1910,11 @@ html[data-theme="dark"] .verification-banner-action {
     margin-top: 6px;
   }
 
-  .mobile-quiet-tool-row > button {
+  .mobile-quiet-tool-row > .desktop-tool-anchor {
+    display: contents;
+  }
+
+  .mobile-quiet-tool-row button {
     position: relative;
     display: grid;
     width: 100%;
@@ -1926,11 +1930,11 @@ html[data-theme="dark"] .verification-banner-action {
     transition: color 150ms ease, background 150ms ease, transform 150ms ease;
   }
 
-  .mobile-quiet-tool-row > button:active {
+  .mobile-quiet-tool-row button:active {
     transform: scale(.9);
   }
 
-  .mobile-quiet-tool-row > button.is-active {
+  .mobile-quiet-tool-row button.is-active {
     color: var(--accent-ink, #087551);
     background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
   }

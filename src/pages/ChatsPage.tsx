@@ -32,6 +32,7 @@ import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatC
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
+import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
 import { EMOJI_PAGES } from "../lib/composerEmojis";
 import { StickerImage } from "../components/StickerImage";
 import { ChatMuteControls } from "../components/ChatMuteControls";
@@ -8198,16 +8199,9 @@ function LiveChatsPage({
                     tools={<>
                       <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={composerBusy || voiceComposer.phase === "sending"} onClick={() => { if (requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) toggleDesktopComposerTool("voice"); }} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
-                        {desktopComposerTool === "voice" ? <div className="desktop-tool-popover is-voice">
-                          <header><strong>{t("audio.record")}</strong></header>
-                          <div className={`desktop-voice-studio is-${voiceComposer.phase}`}>
-                            <div className="desktop-voice-waveform" aria-hidden="true">{voiceComposer.bars.map((bar, index) => <i key={index} style={{ "--voice-level": `${bar}` } as CSSProperties} />)}</div>
-                            <time>{formatDuration(voiceComposer.durationSeconds)}</time>
-                            {!voiceComposer.open ? <button className="desktop-voice-main" onClick={() => void startVoiceRecording()} type="button"><span className="material-symbols-outlined">mic</span>{t("composer.startRecording")}</button> : voiceComposer.phase === "recording" ? <button className="desktop-voice-main is-stop" onClick={stopVoiceRecording} type="button"><span className="material-symbols-outlined">stop</span>{t("audio.stopRecording")}</button> : voiceComposer.phase === "recorded" ? <div className="desktop-voice-actions"><button onClick={() => void toggleVoicePreview()} type="button"><span className="material-symbols-outlined">{voicePreviewPlaying ? "pause" : "play_arrow"}</span>{voicePreviewPlaying ? t("audio.pausePreview") : t("audio.preview")}</button><button className="is-send" onClick={() => void sendRecordedVoiceMessage()} type="button"><span className="material-symbols-outlined">send</span>{t("common.send")}</button></div> : <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{voiceComposer.phase === "sending" ? t("common.sendingPlain") : voiceComposer.phase === "requesting" ? t("audio.preparingMicrophone") : t("audio.generating")}</div>}
-                            {voiceComposer.open && voiceComposer.phase !== "sending" ? <button className="desktop-voice-discard" onClick={cancelVoiceRecording} type="button">{t("common.cancel")}</button> : null}
+                        {desktopComposerTool === "voice" ? <DesktopVoiceStudio onClose={()=>setDesktopComposerTool(null)} phase={voiceComposer.phase} open={voiceComposer.open} bars={voiceComposer.bars} duration={voiceComposer.durationSeconds} previewPlaying={voicePreviewPlaying} onStart={()=>void startVoiceRecording()} onStop={stopVoiceRecording} onCancel={cancelVoiceRecording} onPreview={()=>void toggleVoicePreview()} onSend={()=>void sendRecordedVoiceMessage()}>
                             <audio ref={voicePreviewAudioRef} hidden onEnded={() => { setVoicePreviewPlaying(false); if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null; }} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
-                          </div>
-                        </div> : null}
+                        </DesktopVoiceStudio> : null}
                       </span>
                       {selectedChat?.type === "group" ? <button aria-label={t("chat.mentionMembers")} aria-pressed={mentionSearch !== null} className={mentionSearch !== null ? "is-active" : ""} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => { setDesktopComposerTool(null); setEmojiPickerOpen(false); mentionEditorRef.current?.openMentionPicker(); }} title={t("chat.mentionMembers")} type="button"><span className="material-symbols-outlined" aria-hidden="true">alternate_email</span></button> : null}
                       <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setDesktopComposerTool(null); setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
