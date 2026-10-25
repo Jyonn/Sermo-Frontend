@@ -5,13 +5,14 @@ import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
 import { copyText } from "../lib/presentation";
 import { showToast } from "../lib/toast";
-import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, CloudResourceDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
+import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, CloudResourceDTO, MessageMediaKind, StickerAssetDTO, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
 import { ChatPreview, ChatVoiceComposerRow, type VoiceComposerState } from "../pages/ChatsPage";
 import { ComposerSvgIcon } from "./ComposerSvgIcon";
 import { ChatComposerLayout, useMobileComposerLayout } from "./ChatComposerLayout";
 import { CloudFilePickerSheet } from "./CloudFilePickerSheet";
 import { BottomSheet } from "./BottomSheet";
-import { ComposerQuickEmojiPanel } from "./ComposerQuickEmojiPanel";
+import { ComposerEmojiPicker } from "./ComposerEmojiPicker";
+import { HoldToTalkInput } from "./HoldToTalkInput";
 import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";
 import { MentionComposerInput, type MentionComposerHandle } from "./MentionComposerInput";
 import { SideDrawer } from "./SideDrawer";
@@ -85,6 +86,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const [saving, setSaving] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [voiceInputReady,setVoiceInputReady] = useState(false);
+  const [holdBusy,setHoldBusy] = useState(false);
   const [voiceComposer, setVoiceComposer] = useState<VoiceComposerState>({
     open: false,
     phase: "idle",
@@ -181,6 +184,15 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (galleryInputRef.current) galleryInputRef.current.value = "";
     }
+  };
+
+  const addSticker = async (sticker:StickerAssetDTO) => {
+    if (!state?.can_add || saving) return;
+    await persist([...state.messages,{
+      template_message_id:-Date.now(),position:state.messages.length,type:9,
+      content:JSON.stringify({asset_id:sticker.sticker_asset_id}),
+      payload:{kind:"sticker",uri:sticker.uri,sticker_asset_id:sticker.sticker_asset_id},
+    }]);
   };
 
   const addCloudFile = async (resource: CloudResourceDTO) => {
@@ -505,6 +517,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
         <form className={`composer welcome-template-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${voiceComposer.open ? " is-recording-mode" : ""}`} onSubmit={(event) => void addText(event)} ref={composerRef}>
           {!voiceComposer.open ? <ChatComposerLayout
             mobile={mobileComposerLayout}
+            mobileInput={voiceInputReady ? <HoldToTalkInput disabled={!state?.can_add || saving} onBusyChange={setHoldBusy} onSend={(file,duration)=>addMedia(file,duration)}/> : undefined}
             toolCount={4}
             input={<MentionComposerInput
               className="textarea composer-input composer-rich-input"
@@ -519,10 +532,10 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
               value={draft}
             />}
             tools={<>
-              <button aria-label={t("audio.record")} disabled={!state?.can_add || saving} onClick={() => void startVoiceRecording()} type="button"><ComposerSvgIcon kind="mic"/></button>
-              <button aria-label={t("emoji.choose")} aria-pressed={emojiPickerOpen} disabled={!state?.can_add || saving} onClick={() => setEmojiPickerOpen((value) => !value)} type="button"><ComposerSvgIcon kind="emoji"/></button>
-              <button aria-label={t("media.gallery")} disabled={!state?.can_add || saving} onClick={() => galleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
-              <button aria-label={t("media.file")} disabled={!state?.can_add || saving} onClick={() => setComposerMoreOpen(true)} type="button"><ComposerSvgIcon kind="file"/></button>
+              <button aria-label={t("audio.record")} aria-pressed={voiceInputReady} className={voiceInputReady ? "is-active" : ""} disabled={!state?.can_add || saving || holdBusy} onClick={() => {if(mobileComposerLayout){composerInputRef.current?.blur();setEmojiPickerOpen(false);setVoiceInputReady(value=>!value);}else void startVoiceRecording();}} type="button"><ComposerSvgIcon kind="mic"/></button>
+              <button aria-label={t("emoji.choose")} aria-pressed={emojiPickerOpen} disabled={!state?.can_add || saving || holdBusy} onClick={() => {composerInputRef.current?.blur();setVoiceInputReady(false);setEmojiPickerOpen((value) => !value);}} type="button"><ComposerSvgIcon kind="emoji"/></button>
+              <button aria-label={t("media.gallery")} disabled={!state?.can_add || saving || holdBusy} onClick={() => galleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
+              <button aria-label={t("media.file")} disabled={!state?.can_add || saving || holdBusy} onClick={() => setComposerMoreOpen(true)} type="button"><ComposerSvgIcon kind="file"/></button>
             </>}
           /> : <ChatVoiceComposerRow
             audioRef={voicePreviewAudioRef}
@@ -542,7 +555,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
             previewUri={voicePreviewUri}
             state={voiceComposer}
           />}
-          {!voiceComposer.open && emojiPickerOpen ? <ComposerQuickEmojiPanel mobile={mobileComposerLayout} onSelect={(emoji) => composerInputRef.current?.insertText(emoji)}/> : null}
+          {!voiceComposer.open && emojiPickerOpen ? <ComposerEmojiPicker busy={!state?.can_add || saving} mobile={mobileComposerLayout} onSticker={addSticker} onSelect={(emoji) => composerInputRef.current?.insertTextWithoutFocus(emoji)}/> : null}
           <button hidden type="submit" disabled={!state?.can_add || saving || !draft.trim()}/>
           <input ref={galleryInputRef} accept="image/*,video/*" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
           <input ref={fileInputRef} accept="audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />

@@ -19,9 +19,9 @@ export function MobileChatComposer({ input, tools, toolCount }: {input: ReactNod
   </div>;
 }
 
-export function ChatComposerLayout({ input, tools, toolCount, mobile }: {input: ReactNode; tools: ReactNode; toolCount: number; mobile: boolean}) {
+export function ChatComposerLayout({ input, tools, toolCount, mobile, mobileInput }: {input: ReactNode; tools: ReactNode; toolCount: number; mobile: boolean;mobileInput?:ReactNode}) {
   const { t } = useI18n();
   return mobile
-    ? <MobileChatComposer input={<div className="mobile-quiet-input-wrap">{input}</div>} tools={tools} toolCount={toolCount}/>
+    ? <MobileChatComposer input={mobileInput ?? <div className="mobile-quiet-input-wrap">{input}</div>} tools={tools} toolCount={toolCount}/>
     : <DesktopChatComposerDesk input={input} tools={tools} shortcutLabel={t("composer.desktopShortcut")}/>;
 }

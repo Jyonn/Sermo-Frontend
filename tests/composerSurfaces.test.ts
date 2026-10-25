@@ -29,6 +29,17 @@ test('tools use chat icons and respect welcome and broadcast capabilities',()=>{
   assert.doesNotMatch(admin,/CloudFilePickerSheet|AdminComposerIcon/);
   assert.match(admin,/setBroadcastContent\(value.slice\(0,512\)\)/);
 });
+test('all composers share hold-to-talk and the full sticker and emoji panel',()=>{
+  for(const path of ['pages/ChatsPage.tsx','components/WelcomeMessageEditor.tsx','pages/SpaceAdminDashboardPage.tsx']) {
+    assert.match(read(path),/<HoldToTalkInput/);
+  }
+  assert.match(read('pages/ChatsPage.tsx'),/<ChatEmojiPickerPanel/);
+  assert.match(read('components/ComposerEmojiPicker.tsx'),/<ChatEmojiPickerPanel/);
+  const panel=read('components/ChatEmojiPickerPanel.tsx');
+  assert.match(panel,/sticker.mine/);assert.match(panel,/sticker.explore/);assert.match(panel,/EMOJI_PAGES.map/);
+  assert.match(read('components/ComposerEmojiPicker.tsx'),/api.getAdminStickers/);
+  assert.match(read('components/HoldToTalkInput.tsx'),/onLostPointerCapture/);
+});
 test('voice opens inside the conversation instead of overflowing its left edge',()=>{
   const css=read('styles/app/70-square-composer.css');
   assert.match(css,/\.desktop-tool-popover\.is-voice \{ right:auto;left:0/);

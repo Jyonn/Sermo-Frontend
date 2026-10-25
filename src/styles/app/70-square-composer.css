@@ -1784,6 +1784,23 @@ html[data-theme="dark"] .verification-banner-action {
     width:calc(100% - 8px);
   }
 
+  .composer.is-desktop-writing-desk > .desktop-emoji-reveal.is-inset .composer-emoji-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: min(155px, calc(50vh - 100px));
+    overflow: hidden;
+  }
+
+  .composer.is-desktop-writing-desk > .desktop-emoji-reveal.is-inset :is(.composer-emoji-grid, .composer-sticker-pane) {
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .composer.is-desktop-writing-desk > .desktop-emoji-reveal.is-inset .composer-sticker-grid {
+    max-height: 100%;
+  }
+
   .composer.is-desktop-writing-desk > .desktop-emoji-reveal .composer-emoji-panel {
     width: min(480px, calc(100% - 40px));
     margin: 0;

@@ -1642,6 +1642,12 @@ export const api = {
     });
   },
 
+  getAdminStickers(explore = false, offset = 0, limit = 30, signal?: AbortSignal) {
+    return request<StickerListDTO<StickerAssetDTO | StickerDTO>>(`/spaces/admin/stickers${explore ? "/explore" : ""}`, {
+      adminAuth:true, query:{offset,limit}, signal,
+    });
+  },
+
   exploreStickers(offset = 0, limit = 30, signal?: AbortSignal) {
     return request<StickerListDTO<StickerAssetDTO>>("/stickers/explore", {
       auth: true,

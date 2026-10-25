@@ -9,7 +9,8 @@ import { ChatMuteControls } from "../components/ChatMuteControls";
 import { ChatComposerLayout, useMobileComposerLayout } from "../components/ChatComposerLayout";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
-import { ComposerQuickEmojiPanel } from "../components/ComposerQuickEmojiPanel";
+import { ComposerEmojiPicker } from "../components/ComposerEmojiPicker";
+import { HoldToTalkInput } from "../components/HoldToTalkInput";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -125,6 +126,8 @@ export default function SpaceAdminDashboardPage() {
   const [broadcastState, setBroadcastState] = useState<"idle" | "sending" | "sent">("idle");
   const [broadcastResult, setBroadcastResult] = useState<SpaceAdminBroadcastResultDTO | null>(null);
   const [broadcastMoreOpen, setBroadcastMoreOpen] = useState(false);
+  const [voiceInputReady,setVoiceInputReady] = useState(false);
+  const [holdBusy,setHoldBusy] = useState(false);
   const [broadcastProgress, setBroadcastProgress] = useState(0);
   const [broadcastRecording, setBroadcastRecording] = useState<{
     phase: "idle" | "recording" | "recorded";
@@ -617,6 +620,8 @@ export default function SpaceAdminDashboardPage() {
     broadcastIdRef.current = `admin-broadcast:${crypto.randomUUID()}`;
     setBroadcastProgress(0);
     setBroadcastOpen(true);
+    setVoiceInputReady(false);
+    setBroadcastMoreOpen(false);
   };
 
   const stopBroadcastRecordingResources = () => {
@@ -993,6 +998,7 @@ export default function SpaceAdminDashboardPage() {
             <form ref={broadcastComposerRef} className={`composer admin-broadcast-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
               {broadcastRecording.phase === "idle" ? (
                 <ChatComposerLayout mobile={mobileComposerLayout} toolCount={4}
+                  mobileInput={voiceInputReady ? <HoldToTalkInput disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onSend={(file,duration)=>sendBroadcastMedia([{file,kind:"audio",duration}])}/> : undefined}
                   input={<MentionComposerInput ref={broadcastInputRef}
                     className="textarea composer-input composer-rich-input"
                     members={[]} value={broadcastContent}
@@ -1003,10 +1009,10 @@ export default function SpaceAdminDashboardPage() {
                     placeholder={t("chat.inputPlaceholder")}
                   />}
                   tools={<>
-                    <button aria-label={t("audio.record")} disabled={broadcastState === "sending"} onClick={() => void startBroadcastRecording()} type="button"><ComposerSvgIcon kind="mic"/></button>
-                    <button aria-label={t("emoji.choose")} aria-pressed={broadcastMoreOpen} disabled={broadcastState === "sending"} onClick={() => setBroadcastMoreOpen((value) => !value)} type="button"><ComposerSvgIcon kind="emoji"/></button>
-                    <button aria-label={t("media.gallery")} disabled={broadcastState === "sending"} onClick={() => broadcastGalleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
-                    <button aria-label={t("media.file")} disabled={broadcastState === "sending"} onClick={() => broadcastFileInputRef.current?.click()} type="button"><ComposerSvgIcon kind="file"/></button>
+                    <button aria-label={t("audio.record")} aria-pressed={voiceInputReady} className={voiceInputReady ? "is-active" : ""} disabled={broadcastState === "sending" || holdBusy} onClick={() => {if(mobileComposerLayout){broadcastInputRef.current?.blur();setBroadcastMoreOpen(false);setVoiceInputReady(value=>!value);}else void startBroadcastRecording();}} type="button"><ComposerSvgIcon kind="mic"/></button>
+                    <button aria-label={t("emoji.choose")} aria-pressed={broadcastMoreOpen} disabled={broadcastState === "sending" || holdBusy} onClick={() => {broadcastInputRef.current?.blur();setVoiceInputReady(false);setBroadcastMoreOpen((value) => !value);}} type="button"><ComposerSvgIcon kind="emoji"/></button>
+                    <button aria-label={t("media.gallery")} disabled={broadcastState === "sending" || holdBusy} onClick={() => broadcastGalleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
+                    <button aria-label={t("media.file")} disabled={broadcastState === "sending" || holdBusy} onClick={() => broadcastFileInputRef.current?.click()} type="button"><ComposerSvgIcon kind="file"/></button>
                   </>}
                 />
               ) : (
@@ -1053,7 +1059,12 @@ export default function SpaceAdminDashboardPage() {
                   </button>
                 </div>
               )}
-              {broadcastRecording.phase === "idle" && broadcastMoreOpen ? <ComposerQuickEmojiPanel inset mobile={mobileComposerLayout} onSelect={(emoji) => broadcastInputRef.current?.insertText(emoji)}/> : null}
+              {broadcastRecording.phase === "idle" && broadcastMoreOpen ? <ComposerEmojiPicker admin busy={broadcastState === "sending"} inset mobile={mobileComposerLayout} onSelect={(emoji) => broadcastInputRef.current?.insertTextWithoutFocus(emoji)} onSticker={async sticker=>{
+                if(broadcastState === "sending")return;
+                setBroadcastState("sending");setBroadcastProgress(.08);setError(null);
+                try {finishBroadcast([await sendBroadcastPayload(9,JSON.stringify({asset_id:sticker.sticker_asset_id}),`${broadcastIdRef.current}:sticker:${sticker.sticker_asset_id}`)]);}
+                catch(error){setBroadcastState("idle");setBroadcastProgress(0);setError(error instanceof ApiError?error.message:t("admin.broadcastFailed"));}
+              }}/> : null}
               <button hidden type="submit" disabled={broadcastState === "sending" || !broadcastContent.trim()}/>
               <input ref={broadcastGalleryInputRef} accept="image/*,video/*" hidden multiple onChange={(event) => void handleBroadcastFiles(event, "gallery")} type="file" />
               <input ref={broadcastFileInputRef} hidden multiple onChange={(event) => void handleBroadcastFiles(event, "file")} type="file" />

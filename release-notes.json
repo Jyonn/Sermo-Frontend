@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.19",
+  "id": "2026.10.25.20",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "统一消息输入体验",
+      "title": "语音与表情交互统一",
       "items": [
-        "欢迎语和群发消息直接复用聊天输入区：桌面上方工具栏，手机下方图标栏",
-        "欢迎语支持选择云端文件，群发保留本地附件；统一明暗外观与输入体验"
+        "手机欢迎语与群发支持按住说话、松开发送和上滑取消",
+        "表情入口统一提供我的表情、发现表情和 Emoji 分类"
       ]
     },
     "en": {
-      "title": "One consistent message composer",
+      "title": "Consistent voice and sticker controls",
       "items": [
-        "Welcome and broadcast editors now reuse the chat composer, with desktop top tools and mobile bottom tools",
-        "Choose cloud files for welcome messages and local attachments for broadcasts, with consistent light and dark styling"
+        "Hold to record, release to send, and slide up to cancel in mobile welcome and broadcast editors",
+        "The shared picker includes your stickers, sticker discovery, and Emoji categories"
       ]
     }
   }

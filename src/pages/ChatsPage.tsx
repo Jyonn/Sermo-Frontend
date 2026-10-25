@@ -30,6 +30,10 @@ import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
+import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
+import { HoldToTalkInput } from "../components/HoldToTalkInput";
+import { EMOJI_PAGES } from "../lib/composerEmojis";
+import { StickerImage } from "../components/StickerImage";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -170,58 +174,7 @@ function mergeStickerPage<T>(fresh: T[], cached: T[], identify: (item: T) => num
   const known = new Set(fresh.map(identify));
   return [...fresh, ...cached.filter((item) => !known.has(identify(item)))];
 }
-export const EMOJI_PAGES = [
-  {
-    labelKey: "emoji.frequent",
-    icon: "🕘",
-    emojis: [
-      "😀", "😄", "😁", "😂", "🥹", "😊", "🙂", "🙃", "😉", "😍", "🥰", "😘",
-      "😋", "😎", "🤓", "🫡", "🤔", "🤭", "🫢", "😶", "😅", "🥲", "😴", "😭",
-      "😤", "😡", "🤯", "🥳", "🤩", "😇", "🤗", "🫠", "👍", "👎", "👌", "✌️",
-      "🤝", "👏", "🙌", "🙏", "💪", "👀", "❤️", "💔", "🔥", "✨", "🎉", "💯",
-    ],
-  },
-  {
-    labelKey: "emoji.faces",
-    icon: "😊",
-    emojis: [
-      "😃", "😆", "🤣", "😌", "😏", "😒", "🙄", "😬", "😮‍💨", "🤥", "🫣", "🤫",
-      "🤐", "🫥", "😐", "😑", "😯", "😦", "😧", "😮", "😲", "🥱", "😵", "😵‍💫",
-      "🤤", "🤢", "🤮", "🤧", "🥴", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👻",
-      "💀", "☠️", "👽", "🤖", "💩", "😺", "😸", "😹", "😻", "😼", "🙀", "😿",
-    ],
-  },
-  {
-    labelKey: "emoji.gestures",
-    icon: "👋",
-    emojis: [
-      "👋", "🤚", "🖐️", "✋", "🖖", "🫱", "🫲", "🫳", "🫴", "🫷", "🫸", "🤌",
-      "🤏", "🫰", "🤞", "🫶", "🤟", "🤘", "🤙", "👈", "👉", "👆", "👇", "☝️",
-      "🫵", "✊", "👊", "🤛", "🤜", "🫂", "🙌", "👏", "🤝", "🙏", "✍️", "💅",
-      "🤳", "💪", "🦾", "🦵", "🦶", "👂", "👃", "🧠", "🫀", "🫁", "👀", "👁️",
-    ],
-  },
-  {
-    labelKey: "emoji.life",
-    icon: "🎈",
-    emojis: [
-      "🌞", "🌙", "⭐", "🌈", "☁️", "❄️", "🌊", "🌱", "🌸", "🌻", "🍀", "🍎",
-      "🍓", "🍉", "🍜", "🍰", "☕", "🍻", "🎂", "🎁", "🎈", "🎊", "🎵", "🎧",
-      "🎬", "📷", "🎮", "⚽", "🏀", "🏸", "🚗", "✈️", "🏠", "🏕️", "🌆", "🗺️",
-      "🐶", "🐱", "🐼", "🐰", "🦊", "🐻", "🐧", "🦋", "💐", "🍃", "🚀", "💡",
-    ],
-  },
-  {
-    labelKey: "emoji.symbols",
-    icon: "❤️",
-    emojis: [
-      "❤️", "🧡", "💛", "💚", "🩵", "💙", "💜", "🖤", "🩶", "🤍", "🤎", "💔",
-      "❤️‍🔥", "❤️‍🩹", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "❣️", "💯",
-      "💢", "💥", "💫", "💦", "💨", "💬", "💭", "✅", "❌", "⭕", "❗", "❓",
-      "‼️", "⁉️", "⚠️", "🔔", "🔕", "🔒", "🔑", "📌", "📍", "♻️", "➕", "➖",
-    ],
-  },
-] as const;
+export { EMOJI_PAGES } from "../lib/composerEmojis";
 const EMOJI_SEQUENCE_RE = /(?:[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?)*)/gu;
 const STICKER_MY_PAGE = -2;
 const STICKER_EXPLORE_PAGE = -1;
@@ -1659,23 +1612,7 @@ export function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): Cha
   }));
 }
 
-export function StickerImage({ alt = "", className = "", height, src, width }: {
-  alt?: string;
-  className?: string;
-  height?: number;
-  src: string;
-  width?: number;
-}) {
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => setFailed(false), [src]);
-
-  if (failed) {
-    return <span className={`sticker-load-failed${className ? ` ${className}` : ""}`}>{i18n.t("sticker.unavailable")}</span>;
-  }
-
-  return <img alt={alt} className={className} draggable={false} height={height} loading="lazy" onError={() => setFailed(true)} src={src} width={width} />;
-}
+export { StickerImage } from "../components/StickerImage";
 
 const ForwardBundlePreviewDepthContext = createContext(2);
 const ForwardBundlePresentationContext = createContext<{
@@ -3063,7 +3000,7 @@ function LiveChatsPage({
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
-  const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "sliding" | "cancel">("idle");
+  const [mobileHoldBusy, setMobileHoldBusy] = useState(false);
   const mobileComposerLayout = useMobileComposerLayout();
   const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
@@ -3291,11 +3228,6 @@ function LiveChatsPage({
   const recordingStopRequestedRef = useRef(false);
   const recordingAttemptRef = useRef(0);
   const recordingStartedAtRef = useRef(0);
-  const mobileVoiceStartYRef = useRef(0);
-  const mobileVoicePointerIdRef = useRef<number | null>(null);
-  const mobileVoiceAutoSendRef = useRef(false);
-  const mobileVoiceCancelRef = useRef(false);
-  const mobileVoiceSlideStartedRef = useRef(false);
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [visualViewportHeight, setVisualViewportHeight] = useState(0);
@@ -3374,7 +3306,7 @@ function LiveChatsPage({
     setDraft(value);
     if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
   };
-  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationSending;
+  const composerBusy = sendState === "sending" || mobileHoldBusy || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationSending;
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
 
@@ -3452,11 +3384,6 @@ function LiveChatsPage({
   const resetVoiceComposer = () => {
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
-    mobileVoiceAutoSendRef.current = false;
-    mobileVoiceCancelRef.current = false;
-    mobileVoiceSlideStartedRef.current = false;
-    mobileVoicePointerIdRef.current = null;
-    setMobileVoiceGesture("idle");
     cleanupRecordingResources();
     recordingChunksRef.current = [];
     voicePreviewAudioRef.current?.pause();
@@ -4845,7 +4772,6 @@ function LiveChatsPage({
     setMobileEmojiPanelMounted(false);
     setMobileComposerPanel(null);
     setMobileVoiceReady(false);
-    setMobileVoiceGesture("idle");
     window.requestAnimationFrame(() => mentionEditorRef.current?.moveCaretToEnd());
   }, [cacheScope, selectedChat?.id]);
 
@@ -6886,50 +6812,6 @@ function LiveChatsPage({
     if (!sent) showToast(t("audio.sendRetry"), "error");
   };
 
-  useEffect(() => {
-    if (voiceComposer.phase !== "recorded" || !mobileVoiceAutoSendRef.current) return;
-    mobileVoiceAutoSendRef.current = false;
-    void sendRecordedVoiceMessage();
-  }, [voiceComposer.phase]);
-
-  const beginMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (composerBusy || mobileVoiceGesture !== "idle") return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    mobileVoicePointerIdRef.current = event.pointerId;
-    mobileVoiceStartYRef.current = event.clientY;
-    mobileVoiceAutoSendRef.current = true;
-    mobileVoiceCancelRef.current = false;
-    mobileVoiceSlideStartedRef.current = false;
-    setMobileVoiceGesture("recording");
-    void startVoiceRecording();
-  };
-
-  const moveMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (mobileVoicePointerIdRef.current !== event.pointerId) return;
-    const slideDistance = mobileVoiceStartYRef.current - event.clientY;
-    if (slideDistance > 12) mobileVoiceSlideStartedRef.current = true;
-    const cancelThresholdY = Math.min(mobileVoiceStartYRef.current - 72, window.innerHeight / 2 + 44);
-    const shouldCancel = mobileVoiceSlideStartedRef.current && event.clientY <= cancelThresholdY;
-    mobileVoiceCancelRef.current = shouldCancel;
-    setMobileVoiceGesture(shouldCancel ? "cancel" : mobileVoiceSlideStartedRef.current ? "sliding" : "recording");
-  };
-
-  const endMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>, forceCancel = false) => {
-    if (mobileVoicePointerIdRef.current !== event.pointerId) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    const shouldCancel = forceCancel || mobileVoiceCancelRef.current;
-    mobileVoicePointerIdRef.current = null;
-    setMobileVoiceGesture("idle");
-    if (shouldCancel) {
-      mobileVoiceAutoSendRef.current = false;
-      cancelVoiceRecording();
-      return;
-    }
-    mobileVoiceAutoSendRef.current = true;
-    if (mediaRecorderRef.current?.state === "recording") stopVoiceRecording();
-    else recordingStopRequestedRef.current = true;
-  };
 
   const refreshChats = async () => {
     const rows = await api.getChats(undefined, purpose, submissionMode ? submissionView : undefined);
@@ -8095,7 +7977,7 @@ function LiveChatsPage({
                 onPointerDown={() => {
                   if (emojiPickerOpen) setEmojiPickerOpen(false);
                   if (mobileComposerPanel) setMobileComposerPanel(null);
-                  if (mobileVoiceReady && mobileVoiceGesture === "idle") setMobileVoiceReady(false);
+                  if (mobileVoiceReady && !mobileHoldBusy) setMobileVoiceReady(false);
                 }}
                 onScroll={() => {
                   const element = messageScrollRef.current;
@@ -8249,56 +8131,11 @@ function LiveChatsPage({
                     </button>
                   </div>
                 ) : null}
-                {mobileComposerLayout && mobileVoiceGesture !== "idle" && typeof document !== "undefined" ? createPortal(
-                  <div className={`mobile-voice-mask is-${mobileVoiceGesture}`} aria-live="polite">
-                    {mobileVoiceGesture === "recording" ? (
-                      <div className="mobile-voice-initial-hint">
-                        <span className="material-symbols-outlined">keyboard_arrow_up</span>
-                        <strong>{t("composer.slideToCancel")}</strong>
-                      </div>
-                    ) : null}
-                    {mobileVoiceGesture === "sliding" ? (
-                      <div className="mobile-voice-slide-guide">
-                        <span className="material-symbols-outlined">arrow_upward</span>
-                        <strong>{t("composer.keepSliding")}</strong>
-                      </div>
-                    ) : null}
-                    {mobileVoiceGesture === "sliding" || mobileVoiceGesture === "cancel" ? (
-                      <div className="mobile-voice-cancel-target">
-                        <span className="material-symbols-outlined">{mobileVoiceGesture === "cancel" ? "close" : "keyboard_arrow_up"}</span>
-                        <strong>{t(mobileVoiceGesture === "cancel" ? "composer.releaseToCancel" : "composer.moveHereToCancel")}</strong>
-                      </div>
-                    ) : null}
-                    <div className="mobile-voice-recording-deck">
-                      <div className="mobile-voice-recording-meta">
-                        <span><i aria-hidden="true" />{t(voiceComposer.phase === "requesting" ? "audio.preparingMicrophone" : "composer.recording")}</span>
-                        <time>{formatDuration(voiceComposer.durationSeconds)}</time>
-                      </div>
-                      <div className="mobile-voice-live-waveform" aria-hidden="true">
-                        {voiceComposer.bars.map((level, index) => (
-                          <i key={index} style={{ "--voice-height": `${Math.max(4, level * 36)}px` } as CSSProperties} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>,
-                  document.body,
-                ) : null}
                 {mobileComposerLayout ? (
                   <MobileChatComposer
                     toolCount={submissionMode ? 5 : selectedChat?.type === "group" ? 7 : 6}
                     input={mobileVoiceReady ? (
-                        <button
-                          className={`mobile-voice-hold is-${mobileVoiceGesture}`}
-                          disabled={composerBusy}
-                          onContextMenu={(event) => event.preventDefault()}
-                          onPointerCancel={(event) => endMobileVoiceHold(event, true)}
-                          onPointerDown={beginMobileVoiceHold}
-                          onPointerMove={moveMobileVoiceHold}
-                          onPointerUp={(event) => endMobileVoiceHold(event)}
-                          type="button"
-                        >
-                          {voiceComposer.phase === "requesting" ? t("audio.preparingMicrophone") : t("composer.holdToTalk")}
-                        </button>
+                        <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
                       ) : (
                         <div className="mobile-quiet-input-wrap" ref={mobileMentionAnchorRef}>
                           <MentionComposerInput
@@ -8432,138 +8269,7 @@ function LiveChatsPage({
                 {!voiceComposer.open && (emojiPickerOpen || (mobileComposerLayout && mobileEmojiPanelMounted)) ? (
                   <div className={mobileComposerLayout ? `mobile-composer-reveal mobile-emoji-reveal${emojiPickerOpen ? " is-open" : ""}` : "desktop-emoji-reveal"}>
                     <div className={mobileComposerLayout ? "mobile-composer-reveal-inner" : undefined}>
-                  <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
-                    <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
-                      <button
-                        aria-label={t("sticker.mine")}
-                        aria-selected={emojiPage === STICKER_MY_PAGE}
-                        className={emojiPage === STICKER_MY_PAGE ? "is-active" : ""}
-                        onClick={() => setEmojiPage(STICKER_MY_PAGE)}
-                        role="tab"
-                        title={t("sticker.mine")}
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined">photo_library</span>
-                        <small>{t("sticker.mine")}</small>
-                      </button>
-                      <button
-                        aria-label={t("sticker.explore")}
-                        aria-selected={emojiPage === STICKER_EXPLORE_PAGE}
-                        className={emojiPage === STICKER_EXPLORE_PAGE ? "is-active" : ""}
-                        onClick={() => setEmojiPage(STICKER_EXPLORE_PAGE)}
-                        role="tab"
-                        title={t("sticker.explore")}
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined">explore</span>
-                        <small>{t("sticker.explore")}</small>
-                      </button>
-                      {EMOJI_PAGES.map((page, index) => (
-                        <button
-                          aria-label={t(page.labelKey as TranslationKey)}
-                          aria-selected={emojiPage === index}
-                          className={emojiPage === index ? "is-active" : ""}
-                          key={page.labelKey}
-                          onClick={() => setEmojiPage(index)}
-                          role="tab"
-                          title={t(page.labelKey as TranslationKey)}
-                          type="button"
-                        >
-                          <span>{page.icon}</span>
-                          <small>{t(page.labelKey as TranslationKey)}</small>
-                        </button>
-                      ))}
-                    </div>
-                    {emojiPage === STICKER_MY_PAGE ? (
-                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
-                        {stickers.length ? (
-                          <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll(event, "mine")}>
-                            <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
-                              <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
-                                <span className="material-symbols-outlined">add</span>
-                              </button>
-                            </FeatureDiscoveryTarget>
-                            {stickers.map((sticker) => (
-                              <button
-                                className="composer-sticker-item"
-                                disabled={stickerSaving}
-                                key={sticker.sticker_id}
-                                onClick={() => void sendSticker(sticker)}
-                                type="button"
-                              >
-                                <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                              </button>
-                            ))}
-                            {mineStickersLoading ? (
-                              <span className="composer-sticker-page-loading" aria-label={t("common.loading")} />
-                            ) : null}
-                          </div>
-                        ) : !mineStickersLoading ? (
-                          <div className="composer-sticker-empty">
-                            <span className="material-symbols-outlined">photo_library</span>
-                            <strong>{t("sticker.mineEmpty")}</strong>
-                            <FeatureDiscoveryTarget rewardId="capability.sticker">
-                              <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button>
-                            </FeatureDiscoveryTarget>
-                          </div>
-                        ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
-                      </div>
-                    ) : emojiPage === STICKER_EXPLORE_PAGE ? (
-                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
-                        {exploreStickers.length ? (
-                          <div className="composer-sticker-grid has-frequent-row" onScroll={(event) => handleStickerGridScroll(event, "explore")}>
-                            {exploreStickers.map((sticker, index) => (
-                              <div className={`composer-sticker-explore-item${index < frequentExploreStickerIds.length && frequentExploreStickerIds.includes(sticker.sticker_asset_id) ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>
-                                <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
-                                  <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                                </button>
-                                <span className={`composer-sticker-source is-${sticker.source_scope ?? "external"}`}>
-                                  {sticker.source_scope === "local" && sticker.source_user ? (
-                                    <>
-                                      <UserAvatar className="composer-sticker-source-avatar" name={sticker.source_user.name} uri={sticker.source_user.avatar_uri} />
-                                      <span className={`composer-sticker-source-name${sticker.source_user.name.length > 8 ? " is-scrolling" : ""}`}>
-                                        <span>{sticker.source_user.name}</span>
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="material-symbols-outlined" aria-hidden="true">public</span>
-                                      <span>{t("sticker.externalSource")}</span>
-                                    </>
-                                  )}
-                                </span>
-                                <button aria-label={t("sticker.collect")} className="composer-sticker-collect" disabled={stickerSaving} onClick={() => void collectExploredSticker(sticker)} type="button">
-                                  <span className="material-symbols-outlined">add</span>
-                                </button>
-                              </div>
-                            ))}
-                            {exploreStickersLoading ? (
-                              <span className="composer-sticker-page-loading" aria-label={t("common.loading")} />
-                            ) : null}
-                          </div>
-                        ) : !exploreStickersLoading ? (
-                          <div className="composer-sticker-empty">
-                            <span className="material-symbols-outlined">explore</span>
-                            <strong>{t("sticker.exploreEmpty")}</strong>
-                          </div>
-                        ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
-                      </div>
-                    ) : (
-                      <div className={`composer-emoji-grid${emojiPage === 0 ? " has-frequent-row" : ""}`} role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
-                        {visibleEmojis.map((emoji, index) => (
-                          <button
-                            aria-label={t("emoji.insert", { emoji })}
-                            className={emojiPage === 0 && index < 8 ? "is-frequent" : ""}
-                            key={`${emoji}-${index}`}
-                            onClick={() => insertEmoji(emoji)}
-                            type="button"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <ChatEmojiPickerPanel emojiPage={emojiPage} setEmojiPage={setEmojiPage} visibleEmojis={visibleEmojis} stickers={stickers} exploreStickers={exploreStickers} frequentExploreStickerIds={frequentExploreStickerIds} stickerSaving={stickerSaving} mineStickersLoading={mineStickersLoading} exploreStickersLoading={exploreStickersLoading} sendSticker={sendSticker} collectExploredSticker={collectExploredSticker} openStickerManager={openStickerManager} handleStickerGridScroll={handleStickerGridScroll} insertEmoji={insertEmoji}/>
                     </div>
                   </div>
                 ) : null}
