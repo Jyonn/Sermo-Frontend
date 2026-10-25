@@ -27,3 +27,14 @@ test('reports happen only after clipboard success, never for link-only or own-me
   assert.match(panel,/if\(!await copyText\(item.content\)\)throw[\s\S]{0,80}reportGroupCopies/);
   assert.match(panel,/CHAT_SYNC_EVENT/);
 });
+test('bookmark and panel share a persistent morphing shell for reversible transitions',()=>{
+  const source=readFileSync(new URL('../src/components/GroupCopyShelf.tsx',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/styles/app/70-square-composer.css',import.meta.url),'utf8');
+  assert.match(source,/className="group-copy-surface"/);
+  assert.doesNotMatch(source,/open \? <section/);
+  assert.match(source,/element.inert=!open/);
+  assert.match(source,/observer.observe\(element\)/);
+  assert.match(css,/transition: width 360ms/);
+  assert.match(css,/prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(css,/animation: desktop-tool-popover-left-in 180ms ease-out both/);
+});

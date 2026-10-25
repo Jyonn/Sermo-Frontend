@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { GROUP_COPY_EVENT, GROUP_COPY_REMOVED, copySuggestionHint, orderCopySuggestions, type CopySuggestion } from "../lib/groupCopy";
@@ -22,9 +22,31 @@ export function GroupCopyShelf({chatId,userId}:{chatId:number;userId:number}) {
   const [busy,setBusy] = useState(false);
   const [now,setNow] = useState(Date.now());
   const [panelHeight,setPanelHeight] = useState(400);
+  const [panelSize,setPanelSize] = useState({width:320,height:400});
   const root = useRef<HTMLDivElement | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
+  const panel = useRef<HTMLElement | null>(null);
   const panelId = useId();
+  const visible=orderCopySuggestions(items,now);
+  useLayoutEffect(()=>{
+    const element=panel.current;
+    if(!element)return;
+    const measure=()=>{
+      const next={width:element.offsetWidth,height:element.offsetHeight};
+      setPanelSize(current=>current.width===next.width && current.height===next.height?current:next);
+    };
+    const observer=new ResizeObserver(measure);
+    observer.observe(element);measure();
+    return ()=>observer.disconnect();
+  },[visible.length,panelHeight]);
+  useLayoutEffect(()=>{
+    const element=panel.current;
+    if(!element)return;
+    if(open)element.inert=false;
+    if(open && document.activeElement===trigger.current)element.querySelector<HTMLButtonElement>('button')?.focus({preventScroll:true});
+    if(!open && element.contains(document.activeElement))trigger.current?.focus({preventScroll:true});
+    element.inert=!open;
+  },[open,visible.length]);
   useEffect(()=>{
     const scroller=root.current?.closest('.chat-detail-scene')?.querySelector('.message-scroll');
     if(!scroller)return;
@@ -84,18 +106,17 @@ export function GroupCopyShelf({chatId,userId}:{chatId:number;userId:number}) {
   useEffect(()=>{
     if(!open)return;
     const outside=(event:PointerEvent)=>{if(event.target instanceof Node && !root.current?.contains(event.target))setOpen(false);};
-    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.stopPropagation();setOpen(false);trigger.current?.focus();}};
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.stopPropagation();setOpen(false);}};
     document.addEventListener('pointerdown',outside);
     document.addEventListener('keydown',escape);
     return ()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape);};
   },[open]);
-  const visible=orderCopySuggestions(items,now);
   if(!visible.length)return null;
   return <div className={`group-copy-shelf${hint?' has-hint':''}`} ref={root}>
-    <button ref={trigger} type="button" className="group-copy-bookmark" aria-label={t('copyShelf.title')} aria-expanded={open} aria-controls={panelId} onClick={()=>{setOpen(value=>!value);setHint(false);}}><span className="material-symbols-outlined" aria-hidden="true">content_copy</span></button>
-    {hint && !open ? <span className="group-copy-hint" role="status">{t('copyShelf.popular')}</span>:null}
-    {open ? <section className="group-copy-panel" style={{maxHeight:panelHeight}} id={panelId} aria-label={t('copyShelf.title')}>
-      <header><div><span className="group-copy-eyebrow">{t('copyShelf.recent')}</span><h3>{t('copyShelf.title')}</h3></div><button type="button" aria-label={t('common.close')} onClick={()=>{setOpen(false);trigger.current?.focus();}}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+    <div className="group-copy-surface" style={{width:open?panelSize.width+2:30,height:open?panelSize.height+2:44,transform:open?'translateX(12px)':'translateX(0)',borderRadius:open?'18px':'0 10px 12px 0',boxShadow:open?'0 16px 48px rgba(10,32,23,.18)':'3px 4px 14px rgba(18,40,31,.09)'}}>
+    <button ref={trigger} type="button" className="group-copy-bookmark" style={{opacity:open?0:1,pointerEvents:open?'none':'auto',transitionDelay:open?'0ms':'160ms'}} tabIndex={open?-1:0} aria-hidden={open} aria-label={t('copyShelf.title')} aria-expanded={open} aria-controls={panelId} onClick={()=>{setOpen(value=>!value);setHint(false);}}><span className="material-symbols-outlined" aria-hidden="true">content_copy</span></button>
+    <section ref={panel} className="group-copy-panel" style={{maxHeight:panelHeight,opacity:open?1:0,transform:open?'translate(0,0)':'translate(-6px,-4px)',pointerEvents:open?'auto':'none',transitionDelay:open?'100ms':'0ms'}} id={panelId} aria-hidden={!open} aria-label={t('copyShelf.title')}>
+      <header><div><span className="group-copy-eyebrow">{t('copyShelf.recent')}</span><h3>{t('copyShelf.title')}</h3></div><button type="button" aria-label={t('common.close')} onClick={()=>setOpen(false)}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></header>
       <div className="group-copy-items">{visible.map(item=><button type="button" key={item.message_id} disabled={busy} className={`group-copy-item${item.copied?' is-copied':''}`} onClick={async()=>{
         if(busy)return;setBusy(true);
         try {
@@ -105,6 +126,8 @@ export function GroupCopyShelf({chatId,userId}:{chatId:number;userId:number}) {
         } catch {showToast(t('common.copyFailed'),'error');}
         finally {setBusy(false);}
       }}><span className="group-copy-author">{item.author}<span className="material-symbols-outlined" aria-hidden="true">{item.copied?'check':'content_copy'}</span></span><span className="group-copy-text">{item.content}</span><small>{t(item.copied?'copyShelf.copied':'copyShelf.tap')}</small></button>)}</div>
-    </section>:null}
+    </section>
+    </div>
+    {hint && !open ? <span className="group-copy-hint" role="status">{t('copyShelf.popular')}</span>:null}
   </div>;
 }

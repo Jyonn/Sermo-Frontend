@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.22",
+  "id": "2026.10.25.23",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "群聊复制书签",
+      "title": "复制书签连贯动效",
       "items": [
-        "群聊新增“你可能想复制”，收纳最近24小时大家常复制的消息",
-        "点击书签查看并复制全文，已复制内容自动变暗后移"
+        "复制书签原位展开为浮动框，收起时连续变回书签",
+        "支持快速反向操作，并适配减少动态效果偏好"
       ]
     },
     "en": {
-      "title": "Group copy bookmarks",
+      "title": "Fluid copy bookmark transitions",
       "items": [
-        "A group bookmark surfaces popular messages copied in the last 24 hours",
-        "Copy the full text in one click; messages you copied are muted and moved down"
+        "The copy bookmark expands into its panel and smoothly folds back in place",
+        "Transitions support rapid reversal and reduced-motion preferences"
       ]
     }
   }
