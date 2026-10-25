@@ -12,6 +12,14 @@
   "oauth.saveDraft": "保存草稿",
   "oauth.revisionNumber": "配置 #{{number}}",
   "nav.developer": "开发",
+  "square.unreadCount": "{{count}} 条未读消息",
+  "square.freshContent": "有新发言或活动",
+  "square.keyword": "关键词",
+  "square.dateRange": "日期范围",
+  "square.dateFrom": "开始日期",
+  "square.dateTo": "结束日期",
+  "square.dateRangeHint": "日期可留空，支持仅选择开始或结束日期。",
+  "square.dateRangeInvalid": "结束日期不能早于开始日期。",
   "media.outsideCollection": "已切换到图片集外的聊天图片",
   "media.backToCollection": "已回到原图片集",
   "media.collectionPosition": "图片集 {{index}} / {{count}}",
@@ -2501,7 +2509,7 @@
   ,"square.quotaOfficial": "官方账号"
   ,"square.quotaVerifyFirst": "认证后开启广场互动"
   ,"square.quotaUnlimited": "互动额度不限"
-  ,"square.quotaHero": "近24小时还能发言 {{count}} 次"
+  ,"square.quotaHero": "当前可发言 {{count}} 次"
   ,"square.quotaStatements": "发言"
   ,"square.quotaComments": "评论与回复"
   ,"square.quotaLikes": "点赞"

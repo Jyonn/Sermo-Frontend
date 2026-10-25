@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
+import { UnreadIndicator } from "./UnreadIndicator";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
@@ -177,17 +178,19 @@ export function AppBottomNav() {
     }
     if (!pageActive) return;
     let cancelled = false;
-    const sync = () => void api.getSquareStatus().then((result) => {
-      if (!cancelled) {
+    let revision = 0;
+    const sync = () => { const started = revision; void api.getSquareStatus().then((result) => {
+      if (!cancelled && started === revision) {
         setSquareUnread(result.notification_unread);
         setSquareHasFreshContent(result.explore_unread || result.friends_unread || result.activity_claimable);
       }
-    }).catch(() => undefined);
+    }).catch(() => undefined); };
     sync();
     const timer = window.setInterval(sync, 15_000);
     const handleUpdated = (event: Event) => {
       const detail = (event as CustomEvent<{ unreadCount: number; hasFreshContent?: boolean }>).detail;
       if (detail && !cancelled) {
+        revision++;
         setSquareUnread(Math.max(0, detail.unreadCount));
         if (detail.hasFreshContent !== undefined) setSquareHasFreshContent(detail.hasFreshContent);
       }
@@ -269,7 +272,7 @@ export function AppBottomNav() {
         {visibleRoutes.map((route) => (
           <Link
             key={route.key}
-            aria-label={t(route.labelKey as TranslationKey)}
+            aria-label={route.key === "square" && (squareUnread > 0 || squareHasFreshContent) ? `${t(route.labelKey as TranslationKey)} · ${squareUnread > 0 ? t("square.unreadCount", { count: squareUnread }) : t("square.freshContent")}` : t(route.labelKey as TranslationKey)}
             className={`nav-button ${current === route.key ? "active" : ""}`}
             onFocus={() => preloadRouteForPath(route.href)}
             onMouseEnter={() => preloadRouteForPath(route.href)}
@@ -280,14 +283,11 @@ export function AppBottomNav() {
             <span className="nav-button-icon-wrap">
               <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
               {route.key === "chats" && totalUnread > 0 ? (
-                <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
+                <UnreadIndicator count={totalUnread} />
               ) : null}
-              {route.key === "square" && squareUnread > 0 ? (
-                <span className="nav-unread-badge">{squareUnread > 99 ? "99+" : squareUnread}</span>
-              ) : null}
-              {route.key === "square" && squareUnread === 0 && squareHasFreshContent ? <span className="nav-fresh-dot" /> : null}
+              {route.key === "square" ? <UnreadIndicator count={squareUnread} fresh={squareHasFreshContent} /> : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
-                <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
+                <UnreadIndicator count={incomingRequestCount} />
               ) : null}
             </span>
             <span className="nav-button-label">{t(route.labelKey as TranslationKey)}</span>

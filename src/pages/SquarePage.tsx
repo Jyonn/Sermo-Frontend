@@ -7,7 +7,6 @@ import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { ContentDatePicker, type DatePickerMode } from "../components/ContentDatePicker";
 import { FeedbackState } from "../components/FeedbackState";
 import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
@@ -27,6 +26,10 @@ import { InputDialog } from "../components/InputDialog";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
+import { SquareHeaderTools } from "../components/SquareHeaderTools";
+import { SquareSearchDialog } from "../components/SquareSearchDialog";
+import { availableSquareQuota } from "../lib/squareQuota";
+import { legacySquareDateRange } from "../lib/squareSearch";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -55,7 +58,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -135,20 +138,6 @@ function normalizeFeedDate(value: string | null) {
   const candidate = new Date(Date.UTC(year, month - 1, day));
   if (candidate.getUTCFullYear() !== year || candidate.getUTCMonth() !== month - 1 || candidate.getUTCDate() !== day) return null;
   return value;
-}
-
-function shanghaiCalendarMonth(date?: string | null) {
-  if (date) {
-    const [year, month = 1] = date.split("-").map(Number);
-    return { year, month };
-  }
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Shanghai",
-    year: "numeric",
-    month: "2-digit",
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return { year: Number(values.year), month: Number(values.month) };
 }
 
 function isUnclaimedQqUser(user?: TinyUserDTO | null) {
@@ -244,19 +233,18 @@ function formatActivityDateRange(startsAt: number, endsAt: number | null, langua
   return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
 }
 
-function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean; quota: SquareQuotaDTO | null; onRetry: () => void }) {
+export function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean; quota: SquareQuotaDTO | null; onRetry: () => void }) {
   const { t } = useI18n();
   const levelDeckRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!quota || quota.unlimited) return;
     const current = levelDeckRef.current?.querySelector<HTMLElement>(".is-current");
-    requestAnimationFrame(() => current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
+    requestAnimationFrame(() => { if (current?.getClientRects().length) current.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); });
   }, [quota?.level, quota?.unlimited, quota?.vip]);
   if (loading && !quota) return <FeedbackState tone="loading" title={t("common.loading")} />;
   if (!quota) return <FeedbackState tone="error" icon="cloud_off" title={t("square.quotaLoadFailed")} action={<button className="ghost-button" onClick={onRetry} type="button">{t("common.retry")}</button>} />;
-  const remaining = (used: number, limit: number | null) => limit === null ? null : Math.max(0, limit - used);
-  const statementRemaining = remaining(quota.statements.daily_used, quota.statements.daily_limit);
-  const commentRemaining = remaining(quota.comments.daily_used, quota.comments.daily_limit);
+  const statementRemaining = availableSquareQuota(quota.statements.daily_used, quota.statements.daily_limit, quota.statements.weekly_used, quota.statements.weekly_limit);
+  const commentRemaining = availableSquareQuota(quota.comments.daily_used, quota.comments.daily_limit, quota.comments.weekly_used, quota.comments.weekly_limit);
   const quotaCards = [
     { key: "statement", icon: "edit_square", label: t("square.quotaStatements"), used: quota.statements.daily_used, limit: quota.statements.daily_limit, weeklyUsed: quota.statements.weekly_used, weeklyLimit: quota.statements.weekly_limit, remaining: statementRemaining },
     { key: "comment", icon: "forum", label: t("square.quotaComments"), used: quota.comments.daily_used, limit: quota.comments.daily_limit, weeklyUsed: quota.comments.weekly_used, weeklyLimit: quota.comments.weekly_limit, remaining: commentRemaining },
@@ -275,24 +263,23 @@ function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean; quota
     </section>
     <div className="square-quota-track">
       {quotaCards.map((item) => {
-        const ratio = item.limit === null ? 0 : Math.min(1, item.used / Math.max(1, item.limit));
-        return <article className={item.remaining === 0 ? "is-exhausted" : ""} key={item.key}>
+        return <article className={item.remaining === 0 ? "is-exhausted" : item.remaining !== null && item.remaining <= 1 ? "is-low" : ""} key={item.key}>
           <span className="material-symbols-outlined square-quota-track-icon">{item.icon}</span>
-          <div className="square-quota-track-copy"><strong>{item.label}</strong><small>{t("square.quota24Hours")} {item.used}/{item.limit ?? "∞"} · {t("square.quota7Days")} {item.weeklyUsed}/{item.weeklyLimit ?? "∞"}</small></div>
-          <b>{item.limit === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining ?? 0 })}</b>
-          <div className="square-quota-meter"><i style={{ transform: `scaleX(${ratio})` }} /></div>
+          <div className="square-quota-track-copy"><strong>{item.label}</strong></div>
+          <b>{item.remaining === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining })}</b>
+          <div className="square-quota-windows">{[{ label: t("square.quota24Hours"), used: item.used, limit: item.limit }, { label: t("square.quota7Days"), used: item.weeklyUsed, limit: item.weeklyLimit }].map((window) => <div key={window.label}><span>{window.label}<b>{window.used} / {window.limit ?? "∞"}</b></span><div className="square-quota-meter"><i style={{ transform: `scaleX(${window.limit === null ? 0 : Math.min(1, window.used / Math.max(1, window.limit))})` }} /></div></div>)}</div>
         </article>;
       })}
       {quota.statements.anonymous_available && quota.statements.anonymous_weekly_limit !== null ? <article className="square-quota-anonymous-card">
         <span className="material-symbols-outlined square-quota-track-icon">visibility_off</span>
         <div className="square-quota-track-copy"><strong>{t("square.quotaAnonymous")}</strong><small>{t("square.quotaAnonymousWeekly", { used: quota.statements.anonymous_weekly_used, limit: quota.statements.anonymous_weekly_limit })} · {t("square.exploreOnly")}</small></div>
-        <b>{t("square.quotaRemaining", { count: Math.max(0, quota.statements.anonymous_weekly_limit - quota.statements.anonymous_weekly_used) })}</b>
+        <b>{t("square.quotaRemaining", { count: Math.min(statementRemaining ?? Infinity, Math.max(0, quota.statements.anonymous_weekly_limit - quota.statements.anonymous_weekly_used)) })}</b>
         <div className="square-quota-meter"><i style={{ transform: `scaleX(${Math.min(1, quota.statements.anonymous_weekly_used / Math.max(1, quota.statements.anonymous_weekly_limit))})` }} /></div>
       </article> : null}
       <article className="square-quota-like-card"><span className="material-symbols-outlined square-quota-track-icon">favorite</span><div className="square-quota-track-copy"><strong>{t("square.quotaLikes")}</strong><small>{t("square.quotaLikesToday", { count: quota.likes.daily_used })}</small></div><b>{t("square.quotaUnlimitedShort")}</b></article>
     </div>
-    {!quota.unlimited ? <section className="square-quota-levels">
-      <header><strong>{t("square.quotaLevelBenefits")}</strong><span>{t("square.quotaSwipeLevels")}</span></header>
+    {!quota.unlimited ? <details className="square-quota-levels">
+      <summary>{t("square.quotaLevelBenefits")}<span className="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
       <div className="square-quota-level-deck" ref={levelDeckRef}>{levels.map((row, index) => {
         const current = quota.vip ? index === levels.length - 1 : quota.level >= row.min && quota.level <= row.max;
         return <article className={current ? "is-current" : ""} key={row.range}>
@@ -301,7 +288,7 @@ function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean; quota
           <div className="square-quota-level-formats">{row.formats.map(([icon, key]) => <span key={key}><i className="material-symbols-outlined">{icon}</i>{t(key)}</span>)}</div>
         </article>;
       })}</div>
-    </section> : null}
+    </details> : null}
   </div>;
 }
 
@@ -574,8 +561,10 @@ export default function SquarePage() {
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
   const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
   const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
+  const selectedFeedFrom = normalizeFeedDate(searchParams.get("date_from"));
+  const selectedFeedTo = normalizeFeedDate(searchParams.get("date_to"));
   const selectedFeedKeyword = (searchParams.get("keyword") || "").trim().slice(0, 100);
-  const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedKeyword);
+  const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedFrom || selectedFeedTo || selectedFeedKeyword);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(() => {
     if (profileFeedUserId) return "user";
     const saved = readTabCache<string>(cacheScope, "square:mode")?.data;
@@ -585,7 +574,7 @@ export default function SquarePage() {
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? features.squareExploreEnabled ? "all" : "friends"
     : feedMode;
-  const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedKeyword);
+  const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedKeyword, selectedFeedFrom, selectedFeedTo);
   const initialFeedSnapshotRef = useRef<NormalizedSquareFeedSnapshot<SquareStatementDTO> | null>();
   if (initialFeedSnapshotRef.current === undefined) {
     const normalized = normalizeSquareFeedSnapshot(
@@ -602,13 +591,7 @@ export default function SquarePage() {
   const [hasMore, setHasMore] = useState(() => initialFeedSnapshot?.hasMore ?? true);
   const squareLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState("");
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(() => shanghaiCalendarMonth(selectedFeedDate));
-  const [calendarMode, setCalendarMode] = useState<DatePickerMode>(() => selectedFeedDate?.length === 4 ? "year" : selectedFeedDate?.length === 7 ? "month" : "day");
-  const [calendar, setCalendar] = useState<SquareCalendarDTO | null>(null);
-  const [calendarLoading, setCalendarLoading] = useState(false);
-  const [feedSearchOpen, setFeedSearchOpen] = useState(Boolean(selectedFeedDate || selectedFeedKeyword));
-  const [feedSearchKeyword, setFeedSearchKeyword] = useState(selectedFeedKeyword);
+  const [feedSearchOpen, setFeedSearchOpen] = useState(false);
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
   const [anonymousStatement, setAnonymousStatement] = useState(false);
@@ -633,7 +616,6 @@ export default function SquarePage() {
     if (!features.squareExploreEnabled && feedMode === "all") setFeedMode("friends");
   }, [features.squareExploreEnabled, feedMode]);
 
-  useEffect(() => setFeedSearchKeyword(selectedFeedKeyword), [selectedFeedKeyword]);
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -1053,29 +1035,12 @@ export default function SquarePage() {
     void api.getSquareQuota().then(setQuota).catch(() => setQuota(null)).finally(() => setQuotaLoading(false));
   };
 
-  const openCalendar = () => {
-    setCalendarMonth(shanghaiCalendarMonth(selectedFeedDate));
-    setCalendarMode(selectedFeedDate?.length === 4 ? "year" : selectedFeedDate?.length === 7 ? "month" : "day");
-    setCalendarOpen(true);
-  };
-
-  const selectFeedDate = (date: string | null) => {
+  const applyFeedSearch = (value: string, from: string, to: string) => {
     const next = new URLSearchParams(searchParams);
-    if (date) next.set("date", date);
-    else next.delete("date");
-    const keyword = feedSearchKeyword.trim();
-    if (keyword) next.set("keyword", keyword);
-    else next.delete("keyword");
-    const query = next.toString();
-    if (routedStatementId !== null) navigate({ pathname: "/app/square", search: query ? `?${query}` : "" });
-    else setSearchParams(next);
-    setCalendarOpen(false);
-    setFeedSearchOpen(false);
-  };
-
-  const applyFeedSearch = () => {
-    const next = new URLSearchParams(searchParams);
-    const keyword = feedSearchKeyword.trim();
+    next.delete("date");
+    if (from) next.set("date_from", from); else next.delete("date_from");
+    if (to) next.set("date_to", to); else next.delete("date_to");
+    const keyword = value.trim();
     if (keyword) next.set("keyword", keyword);
     else next.delete("keyword");
     const query = next.toString();
@@ -1087,8 +1052,9 @@ export default function SquarePage() {
   const clearFeedSearch = () => {
     const next = new URLSearchParams(searchParams);
     next.delete("date");
+    next.delete("date_from");
+    next.delete("date_to");
     next.delete("keyword");
-    setFeedSearchKeyword("");
     const query = next.toString();
     if (routedStatementId !== null) navigate({ pathname: "/app/square", search: query ? `?${query}` : "" });
     else setSearchParams(next);
@@ -1280,7 +1246,7 @@ export default function SquarePage() {
   const loadStatements = async (before?: number) => {
     const requestFeedKey = activeFeedCacheKey;
     try {
-      const rows = await api.getSquareStatements({ before, date: selectedFeedDate ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined });
+      const rows = await api.getSquareStatements({ before, date: selectedFeedDate ?? undefined, date_from: selectedFeedFrom ?? undefined, date_to: selectedFeedTo ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined });
       if (activeFeedCacheKeyRef.current !== requestFeedKey) return;
       setStatements((current) => {
         if (!before) return rows;
@@ -1322,7 +1288,7 @@ export default function SquarePage() {
     const cached = normalizedCached?.trusted ? normalizedCached : null;
     setSyncing(true);
     const controller = new AbortController();
-    void api.getSquareStatements({ date: selectedFeedDate ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
+    void api.getSquareStatements({ date: selectedFeedDate ?? undefined, date_from: selectedFeedFrom ?? undefined, date_to: selectedFeedTo ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
       if (activeFeedCacheKeyRef.current !== cacheKey) return;
       const refreshed = mergeSquareFeedRefresh(cached?.items ?? [], rows);
       const nextHasMore = refreshed.connected && cached
@@ -1353,25 +1319,7 @@ export default function SquarePage() {
       }
     });
     return () => controller.abort();
-  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedKeyword, t]);
-
-  useEffect(() => {
-    if (!calendarOpen) return;
-    const controller = new AbortController();
-    setCalendar(null);
-    setCalendarLoading(true);
-    void api.getSquareCalendar({
-      year: calendarMonth.year,
-      month: calendarMonth.month,
-      scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode,
-      user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined,
-    }, controller.signal).then(setCalendar).catch((cause) => {
-      if ((cause as Error).name !== "AbortError") setCalendar(null);
-    }).finally(() => {
-      if (!controller.signal.aborted) setCalendarLoading(false);
-    });
-    return () => controller.abort();
-  }, [calendarMonth, calendarOpen, effectiveFeedMode, profileFeedUserId]);
+  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedFrom, selectedFeedTo, selectedFeedKeyword, t]);
 
   useEffect(() => {
     if (loading || statementsFeedKey !== activeFeedCacheKey) return;
@@ -2286,43 +2234,22 @@ export default function SquarePage() {
           title={t("square.title")}
           secondary={<div className="square-workspace-tabs is-square" role="tablist">
             <div className="square-workspace-tab-group is-square-channels">
-              {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
-              <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <i className="square-fresh-dot" /> : null}</button>
+              {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button> : null}
+              <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button>
               <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
               {profileFeedUserId ? <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}><button aria-selected={feedMode === "user"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode("mine"); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
           </div>}
           actions={<div className="square-header-actions is-square">
-            <div className="square-header-square-tools">
-              <button aria-expanded={feedSearchOpen} aria-label={t("square.search")} aria-pressed={hasFeedFilters} className={`square-header-date${feedSearchOpen || hasFeedFilters ? " is-active" : ""}`} onClick={() => setFeedSearchOpen((open) => !open)} type="button"><span className="material-symbols-outlined">search</span></button>
-              <button aria-label={t("square.quotaTitle")} className="square-header-quota" onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span></button>
-              <button aria-label={t("square.notifications")} className="square-header-notifications" onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}</button>
-            </div>
+            <SquareHeaderTools searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => setFeedSearchOpen(true)} onQuota={openQuota} onNotifications={openNotificationDrawer} />
             {features.squareFreePostEnabled ? <button aria-label={t("square.publish")} title={t("square.publish")} className="square-header-publish" onClick={openComposer} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("square.publish")}</span></button> : null}
           </div>}
         />
         <div className="square-workspace-surface is-square">
         <div className="square-feed-column">
-          {feedSearchOpen ? <div className="square-search-reveal is-open">
-            <form className="square-search-panel" onSubmit={(event) => { event.preventDefault(); applyFeedSearch(); }}>
-              <label className="square-search-keyword">
-                <span className="material-symbols-outlined" aria-hidden="true">search</span>
-                <input autoComplete="off" maxLength={100} onChange={(event) => setFeedSearchKeyword(event.target.value)} placeholder={t("square.searchPlaceholder")} type="search" value={feedSearchKeyword} />
-              </label>
-              <button className={`square-search-date${selectedFeedDate ? " is-selected" : ""}`} onClick={openCalendar} type="button">
-                <span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>
-                <span><small>{t("square.date")}</small><strong>{selectedFeedDateLabel || t("square.anyDate")}</strong></span>
-                <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-              </button>
-              <div className="square-search-actions">
-                <button disabled={!hasFeedFilters && !feedSearchKeyword} onClick={clearFeedSearch} type="button">{t("common.clear")}</button>
-                <button type="submit"><span className="material-symbols-outlined" aria-hidden="true">search</span>{t("square.applySearch")}</button>
-              </div>
-            </form>
-          </div> : null}
           {hasFeedFilters ? <div className="square-date-context">
             <span className="material-symbols-outlined" aria-hidden="true">filter_alt</span>
-            <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
+            <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedFrom || selectedFeedTo ? `${selectedFeedFrom || t("square.anyDate")} → ${selectedFeedTo || t("square.anyDate")}` : selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
             <button aria-label={t("square.clearSearch")} onClick={clearFeedSearch} type="button"><span>{t("square.clearSearch")}</span><span className="material-symbols-outlined">close</span></button>
           </div> : null}
           {!hasFeedFilters && feedMode === "all" && activityBannerCount ? <div className="square-activity-carousel"><section className="square-activity-rail" aria-label={t("activity.active")} onScroll={(event) => {
@@ -2762,23 +2689,10 @@ export default function SquarePage() {
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) { setPublicCommentConfirmOpen(false); setPendingCommentSticker(null); } }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(pendingCommentSticker); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />
-      <BottomSheet className="message-search-calendar-sheet square-calendar-sheet" onClose={() => setCalendarOpen(false)} open={calendarOpen} title={t("square.byDate")}>
-        <ContentDatePicker
-          entries={calendar?.days ?? []}
-          loading={calendarLoading}
-          mode={calendarMode}
-          modes={["year", "month", "day"]}
-          month={calendarMonth}
-          onModeChange={setCalendarMode}
-          onMonthChange={setCalendarMonth}
-          onSelect={(value) => selectFeedDate(value)}
-          range={calendar?.range}
-          selected={selectedFeedDate}
-        />
-      </BottomSheet>
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} onRetry={openQuota} />
       </BottomSheet>
+      <SquareSearchDialog open={feedSearchOpen} keyword={selectedFeedKeyword} from={selectedFeedFrom || legacySquareDateRange(selectedFeedDate).from} to={selectedFeedTo || legacySquareDateRange(selectedFeedDate).to} onClose={() => setFeedSearchOpen(false)} onApply={applyFeedSearch} onClear={clearFeedSearch} />
     </AppChrome>
   );
 }

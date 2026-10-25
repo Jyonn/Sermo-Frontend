@@ -12,6 +12,14 @@
   "oauth.saveDraft": "Save draft",
   "oauth.revisionNumber": "Configuration #{{number}}",
   "nav.developer": "Development",
+  "square.unreadCount": "{{count}} unread notifications",
+  "square.freshContent": "New posts or activities",
+  "square.keyword": "Keyword",
+  "square.dateRange": "Date range",
+  "square.dateFrom": "Start date",
+  "square.dateTo": "End date",
+  "square.dateRangeHint": "Dates are optional. You can set either boundary or both.",
+  "square.dateRangeInvalid": "The end date must not be before the start date.",
   "media.outsideCollection": "Now browsing chat photos outside this collection",
   "media.backToCollection": "Back in the original collection",
   "media.collectionPosition": "Collection {{index}} / {{count}}",
@@ -2501,7 +2509,7 @@
   ,"square.quotaOfficial": "Official account"
   ,"square.quotaVerifyFirst": "Verify to join Square conversations"
   ,"square.quotaUnlimited": "Unlimited activity"
-  ,"square.quotaHero": "{{count}} statements left in the next 24 hours"
+  ,"square.quotaHero": "{{count}} posts available now"
   ,"square.quotaStatements": "Statements"
   ,"square.quotaComments": "Comments & replies"
   ,"square.quotaLikes": "Likes"

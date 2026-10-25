@@ -6,12 +6,16 @@ export type SquareBadgeStatus = {
   claimableActivityKeys: string[];
 };
 
+export function squareBadgeUpdate(unreadCount: number, status?: Partial<SquareBadgeStatus>) {
+  return {
+      unreadCount: Number.isFinite(unreadCount) ? Math.max(0, Math.floor(unreadCount)) : 0,
+      ...(status?.hasFreshContent !== undefined ? { hasFreshContent: Boolean(status.hasFreshContent) } : {}),
+      ...(status?.claimableActivityKeys !== undefined ? { claimableActivityKeys: status.claimableActivityKeys } : {}),
+  };
+}
+
 export function announceSquareUnread(unreadCount: number, status?: Partial<SquareBadgeStatus>) {
   window.dispatchEvent(new CustomEvent(SQUARE_NOTIFICATIONS_UPDATED_EVENT, {
-    detail: {
-      unreadCount: Math.max(0, unreadCount),
-      hasFreshContent: Boolean(status?.hasFreshContent),
-      claimableActivityKeys: status?.claimableActivityKeys ?? [],
-    },
+    detail: squareBadgeUpdate(unreadCount, status),
   }));
 }
