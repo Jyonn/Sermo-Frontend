@@ -21,6 +21,8 @@ export interface ApiEnvelope<T> {
 }
 
 export interface TinyUserDTO {
+  growth_level_name?: string;
+  founder_medal_years?: number[];
   user_id: number;
   name: string;
   official?: boolean;
@@ -104,6 +106,7 @@ export interface UserGrowthDTO {
   level: number;
   acknowledged_level?: number;
   pending_level?: number | null;
+  pending_founder_medal_years?: number[];
   name: string;
   next_score: number | null;
   progress: number;

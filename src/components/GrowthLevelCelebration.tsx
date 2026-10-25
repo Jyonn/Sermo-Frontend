@@ -8,6 +8,8 @@ import { growthStageForLevel } from "../lib/growth-stage";
 import { UserAvatar } from "./UserAvatar";
 import ChatsPage from "../pages/ChatsPage";
 import { usePageActive } from "../lib/pageActivity";
+import { useModalFocus } from "../lib/modalFocus";
+import "./FounderMedals.css";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -115,12 +117,15 @@ export function GrowthLevelCelebration() {
   const { t } = useI18n();
   const { patchSessionUser, session } = useAuth();
   const [growth, setGrowth] = useState<UserGrowthDTO | null>(null);
+  const [growthToken, setGrowthToken] = useState<string | undefined>(undefined);
   const [page, setPage] = useState<CelebrationPage>("arrival");
   const [rewardCursor, setRewardCursor] = useState(0);
   const [acknowledging, setAcknowledging] = useState(false);
   const [applyingReward, setApplyingReward] = useState(false);
   const [error, setError] = useState("");
   const requestInFlightRef = useRef(false);
+  const refreshVersion = useRef(0);
+  const founderRoot = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLButtonElement | null>(null);
   const rewardTrackRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,8 +139,9 @@ export function GrowthLevelCelebration() {
     const refresh = () => {
       if (requestInFlightRef.current) return;
       requestInFlightRef.current = true;
+      const version = refreshVersion.current;
       void api.getGrowth().then((nextGrowth) => {
-        if (!cancelled) setGrowth(nextGrowth);
+        if (!cancelled && version === refreshVersion.current) { setGrowth(nextGrowth); setGrowthToken(session.accessToken); }
       }).catch(() => undefined).finally(() => {
         requestInFlightRef.current = false;
       });
@@ -152,6 +158,8 @@ export function GrowthLevelCelebration() {
   }, [pageActive, session?.accessToken]);
 
   const acknowledgedLevel = growth?.acknowledged_level ?? 0;
+  const pendingFounderYear = growthToken === session?.accessToken ? growth?.pending_founder_medal_years?.[0] : undefined;
+  useModalFocus(founderRoot, Boolean(pendingFounderYear), () => {});
   const pendingLevel = growth?.pending_level ?? (growth && acknowledgedLevel < growth.level ? acknowledgedLevel + 1 : null);
   const level = pendingLevel ? growth?.levels?.find((item) => item.level === pendingLevel) : null;
   const previousLevel = Math.max(0, (pendingLevel ?? 1) - 1);
@@ -163,7 +171,7 @@ export function GrowthLevelCelebration() {
     setPage("arrival");
     setRewardCursor(0);
     setError("");
-  }, [pendingLevel]);
+  }, [pendingLevel, pendingFounderYear]);
 
   useEffect(() => {
     if (page !== "rewards" || !level || level.rewards.length < 2) return;
@@ -186,7 +194,7 @@ export function GrowthLevelCelebration() {
   }, [page, rewardCursor]);
 
   useEffect(() => {
-    if (!pendingLevel) return;
+    if (!pendingLevel && !pendingFounderYear) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const timer = window.setTimeout(() => actionRef.current?.focus(), 500);
@@ -194,7 +202,22 @@ export function GrowthLevelCelebration() {
       document.body.style.overflow = previousOverflow;
       window.clearTimeout(timer);
     };
-  }, [pendingLevel, page]);
+  }, [pendingLevel, pendingFounderYear, page]);
+
+  if (pendingFounderYear) return <div ref={founderRoot} tabIndex={-1} aria-labelledby="founder-ceremony-title" aria-modal="true" role="dialog" className="growth-celebration growth-ceremony stage-legendary founder-ceremony">
+    <header className="growth-ceremony-topbar"><strong>FRIENDEN 友间</strong><span>{pendingFounderYear}</span></header>
+    <main className="founder-ceremony-main">
+      <div className="founder-ceremony-emblem" aria-hidden="true"><span className="material-symbols-outlined">workspace_premium</span></div>
+      <small>{t("profile.founderHonored")}</small>
+      <h1 id="founder-ceremony-title">{t("profile.founderMedal", { year: pendingFounderYear })}</h1>
+      <p>{session?.user.name}</p><p>{t("profile.founderThanks")}</p>
+    </main>
+    <footer className="growth-ceremony-footer">{error ? <p role="alert">{error}</p> : null}<button ref={actionRef} type="button" disabled={acknowledging} onClick={() => {
+      if (acknowledging) return;
+      setAcknowledging(true); setError("");
+      void api.acknowledgeFounderMedal(pendingFounderYear).then(next => { refreshVersion.current += 1; setGrowth(next); }).catch(() => setError(t("growth.confirmFailed"))).finally(() => setAcknowledging(false));
+    }}>{t(acknowledging ? "growth.confirming" : "profile.founderAccept")}</button><small>{t("profile.founderSaved")}</small></footer>
+  </div>;
 
   if (!growth || !pendingLevel || !level) return null;
 

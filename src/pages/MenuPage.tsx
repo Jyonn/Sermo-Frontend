@@ -2111,7 +2111,7 @@ export default function MenuPage() {
               {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
             <button className={`menu-growth-entry stage-${currentLevelStage}`} onClick={() => setGrowthDrawerOpen(true)} type="button">
-              <GrowthLevelBadge className="menu-growth-level" label={`Lv.${me?.growth?.level ?? 1}`} level={me?.growth?.level ?? 1} />
+              <GrowthLevelBadge className="menu-growth-level" name={me?.growth_level_name || me?.growth?.name} level={me?.growth?.level ?? 1} />
               <span className="menu-growth-identity">
                 <small>{t(`growth.levelStage.${currentLevelStage}` as TranslationKey)}</small>
                 <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>

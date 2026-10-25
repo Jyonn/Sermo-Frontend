@@ -37,12 +37,13 @@ test("invalid references, schema lengths, cross-endpoint data and cycles fail ex
   assert.throws(() => decodeCompact(packed, "messages"), /schema/);
 });
 
-test("message paging and both growth calls explicitly negotiate compact transport", () => {
+test("message paging, growth and founder acknowledgement negotiate compact transport", () => {
   const source = readFileSync(new URL("../src/lib/api.ts", import.meta.url), "utf8");
   const messages = source.slice(source.indexOf("  getMessages("), source.indexOf("  searchMessages("));
   assert.match(messages, /query: \{ \.\.\.params, format: "compact-v1" \}/);
   assert.match(messages, /decodeCompact<ChatMessageDTO\[\]>/);
   const growth = source.slice(source.indexOf("  getGrowth("), source.indexOf("  getFeatureDiscoveries("));
-  assert.equal((growth.match(/format: "compact-v1"/g) ?? []).length, 2);
-  assert.equal((growth.match(/decodeCompact<UserGrowthDTO>/g) ?? []).length, 2);
+  assert.equal((growth.match(/format: "compact-v1"/g) ?? []).length, 3);
+  assert.equal((growth.match(/decodeCompact<UserGrowthDTO>/g) ?? []).length, 3);
+  assert.match(growth, /acknowledgeFounderMedal/);
 });

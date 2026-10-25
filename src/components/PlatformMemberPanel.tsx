@@ -5,6 +5,8 @@ import { formatRelativeTime } from "../lib/presentation";
 import type { ChatDTO, PlatformAdminMemberDTO } from "../types";
 import { FeedbackState } from "./FeedbackState";
 import { UserAvatar } from "./UserAvatar";
+import { GrowthLevelBadge } from "./GrowthLevelBadge";
+import "./FounderMedals.css";
 
 export function PlatformMemberPanel({ member, onChat }: { member: PlatformAdminMemberDTO; onChat: (chat: ChatDTO) => void }) {
   const { t } = useI18n();
@@ -12,6 +14,18 @@ export function PlatformMemberPanel({ member, onChat }: { member: PlatformAdminM
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [retry, setRetry] = useState(0);
+  const [award, setAward] = useState<{ userId: number; years: number[] } | null>(null);
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [awarding, setAwarding] = useState(false);
+  const [awardError, setAwardError] = useState("");
+  const years = award?.userId === member.user_id ? award.years : member.founder_medal_years ?? [];
+  const updateMedal = async () => {
+    const userId = member.user_id;
+    setAwarding(true); setAwardError("");
+    try { const result = await api.setFounderMedal(userId, year, !years.includes(year)); setAward({ userId, years: result.founder_medal_years }); }
+    catch (cause) { setAwardError(cause instanceof Error ? cause.message : t("management.awardFailed")); }
+    finally { setAwarding(false); }
+  };
   useEffect(() => {
     const controller = new AbortController();
     setChats(null);
@@ -28,8 +42,13 @@ export function PlatformMemberPanel({ member, onChat }: { member: PlatformAdminM
   return <div className="platform-member-sheet">
     <header className="platform-member-identity">
       <UserAvatar className="platform-member-portrait" frame={member.avatar_frame_style} name={member.name} uri={member.avatar_uri} />
-      <div><h2>{member.name}</h2><p>#{member.user_id}<span>LV{member.growth_level ?? 1}</span><span>{t(member.verified ? "admin.verified" : "management.unverified")}</span></p></div>
+      <div><h2>{member.name}</h2><p>#{member.user_id}<GrowthLevelBadge level={member.growth_level ?? 1} name={member.growth_level_name} /><span>{t(member.verified ? "admin.verified" : "management.unverified")}</span></p></div>
     </header>
+    <section className="founder-medal-management"><h3>{t("management.founderMedal")}</h3>
+      {years.map(value => <span key={value}>{t("profile.founderMedal", { year: value })}</span>)}
+      <div><label>{t("management.awardYear")} <input type="number" min={2026} max={new Date().getFullYear()} value={year} onChange={event => setYear(Number(event.target.value))} /></label><button type="button" className="ghost-button" disabled={awarding || !Number.isInteger(year) || year < 2026 || year > new Date().getFullYear()} onClick={() => void updateMedal()}>{t(years.includes(year) ? "management.revokeMedal" : "management.grantMedal")}</button></div>
+      {awardError ? <p role="alert">{awardError}</p> : null}
+    </section>
     <dl className="platform-member-facts">{[
       { label: t("admin.friends"), value: member.friend_count },
       { label: t("management.conversations"), value: member.chat_count },

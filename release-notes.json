@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.14",
+  "id": "2026.10.25.15",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "弹窗与消息角标优化",
+      "title": "等级名称与创始人奖章",
       "items": [
-        "修复桌面弹窗自定义标题的居中显示",
-        "广场未读数字使用完整包裹的红色圆角角标"
+        "个人名片、广场等位置显示空间自定义等级名称",
+        "年度创始人奖章授予后首次进入展示全屏荣誉海报，并珍藏于个人名片"
       ]
     },
     "en": {
-      "title": "Better dialogs and notification badges",
+      "title": "Level names and Founder Medals",
       "items": [
-        "Custom desktop dialog headers are properly centered",
-        "Square unread counts fit neatly inside rounded red badges"
+        "Profiles and Square show your space's custom level names",
+        "Annual Founder Medals greet recipients with a one-time full-screen ceremony and remain on their profiles"
       ]
     }
   }

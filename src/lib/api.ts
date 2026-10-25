@@ -1597,6 +1597,11 @@ export const api = {
       return decodeCompact<UserGrowthDTO>(growth, "growth");
     });
   },
+  acknowledgeFounderMedal(year: number) {
+    return request<UserGrowthDTO | CompactPayload>("/users/me/founder-medal-ack", {
+      method: "POST", auth: true, query: { format: "compact-v1" }, body: { year },
+    }).then(payload => decodeCompact<UserGrowthDTO>(payload, "growth"));
+  },
 
   getFeatureDiscoveries(signal?: AbortSignal) {
     return request<FeatureDiscoveryStatusDTO>("/users/me/feature-discoveries", { auth: true, signal });
@@ -1960,6 +1965,11 @@ export const api = {
   },
   getPlatformMemberChats(userId: number, signal?: AbortSignal) {
     return request<ChatDTO[]>(`/platform-admin/members/${userId}/chats`, { platformAdminAuth: true, signal });
+  },
+  setFounderMedal(userId: number, year: number, enabled: boolean) {
+    return request<{ founder_medal_years: number[] }>(`/platform-admin/members/${userId}/founder-medal`, {
+      method: "POST", platformAdminAuth: true, body: { year, enabled },
+    });
   },
   getPlatformChatMessages(chatId: number, reason: string, before?: number, perspectiveUserId?: number | null, signal?: AbortSignal) {
     return request<{ chat: ChatDTO; messages: ChatMessageDTO[]; has_more: boolean; next_before: number | null; first_person_user_id: number | null }>(`/platform-admin/chats/${chatId}/messages`, {

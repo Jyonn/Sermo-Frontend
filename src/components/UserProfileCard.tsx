@@ -3,12 +3,16 @@ import { OfficialBadge } from "./OfficialBadge";
 import { OperatorBadge } from "./OperatorBadge";
 import { UserAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
+import { useI18n } from "../lib/language";
+import "./FounderMedals.css";
 
 interface UserProfileCardProps {
   avatarLabel?: string;
   avatarFrame?: UserDTO["avatar_frame_style"];
   avatarUri?: string;
   growthLevel?: number;
+  growthLevelName?: string;
+  founderMedalYears?: number[];
   isOnline?: boolean;
   isPermanentVip?: boolean;
   name: string;
@@ -25,6 +29,8 @@ export function UserProfileCard({
   avatarFrame,
   avatarUri,
   growthLevel,
+  growthLevelName,
+  founderMedalYears,
   isOnline,
   isPermanentVip,
   name,
@@ -35,6 +41,7 @@ export function UserProfileCard({
   presence,
   relationshipLabel,
 }: UserProfileCardProps) {
+  const { t } = useI18n();
   return (
     <section className="user-profile-social-card">
       <div className="user-profile-cover" aria-hidden="true" />
@@ -65,10 +72,11 @@ export function UserProfileCard({
         </div>
       </div>
       <div className="user-profile-facts">
-        {!official && growthLevel ? <GrowthLevelBadge level={growthLevel} /> : null}
+        {!official && growthLevel ? <GrowthLevelBadge level={growthLevel} name={growthLevelName} /> : null}
         {isPermanentVip && permanentVipLabel ? <span className="is-vip">{permanentVipLabel}</span> : null}
         {relationshipLabel ? <span className="is-relationship">{relationshipLabel}</span> : null}
       </div>
+      {founderMedalYears?.length ? <div className="founder-medals">{founderMedalYears.map(year => <div className="founder-medal" key={year}><span className="material-symbols-outlined" aria-hidden="true">workspace_premium</span><span><small>FRIENDEN</small><strong>{t("profile.founderMedal", { year })}</strong></span></div>)}</div> : null}
     </section>
   );
 }

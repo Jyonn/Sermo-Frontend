@@ -31,6 +31,7 @@ export interface UserProfileSeed {
   permanent_vip_slot?: number | null;
   growth_level?: number;
   growth_level_name?: string;
+  founder_medal_years?: number[];
   avatar_frame_style?: UserDTO["avatar_frame_style"];
   profile_card_theme?: UserDTO["profile_card_theme"];
   chronelle_calendar_id?: string;
@@ -363,6 +364,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         avatarFrame={user.avatar_frame_style}
         avatarUri={user.avatar_uri}
         growthLevel={user.growth_level}
+        growthLevelName={user.growth_level_name}
+        founderMedalYears={user.founder_medal_years}
         isOnline={user.is_alive}
         isPermanentVip={user.is_permanent_vip}
         name={user.name}
