@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.8",
+  "id": "2026.10.25.9",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "开发者工作台，更清晰",
+      "title": "独立的应用创建面板",
       "items": [
-        "应用列表与详情减少重复标题和嵌套，完善横竖屏及深色模式",
-        "创建和编辑应用改为三步填写，保存后直接查看草稿，保留独立的提审与审批确认"
+        "添加应用在独立抽屉中完成，桌面宽屏同时展示应用列表与创建面板",
+        "开发者入口更名为开发，保留分步填写和未保存提醒"
       ]
     },
     "en": {
-      "title": "A clearer developer workspace",
+      "title": "A dedicated application creation panel",
       "items": [
-        "Simpler application lists and details with fewer repeated headings, refined for portrait, landscape and dark mode",
-        "Create and edit applications in three steps, then open the saved draft directly; submission and approval remain separate confirmations"
+        "Add applications in a dedicated drawer, alongside the application list on wide desktop screens",
+        "Renamed the tab to Development, retaining guided steps and unsaved-change protection"
       ]
     }
   }

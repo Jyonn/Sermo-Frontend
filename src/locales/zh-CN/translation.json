@@ -11,7 +11,7 @@
   "oauth.platformCreateHint": "下一步确认配置及本机回调例外，创建后直接生效。",
   "oauth.saveDraft": "保存草稿",
   "oauth.revisionNumber": "配置 #{{number}}",
-  "nav.developer": "开发者",
+  "nav.developer": "开发",
   "management.emailPreview": "邮件预览",
   "management.emailSource": "查看正文源码",
   "management.unverified": "未认证",

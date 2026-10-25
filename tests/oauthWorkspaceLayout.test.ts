@@ -20,6 +20,10 @@ test('shared editor gates saving behind validated steps while preserving permiss
   assert.match(workspace, /showSavedDraft \? \{ kind: "detail"/);
   assert.match(workspace, /if \(platform\) surface.addEventListener\("keydown", trap\)/);
   assert.doesNotMatch(workspace, /oauth-eyebrow|oauth-column-head/);
+  assert.match(workspace, /!panel \|\| platform \|\| creationDrawer/);
+  assert.match(workspace, /creationDrawer \? <SideDrawer className="oauth-create-drawer/);
+  assert.match(workspace, /if \(creationDrawer && !item\)/);
+  assert.match(workspace, /if \(!showSavedDraft\) setCreationDrawer\(false\)/);
 });
 
 test('workspace adapts to its container and uses theme-aware state surfaces', async () => {

@@ -11,7 +11,7 @@
   "oauth.platformCreateHint": "Next, confirm the configuration and loopback exceptions. Platform-created apps become active immediately.",
   "oauth.saveDraft": "Save draft",
   "oauth.revisionNumber": "Configuration #{{number}}",
-  "nav.developer": "Developer",
+  "nav.developer": "Development",
   "management.emailPreview": "Email preview",
   "management.emailSource": "View message source",
   "management.unverified": "Unverified",

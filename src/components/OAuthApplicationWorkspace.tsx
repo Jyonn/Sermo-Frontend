@@ -27,6 +27,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<OAuthApplicationFilter>("all");
   const [panel, setPanel] = useState<Panel | null>(null);
+  const [creationDrawer, setCreationDrawer] = useState(false);
   const [tab, setTab] = useState<DetailTab>("configuration");
   const [viewedRevision, setViewedRevision] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -70,7 +71,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
     if (!force && panel?.kind === "discard") { setPanel(previousPanel.current); return; }
     if (!force && panel?.kind === "action" && panel.action === "create" && dirty) { previousPanel.current = { ...panel, kind: "edit" }; setPanel({ ...panel, kind: "discard" }); return; }
     if (!force && panel?.kind === "edit" && dirty) { previousPanel.current = panel; setPanel({ ...panel, kind: "discard" }); return; }
-    setPanel(null); setPanelError(""); setDraft(emptyDraft());
+    setPanel(null); setCreationDrawer(false); setPanelError(""); setDraft(emptyDraft());
     requestAnimationFrame(() => { (opener.current?.isConnected ? opener.current : addButton.current)?.focus(); });
   };
   useEffect(() => {
@@ -91,8 +92,10 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
     return () => { cancelAnimationFrame(frame); surface.removeEventListener("keydown", trap); };
   }, [Boolean(panel), panel?.kind, platform && mobile, platform]);
 
-  const detail = (item: OAuthApplication) => { setTab("configuration"); setViewedRevision(null); open({ kind: "detail", appId: item.id, version: item.version }); };
+  const detail = (item: OAuthApplication) => { if (creationDrawer) { panelBody.current?.focus(); return; } setTab("configuration"); setViewedRevision(null); open({ kind: "detail", appId: item.id, version: item.version }); };
   const edit = (item?: OAuthApplication, rev?: OAuthRevision, existing = false) => {
+    if (creationDrawer && !item) { panelBody.current?.focus(); return; }
+    if (!platform && !item) setCreationDrawer(true);
     const next = item && rev ? { client_id: item.client_id, name: rev.name, description: rev.description, icon_url: rev.icon_url ?? "", redirects: rev.redirect_uris.join("\n"), scopes: [...rev.scopes], loopbacks: rev.loopback_uris.join("\n") } : emptyDraft();
     setDraft(next); setEditStep(0); initialDraft.current = JSON.stringify(next);
     open({ kind: "edit", appId: item?.id, version: item?.version, revisionId: existing ? rev?.id : undefined });
@@ -107,6 +110,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
       setApps((current) => current.some((item) => item.id === result.id) ? current.map((item) => item.id === result.id ? result : item) : [result, ...current]);
       const showSavedDraft = !platform && ["create", "edit", "revise"].includes(String(data.action));
       setPanel(showSavedDraft ? { kind: "detail", appId: result.id, version: result.version } : null);
+      if (!showSavedDraft) setCreationDrawer(false);
       setTab("configuration"); setViewedRevision(null); setDraft(emptyDraft()); showToast(t("oauth.updated"));
       requestAnimationFrame(() => { if (showSavedDraft) panelBody.current?.focus(); else (opener.current?.isConnected ? opener.current : addButton.current)?.focus(); });
     } catch (error) { setPanelError(error instanceof Error ? error.message : t("apps.authorizeFailed")); }
@@ -125,7 +129,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
   </>;
 
   const panelContent = panel ? <div className={`oauth-panel-body ${platform ? "is-platform" : ""}`} ref={panelBody} tabIndex={-1}>
-    {!platform ? <div className="oauth-inline-heading"><button className="oauth-button is-quiet" onClick={() => close()} disabled={busy} type="button"><span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>{t("common.back")}</button>{panel.kind === "edit" ? <h3>{title}</h3> : null}</div> : null}
+    {!platform && !creationDrawer ? <div className="oauth-inline-heading"><button className="oauth-button is-quiet" onClick={() => close()} disabled={busy} type="button"><span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>{t("common.back")}</button>{panel.kind === "edit" ? <h3>{title}</h3> : null}</div> : null}
     {panelError ? <div className="oauth-error" role="alert"><span className="material-symbols-outlined" aria-hidden="true">error</span><p>{panelError}</p></div> : null}
     {panel.kind === "detail" && app ? <>
       <div className="oauth-app-summary"><OAuthApplicationMark name={oauthApplicationName(app)} uri={currentOAuthRevision(app)?.icon_url} /><div><h3>{oauthApplicationName(app)}</h3><span>{app.client_id}</span></div><span className={`oauth-badge is-${oauthApplicationStatus(app)}`}>{statusText(oauthApplicationStatus(app))}</span></div>
@@ -159,7 +163,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
   </div> : null;
 
   return <section className={`oauth-workspace oauth-surface ${platform ? "is-platform" : "is-member"}`}>
-    {(!panel || platform) ? <>
+    {(!panel || platform || creationDrawer) ? <>
       <header className="oauth-list-heading"><div><h2>{t("oauth.directory")}<small>{apps.length}</small></h2></div><div className="oauth-toolbar-actions"><button className="oauth-button is-icon" aria-label={t("oauth.refresh")} title={t("oauth.refresh")} type="button" disabled={loading} onClick={() => void load()}><span className="material-symbols-outlined" aria-hidden="true">refresh</span></button><button className="oauth-button is-primary" ref={addButton} type="button" onClick={() => edit()}><span className="material-symbols-outlined" aria-hidden="true">add</span>{t("oauth.add")}</button></div></header>
       <div className="oauth-list-controls"><div className="oauth-filter-tabs" role="tablist" aria-label={t("oauth.filter")}>
         {(["all", "pending", "enabled", "disabled"] as const).map((value) => <button key={value} type="button" role="tab" aria-selected={filter === value} onClick={() => setFilter(value)}>{t(`oauth.filter.${value}` as "oauth.filter.all")}{value === "pending" && pendingCount ? <span>{pendingCount}</span> : null}</button>)}
@@ -170,6 +174,6 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
         {!loading && !listError && !visible.length ? <div className="oauth-list-empty"><span className="material-symbols-outlined" aria-hidden="true">{query || filter !== "all" ? "search_off" : "apps"}</span><strong>{t(query || filter !== "all" ? "oauth.noMatches" : "oauth.empty")}</strong>{query || filter !== "all" ? <button className="oauth-button is-quiet" type="button" onClick={() => { setQuery(""); setFilter("all"); }}>{t("oauth.clearFilters")}</button> : null}</div> : null}
       </div>
     </> : null}
-    {platform ? mobile ? <BottomSheet className="oauth-mobile-sheet oauth-surface is-platform" bodyClassName="oauth-sheet-body" open={Boolean(panel)} title={surfaceTitle} onClose={() => close()}>{panelContent}</BottomSheet> : <SideDrawer className="oauth-detail-drawer oauth-surface is-platform" historyMode="route" open={Boolean(panel)} title={surfaceTitle} onClose={() => close()}>{panelContent}</SideDrawer> : panelContent}
+    {platform ? mobile ? <BottomSheet className="oauth-mobile-sheet oauth-surface is-platform" bodyClassName="oauth-sheet-body" open={Boolean(panel)} title={surfaceTitle} onClose={() => close()}>{panelContent}</BottomSheet> : <SideDrawer className="oauth-detail-drawer oauth-surface is-platform" historyMode="route" open={Boolean(panel)} title={surfaceTitle} onClose={() => close()}>{panelContent}</SideDrawer> : creationDrawer ? <SideDrawer className="oauth-create-drawer oauth-detail-drawer oauth-surface" historyMode="route" open={Boolean(panel)} title={surfaceTitle} onClose={() => close()}>{panelContent}</SideDrawer> : panelContent}
   </section>;
 }
