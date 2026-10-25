@@ -1,6 +1,6 @@
 export interface CompactPayload {
   format: "compact-v1";
-  kind: "messages" | "growth";
+  kind: "messages" | "growth" | "growth-report";
   schemas: string[][];
   records: unknown[][];
   root: unknown;

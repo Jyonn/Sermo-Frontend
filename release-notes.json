@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.25.15",
+  "id": "2026.10.25.16",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "等级名称与创始人奖章",
+      "title": "更清晰的成长旅程",
       "items": [
-        "个人名片、广场等位置显示空间自定义等级名称",
-        "年度创始人奖章授予后首次进入展示全屏荣誉海报，并珍藏于个人名片"
+        "重新整理我的成长与等级图鉴，统一头像框、气泡和背景奖励预览",
+        "LV16 解锁真实成长报告，LV18 获得永久满级名片纪念展示",
+        "优化升级全屏海报，移除 LV17 头像框收藏入口"
       ]
     },
     "en": {
-      "title": "Level names and Founder Medals",
+      "title": "A clearer growth journey",
       "items": [
-        "Profiles and Square show your space's custom level names",
-        "Annual Founder Medals greet recipients with a one-time full-screen ceremony and remain on their profiles"
+        "Refreshed growth overview and level atlas with consistent reward previews",
+        "Unlock a personal growth report at LV16 and a permanent profile keepsake at LV18",
+        "Improved level-up ceremonies and removed the LV17 frame collection entry"
       ]
     }
   }

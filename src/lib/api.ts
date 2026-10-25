@@ -1585,6 +1585,11 @@ export const api = {
       signal,
     }).then((payload) => decodeCompact<UserGrowthDTO>(payload, "growth"));
   },
+  getGrowthReport(signal?: AbortSignal) {
+    return request<import("../types").GrowthReportDTO | CompactPayload>("/users/me/growth-report", {
+      auth: true, query: { format: "compact-v1" }, signal,
+    }).then(payload => decodeCompact<import("../types").GrowthReportDTO>(payload, "growth-report"));
+  },
 
   acknowledgeGrowthLevel(level: number) {
     return request<UserGrowthDTO | CompactPayload>("/users/me/growth", {

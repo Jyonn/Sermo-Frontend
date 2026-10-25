@@ -4393,7 +4393,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     --chat-input-surface: rgba(255, 255, 255, 0.66);
   }
 
-  .chat-detail-scene:is(
+  .chat-detail-scene:not(.is-preview-scene):is(
     .chat-background-paper,
     .chat-background-mint,
     .chat-background-dusk,
@@ -4425,7 +4425,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     --chat-input-surface: rgba(27, 39, 33, 0.86);
   }
 
-  html[data-theme="dark"] .chat-detail-scene:is(
+  html[data-theme="dark"] .chat-detail-scene:not(.is-preview-scene):is(
     .chat-background-paper,
     .chat-background-mint,
     .chat-background-dusk,

@@ -21,6 +21,7 @@ export interface ApiEnvelope<T> {
 }
 
 export interface TinyUserDTO {
+  growth_honor?: GrowthHonorDTO | null;
   growth_level_name?: string;
   founder_medal_years?: number[];
   user_id: number;
@@ -106,6 +107,7 @@ export interface UserGrowthDTO {
   level: number;
   acknowledged_level?: number;
   pending_level?: number | null;
+  report_available?: boolean;
   pending_founder_medal_years?: number[];
   name: string;
   next_score: number | null;
@@ -147,6 +149,20 @@ export interface UserGrowthDTO {
     required_level: number;
     available: boolean;
   }>;
+}
+
+export interface GrowthHonorDTO {
+  level: number;
+  name: string;
+  earned_at?: number;
+}
+
+export interface GrowthReportDTO {
+  level: number; name: string; score: number; joined_at: number; days_together: number; record_count: number;
+  categories: Array<{ category: string; points: number; count: number }>;
+  activity: Array<{ date: string; count: number }>;
+  milestones: Array<{ key: string; title: string; points: number; earned: boolean }>;
+  recent_events: Array<{ key: string; title: string; points: number; created_at: number }>;
 }
 
 export interface FeatureDiscoveryDTO {

@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, GrowthRewardDTO, PersonalizationDTO, UserGrowthDTO } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
-import { UserAvatar } from "./UserAvatar";
-import ChatsPage from "../pages/ChatsPage";
+import { GrowthRewardPreview } from "./GrowthRewardPreview";
 import { usePageActive } from "../lib/pageActivity";
 import { useModalFocus } from "../lib/modalFocus";
 import "./FounderMedals.css";
@@ -15,61 +14,19 @@ const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
 
 type CelebrationPage = "arrival" | "rewards" | "next";
-function RewardIcon({ category }: { category: GrowthRewardDTO["category"] }) {
-  const paths: Record<GrowthRewardDTO["category"], ReactNode> = {
-    capability: <><path d="M7 12.5 10.2 16 17 8.5" /><path d="M12 2.8 14.4 6l4-.1-1.1 3.8 2.5 3.1-3.4 2.1.2 4-3.9-.8-2.1 3.3-2.8-2.8-3.8.7-.5-3.9-3.6-1.8 2.2-3.3L1.2 7.7l3.9-1.4L7.2 3z" /></>,
-    background: <><rect height="15" rx="2" width="18" x="3" y="4.5" /><path d="m5.5 16 4.2-4.5 3.1 3 2.4-2.2 3.3 3.7M8 9h.01" /></>,
-    bubble: <path d="M4 5.5h16v11H9l-4.5 3v-3H4z" />,
-    frame: <><rect height="15" rx="4" width="15" x="4.5" y="4.5" /><circle cx="12" cy="10" r="2.2" /><path d="m7.2 17 3.1-3.4 2.2 2.1 1.7-1.5 2.6 2.8" /></>,
-    identity: <><circle cx="12" cy="8.5" r="3.5" /><path d="M5.5 20c.7-4.2 3-6.3 6.5-6.3s5.8 2.1 6.5 6.3" /><path d="m18.5 4 .6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" /></>,
-  };
-  return <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">{paths[category]}</svg>;
-}
-
 function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
   const { session } = useAuth();
-  const assetKey = reward.asset_key ?? "default";
-  if (reward.category === "background") {
-    return (
-      <div className="growth-reward-real-preview reward-chat-page">
-        <ChatsPage preview={{ avatarName: session?.user.name ?? "FRIENDEN", backgroundTheme: assetKey as ChatBackgroundTheme, bubbleStyle: "default", selfOnly: true }} />
-      </div>
-    );
-  }
-  if (reward.category === "bubble") {
-    return (
-      <div className="growth-reward-real-preview reward-chat-page">
-        <ChatsPage preview={{ avatarName: session?.user.name ?? "FRIENDEN", bubbleStyle: assetKey as ChatBubbleStyle, selfOnly: true }} />
-      </div>
-    );
-  }
-  if (reward.category === "frame") {
-    return (
-      <div className={`growth-reward-real-preview reward-frame frame-${assetKey}`}>
-        <UserAvatar
-          className="growth-reward-avatar"
-          frame={assetKey as AvatarFrameStyle}
-          name={session?.user.name ?? "FRIENDEN"}
-          uri={session?.user.avatar_uri}
-        />
-      </div>
-    );
-  }
-  return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
+  return <GrowthRewardPreview reward={reward} name={session?.user.name} uri={session?.user.avatar_uri} />;
 }
 
 function RewardThumbnail({ reward }: { reward: GrowthRewardDTO }) {
   const { session } = useAuth();
-  const assetKey = reward.asset_key ?? "default";
-  if (reward.category === "background") return <span className={`growth-reward-track-background chat-background-choice theme-${assetKey}`}><span /></span>;
-  if (reward.category === "bubble") return <span className="growth-reward-track-bubble field-chat_bubble_style"><span className={`personalization-option preview-${assetKey}`}><i aria-hidden="true"><span /></i></span></span>;
-  if (reward.category === "frame") return <div className={`growth-reward-real-preview reward-frame frame-${assetKey}`}><UserAvatar className="growth-reward-avatar" frame={assetKey as AvatarFrameStyle} name={session?.user.name ?? "FRIENDEN"} uri={session?.user.avatar_uri} /></div>;
-  return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
+  return <GrowthRewardPreview reward={reward} compact name={session?.user.name} uri={session?.user.avatar_uri} />;
 }
 
 function RewardCard({ reward, index, compact = false, spotlight = false, active = false, applying = false, onApply }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean; active?: boolean; applying?: boolean; onApply?: () => void }) {
   const { t } = useI18n();
-  const useCatalogPreview = compact && (reward.category === "background" || reward.category === "bubble");
+  const useCatalogPreview = compact;
   return (
     <article
       className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}${spotlight ? " is-spotlight" : ""}${active ? " is-active-reward" : ""}`}
@@ -126,6 +83,7 @@ export function GrowthLevelCelebration() {
   const requestInFlightRef = useRef(false);
   const refreshVersion = useRef(0);
   const founderRoot = useRef<HTMLDivElement>(null);
+  const celebrationRoot = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLButtonElement | null>(null);
   const rewardTrackRef = useRef<HTMLDivElement | null>(null);
 
@@ -166,6 +124,7 @@ export function GrowthLevelCelebration() {
   const previous = growth?.levels?.find((item) => item.level === previousLevel);
   const nextLevel = growth?.levels?.find((item) => item.level === (pendingLevel ?? 0) + 1);
   const stage = growthStageForLevel(pendingLevel ?? 1);
+  useModalFocus(celebrationRoot, Boolean(growth && pendingLevel && level && !pendingFounderYear), () => {});
 
   useEffect(() => {
     setPage("arrival");
@@ -173,18 +132,13 @@ export function GrowthLevelCelebration() {
     setError("");
   }, [pendingLevel, pendingFounderYear]);
 
-  useEffect(() => {
-    if (page !== "rewards" || !level || level.rewards.length < 2) return;
-    const timer = window.setTimeout(() => setRewardCursor((value) => (value + 1) % level.rewards.length), 2600);
-    return () => window.clearTimeout(timer);
-  }, [level, page, rewardCursor]);
 
   useEffect(() => {
     if (page !== "rewards") return;
     const track = rewardTrackRef.current;
     const item = track?.querySelector<HTMLElement>(`[data-reward-index="${rewardCursor}"]`);
     if (!track || !item) return;
-    if (window.matchMedia("(min-width: 900px)").matches) {
+    if (window.matchMedia("(min-width: 900px), (min-width: 600px) and (max-height: 550px)").matches) {
       const targetTop = item.offsetTop - (track.clientHeight - item.offsetHeight) / 2;
       track.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
     } else {
@@ -263,7 +217,7 @@ export function GrowthLevelCelebration() {
   };
 
   return (
-    <div aria-labelledby="growth-celebration-title" aria-modal="true" className={`growth-celebration growth-ceremony stage-${stage} page-${page}`} role="dialog">
+    <div ref={celebrationRoot} tabIndex={-1} aria-labelledby="growth-celebration-title" aria-modal="true" className={`growth-celebration growth-ceremony growth-renewed stage-${stage} page-${page}`} role="dialog">
       <div aria-hidden="true" className="growth-ceremony-atmosphere"><i /><i /><i /></div>
       <header className="growth-ceremony-topbar">
         <strong>{t("growth.badge")}</strong>

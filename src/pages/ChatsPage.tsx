@@ -10585,7 +10585,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
         }}
         onContextMenu={(event) => event.preventDefault()}
       >
-        <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`} style={previewBackgroundStyle}>
+        <div className={`chat-detail-scene is-preview-scene chat-background-${config.backgroundTheme ?? "default"}`} style={previewBackgroundStyle}>
           <FriendenLivingWallpaper theme={config.backgroundTheme} />
           <div className="message-scroll">
             {groups.map((group) => <MessageGroupBlock enteringMessageIds={[]} group={group} key={group.key} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />)}
@@ -10619,7 +10619,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       }}
       onContextMenu={(event) => event.preventDefault()}
     >
-      <div className="chat-detail-scene chat-background-default">
+      <div className="chat-detail-scene is-preview-scene chat-background-default">
         <div className="message-scroll">
           {groups.map((group, index) => (
             <MessageGroupBlock
@@ -10793,7 +10793,7 @@ export function ChatPreview({
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
       onClickCapture={handleMessageClick}
     >
-      <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
+      <div className={`chat-detail-scene is-preview-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
         <FriendenLivingWallpaper theme={backgroundTheme} />
         <ForwardBundlePreviewDepthContext.Provider value={forwardBundlePreviewDepth}>{messageList}</ForwardBundlePreviewDepthContext.Provider>
       </div>

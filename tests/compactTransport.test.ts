@@ -43,7 +43,7 @@ test("message paging, growth and founder acknowledgement negotiate compact trans
   assert.match(messages, /query: \{ \.\.\.params, format: "compact-v1" \}/);
   assert.match(messages, /decodeCompact<ChatMessageDTO\[\]>/);
   const growth = source.slice(source.indexOf("  getGrowth("), source.indexOf("  getFeatureDiscoveries("));
-  assert.equal((growth.match(/format: "compact-v1"/g) ?? []).length, 3);
+  assert.equal((growth.match(/format: "compact-v1"/g) ?? []).length, 4);
   assert.equal((growth.match(/decodeCompact<UserGrowthDTO>/g) ?? []).length, 3);
   assert.match(growth, /acknowledgeFounderMedal/);
 });

@@ -16,6 +16,9 @@ import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
+import { GrowthAtlas } from "../components/GrowthAtlas";
+import { GrowthSummary } from "../components/GrowthSummary";
+import { GrowthReport } from "../components/GrowthReport";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
@@ -394,45 +397,6 @@ function QrCodeIcon() {
   );
 }
 
-function growthRewardIcon(reward: GrowthRewardDTO) {
-  const value = `${reward.capability_key ?? ""} ${reward.id}`;
-  if (/image|photo/.test(value)) return "image";
-  if (/audio|voice/.test(value)) return "mic";
-  if (/video/.test(value)) return "videocam";
-  if (/location|map/.test(value)) return "location_on";
-  if (/group/.test(value)) return "group_add";
-  if (/download/.test(value)) return "download";
-  if (/nickname|edit|rename/.test(value)) return "edit";
-  if (/notification|online/.test(value)) return "notifications_active";
-  return "lock_open";
-}
-
-function GrowthRewardVisual({ reward, me, name, uri }: {
-  reward: GrowthRewardDTO;
-  me: UserMeDTO | null;
-  name: string;
-  uri?: string;
-}) {
-  const asset = reward.asset_key ?? "default";
-  if (reward.category === "background") {
-    return <span className={`growth-reward-visual is-background chat-background-choice theme-${asset}`}><span /></span>;
-  }
-  if (reward.category === "bubble") {
-    return <span className="growth-reward-visual is-bubble field-chat_bubble_style"><span className={`personalization-option preview-${asset}`}><i aria-hidden="true"><span /></i></span></span>;
-  }
-  if (reward.category === "frame") {
-    return (
-      <span className="growth-reward-visual is-frame">
-        <UserAvatar className="growth-reward-avatar" frame={asset as PersonalizationDTO["avatar_frame_style"]} name={name} uri={uri} />
-      </span>
-    );
-  }
-  return (
-    <span className="growth-reward-visual is-capability">
-      <span className="material-symbols-outlined">{growthRewardIcon(reward)}</span>
-    </span>
-  );
-}
 
 export default function MenuPage() {
   const { session: platformAdminSession } = usePlatformAdminAuth();
@@ -503,6 +467,7 @@ export default function MenuPage() {
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
+  const [growthReportOpen, setGrowthReportOpen] = useState(false);
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatPageDrawerOpen, setChatPageDrawerOpen] = useState(false);
   const [chatPersonalizationPanel, setChatPersonalizationPanel] = useState<ChatPersonalizationPanel>(null);
@@ -583,7 +548,6 @@ export default function MenuPage() {
   const chatBackgroundTrackRef = useRef<HTMLDivElement | null>(null);
   const chatBubbleTrackRef = useRef<HTMLDivElement | null>(null);
   const pwaGrowthClaimedRef = useRef(false);
-  const growthLevelTrackRef = useRef<HTMLDivElement | null>(null);
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
@@ -1910,17 +1874,11 @@ export default function MenuPage() {
     const value = (me?.welcome_message ?? session?.user?.welcome_message ?? "").trim();
     return value || t("profile.noWelcome");
   }, [me?.welcome_message, session?.user?.welcome_message]);
-  const growthLevels = me?.growth?.levels ?? [];
 
   useEffect(() => {
     if (!growthLevelsOpen) return;
     const currentLevel = me?.growth?.level ?? 1;
     setActiveGrowthGuideLevel(currentLevel);
-    window.requestAnimationFrame(() => {
-      growthLevelTrackRef.current
-        ?.querySelector<HTMLElement>(`[data-growth-level="${currentLevel}"]`)
-        ?.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
-    });
   }, [growthLevelsOpen, me?.growth?.level]);
 
   const openChannelsEntry = () => {
@@ -2050,7 +2008,7 @@ export default function MenuPage() {
     items: (me?.growth?.milestones ?? []).filter(
       (item) => item.category !== "security" && growthMilestoneArea(item.key) === area
     ),
-  }));
+  })).filter(group => group.items.length > 0);
   const pendingExplorationCount = growthExplorationGroups.reduce(
     (total, group) => total + group.items.filter((item) => !item.earned).length,
     0
@@ -2114,7 +2072,7 @@ export default function MenuPage() {
               <GrowthLevelBadge className="menu-growth-level" name={me?.growth_level_name || me?.growth?.name} level={me?.growth?.level ?? 1} />
               <span className="menu-growth-identity">
                 <small>{t(`growth.levelStage.${currentLevelStage}` as TranslationKey)}</small>
-                <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>
+                <strong>{t("growth.mine")}</strong>
               </span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2312,43 +2270,8 @@ export default function MenuPage() {
       </ConfirmDialog>
 
       <SideDrawer historyKey="growth" onRouteOpen={() => setGrowthDrawerOpen(true)} open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
-        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>
-          <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
-            <span className="growth-hero-stage" aria-hidden="true">{String(me?.growth?.level ?? 1).padStart(2, "0")}</span>
-            <div className="growth-hero-heading">
-              <div className="growth-level-seal">
-                <span>LEVEL</span>
-                <strong>{String(me?.growth?.level ?? 1).padStart(2, "0")}</strong>
-              </div>
-              <div className="growth-hero-title">
-                <small>{t("growth.currentTitle")} · {t(`growth.levelStage.${growthStageForLevel(me?.growth?.level ?? 1)}` as TranslationKey)}</small>
-                <strong>{me?.growth?.name ?? t("growth.firstLevel")}</strong>
-              </div>
-              <span className="growth-hero-guide">
-                {t("growth.openAtlas")}
-                <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-                  <path d="M4 10h11M11.5 6.5 15 10l-3.5 3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
-                </svg>
-              </span>
-            </div>
-            <div className="growth-progress-copy">
-              <div>
-                <strong>{me?.growth?.level_cap_reason || (me?.growth?.next_score ? t("growth.toNextLevel", { level: (me.growth.level ?? 1) + 1 }) : t("growth.maxLevel"))}</strong>
-                <span>{me?.growth?.level_cap_reason ? t("growth.scoreLevelAndCap", { score: me.growth.score, scoreLevel: me.growth.score_level ?? me.growth.level, level: me.growth.level_cap }) : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : t("growth.score", { score: me?.growth?.score ?? 0 })}</span>
-              </div>
-              <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
-            </div>
-          </button>
-          <section className="growth-daily-card">
-            <div className="growth-daily-copy">
-              <strong>{t("growth.todayInteraction")}</strong>
-              <span>{t("growth.daily")}</span>
-            </div>
-            <div className="growth-daily-meter">
-              <i style={{ transform: `scaleX(${Math.min(1, (me?.growth?.daily?.earned ?? 0) / Math.max(1, me?.growth?.daily?.limit ?? 40))})` }} />
-            </div>
-            <b>{me?.growth?.daily?.earned ?? 0}<small>/{me?.growth?.daily?.limit ?? 40}</small></b>
-          </section>
+        <div className={`growth-drawer growth-workspace is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>
+          <GrowthSummary growth={me?.growth} onAtlas={() => setGrowthLevelsOpen(true)} onReport={() => setGrowthReportOpen(true)} />
           <details className="growth-disclosure" open>
             <summary><span><strong>{t("growth.nextSteps")}</strong><small>{t("growth.nextStepsHint")}</small></span><b>{pendingExplorationCount}</b><span className="material-symbols-outlined">expand_more</span></summary>
             <div className="growth-milestone-sections">
@@ -2390,63 +2313,10 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer className="growth-level-atlas-drawer" historyKey="growth-levels" onRouteOpen={() => setGrowthLevelsOpen(true)} open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
-        <div className={`growth-scroll-atlas growth-stage-${growthStageForLevel(activeGrowthGuideLevel)}`}>
-          <aside className="growth-scroll-chapter">
-            <span className="growth-scroll-eyebrow">CURRENT CHAPTER</span>
-            <div className="growth-scroll-level-number"><small>LV</small>{String(activeGrowthGuideLevel).padStart(2, "0")}</div>
-            <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
-            <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
-            <em>{t(`growth.levelStage.${growthStageForLevel(activeGrowthGuideLevel)}` as TranslationKey)}</em>
-            <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? t("growth.currentLevelLabel") : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? t("growth.reached") : t("growth.keepGrowing")}</small>
-            <div className="growth-scroll-score">
-              <span>{t("growth.unlockCondition")}</span>
-              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString(getActiveLocale())}<small>{t("growth.points")}</small></strong>
-            </div>
-          </aside>
-          <div
-            className="growth-scroll-map"
-            ref={growthLevelTrackRef}
-          >
-            {growthLevels.map((item) => {
-              const current = item.level === (me?.growth?.level ?? 1);
-              const next = item.level === (me?.growth?.level ?? 1) + 1;
-              return (
-                <article
-                  className={`growth-scroll-node growth-stage-${growthStageForLevel(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
-                  data-growth-level={item.level}
-                  key={item.level}
-                >
-                  <button
-                    className="growth-scroll-node-heading"
-                    onClick={(event) => {
-                      setActiveGrowthGuideLevel(item.level);
-                      event.currentTarget.closest<HTMLElement>("[data-growth-level]")?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      window.navigator.vibrate?.(8);
-                    }}
-                    type="button"
-                  >
-                    <span className="growth-scroll-node-number">{String(item.level).padStart(2, "0")}</span>
-                    <span className="growth-scroll-node-copy">
-                      <b>{item.name}</b>
-                      <small>{item.score.toLocaleString(getActiveLocale())} {t("growth.points")}</small>
-                    </span>
-                    <span className="growth-scroll-node-state">{current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}</span>
-                  </button>
-                  <div className="growth-scroll-rewards">
-                    {(item.rewards ?? []).map((reward) => (
-                      <article className={`growth-scroll-reward is-${reward.rarity}`} key={reward.id}>
-                        <GrowthRewardVisual me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
-                        <span><b>{reward.title}</b>{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
-                      </article>
-                    ))}
-                    {!(item.rewards ?? []).length ? <span className="growth-scroll-rest">{t("growth.stage")}</span> : null}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          {me?.growth?.level_cap_reason ? <p className="growth-level-cap-note">{me.growth.level_cap_reason}</p> : null}
-        </div>
+        <GrowthAtlas growth={me?.growth} selected={activeGrowthGuideLevel} onSelect={setActiveGrowthGuideLevel} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} onReport={() => setGrowthReportOpen(true)} />
+      </SideDrawer>
+      <SideDrawer historyKey="growth-report" onRouteOpen={() => setGrowthReportOpen(true)} open={growthReportOpen} onClose={() => setGrowthReportOpen(false)} title={t("growth.openReport")}>
+        {growthReportOpen ? <GrowthReport /> : null}
       </SideDrawer>
 
       <SideDrawer historyKey="basic-info" onRouteOpen={() => setBasicDrawerOpen(true)} open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>

@@ -5,6 +5,7 @@ import { UserAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
 import { useI18n } from "../lib/language";
 import "./FounderMedals.css";
+import { GrowthHonor } from "./GrowthHonor";
 
 interface UserProfileCardProps {
   avatarLabel?: string;
@@ -13,6 +14,7 @@ interface UserProfileCardProps {
   growthLevel?: number;
   growthLevelName?: string;
   founderMedalYears?: number[];
+  growthHonor?: UserDTO["growth_honor"];
   isOnline?: boolean;
   isPermanentVip?: boolean;
   name: string;
@@ -31,6 +33,7 @@ export function UserProfileCard({
   growthLevel,
   growthLevelName,
   founderMedalYears,
+  growthHonor,
   isOnline,
   isPermanentVip,
   name,
@@ -76,7 +79,10 @@ export function UserProfileCard({
         {isPermanentVip && permanentVipLabel ? <span className="is-vip">{permanentVipLabel}</span> : null}
         {relationshipLabel ? <span className="is-relationship">{relationshipLabel}</span> : null}
       </div>
-      {founderMedalYears?.length ? <div className="founder-medals">{founderMedalYears.map(year => <div className="founder-medal" key={year}><span className="material-symbols-outlined" aria-hidden="true">workspace_premium</span><span><small>FRIENDEN</small><strong>{t("profile.founderMedal", { year })}</strong></span></div>)}</div> : null}
+      {growthHonor || founderMedalYears?.length ? <div className="user-profile-awards">
+        {growthHonor ? <GrowthHonor honor={growthHonor} /> : null}
+        {founderMedalYears?.map(year => <div className="founder-medal" aria-label={t("profile.founderMedal", { year })} key={year}><span className="material-symbols-outlined" aria-hidden="true">workspace_premium</span><span><small>{year}</small><strong>{t("profile.founderMedalName")}</strong></span></div>)}
+      </div> : null}
     </section>
   );
 }
