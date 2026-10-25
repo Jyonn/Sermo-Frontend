@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { useDesktopPanels } from "./DesktopPanelWorkspace";
+import { useModalFocus } from "../lib/modalFocus";
 
 const activeDrawerIds = new Set<string>();
 
@@ -29,6 +30,7 @@ interface SideDrawerProps {
   floatingBack?: boolean;
   floatingAccessory?: ReactNode;
   style?: CSSProperties;
+  trapFocus?: boolean;
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -70,10 +72,12 @@ export function SideDrawer({
   floatingBack = true,
   floatingAccessory,
   style,
+  trapFocus = false,
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
   const drawerId = useId();
+  const surfaceRef = useRef<HTMLElement | null>(null);
   const panels = useDesktopPanels();
   const desktopPanel = Boolean(panels?.enabled && panels.host);
   const registerPanel = panels?.register;
@@ -229,6 +233,7 @@ export function SideDrawer({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [requestClose, visible, desktopPanel, panels?.topId, drawerId]);
 
+  useModalFocus(surfaceRef, visible && trapFocus, requestClose);
   if (!visible || typeof document === "undefined") return null;
 
   const desktopClose = desktopPanel && !panels?.single;
@@ -242,6 +247,8 @@ export function SideDrawer({
     {createPortal(
     <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
       <aside
+        ref={surfaceRef}
+        tabIndex={trapFocus ? -1 : undefined}
         aria-label={title}
         aria-modal={desktopPanel ? undefined : true}
         className={`side-drawer${panels?.surfaceClassName ? ` ${panels.surfaceClassName}` : ""}${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}

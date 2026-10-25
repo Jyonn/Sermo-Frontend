@@ -6,11 +6,12 @@ import { showToast } from "../lib/toast";
 import { MediaLightbox } from "./ImageLightbox";
 import type { ChatMessageDTO, ImageMetadataDTO } from "../types";
 
-export function ChatImagePreview({ images, initialIndex, chatId, onClose }: {
+export function ChatImagePreview({ images, initialIndex, chatId, onClose, onJumpToMessage }: {
   images: ChatPreviewImage[];
   initialIndex: number;
   chatId?: number;
   onClose: () => void;
+  onJumpToMessage?: (messageId: number) => void;
 }) {
   const { t } = useI18n();
   const [gallery, setGallery] = useState({ items: images, index: initialIndex });
@@ -56,7 +57,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, onClose }: {
       }
       if (controller.signal.aborted) return;
       const incoming = rows.filter((row) => row.type === 1 && row.payload?.uri).sort((a, b) => a.message_id - b.message_id).map((row) => ({
-        uri: row.payload!.uri!, messageId: row.message_id, metadata: row.payload?.image_metadata, posterUri: row.payload?.thumbnail_uri,
+        uri: row.payload!.uri!, messageId: row.message_id, metadata: row.payload?.image_metadata, posterUri: row.payload?.thumbnail_uri, owner: row.user, createdAt: row.created_at,
       }));
       const current = galleryRef.current;
       const next = mergeChatImages(current.items, incoming, current.index, direction);
@@ -89,6 +90,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, onClose }: {
   const collectionIndex = images.findIndex((image) => image.messageId === null ? image.uri === active?.uri : image.messageId === active?.messageId);
   return <MediaLightbox index={gallery.index} items={gallery.items.map((image) => ({
     id: image.messageId ?? image.uri, uri: image.uri, kind: "image", posterUri: image.posterUri, imageMetadata: image.metadata,
+    owner: image.owner, createdAt: image.createdAt,
     downloadLabel: image.metadata?.file_size ? image.metadata.file_size >= 1048576 ? `${(image.metadata.file_size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(image.metadata.file_size / 1024))} KB` : undefined,
   }))} onClose={onClose} onIndexChange={(index) => {
     if (!gallery.items[index]) return;
@@ -97,5 +99,6 @@ export function ChatImagePreview({ images, initialIndex, chatId, onClose }: {
   }} onApproachingStart={() => void load("older")} onApproachingEnd={() => void load("newer")}
     hasPrevious={more.older} hasNext={more.newer} loading={pending.older || pending.newer}
     onBoundary={(direction) => void load(direction, true)}
-    navigationLabel={collectionIndex >= 0 ? t("media.collectionPosition", { index: collectionIndex + 1, count: images.length }) : t("media.chatPhotos")} />;
+    onJumpToMessage={chatId && active?.messageId && onJumpToMessage ? () => onJumpToMessage(active.messageId!) : undefined}
+    navigationLabel={`${collectionIndex >= 0 ? collectionIndex + 1 : gallery.index + 1} / ${collectionIndex >= 0 ? images.length : gallery.items.length}`} />;
 }

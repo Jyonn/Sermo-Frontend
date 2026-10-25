@@ -754,6 +754,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
 
   return (
     <SideDrawer
+      trapFocus={Boolean(focusLocation)}
       backdropClassName={backdropClassName}
       historyKey={historyKey}
       onRouteOpen={onRouteOpen}

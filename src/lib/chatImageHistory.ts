@@ -1,10 +1,12 @@
-import type { ChatMessageDTO, ImageMetadataDTO } from "../types";
+import type { ChatMessageDTO, ImageMetadataDTO, TinyUserDTO } from "../types";
 
 export interface ChatPreviewImage {
   uri: string;
   messageId: number | null;
   metadata?: ImageMetadataDTO | null;
   posterUri?: string | null;
+  owner?: TinyUserDTO | null;
+  createdAt?: number;
 }
 
 export async function readNewerChatImagePage(after: number, read: (cursor: number) => Promise<ChatMessageDTO[]>, signal: AbortSignal) {

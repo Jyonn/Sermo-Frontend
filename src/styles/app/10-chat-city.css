@@ -3880,7 +3880,7 @@ html[data-theme="dark"] .message-link-preview-site {
 }
 
 .drawer-backdrop.media-location-drawer-backdrop {
-  z-index: 1300;
+  z-index: 5100;
 }
 
 .side-drawer {

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 import { MediaWaitFeedback, type MediaWaitPhase } from "./MediaWaitFeedback";
 import { PhotoArchivePlate } from "./PhotoArchivePlate";
+import { UserAvatar } from "./UserAvatar";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
 import type { ImageMetadataDTO, TinyUserDTO } from "../types";
@@ -24,6 +25,7 @@ interface ImageLightboxProps {
 }
 
 export interface MediaLightboxItem {
+  createdAt?: number;
   id?: number | string;
   uri: string;
   kind: "image" | "video";
@@ -618,7 +620,7 @@ export function MediaLightbox({
   loading = false,
   navigationLabel,
 }: MediaLightboxProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const resolvedAltPrefix = altPrefix || t("media.imagePreview");
   const modalRef = useRef<HTMLElement | null>(null);
   useBodyScrollLock(items.length > 0);
@@ -655,6 +657,8 @@ export function MediaLightbox({
 
   if (!items.length) return null;
   const activeItem = items[index] ?? items[0];
+  const sentAt = activeItem.createdAt ? new Date(activeItem.createdAt * 1000) : null;
+  const sentTime = sentAt && Number.isFinite(sentAt.getTime()) ? new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(sentAt) : "";
   const close = () => onClose();
   const move = (direction: -1 | 1) => {
     const next = index + direction;
@@ -714,7 +718,14 @@ export function MediaLightbox({
         </div>
         {!immersive && sharedDetail ? <div className="message-image-preview-shared-detail" onClick={(event) => event.stopPropagation()}>{sharedDetail}</div> : null}
         {!immersive && activeItem.kind === "image" ? <div className="photo-archive-navigation" onClick={(event) => event.stopPropagation()}>
-          <div className="photo-preview-context"><span>{navigationLabel || resolvedAltPrefix}</span>{loading ? <span className="media-wait-spinner" aria-label={t("common.loading")} role="status" /> : null}{!navigationLabel && (totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{index + 1}<i />{totalCount ?? items.length}</span> : null}</div>
+          <div className="photo-preview-context">
+            {activeItem.owner ? <UserAvatar className="photo-preview-sender-avatar" name={activeItem.owner.name} uri={activeItem.owner.avatar_uri} cacheKey={activeItem.owner.avatar_cache_key} /> : null}
+            <div className="photo-preview-sender-copy"><strong title={activeItem.owner?.name}>{activeItem.owner?.name || resolvedAltPrefix}</strong>
+              {sentTime ? <time dateTime={sentAt!.toISOString()} title={sentAt!.toLocaleString(locale)}>{sentTime}</time> : null}
+              <span className="photo-preview-position">{navigationLabel || `${index + 1} / ${totalCount ?? items.length}`}</span>
+            </div>
+            {loading ? <span className="media-wait-spinner" aria-label={t("common.loading")} role="status" /> : null}
+          </div>
           <div className="photo-preview-tools">{actions}<button aria-label={t("common.close")} onClick={close} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
         </div> : null}
         {!immersive && (items.length > 1 || hasPrevious || hasNext) ? <div className="photo-preview-paging" onClick={(event) => event.stopPropagation()}>

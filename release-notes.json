@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.10",
+  "id": "2026.10.25.11",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "聊天图片，连贯浏览",
+      "title": "图片预览信息更完整",
       "items": [
-        "聊天图片可跨图片集浏览更早或更晚的照片，跨出或返回原图片集时轻提示",
-        "重新整理图片预览布局与深浅色样式，点击画布空白即可退出，支持键盘翻页"
+        "聊天与记录搜索的图片预览统一展示发送者、时间和图片序号，支持跳转原消息",
+        "修复照片地图被图片预览遮挡的问题，关闭地图后继续浏览照片"
       ]
     },
     "en": {
-      "title": "Browse chat photos without boundaries",
+      "title": "More context in photo previews",
       "items": [
-        "Browse earlier and later chat photos beyond the original collection, with gentle collection-boundary notices",
-        "Refined image previews for light and dark themes, with blank-canvas dismissal and keyboard navigation"
+        "Chat and search photo previews show sender, time and position, with a shortcut to the original message",
+        "Photo maps now open above the preview and return you to the photo when closed"
       ]
     }
   }

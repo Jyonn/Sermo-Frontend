@@ -9575,6 +9575,7 @@ function LiveChatsPage({
           height: message.payload?.pixel_height,
           imageMetadata: message.type === MESSAGE_TYPE_VIDEO ? undefined : message.payload?.image_metadata,
           owner: message.user,
+          createdAt: message.created_at,
           detail: message.type === MESSAGE_TYPE_VIDEO ? <MediaMetadataPanel kind="video" metadata={message.payload?.video_metadata} owner={message.user} /> : undefined,
           downloadLabel: formatImageFileSize((message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata)?.file_size),
         }))}
@@ -9585,7 +9586,7 @@ function LiveChatsPage({
           const message = messageSearchMediaResults[messageSearchPreviewIndex];
           if (message) revealMessageFromSearch(message.message_id);
         }}
-        totalCount={messageSearchTotal}
+        totalCount={messageSearchType === MESSAGE_TYPE_IMAGE || messageSearchType === MESSAGE_TYPE_VIDEO ? messageSearchTotal : messageSearchMediaResults.length}
       /> : null}
       <BottomSheet className="message-search-calendar-sheet" onClose={() => { messageSearchCalendarInitialLoadRef.current = false; setMessageSearchCalendarOpen(false); }} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
         <ContentDatePicker
@@ -10026,7 +10027,12 @@ function LiveChatsPage({
       />
       {imagePreview ? (
         <ChatImagePreview key={`${imagePreview.chatId}:${imagePreview.uris[0]}`} chatId={imagePreview.chatId} initialIndex={imagePreview.index}
-          images={imagePreview.uris.map((uri, index) => ({ uri, messageId: imagePreview.messageIds[index] ?? null, metadata: imagePreview.metadata[index], posterUri: selectedMessages.find((message) => message.id === imagePreview.messageIds[index])?.payload?.thumbnail_uri }))}
+          images={imagePreview.uris.map((uri, index) => {
+            const message = selectedMessages.find((item) => item.id === imagePreview.messageIds[index]);
+            return { uri, messageId: imagePreview.messageIds[index] ?? null, metadata: imagePreview.metadata[index], posterUri: message?.payload?.thumbnail_uri,
+              owner: message ? { user_id: message.userId ?? 0, name: message.name, avatar_uri: message.avatarUri, avatar_cache_key: message.avatarCacheKey } : undefined, createdAt: message?.createdAt };
+          })}
+          onJumpToMessage={(messageId) => { setImagePreview(null); revealMessageFromSearch(messageId); }}
           onClose={() => setImagePreview(null)} />
       ) : null}
       {videoPreview ? (
