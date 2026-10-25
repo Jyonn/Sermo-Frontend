@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.25.7",
+  "id": "2026.10.25.8",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "开发者入口独立呈现",
+      "title": "开发者工作台，更清晰",
       "items": [
-        "开启 DEV 能力的空间新增开发者顶级导航，OAuth 应用管理不再放在应用与插件中"
+        "应用列表与详情减少重复标题和嵌套，完善横竖屏及深色模式",
+        "创建和编辑应用改为三步填写，保存后直接查看草稿，保留独立的提审与审批确认"
       ]
     },
     "en": {
-      "title": "A dedicated developer tab",
+      "title": "A clearer developer workspace",
       "items": [
-        "Spaces with DEV enabled now have a top-level Developer tab for OAuth applications, replacing the Apps & plugins entry"
+        "Simpler application lists and details with fewer repeated headings, refined for portrait, landscape and dark mode",
+        "Create and edit applications in three steps, then open the saved draft directly; submission and approval remain separate confirmations"
       ]
     }
   }

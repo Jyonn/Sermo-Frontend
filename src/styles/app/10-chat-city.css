@@ -4895,6 +4895,11 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   letter-spacing: 0.02em;
 }
 
+@media (max-width: 719px) {
+  .app-mobile-nav .nav-button { min-width: 0; }
+  .app-mobile-nav .nav-button-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
 .nav-button.active {
   color: var(--brand-primary);
   background: transparent;

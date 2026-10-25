@@ -1,8 +1,16 @@
 import type { OAuthApplication } from "./oauthClients";
 
 export type OAuthApplicationFilter = "all" | "pending" | "enabled" | "disabled";
+export function safeOAuthIconUri(uri?: string) {
+  if (!uri || uri.trim() !== uri || /[\s\\]/.test(uri)) return undefined;
+  try {
+    const url = new URL(uri);
+    return url.protocol === "https:" && !url.username && !url.password && !url.hash ? uri : undefined;
+  } catch { return undefined; }
+}
 export const currentOAuthRevision = (app: OAuthApplication) => app.revisions.find((revision) => revision.id === app.approved_revision_id);
 export const pendingOAuthRevision = (app: OAuthApplication) => app.revisions.find((revision) => revision.status === "pending");
+export const workingOAuthRevision = (app: OAuthApplication) => app.revisions.find((revision) => revision.status === "draft") ?? pendingOAuthRevision(app) ?? currentOAuthRevision(app) ?? app.revisions[0];
 export const oauthApplicationName = (app: OAuthApplication) => (currentOAuthRevision(app) ?? app.revisions[0])?.name || app.client_id;
 export function oauthApplicationStatus(app: OAuthApplication) {
   if (!app.enabled) return "disabled";
