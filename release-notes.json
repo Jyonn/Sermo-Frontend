@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.2",
+  "id": "2026.10.25.3",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "投稿，独立又简洁",
+      "title": "管理，更有条理",
       "items": [
-        "投稿拥有独立导航入口，不再与广场混合，旧链接仍可正常打开",
-        "列表采用简洁聊天样式，重新整理我的、审批和状态筛选"
+        "空间管理按成员、社区、运营、设置与访问控制重新分组，常用功能直接在面板中操作",
+        "超级管理员采用两级导航，拆分邮件投递、邮件审阅和诊断详情，适配横竖屏"
       ]
     },
     "en": {
-      "title": "A simpler home for submissions",
+      "title": "A clearer administration workspace",
       "items": [
-        "Submissions now have their own navigation tab, separate from Square, with support for existing links",
-        "A clean chat-style list with refreshed My submissions, Reviews and status filtering"
+        "Space administration is organized around people, community, engagement, settings and access, with everyday tools directly in the main panel",
+        "Platform administration gains two-level navigation, separate delivery and review pages, and contextual diagnostics across portrait and landscape layouts"
       ]
     }
   }

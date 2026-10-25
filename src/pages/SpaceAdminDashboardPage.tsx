@@ -1,4 +1,6 @@
 import { type ChangeEvent, type FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { managementSection, managementSettingsForSection, spaceManagementSections, type SpaceManagementSection } from "../lib/managementNavigation";
 import { ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
@@ -24,7 +26,7 @@ import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
 
 type MemberFilter = "all" | "online";
-type AdminTab = "members" | "square" | "permissions" | "menu";
+type AdminTab = SpaceManagementSection;
 
 function formatCreatedAt(value?: number) {
   if (!value) return i18n.t("admin.justCreated");
@@ -110,7 +112,9 @@ export default function SpaceAdminDashboardPage() {
   const [members, setMembers] = useState<AdminMemberDTO[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<MemberFilter>("all");
-  const [activeTab, setActiveTab] = useState<AdminTab>("members");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = managementSection(searchParams.get("section"), spaceManagementSections, "members");
+  const setActiveTab = (section: AdminTab) => setSearchParams((current) => { const next = new URLSearchParams(current); next.set("section", section); return next; });
   const [selectedMember, setSelectedMember] = useState<AdminMemberDTO | null>(null);
   const [squareStatements, setSquareStatements] = useState<SquareStatementDTO[]>([]);
   const [squareState, setSquareState] = useState<AppViewState>("idle");
@@ -125,15 +129,9 @@ export default function SpaceAdminDashboardPage() {
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
   const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
-  const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
-  const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
-  const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
-  const [verificationOpen, setVerificationOpen] = useState(false);
-  const [activitiesOpen, setActivitiesOpen] = useState(false);
   const [activities, setActivities] = useState<AdminActivityDTO[]>([]);
   const [activitiesState, setActivitiesState] = useState<AppViewState>("idle");
   const [activityClaimingKey, setActivityClaimingKey] = useState<string | null>(null);
-  const [squareMutesOpen, setSquareMutesOpen] = useState(false);
   const [squareMutes, setSquareMutes] = useState<SquareMuteDTO[]>([]);
   const [squareMutesState, setSquareMutesState] = useState<AppViewState>("idle");
   const [muteEditTarget, setMuteEditTarget] = useState<SquareMuteDTO | null>(null);
@@ -150,7 +148,6 @@ export default function SpaceAdminDashboardPage() {
   const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(defaultLevelNames);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [officialLoginBusy, setOfficialLoginBusy] = useState(false);
-  const [operatorsOpen, setOperatorsOpen] = useState(false);
   const [operatorBusyUserId, setOperatorBusyUserId] = useState<number | null>(null);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
@@ -179,12 +176,30 @@ export default function SpaceAdminDashboardPage() {
   const operators = dashboard?.operators ?? [];
 
   const currentSpace = dashboard?.space ?? session?.space ?? null;
+  const communityEnabled = currentSpace?.group_square_enabled === true;
+  const activeTab = (requestedTab === "square" || requestedTab === "mutes") && currentSpace && !communityEnabled ? "features" : requestedTab;
   const entryHref = useMemo(() => (currentSpace ? buildJoinHrefForCurrentHost(currentSpace.slug) : ""), [currentSpace]);
-  const adminTabs: Array<{ key: AdminTab; icon: string; label: string }> = [
-    { key: "members", icon: "group", label: t("admin.members") },
-    ...(settingsSquareEnabled ? [{ key: "square" as const, icon: "explore", label: t("nav.square") }] : []),
-    { key: "permissions", icon: "account_tree", label: t("admin.permissionMatrix") },
-    { key: "menu", icon: "menu", label: t("nav.menu") },
+  const group = (id: string, icon: string) => ({ id, icon, label: t(`management.group.${id}` as TranslationKey) });
+  const people = group("people", "group");
+  const community = group("community", "forum");
+  const operations = group("operations", "campaign");
+  const configuration = group("configuration", "tune");
+  const access = group("access", "shield");
+  const adminTabs = [
+    { id: "members", icon: "group", label: t("admin.members"), group: people },
+    { id: "operators", icon: "shield_person", label: t("admin.operators"), group: people },
+    ...(communityEnabled ? [
+      { id: "square", icon: "explore", label: t("nav.square"), group: community },
+      { id: "mutes", icon: "voice_over_off", label: t("admin.squareMutes"), group: community },
+    ] : []),
+    { id: "activities", icon: "local_activity", label: t("admin.activityManagement"), group: operations },
+    { id: "official", icon: "campaign", label: t("admin.officialAccount"), group: operations },
+    { id: "basics", icon: "settings", label: t("admin.basicSettings"), group: configuration },
+    { id: "features", icon: "tune", label: t("admin.featureAccess"), group: configuration },
+    { id: "levels", icon: "badge", label: t("admin.spaceLevels"), group: configuration },
+    { id: "verification", icon: "verified_user", label: t("admin.spaceVerification"), group: configuration },
+    { id: "access", icon: "shield", label: t("admin.unverifiedAccess"), group: access },
+    { id: "permissions", icon: "account_tree", label: t("admin.permissionMatrix"), group: access },
   ];
   const formatRelativeTime = (value: number) => {
     const minutes = Math.max(0, Math.floor((Date.now() / 1000 - value) / 60));
@@ -355,7 +370,7 @@ export default function SpaceAdminDashboardPage() {
   }, [activeTab, settingsSquareEnabled, squareState, t]);
 
   useEffect(() => {
-    if (!squareMutesOpen) return;
+    if (activeTab !== "mutes") return;
     const controller = new AbortController();
     setSquareMutesState("loading");
     api.getAdminSquareMutes(controller.signal).then((rows) => {
@@ -367,7 +382,7 @@ export default function SpaceAdminDashboardPage() {
       showToast(apiError instanceof ApiError ? apiError.message : t("admin.muteLoadFailed"), "error");
     });
     return () => controller.abort();
-  }, [squareMutesOpen, t]);
+  }, [activeTab, t]);
 
   const editSquareMute = (mute: SquareMuteDTO) => {
     setMuteEditTarget(mute);
@@ -432,14 +447,27 @@ export default function SpaceAdminDashboardPage() {
 
   const saveSettings = async () => {
     if (!currentSpace) return;
-    if (settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) {
+    if (activeTab === "features" && settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) {
       setError(t("admin.squareModesRequired"));
       return;
     }
     setSettingsSaving(true);
     setError(null);
     try {
-      const payload = await api.updateAdminSettings({
+      const payload = await api.updateAdminSettings(managementSettingsForSection<Parameters<typeof api.updateAdminSettings>[0]>(activeTab, {
+        name: currentSpace.name,
+        group_square_enabled: currentSpace.group_square_enabled ? 1 : 0,
+        chat_enabled: currentSpace.chat_enabled !== false ? 1 : 0,
+        space_group_enabled: currentSpace.space_group_enabled ? 1 : 0,
+        square_free_post_enabled: currentSpace.square_free_post_enabled !== false ? 1 : 0,
+        submission_enabled: currentSpace.submission_enabled ? 1 : 0,
+        square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
+        qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
+        ...(currentSpace.oauth_developer_eligible ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
+        unverified_group_policy: currentSpace.unverified_group_policy ?? 2,
+        member_limit: currentSpace.member_limit ?? null,
+        level_names: currentSpace.level_names?.length === 18 ? currentSpace.level_names : defaultLevelNames,
+      }, {
         name: settingsName.trim(),
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
         chat_enabled: settingsChatEnabled ? 1 : 0,
@@ -452,7 +480,7 @@ export default function SpaceAdminDashboardPage() {
         unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
-      });
+      }));
       setCachedSpaceFeatures(payload.space_id, {
         chatEnabled: payload.chat_enabled !== false,
         submissionEnabled: payload.submission_enabled === true,
@@ -469,9 +497,6 @@ export default function SpaceAdminDashboardPage() {
             }
           : current
       );
-      setBasicSettingsOpen(false);
-      setModuleSettingsOpen(false);
-      setAccessPolicyOpen(false);
       showToast(t("admin.settingsSaved"), "success");
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : t("admin.settingsSaveFailed"));
@@ -786,7 +811,7 @@ export default function SpaceAdminDashboardPage() {
       avatar={<SpaceAvatar className="management-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />}
       identity={currentSpace?.name ?? "FRIENDEN"}
       title={t("admin.dashboardTitle")}
-      items={adminTabs.map((item) => ({ ...item, id: item.key }))}
+      items={adminTabs}
       activeId={activeTab}
       onSelect={(id) => setActiveTab(id as AdminTab)}
       onLogout={logout}
@@ -832,39 +857,14 @@ export default function SpaceAdminDashboardPage() {
             <PermissionWorkspace scope="space" />
           </section> : null}
 
-          {activeTab === "menu" && currentSpace ? <section className="admin-tab-page admin-menu-tab">
-            <section className="admin-menu-profile"><SpaceAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>{PUBLIC_HOST}/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
-            <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
-              <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setActivitiesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">local_activity</span></span><span><strong>{t("admin.activityManagement")}</strong><small>{t("admin.activityManagementHint", { count: activities.filter((activity) => activity.status === "active").length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setSquareMutesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">voice_over_off</span></span><span><strong>{t("admin.squareMutes")}</strong><small>{t("admin.squareMutesHint", { count: squareMutes.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setOperatorsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield_person</span></span><span><strong>{t("admin.operators")}</strong><small>{t("admin.operatorCount", { count: operators.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-            </div></section>
+          {activeTab === "official" && currentSpace ? <section className="management-form-page">
             <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
-            <section className="admin-menu-section"><h2>{t("admin.spaceEntry")}</h2><div className="admin-menu-list"><button onClick={() => void copyEntryLink()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">link</span></span><span><strong>{t("admin.copyMemberEntry")}</strong></span><span className="material-symbols-outlined">content_copy</span></button><a href={entryHref}><span className="admin-policy-icon"><span className="material-symbols-outlined">open_in_new</span></span><span><strong>{t("admin.openMemberEntry")}</strong></span><span className="material-symbols-outlined">chevron_right</span></a></div></section>
           </section> : null}
-        </div>
-
-
-      <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
-        {selectedMember ? <div className="admin-member-drawer">
-          <section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section>
-          <section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section>
-          <section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section>
-          {!selectedMember.is_deleted ? <section className="admin-member-detail-section admin-member-chat-mute"><h3>{t("admin.globalChatMute")}</h3><p>{t("admin.globalChatMuteHint")}</p><ChatMuteControls busy={globalChatMuteBusy} mute={selectedMember.chat_mute} onMute={(duration) => void setGlobalChatMute(duration)} onUnmute={() => void removeGlobalChatMute()} /></section> : null}
-          <button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button>
-          <button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button>
-        </div> : null}
-      </SideDrawer>
-
-      <SideDrawer historyKey="admin-operators" onClose={() => setOperatorsOpen(false)} open={operatorsOpen} title={t("admin.operators")}>
+          {activeTab === "operators" ? <section className="management-form-page">
         <div className="admin-operator-list"><section className="admin-policy-intro"><strong>{t("admin.operatorCount", { count: operators.length })}</strong><p>{t("admin.operatorHint")}</p></section>{operators.map((operator) => <article className="admin-operator-card" key={operator.operator_id}><UserAvatar className="mini-avatar" name={operator.user.name} uri={operator.user.avatar_uri} /><span><strong>{operator.user.name}</strong><small>{t("profile.operator")}</small></span><button disabled={operatorBusyUserId === operator.user.user_id} onClick={() => { const member = members.find((item) => item.user_id === operator.user.user_id); if (member) void setOperator(member, false); }} type="button">{t("admin.removeOperator")}</button></article>)}</div>
-      </SideDrawer>
+          </section> : null}
 
-      <SideDrawer historyKey="admin-activities" onClose={() => setActivitiesOpen(false)} open={activitiesOpen} title={t("admin.activityManagement")}>
+          {activeTab === "activities" ? <section className="management-form-page">
         <div className="admin-activity-list">
           <section className="admin-policy-intro"><strong>{t("admin.activityArrangementTitle")}</strong><p>{t("admin.activityArrangementHint")}</p></section>
           {activities.map((activity) => {
@@ -882,9 +882,9 @@ export default function SpaceAdminDashboardPage() {
           {activitiesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
           {activitiesState === "error" ? <FeedbackState tone="error" title={t("admin.activityLoadFailed")} /> : null}
         </div>
-      </SideDrawer>
+          </section> : null}
 
-      <SideDrawer historyKey="admin-square-mutes" onClose={() => setSquareMutesOpen(false)} open={squareMutesOpen} title={t("admin.squareMutes")}>
+          {activeTab === "mutes" ? <section className="management-form-page">
         <div className="admin-square-mute-list">
           {squareMutes.map((mute) => <article className="admin-square-mute-card" key={mute.mute_id}>
             <header><UserAvatar className="admin-square-mute-avatar" name={mute.user.name} uri={mute.user.avatar_uri} /><span><strong>{mute.user.name}</strong><small>{mute.permanent ? t("admin.mutePermanent") : t("admin.muteUntil", { time: new Date((mute.muted_until ?? 0) * 1000).toLocaleString(getActiveLocale()) })}</small>{mute.created_by ? <small>{t("admin.muteCreatedBy", { name: mute.created_by.name })}</small> : null}</span></header>
@@ -894,26 +894,31 @@ export default function SpaceAdminDashboardPage() {
           {squareMutesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
           {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState tone="empty" icon="verified_user" description={t("admin.noSquareMutesHint")} title={t("admin.noSquareMutes")} /> : null}
         </div>
-      </SideDrawer>
+          </section> : null}
 
-      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-features" onAction={() => void saveSettings()} onClose={() => setModuleSettingsOpen(false)} open={moduleSettingsOpen} title={t("admin.featureAccess")}>
+          {activeTab === "features" ? <section className="management-form-page">
         <div className="admin-policy-drawer">
           <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
           <SettingGroup>
             <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) setSettingsSpaceGroupEnabled(false); }} />} />
             <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
+          </SettingGroup>
+          <SettingGroup>
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (settingsSquareEnabled) setSettingsSubmissionEnabled(false); if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
+          </SettingGroup>
+          {(currentSpace?.qq_binding_granted || (currentSpace?.slug === "dev" && currentSpace.oauth_developer_eligible)) ? <SettingGroup>
             {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
             {currentSpace?.slug === "dev" && currentSpace.oauth_developer_eligible ? <SettingRow title={t("oauth.manage")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("oauth.manage")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
-          </SettingGroup>
+          </SettingGroup> : null}
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>
-      </SideDrawer>
+            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.processing") : t("common.save")}</button></footer>
+          </section> : null}
 
-      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-unverified-policy" onAction={() => void saveSettings()} onClose={() => setAccessPolicyOpen(false)} open={accessPolicyOpen} title={t("admin.unverifiedAccess")}>
+          {activeTab === "access" ? <section className="management-form-page">
         <div className="admin-policy-drawer">
           <section className="admin-policy-intro"><strong>{t("admin.unverifiedAccessTitle")}</strong><p>{t("admin.unverifiedAccessHint")}</p></section>
           <div className="admin-policy-options">
@@ -928,13 +933,19 @@ export default function SpaceAdminDashboardPage() {
             <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
           </section>
         </div>
-      </SideDrawer>
+            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+          </section> : null}
 
-      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-basic-settings" onAction={() => void saveSettings()} onClose={() => setBasicSettingsOpen(false)} open={basicSettingsOpen} title={t("admin.basicSettings")}>
-        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceName")}</label><input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label">{t("admin.memberLimit")}</label><input className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /><small>{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></section></div>
-      </SideDrawer>
+          {activeTab === "basics" ? <section className="management-form-page">
+            <section className="admin-menu-profile"><SpaceAvatar className="admin-menu-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} /><span><strong>{currentSpace?.name}</strong><small>{PUBLIC_HOST}/{currentSpace?.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace?.effective_member_limit ?? currentSpace?.tier_member_limit}</b></section>
+        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label" htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label" htmlFor="admin-space-capacity">{t("admin.memberLimit")}</label><input id="admin-space-capacity" className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /><small>{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div></section></div>
+            <section className="admin-menu-section"><h2>{t("admin.spaceEntry")}</h2><div className="admin-menu-list"><button onClick={() => void copyEntryLink()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">link</span></span><span><strong>{t("admin.copyMemberEntry")}</strong></span><span className="material-symbols-outlined">content_copy</span></button><a href={entryHref}><span className="admin-policy-icon"><span className="material-symbols-outlined">open_in_new</span></span><span><strong>{t("admin.openMemberEntry")}</strong></span><span className="material-symbols-outlined">chevron_right</span></a></div></section>
+            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+          </section> : null}
 
-      <SideDrawer historyKey="admin-verification" onClose={() => setVerificationOpen(false)} open={verificationOpen} title={t("admin.spaceVerification")}>
+          {activeTab === "levels" ? <section className="management-form-page"><div className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></div><footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer></section> : null}
+
+          {activeTab === "verification" ? <section className="management-form-page">
         <div className="admin-policy-drawer admin-verification-drawer">
           <section className="admin-verification-tier">
             <span>{t(`admin.tier.${currentSpace?.verification_tier ?? "email"}` as TranslationKey)}</span>
@@ -952,7 +963,35 @@ export default function SpaceAdminDashboardPage() {
           </section>}
           <input ref={identityInputRef} accept="application/pdf,.pdf" hidden onChange={(event) => void submitIdentity(event)} type="file" />
         </div>
+          </section> : null}
+
+        </div>
+
+
+      <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
+        {selectedMember ? <div className="admin-member-drawer">
+          <section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section>
+          <section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section>
+          <section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section>
+          {!selectedMember.is_deleted ? <section className="admin-member-detail-section admin-member-chat-mute"><h3>{t("admin.globalChatMute")}</h3><p>{t("admin.globalChatMuteHint")}</p><ChatMuteControls busy={globalChatMuteBusy} mute={selectedMember.chat_mute} onMute={(duration) => void setGlobalChatMute(duration)} onUnmute={() => void removeGlobalChatMute()} /></section> : null}
+          <button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button>
+          <button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button>
+        </div> : null}
       </SideDrawer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <BottomSheet
         open={broadcastOpen}

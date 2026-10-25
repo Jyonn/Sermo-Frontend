@@ -3,6 +3,7 @@ import { useI18n } from "../lib/language";
 import { preloadLanguageChoices, type SupportedLanguage } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { DesktopPanelWorkspace } from "./DesktopPanelWorkspace";
+import { PageTabs } from "./PageTabs";
 import "./ManagementWorkspace.css";
 
 export interface ManagementDestination {
@@ -10,6 +11,7 @@ export interface ManagementDestination {
   icon: string;
   label: string;
   badge?: number;
+  group: { id: string; label: string; icon: string };
 }
 
 export function ManagementWorkspace({ title, identity, avatar, items, activeId, onSelect, onLogout, status, children, className = "", fill = false }: {
@@ -29,25 +31,35 @@ export function ManagementWorkspace({ title, identity, avatar, items, activeId, 
   const { resolvedTheme, setPreference } = useTheme();
   const nav = useRef<HTMLElement>(null);
   const body = useRef<HTMLDivElement>(null);
+  const subnav = useRef<HTMLDivElement>(null);
+  const lastDestination = useRef<Record<string, string>>({});
+  const activeItem = items.find((item) => item.id === activeId) ?? items[0];
+  const groups = items.filter((item, index) => items.findIndex((other) => other.group.id === item.group.id) === index);
+  const siblings = items.filter((item) => item.group.id === activeItem?.group.id);
   useLayoutEffect(() => {
+    if (activeItem) lastDestination.current[activeItem.group.id] = activeItem.id;
     nav.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    subnav.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
     body.current?.scrollTo({ top: 0 });
   }, [activeId]);
-  return <DesktopPanelWorkspace className={`management-workspace ${className}`} surfaceClassName="management-detail">
+  return <DesktopPanelWorkspace className={`management-workspace ${siblings.length > 1 ? "has-section-tabs" : ""} ${className}`} surfaceClassName="management-detail">
     <div className="management-brand">
       {avatar}
       <span><small>{title}</small><strong title={identity}>{identity}</strong></span>
     </div>
     <nav aria-label={title} className="management-nav" ref={nav}>
-      {items.map((item) => <button aria-current={item.id === activeId ? "page" : undefined} key={item.id} onClick={() => onSelect(item.id)} title={item.label} type="button">
-        <span aria-hidden="true" className="material-symbols-outlined">{item.icon}</span>
-        <span className="management-nav-label">{item.label}</span>
-        {item.badge ? <b>{item.badge > 99 ? "99+" : item.badge}</b> : null}
-      </button>)}
+      {groups.map((item) => {
+        const badge = items.filter((destination) => destination.group.id === item.group.id).reduce((sum, destination) => sum + (destination.badge ?? 0), 0);
+        return <button aria-current={item.group.id === activeItem?.group.id ? "page" : undefined} key={item.group.id} onClick={() => onSelect(lastDestination.current[item.group.id] ?? item.id)} title={item.group.label} type="button">
+          <span aria-hidden="true" className="material-symbols-outlined">{item.group.icon}</span>
+          <span className="management-nav-label">{item.group.label}</span>
+          {badge ? <b>{badge > 99 ? "99+" : badge}</b> : null}
+        </button>;
+      })}
     </nav>
     <section className="management-content">
       <header className="management-page-header">
-        <div><small>{title}</small><h1>{items.find((item) => item.id === activeId)?.label}</h1></div>
+        <div><small>{title}</small><h1>{activeItem?.group.label}</h1></div>
         <div className="management-header-actions">
           {status}
           <label className="management-language-control" title={t("menu.language")}>
@@ -65,6 +77,9 @@ export function ManagementWorkspace({ title, identity, avatar, items, activeId, 
           <button aria-label={t("auth.logout")} onClick={onLogout} title={t("auth.logout")} type="button"><span aria-hidden="true" className="material-symbols-outlined">logout</span></button>
         </div>
       </header>
+      <div className="management-section-tabs" hidden={siblings.length < 2} ref={subnav}>
+        <PageTabs label={activeItem?.group.label ?? title} items={siblings.map((item) => ({ value: item.id, label: `${item.label}${item.badge ? ` · ${item.badge}` : ""}` }))} value={activeId} onChange={onSelect} />
+      </div>
       <div className={`management-body${fill ? " is-fill" : ""}`} ref={body}>{children}</div>
     </section>
   </DesktopPanelWorkspace>;

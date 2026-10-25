@@ -15,7 +15,9 @@ test("both administration scopes share one responsive navigation and retain thei
   assert.match(read("pages/PlatformAdminPage.tsx"), /session \? <PlatformAdminConsole \/> : <PlatformAdminLogin \/>/);
   const component = read("components/ManagementWorkspace.tsx");
   assert.match(component, /scrollIntoView\(\{ block: "nearest", inline: "nearest" \}\)/);
-  assert.match(component, /aria-current=\{item.id === activeId \? "page" : undefined\}/);
+  assert.match(component, /aria-current=\{item.group.id === activeItem\?\.group.id \? "page" : undefined\}/);
+  assert.match(component, /lastDestination.current\[item.group.id\] \?\? item.id/);
+  assert.match(component, /<PageTabs label=\{activeItem\?\.group.label/);
   assert.match(component, /surfaceClassName="management-detail"/);
   assert.match(component, /onClick=\{onLogout\}/);
 });
@@ -48,6 +50,6 @@ test("management adapts to portrait, compact rail and short landscape without du
 test("management navigation labels have Chinese and English translations", () => {
   for (const locale of ["zh-CN", "en"]) {
     const messages = JSON.parse(read(`locales/${locale}/translation.json`));
-    for (const key of ["platformTitle", "secureSession", "oauth", "overview", "spaces", "permissions", "reviews", "emails", "audit", "debug", "security"]) assert.ok(messages[`management.${key}`]);
+    for (const key of ["platformTitle", "secureSession", "oauth", "overview", "spaces", "permissions", "reviews", "emails", "emailReview", "audit", "debug", "security", ...["people", "community", "operations", "configuration", "access", "overview", "governance", "services", "observability", "security"].map((group) => `group.${group}`)]) assert.ok(messages[`management.${key}`]);
   }
 });

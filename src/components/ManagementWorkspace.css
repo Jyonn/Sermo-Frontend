@@ -2,6 +2,7 @@
 .management-workspace,
 .management-workspace.platform-console {
   --management-rail: 224px;
+  --management-subnav-height: 0px;
   --pa-ink: var(--text-primary);
   --pa-muted: var(--text-muted);
   --pa-line: var(--line-soft);
@@ -15,7 +16,7 @@
   min-height: 0;
   overflow: hidden;
   color: var(--text-primary);
-  background: radial-gradient(ellipse at 85% 0, color-mix(in srgb, var(--brand-primary) 8%, transparent), transparent 45%), var(--bg-page);
+  background: radial-gradient(ellipse at 85% 0, color-mix(in srgb, var(--brand-primary) 8%, transparent), transparent 45%), var(--bg-canvas);
 }
 .management-brand {
   display: flex;
@@ -26,6 +27,7 @@
   border-right: 1px solid var(--line-soft);
   background: var(--bg-elevated);
 }
+.management-workspace.has-section-tabs { --management-subnav-height: 49px; }
 .management-brand > :first-child { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; object-fit: contain; }
 .management-brand > span { display: grid; gap: 5px; min-width: 0; }
 .management-brand small { color: var(--text-muted); font-size: 10px; letter-spacing: .04em; }
@@ -66,7 +68,19 @@
 .management-nav > button[aria-current="page"] { color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 13%, transparent); }
 .management-nav .material-symbols-outlined { font-size: 22px; }
 .management-nav b { margin-left: auto; padding: 2px 5px; border-radius: 6px; color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 15%, transparent); font-size: 10px; }
-.management-content { grid-column: 2; grid-row: 1 / -1; display: grid; grid-template-rows: 88px minmax(0, 1fr); min-width: 0; min-height: 0; }
+.management-content { grid-column: 2; grid-row: 1 / -1; display: grid; grid-template-rows: 88px auto minmax(0, 1fr); min-width: 0; min-height: 0; }
+.management-section-tabs { min-width: 0; padding-inline: clamp(18px, 3vw, 40px); border-bottom: 1px solid var(--line-soft); background: var(--bg-elevated); }
+.management-section-tabs[hidden] { display: none; }
+.management-section-tabs .app-page-tabs { max-width: 1280px; margin-inline: auto; }
+.management-section-tabs .app-page-tabs-items { gap: 28px; }
+.management-section-tabs .app-page-tabs-items button { min-height: 48px; }
+.management-form-page { display: grid; gap: 24px; width: 100%; max-width: 800px; margin-inline: auto; }
+.management-form-actions { position: sticky; bottom: -1px; display: flex; justify-content: flex-end; padding: 16px 0; border-top: 1px solid var(--line-soft); background: var(--bg-canvas); }
+.management-form-actions button { min-width: 112px; }
+.management-form-page .admin-policy-drawer { padding: 0; }
+.management-report-content { margin: 0; padding: 16px; border-radius: 14px; color: var(--text-secondary); background: var(--bg-canvas); font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.management-workspace .admin-menu-section { margin: 0; }
+.management-workspace .admin-menu-profile { margin-bottom: 24px; }
 .management-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px clamp(18px, 3vw, 40px); border-bottom: 1px solid var(--line-soft); }
 .management-page-header > div:first-child { min-width: 0; display: grid; gap: 4px; }
 .management-page-header small { color: var(--text-muted); font-size: 10px; letter-spacing: .06em; }
@@ -145,7 +159,7 @@
   .permission-remove-rule { grid-column: 3; grid-row: 1; }
 }
 @media (min-width: 720px) {
-  .management-workspace > .desktop-panel-slot { position: absolute; top: 88px; bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+  .management-workspace > .desktop-panel-slot { position: absolute; top: calc(88px + var(--management-subnav-height)); bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
   .management-workspace .permission-workspace { display: grid; grid-template-columns: minmax(180px, 26%) minmax(0, 1fr); }
   .management-workspace .permission-tree-panel { max-height: none; border-right: 1px solid var(--line-soft); border-bottom: 0; }
 }
@@ -159,7 +173,7 @@
   .management-nav-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 }
 @media (max-width: 719px) {
-  .management-workspace, .management-workspace.platform-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); padding-top: env(safe-area-inset-top); }
+  .management-workspace, .management-workspace.platform-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr); padding-top: env(safe-area-inset-top); }
   .management-brand { display: none; }
   .management-content { display: contents; }
   .management-page-header { grid-row: 1; padding: 14px 16px; min-height: 72px; }
@@ -169,7 +183,8 @@
   .management-nav { grid-row: 2; flex-direction: row; gap: 6px; padding: 7px 12px; border-right: 0; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; }
   .management-nav > button { min-height: 40px; padding: 8px 12px; gap: 6px; font-size: 12px; }
   .management-nav .material-symbols-outlined { font-size: 19px; }
-  .management-body { grid-row: 3; padding: 16px 14px max(22px, env(safe-area-inset-bottom)); }
+  .management-section-tabs { grid-row: 3; padding-inline: 16px; }
+  .management-body { grid-row: 4; padding: 16px 14px max(22px, env(safe-area-inset-bottom)); }
   .management-body.is-fill { padding: 12px 10px max(10px, env(safe-area-inset-bottom)); }
   .management-workspace .platform-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .management-workspace .platform-metric { min-height: 110px; padding: 13px 9px; }
@@ -184,10 +199,10 @@
 }
 @media (min-width: 720px) and (max-height: 560px) {
   .management-workspace, .management-workspace.platform-console { grid-template-rows: 64px minmax(0, 1fr); }
-  .management-content { grid-template-rows: 64px minmax(0, 1fr); }
+  .management-content { grid-template-rows: 64px auto minmax(0, 1fr); }
   .management-brand { padding-block: 10px; }
   .management-page-header { padding-block: 8px; }
   .management-body { padding-top: 16px; }
-  .management-workspace > .desktop-panel-slot { top: 72px; bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
+  .management-workspace > .desktop-panel-slot { top: calc(72px + var(--management-subnav-height)); bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
   .management-workspace .permission-tree-panel { max-height: none; }
 }
