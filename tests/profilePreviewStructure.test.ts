@@ -4,17 +4,18 @@ import test from "node:test";
 
 const menu = readFileSync(new URL("../src/pages/MenuPage.tsx", import.meta.url), "utf8");
 const panel = readFileSync(new URL("../src/components/UserProfilePanel.tsx", import.meta.url), "utf8");
+const sharedDrawer = readFileSync(new URL("../src/components/MyProfileCardDrawer.tsx", import.meta.url), "utf8");
 test("my card uses the same full-bleed drawer composition as other profiles", () => {
-  const drawer = menu.slice(menu.indexOf('<SideDrawer headerless historyKey="my-profile-card"'));
+  const drawer = sharedDrawer.slice(sharedDrawer.indexOf('<SideDrawer headerless historyKey="my-profile-card"'));
   const content = drawer.slice(0, drawer.indexOf("</SideDrawer>"));
   assert.match(content, /<UserProfilePanel/);
   assert.doesNotMatch(content, /more-apps-drawer|<UserProfileCard/);
-  assert.match(content, /previewAudience=\{cardAudience\}/);
+  assert.match(content, /previewAudience=\{audience\}/);
   assert.match(content, /floatingAccessory=/);
   assert.doesNotMatch(panel, /profile\.cardAudience/);
 });
 test("my card entry follows the basic fields in its own section", () => {
-  const basic = menu.slice(menu.indexOf('<SideDrawer historyKey="basic-info"'), menu.indexOf('<SideDrawer headerless historyKey="my-profile-card"'));
+  const basic = menu.slice(menu.indexOf('<SideDrawer historyKey="basic-info"'), menu.indexOf('<MyProfileCardDrawer'));
   assert.ok(basic.indexOf('aria-label={t("profile.myCard")}') > basic.indexOf('t("profile.welcome")'));
 });
 test("preview relationship controls cannot mutate the current user's friendships", () => {
