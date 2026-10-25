@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.18",
+  "id": "2026.10.25.19",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "更顺手的消息编辑",
+      "title": "统一消息输入体验",
       "items": [
-        "修复桌面聊天语音浮层遮挡，优化文件与足迹工具布局",
-        "欢迎语编辑拥有更宽的桌面面板，输入样式与群发消息保持统一"
+        "欢迎语和群发消息直接复用聊天输入区：桌面上方工具栏，手机下方图标栏",
+        "欢迎语支持选择云端文件，群发保留本地附件；统一明暗外观与输入体验"
       ]
     },
     "en": {
-      "title": "A smoother message editor",
+      "title": "One consistent message composer",
       "items": [
-        "Fixed clipped desktop voice controls and refined file and footprint tools",
-        "A wider desktop welcome editor with consistent message inputs for welcome and broadcasts"
+        "Welcome and broadcast editors now reuse the chat composer, with desktop top tools and mobile bottom tools",
+        "Choose cloud files for welcome messages and local attachments for broadcasts, with consistent light and dark styling"
       ]
     }
   }

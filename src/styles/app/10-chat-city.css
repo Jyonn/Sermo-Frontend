@@ -1129,8 +1129,8 @@ html[data-theme="dark"] .personalization-bubble-stage {
 }
 
 .composer-input {
-  min-height: 24px !important;
-  max-height: 96px !important;
+  min-height: 24px;
+  max-height: 96px;
   margin: 0;
   padding: 12px 0;
   border: 0;

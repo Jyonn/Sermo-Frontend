@@ -6,7 +6,10 @@ import { ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatMuteControls } from "../components/ChatMuteControls";
-import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
+import { ChatComposerLayout, useMobileComposerLayout } from "../components/ChatComposerLayout";
+import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
+import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
+import { ComposerQuickEmojiPanel } from "../components/ComposerQuickEmojiPanel";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -62,49 +65,12 @@ function formatBroadcastDuration(seconds: number) {
   return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, "0")}`;
 }
 
-function AdminComposerIcon({ kind }: { kind: "mic" | "gallery" | "file" | "delete" | "stop" }) {
-  if (kind === "gallery") {
-    return (
-      <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-        <rect x="3.5" y="5" width="17" height="14" rx="3.5" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="9" cy="10" r="1.7" fill="currentColor" />
-        <path d="m7 16.5 4.2-4.2a1.1 1.1 0 0 1 1.56 0l1.58 1.58a1.1 1.1 0 0 0 1.56 0L17 12.6l3.5 3.9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-      </svg>
-    );
-  }
-  if (kind === "file") {
-    return (
-      <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-        <path d="M7 3.75h6.7L18.5 8.6v11.65H7V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
-        <path d="M13.5 4v5h4.75M9.5 13h6M9.5 16.5h4.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-      </svg>
-    );
-  }
-  if (kind === "delete") {
-    return (
-      <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-        <path d="M7 7.5h10v11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-11ZM5 6h14M9 6V4h6v2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-      </svg>
-    );
-  }
-  if (kind === "stop") {
-    return (
-      <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
-        <rect x="9" y="9" width="6" height="6" rx="1.3" fill="currentColor" />
-      </svg>
-    );
-  }
-  return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-      <rect x="8.25" y="3.5" width="7.5" height="11.5" rx="3.75" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
 
 export default function SpaceAdminDashboardPage() {
   const { t } = useI18n();
+  const mobileComposerLayout = useMobileComposerLayout();
+  const broadcastInputRef = useRef<MentionComposerHandle>(null);
+  const broadcastComposerRef = useRef<HTMLFormElement>(null);
   const defaultLevelNames = useMemo(() => t("admin.defaultLevelNames").split("|"), [t]);
   const { session, logout, patchSpace } = useAdminAuth();
   const [dashboardState, setDashboardState] = useState<AppViewState>("idle");
@@ -1024,48 +990,24 @@ export default function SpaceAdminDashboardPage() {
                 <span style={{ transform: `scaleX(${Math.max(0.02, broadcastProgress)})` }} />
               </div>
             ) : null}
-            <form className={`composer admin-broadcast-composer${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
+            <form ref={broadcastComposerRef} className={`composer admin-broadcast-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
               {broadcastRecording.phase === "idle" ? (
-                <ChatComposerTextRow
-                  canSend={Boolean(broadcastContent.trim())}
-                  disabled={broadcastState === "sending"}
-                  leadingAction={<button
-                    aria-label={t("audio.record")}
-                    className="composer-action-button"
-                    disabled={broadcastState === "sending"}
-                    onClick={() => void startBroadcastRecording()}
-                    type="button"
-                  >
-                    <span className="admin-composer-svg"><AdminComposerIcon kind="mic" /></span>
-                  </button>}
-                  input={<textarea
-                      className="composer-input"
-                      disabled={broadcastState === "sending"}
-                      enterKeyHint="send"
-                      maxLength={512}
-                      placeholder={t("chat.inputPlaceholder")}
-                      rows={3}
-                      value={broadcastContent}
-                      onChange={(event) => setBroadcastContent(event.target.value)}
-                      onKeyDown={(event) => {
-                        const nativeEvent = event.nativeEvent as KeyboardEvent & { isComposing?: boolean; keyCode?: number };
-                        if (nativeEvent.isComposing || nativeEvent.keyCode === 229) return;
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          event.currentTarget.form?.requestSubmit();
-                        }
-                      }}
-                    />}
-                  trailingAction={<button
-                    aria-expanded={broadcastMoreOpen}
-                    aria-label={broadcastMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
-                    className={`composer-plus ${broadcastMoreOpen ? "is-open" : ""}`}
-                    disabled={broadcastState === "sending"}
-                    onClick={() => setBroadcastMoreOpen((current) => !current)}
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined">add</span>
-                  </button>}
+                <ChatComposerLayout mobile={mobileComposerLayout} toolCount={4}
+                  input={<MentionComposerInput ref={broadcastInputRef}
+                    className="textarea composer-input composer-rich-input"
+                    members={[]} value={broadcastContent}
+                    onFocus={() => setBroadcastMoreOpen(false)}
+                    onChange={(value) => {if (broadcastState !== "sending") setBroadcastContent(value.slice(0,512));}}
+                    onMentionQueryChange={() => undefined} onSelectFirstMention={() => false}
+                    onSubmit={() => broadcastComposerRef.current?.requestSubmit()}
+                    placeholder={t("chat.inputPlaceholder")}
+                  />}
+                  tools={<>
+                    <button aria-label={t("audio.record")} disabled={broadcastState === "sending"} onClick={() => void startBroadcastRecording()} type="button"><ComposerSvgIcon kind="mic"/></button>
+                    <button aria-label={t("emoji.choose")} aria-pressed={broadcastMoreOpen} disabled={broadcastState === "sending"} onClick={() => setBroadcastMoreOpen((value) => !value)} type="button"><ComposerSvgIcon kind="emoji"/></button>
+                    <button aria-label={t("media.gallery")} disabled={broadcastState === "sending"} onClick={() => broadcastGalleryInputRef.current?.click()} type="button"><ComposerSvgIcon kind="album"/></button>
+                    <button aria-label={t("media.file")} disabled={broadcastState === "sending"} onClick={() => broadcastFileInputRef.current?.click()} type="button"><ComposerSvgIcon kind="file"/></button>
+                  </>}
                 />
               ) : (
                 <div className="composer-row composer-row-recording">
@@ -1076,7 +1018,7 @@ export default function SpaceAdminDashboardPage() {
                     onClick={cancelBroadcastRecording}
                     type="button"
                   >
-                    <span className="admin-composer-svg"><AdminComposerIcon kind="delete" /></span>
+                    <span className="admin-composer-svg"><ComposerSvgIcon kind="delete" /></span>
                   </button>
                   <div className="composer-recording-bar">
                     <button
@@ -1086,7 +1028,7 @@ export default function SpaceAdminDashboardPage() {
                       onClick={stopBroadcastRecording}
                       type="button"
                     >
-                      <span className="admin-composer-svg"><AdminComposerIcon kind="stop" /></span>
+                      <span className="admin-composer-svg"><ComposerSvgIcon kind="stop" /></span>
                     </button>
                     <div aria-hidden="true" className={`admin-broadcast-waveform${broadcastRecording.phase === "recording" ? " is-recording" : ""}`}>
                       {Array.from({ length: 12 }, (_, index) => <span key={index} />)}
@@ -1111,20 +1053,8 @@ export default function SpaceAdminDashboardPage() {
                   </button>
                 </div>
               )}
-              {broadcastRecording.phase === "idle" ? (
-                <div className={`composer-actions-reveal ${broadcastMoreOpen ? "is-open" : ""}`} aria-hidden={!broadcastMoreOpen}>
-                  <div className="composer-actions-grid">
-                    <button className="composer-action-tile" disabled={broadcastState === "sending"} onClick={() => broadcastGalleryInputRef.current?.click()} type="button">
-                      <span className="composer-action-tile-icon"><AdminComposerIcon kind="gallery" /></span>
-                      <span>{t("media.gallery")}</span>
-                    </button>
-                    <button className="composer-action-tile" disabled={broadcastState === "sending"} onClick={() => broadcastFileInputRef.current?.click()} type="button">
-                      <span className="composer-action-tile-icon"><AdminComposerIcon kind="file" /></span>
-                      <span>{t("media.file")}</span>
-                    </button>
-                  </div>
-                </div>
-              ) : null}
+              {broadcastRecording.phase === "idle" && broadcastMoreOpen ? <ComposerQuickEmojiPanel inset mobile={mobileComposerLayout} onSelect={(emoji) => broadcastInputRef.current?.insertText(emoji)}/> : null}
+              <button hidden type="submit" disabled={broadcastState === "sending" || !broadcastContent.trim()}/>
               <input ref={broadcastGalleryInputRef} accept="image/*,video/*" hidden multiple onChange={(event) => void handleBroadcastFiles(event, "gallery")} type="file" />
               <input ref={broadcastFileInputRef} hidden multiple onChange={(event) => void handleBroadcastFiles(event, "file")} type="file" />
             </form>

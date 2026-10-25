@@ -50,7 +50,8 @@ test("all four tabs use the same tablet boundary and native details retain compl
   assert.match(workspace, /const floating = enabled && mode === "floating";/);
   assert.match(workspace, /const split = enabled && mode === "split";/);
   assert.match(chats, /workspaceSelected=\{Boolean\(displayedChat\)\}/);
-  assert.match(chats, /max-width: 719px/);
+  assert.match(chats, /useMobileComposerLayout\(\)/);
+  assert.match(readFileSync(new URL("../src/components/ChatComposerLayout.tsx", import.meta.url), "utf8"), /max-width: 719px/);
   assert.match(square, /min-width: 720px/);
   assert.match(square, /className="native-current-statement">\{desktopWorkspace \? renderFeedStatement\(activeCommentStatement, true\) : null\}/);
   assert.match(workspace, /mode === "floating" \? conversationPanelLayout\(available,/);

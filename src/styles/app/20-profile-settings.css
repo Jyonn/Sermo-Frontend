@@ -3745,7 +3745,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 .admin-broadcast-form > .admin-broadcast-composer {
-  width:100%;margin:0;padding:0;border:0;background:transparent;box-shadow:none;
+  width:100%;margin:0;padding:4px;border:0;border-radius:0;overflow:visible;background:transparent;box-shadow:none;
 }
 
 .admin-composer-svg,
