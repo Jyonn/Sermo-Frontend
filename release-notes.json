@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.25.6",
+  "id": "2026.10.25.7",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "邮件提醒，更自然",
+      "title": "开发者入口独立呈现",
       "items": [
-        "修复中文互动邮件出现英文的情况",
-        "聊天邮件采用头像与消息气泡，邮件审阅支持排版预览，并保留隐藏消息内容的隐私设置"
+        "开启 DEV 能力的空间新增开发者顶级导航，OAuth 应用管理不再放在应用与插件中"
       ]
     },
     "en": {
-      "title": "More natural email reminders",
+      "title": "A dedicated developer tab",
       "items": [
-        "Fixed English text appearing in Chinese interaction emails",
-        "Chat emails now use avatars and message bubbles, with formatted review previews and content-hiding privacy settings preserved"
+        "Spaces with DEV enabled now have a top-level Developer tab for OAuth applications, replacing the Apps & plugins entry"
       ]
     }
   }

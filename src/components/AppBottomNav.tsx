@@ -7,6 +7,7 @@ import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
+import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
 import { SpaceAvatar, UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
@@ -17,6 +18,7 @@ const mobileRoutes = [
   { key: "square", href: "/app/square", icon: "explore", labelKey: "nav.square" },
   { key: "submissions", href: "/app/submissions", icon: "outbox", labelKey: "submission.title" },
   { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
+  { key: "developer", href: "/app/developer", icon: "code", labelKey: "nav.developer" },
   { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
 ] as const;
 
@@ -25,6 +27,7 @@ function activeKey(pathname: string) {
   if (pathname.startsWith("/app/submissions")) return "submissions";
   if (pathname.startsWith("/app/square")) return "square";
   if (pathname.startsWith("/app/notifications")) return "notifications";
+  if (pathname.startsWith("/app/developer")) return "developer";
   if (pathname.startsWith("/app/menu")) return "menu";
   return null;
 }
@@ -226,6 +229,7 @@ export function AppBottomNav() {
 
   const current = activeKey(effectivePathname);
   const visibleRoutes = mobileRoutes.filter((route) => {
+    if (route.key === "developer") return canManageOAuthApplications(space, sessionSpaceId ?? undefined);
     if (route.key === "square") return features.squareEnabled;
     if (route.key === "submissions") return features.ready && features.submissionEnabled;
     if (route.key === "chats") return features.ready && features.chatEnabled;

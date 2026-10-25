@@ -31,6 +31,7 @@ const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebr
 const ChatsPage = lazy(routeResources.chats);
 const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
 const MenuPage = lazy(routeResources.menu);
+const DeveloperPage = lazy(routeResources.developer);
 const NotificationsPage = lazy(routeResources.notifications);
 const PlatformAdminPage = lazy(() => import("./pages/PlatformAdminPage"));
 const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPage"));
@@ -202,6 +203,10 @@ export default function App() {
               <FriendProfilePage />
             </RequireAuth>
           }
+        />
+        <Route
+          path="/app/developer"
+          element={<RequireAuth><DeveloperPage /></RequireAuth>}
         />
         <Route
           path="/app/menu"

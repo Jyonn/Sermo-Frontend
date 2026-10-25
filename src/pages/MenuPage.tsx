@@ -52,8 +52,6 @@ import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import stillfolioMark from "../assets/stillfolio-mark.svg";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./MoreApps.css";
-import { OAuthApplicationWorkspace } from "../components/OAuthApplicationWorkspace";
-import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -498,7 +496,6 @@ export default function MenuPage() {
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
-  const [oauthApplicationsOpen, setOAuthApplicationsOpen] = useState(false);
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
@@ -590,7 +587,11 @@ export default function MenuPage() {
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
-  const canManageOAuth = canManageOAuthApplications(space, session?.user.space_id);
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
+      navigate("/app/developer", { replace: true });
+    }
+  }, [location.search, navigate]);
   const hasGrowthCapability = (key: string, fallbackLevel: number) =>
     me?.growth?.capabilities?.[key]?.available ?? (me?.growth?.level ?? 1) >= fallbackLevel;
   const canUploadCustomAvatar = hasGrowthCapability("menu.profile.avatar.custom", 4);
@@ -2266,7 +2267,6 @@ export default function MenuPage() {
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
         <div className="more-apps-drawer">
-          {canManageOAuth ? <button className="simple-row menu-link-row" type="button" onClick={() => setOAuthApplicationsOpen(true)}>{t("oauth.manage")}</button> : null}
           {platformAdminSession ? <button className="simple-row menu-link-row" type="button" onClick={() => navigate("/admin?section=oauth")}>{t("oauth.platformManage")}</button> : null}
           <div className="mode-switch" role="tablist" aria-label={t("apps.more")}>
             {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
@@ -3795,9 +3795,6 @@ export default function MenuPage() {
           void leave();
         }}
       />
-      <SideDrawer historyKey="oauth-applications" onRouteOpen={() => { if (canManageOAuth) setOAuthApplicationsOpen(true); }} open={oauthApplicationsOpen && canManageOAuth} onClose={() => setOAuthApplicationsOpen(false)} title={t("oauth.manage")}>
-        {oauthApplicationsOpen && canManageOAuth ? <OAuthApplicationWorkspace /> : null}
-      </SideDrawer>
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );

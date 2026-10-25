@@ -1,10 +1,11 @@
-type RouteResourceKey = "chats" | "square" | "notifications" | "menu";
+type RouteResourceKey = "chats" | "square" | "notifications" | "menu" | "developer";
 
 const routeLoaders = {
   chats: () => import("../pages/ChatsPage"),
   square: () => import("../pages/SquarePage"),
   notifications: () => import("../pages/NotificationsPage"),
   menu: () => import("../pages/MenuPage"),
+  developer: () => import("../pages/DeveloperPage"),
 } satisfies Record<RouteResourceKey, () => Promise<unknown>>;
 
 const pendingLoads = new Map<RouteResourceKey, Promise<unknown>>();
@@ -29,6 +30,7 @@ export function preloadRouteForPath(pathname: string) {
   if (pathname.startsWith("/app/square")) return preloadRouteResource("square");
   if (pathname.startsWith("/app/notifications")) return preloadRouteResource("notifications");
   if (pathname.startsWith("/app/menu")) return preloadRouteResource("menu");
+  if (pathname.startsWith("/app/developer")) return preloadRouteResource("developer");
 }
 
 export const routeResources = routeLoaders;
