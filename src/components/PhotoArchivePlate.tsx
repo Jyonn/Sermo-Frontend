@@ -57,18 +57,17 @@ export function PhotoArchivePlate({ metadata, owner, width, height, children, ac
     {exposure.length ? <div className="photo-archive-exposure"><span className="photo-archive-label">{t("media.exposureLabel")}</span><span className="photo-archive-exposure-values">{exposure.map((value, index) => <span key={value}>{index > 0 ? `/ ${value}` : value}</span>)}</span></div> : null}
   </header> : null;
 
-  return <article className={`photo-archive-plate${expanded ? " is-expanded" : ""}${long ? " is-long" : ""}${hasTechnical ? " has-technical" : ""}${location ? " has-location" : ""}`} onClick={(event) => event.stopPropagation()}>
-    {!expanded ? technical : null}
+  return <article className={`photo-archive-plate${expanded ? " is-expanded" : ""}${long ? " is-long" : ""}${hasTechnical ? " has-technical" : ""}${location ? " has-location" : ""}`} onClick={(event) => {
+    if ((event.target as HTMLElement).closest('button,a,.photo-preview-details,.photo-archive-extra')) event.stopPropagation();
+  }}>
     <div className="photo-archive-visual">
       <div className="photo-archive-image-scroll">{children}</div>
-      {expanded ? technical : null}
-      {expanded ? location : null}
     </div>
-    {!expanded ? location : null}
     {detail ? <div className="photo-archive-extra">{detail}</div> : null}
-    <footer className="photo-archive-footer">
-      {date ? <div className="photo-archive-date"><span className="photo-archive-label">{t("media.dateLabel")}</span><time dateTime={takenAt!.toISOString()}>{date}</time></div> : <span />}
-      {actions}
-    </footer>
+    {hasTechnical || location || date ? <details className="photo-preview-details">
+      <summary tabIndex={0}><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("media.photoDetails")}<span className="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
+      <div className="photo-preview-details-body">{technical}{location}{date ? <div className="photo-archive-date"><span className="photo-archive-label">{t("media.dateLabel")}</span><time dateTime={takenAt!.toISOString()}>{date}</time></div> : null}</div>
+    </details> : null}
+    {actions ? <footer className="photo-archive-footer">{actions}</footer> : null}
   </article>;
 }

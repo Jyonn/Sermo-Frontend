@@ -24,6 +24,7 @@ interface ImageLightboxProps {
 }
 
 export interface MediaLightboxItem {
+  id?: number | string;
   uri: string;
   kind: "image" | "video";
   posterUri?: string | null;
@@ -47,6 +48,12 @@ interface MediaLightboxProps {
   totalCount?: number;
   onApproachingEnd?: () => void;
   onJumpToMessage?: () => void;
+  onApproachingStart?: () => void;
+  onBoundary?: (direction: "older" | "newer") => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+  loading?: boolean;
+  navigationLabel?: string;
 }
 
 async function downloadMedia(uri: string, fileNamePrefix: string) {
@@ -338,7 +345,7 @@ function PreviewImage({ alt, item, active, onSize }: { alt: string; item: MediaL
   const [attempt, setAttempt] = useState(0);
   return <div className="media-preview-image-shell">
     {item.posterUri && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={item.posterUri} /> : null}
-    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onError={() => setPhase("error")} onLoad={(event) => { setPhase("idle"); onSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight); }} referrerPolicy={item.referrerPolicy} src={item.uri} />
+    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onClick={(event) => event.stopPropagation()} onError={() => setPhase("error")} onLoad={(event) => { setPhase("idle"); onSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight); }} referrerPolicy={item.referrerPolicy} src={item.uri} />
     {active ? <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} /> : null}
   </div>;
 }
@@ -604,6 +611,12 @@ export function MediaLightbox({
   totalCount,
   onApproachingEnd,
   onJumpToMessage,
+  onApproachingStart,
+  onBoundary,
+  hasPrevious = false,
+  hasNext = false,
+  loading = false,
+  navigationLabel,
 }: MediaLightboxProps) {
   const { t } = useI18n();
   const resolvedAltPrefix = altPrefix || t("media.imagePreview");
@@ -611,8 +624,10 @@ export function MediaLightbox({
   useBodyScrollLock(items.length > 0);
   useModalFocus(modalRef, items.length > 0, onClose);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const gestureRef = useRef<{ moved: boolean; x: number } | null>(null);
+  const scrollPositionRef = useRef<{ index: number; length: number } | null>(null);
+  const gestureRef = useRef<{ moved: boolean; x: number; y: number } | null>(null);
   const approachingEndRef = useRef(onApproachingEnd);
+  const approachingStartRef = useRef(onApproachingStart);
   const [immersive, setImmersive] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
@@ -622,20 +637,30 @@ export function MediaLightbox({
   useEffect(() => { setDownloadError(false); }, [activeUri]);
 
   useEffect(() => { approachingEndRef.current = onApproachingEnd; }, [onApproachingEnd]);
+  useEffect(() => { approachingStartRef.current = onApproachingStart; }, [onApproachingStart]);
 
   useEffect(() => {
     if (items.length - index <= 5) approachingEndRef.current?.();
+    if (index < 5) approachingStartRef.current?.();
   }, [index, items.length]);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
     if (!track) return;
+    const position = scrollPositionRef.current;
+    if (position?.index === index && position.length === items.length) return;
     track.scrollLeft = track.clientWidth * index;
-  }, [index, items]);
+    scrollPositionRef.current = { index, length: items.length };
+  }, [index, items.length]);
 
   if (!items.length) return null;
   const activeItem = items[index] ?? items[0];
   const close = () => onClose();
+  const move = (direction: -1 | 1) => {
+    const next = index + direction;
+    if (next >= 0 && next < items.length) onIndexChange(next);
+    else onBoundary?.(direction === -1 ? "older" : "newer");
+  };
   const actions = <div className="photo-archive-actions" onClick={(event) => event.stopPropagation()}>
     {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
     <button aria-label={downloading ? t("media.downloading") : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} title={activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
@@ -653,21 +678,26 @@ export function MediaLightbox({
         return;
       }
       close();
-    }} onPointerDown={(event) => { gestureRef.current = { moved: false, x: event.clientX }; }} onPointerMove={(event) => {
+    }} onPointerDown={(event) => { gestureRef.current = { moved: false, x: event.clientX, y: event.clientY }; }} onPointerMove={(event) => {
       const gesture = gestureRef.current;
-      if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
+      if (gesture && Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 8) gesture.moved = true;
     }} role="presentation">
-      <section ref={modalRef} tabIndex={-1} aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
+      <section ref={modalRef} tabIndex={-1} aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog" onKeyDown={(event) => {
+        if (immersive || event.target instanceof HTMLElement && event.target.closest('input,textarea,select,video')) return;
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1); }
+      }}>
         <div className="message-image-preview-track" onScroll={(event) => {
           const element = event.currentTarget;
           const nextIndex = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
-          if (nextIndex !== index) onIndexChange(nextIndex);
+          if (nextIndex >= 0 && nextIndex < items.length && nextIndex !== index) {
+            scrollPositionRef.current = { index: nextIndex, length: items.length };
+            onIndexChange(nextIndex);
+          }
         }} ref={trackRef}>
-          {items.map((item, itemIndex) => <div aria-hidden={itemIndex !== index} className="message-image-preview-slide" key={`${item.uri}:${itemIndex}`}>
+          {items.map((item, itemIndex) => <div aria-hidden={itemIndex !== index} className="message-image-preview-slide" key={item.id ?? `${item.uri}:${itemIndex}`}>
             {item.kind === "image" && !immersive ? <PhotoArchivePlate
               metadata={item.imageMetadata} owner={item.owner} detail={item.detail}
               width={item.width || imageSizes[item.uri]?.width} height={item.height || imageSizes[item.uri]?.height}
-              actions={itemIndex === index ? actions : null}
             ><PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} onSize={(width, height) => setImageSizes((current) => current[item.uri]?.width === width && current[item.uri]?.height === height ? current : { ...current, [item.uri]: { width, height } })} /></PhotoArchivePlate> : <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
               <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`}>
                 {item.kind === "video"
@@ -684,8 +714,12 @@ export function MediaLightbox({
         </div>
         {!immersive && sharedDetail ? <div className="message-image-preview-shared-detail" onClick={(event) => event.stopPropagation()}>{sharedDetail}</div> : null}
         {!immersive && activeItem.kind === "image" ? <div className="photo-archive-navigation" onClick={(event) => event.stopPropagation()}>
-          {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
-          <button aria-label={t("common.close")} onClick={close} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+          <div className="photo-preview-context"><span>{navigationLabel || resolvedAltPrefix}</span>{loading ? <span className="media-wait-spinner" aria-label={t("common.loading")} role="status" /> : null}{!navigationLabel && (totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{index + 1}<i />{totalCount ?? items.length}</span> : null}</div>
+          <div className="photo-preview-tools">{actions}<button aria-label={t("common.close")} onClick={close} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
+        </div> : null}
+        {!immersive && (items.length > 1 || hasPrevious || hasNext) ? <div className="photo-preview-paging" onClick={(event) => event.stopPropagation()}>
+          <button type="button" aria-label={t("media.previousImage")} disabled={index === 0 && (!hasPrevious || loading)} onClick={() => move(-1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+          <button type="button" aria-label={t("media.nextImage")} disabled={index === items.length - 1 && (!hasNext || loading)} onClick={() => move(1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
         </div> : null}
         {!immersive && activeItem.kind === "video" ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
           {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}

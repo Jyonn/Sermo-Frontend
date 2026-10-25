@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.9",
+  "id": "2026.10.25.10",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "独立的应用创建面板",
+      "title": "聊天图片，连贯浏览",
       "items": [
-        "添加应用在独立抽屉中完成，桌面宽屏同时展示应用列表与创建面板",
-        "开发者入口更名为开发，保留分步填写和未保存提醒"
+        "聊天图片可跨图片集浏览更早或更晚的照片，跨出或返回原图片集时轻提示",
+        "重新整理图片预览布局与深浅色样式，点击画布空白即可退出，支持键盘翻页"
       ]
     },
     "en": {
-      "title": "A dedicated application creation panel",
+      "title": "Browse chat photos without boundaries",
       "items": [
-        "Add applications in a dedicated drawer, alongside the application list on wide desktop screens",
-        "Renamed the tab to Development, retaining guided steps and unsaved-change protection"
+        "Browse earlier and later chat photos beyond the original collection, with gentle collection-boundary notices",
+        "Refined image previews for light and dark themes, with blank-canvas dismissal and keyboard navigation"
       ]
     }
   }

@@ -38,7 +38,8 @@ import { FriendenLivingWallpaper } from "../components/FriendenLivingWallpaper";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
-import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
+import { MediaLightbox } from "../components/ImageLightbox";
+import { ChatImagePreview } from "../components/ChatImagePreview";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
 import { RelativeDateSections } from "../components/RelativeDateSections";
@@ -2703,6 +2704,7 @@ interface MessageSelectionActionPrompt {
 }
 
 interface ImagePreviewState {
+  chatId?: number;
   index: number;
   uris: string[];
   metadata: Array<ImageMetadataDTO | null>;
@@ -3299,31 +3301,6 @@ function LiveChatsPage({
   const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
   const fileDropDepthRef = useRef(0);
-
-  useEffect(() => {
-    if (!imagePreview) return;
-    const messageId = imagePreview.messageIds[imagePreview.index];
-    const metadata = imagePreview.metadata[imagePreview.index];
-    if (!messageId || metadata?.status === 2) return;
-    if (metadata?.status === 1 && metadata.geocoding_status !== 0) return;
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      void api.getMediaMetadata<ImageMetadataDTO>(messageId, controller.signal)
-        .then((nextMetadata) => {
-          setImagePreview((current) => {
-            if (!current || current.messageIds[current.index] !== messageId) return current;
-            const next = [...current.metadata];
-            next[current.index] = nextMetadata;
-            return { ...current, metadata: next };
-          });
-        })
-        .catch(() => undefined);
-    }, 1200);
-    return () => {
-      controller.abort();
-      window.clearTimeout(timer);
-    };
-  }, [imagePreview]);
 
   useEffect(() => {
     if (!videoPreview?.messageId) return;
@@ -8272,6 +8249,7 @@ function LiveChatsPage({
                       group={group}
                       onOpenImage={(uris, index, metadata = [], messageIds = []) => {
                         setImagePreview({
+                          chatId: selectedChat?.id,
                           uris,
                           index,
                           metadata: uris.map((_uri, itemIndex) => metadata[itemIndex] ?? null),
@@ -10047,15 +10025,9 @@ function LiveChatsPage({
         type="file"
       />
       {imagePreview ? (
-        <ImageLightbox
-          metadata={imagePreview.metadata}
-          downloadLabels={imagePreview.metadata.map((metadata) => formatImageFileSize(metadata?.file_size))}
-          index={imagePreview.index}
-          onClose={() => setImagePreview(null)}
-          onIndexChange={(index) => setImagePreview((current) => current ? { ...current, index } : current)}
-          posterUris={imagePreview.messageIds.map((id) => id === null ? undefined : selectedMessages.find((message) => message.id === id)?.payload?.thumbnail_uri)}
-          uris={imagePreview.uris}
-        />
+        <ChatImagePreview key={`${imagePreview.chatId}:${imagePreview.uris[0]}`} chatId={imagePreview.chatId} initialIndex={imagePreview.index}
+          images={imagePreview.uris.map((uri, index) => ({ uri, messageId: imagePreview.messageIds[index] ?? null, metadata: imagePreview.metadata[index], posterUri: selectedMessages.find((message) => message.id === imagePreview.messageIds[index])?.payload?.thumbnail_uri }))}
+          onClose={() => setImagePreview(null)} />
       ) : null}
       {videoPreview ? (
         <MediaLightbox
