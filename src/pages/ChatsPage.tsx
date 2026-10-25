@@ -62,6 +62,7 @@ import { PlainAvatar, UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
 import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
+import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components/VirtualDynamicList";
 import { ApiError, api } from "../lib/api";
@@ -2329,6 +2330,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   onOpenOfficialNotice,
   onMentionAuthor,
   onOpenAuthorProfile,
+  onOpenSelfProfile,
   onRetry,
   onToggleGroupSelection,
   onToggleSelection,
@@ -2462,6 +2464,8 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           >
             {groupAvatar}
           </button>
+        ) : group.from === "self" && groupAvatar && onOpenSelfProfile ? (
+          <button className="message-avatar-selection-trigger" aria-label={i18n.t("profile.myCard")} onClick={onOpenSelfProfile} type="button">{groupAvatar}</button>
         ) : group.from === "other" && groupAvatar && typeof group.userId === "number" && (onMentionAuthor || onOpenAuthorProfile) ? (
           <MessageAvatarMentionTarget
             name={group.name}
@@ -2519,6 +2523,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   prev.showAuthor === next.showAuthor
   && prev.showSelfAuthor === next.showSelfAuthor
   && prev.showSelfAvatar === next.showSelfAvatar
+  && prev.onOpenSelfProfile === next.onOpenSelfProfile
   && prev.selfAvatarFrame === next.selfAvatarFrame
   && prev.selfAvatarName === next.selfAvatarName
   && prev.selfAvatarUri === next.selfAvatarUri
@@ -2670,6 +2675,7 @@ interface MessageGroupBlockProps {
   onOpenOfficialNotice?: (message: ChatMessage) => void;
   onMentionAuthor?: (userId: number) => void;
   onOpenAuthorProfile?: (userId: number) => void;
+  onOpenSelfProfile?: () => void;
   onRetry: (message: ChatMessage) => void;
   onToggleGroupSelection: (messages: ChatMessage[]) => void;
   onToggleSelection: (message: ChatMessage) => void;
@@ -3134,6 +3140,7 @@ function LiveChatsPage({
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
+  const [myCardOpen, setMyCardOpen] = useState(false);
   const [, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | "background" | null>(null);
   const [groupBackgroundOpen, setGroupBackgroundOpen] = useState(false);
@@ -8264,13 +8271,14 @@ function LiveChatsPage({
                       }}
                       onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
                       onOpenAuthorProfile={setProfileDrawerUserId}
+                      onOpenSelfProfile={() => setMyCardOpen(true)}
                       onRetry={retryFailedMessage}
                       onToggleGroupSelection={toggleMessageGroupSelection}
                       onToggleSelection={toggleMessageSelection}
                       selectedClientIds={selectedMessageClientIds}
                       selectionMode={messageSelectionMode}
                       showAuthor={Boolean(selectedChat?.type === "group")}
-                      showSelfAvatar={Boolean(currentUserMe?.show_self_avatar)}
+                      showSelfAvatar={currentUserMe?.show_self_avatar ?? true}
                       selfAvatarFrame={currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style}
                       selfAvatarName={currentUserName}
                       selfAvatarUri={currentUserMe?.avatar_uri ?? session?.user.avatar_uri}
@@ -9613,6 +9621,7 @@ function LiveChatsPage({
           <ChatMuteControls busy={groupMuteBusy} mute={groupMuteTarget.groupChatMute} onMute={(duration) => void setGroupMemberMute(duration)} onUnmute={() => void removeGroupMemberMute()} />
         </div> : null}
       </BottomSheet>
+      {session ? <MyProfileCardDrawer open={myCardOpen} onRouteOpen={() => setMyCardOpen(true)} onClose={() => setMyCardOpen(false)} user={{ ...session.user, ...currentUserMe, user_id: session.user.user_id, name: currentUserName }} /> : null}
       <SideDrawer
         headerless
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}

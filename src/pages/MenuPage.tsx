@@ -12,7 +12,7 @@ import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
-import { UserProfilePanel } from "../components/UserProfilePanel";
+import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
@@ -463,7 +463,6 @@ export default function MenuPage() {
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
-  const [cardAudience, setCardAudience] = useState<"friend" | "stranger">("friend");
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
@@ -496,7 +495,7 @@ export default function MenuPage() {
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
     avatar_frame_style: "none",
-    show_self_avatar: false,
+    show_self_avatar: true,
     profile_card_theme: "default",
   });
   const [bindMoreOpen, setBindMoreOpen] = useState(false);
@@ -774,7 +773,7 @@ export default function MenuPage() {
     setPersonalizationDraft({
       chat_bubble_style: currentBubble,
       avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
-      show_self_avatar: Boolean(me.show_self_avatar),
+      show_self_avatar: me.show_self_avatar ?? true,
       profile_card_theme: me.profile_card_theme ?? "default",
     });
   }, [chatPageDrawerOpen, me?.chat_background_theme, me?.chat_bubble_style, me?.avatar_frame_style, me?.show_self_avatar]);
@@ -784,7 +783,7 @@ export default function MenuPage() {
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
-      show_self_avatar: Boolean(me.show_self_avatar),
+      show_self_avatar: me.show_self_avatar ?? true,
       profile_card_theme: me.profile_card_theme ?? "default",
     });
   }, [
@@ -1721,7 +1720,7 @@ export default function MenuPage() {
 
   const saveSelfAvatarPreference = async () => {
     if (!me || personalizationSaving) return;
-    const previous = Boolean(me.show_self_avatar);
+    const previous = me.show_self_avatar ?? true;
     const next = !previous;
     setMe((current) => current ? { ...current, show_self_avatar: next } : current);
     setPersonalizationSaving(true);
@@ -2369,17 +2368,7 @@ export default function MenuPage() {
       </SideDrawer>
 
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} /> : null}
-      <SideDrawer headerless historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")} floatingAccessory={
-        <div className="profile-audience-switch" role="group" aria-label={t("profile.cardAudience")}>
-          {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" aria-pressed={cardAudience === audience} onClick={() => setCardAudience(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
-        </div>
-      }>
-        {session ? <UserProfilePanel
-          userId={session.user.user_id}
-          initialUser={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }}
-          previewAudience={cardAudience}
-        /> : null}
-      </SideDrawer>
+      {session ? <MyProfileCardDrawer onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} user={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }} /> : null}
 
       <BottomSheet open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")} className="bgm-info-sheet">
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
@@ -2416,7 +2405,7 @@ export default function MenuPage() {
               description={t("menu.showSelfAvatarHint")}
               title={t("menu.showSelfAvatar")}
               trailing={<SettingSwitch
-                checked={Boolean(me?.show_self_avatar)}
+                checked={me?.show_self_avatar ?? true}
                 disabled={personalizationSaving}
                 label={t("menu.showSelfAvatar")}
                 onChange={() => void saveSelfAvatarPreference()}

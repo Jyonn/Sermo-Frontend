@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.25.16",
+  "id": "2026.10.25.17",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的成长旅程",
+      "title": "从聊天打开我的名片",
       "items": [
-        "重新整理我的成长与等级图鉴，统一头像框、气泡和背景奖励预览",
-        "LV16 解锁真实成长报告，LV18 获得永久满级名片纪念展示",
-        "优化升级全屏海报，移除 LV17 头像框收藏入口"
+        "新账户默认显示自己的聊天头像，保留已有显示偏好",
+        "点击自己消息旁的头像，即可查看我的名片并切换好友或陌生人视角"
       ]
     },
     "en": {
-      "title": "A clearer growth journey",
+      "title": "Your profile, right from chat",
       "items": [
-        "Refreshed growth overview and level atlas with consistent reward previews",
-        "Unlock a personal growth report at LV16 and a permanent profile keepsake at LV18",
-        "Improved level-up ceremonies and removed the LV17 frame collection entry"
+        "New accounts show their own chat avatar by default, while existing preferences are preserved",
+        "Tap your avatar beside a message to preview your profile as a friend or stranger"
       ]
     }
   }
