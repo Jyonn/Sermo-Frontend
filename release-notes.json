@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.27.4",
+  "id": "2026.10.27.5",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "深色聊天显示更清晰",
+      "title": "通知设置排版更舒适",
       "items": [
-        "修复手机壁纸加载后会话标题及锁定栏配色，加载页面也跟随深色模式",
-        "优化换行按钮的图标与交互，修复折叠导航头像居中"
+        "调整通知与提醒的按类型列表留白，让文字、开关和列标题对齐更自然"
       ]
     },
     "en": {
-      "title": "Clearer dark chat surfaces",
+      "title": "More comfortable notification settings",
       "items": [
-        "Keep mobile chat headers, pinned bars and loading screens readable in dark mode",
-        "Refine the newline control and center avatars in collapsed navigation"
+        "Improve spacing and column alignment in notification settings by type"
       ]
     }
   }

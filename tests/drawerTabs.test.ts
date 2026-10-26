@@ -13,6 +13,13 @@ runInNewContext(compiled, { module, exports: module.exports, require: createRequ
 const { DrawerTabs } = module.exports;
 const items = [{ value: "apps", label: "Apps" }, { value: "plugins", label: "Plugins" }];
 
+test("notification type rows and their column headings retain matching insets", () => {
+  const css = readFileSync(new URL("../src/pages/MenuSections.css", import.meta.url), "utf8");
+  assert.match(css, /\.notification-topic-row \{ padding:14px 16px;/);
+  assert.match(css, /\.notification-type-card > header \{ padding:4px 16px 14px;/);
+  assert.match(css, /\.notification-channel-legend \{[^}]*padding-inline:16px;/);
+});
+
 test("drawer tabs expose selected state and one keyboard entry point", () => {
   const html = renderToStaticMarkup(DrawerTabs({ label: "Tools", items, value: "apps", onChange() {} }));
   assert.match(html, /role="tablist" aria-label="Tools"/);

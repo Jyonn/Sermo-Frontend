@@ -11,11 +11,11 @@
 .menu-settings-section :is(.more-apps-row,.notification-channel-card) small { font-size:12px; line-height:1.6; color:var(--text-secondary); overflow-wrap:anywhere; }
 .menu-settings-section .notification-type-stack { gap:20px; }
 .menu-settings-section .notification-type-card { border:0; border-radius:0; background:transparent; }
-.menu-settings-section .notification-type-card > header { padding:0 0 12px; gap:4px; }
-.menu-settings-section .notification-topic-row { padding:12px 0; gap:8px; min-height:60px; border-color:var(--line-soft); }
+.menu-settings-section .notification-type-card > header { padding:4px 16px 14px; gap:4px; }
+.menu-settings-section .notification-topic-row { padding:14px 16px; gap:8px; min-height:64px; border-color:var(--line-soft); }
 .menu-settings-section .notification-topic-row strong { font-size:13px; font-weight:550; }
 .menu-settings-section .notification-topic-row small { font-size:11px; }
 .menu-settings-section .notification-topic-channels { gap:6px; }
 .menu-settings-section .notification-mini-toggle { width:36px; height:36px; border-radius:11px; }
-.notification-channel-legend { display:flex; justify-content:flex-end; gap:6px; color:var(--text-muted); font-size:10px; }
+.notification-channel-legend { display:flex; justify-content:flex-end; gap:6px; padding-inline:16px; color:var(--text-muted); font-size:10px; }
 .notification-channel-legend > span { width:36px; text-align:center; overflow-wrap:anywhere; }
