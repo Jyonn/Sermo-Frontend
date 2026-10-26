@@ -20,3 +20,18 @@ html[data-theme="dark"] body .activity-drawer.is-custom-activity.side-drawer > .
 .activity-drawer.is-custom-activity .drawer-title { position:static; width:auto; height:auto; clip:auto; clip-path:none; overflow:visible; color:var(--text-primary); }
 .activity-drawer.is-custom-activity .drawer-back-button { color:var(--text-primary); }
 .activity-drawer.is-custom-activity .activity-drawer-share { color:var(--text-primary); background:color-mix(in srgb,#77b89a 14%,transparent); border-color:var(--line-soft); }
+.activity-drawer.activity-transparent-header .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; }
+html[data-theme="dark"] body .side-drawer.activity-drawer.activity-transparent-header > .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; backdrop-filter:none; }
+html[data-theme="dark"] .activity-transparent-header .drawer-title-row .campaign-title-art { filter:brightness(0) invert(.92) sepia(.2); }
+.activity-drawer.activity-transparent-header .drawer-topbar-shell { min-height:42px; }
+.activity-transparent-header .drawer-title-row:has(.campaign-title-art,.campaign-title-text,.activity-drawer-title-art) > .drawer-title { position:absolute; width:1px; height:1px; margin:-1px; padding:0; clip-path:inset(50%); overflow:hidden; white-space:nowrap; }
+.activity-transparent-header .drawer-title-row { min-width:0; }
+.activity-transparent-header .drawer-title-row .campaign-title-art,
+.activity-transparent-header .drawer-title-row .activity-drawer-title-art { display:block; width:auto; max-width:min(140px,40vw); height:32px; max-height:32px; object-fit:contain; object-position:left center; }
+.activity-transparent-header .drawer-title-row .campaign-title-text { font-size:17px; line-height:1.25; -webkit-line-clamp:1; }
+.activity-drawer.activity-transparent-header .drawer-back-button,
+.activity-drawer.activity-transparent-header .activity-drawer-share { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; padding:0; border:0; border-radius:50%; background:transparent; box-shadow:none; }
+.activity-transparent-header .drawer-back-button .material-symbols-outlined,
+.activity-transparent-header .activity-drawer-share .material-symbols-outlined { font-size:23px; }
+.activity-transparent-header .drawer-back-button:hover,
+.activity-transparent-header .activity-drawer-share:hover { background:color-mix(in srgb,currentColor 7%,transparent); }

@@ -29,3 +29,8 @@
 - Maintain Chinese and English through translation keys rather than hard-coded bilingual branches.
 - Design mobile-first while verifying desktop layouts, dark mode, safe areas, PWA behavior, loading states, and empty states.
 - Prefer restrained copy, clear hierarchy, and native-feeling Drawer, Sheet, Modal, and Toast interactions.
+
+## Activity Design
+
+- Use imagegen for every new activity's custom activity-name lettering. Persist the transparent asset in this repository and reuse it for the banner, share card, and header, with accessible text and a localized fallback. Plain text or a generic display font is not the final Chinese activity wordmark.
+- Activity headers must be transparent and include a back button, a compact activity wordmark, and a share button. Use navigation-title sizing rather than an oversized hero title, and verify safe areas, portrait, landscape, desktop, and dark-mode readability.

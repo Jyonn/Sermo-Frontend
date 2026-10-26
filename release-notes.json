@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.3",
+  "id": "2026.10.26.4",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋，邀友推理",
+      "title": "数字交锋，焕新登场",
       "items": [
-        "新增七日数字交锋活动，空间管理员申领后即可开启，支持房间邀请和30秒同步对局",
-        "10／20／50分档随等级解锁，每日首场获胜双倍，失败不扣分"
+        "数字交锋新增专属艺术字体，广场横幅与分享卡片同步焕新",
+        "活动页采用透明导航栏，返回、活动标题和分享操作更清晰"
       ]
     },
     "en": {
-      "title": "Challenge a friend to Code Duel",
+      "title": "A fresh look for Code Duel",
       "items": [
-        "Space administrators can launch a seven-day Code Duel event with room invitations and simultaneous 30-second rounds",
-        "Unlock 10/20/50-point tiers by level, earn double for a first-match win, and never lose points"
+        "Code Duel has a bespoke title wordmark, shared across its banner and share cards",
+        "Activity pages now feature transparent headers with compact titles, back navigation, and sharing"
       ]
     }
   }

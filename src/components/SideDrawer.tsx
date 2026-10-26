@@ -31,6 +31,7 @@ interface SideDrawerProps {
   floatingAccessory?: ReactNode;
   style?: CSSProperties;
   trapFocus?: boolean;
+  dismissAction?: "auto" | "back";
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -73,6 +74,7 @@ export function SideDrawer({
   floatingAccessory,
   style,
   trapFocus = false,
+  dismissAction = "auto",
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
@@ -236,7 +238,7 @@ export function SideDrawer({
   useModalFocus(surfaceRef, visible && trapFocus, requestClose);
   if (!visible || typeof document === "undefined") return null;
 
-  const desktopClose = desktopPanel && !panels?.single;
+  const desktopClose = desktopPanel && !panels?.single && dismissAction !== "back";
   const dismissLabel = t(desktopClose ? "common.close" : "common.back");
   const dismissIcon = desktopClose ? "close" : "arrow_back";
   return <>
