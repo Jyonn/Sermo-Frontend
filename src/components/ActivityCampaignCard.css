@@ -22,7 +22,6 @@ html[data-theme="dark"] body .activity-drawer.is-custom-activity.side-drawer > .
 .activity-drawer.is-custom-activity .activity-drawer-share { color:var(--text-primary); background:color-mix(in srgb,#77b89a 14%,transparent); border-color:var(--line-soft); }
 .activity-drawer.activity-transparent-header .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; }
 html[data-theme="dark"] body .side-drawer.activity-drawer.activity-transparent-header > .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; backdrop-filter:none; }
-html[data-theme="dark"] .activity-transparent-header .drawer-title-row .campaign-title-art { filter:brightness(0) invert(.92) sepia(.2); }
 .activity-drawer.activity-transparent-header .drawer-topbar-shell { min-height:42px; }
 .activity-transparent-header .drawer-title-row:has(.campaign-title-art,.campaign-title-text,.activity-drawer-title-art) > .drawer-title { position:absolute; width:1px; height:1px; margin:-1px; padding:0; clip-path:inset(50%); overflow:hidden; white-space:nowrap; }
 .activity-transparent-header .drawer-title-row { min-width:0; }

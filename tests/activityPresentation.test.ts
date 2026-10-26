@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { activityPresentation, safeActivityImage } from "../src/lib/activityPresentation.ts";
+
+test("activity headers preserve lettering colors in dark mode", () => {
+  const css = readFileSync(new URL("../src/components/ActivityCampaignCard.css", import.meta.url), "utf8");
+  assert.doesNotMatch(css, /campaign-title-art\s*\{[^}]*filter:\s*brightness\(0\)/);
+  assert.match(css, /height:32px/);
+});
 
 test("unknown campaigns never inherit Baxian artwork", () => {
   assert.equal(activityPresentation({ key: "new-event" }).artwork_url, undefined);
