@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.27.8",
+  "id": "2026.10.27.9",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "锁定消息入口更直接",
+      "title": "投稿详情显示更干净",
       "items": [
-        "点击整条锁定栏即可查看锁定消息，矮屏时入口收进会话顶部菜单旁",
-        "修复平板导航头像居中，矮屏隐藏头像并默认折叠输入框"
+        "修复投稿详情在横屏和紧凑布局下，左上角被隐藏列表遮挡的问题"
       ]
     },
     "en": {
-      "title": "Quicker access to pinned messages",
+      "title": "Cleaner submission details",
       "items": [
-        "Open pinned messages from the entire bar, or a header lock button on short screens",
-        "Center tablet navigation avatars and simplify navigation and composing on short screens"
+        "Prevent hidden submission lists from covering the detail header in landscape and compact layouts"
       ]
     }
   }
