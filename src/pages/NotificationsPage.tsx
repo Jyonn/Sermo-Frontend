@@ -6,6 +6,7 @@ import { QuietState } from "../components/BoundaryState";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
+import { DrawerTabs } from "../components/DrawerTabs";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ApiError, api } from "../lib/api";
@@ -364,14 +365,10 @@ export default function NotificationsPage() {
         onClose={() => setRequestSheetOpen(false)}
       >
         <div className="friend-request-drawer">
-          <div className="friend-request-tabs" role="tablist">
-            <button className={requestDrawerTab === "incoming" ? "active" : ""} onClick={() => setRequestDrawerTab("incoming")} role="tab" type="button">
-              {t("request.incoming")}{filteredIncoming.length ? ` ${filteredIncoming.length}` : ""}
-            </button>
-            <button className={requestDrawerTab === "outgoing" ? "active" : ""} onClick={() => setRequestDrawerTab("outgoing")} role="tab" type="button">
-              {t("request.outgoing")}{filteredOutgoing.length ? ` ${filteredOutgoing.length}` : ""}
-            </button>
-          </div>
+          <DrawerTabs label={t("contacts.requests")} value={requestDrawerTab} onChange={setRequestDrawerTab} items={[
+            { value: "incoming", label: `${t("request.incoming")}${filteredIncoming.length ? ` ${filteredIncoming.length}` : ""}` },
+            { value: "outgoing", label: `${t("request.outgoing")}${filteredOutgoing.length ? ` ${filteredOutgoing.length}` : ""}` },
+          ]} />
           {requestDrawerTab === "incoming" ? filteredIncoming.length ? (
             <div className="simple-list friend-request-list">
               {filteredIncoming.map((request) => (

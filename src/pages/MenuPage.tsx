@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type Change
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
+import { DrawerTabs } from "../components/DrawerTabs";
+import "./MenuSections.css";
 import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AppChrome } from "../components/AppChrome";
@@ -2224,11 +2226,9 @@ export default function MenuPage() {
       <CloudResourceDrawer onRouteOpen={() => setCloudResourcesOpen(true)} onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
-        <div className="more-apps-drawer">
+        <div className="more-apps-drawer menu-settings-section">
           {platformAdminSession ? <button className="simple-row menu-link-row" type="button" onClick={() => navigate("/admin?section=oauth")}>{t("oauth.platformManage")}</button> : null}
-          <div className="mode-switch" role="tablist" aria-label={t("apps.more")}>
-            {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
-          </div>
+          <DrawerTabs label={t("apps.more")} value={appsTab} onChange={setAppsTab} items={[{ value: "apps", label: t("apps.appTab") }, { value: "plugins", label: t("apps.pluginTab") }]} />
           {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
             <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
               <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
@@ -2974,13 +2974,10 @@ export default function MenuPage() {
       </BottomSheet>
 
       <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
-        <div className="notification-routing-drawer">
-          <div className="mode-switch notification-routing-mode" role="tablist">
-            <button className={`mode-pill ${notificationSettingsMode === "channel" ? "active" : ""}`} onClick={() => setNotificationSettingsMode("channel")} role="tab" type="button">{t("notification.byChannel")}</button>
-            <button className={`mode-pill ${notificationSettingsMode === "type" ? "active" : ""}`} onClick={() => setNotificationSettingsMode("type")} role="tab" type="button">{t("notification.byType")}</button>
-          </div>
+        <div className="notification-routing-drawer menu-settings-section">
+          <DrawerTabs label={t("menu.notifications")} value={notificationSettingsMode} onChange={setNotificationSettingsMode} items={[{ value: "channel", label: t("notification.byChannel") }, { value: "type", label: t("notification.byType") }]} />
           {notificationSettingsMode === "channel" ? (
-            <div className="notification-routing-grid">
+            <div className="notification-routing-grid" role="tabpanel" aria-label={t("notification.byChannel")}>
               <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">{standalonePwa ? "desktop_windows" : "language"}</span><div><strong>{standalonePwa ? t("channel.system") : t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
               <button className="notification-channel-card is-email" onClick={() => emailVerified ? openPrefDrawer("email") : openBindingFromNotifications("email")} type="button">
                 <span className="material-symbols-outlined">mail</span>
@@ -2994,18 +2991,19 @@ export default function MenuPage() {
               </button>
             </div>
           ) : (
-            <div className="notification-type-stack">
+            <div className="notification-type-stack" role="tabpanel" aria-label={t("notification.byType")}>
+              <div className="notification-channel-legend" aria-hidden="true"><span>{standalonePwa ? t("channel.system") : t("channel.web")}</span><span>{t("channel.email")}</span><span>{t("channel.instant")}</span></div>
               {([
                 { title: t("notification.chatType"), hint: t("notification.chatTypeHint"), topics: [[1, 0]] },
                 { title: t("notification.squareType"), hint: t("notification.squareTypeHint"), topics: [[2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2]] },
                 { title: t("notification.onlineType"), hint: t("notification.onlineTypeHint"), topics: [[6, 0]] },
               ] as Array<{ title: string; hint: string; topics: Array<[number, number]> }>).map((section) => (
                 <section className="notification-type-card" key={section.title}>
-                  <header><strong>{section.title}</strong><small>{section.hint}</small></header>
+                  {section.topics.length > 1 ? <header><strong>{section.title}</strong><small>{section.hint}</small></header> : null}
                   {section.topics.map(([topic, audience]) => {
                     const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
-                    return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : null}</div><div className="notification-topic-channels">
-                      {([0, 1, 3] as Array<0 | 1 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || (channel === 1 && !emailVerified) || (channel === 3 && instantEndpoints.length === 0) || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? (standalonePwa ? "desktop_windows" : "language") : channel === 1 ? "mail" : "notifications_active"}</span></button>)}
+                    return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : <small>{section.hint}</small>}</div><div className="notification-topic-channels">
+                      {([0, 1, 3] as Array<0 | 1 | 3>).map((channel) => <button aria-label={`${labels[topic]}${audience ? ` · ${audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}` : ""} · ${channel === 0 ? (standalonePwa ? t("channel.system") : t("channel.web")) : channel === 1 ? t("channel.email") : t("channel.instant")}`} aria-pressed={topicEnabled(channel, topic, audience)} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || (channel === 1 && !emailVerified) || (channel === 3 && instantEndpoints.length === 0) || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? (standalonePwa ? "desktop_windows" : "language") : channel === 1 ? "mail" : "notifications_active"}</span></button>)}
                     </div></div>;
                   })}
                 </section>

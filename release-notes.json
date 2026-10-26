@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.13",
+  "id": "2026.10.26.14",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋延长至30轮",
+      "title": "菜单设置排版更新",
       "items": [
-        "每场最多30轮，每轮仍为30秒，第30轮结束仍未猜中则平局",
-        "活动结束前18分钟停止新建房间，为完整对局预留时间"
+        "通知与提醒、应用与插件采用与好友申请一致的双Tab切换和简洁列表",
+        "应用和插件更名为应用与插件，通知类型设置的渠道与开关状态更清晰"
       ]
     },
     "en": {
-      "title": "Code Duel extends to 30 rounds",
+      "title": "Refined menu settings",
       "items": [
-        "Matches allow 30 rounds of 30 seconds; unsolved matches draw after round 30",
-        "New rooms close 18 minutes before the event ends to allow time for a full match"
+        "Notifications and Apps & Plugins share the friend-request tab style and simpler lists",
+        "Notification channel labels and toggle states are clearer"
       ]
     }
   }
