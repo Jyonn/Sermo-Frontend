@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.7",
+  "id": "2026.10.26.8",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋专属数字字体",
+      "title": "数字交锋滚动体验优化",
       "items": [
-        "档位、倒计时、秘密数字、推理记录和结算分数统一使用专属数字字体",
-        "数字等宽对齐，0的形态更清晰，字体随站点本地加载"
+        "活动页与房间页滚动边界更稳定，短屏和横屏也能完整查看底部内容",
+        "房间标题保持在顶部，底部操作预留安全空间"
       ]
     },
     "en": {
-      "title": "Dedicated Code Duel numerals",
+      "title": "Smoother Code Duel scrolling",
       "items": [
-        "Entry tiers, timers, secret codes, reasoning history and settlement points use a dedicated numeric typeface",
-        "Tabular numerals and a distinctive zero improve readability, with the font hosted locally"
+        "Activity and room content stays fully reachable on short screens and in landscape",
+        "Room headers stay visible while bottom actions retain safe spacing"
       ]
     }
   }

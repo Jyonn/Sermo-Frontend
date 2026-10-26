@@ -3,7 +3,8 @@
 .duel-panel button:disabled { opacity:.4; cursor:not-allowed; }
 .side-drawer.activity-drawer.is-custom-activity:has(.number-duel) { background:radial-gradient(ellipse at 95% 0,color-mix(in srgb,#a2b992 18%,transparent),transparent 58%),var(--bg-canvas); }
 html body .activity-drawer.is-custom-activity:has(.number-duel) > .drawer-body,
-html[data-theme="dark"] body .activity-drawer.is-custom-activity:has(.number-duel) > .drawer-body { background:transparent; }
+html[data-theme="dark"] body .activity-drawer.is-custom-activity:has(.number-duel) > .drawer-body { background:transparent; min-height:0; flex:1 1 0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scroll-padding-bottom:max(24px,env(safe-area-inset-bottom)); }
+.activity-drawer:has(.number-duel) > .drawer-body > .number-duel { min-height:0; padding-bottom:max(32px,env(safe-area-inset-bottom)); }
 @media (min-width:900px) { .side-drawer.activity-drawer:has(.number-duel) { --drawer-width:min(100vw,760px); max-width:760px; } }
 @media (min-width:720px) and (max-height:500px) { .side-drawer.activity-drawer:has(.number-duel) { --drawer-width:min(100vw,720px); max-width:720px; } }
 html[data-theme="dark"] .number-duel,html[data-theme="dark"] .duel-panel { --duel-accent:#64d3a6; --duel-tint:#213b2e; }
