@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.27.10",
+  "id": "2026.10.27.11",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "活动字标更清晰",
+      "title": "好友二维码更清爽",
       "items": [
-        "深色模式保留活动字标的原始配色与描边，修复主角登场标题糊成一片的问题"
+        "优化好友二维码的排版与深色配色，支持下载完整邀请卡图片"
       ]
     },
     "en": {
-      "title": "Clearer activity lettering",
+      "title": "A cleaner friend QR card",
       "items": [
-        "Preserve activity lettering colors and outlines in dark mode so titles remain legible"
+        "Refined friend QR cards with dark mode support and downloadable invitation images"
       ]
     }
   }

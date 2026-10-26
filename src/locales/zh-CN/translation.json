@@ -1971,6 +1971,7 @@
   "webReminder.messageSound": "新消息提示音",
   "webReminder.titleAlert": "标题提醒",
   "invite.friendQr": "好友二维码",
+  "invite.downloadImage": "下载图片",
   "invite.qrAlt": "好友邀请二维码",
   "invite.fromUser": "{{name}} 的好友邀请",
   "invite.spaceOnly": "仅限当前空间内使用，{{validity}}",

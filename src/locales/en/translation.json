@@ -1971,6 +1971,7 @@
   "webReminder.messageSound": "New message sound",
   "webReminder.titleAlert": "Title alerts",
   "invite.friendQr": "Friend QR code",
+  "invite.downloadImage": "Download image",
   "invite.qrAlt": "Friend invite QR code",
   "invite.fromUser": "{{name}}'s friend invite",
   "invite.spaceOnly": "For this space only, {{validity}}",

@@ -1024,15 +1024,18 @@ html[data-theme="dark"] .user-profile-panel {
 
 .menu-share-card {
   display: grid;
-  gap: 18px;
-  padding: 18px;
+  gap: 24px;
+  width: min(100%, 440px);
+  min-width: 0;
+  margin-inline: auto;
+  padding: clamp(20px, 5vw, 32px);
   border-radius: 24px;
   background:
-    radial-gradient(circle at top right, rgba(44, 169, 255, 0.12), transparent 32%),
-    radial-gradient(circle at left top, rgba(0, 208, 132, 0.12), transparent 26%),
-    rgba(255, 255, 255, 0.94);
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--brand-primary) 9%, transparent), transparent 65%),
+    var(--bg-elevated);
+  color: var(--text-primary);
   border: 1px solid color-mix(in srgb, var(--line-soft) 92%, transparent);
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
 }
 
 .menu-share-qr-shell {
@@ -1042,31 +1045,29 @@ html[data-theme="dark"] .user-profile-panel {
 
 .menu-share-qr-frame {
   position: relative;
-  width: min(100%, 296px);
+  width: min(100%, 264px);
   aspect-ratio: 1;
   padding: 18px;
-  border-radius: 30px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(243, 248, 255, 0.96));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 18px 36px rgba(15, 23, 42, 0.1);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .menu-share-qr-image {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 22px;
+  border-radius: 0;
 }
 
 .menu-share-qr-avatar {
   position: absolute;
   inset: 50% auto auto 50%;
   transform: translate(-50%, -50%);
-  width: 74px;
-  height: 74px;
-  padding: 8px;
-  border-radius: 24px;
+  width: 58px;
+  height: 58px;
+  padding: 5px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
 }
@@ -1079,18 +1080,20 @@ html[data-theme="dark"] .user-profile-panel {
 
 .menu-share-meta {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   text-align: center;
 }
 
 .menu-share-meta strong {
-  font-size: 1rem;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
 }
 
 .menu-share-link-box {
   padding: 14px 16px;
   border-radius: 18px;
-  background: rgba(248, 250, 252, 0.96);
+  min-width: 0;
+  background: var(--bg-canvas);
   border: 1px solid color-mix(in srgb, var(--line-soft) 92%, transparent);
 }
 
@@ -1104,10 +1107,12 @@ html[data-theme="dark"] .user-profile-panel {
 
 .menu-share-actions {
   display: grid;
+  gap: 10px;
 }
 
 .menu-share-mode-switch {
   justify-content: center;
+  width: 100%;
 }
 
 .menu-danger-row {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
+import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
 import { DrawerTabs } from "../components/DrawerTabs";
 import "./MenuSections.css";
@@ -542,6 +543,7 @@ export default function MenuPage() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [friendInviteLink, setFriendInviteLink] = useState("");
   const [friendInviteQrUri, setFriendInviteQrUri] = useState("");
+  const [friendInviteDownloading, setFriendInviteDownloading] = useState(false);
   const [friendInviteLoading, setFriendInviteLoading] = useState(false);
   const [friendInviteExpire, setFriendInviteExpire] = useState<number | null>(null);
   const [friendInviteMode, setFriendInviteMode] = useState<"limited" | "permanent">("limited");
@@ -3075,6 +3077,10 @@ export default function MenuPage() {
         <div className="detail-list menu-share-drawer">
           {!friendInviteLoading && friendInviteQrUri ? (
             <div className="menu-share-card">
+              <div className="menu-share-meta">
+                <strong>{t("invite.fromUser", { name: session?.user.name ?? t("brand.user") })}</strong>
+                <div className="row-subtle">{t("invite.spaceOnly", { validity: friendInviteValidityText })}</div>
+              </div>
               <div className="menu-share-qr-shell">
                 <div className="menu-share-qr-frame">
                   <img alt={t("invite.qrAlt")} className="menu-share-qr-image" src={friendInviteQrUri} />
@@ -3084,24 +3090,10 @@ export default function MenuPage() {
                 </div>
               </div>
 
-              <div className="menu-share-meta">
-                <strong>{t("invite.fromUser", { name: session?.user.name ?? t("brand.user") })}</strong>
-                <div className="row-subtle">{t("invite.spaceOnly", { validity: friendInviteValidityText })}</div>
-              </div>
-
-              <div className="menu-share-link-box">
-                <div className="menu-share-link-text">{friendInviteLink}</div>
-              </div>
-
-              <div className="menu-share-actions">
-                <button className="button" onClick={() => void copyFriendInviteLink()} type="button">
-                  {t("common.copyLink")}
-                </button>
-              </div>
-
               <div className="mode-switch menu-share-mode-switch">
                 <button
                   className={`mode-pill ${friendInviteMode === "limited" ? "active" : ""}`}
+                  aria-pressed={friendInviteMode === "limited"}
                   onClick={() => setFriendInviteMode("limited")}
                   type="button"
                 >
@@ -3109,10 +3101,37 @@ export default function MenuPage() {
                 </button>
                 <button
                   className={`mode-pill ${friendInviteMode === "permanent" ? "active" : ""}`}
+                  aria-pressed={friendInviteMode === "permanent"}
                   onClick={() => setFriendInviteMode("permanent")}
                   type="button"
                 >
                   {t("invite.permanentCompact")}
+                </button>
+              </div>
+              <div className="menu-share-link-box">
+                <div className="menu-share-link-text">{friendInviteLink}</div>
+              </div>
+              <div className="menu-share-actions">
+                <button className="button" disabled={friendInviteDownloading} onClick={async () => {
+                  setFriendInviteDownloading(true);
+                  try {
+                    await downloadFriendInviteImage({
+                      link: friendInviteLink,
+                      title: t("invite.fromUser", { name: session?.user.name ?? t("brand.user") }),
+                      space: space?.name ?? "",
+                      validity: t("invite.spaceOnly", { validity: friendInviteValidityText }),
+                      label: t("invite.friendQr"),
+                    });
+                  } catch {
+                    showToast(t("media.downloadFailed"), "error");
+                  } finally {
+                    setFriendInviteDownloading(false);
+                  }
+                }} type="button">
+                  {t(friendInviteDownloading ? "common.loading" : "invite.downloadImage")}
+                </button>
+                <button className="button secondary" onClick={() => void copyFriendInviteLink()} type="button">
+                  {t("common.copyLink")}
                 </button>
               </div>
             </div>
