@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.25.23",
-  "publishedAt": "2026-10-25",
+  "id": "2026.10.26.1",
+  "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "复制书签连贯动效",
+      "title": "保留自己的热门消息",
       "items": [
-        "复制书签原位展开为浮动框，收起时连续变回书签",
-        "支持快速反向操作，并适配减少动态效果偏好"
+        "群聊复制前三中自己的消息不再隐藏，改为排在其他消息后面"
       ]
     },
     "en": {
-      "title": "Fluid copy bookmark transitions",
+      "title": "Keep your popular messages",
       "items": [
-        "The copy bookmark expands into its panel and smoothly folds back in place",
-        "Transitions support rapid reversal and reduced-motion preferences"
+        "Your own messages in the group's top three copies stay visible after other members' messages"
       ]
     }
   }

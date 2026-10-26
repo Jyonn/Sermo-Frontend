@@ -11,6 +11,11 @@ test('copied candidates move behind untouched candidates without disturbing rank
 test('expired messages disappear at 24 hours',()=>{
   assert.equal(orderCopySuggestions([{...row(1),created_at:(now-86400000)/1000}],now).length,0);
 });
+test('own messages remain in the top three but follow even copied messages from others',()=>{
+  assert.deepEqual(orderCopySuggestions([{...row(1),own:true},row(2,true),row(3)],now).map(item=>item.message_id),[3,2,1]);
+  assert.deepEqual(orderCopySuggestions([{...row(1),own:true},{...row(2),own:true}],now).map(item=>item.message_id),[1,2]);
+  assert.equal(copySuggestionHint([{...row(1),own:true}],null,'today'),false);
+});
 test('only unseen uncopied candidates trigger a once-per-day hint',()=>{
   assert.equal(copySuggestionHint([row(1)],null,'today'),true);
   assert.equal(copySuggestionHint([row(1,true)],null,'today'),false);
