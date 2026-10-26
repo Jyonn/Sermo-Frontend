@@ -16,6 +16,7 @@ html[data-theme="dark"] .number-duel,html[data-theme="dark"] .duel-panel { --due
 .duel-topline nav > button + button::before { display:inline-block; margin-right:12px; height:10px; border-left:1px solid var(--line-strong,var(--line-soft)); content:""; }
 .duel-topline time { font-size:11px; color:var(--text-secondary); }
 .duel-primary-actions { display:grid; gap:12px; max-width:420px; margin:28px auto 0; }
+.duel-join-invite-hint { margin:0; text-align:center; color:var(--text-secondary); font-family:var(--font-body); font-size:12px; font-weight:400; line-height:1.8; }
 .duel-primary-actions > button { display:flex; align-items:center; justify-content:center; gap:16px; min-height:48px; width:100%; }
 .duel-primary-actions > .ghost-button { min-height:40px; background:transparent; border-color:transparent; box-shadow:none; color:var(--duel-accent); }
 .duel-hero { display:grid; grid-template-columns:minmax(0,1fr) 38%; align-items:center; padding:28px 0 24px; }

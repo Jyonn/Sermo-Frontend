@@ -1,21 +1,17 @@
 {
-  "id": "2026.10.26.10",
+  "id": "2026.10.26.11",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋成长进度",
+      "title": "活动提示排版优化",
       "items": [
-        "活动大厅和房间展示当前等级，以及距离下一等级所需的成长分",
-        "投入与结算后刷新成长进度；数字允许重复，首位可为0",
-        "猜测结果仅展示完全正确的位数，不再显示A/B"
+        "数字交锋加入对局提示统一为小号辅助文字，保持页面层级清晰"
       ]
     },
     "en": {
-      "title": "Code Duel growth progress",
+      "title": "Refined activity hint typography",
       "items": [
-        "The lobby and room show your current level and points needed for the next level",
-        "Progress refreshes after entry and settlement; repeated digits and leading zeros are allowed",
-        "Feedback shows only exact-position matches, without A/B notation"
+        "Code Duel invitation guidance uses consistent, subtle helper typography"
       ]
     }
   }

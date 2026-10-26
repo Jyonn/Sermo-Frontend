@@ -32,7 +32,6 @@ html[data-theme="dark"] .duel-room-surface { background:linear-gradient(145deg,#
 .duel-room-surface .duel-tiers > button[aria-pressed="true"] { background:linear-gradient(140deg,#dceccd,#bddabd); border-color:#638969; transform:translateY(2px); box-shadow:inset 0 2px 4px #69856520,0 3px 0 #476c4c22; }
 html[data-theme="dark"] .duel-room-surface .duel-tiers > button { background:linear-gradient(140deg,#324a3c,#1a3027); border-color:#81a47930; box-shadow:inset 0 1px 0 #b9d3a833,0 5px 0 #071b134d; }
 html[data-theme="dark"] .duel-room-surface .duel-tiers > button[aria-pressed="true"] { background:linear-gradient(140deg,#43684f,#2b4c39); border-color:#91c89e; }
-.duel-join-invite-hint { text-align:center; color:var(--text-secondary); font-size:12px; line-height:1.8; }
 .duel-cost-preview { font-weight:600; }
 .duel-cost-note { grid-column:1/-1; text-align:center; color:var(--text-secondary); font-size:12px; line-height:1.8; }
 .duel-entry-ledger { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
