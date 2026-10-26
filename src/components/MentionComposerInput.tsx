@@ -15,6 +15,7 @@ export interface MentionComposerHandle {
   blur: () => void;
   insertMention: (member: MentionComposerMember) => void;
   insertText: (text: string) => void;
+  insertLineBreak: () => void;
   openMentionPicker: () => void;
   insertTextWithoutFocus: (text: string) => void;
   moveCaretToEnd: () => void;
@@ -238,6 +239,26 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
 
   const insertText = (text: string) => insertTextAtSelection(text, true);
 
+  const insertLineBreak = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const selection = window.getSelection();
+    const saved = selection?.rangeCount && editor.contains(selection.getRangeAt(0).commonAncestorContainer)
+      ? selection.getRangeAt(0) : lastSelectionRangeRef.current;
+    const range = saved?.cloneRange() || document.createRange();
+    if (!saved) { range.selectNodeContents(editor); range.collapse(false); }
+    range.deleteContents();
+    const br = document.createElement("br");
+    range.insertNode(br);
+    // Keep a terminal caret line, matching native contenteditable Shift+Enter.
+    if (!br.nextSibling || (br.nextSibling.nodeType === Node.TEXT_NODE && !br.nextSibling.textContent)) {
+      br.parentNode?.appendChild(document.createElement("br"));
+    }
+    placeCaretAfter(br);
+    emitChange();
+  };
+
   const openMentionPicker = () => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -276,6 +297,7 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     blur: () => editorRef.current?.blur(),
     insertMention,
     insertText,
+    insertLineBreak,
     openMentionPicker,
     insertTextWithoutFocus: (text: string) => insertTextAtSelection(text, false),
     moveCaretToEnd: () => {

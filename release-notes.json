@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.27.1",
+  "id": "2026.10.27.2",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "聊天工具栏更简洁",
+      "title": "聊天输入与导航更顺手",
       "items": [
-        "文件与足迹收进加号展开的更多操作区，支持平滑展开和收起",
-        "文件来源、足迹操作改用统一操作菜单，手机与桌面保持一致"
+        "修复深色会话标题与平板返回，群聊人数不再重复显示",
+        "桌面加号改为浮动菜单，支持切换紧凑输入，短横屏默认折叠，并新增换行按钮"
       ]
     },
     "en": {
-      "title": "A cleaner chat toolbar",
+      "title": "Smoother chat navigation and composing",
       "items": [
-        "Files and footprints move into an animated More panel behind the plus button",
-        "File sources and footprint actions use consistent action sheets on mobile and desktop"
+        "Improve dark chat headers and tablet back navigation; show group counts only once",
+        "Desktop More opens a popover with compact mode, automatic short-screen folding and a newline button"
       ]
     }
   }

@@ -38,11 +38,33 @@ test("submission mode omits footprints and busy operations cannot be selected", 
 
 test("chat layouts share the same expansion and remove the old file/map popovers", () => {
   const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
-  assert.equal((chat.match(/more=\{composerMoreActions\}/g) ?? []).length, 2);
+  assert.match(chat, /more=\{narrowComposerLayout \? composerMoreActions : undefined\}/);
+  assert.match(chat, /ComposerActionsPopover open=\{composerMoreOpen\}/);
+  assert.match(chat, /setCompactComposerOverride\(!mobileComposerLayout\)/);
   assert.doesNotMatch(chat, /desktopComposerTool === "(?:file|footprint)"/);
   assert.doesNotMatch(chat, /mobileComposerPanel/);
   const css = readFileSync(new URL("../src/components/ComposerMoreActions.css", import.meta.url), "utf8");
   assert.match(css, /grid-template-rows:0fr/);
   assert.match(css, /grid-template-rows:1fr/);
   assert.match(css, /prefers-reduced-motion:reduce/);
+});
+
+test("tablet back does not wait for a mobile-only animation and group counts stay on one line", () => {
+  const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  const close = chat.slice(chat.indexOf("const closeChatView ="), chat.indexOf("const closeChatView =") + 650);
+  assert.match(close, /max-width: 719px/);
+  assert.match(close, /prefers-reduced-motion: reduce/);
+  assert.match(close, /navigate\(listPath\)/);
+  assert.doesNotMatch(chat, /t\("chat.memberCount", \{ count: displayedChat.members \}\)/);
+});
+
+test("short screens default compact and expanded composer exposes a real line break", () => {
+  const layout = readFileSync(new URL("../src/components/ChatComposerLayout.tsx", import.meta.url), "utf8");
+  assert.match(layout, /max-height: 500px/);
+  const input = readFileSync(new URL("../src/components/MentionComposerInput.tsx", import.meta.url), "utf8");
+  assert.match(input, /insertLineBreak: \(\) => void/);
+  assert.match(input, /range.insertNode\(br\)/);
+  const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  assert.match(chat, /compactComposerOverride \?\? shortComposerLayout/);
+  assert.match(chat, /mentionEditorRef.current\?\.insertLineBreak\(\)/);
 });

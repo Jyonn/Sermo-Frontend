@@ -11,6 +11,14 @@ const subscribe = (listener: () => void) => {
 const snapshot = () => window.matchMedia(query).matches;
 export const useMobileComposerLayout = () => useSyncExternalStore(subscribe, snapshot, () => false);
 
+const shortQuery = "(max-height: 500px)";
+const subscribeShort = (listener: () => void) => {
+  const media = window.matchMedia(shortQuery);
+  media.addEventListener("change", listener);
+  return () => media.removeEventListener("change", listener);
+};
+export const useShortComposerLayout = () => useSyncExternalStore(subscribeShort, () => window.matchMedia(shortQuery).matches, () => false);
+
 export function MobileChatComposer({ input, tools, toolCount, more }: {input: ReactNode; tools: ReactNode; toolCount: number; more?: ReactNode}) {
   const { t } = useI18n();
   return <div className="mobile-quiet-composer">

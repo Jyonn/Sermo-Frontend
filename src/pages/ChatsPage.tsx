@@ -28,8 +28,9 @@ import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatCalendarAvailability, useChatCalendarAvailability } from "../components/ChatCalendarAvailability";
 import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
-import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
+import { MobileChatComposer, useMobileComposerLayout, useShortComposerLayout } from "../components/ChatComposerLayout";
 import { ComposerMoreActions } from "../components/ComposerMoreActions";
+import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
@@ -2999,6 +3000,7 @@ function LiveChatsPage({
   const [groupMuteBusy, setGroupMuteBusy] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const composerMoreAnchor = useRef<HTMLButtonElement>(null);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
   const [composerActionSheet, setComposerActionSheet] = useState<"file" | "footprint" | null>(null);
@@ -3006,7 +3008,11 @@ function LiveChatsPage({
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
   const [mobileHoldBusy, setMobileHoldBusy] = useState(false);
-  const mobileComposerLayout = useMobileComposerLayout();
+  const narrowComposerLayout = useMobileComposerLayout();
+  const shortComposerLayout = useShortComposerLayout();
+  const [compactComposerOverride, setCompactComposerOverride] = useState<boolean | null>(null);
+  const mobileComposerLayout = narrowComposerLayout || (compactComposerOverride ?? shortComposerLayout);
+  useEffect(() => { setCompactComposerOverride(null); }, [shortComposerLayout]);
   const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [stickers, setStickers] = useState<StickerDTO[]>(() => initialMineStickerCache?.data.items ?? []);
@@ -4318,6 +4324,14 @@ function LiveChatsPage({
   );
 
   const closeChatView = () => {
+    if (!window.matchMedia("(max-width: 719px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDetailsSheetOpen(false);
+      setMessageMenu(null);
+      setIsClosingChatView(false);
+      setClosingChatSnapshot(null);
+      navigate(listPath);
+      return;
+    }
     if (!selectedChat) {
       if (DEBUG_CHAT_SEND) {
         console.log("[chat-close] no selectedChat, navigate immediately");
@@ -5181,7 +5195,7 @@ function LiveChatsPage({
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const shouldLockViewport = Boolean(selectedChat) && mobileComposerLayout;
+    const shouldLockViewport = Boolean(selectedChat) && narrowComposerLayout;
     if (!shouldLockViewport) {
       delete document.body.dataset.chatDetail;
       return;
@@ -5192,7 +5206,7 @@ function LiveChatsPage({
     return () => {
       delete document.body.dataset.chatDetail;
     };
-  }, [mobileComposerLayout, selectedChat]);
+  }, [narrowComposerLayout, selectedChat]);
 
   useEffect(() => {
     return () => {
@@ -7769,7 +7783,7 @@ function LiveChatsPage({
   const preferredChatBackgroundTheme = selectedChat?.type === "group" && selectedChat.groupBackgroundTheme && !selectedChat.usePersonalBackground
     ? selectedChat.groupBackgroundTheme
     : personalChatBackgroundTheme;
-  const chatBackgroundTheme = mobileComposerLayout ? preferredChatBackgroundTheme : "default";
+  const chatBackgroundTheme = narrowComposerLayout ? preferredChatBackgroundTheme : "default";
   const hasDecorativeChatBackground = chatBackgroundTheme !== "default";
   const chatWallpaperToneClass = hasDecorativeChatBackground
     ? DARK_CHAT_BACKGROUND_THEMES.has(chatBackgroundTheme) ? " is-dark-wallpaper" : " is-light-wallpaper"
@@ -7818,7 +7832,7 @@ function LiveChatsPage({
     </div>
   ) : null;
 
-  const composerMoreButton = <button type="button" className={`composer-more-trigger${composerMoreOpen ? " is-active" : ""}`} aria-label={t("composer.moreActions")} title={t("composer.moreActions")} aria-expanded={composerMoreOpen} aria-controls="chat-composer-more" disabled={composerBusy} onClick={() => {
+  const composerMoreButton = <button ref={composerMoreAnchor} type="button" className={`composer-more-trigger${composerMoreOpen ? " is-active" : ""}`} aria-label={t("composer.moreActions")} title={t("composer.moreActions")} aria-expanded={composerMoreOpen} aria-controls="chat-composer-more" disabled={composerBusy} onClick={() => {
     if (mobileComposerLayout) suspendMobileComposerInput();
     setEmojiPickerOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setComposerActionSheet(null);
     setComposerMoreOpen((open) => !open);
@@ -7880,7 +7894,7 @@ function LiveChatsPage({
                   displayedChat.title
                 )}
               </strong>
-              <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
+              {displayedChat.type !== "group" || displayedChat.purpose === "submission" ? <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.subtitle}</div> : null}
             </div>
           </div>
         ) : undefined
@@ -7898,6 +7912,10 @@ function LiveChatsPage({
         ) : undefined
       }
     >
+      {!narrowComposerLayout ? <ComposerActionsPopover open={composerMoreOpen} anchor={composerMoreAnchor} onClose={() => setComposerMoreOpen(false)} label={t("composer.moreActions")}>
+        {composerMoreActions}
+        <button className="composer-layout-toggle" type="button" onClick={() => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }}><span className="material-symbols-outlined">{mobileComposerLayout ? "expand_all" : "collapse_all"}</span>{t(mobileComposerLayout ? "composer.expandLayout" : "composer.collapseLayout")}</button>
+      </ComposerActionsPopover> : null}
       <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t(composerActionSheet === "file" ? "cloudResources.fileSourceTitle" : "travelMap.actionShort")} actions={composerActionSheet === "file" ? [
         { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
@@ -7934,7 +7952,7 @@ function LiveChatsPage({
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
                       {displayedChat.type === "group" && displayedChat.purpose !== "submission" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
                     </strong>
-                    <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
+              {displayedChat.type !== "group" || displayedChat.purpose === "submission" ? <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.subtitle}</div> : null}
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
@@ -7990,7 +8008,7 @@ function LiveChatsPage({
                   event.preventDefault();
                 }}
               >
-              {mobileComposerLayout ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
+              {narrowComposerLayout ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
               {selectedChat?.type === "group" && !submissionMode ? <GroupCopyShelf key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId}/> : null}
               <div
                 ref={messageScrollRef}
@@ -8156,7 +8174,7 @@ function LiveChatsPage({
                 {mobileComposerLayout ? (
                   <MobileChatComposer
                     toolCount={selectedChat?.type === "group" ? 6 : 5}
-                    more={composerMoreActions}
+                    more={narrowComposerLayout ? composerMoreActions : undefined}
                     input={mobileVoiceReady ? (
                         <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
                       ) : (
@@ -8206,7 +8224,6 @@ function LiveChatsPage({
                   />
                 ) : (
                   <DesktopChatComposerDesk
-                    more={composerMoreActions}
                     shortcutLabel={t("composer.desktopShortcut")}
                     reply={replyingTo ? (
                       <div className="composer-reply-preview">
@@ -8235,6 +8252,7 @@ function LiveChatsPage({
                       {composerMoreButton}
                     </>}
                     input={<>
+                      <button className="composer-insert-newline" type="button" aria-label={t("composer.insertNewline")} title={t("composer.insertNewline")} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => mentionEditorRef.current?.insertLineBreak()}><span className="material-symbols-outlined">keyboard_return</span></button>
                       <MentionComposerInput
                         ref={mentionEditorRef}
                         className="textarea composer-input composer-rich-input"
@@ -9631,7 +9649,7 @@ function LiveChatsPage({
         open={locationPickerOpen}
         onClose={() => setLocationPickerOpen(false)}
         onSelect={(location) => void sendLocationMessage(location)}
-        presentation={mobileComposerLayout ? "fullscreen-drawer" : "chat-modal"}
+        presentation={narrowComposerLayout ? "fullscreen-drawer" : "chat-modal"}
       />
       <TravelMapDrawer
         historyKey="user-travel-map"
