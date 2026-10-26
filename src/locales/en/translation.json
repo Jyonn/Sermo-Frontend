@@ -3042,6 +3042,8 @@
   ,"audio.transcriptFailed": "Could not transcribe this audio. Tap retry."
   ,"composer.tools": "Message tools"
   ,"composer.moreActions": "More actions"
+  ,"composer.publishFootprint": "Share my footprints"
+  ,"composer.stopFootprintSharing": "Stop sharing my footprints"
   ,"composer.collapseLayout": "Compact composer"
   ,"composer.expandLayout": "Expand composer"
   ,"composer.insertNewline": "Insert newline"

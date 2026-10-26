@@ -38,7 +38,8 @@ test("submission mode omits footprints and busy operations cannot be selected", 
 
 test("chat layouts share the same expansion and remove the old file/map popovers", () => {
   const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
-  assert.match(chat, /more=\{narrowComposerLayout \? composerMoreActions : undefined\}/);
+  assert.match(chat, /more=\{composerMoreActions\}/);
+  assert.match(chat, /!mobileComposerLayout \? <ComposerActionsPopover/);
   assert.match(chat, /ComposerActionsPopover open=\{composerMoreOpen\}/);
   assert.match(chat, /setCompactComposerOverride\(!mobileComposerLayout\)/);
   assert.doesNotMatch(chat, /desktopComposerTool === "(?:file|footprint)"/);
@@ -47,6 +48,19 @@ test("chat layouts share the same expansion and remove the old file/map popovers
   assert.match(css, /grid-template-rows:0fr/);
   assert.match(css, /grid-template-rows:1fr/);
   assert.match(css, /prefers-reduced-motion:reduce/);
+});
+
+test("layout switching is a peer action and footprints expose the current permission directly", () => {
+  const expanded = render({ compact: false, onToggleLayout() {} });
+  assert.equal((expanded.match(/<button/g) ?? []).length, 3);
+  assert.match(expanded, /composer.collapseLayout/);
+  assert.match(render({ compact: true, onToggleLayout() {} }), /composer.expandLayout/);
+  const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  assert.match(chat, /authorized_by_me \? "composer.stopFootprintSharing" : "composer.publishFootprint"/);
+  assert.doesNotMatch(chat, /chatTravelMapMenuOpen|composer-layout-toggle/);
+  const load = chat.slice(chat.indexOf("const openComposerFootprintActions"), chat.indexOf("const grantChatTravelMap"));
+  assert.match(load, /await api.getChatTravelMapAccess/);
+  assert.match(load, /setComposerActionSheet\("footprint"\)/);
 });
 
 test("tablet back does not wait for a mobile-only animation and group counts stay on one line", () => {

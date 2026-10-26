@@ -3053,7 +3053,6 @@ function LiveChatsPage({
   const [chatTravelMapOpen, setChatTravelMapOpen] = useState(false);
   const [chatTravelMapAccess, setChatTravelMapAccess] = useState<ChatTravelMapAccessDTO | null>(null);
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
-  const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
   const [desktopComposerTool, setDesktopComposerTool] = useState<"voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [fileDropActive, setFileDropActive] = useState(false);
@@ -6340,15 +6339,14 @@ function LiveChatsPage({
     }
   };
 
-  const openChatTravelMap = async () => {
+  const openComposerFootprintActions = async () => {
     if (!selectedChat || composerBusy || travelMapSaving) return;
     setComposerMoreOpen(false);
     setTravelMapSaving(true);
     try {
       const access = await api.getChatTravelMapAccess(selectedChat.id);
       setChatTravelMapAccess(access);
-      if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
-      else setChatTravelMapGrantConfirmOpen(true);
+      setComposerActionSheet("footprint");
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
     } finally {
@@ -6390,7 +6388,7 @@ function LiveChatsPage({
     try {
       const access = await api.revokeChatTravelMapAccess(selectedChat.id);
       setChatTravelMapAccess(access);
-      setChatTravelMapMenuOpen(false);
+      setComposerActionSheet(null);
       showToast(t("travelMap.accessRemoved"));
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
@@ -7837,7 +7835,7 @@ function LiveChatsPage({
     setEmojiPickerOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setComposerActionSheet(null);
     setComposerMoreOpen((open) => !open);
   }}><ComposerSvgIcon kind="plus" /></button>;
-  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => setComposerActionSheet("footprint")} />;
+  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
   return (
     <AppChrome
@@ -7912,16 +7910,15 @@ function LiveChatsPage({
         ) : undefined
       }
     >
-      {!narrowComposerLayout ? <ComposerActionsPopover open={composerMoreOpen} anchor={composerMoreAnchor} onClose={() => setComposerMoreOpen(false)} label={t("composer.moreActions")}>
+      {!mobileComposerLayout ? <ComposerActionsPopover open={composerMoreOpen} anchor={composerMoreAnchor} onClose={() => setComposerMoreOpen(false)} label={t("composer.moreActions")}>
         {composerMoreActions}
-        <button className="composer-layout-toggle" type="button" onClick={() => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }}><span className="material-symbols-outlined">{mobileComposerLayout ? "expand_all" : "collapse_all"}</span>{t(mobileComposerLayout ? "composer.expandLayout" : "composer.collapseLayout")}</button>
       </ComposerActionsPopover> : null}
       <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t(composerActionSheet === "file" ? "cloudResources.fileSourceTitle" : "travelMap.actionShort")} actions={composerActionSheet === "file" ? [
         { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
       ] : [
         { key: "map", label: t("travelMap.openMap"), description: t("composer.openFootprintHint"), icon: <ComposerSvgIcon kind="map" />, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); setChatTravelMapOpen(true); } },
-        { key: "sharing", label: t("composer.shareFootprint"), description: t("composer.shareFootprintHint"), icon: <span className="material-symbols-outlined">group_add</span>, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); void openChatTravelMap(); } },
+        { key: "sharing", label: t(chatTravelMapAccess?.authorized_by_me ? "composer.stopFootprintSharing" : "composer.publishFootprint"), description: t("composer.shareFootprintHint"), icon: <span className="material-symbols-outlined">{chatTravelMapAccess?.authorized_by_me ? "visibility_off" : "group_add"}</span>, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); if (chatTravelMapAccess?.authorized_by_me) void revokeChatTravelMap(); else setChatTravelMapGrantConfirmOpen(true); } },
       ]} />
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
@@ -8174,7 +8171,7 @@ function LiveChatsPage({
                 {mobileComposerLayout ? (
                   <MobileChatComposer
                     toolCount={selectedChat?.type === "group" ? 6 : 5}
-                    more={narrowComposerLayout ? composerMoreActions : undefined}
+                    more={composerMoreActions}
                     input={mobileVoiceReady ? (
                         <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
                       ) : (
@@ -9683,27 +9680,6 @@ function LiveChatsPage({
         onClose={() => setChatTravelMapGrantConfirmOpen(false)}
         onConfirm={() => void grantChatTravelMap()}
       />
-      <BottomSheet
-        open={chatTravelMapMenuOpen}
-        title={t("travelMap.sharedFootprints")}
-        onClose={() => setChatTravelMapMenuOpen(false)}
-      >
-        <div className="travel-map-access-actions">
-          <div className="travel-map-access-person">
-            <span>
-              <strong>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess?.shared_members.length ?? 0 })}</strong>
-              <small>{selectedChat?.title}</small>
-            </span>
-          </div>
-          <button className="button" onClick={() => { setChatTravelMapMenuOpen(false); setChatTravelMapOpen(true); }} type="button">
-            <ComposerSvgIcon kind="map" />
-            {t("travelMap.openMap")}
-          </button>
-          <button className="ghost-button danger-text-button" disabled={travelMapSaving} onClick={() => void revokeChatTravelMap()} type="button">
-            {t("travelMap.stopSharing")}
-          </button>
-        </div>
-      </BottomSheet>
       <BottomSheet
         open={Boolean(travelMapMenu)}
         title={t("travelMap.accessMenuTitle")}

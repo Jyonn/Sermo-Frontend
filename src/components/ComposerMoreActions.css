@@ -3,6 +3,7 @@
 .composer-more-reveal-inner { min-height:0; overflow:hidden; }
 .composer-more-actions { display:flex; gap:14px; padding:12px 4px; }
 .composer-more-actions > button { display:grid; justify-items:center; gap:6px; min-width:68px; padding:0 8px; color:var(--text-secondary); background:transparent; }
+.composer-more-actions .material-symbols-outlined { font-size:24px; font-style:normal; }
 .composer-more-actions > button > span { display:grid; place-items:center; width:48px; height:44px; border:1px solid var(--chat-chrome-border,var(--line-soft)); border-radius:14px; background:color-mix(in srgb,var(--bg-elevated) 80%,transparent); }
 .composer-more-actions svg { width:24px; height:24px; }
 .composer-more-actions strong { font-size:11px; font-weight:500; }
@@ -22,7 +23,6 @@
 }
 .composer-actions-popover { position:fixed; z-index:240; width:280px; max-height:calc(100dvh - 80px); overflow:auto; padding:12px; border:1px solid var(--line-soft); border-radius:22px; background:var(--bg-surface); color:var(--text-primary); box-shadow:0 16px 48px #0003; animation:composer-popover-in 160ms ease-out; }
 .composer-actions-popover .composer-more-actions { padding:4px 0 14px; }
-.composer-layout-toggle { display:flex; gap:10px; align-items:center; width:100%; border-top:1px solid var(--line-soft); padding:14px 8px 4px; background:transparent; color:var(--text-primary); font:inherit; font-size:13px; }
 .composer-insert-newline { position:absolute; right:16px; bottom:12px; display:grid; place-items:center; width:32px; height:32px; border-radius:10px; background:var(--bg-elevated); color:var(--text-muted); z-index:2; }
 .desktop-writing-desk-input:has(.composer-insert-newline) { padding-right:58px; }
 .topbar.conversation-topbar :is(.chat-topbar-name,.chat-back-button) { color:var(--chat-readable-text,var(--text-primary)); }

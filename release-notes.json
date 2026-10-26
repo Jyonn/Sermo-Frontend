@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.27.2",
+  "id": "2026.10.27.3",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "聊天输入与导航更顺手",
+      "title": "聊天更多操作更连贯",
       "items": [
-        "修复深色会话标题与平板返回，群聊人数不再重复显示",
-        "桌面加号改为浮动菜单，支持切换紧凑输入，短横屏默认折叠，并新增换行按钮"
+        "折叠输入框从下方展开更多操作，展开输入框使用浮动菜单，布局切换与其他操作并列",
+        "足迹菜单直接显示公开或停止共享，去掉重复的中间页面"
       ]
     },
     "en": {
-      "title": "Smoother chat navigation and composing",
+      "title": "More consistent composer actions",
       "items": [
-        "Improve dark chat headers and tablet back navigation; show group counts only once",
-        "Desktop More opens a popover with compact mode, automatic short-screen folding and a newline button"
+        "Compact composers expand tools below; expanded composers use a popover with layout switching alongside other actions",
+        "Footprint menus show sharing permissions directly without an extra page"
       ]
     }
   }
