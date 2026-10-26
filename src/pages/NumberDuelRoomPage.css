@@ -21,7 +21,7 @@ html[data-theme="dark"] .duel-room-surface { background:linear-gradient(145deg,#
 .duel-room-surface .duel-versus > span { display:grid; grid-template-columns:44px minmax(0,1fr); gap:0 12px; align-items:center; }
 .duel-room-surface .duel-player-avatar { grid-row:1/span 2; width:44px; height:44px; border-radius:15px; box-shadow:0 4px 12px #21422c18; }
 .duel-room-surface .duel-versus > span > strong { min-width:0; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.duel-room-surface .duel-versus > span > small { margin-top:4px; }
+.duel-room-surface .duel-versus > span > small { min-width:0; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .duel-room-surface .duel-versus > span:last-child { grid-template-columns:minmax(0,1fr) 44px; }
 .duel-room-surface .duel-versus > span:last-child .duel-player-avatar { grid-column:2; }
 .duel-room-surface .duel-versus > span:last-child > strong,.duel-room-surface .duel-versus > span:last-child > small { grid-column:1; }

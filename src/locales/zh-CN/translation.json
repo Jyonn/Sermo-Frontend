@@ -61,7 +61,7 @@
   "duel.round": "第 {{round}} / {{total}} 轮",
   "duel.seconds": "剩余 {{count}} 秒",
   "duel.you": "我",
-  "duel.secretLocked": "秘密数字已锁定",
+  "duel.secretLocked": "数字已锁定",
   "duel.stake": "{{points}} 分档",
   "duel.inviteHint": "房间保留10分钟。邀请同空间的朋友入场后，一起选档再开始。",
   "duel.invite": "邀请朋友",

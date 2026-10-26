@@ -1,0 +1,18 @@
+@font-face {
+  font-family:"Frienden Duel Digits";
+  src:url('/fonts/frienden-duel-digits-v1.woff2') format('woff2');
+  font-style:normal;
+  font-weight:300 700;
+  font-display:swap;
+  unicode-range:U+0020,U+002B-003F,U+2212;
+}
+
+.number-duel,.duel-panel,.number-duel-card { --duel-number-font:"Frienden Duel Digits",var(--font-body); font-family:var(--duel-number-font); font-variant-numeric:tabular-nums lining-nums slashed-zero; }
+.number-duel :is(.duel-timer,.duel-digit-input,.duel-tiers strong,.duel-daily strong,.duel-result-points,.duel-secrets strong,.duel-history-row strong,.duel-history-row small,.duel-round-wait > strong,.duel-feedback,.duel-entry-ledger dd,.duel-leaders b,.duel-topline time,.duel-cost-preview,.duel-tier-agreement > .button),
+.duel-panel :is(.duel-records small,.duel-leaders b),
+.duel-card-code b {
+  font-family:var(--duel-number-font);
+  font-variant-numeric:tabular-nums lining-nums slashed-zero;
+  font-feature-settings:"tnum" 1,"lnum" 1,"zero" 1;
+}
+.number-duel .duel-match-heading h2 { font-family:"Frienden Duel Digits",var(--font-heading); font-variant-numeric:tabular-nums lining-nums; }

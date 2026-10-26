@@ -2,6 +2,7 @@ import { useI18n } from "../lib/language";
 import type { DuelRoomSummary } from "../lib/numberDuel";
 import { ActivityTitle } from "./ActivityCampaignCard";
 import "./NumberDuelCard.css";
+import "./NumberDuelDigits.css";
 
 export function NumberDuelCard({ room, onClick, className = "" }: { room?: DuelRoomSummary | null; onClick?: () => void; className?: string }) {
   const { t } = useI18n();

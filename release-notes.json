@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.26.6",
+  "id": "2026.10.26.7",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋独立房间",
+      "title": "数字交锋专属数字字体",
       "items": [
-        "进入独立对战房间后，双方按较低等级共同确认积分档位",
-        "统一入场投入与结算规则：胜者获得双方投入，平局或异常结束退款，取消首场保护",
-        "新增专属邀请卡片和推理桌面背景，好友通过链接入场，无需房间号"
+        "档位、倒计时、秘密数字、推理记录和结算分数统一使用专属数字字体",
+        "数字等宽对齐，0的形态更清晰，字体随站点本地加载"
       ]
     },
     "en": {
-      "title": "Dedicated Code Duel rooms",
+      "title": "Dedicated Code Duel numerals",
       "items": [
-        "Enter a dedicated room and agree on a tier unlocked by both players",
-        "Both commit entry points; the winner receives both entries, with refunds for draws or abnormal endings and no first-match protection",
-        "A crafted room background and dedicated invitation cards let friends join without room codes"
+        "Entry tiers, timers, secret codes, reasoning history and settlement points use a dedicated numeric typeface",
+        "Tabular numerals and a distinctive zero improve readability, with the font hosted locally"
       ]
     }
   }

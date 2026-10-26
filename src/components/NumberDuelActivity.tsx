@@ -15,6 +15,7 @@ import { NumberDuelCard } from "./NumberDuelCard";
 import { UserAvatar } from "./UserAvatar";
 import { signedGrowthPoints } from "../lib/growthPoints";
 import "./NumberDuelActivity.css";
+import "./NumberDuelDigits.css";
 
 export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number }) {
   const navigate = useNavigate();
