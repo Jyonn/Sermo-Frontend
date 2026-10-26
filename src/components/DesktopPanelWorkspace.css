@@ -185,7 +185,11 @@
   }
 
   .native-detail-single > .chat-mobile-layout > .mobile-chat-list-screen,
-  .native-detail-single > .square-desktop-workspace > .square-feed-screen { visibility: hidden; pointer-events: none; }
+  .native-detail-single > .square-desktop-workspace > .square-feed-screen { display: none; }
+
+  /* Hidden zero-width tracks still retain padding and WebKit backdrop layers. */
+  .native-detail-single > .chat-mobile-layout > .chat-main-pane,
+  .native-detail-single > .square-desktop-workspace > .square-desktop-detail-pane { grid-column: 2; }
 
   .desktop-panel-workspace .native-panel-back { display: none; }
   .desktop-panel-workspace.native-detail-single .native-panel-back { display: grid; flex: 0 0 auto; }

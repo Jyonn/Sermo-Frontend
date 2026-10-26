@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.26.14",
+  "id": "2026.10.26.15",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "菜单设置排版更新",
+      "title": "横屏面板显示修复",
       "items": [
-        "通知与提醒、应用与插件采用与好友申请一致的双Tab切换和简洁列表",
-        "应用和插件更名为应用与插件，通知类型设置的渠道与开关状态更清晰"
+        "单面板横屏布局不再保留隐藏列表的背景绘制层，避免标题栏左侧出现异常色块"
       ]
     },
     "en": {
-      "title": "Refined menu settings",
+      "title": "Landscape panel rendering fix",
       "items": [
-        "Notifications and Apps & Plugins share the friend-request tab style and simpler lists",
-        "Notification channel labels and toggle states are clearer"
+        "Single-panel landscape layouts remove hidden list painting layers to prevent stray header backgrounds"
       ]
     }
   }

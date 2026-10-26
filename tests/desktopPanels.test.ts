@@ -95,6 +95,12 @@ test("navigation expansion can switch the same desktop from dual panels to a sin
   assert.equal(desktopPanelLayout(1024 - 252).presentation, "single");
 });
 
+test("single detail removes hidden list paint layers and keeps detail in its grid track", () => {
+  const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");
+  assert.match(css, /\.native-detail-single > \.chat-mobile-layout > \.mobile-chat-list-screen,\s*\.native-detail-single > \.square-desktop-workspace > \.square-feed-screen\s*\{ display: none; \}/);
+  assert.match(css, /\.native-detail-single > \.chat-mobile-layout > \.chat-main-pane,\s*\.native-detail-single > \.square-desktop-workspace > \.square-desktop-detail-pane\s*\{ grid-column: 2; \}/);
+});
+
 test("wide editors expand instead of inheriting phone-width detail panels", () => {
   assert.equal(desktopPanelLayout(1100, true).secondary, 660);
   assert.equal(desktopPanelLayout(1100, true).presentation, "dual");
