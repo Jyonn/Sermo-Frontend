@@ -1,6 +1,7 @@
 export interface DuelMatch {
   id: string; code: string; status: "waiting" | "choosing" | "secrets" | "playing" | "finished";
   tiers: number[]; own_tier: number | null; opponent_tier: number | null;
+  funded: boolean; practice_reason: string; balance: number; returned: number;
   stake: number; round: number; deadline: number; host: boolean;
   opponent: { user_id: number; name: string; avatar_uri?: string; avatar_cache_key?: string } | null;
   own_secret: string | null; opponent_locked: boolean; opponent_secret: string | null;

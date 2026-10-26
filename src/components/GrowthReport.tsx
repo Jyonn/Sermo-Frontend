@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import type { GrowthReportDTO } from "../types";
 import { FeedbackState } from "./FeedbackState";
+import { signedGrowthPoints } from "../lib/growthPoints";
 import "./GrowthExperience.css";
 
 export function GrowthReport() {
@@ -22,6 +23,6 @@ export function GrowthReport() {
     <section><h3>{t("growth.report.activity")}</h3><p>{t("growth.report.activityHint")}</p><div className="growth-report-chart" role="list">{report.activity.map(day => <div key={day.date} role="listitem" aria-label={`${day.date}: ${day.count}`} title={`${day.date}: ${day.count}`}><i style={{ height: `${Math.max(3, day.count / max * 100)}%` }} className={day.count ? "" : "is-empty"} /></div>)}</div><div className="growth-report-chart-labels"><span>{report.activity[0]?.date}</span><span>{report.activity[report.activity.length - 1]?.date}</span></div></section>
     <section><h3>{t("growth.report.sources")}</h3>{report.categories.length ? <div className="growth-report-sources">{report.categories.map(item => <div key={item.category}><span>{categories[item.category] ?? t("growth.report.category.other")}</span><strong>{item.points.toLocaleString(locale)}</strong><div><i style={{ transform: `scaleX(${item.points / total})` }} /></div></div>)}</div> : <p>{t("growth.report.noRecords")}</p>}</section>
     <section><h3>{t("growth.report.milestones")}</h3><div className="growth-report-milestones">{report.milestones.map(item => <span key={item.key}><span className="material-symbols-outlined" aria-hidden="true">check</span>{item.title}</span>)}</div>{!report.milestones.length ? <p>{t("growth.report.noRecords")}</p> : null}</section>
-    <section><h3>{t("growth.journey")}</h3><ol className="growth-report-history">{report.recent_events.map((item, index) => <li key={`${item.key}-${index}`}><span><strong>{item.title}</strong><time>{new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(item.created_at * 1000)}</time></span><b>+{item.points}</b></li>)}</ol></section>
+    <section><h3>{t("growth.journey")}</h3><ol className="growth-report-history">{report.recent_events.map((item, index) => <li key={`${item.key}-${index}`}><span><strong>{item.title}</strong><time>{new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(item.created_at * 1000)}</time></span><b>{signedGrowthPoints(item.points)}</b></li>)}</ol></section>
   </div>;
 }

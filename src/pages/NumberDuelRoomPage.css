@@ -30,6 +30,13 @@ html[data-theme="dark"] .duel-room-surface { background:linear-gradient(145deg,#
 html[data-theme="dark"] .duel-room-surface .duel-tiers > button { background:linear-gradient(140deg,#324a3c,#1a3027); border-color:#81a47930; box-shadow:inset 0 1px 0 #b9d3a833,0 5px 0 #071b134d; }
 html[data-theme="dark"] .duel-room-surface .duel-tiers > button[aria-pressed="true"] { background:linear-gradient(140deg,#43684f,#2b4c39); border-color:#91c89e; }
 .duel-join-invite-hint { text-align:center; color:var(--text-secondary); font-size:12px; line-height:1.8; }
+.duel-cost-preview { font-weight:600; }
+.duel-cost-note { grid-column:1/-1; text-align:center; color:var(--text-secondary); font-size:12px; line-height:1.8; }
+.duel-entry-ledger { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+.duel-entry-ledger > div { padding:14px; border-radius:14px; border:1px solid var(--line-soft); background:color-mix(in srgb,var(--bg-surface) 55%,transparent); }
+.duel-entry-ledger dt { font-size:12px; color:var(--text-secondary); }
+.duel-entry-ledger dd { margin:8px 0 0; font-size:24px; font-variant-numeric:tabular-nums; }
+.duel-result-points.is-loss { color:#c5795a; }
 @media (max-width:600px) { .duel-room-page { padding-inline:max(10px,env(safe-area-inset-left)); } .duel-room-header { min-height:74px; gap:14px; padding-inline:6px; } .duel-room-surface { border-radius:20px; min-height:calc(100dvh - 100px); } .duel-room-surface .number-duel { padding:18px; } .duel-room-entry { padding:28px 0; } }
 @media (max-height:500px) and (min-width:650px) { .duel-room-header { min-height:64px; } .duel-room-surface { min-height:calc(100dvh - 88px); } .duel-room-surface .duel-match-heading { margin-top:8px; } .duel-tier-agreement { margin:14px auto; } }
 @media (max-height:500px) and (min-width:720px) {

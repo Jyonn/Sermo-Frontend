@@ -19,6 +19,7 @@ import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { GrowthAtlas } from "../components/GrowthAtlas";
 import { GrowthSummary } from "../components/GrowthSummary";
 import { GrowthReport } from "../components/GrowthReport";
+import { signedGrowthPoints } from "../lib/growthPoints";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
@@ -2305,7 +2306,7 @@ export default function MenuPage() {
           {me?.growth?.recent_events?.length ? (
             <details className="growth-disclosure is-history">
               <summary><span><strong>{t("growth.journey")}</strong><small>{t("growth.journeyHint")}</small></span><span className="material-symbols-outlined">expand_more</span></summary>
-              {me?.growth?.recent_events?.length ? <div className="growth-event-list">{me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}</div> : null}
+              {me?.growth?.recent_events?.length ? <div className="growth-event-list">{me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>{signedGrowthPoints(event.points)}</strong></div>)}</div> : null}
             </details>
           ) : null}
         </div>
