@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+ <defs><linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f6f4e8"/><stop offset="1" stop-color="#d6e5ce"/></linearGradient></defs>
+ <circle cx="200" cy="150" r="132" fill="none" stroke="#87a994" stroke-width="1" stroke-dasharray="4 12"/>
+ <g transform="translate(55 65) rotate(-9 140 80)" fill="url(#paper)" stroke="#9bb7a1" stroke-width="2">
+  <rect width="132" height="160" rx="23"/><rect x="152" y="24" width="132" height="160" rx="23"/>
+ </g>
+ <g fill="#305b48" font-family="Georgia,serif" font-weight="bold" font-size="106" text-anchor="middle">
+  <text x="124" y="192" transform="rotate(-9 124 170)">0</text><text x="277" y="190" transform="rotate(-9 277 170)">7</text>
+ </g>
+ <g fill="#bc7951"><circle cx="330" cy="58" r="7"/><path d="M48 220h28m-14-14v28" stroke="#bc7951" stroke-width="3"/></g>
+</svg>

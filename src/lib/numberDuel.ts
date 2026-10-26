@@ -1,0 +1,18 @@
+export interface DuelMatch {
+  id: string; code: string; status: "waiting" | "secrets" | "playing" | "finished";
+  stake: number; round: number; deadline: number; host: boolean;
+  opponent: { user_id: number; name: string } | null;
+  own_secret: string | null; opponent_locked: boolean; opponent_secret: string | null;
+  guesses: { round: number; mine: boolean; value: string | null; exact: number | null; misplaced: number | null }[];
+  outcome: "win" | "loss" | "draw" | null; reason: string; points: number; reward_reason: string;
+}
+export interface DuelLobby {
+  active: boolean; eligible: boolean; ends_at: number | null; server_time: number;
+  daily: { matches: number; points: number; match_limit: number };
+  tiers: number[]; max_rounds: number; round_seconds: number; match: DuelMatch | null;
+  history: { id: string; opponent: string; outcome: string; reason: string; finished_at: number }[];
+  leaders: { user_id: number; name: string; points: number }[];
+}
+export interface DuelInvitation { code: string; stake: number; name: string }
+export function validDuelDigits(value: string) { return /^[0-9]{4}$/.test(value) && new Set(value).size === 4; }
+export function duelSeconds(deadline: number, now: number) { return Math.max(0, Math.ceil(deadline - now)); }

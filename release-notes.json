@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.26.1",
+  "id": "2026.10.26.2",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "保留自己的热门消息",
+      "title": "数字交锋，邀友推理",
       "items": [
-        "群聊复制前三中自己的消息不再隐藏，改为排在其他消息后面"
+        "新增七日数字交锋活动，空间管理员申领后即可开启，支持房间邀请和30秒同步对局",
+        "10／20／50分档随等级解锁，每日首场获胜双倍，失败不扣分"
       ]
     },
     "en": {
-      "title": "Keep your popular messages",
+      "title": "Challenge a friend to Code Duel",
       "items": [
-        "Your own messages in the group's top three copies stay visible after other members' messages"
+        "Space administrators can launch a seven-day Code Duel event with room invitations and simultaneous 30-second rounds",
+        "Unlock 10/20/50-point tiers by level, earn double for a first-match win, and never lose points"
       ]
     }
   }

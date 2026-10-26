@@ -1,4 +1,5 @@
 import { mergeSessionUser } from "./sessionUser";
+import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import { decodeCompact, type CompactPayload } from "./compactTransport";
@@ -1030,6 +1031,16 @@ export const api = {
 
   getActivity(key: string, signal?: AbortSignal) {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
+  },
+
+  getNumberDuel(key: string, matchId?: string, signal?: AbortSignal) {
+    return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, query: matchId ? { match_id: matchId } : undefined });
+  },
+  numberDuelAction(key: string, body: Record<string, unknown>) {
+    return request<DuelMatch>(`/activities/${key}/duel`, { method: "POST", auth: true, body });
+  },
+  previewNumberDuel(key: string, code: string) {
+    return request<DuelInvitation>(`/activities/${key}/duel`, { method: "POST", auth: true, body: { action: "preview", code } });
   },
 
   configureBgm(key: string, style: "blue" | "pink", slots?: string[], preferences?: { mode?: "off" | "auto" | "manual"; track?: string; receive_audio?: boolean }) {
