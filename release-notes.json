@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.4",
+  "id": "2026.10.26.5",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋，焕新登场",
+      "title": "更清爽的活动首页",
       "items": [
-        "数字交锋新增专属艺术字体，广场横幅与分享卡片同步焕新",
-        "活动页采用透明导航栏，返回、活动标题和分享操作更清晰"
+        "数字交锋将开房、加入、记录和榜单收进弹层，首页更简洁",
+        "活动返回按钮改为半透明圆形样式，保留清晰的返回与分享操作"
       ]
     },
     "en": {
-      "title": "A fresh look for Code Duel",
+      "title": "A calmer event home",
       "items": [
-        "Code Duel has a bespoke title wordmark, shared across its banner and share cards",
-        "Activity pages now feature transparent headers with compact titles, back navigation, and sharing"
+        "Code Duel moves room setup, joining, history, and ranking into focused sheets",
+        "Activity back buttons now use a translucent circular treatment"
       ]
     }
   }

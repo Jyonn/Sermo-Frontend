@@ -34,3 +34,4 @@
 
 - Use imagegen for every new activity's custom activity-name lettering. Persist the transparent asset in this repository and reuse it for the banner, share card, and header, with accessible text and a localized fallback. Plain text or a generic display font is not the final Chinese activity wordmark.
 - Activity headers must be transparent and include a back button, a compact activity wordmark, and a share button. Use navigation-title sizing rather than an oversized hero title, and verify safe areas, portrait, landscape, desktop, and dark-mode readability.
+- Keep activity landing pages focused on the main visual, essential progress, and primary actions. Move rules, records, rankings, reward pools, and setup forms into shared modals or Sheets opened from concise secondary links. Use a translucent circular back control.
