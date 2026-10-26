@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.27.3",
+  "id": "2026.10.27.4",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "聊天更多操作更连贯",
+      "title": "深色聊天显示更清晰",
       "items": [
-        "折叠输入框从下方展开更多操作，展开输入框使用浮动菜单，布局切换与其他操作并列",
-        "足迹菜单直接显示公开或停止共享，去掉重复的中间页面"
+        "修复手机壁纸加载后会话标题及锁定栏配色，加载页面也跟随深色模式",
+        "优化换行按钮的图标与交互，修复折叠导航头像居中"
       ]
     },
     "en": {
-      "title": "More consistent composer actions",
+      "title": "Clearer dark chat surfaces",
       "items": [
-        "Compact composers expand tools below; expanded composers use a popover with layout switching alongside other actions",
-        "Footprint menus show sharing permissions directly without an extra page"
+        "Keep mobile chat headers, pinned bars and loading screens readable in dark mode",
+        "Refine the newline control and center avatars in collapsed navigation"
       ]
     }
   }

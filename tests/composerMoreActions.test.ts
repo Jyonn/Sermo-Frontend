@@ -82,3 +82,14 @@ test("short screens default compact and expanded composer exposes a real line br
   assert.match(chat, /compactComposerOverride \?\? shortComposerLayout/);
   assert.match(chat, /mentionEditorRef.current\?\.insertLineBreak\(\)/);
 });
+
+test("wallpaper chrome, loading and collapsed navigation retain theme and alignment", () => {
+  const themes = readFileSync(new URL("../src/styles/app/60-profile-themes.css", import.meta.url), "utf8");
+  assert.match(themes, /\.has-chat-wallpaper\.is-dark-wallpaper,html\[data-theme="dark"\] \.has-chat-wallpaper\{/);
+  const foundation = readFileSync(new URL("../src/styles/app/00-foundation.css", import.meta.url), "utf8");
+  assert.match(foundation, /\.auth-restore-screen \{[^}]*background: var\(--bg-canvas\)/s);
+  const nav = readFileSync(new URL("../src/styles/app/10-chat-city.css", import.meta.url), "utf8");
+  assert.match(nav, /html\[data-desktop-nav="collapsed"\] \.desktop-nav-user \{\s*grid-template-columns: minmax\(0, 1fr\) 0fr;\s*justify-items: center/);
+  const css = readFileSync(new URL("../src/components/ComposerMoreActions.css", import.meta.url), "utf8");
+  assert.match(css, /\.composer-insert-newline svg \{ width:19px; height:19px;/);
+});

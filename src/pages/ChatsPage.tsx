@@ -8249,7 +8249,7 @@ function LiveChatsPage({
                       {composerMoreButton}
                     </>}
                     input={<>
-                      <button className="composer-insert-newline" type="button" aria-label={t("composer.insertNewline")} title={t("composer.insertNewline")} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => mentionEditorRef.current?.insertLineBreak()}><span className="material-symbols-outlined">keyboard_return</span></button>
+                      <button className="composer-insert-newline" type="button" aria-label={t("composer.insertNewline")} title={t("composer.insertNewline")} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => mentionEditorRef.current?.insertLineBreak()}><ComposerSvgIcon kind="return" /></button>
                       <MentionComposerInput
                         ref={mentionEditorRef}
                         className="textarea composer-input composer-rich-input"

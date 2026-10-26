@@ -563,6 +563,8 @@
 }
 
 html[data-theme="dark"] {
+  --chat-wallpaper-dark-surface: #151d19;
+  --chat-wallpaper-dark-surface-secondary: #1b2520;
   --bg-canvas: #0e1411;
   --bg-surface: #151d19;
   --bg-elevated: #1b2520;
@@ -3393,7 +3395,7 @@ html[data-theme="dark"] body .growth-level-detail {
   place-items: center;
   padding: calc(22px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
   overflow: hidden;
-  background: var(--page-background, linear-gradient(140deg, #f8fbf6, #f4f8f3));
+  background: var(--bg-canvas);
 }
 
 .auth-restore-inline {

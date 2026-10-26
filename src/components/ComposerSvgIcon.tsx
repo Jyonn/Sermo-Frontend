@@ -1,4 +1,5 @@
-export function ComposerSvgIcon({ kind, className }: { kind: "plus" | "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
+export function ComposerSvgIcon({ kind, className }: { kind: "return" | "plus" | "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
+  if (kind === "return") return <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24"><path d="M19 5v7a3 3 0 0 1-3 3H5m5-5-5 5 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
   if (kind === "plus") return <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24"><path d="M12 4.5v15M4.5 12h15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
   if (kind === "emoji") {
     return (

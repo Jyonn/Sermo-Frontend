@@ -5277,7 +5277,8 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   }
 
   html[data-desktop-nav="collapsed"] .desktop-nav-user {
-    grid-template-columns: 36px 0fr;
+    grid-template-columns: minmax(0, 1fr) 0fr;
+    justify-items: center;
     gap: 0;
     padding-inline: 0;
   }

@@ -23,7 +23,11 @@
 }
 .composer-actions-popover { position:fixed; z-index:240; width:280px; max-height:calc(100dvh - 80px); overflow:auto; padding:12px; border:1px solid var(--line-soft); border-radius:22px; background:var(--bg-surface); color:var(--text-primary); box-shadow:0 16px 48px #0003; animation:composer-popover-in 160ms ease-out; }
 .composer-actions-popover .composer-more-actions { padding:4px 0 14px; }
-.composer-insert-newline { position:absolute; right:16px; bottom:12px; display:grid; place-items:center; width:32px; height:32px; border-radius:10px; background:var(--bg-elevated); color:var(--text-muted); z-index:2; }
+.composer-insert-newline { position:absolute; right:16px; bottom:12px; display:grid; place-items:center; width:34px; height:34px; padding:0; border:1px solid var(--line-soft); border-radius:11px; background:transparent; color:var(--text-secondary); z-index:2; transition:color 160ms ease,background 160ms ease; }
+.composer-insert-newline svg { width:19px; height:19px; }
+.composer-insert-newline:hover { color:var(--brand-primary); background:color-mix(in srgb,var(--brand-primary) 8%,var(--bg-elevated)); }
+.composer-insert-newline:focus-visible { outline:2px solid var(--brand-primary); outline-offset:3px; }
+.composer-insert-newline:disabled { opacity:.4; }
 .desktop-writing-desk-input:has(.composer-insert-newline) { padding-right:58px; }
 .topbar.conversation-topbar :is(.chat-topbar-name,.chat-back-button) { color:var(--chat-readable-text,var(--text-primary)); }
 .topbar.conversation-topbar .chat-topbar-status { color:var(--chat-readable-muted,var(--text-muted)); }
