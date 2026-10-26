@@ -16,3 +16,6 @@ export interface DuelLobby {
 export interface DuelInvitation { code: string; stake: number; name: string }
 export function validDuelDigits(value: string) { return /^[0-9]{4}$/.test(value) && new Set(value).size === 4; }
 export function duelSeconds(deadline: number, now: number) { return Math.max(0, Math.ceil(deadline - now)); }
+export function duelLoginReturn(value: unknown) {
+  return typeof value === "string" && /^\/app\/square\/activities\/number-duel-2026\?room=[A-Z2-9]{8}$/.test(value) ? value : "/app";
+}

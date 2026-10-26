@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { duelLoginReturn } from "../lib/numberDuel";
 import { AppChrome } from "../components/AppChrome";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -46,6 +47,8 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
   const { t } = useI18n();
   const { slug: routeSlug = "" } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginReturn = duelLoginReturn(location.state?.from);
   const { loginFromJoin, session } = useAuth();
   const detectedSlug = getDetectedSpaceSlug();
   const slug = useMemo(() => normalizeSlug(spaceSlug || routeSlug || detectedSlug || ""), [detectedSlug, routeSlug, spaceSlug]);
@@ -91,8 +94,8 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
       navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
       return;
     }
-    navigate("/app", { replace: true });
-  }, [embedded, navigate, session]);
+    navigate(loginReturn, { replace: true });
+  }, [embedded, navigate, session, loginReturn]);
 
   useEffect(() => {
     if (!slug) navigate("/space", { replace: true });
@@ -251,7 +254,7 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
         navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
       } else {
         clearPendingFriendInviteToken();
-        navigate("/app", { replace: true });
+        navigate(loginReturn, { replace: true });
       }
     } catch (error) {
       if (!alive.current) return;

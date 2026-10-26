@@ -343,7 +343,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   if (!session) {
     const detectedSlug = getDetectedSpaceSlug();
-    return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? "/" : "/space"} />;
+    return <Navigate replace state={{ from: location.pathname + location.search }} to={detectedSlug ? "/" : "/space"} />;
   }
 
   if (!gesturePreferenceReady) {
