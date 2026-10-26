@@ -12,6 +12,7 @@ import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
 import { SpaceAvatar, UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
+import { useShortViewport } from "../lib/compactViewport";
 import { preloadRouteForPath, preloadRouteResource } from "../lib/routeResources";
 
 const mobileRoutes = [
@@ -34,6 +35,7 @@ function activeKey(pathname: string) {
 }
 
 export function AppBottomNav() {
+  const shortViewport = useShortViewport();
   const location = useLocation();
   const { session, patchSessionUser } = useAuth();
   const space = useSpaceBrand();
@@ -294,7 +296,7 @@ export function AppBottomNav() {
           </Link>
         ))}
       </div>
-      <Link aria-label={t("menu.switchAccount")} className="desktop-nav-user" title={t("menu.switchAccount")} to="/app/menu?switch-account=1">
+      {!shortViewport ? <Link aria-label={t("menu.switchAccount")} className="desktop-nav-user" title={t("menu.switchAccount")} to="/app/menu?switch-account=1">
         <UserAvatar
           className="mini-avatar"
           cacheKey={session.user.avatar_cache_key}
@@ -303,7 +305,7 @@ export function AppBottomNav() {
           uri={session.user.avatar_uri}
         />
         <span>{session.user.name}</span>
-      </Link>
+      </Link> : null}
     </nav>
   );
 }

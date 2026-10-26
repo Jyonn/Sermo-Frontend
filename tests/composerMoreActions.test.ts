@@ -73,14 +73,24 @@ test("tablet back does not wait for a mobile-only animation and group counts sta
 });
 
 test("short screens default compact and expanded composer exposes a real line break", () => {
-  const layout = readFileSync(new URL("../src/components/ChatComposerLayout.tsx", import.meta.url), "utf8");
-  assert.match(layout, /max-height: 500px/);
+  const layout = readFileSync(new URL("../src/lib/compactViewport.ts", import.meta.url), "utf8");
+  assert.match(layout, /COMPACT_VIEWPORT_HEIGHT = 500/);
   const input = readFileSync(new URL("../src/components/MentionComposerInput.tsx", import.meta.url), "utf8");
   assert.match(input, /insertLineBreak: \(\) => void/);
   assert.match(input, /range.insertNode\(br\)/);
   const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
   assert.match(chat, /compactComposerOverride \?\? shortComposerLayout/);
   assert.match(chat, /mentionEditorRef.current\?\.insertLineBreak\(\)/);
+});
+
+test("navigation and composer share the same compact-height policy", () => {
+  const nav = readFileSync(new URL("../src/components/AppBottomNav.tsx", import.meta.url), "utf8");
+  const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  assert.match(nav, /const shortViewport = useShortViewport\(\)/);
+  assert.match(nav, /!shortViewport \? <Link[^>]+className="desktop-nav-user"/);
+  assert.match(chat, /const shortComposerLayout = useShortViewport\(\)/);
+  const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");
+  assert.match(css, /\.desktop-nav-user \{ grid-template-columns: minmax\(0, 1fr\) 0fr; justify-items: center/);
 });
 
 test("wallpaper chrome, loading and collapsed navigation retain theme and alignment", () => {

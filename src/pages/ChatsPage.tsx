@@ -28,7 +28,8 @@ import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatCalendarAvailability, useChatCalendarAvailability } from "../components/ChatCalendarAvailability";
 import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
-import { MobileChatComposer, useMobileComposerLayout, useShortComposerLayout } from "../components/ChatComposerLayout";
+import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
+import { useShortViewport } from "../lib/compactViewport";
 import { ComposerMoreActions } from "../components/ComposerMoreActions";
 import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
@@ -3009,7 +3010,7 @@ function LiveChatsPage({
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
   const [mobileHoldBusy, setMobileHoldBusy] = useState(false);
   const narrowComposerLayout = useMobileComposerLayout();
-  const shortComposerLayout = useShortComposerLayout();
+  const shortComposerLayout = useShortViewport();
   const [compactComposerOverride, setCompactComposerOverride] = useState<boolean | null>(null);
   const mobileComposerLayout = narrowComposerLayout || (compactComposerOverride ?? shortComposerLayout);
   useEffect(() => { setCompactComposerOverride(null); }, [shortComposerLayout]);

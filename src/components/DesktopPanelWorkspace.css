@@ -226,7 +226,7 @@
   html[data-desktop-nav] body .app-mobile-nav { width: 76px; padding-inline: 12px; }
   html[data-desktop-nav] body .app-mobile-nav .nav-button { grid-template-columns: 28px 0fr; justify-items: center; gap: 0; padding-inline: 0; }
   html[data-desktop-nav] body .app-mobile-nav :is(.nav-button-label, .desktop-nav-brand, .desktop-nav-toggle) { display: none; }
-  html[data-desktop-nav] body .desktop-nav-user { grid-template-columns: 36px 0fr; gap: 0; padding-inline: 0; }
+  html[data-desktop-nav] body .desktop-nav-user { grid-template-columns: minmax(0, 1fr) 0fr; justify-items: center; gap: 0; padding-inline: 0; }
   html[data-desktop-nav] body .desktop-nav-user > span { display: none; }
 }
 
