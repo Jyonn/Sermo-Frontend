@@ -27,6 +27,13 @@ html[data-theme="dark"] .number-duel,html[data-theme="dark"] .duel-panel { --due
 .duel-daily > span { display:flex; align-items:baseline; gap:9px; }
 .duel-daily strong { font-size:20px; color:var(--text-primary); font-variant-numeric:tabular-nums; }
 .duel-daily strong small { font-size:12px; color:var(--text-muted); }
+.duel-growth { grid-column:1/-1; margin-block:18px; padding:14px 16px; border:1px solid var(--line-soft); border-radius:14px; background:color-mix(in srgb,var(--bg-surface) 50%,transparent); }
+.duel-growth-copy { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px 16px; font-size:12px; line-height:1.7; }
+.duel-growth-copy strong { color:var(--duel-accent); font-weight:600; }
+.duel-growth-copy span { color:var(--text-secondary); overflow-wrap:anywhere; }
+.duel-growth-track { height:4px; margin-top:10px; overflow:hidden; border-radius:4px; background:var(--line-soft); }
+.duel-growth-track i { display:block; width:100%; height:100%; border-radius:inherit; background:var(--duel-accent); transform-origin:left; transition:transform .3s ease; }
+@media (prefers-reduced-motion:reduce) { .duel-growth-track i { transition:none; } }
 .duel-daily .duel-first { margin-left:auto; color:var(--duel-accent); background:var(--duel-tint); padding:6px 9px; border-radius:7px; font-size:11px; }
 .number-duel h3 { font-size:16px; margin:0 0 12px; }
 .duel-create > p { margin:0 0 16px; color:var(--text-secondary); font-size:12px; }

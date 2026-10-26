@@ -86,6 +86,7 @@
   "duel.roundHistory": "推理记录",
   "duel.feedbackHint": "仅计算数字和位置都正确的位数。例如秘密0011，猜0101，完全对2位。",
   "duel.exactFeedback": "完全对{{count}}位",
+  "duel.growthRemaining": "还差 {{points}} 成长分升至 {{level}}",
   "duel.skipped": "本轮跳过",
   "duel.yourSecret": "我的秘密数字",
   "duel.theirSecret": "对方的秘密数字",

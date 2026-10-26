@@ -7,13 +7,14 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { duelSeconds, validDuelDigits, type DuelLobby } from "../lib/numberDuel";
-import type { ActivityCampaignDTO, ChatDTO } from "../types";
+import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ChatTargetPicker } from "./ChatTargetPicker";
 import { NumberDuelCard } from "./NumberDuelCard";
 import { UserAvatar } from "./UserAvatar";
 import { signedGrowthPoints } from "../lib/growthPoints";
+import { DuelGrowthProgress } from "./DuelGrowthProgress";
 import "./NumberDuelActivity.css";
 import "./NumberDuelDigits.css";
 
@@ -23,6 +24,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   const t = (key: TranslationKey | `duel.${string}`, values?: Record<string, string | number | undefined>) => translate(key as TranslationKey, values);
   const { session, patchSessionUser } = useAuth();
   const [lobby, setLobby] = useState<DuelLobby | null>(null);
+  const [growth, setGrowth] = useState<UserGrowthDTO | null>(null);
   const [stake, setStake] = useState(10);
   const [digits, setDigits] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,6 +80,13 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   useEffect(() => { setDigits(""); }, [match?.id, match?.status, match?.round]);
   useEffect(() => { setStake(match?.own_tier ?? 10); }, [match?.id, match?.own_tier]);
   const settled = match?.status === "finished";
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.getGrowth(controller.signal).then((data) => {
+      if (!controller.signal.aborted) setGrowth(data);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [activity.key, match?.id, match?.funded, settled]);
   useEffect(() => {
     if (!match?.funded) return;
     const controller = new AbortController();
@@ -145,6 +154,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     {!lobby ? <p className="duel-loading" role="status">{t("common.loading")}</p> : !roomCode ? <>
       <section className="duel-hero"><div><small>{t("duel.eyebrow")}</small><h2>{t("duel.headline")}</h2><p>{t("duel.subtitle")}</p></div><img src="/activity/number-duel/digits.svg" alt="" /></section>
       <div className="duel-daily"><span>{t("duel.today")} <strong>{lobby.daily.matches}<small> / {lobby.daily.match_limit}</small></strong></span><span>{t("duel.earned")} <strong>{signedGrowthPoints(lobby.daily.points)}</strong></span><span className="duel-first">{t("duel.poolRule")}</span></div>
+      <DuelGrowthProgress growth={growth} />
       {!lobby.eligible ? <p className="duel-notice">{t("duel.verify")}</p> : !lobby.active ? <p className="duel-notice">{t("duel.ended")}</p> : lobby.daily.matches >= lobby.daily.match_limit ? <p className="duel-notice">{t("duel.practice")}</p> : null}
       <section className="duel-primary-actions"><button className="button" disabled={busy || !canEnter} type="button" onClick={() => match ? showMatch(match.code) : void act("create")}>{t(match ? "duel.resumeRoom" : "duel.createTitle")}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><p className="duel-join-invite-hint">{t("duel.joinViaInvite")}</p></section>
     </> : !match ? <section className="duel-room-entry">
@@ -157,6 +167,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
         {!done ? <time className={`duel-timer${seconds <= 5 ? " is-urgent" : ""}`} aria-label={t("duel.seconds", { count: seconds })}>{seconds >= 60 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : `${seconds}s`}</time> : <strong className={`duel-result-points${match.points < 0 ? " is-loss" : ""}`}>{signedGrowthPoints(match.points)}</strong>}
       </header>
       <div className="duel-versus"><span><UserAvatar className="duel-player-avatar" name={session?.user.name ?? t("duel.you")} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} /><strong>{session?.user.name ?? t("duel.you")}</strong><small>{match.own_secret ? t("duel.secretLocked") : match.own_tier ? t("duel.stake", { points: match.own_tier }) : t("duel.you")}</small></span><b>VS</b><span><UserAvatar className="duel-player-avatar" name={match.opponent?.name ?? "?"} uri={match.opponent?.avatar_uri} cacheKey={match.opponent?.avatar_cache_key} /><strong>{match.opponent?.name ?? t("duel.waitingPeer")}</strong><small>{match.stake || match.opponent_tier ? t("duel.stake", { points: match.stake || match.opponent_tier! }) : t("duel.tierPending")}</small></span></div>
+      <DuelGrowthProgress growth={growth} />
       {match.status === "waiting" ? <section className="duel-waiting"><NumberDuelCard room={lobby.room} /><p>{t("duel.inviteHint")}</p><button className="button" type="button" onClick={() => void openShare()}>{t("duel.invite")}</button><button className="ghost-button" type="button" onClick={() => void copyInvite()}>{t("duel.copyLink")}</button></section> : match.status === "choosing" ? <section className="duel-tier-agreement"><p>{t("duel.tierHint")}</p><p className="duel-cost-preview">{t("duel.entryConfirm", { points: stake, balance: match.balance })}</p><div className="duel-tiers">{[10, 20, 50].map((value, index) => <button key={value} type="button" aria-pressed={stake === value} disabled={busy || !match.tiers.includes(value)} onClick={() => setStake(value)}><strong>{value}</strong><small>{t("duel.tierLevel", { level: [1, 8, 14][index] })}</small></button>)}</div><button type="button" className="button" disabled={busy || !match.tiers.includes(stake) || match.own_tier === stake || seconds === 0} onClick={() => void act("tier", { stake })}>{t(match.own_tier === stake ? "duel.waitTier" : "duel.confirmTier", { points: stake })}</button><p role="status">{match.opponent_tier ? t("duel.peerTier", { points: match.opponent_tier }) : t("duel.peerChoosing")}</p></section> : done ? <section className="duel-result"><p>{t(match.practice_reason || !match.funded ? "duel.practiceMatch" : match.reason === "normal" ? "duel.resultHint" : `duel.finish.${["ended", "forfeit", "inactive", "timeout"].includes(match.reason) ? match.reason : "timeout"}`)}</p><dl className="duel-entry-ledger"><div><dt>{t("duel.entryCost")}</dt><dd>{signedGrowthPoints(match.funded ? -match.stake : 0)}</dd></div><div><dt>{t("duel.returned")}</dt><dd>{signedGrowthPoints(match.returned)}</dd></div></dl><div className="duel-secrets"><span>{t("duel.yourSecret")}<strong>{match.own_secret ?? "—"}</strong></span><span>{t("duel.theirSecret")}<strong>{match.opponent_secret ?? "—"}</strong></span></div><button className="button" type="button" onClick={() => showMatch(undefined)}>{t("duel.backLobby")}</button></section> : <section className="duel-play-area">
         {secretStage && match.own_secret ? <div className="duel-round-wait"><span className="material-symbols-outlined" aria-hidden="true">lock</span><strong>{match.own_secret}</strong><p>{t("duel.waitSecret")}</p></div> : !secretStage && myGuess ? <div className="duel-round-wait"><strong>{myGuess.value}</strong><span className="duel-feedback"><b>{t("duel.exactFeedback", { count: myGuess.exact ?? "—" })}</b></span><p>{t("duel.waitGuess")}</p></div> : <form onSubmit={(event) => { event.preventDefault(); void act(secretStage ? "secret" : "guess", { value: digits, round: match.round }); }}>
           <label htmlFor="duel-digits">{t(secretStage ? "duel.secretHint" : "duel.guessHint")}</label><input autoFocus id="duel-digits" className="duel-digit-input" autoComplete="off" inputMode="numeric" maxLength={4} value={digits} onChange={(event) => setDigits(event.target.value.replace(/[^0-9]/g, "").slice(0, 4))} placeholder="0 1 2 3" aria-describedby="duel-digit-help" /><small id="duel-digit-help">{t(digits.length === 4 && !validDuelDigits(digits) ? "duel.error.invalid" : "duel.digitHint")}</small><button className="button" disabled={busy || !validDuelDigits(digits) || seconds === 0} type="submit">{t(secretStage ? "duel.lockSecret" : "duel.submit")}</button>

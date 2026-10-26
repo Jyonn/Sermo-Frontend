@@ -86,6 +86,7 @@
   "duel.roundHistory": "Your deductions",
   "duel.feedbackHint": "Only digits in the correct position count. Secret 0011, guess 0101: 2 exact matches.",
   "duel.exactFeedback": "{{count}} exact matches",
+  "duel.growthRemaining": "{{points}} growth points to {{level}}",
   "duel.skipped": "Skipped",
   "duel.yourSecret": "Your code",
   "duel.theirSecret": "Their code",

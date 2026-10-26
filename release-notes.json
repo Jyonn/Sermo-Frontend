@@ -1,18 +1,20 @@
 {
-  "id": "2026.10.26.9",
+  "id": "2026.10.26.10",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋玩法简化",
+      "title": "数字交锋成长进度",
       "items": [
-        "秘密数字和猜测允许重复，首位仍可为0",
+        "活动大厅和房间展示当前等级，以及距离下一等级所需的成长分",
+        "投入与结算后刷新成长进度；数字允许重复，首位可为0",
         "猜测结果仅展示完全正确的位数，不再显示A/B"
       ]
     },
     "en": {
-      "title": "Simpler Code Duel rules",
+      "title": "Code Duel growth progress",
       "items": [
-        "Secret codes and guesses allow repeated digits and leading zeros",
+        "The lobby and room show your current level and points needed for the next level",
+        "Progress refreshes after entry and settlement; repeated digits and leading zeros are allowed",
         "Feedback shows only exact-position matches, without A/B notation"
       ]
     }
