@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { duelLoginReturn, duelSeconds, validDuelDigits } from "../src/lib/numberDuel.ts";
-test("four distinct ASCII digits, including leading zero", () => {
+test("four ASCII digits, allowing repetition and leading zero", () => {
   assert.equal(validDuelDigits("0123"), true);
-  for (const value of ["1123", "１２３４", "123", "12345", "12 3"]) assert.equal(validDuelDigits(value), false);
+  for (const value of ["1123", "0000", "1111", "0011"]) assert.equal(validDuelDigits(value), true);
+  for (const value of ["１２３４", "123", "12345", "12 3"]) assert.equal(validDuelDigits(value), false);
 });
 test("deadline rounds up and never goes negative", () => {
   assert.equal(duelSeconds(30, 0.1), 30);

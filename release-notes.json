@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.8",
+  "id": "2026.10.26.9",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "数字交锋滚动体验优化",
+      "title": "数字交锋玩法简化",
       "items": [
-        "活动页与房间页滚动边界更稳定，短屏和横屏也能完整查看底部内容",
-        "房间标题保持在顶部，底部操作预留安全空间"
+        "秘密数字和猜测允许重复，首位仍可为0",
+        "猜测结果仅展示完全正确的位数，不再显示A/B"
       ]
     },
     "en": {
-      "title": "Smoother Code Duel scrolling",
+      "title": "Simpler Code Duel rules",
       "items": [
-        "Activity and room content stays fully reachable on short screens and in landscape",
-        "Room headers stay visible while bottom actions retain safe spacing"
+        "Secret codes and guesses allow repeated digits and leading zeros",
+        "Feedback shows only exact-position matches, without A/B notation"
       ]
     }
   }
