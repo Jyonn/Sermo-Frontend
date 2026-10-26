@@ -1,4 +1,4 @@
-.chronelle-calendar { display: grid; gap: 16px; min-width: 0; margin-block: 24px; padding: 18px; border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 22px; color: var(--profile-ink, var(--text-primary)); background: var(--profile-card, var(--bg-canvas)); }
+.chronelle-calendar { display: grid; gap: 16px; min-width: 0; margin-block: 24px 0; padding: 18px; border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 22px; color: var(--profile-ink, var(--text-primary)); background: var(--profile-card, var(--bg-canvas)); }
 .chronelle-calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .chronelle-calendar-heading > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .chronelle-calendar-heading img { width: 28px; height: 28px; border-radius: 8px; }

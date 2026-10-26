@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.27.5",
+  "id": "2026.10.27.6",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "通知设置排版更舒适",
+      "title": "界面细节更简洁",
       "items": [
-        "调整通知与提醒的按类型列表留白，让文字、开关和列标题对齐更自然"
+        "输入框操作简化为折叠与展开，减少个人名片日历下方的重复留白"
       ]
     },
     "en": {
-      "title": "More comfortable notification settings",
+      "title": "Cleaner interface details",
       "items": [
-        "Improve spacing and column alignment in notification settings by type"
+        "Shorten composer layout labels and remove duplicate spacing below profile calendars"
       ]
     }
   }
