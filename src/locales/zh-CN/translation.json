@@ -34,7 +34,7 @@
   "duel.ended": "本空间活动已结束，可以查看对战记录。",
   "duel.practice": "今日计分场次已满，仍可进行不计分的练习对局。",
   "duel.createTitle": "发起挑战",
-  "duel.tierHint": "按双方较低等级解锁档位，90秒内选择一致即可开始。失败不扣分。",
+  "duel.tierHint": "按双方较低等级解锁档位，90秒内确认相同档位。",
   "duel.tierLevel": "LV {{level}} 起",
   "duel.create": "开房邀请朋友",
   "duel.joinTitle": "接受朋友的邀请",

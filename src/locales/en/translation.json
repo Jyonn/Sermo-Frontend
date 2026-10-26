@@ -34,7 +34,7 @@
   "duel.ended": "This space's event has ended. Your match history remains available.",
   "duel.practice": "Today's scoring limit is reached. You can still play practice matches without rewards.",
   "duel.createTitle": "Start a challenge",
-  "duel.tierHint": "Tiers follow the lower player level. Agree within 90 seconds. Losing costs no points.",
+  "duel.tierHint": "Tiers follow the lower player level. Confirm matching choices within 90 seconds.",
   "duel.tierLevel": "LV {{level}}+",
   "duel.create": "Create a room",
   "duel.joinTitle": "Have an invitation?",
