@@ -3041,6 +3041,7 @@
   ,"audio.transcriptEmpty": "没有识别出清晰的文字"
   ,"audio.transcriptFailed": "暂时无法识别，点击重试"
   ,"composer.tools": "消息工具"
+  ,"composer.moreActions": "更多操作"
   ,"composer.holdToTalk": "按住说话"
   ,"composer.slideToCancel": "上滑取消"
   ,"composer.keepSliding": "保持按住并上滑"

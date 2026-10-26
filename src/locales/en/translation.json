@@ -3041,6 +3041,7 @@
   ,"audio.transcriptEmpty": "No clear speech was detected"
   ,"audio.transcriptFailed": "Could not transcribe this audio. Tap retry."
   ,"composer.tools": "Message tools"
+  ,"composer.moreActions": "More actions"
   ,"composer.holdToTalk": "Hold to talk"
   ,"composer.slideToCancel": "Slide up to cancel"
   ,"composer.keepSliding": "Keep holding and slide up"

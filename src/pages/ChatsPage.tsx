@@ -29,6 +29,8 @@ import { ChatCalendarAvailability, useChatCalendarAvailability } from "../compon
 import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
+import { ComposerMoreActions } from "../components/ComposerMoreActions";
+import { ActionSheet } from "../components/ActionSheet";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
@@ -2999,7 +3001,7 @@ function LiveChatsPage({
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
-  const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "footprint" | null>(null);
+  const [composerActionSheet, setComposerActionSheet] = useState<"file" | "footprint" | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
@@ -3046,7 +3048,7 @@ function LiveChatsPage({
   const [chatTravelMapAccess, setChatTravelMapAccess] = useState<ChatTravelMapAccessDTO | null>(null);
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
   const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
-  const [desktopComposerTool, setDesktopComposerTool] = useState<"file" | "footprint" | "voice" | null>(null);
+  const [desktopComposerTool, setDesktopComposerTool] = useState<"voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -4773,7 +4775,7 @@ function LiveChatsPage({
     setDraft(nextDraft);
     setMentionSearch(null);
     setMobileEmojiPanelMounted(false);
-    setMobileComposerPanel(null);
+    setComposerActionSheet(null);
     setMobileVoiceReady(false);
     window.requestAnimationFrame(() => mentionEditorRef.current?.moveCaretToEnd());
   }, [cacheScope, selectedChat?.id]);
@@ -4806,7 +4808,7 @@ function LiveChatsPage({
     return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
   }, [desktopComposerTool, mobileComposerLayout]);
 
-  const toggleDesktopComposerTool = (tool: "file" | "footprint" | "voice") => {
+  const toggleDesktopComposerTool = (tool: "voice") => {
     setEmojiPickerOpen(false);
     setComposerMoreOpen(false);
     setDesktopComposerTool((current) => current === tool ? null : tool);
@@ -4817,26 +4819,21 @@ function LiveChatsPage({
     setMentionSearch(null);
   };
 
-  const openMobileComposerPanel = (panel: "file" | "footprint") => {
-    suspendMobileComposerInput();
-    setMobileVoiceReady(false);
-    setEmojiPickerOpen(false);
-    setMobileComposerPanel((current) => current === panel ? null : panel);
-  };
-
   const toggleMobileEmojiPanel = () => {
+    setComposerMoreOpen(false);
     suspendMobileComposerInput();
     setMobileVoiceReady(false);
-    setMobileComposerPanel(null);
+    setComposerActionSheet(null);
     if (!emojiPickerOpen) setMobileEmojiPanelMounted(true);
     setEmojiPickerOpen((current) => !current);
   };
 
   const prepareMobileVoice = async () => {
+    setComposerMoreOpen(false);
     if (mobileMicrophoneBusy) return;
     suspendMobileComposerInput();
     setEmojiPickerOpen(false);
-    setMobileComposerPanel(null);
+    setComposerActionSheet(null);
     if (!requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       showToast(t("audio.unsupported"), "error");
@@ -6229,6 +6226,7 @@ function LiveChatsPage({
   const openGalleryPicker = () => {
     if (composerBusy) return;
     if (!requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return;
+    setComposerMoreOpen(false);
     galleryInputRef.current?.click();
   };
 
@@ -6236,7 +6234,7 @@ function LiveChatsPage({
     if (composerBusy || !requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
     setComposerMoreOpen(false);
     suspendMobileComposerInput();
-    setMobileComposerPanel(null);
+    setComposerActionSheet(null);
     setDesktopComposerTool(null);
     setLocationPickerOpen(true);
   };
@@ -6328,17 +6326,15 @@ function LiveChatsPage({
     }
   };
 
-  const openChatTravelMap = async (inline = false) => {
+  const openChatTravelMap = async () => {
     if (!selectedChat || composerBusy || travelMapSaving) return;
     setComposerMoreOpen(false);
     setTravelMapSaving(true);
     try {
       const access = await api.getChatTravelMapAccess(selectedChat.id);
       setChatTravelMapAccess(access);
-      if (!inline) {
-        if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
-        else setChatTravelMapGrantConfirmOpen(true);
-      }
+      if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
+      else setChatTravelMapGrantConfirmOpen(true);
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
     } finally {
@@ -7822,6 +7818,13 @@ function LiveChatsPage({
     </div>
   ) : null;
 
+  const composerMoreButton = <button type="button" className={`composer-more-trigger${composerMoreOpen ? " is-active" : ""}`} aria-label={t("composer.moreActions")} title={t("composer.moreActions")} aria-expanded={composerMoreOpen} aria-controls="chat-composer-more" disabled={composerBusy} onClick={() => {
+    if (mobileComposerLayout) suspendMobileComposerInput();
+    setEmojiPickerOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setComposerActionSheet(null);
+    setComposerMoreOpen((open) => !open);
+  }}><ComposerSvgIcon kind="plus" /></button>;
+  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => setComposerActionSheet("footprint")} />;
+
   return (
     <AppChrome
       workspaceSelected={Boolean(displayedChat)}
@@ -7895,6 +7898,13 @@ function LiveChatsPage({
         ) : undefined
       }
     >
+      <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t(composerActionSheet === "file" ? "cloudResources.fileSourceTitle" : "travelMap.actionShort")} actions={composerActionSheet === "file" ? [
+        { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
+        { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
+      ] : [
+        { key: "map", label: t("travelMap.openMap"), description: t("composer.openFootprintHint"), icon: <ComposerSvgIcon kind="map" />, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); setChatTravelMapOpen(true); } },
+        { key: "sharing", label: t("composer.shareFootprint"), description: t("composer.shareFootprintHint"), icon: <span className="material-symbols-outlined">group_add</span>, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); void openChatTravelMap(); } },
+      ]} />
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
@@ -7987,7 +7997,8 @@ function LiveChatsPage({
                 className="message-scroll"
                 onPointerDown={() => {
                   if (emojiPickerOpen) setEmojiPickerOpen(false);
-                  if (mobileComposerPanel) setMobileComposerPanel(null);
+                  setComposerMoreOpen(false);
+                  if (composerActionSheet) setComposerActionSheet(null);
                   if (mobileVoiceReady && !mobileHoldBusy) setMobileVoiceReady(false);
                 }}
                 onScroll={() => {
@@ -8144,7 +8155,8 @@ function LiveChatsPage({
                 ) : null}
                 {mobileComposerLayout ? (
                   <MobileChatComposer
-                    toolCount={submissionMode ? 5 : selectedChat?.type === "group" ? 7 : 6}
+                    toolCount={selectedChat?.type === "group" ? 6 : 5}
+                    more={composerMoreActions}
                     input={mobileVoiceReady ? (
                         <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
                       ) : (
@@ -8156,7 +8168,7 @@ function LiveChatsPage({
                             onChange={updateDraft}
                             onFocus={() => {
                               setEmojiPickerOpen(false);
-                              setMobileComposerPanel(null);
+                              setComposerActionSheet(null);
                               setMobileVoiceReady(false);
                             }}
                             onMentionQueryChange={(query) => setMentionSearch(selectedChat?.type === "group" ? query : null)}
@@ -8186,14 +8198,15 @@ function LiveChatsPage({
                       <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy || mobileMicrophoneBusy} onClick={() => void prepareMobileVoice()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                       {selectedChat?.type === "group" ? <button aria-label={t("chat.mentionMembers")} aria-pressed={mentionSearch !== null} className={mentionSearch !== null ? "is-active" : ""} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => { setMobileVoiceReady(false); mentionEditorRef.current?.openMentionPicker(); }} title={t("chat.mentionMembers")} type="button"><span className="material-symbols-outlined" aria-hidden="true">alternate_email</span></button> : null}
                       <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
-                      <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
-                      <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
+                      <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setComposerActionSheet(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
+
                       <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
-                      {!submissionMode ? <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button> : null}
+                      {composerMoreButton}
                     </>}
                   />
                 ) : (
                   <DesktopChatComposerDesk
+                    more={composerMoreActions}
                     shortcutLabel={t("composer.desktopShortcut")}
                     reply={replyingTo ? (
                       <div className="composer-reply-preview">
@@ -8217,27 +8230,9 @@ function LiveChatsPage({
                       <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setDesktopComposerTool(null); setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
                       <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
-                        {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
-                          <div className="desktop-tool-choice-grid">
-                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong></button>
-                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong></button>
-                          </div>
-                        </div> : null}
-                      </span>
-                      <span className="desktop-tool-anchor">
                         <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                       </span>
-                      {selectedChat && !submissionMode ? <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
-                        {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
-                          <header><strong>{t("travelMap.sharedFootprints")}</strong></header>
-                          {travelMapSaving ? <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("common.loading")}</div> : chatTravelMapAccess?.authorized_by_me ? <div className="desktop-tool-stack">
-                            <button className="desktop-tool-wide-action" onClick={() => { setDesktopComposerTool(null); setChatTravelMapOpen(true); }} type="button"><ComposerSvgIcon kind="map" /><span><strong>{t("travelMap.openMap")}</strong><small>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess.shared_members.length })}</small></span></button>
-                            <button className="desktop-tool-text-danger" onClick={() => void revokeChatTravelMap()} type="button">{t("travelMap.stopSharing")}</button>
-                          </div> : <button className="desktop-tool-primary-action is-wide" onClick={() => void grantChatTravelMap()} type="button"><ComposerSvgIcon kind="map" />{t("travelMap.authorize")}</button>}
-                        </div> : null}
-                      </span> : null}
+                      {composerMoreButton}
                     </>}
                     input={<>
                       <MentionComposerInput
@@ -8274,38 +8269,6 @@ function LiveChatsPage({
                   <div className={mobileComposerLayout ? `mobile-composer-reveal mobile-emoji-reveal${emojiPickerOpen ? " is-open" : ""}` : "desktop-emoji-reveal"}>
                     <div className={mobileComposerLayout ? "mobile-composer-reveal-inner" : undefined}>
                   <ChatEmojiPickerPanel emojiPage={emojiPage} setEmojiPage={setEmojiPage} visibleEmojis={visibleEmojis} stickers={stickers} exploreStickers={exploreStickers} frequentExploreStickerIds={frequentExploreStickerIds} stickerSaving={stickerSaving} mineStickersLoading={mineStickersLoading} exploreStickersLoading={exploreStickersLoading} sendSticker={sendSticker} collectExploredSticker={collectExploredSticker} openStickerManager={openStickerManager} handleStickerGridScroll={handleStickerGridScroll} insertEmoji={insertEmoji}/>
-                    </div>
-                  </div>
-                ) : null}
-                {mobileComposerLayout ? (
-                  <div className={`mobile-composer-reveal${mobileComposerPanel === "file" ? " is-open" : ""}`}>
-                    <div className="mobile-composer-reveal-inner">
-                  <div className="mobile-composer-options" aria-label={t("cloudResources.fileSourceTitle")}>
-                    <button tabIndex={mobileComposerPanel === "file" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); setCloudFilePickerOpen(true); }} type="button">
-                      <span className="material-symbols-outlined">cloud</span>
-                      <span><strong>{t("cloudResources.chooseCloud")}</strong><small>{t("composer.cloudFileHint")}</small></span>
-                    </button>
-                    <button tabIndex={mobileComposerPanel === "file" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); fileInputRef.current?.click(); }} type="button">
-                      <span className="material-symbols-outlined">upload_file</span>
-                      <span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span>
-                    </button>
-                  </div>
-                    </div>
-                  </div>
-                ) : null}
-                {mobileComposerLayout && !submissionMode ? (
-                  <div className={`mobile-composer-reveal${mobileComposerPanel === "footprint" ? " is-open" : ""}`}>
-                    <div className="mobile-composer-reveal-inner">
-                  <div className="mobile-composer-options" aria-label={t("travelMap.actionShort")}>
-                    <button tabIndex={mobileComposerPanel === "footprint" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); setChatTravelMapOpen(true); }} type="button">
-                      <span className="material-symbols-outlined">travel_explore</span>
-                      <span><strong>{t("travelMap.openMap")}</strong><small>{t("composer.openFootprintHint")}</small></span>
-                    </button>
-                    <button tabIndex={mobileComposerPanel === "footprint" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); void openChatTravelMap(); }} type="button">
-                      <span className="material-symbols-outlined">group_add</span>
-                      <span><strong>{t("composer.shareFootprint")}</strong><small>{t("composer.shareFootprintHint")}</small></span>
-                    </button>
-                  </div>
                     </div>
                   </div>
                 ) : null}

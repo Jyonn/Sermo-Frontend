@@ -9,6 +9,7 @@ interface DesktopChatComposerDeskProps {
   reply?: ReactNode;
   shortcutLabel: string;
   tools: ReactNode;
+  more?: ReactNode;
 }
 
 export function DesktopChatComposerDesk({
@@ -16,6 +17,7 @@ export function DesktopChatComposerDesk({
   reply,
   shortcutLabel,
   tools,
+  more,
 }: DesktopChatComposerDeskProps) {
   const [height, setHeight] = useState(220);
   const dragStart = useRef<{ height: number; y: number } | null>(null);
@@ -60,13 +62,14 @@ export function DesktopChatComposerDesk({
 
   return (
     <div
-      className={`desktop-writing-desk${reply ? " has-reply" : ""}`}
+      className={`desktop-writing-desk${reply ? " has-reply" : ""}${more ? " has-tools-expansion" : ""}`}
       style={{ "--desktop-writing-desk-height": `${height}px` } as CSSProperties}
     >
       <div className="desktop-writing-desk-toolbar" role="toolbar">
         <div className="desktop-writing-desk-tools">{tools}</div>
         <span className="desktop-writing-desk-shortcut">{shortcutLabel}</span>
       </div>
+      {more}
       <div
         aria-orientation="horizontal"
         aria-valuemax={Math.round(maximumHeight())}

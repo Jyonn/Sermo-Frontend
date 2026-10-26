@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.26.15",
-  "publishedAt": "2026-10-26",
+  "id": "2026.10.27.1",
+  "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "横屏面板显示修复",
+      "title": "聊天工具栏更简洁",
       "items": [
-        "单面板横屏布局不再保留隐藏列表的背景绘制层，避免标题栏左侧出现异常色块"
+        "文件与足迹收进加号展开的更多操作区，支持平滑展开和收起",
+        "文件来源、足迹操作改用统一操作菜单，手机与桌面保持一致"
       ]
     },
     "en": {
-      "title": "Landscape panel rendering fix",
+      "title": "A cleaner chat toolbar",
       "items": [
-        "Single-panel landscape layouts remove hidden list painting layers to prevent stray header backgrounds"
+        "Files and footprints move into an animated More panel behind the plus button",
+        "File sources and footprint actions use consistent action sheets on mobile and desktop"
       ]
     }
   }

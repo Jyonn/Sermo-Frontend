@@ -11,11 +11,12 @@ const subscribe = (listener: () => void) => {
 const snapshot = () => window.matchMedia(query).matches;
 export const useMobileComposerLayout = () => useSyncExternalStore(subscribe, snapshot, () => false);
 
-export function MobileChatComposer({ input, tools, toolCount }: {input: ReactNode; tools: ReactNode; toolCount: number}) {
+export function MobileChatComposer({ input, tools, toolCount, more }: {input: ReactNode; tools: ReactNode; toolCount: number; more?: ReactNode}) {
   const { t } = useI18n();
   return <div className="mobile-quiet-composer">
     <div className="mobile-quiet-input-row">{input}</div>
     <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")} style={{"--mobile-composer-tool-columns": toolCount} as CSSProperties}>{tools}</div>
+    {more}
   </div>;
 }
 
