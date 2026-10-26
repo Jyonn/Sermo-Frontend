@@ -107,6 +107,13 @@ html[data-theme="dark"] .number-duel,html[data-theme="dark"] .duel-panel { --due
 .duel-rule-list { padding:0 0 0 22px; margin:0; }
 .duel-rule-list li { padding:8px 0 8px 8px; font-size:14px; line-height:1.8; color:var(--text-primary); }
 .duel-share { display:flex; flex-wrap:wrap; gap:10px; }
+.duel-share .number-duel-card { max-width:none; margin:0; padding:12px 14px; gap:8px; border-radius:14px; }
+.duel-share .duel-card-copy { gap:4px; }
+.duel-share .duel-card-copy > small,.duel-share .duel-card-footer { display:none; }
+.duel-share .duel-card-copy .campaign-title-art { height:24px; max-width:110px; }
+.duel-share .duel-card-code { grid-template-columns:repeat(4,22px); gap:3px; transform:none; }
+.duel-share .duel-card-code b { width:22px; height:28px; font-size:18px; border-radius:5px; }
+.duel-share > .ghost-button { min-height:28px; padding:3px 8px; font-size:12px; }
 .duel-share > h3,.duel-share > p { flex-basis:100%; }
 .duel-share > h3 { margin:16px 0 0; font-size:14px; }
 @container (min-width:600px) {

@@ -4,6 +4,7 @@ import { BottomSheet } from "./BottomSheet";
 import { ContentLoader, QuietState } from "./BoundaryState";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
+import "./ChatTargetPicker.css";
 
 export interface ChatTargetPickerItem {
   id: number;
@@ -76,7 +77,7 @@ export function ChatTargetPicker({
 
   const content = <>
       {presentation === "drawer" && description ? <p className="card-subtitle">{description}</p> : null}
-      {beforeList}
+      {beforeList ? <div className="chat-target-picker-preview">{beforeList}</div> : null}
       {multiple ? <div className="chat-target-picker-heading"><strong>{t("message.chooseForwardChats")}</strong><span>{selectedIds.length}/{maxSelections}</span></div> : null}
       {loading && !targets.length ? <ContentLoader label={t("square.loadingChats")} rows={4} /> : null}
       {!loading && !targets.length ? <QuietState icon="forum" title={emptyTitle} /> : null}

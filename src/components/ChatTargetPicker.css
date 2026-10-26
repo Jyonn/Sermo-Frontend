@@ -1,0 +1,37 @@
+.chat-target-picker-sheet.bottom-sheet {
+  display:flex;
+  flex-direction:column;
+  height:min(90dvh,800px);
+  max-height:calc(100dvh - 32px);
+}
+.chat-target-picker-sheet > :is(.sheet-header,.sheet-drag-zone) { flex:0 0 auto; }
+.chat-target-picker-sheet > .chat-target-picker-body { height:auto; max-height:none; flex:1 1 0; gap:10px; }
+.chat-target-picker-body > .chat-target-picker-heading { margin:0 2px; }
+.chat-target-picker-body > .chat-target-picker-submit { padding-top:8px; }
+.chat-target-picker-body > .chat-target-picker-preview {
+  flex:0 1 auto;
+  min-height:0;
+  max-height:min(22dvh,150px);
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+.chat-target-picker-body > .chat-target-picker-list { flex:1 1 0; }
+.chat-target-picker-body > :is(.chat-target-picker-heading,.chat-target-picker-submit) { flex:0 0 auto; }
+@media (max-height:500px) {
+  .chat-target-picker-sheet > .chat-target-picker-body { gap:8px; }
+  .chat-target-picker-body > .chat-target-picker-preview { max-height:64px; }
+  .chat-target-picker-body > .chat-target-picker-submit { padding:0; }
+  .chat-target-picker-submit > .button { min-height:40px; }
+}
+@media (min-width:600px) and (max-height:500px) {
+  .chat-target-picker-sheet > .chat-target-picker-body:has(> .chat-target-picker-preview) {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr) auto;
+    column-gap:16px;
+  }
+  .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-preview { grid-column:1; grid-row:1 / -1; max-height:100%; }
+  .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-heading { grid-column:2; grid-row:1; }
+  .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-list { grid-column:2; grid-row:2; }
+  .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-submit { grid-column:2; grid-row:3; }
+}

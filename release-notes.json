@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.26.11",
+  "id": "2026.10.26.12",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "活动提示排版优化",
+      "title": "分享与站内链接优化",
       "items": [
-        "数字交锋加入对局提示统一为小号辅助文字，保持页面层级清晰"
+        "活动分享预览更紧凑，会话列表保留充足滚动空间",
+        "四个站点的活动、对局邀请和发言链接均可识别为会话卡片"
       ]
     },
     "en": {
-      "title": "Refined activity hint typography",
+      "title": "Better sharing and internal links",
       "items": [
-        "Code Duel invitation guidance uses consistent, subtle helper typography"
+        "Compact activity previews leave more scrolling space for conversation selection",
+        "Activity, duel invitation and statement links from all four sites become conversation cards"
       ]
     }
   }

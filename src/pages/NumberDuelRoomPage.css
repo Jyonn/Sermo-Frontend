@@ -17,7 +17,6 @@
 .duel-tier-agreement > .button { width:100%; }
 .duel-room-surface .duel-versus { margin-block:20px; }
 .duel-room-surface .duel-match-heading { margin-top:24px; }
-.duel-share .number-duel-card { margin:0 auto 12px; }
 html[data-theme="dark"] .duel-room-header > .campaign-title-art { filter:brightness(0) saturate(100%) invert(91%) sepia(14%) saturate(364%); }
 html[data-theme="dark"] .duel-room-page { background-image:linear-gradient(#091b18a3,#091b18cf),url('/activity/number-duel/room-garden-v1.webp'); }
 html[data-theme="dark"] .duel-room-surface { background:linear-gradient(145deg,#142b24e6,#101f1bdb); border-color:#9abf9538; box-shadow:0 22px 80px #0004,inset 0 1px 0 #dfedc912; }
