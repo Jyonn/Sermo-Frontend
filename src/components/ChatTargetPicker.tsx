@@ -105,7 +105,7 @@ export function ChatTargetPicker({
           </button>;
         })}
       </div> : null}
-      {multiple ? <div className="chat-target-picker-submit"><button className="button" disabled={!selectedIds.length || busy} onClick={() => void onSubmit(selectedIds)} type="button">{busy ? t("common.processing") : submitLabel}</button></div> : null}
+      {multiple ? <div className="chat-target-picker-submit"><button className="button" disabled={!selectedIds.length || busy} onClick={() => void onSubmit(selectedIds)} type="button">{busy ? t("common.processing") : submitLabel ?? t("common.send")}</button></div> : null}
     </>;
 
   if (presentation === "drawer") {

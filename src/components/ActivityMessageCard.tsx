@@ -3,15 +3,19 @@ import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.we
 import { getActiveLocale, useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import { ActivityCampaignCard } from "./ActivityCampaignCard";
+import { NumberDuelCard } from "./NumberDuelCard";
+import type { DuelRoomSummary } from "../lib/numberDuel";
 
 interface ActivityMessageCardProps {
   activity?: ActivityCampaignDTO | null;
   activityKey?: string;
   className?: string;
   title?: string;
+  roomCode?: string;
+  room?: DuelRoomSummary;
 }
 
-export function ActivityMessageCard({ activity, activityKey, className, title }: ActivityMessageCardProps) {
+export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, room }: ActivityMessageCardProps) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const key = activity?.key || activityKey || "";
@@ -19,6 +23,9 @@ export function ActivityMessageCard({ activity, activityKey, className, title }:
     ? (getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title)
     : title || t("message.activityUnavailable");
 
+  if (key === "number-duel-2026") {
+    return <NumberDuelCard room={room} className={className} onClick={() => navigate(roomCode ? `/app/number-duel/${roomCode}` : `/app/square/activities/${key}`)} />;
+  }
   if (activity?.theme !== "baxian" || activity?.presentation) {
     return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t("message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => navigate(`/app/square/activities/${key}`)} />;
   }

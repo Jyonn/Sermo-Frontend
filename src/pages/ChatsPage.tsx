@@ -1877,7 +1877,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "activity") {
-    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} className={groupClassName} title={message.payload?.title} />;
+    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} className={groupClassName} title={message.payload?.title} roomCode={message.payload?.room_code} room={message.payload?.duel_room} />;
   }
 
   if (message.kind === "forward_bundle") {
@@ -9145,7 +9145,7 @@ function LiveChatsPage({
                 } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
                   navigate(`/app/square/statements/${message.payload.statement_id}`);
                 } else if (message.type === MESSAGE_TYPE_ACTIVITY && message.payload?.activity_key) {
-                  navigate(`/app/square/activities/${message.payload.activity_key}`);
+                  navigate(message.payload.room_code ? `/app/number-duel/${message.payload.room_code}` : `/app/square/activities/${message.payload.activity_key}`);
                 } else {
                   revealMessageFromSearch(message.message_id);
                 }

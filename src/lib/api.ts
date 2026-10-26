@@ -1033,8 +1033,8 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
-  getNumberDuel(key: string, matchId?: string, signal?: AbortSignal) {
-    return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, query: matchId ? { match_id: matchId } : undefined });
+  getNumberDuel(key: string, matchId?: string, signal?: AbortSignal, roomCode?: string) {
+    return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, query: roomCode ? { room_code: roomCode } : matchId ? { match_id: matchId } : undefined });
   },
   numberDuelAction(key: string, body: Record<string, unknown>) {
     return request<DuelMatch>(`/activities/${key}/duel`, { method: "POST", auth: true, body });

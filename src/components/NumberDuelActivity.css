@@ -100,9 +100,6 @@ html[data-theme="dark"] .number-duel,html[data-theme="dark"] .duel-panel { --due
 .duel-share { display:flex; flex-wrap:wrap; gap:10px; }
 .duel-share > h3,.duel-share > p { flex-basis:100%; }
 .duel-share > h3 { margin:16px 0 0; font-size:14px; }
-.duel-chat-target { display:flex; align-items:center; gap:12px; width:100%; border:0; border-bottom:1px solid var(--line-soft); background:none; padding:14px 0; color:var(--text-primary); text-align:left; }
-.duel-chat-target > strong { flex:1; overflow-wrap:anywhere; }
-.duel-chat-target > .material-symbols-outlined { color:var(--text-secondary); font-size:20px; }
 @container (min-width:600px) {
   .duel-play-area,.duel-round-history,.duel-result { max-width:620px; margin-inline:auto; }
 }

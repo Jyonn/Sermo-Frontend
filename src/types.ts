@@ -1130,6 +1130,8 @@ export interface ChatMessagePayloadDTO {
   url?: string;
   statement?: SquareStatementDTO | null;
   activity_key?: string;
+  room_code?: string;
+  duel_room?: import("./lib/numberDuel").DuelRoomSummary;
   activity?: ActivityCampaignDTO | null;
   sticker_asset_id?: number;
   content_hash?: string;

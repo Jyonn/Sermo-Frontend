@@ -27,6 +27,7 @@ import { routeResources } from "./lib/routeResources";
 import { readOAuthRequest, isOAuthLoginPending } from "./lib/oauthPending";
 
 const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
+const NumberDuelRoomPage = lazy(() => import("./pages/NumberDuelRoomPage"));
 const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
 const ChatsPage = lazy(routeResources.chats);
 const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
@@ -181,6 +182,10 @@ export default function App() {
           }
         />
         <Route
+          path="/app/number-duel/:roomCode"
+          element={<RequireAuth><NumberDuelRoomPage /></RequireAuth>}
+        />
+        <Route
           path="/app/square/activities/:activityKey"
           element={
             <RequireAuth>
@@ -246,7 +251,7 @@ export default function App() {
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalMediaLocationMap /> : null}
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalChatLayoutDiagnostics /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
-      {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab && !location.pathname.startsWith("/app/number-duel/") ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
       {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
       {ready && !isPlatformAdmin && !isDesignLab && location.pathname !== "/oauth/authorize" ? <SiteMigrationNotice /> : null}

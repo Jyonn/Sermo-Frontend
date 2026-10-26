@@ -13,5 +13,8 @@ test("deadline rounds up and never goes negative", () => {
 test("room invitations survive login without introducing arbitrary redirects", () => {
   const path = "/app/square/activities/number-duel-2026?room=KW7D9AH2";
   assert.equal(duelLoginReturn(path), path);
+  const room = "/app/number-duel/KW7D9AH2";
+  assert.equal(duelLoginReturn(room), room);
+  assert.equal(duelLoginReturn(room + "?next=https://evil.test"), "/app");
   for (const value of [null, {}, "https://evil.test", "//evil.test", path + "&next=https://evil.test", "/app/other"]) assert.equal(duelLoginReturn(value), "/app");
 });

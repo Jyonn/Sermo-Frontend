@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.5",
+  "id": "2026.10.26.6",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "更清爽的活动首页",
+      "title": "数字交锋独立房间",
       "items": [
-        "数字交锋将开房、加入、记录和榜单收进弹层，首页更简洁",
-        "活动返回按钮改为半透明圆形样式，保留清晰的返回与分享操作"
+        "进入独立对战房间后，双方按较低等级共同确认积分档位",
+        "新增专属邀请卡片，使用熟悉的会话列表邀请好友"
       ]
     },
     "en": {
-      "title": "A calmer event home",
+      "title": "Dedicated Code Duel rooms",
       "items": [
-        "Code Duel moves room setup, joining, history, and ranking into focused sheets",
-        "Activity back buttons now use a translucent circular treatment"
+        "Enter a dedicated room and agree on a tier unlocked by both players",
+        "Invite friends with a dedicated duel card and the familiar conversation picker"
       ]
     }
   }
