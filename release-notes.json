@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.26.12",
+  "id": "2026.10.26.13",
   "publishedAt": "2026-10-26",
   "locales": {
     "zh-CN": {
-      "title": "分享与站内链接优化",
+      "title": "数字交锋延长至30轮",
       "items": [
-        "活动分享预览更紧凑，会话列表保留充足滚动空间",
-        "四个站点的活动、对局邀请和发言链接均可识别为会话卡片"
+        "每场最多30轮，每轮仍为30秒，第30轮结束仍未猜中则平局",
+        "活动结束前18分钟停止新建房间，为完整对局预留时间"
       ]
     },
     "en": {
-      "title": "Better sharing and internal links",
+      "title": "Code Duel extends to 30 rounds",
       "items": [
-        "Compact activity previews leave more scrolling space for conversation selection",
-        "Activity, duel invitation and statement links from all four sites become conversation cards"
+        "Matches allow 30 rounds of 30 seconds; unsolved matches draw after round 30",
+        "New rooms close 18 minutes before the event ends to allow time for a full match"
       ]
     }
   }
