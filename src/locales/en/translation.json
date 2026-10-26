@@ -1,4 +1,7 @@
 {
+  "duel.roomSync": "Four digits · Live rounds",
+  "duel.roomEyebrow": "A live duel for two",
+  "duel.joinViaInvite": "Join through a friend's invitation card or link",
   "duel.roomInvite": "A challenge from a friend",
   "duel.enterRoom": "Enter duel room",
   "duel.resumeRoom": "Continue my duel",

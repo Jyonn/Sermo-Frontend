@@ -2,7 +2,7 @@ export interface DuelMatch {
   id: string; code: string; status: "waiting" | "choosing" | "secrets" | "playing" | "finished";
   tiers: number[]; own_tier: number | null; opponent_tier: number | null;
   stake: number; round: number; deadline: number; host: boolean;
-  opponent: { user_id: number; name: string } | null;
+  opponent: { user_id: number; name: string; avatar_uri?: string; avatar_cache_key?: string } | null;
   own_secret: string | null; opponent_locked: boolean; opponent_secret: string | null;
   guesses: { round: number; mine: boolean; value: string | null; exact: number | null; misplaced: number | null }[];
   outcome: "win" | "loss" | "draw" | null; reason: string; points: number; reward_reason: string;

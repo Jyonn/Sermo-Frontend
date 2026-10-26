@@ -1,4 +1,7 @@
 {
+  "duel.roomSync": "四位数字 · 同步交锋",
+  "duel.roomEyebrow": "双人实时对决",
+  "duel.joinViaInvite": "通过朋友分享的邀请卡片或链接加入对局",
   "duel.roomInvite": "好友对决邀请",
   "duel.enterRoom": "进入对战房间",
   "duel.resumeRoom": "继续我的对局",
@@ -89,7 +92,7 @@
   "duel.finish.timeout": "等待入场或设定数字超时，房间已关闭，本场不计分。",
   "duel.reconnecting": "连接暂时中断，正在重连。倒计时以服务器为准。",
   "duel.retry": "重试",
-  "duel.error.invalid": "请输入4个不重复的数字；房间码为8位字母或数字。",
+  "duel.error.invalid": "请输入4个不重复的数字。",
   "duel.error.closed": "房间已关闭、人数已满或活动即将结束，请返回大厅重新开房。",
   "duel.error.forbidden": "无法查看或操作其他人的对局。",
   "duel.error.account": "请先完成邮箱或手机认证。",

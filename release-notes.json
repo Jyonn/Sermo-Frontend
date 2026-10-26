@@ -6,14 +6,14 @@
       "title": "数字交锋独立房间",
       "items": [
         "进入独立对战房间后，双方按较低等级共同确认积分档位",
-        "新增专属邀请卡片，使用熟悉的会话列表邀请好友"
+        "新增专属邀请卡片和推理桌面背景，好友通过链接入场，无需房间号"
       ]
     },
     "en": {
       "title": "Dedicated Code Duel rooms",
       "items": [
         "Enter a dedicated room and agree on a tier unlocked by both players",
-        "Invite friends with a dedicated duel card and the familiar conversation picker"
+        "A crafted room background and dedicated invitation cards let friends join without room codes"
       ]
     }
   }

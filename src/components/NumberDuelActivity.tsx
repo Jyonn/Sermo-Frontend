@@ -12,6 +12,7 @@ import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ChatTargetPicker } from "./ChatTargetPicker";
 import { NumberDuelCard } from "./NumberDuelCard";
+import { UserAvatar } from "./UserAvatar";
 import "./NumberDuelActivity.css";
 
 export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number }) {
@@ -21,13 +22,12 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   const { session } = useAuth();
   const [lobby, setLobby] = useState<DuelLobby | null>(null);
   const [stake, setStake] = useState(10);
-  const [code, setCode] = useState(() => new URLSearchParams(window.location.search).get("room")?.toUpperCase().slice(0, 8) ?? "");
   const [digits, setDigits] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [offline, setOffline] = useState(false);
   const [now, setNow] = useState(Date.now() / 1000);
-  const [sheet, setSheet] = useState<"rules" | "share" | "join" | "history" | "leaders" | null>(null);
+  const [sheet, setSheet] = useState<"rules" | "share" | "history" | "leaders" | null>(null);
   const [leave, setLeave] = useState(false);
   const [chats, setChats] = useState<ChatDTO[] | null>(null);
   const [selectedChats, setSelectedChats] = useState<number[]>([]);
@@ -80,7 +80,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     if (mutation.current) return;
     mutation.current = true; generation.current++; setBusy(true); setError("");
     try {
-      const data = await api.numberDuelAction(activity.key, { action, ...(match ? { id: match.id } : {}), ...extra });
+      const data = await api.numberDuelAction(activity.key, { action, room_flow: 2, ...(match ? { id: match.id } : {}), ...extra });
       if (!alive.current) return;
       selected.current = data.id;
       setLobby((current) => current ? { ...current, match: data } : current);
@@ -89,10 +89,6 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
       await refresh();
     } catch (cause) { if (alive.current) setError(failure(cause)); }
     finally { mutation.current = false; if (alive.current) setBusy(false); }
-  }
-  async function preview() {
-    if (busy) return;
-    setSheet(null); navigate(`/app/number-duel/${code.trim()}`);
   }
   function invitationUrl() {
     const path = roomCode ? `/app/number-duel/${roomCode}` : `/app/square/activities/${activity.key}`;
@@ -141,14 +137,17 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
       <section className="duel-hero"><div><small>{t("duel.eyebrow")}</small><h2>{t("duel.headline")}</h2><p>{t("duel.subtitle")}</p></div><img src="/activity/number-duel/digits.svg" alt="" /></section>
       <div className="duel-daily"><span>{t("duel.today")} <strong>{lobby.daily.matches}<small> / {lobby.daily.match_limit}</small></strong></span><span>{t("duel.earned")} <strong>+{lobby.daily.points}</strong></span><span className="duel-first">{t(lobby.daily.matches === 0 ? "duel.firstDouble" : "duel.noLoss")}</span></div>
       {!lobby.eligible ? <p className="duel-notice">{t("duel.verify")}</p> : !lobby.active ? <p className="duel-notice">{t("duel.ended")}</p> : lobby.daily.matches >= lobby.daily.match_limit ? <p className="duel-notice">{t("duel.practice")}</p> : null}
-      <section className="duel-primary-actions"><button className="button" disabled={busy || !canEnter} type="button" onClick={() => match ? showMatch(match.code) : void act("create")}>{t(match ? "duel.resumeRoom" : "duel.createTitle")}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><button className="ghost-button" disabled={busy || !canEnter} type="button" onClick={() => setSheet("join")}>{t("duel.enterCode")}</button></section>
+      <section className="duel-primary-actions"><button className="button" disabled={busy || !canEnter} type="button" onClick={() => match ? showMatch(match.code) : void act("create")}>{t(match ? "duel.resumeRoom" : "duel.createTitle")}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><p className="duel-join-invite-hint">{t("duel.joinViaInvite")}</p></section>
     </> : !match ? <section className="duel-room-entry">
       <NumberDuelCard room={lobby.room} />
       <p>{t(!lobby.eligible ? "duel.verify" : !lobby.active ? "duel.ended" : "duel.roomEntryHint")}</p>
       {lobby.current_code ? <button type="button" className="button" onClick={() => showMatch(lobby.current_code!)}>{t("duel.resumeRoom")}</button> : <button type="button" className="button" disabled={busy || !canEnter || lobby.room?.status !== "waiting"} onClick={() => void act("join", { code: roomCode })}>{t(lobby.room?.status === "waiting" ? "duel.enterRoom" : lobby.room?.status === "finished" ? "duel.roomEnded" : "duel.roomStarted")}</button>}
     </section> : <>
-      <header className="duel-match-heading"><div><small>{t("duel.roomCode")} · {match.code}</small><h2>{done ? t(match.reason === "normal" ? `duel.outcome.${match.outcome}` : "duel.cancelled") : t(match.status === "waiting" ? "duel.waiting" : match.status === "choosing" ? "duel.chooseTier" : secretStage ? "duel.setSecret" : "duel.round", { round: match.round, total: lobby.max_rounds })}</h2></div>{!done ? <time className={`duel-timer${seconds <= 5 ? " is-urgent" : ""}`} aria-label={t("duel.seconds", { count: seconds })}>{seconds >= 60 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : `${seconds}s`}</time> : <strong className="duel-result-points">+{match.points}</strong>}</header>
-      <div className="duel-versus"><span>{session?.user.name ?? t("duel.you")}<small>{match.own_secret ? t("duel.secretLocked") : match.own_tier ? t("duel.stake", { points: match.own_tier }) : t("duel.you")}</small></span><b>VS</b><span>{match.opponent?.name ?? t("duel.waitingPeer")}<small>{match.stake || match.opponent_tier ? t("duel.stake", { points: match.stake || match.opponent_tier! }) : t("duel.tierPending")}</small></span></div>
+      <header className="duel-match-heading">
+        <div><small>{t("duel.roomEyebrow")}</small><h2>{done ? t(match.reason === "normal" ? `duel.outcome.${match.outcome}` : "duel.cancelled") : t(match.status === "waiting" ? "duel.waiting" : match.status === "choosing" ? "duel.chooseTier" : secretStage ? "duel.setSecret" : "duel.round", { round: match.round, total: lobby.max_rounds })}</h2></div>
+        {!done ? <time className={`duel-timer${seconds <= 5 ? " is-urgent" : ""}`} aria-label={t("duel.seconds", { count: seconds })}>{seconds >= 60 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : `${seconds}s`}</time> : <strong className="duel-result-points">+{match.points}</strong>}
+      </header>
+      <div className="duel-versus"><span><UserAvatar className="duel-player-avatar" name={session?.user.name ?? t("duel.you")} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} /><strong>{session?.user.name ?? t("duel.you")}</strong><small>{match.own_secret ? t("duel.secretLocked") : match.own_tier ? t("duel.stake", { points: match.own_tier }) : t("duel.you")}</small></span><b>VS</b><span><UserAvatar className="duel-player-avatar" name={match.opponent?.name ?? "?"} uri={match.opponent?.avatar_uri} cacheKey={match.opponent?.avatar_cache_key} /><strong>{match.opponent?.name ?? t("duel.waitingPeer")}</strong><small>{match.stake || match.opponent_tier ? t("duel.stake", { points: match.stake || match.opponent_tier! }) : t("duel.tierPending")}</small></span></div>
       {match.status === "waiting" ? <section className="duel-waiting"><NumberDuelCard room={lobby.room} /><p>{t("duel.inviteHint")}</p><button className="button" type="button" onClick={() => void openShare()}>{t("duel.invite")}</button><button className="ghost-button" type="button" onClick={() => void copyInvite()}>{t("duel.copyLink")}</button></section> : match.status === "choosing" ? <section className="duel-tier-agreement"><p>{t("duel.tierHint")}</p><div className="duel-tiers">{[10, 20, 50].map((value, index) => <button key={value} type="button" aria-pressed={stake === value} disabled={busy || !match.tiers.includes(value)} onClick={() => setStake(value)}><strong>{value}</strong><small>{t("duel.tierLevel", { level: [1, 8, 14][index] })}</small></button>)}</div><button type="button" className="button" disabled={busy || !match.tiers.includes(stake) || match.own_tier === stake || seconds === 0} onClick={() => void act("tier", { stake })}>{t(match.own_tier === stake ? "duel.waitTier" : "duel.confirmTier")}</button><p role="status">{match.opponent_tier ? t("duel.peerTier", { points: match.opponent_tier }) : t("duel.peerChoosing")}</p></section> : done ? <section className="duel-result"><p>{t(match.reason === "normal" ? match.reward_reason === "pair" ? "duel.samePeer" : match.reward_reason === "quota" ? "duel.practice" : "duel.resultHint" : `duel.finish.${["ended", "forfeit", "inactive", "timeout"].includes(match.reason) ? match.reason : "timeout"}`)}</p><div className="duel-secrets"><span>{t("duel.yourSecret")}<strong>{match.own_secret ?? "—"}</strong></span><span>{t("duel.theirSecret")}<strong>{match.opponent_secret ?? "—"}</strong></span></div><button className="button" type="button" onClick={() => showMatch(undefined)}>{t("duel.backLobby")}</button></section> : <section className="duel-play-area">
         {secretStage && match.own_secret ? <div className="duel-round-wait"><span className="material-symbols-outlined" aria-hidden="true">lock</span><strong>{match.own_secret}</strong><p>{t("duel.waitSecret")}</p></div> : !secretStage && myGuess ? <div className="duel-round-wait"><strong>{myGuess.value}</strong><span className="duel-feedback"><b>{myGuess.exact}A</b><b>{myGuess.misplaced}B</b></span><p>{t("duel.waitGuess")}</p></div> : <form onSubmit={(event) => { event.preventDefault(); void act(secretStage ? "secret" : "guess", { value: digits, round: match.round }); }}>
           <label htmlFor="duel-digits">{t(secretStage ? "duel.secretHint" : "duel.guessHint")}</label><input autoFocus id="duel-digits" className="duel-digit-input" autoComplete="off" inputMode="numeric" maxLength={4} value={digits} onChange={(event) => setDigits(event.target.value.replace(/[^0-9]/g, "").slice(0, 4))} placeholder="0 1 2 3" aria-describedby="duel-digit-help" /><small id="duel-digit-help">{t(digits.length === 4 && !validDuelDigits(digits) ? "duel.error.invalid" : "duel.digitHint")}</small><button className="button" disabled={busy || !validDuelDigits(digits) || seconds === 0} type="submit">{t(secretStage ? "duel.lockSecret" : "duel.submit")}</button>
@@ -159,11 +158,9 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
       {!done ? <button className="duel-leave" disabled={busy} onClick={() => setLeave(true)} type="button">{t("duel.leave")}</button> : null}
     </>}
     <ConfirmDialog open={leave} title={t("duel.leave")} description={t("duel.leaveHint")} busy={busy} onClose={() => setLeave(false)} onConfirm={() => void act("leave")} danger />
-    <BottomSheet open={sheet === "join" || sheet === "history" || sheet === "leaders"} onClose={() => setSheet(null)} title={t(sheet === "join" ? "duel.joinTitle" : sheet === "history" ? "duel.history" : "duel.leaders")}>
+    <BottomSheet open={sheet === "history" || sheet === "leaders"} onClose={() => setSheet(null)} title={t(sheet === "history" ? "duel.history" : "duel.leaders")}>
       <div className="duel-panel">
         {error ? <p className="duel-error" role="alert">{error}</p> : null}
-        {sheet === "join" && lobby && !canEnter ? <p className="duel-notice">{t(lobby.eligible ? "duel.ended" : "duel.verify")}</p> : null}
-        {sheet === "join" ? <form className="duel-join" onSubmit={(event) => { event.preventDefault(); void preview(); }}><label htmlFor="duel-room-code">{t("duel.roomCode")}</label><input autoFocus autoCapitalize="characters" autoComplete="off" id="duel-room-code" maxLength={8} value={code} onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))} placeholder="ABCDEFGH" /><button className="button" disabled={busy || !canEnter || code.length !== 8} type="submit">{t("duel.join")}</button></form> : null}
         {sheet === "history" ? lobby?.history.length ? <div className="duel-records">{lobby.history.map((row) => <button key={row.id} type="button" onClick={() => showMatch(row.code)}><span>{row.opponent || t("duel.waitingPeer")}<small>{date(row.finished_at)}</small></span><b>{t(row.reason === "normal" ? `duel.outcome.${row.outcome}` : "duel.cancelled")}</b><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</div> : <p className="duel-empty">{t("duel.noHistory")}</p> : null}
         {sheet === "leaders" ? lobby?.leaders.length ? <ol className="duel-leaders">{lobby.leaders.map((row) => <li key={row.user_id}><span>{row.name}</span><b>+{row.points}</b></li>)}</ol> : <p className="duel-empty">{t("duel.noLeaders")}</p> : null}
       </div>
