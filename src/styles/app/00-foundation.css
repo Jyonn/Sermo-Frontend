@@ -8862,6 +8862,9 @@ html[data-theme="dark"] .square-chat-record {
 }
 
 .chat-pinned-bar {
+  width: 100%;
+  padding: 0;
+  text-align: left;
   position: relative;
   z-index: 7;
   display: grid;

@@ -93,6 +93,15 @@ test("navigation and composer share the same compact-height policy", () => {
   assert.match(css, /\.desktop-nav-user \{ grid-template-columns: minmax\(0, 1fr\) 0fr; justify-items: center/);
 });
 
+test("pinned messages use one bar action and a shared short-screen header entry", () => {
+  const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  assert.match(chat, /orderedPinnedMessages.length && !shortComposerLayout/);
+  assert.match(chat, /shortComposerLayout && orderedPinnedMessages.length \? <button className="chat-details-button chat-header-pinned-button"/);
+  assert.equal((chat.match(/\{pinnedHeaderButton\}/g) ?? []).length, 2);
+  assert.doesNotMatch(chat, /revealPinnedMessage\(orderedPinnedMessages\[0\]/);
+  assert.match(chat, /<span aria-hidden="true" className="chat-pinned-list-button">/);
+});
+
 test("wallpaper chrome, loading and collapsed navigation retain theme and alignment", () => {
   const themes = readFileSync(new URL("../src/styles/app/60-profile-themes.css", import.meta.url), "utf8");
   assert.match(themes, /\.has-chat-wallpaper\.is-dark-wallpaper,html\[data-theme="dark"\] \.has-chat-wallpaper\{/);

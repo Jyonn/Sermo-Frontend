@@ -7838,6 +7838,8 @@ function LiveChatsPage({
   }}><ComposerSvgIcon kind="plus" /></button>;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
+  const pinnedHeaderButton = shortComposerLayout && orderedPinnedMessages.length ? <button className="chat-details-button chat-header-pinned-button" type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} title={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></button> : null;
+
   return (
     <AppChrome
       workspaceSelected={Boolean(displayedChat)}
@@ -7906,6 +7908,7 @@ function LiveChatsPage({
         ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
             {chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
+            {pinnedHeaderButton}
             <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />
           </div>
         ) : undefined
@@ -7954,7 +7957,9 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
+                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
+                    {pinnedHeaderButton}
+                    <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>
                 {submissionWorkflowBar}
                 {sendProgress !== null ? (
@@ -7963,12 +7968,10 @@ function LiveChatsPage({
                   </div>
                 ) : null}
               </header>
-              {orderedPinnedMessages.length ? (
-                <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
-                  <button
+              {orderedPinnedMessages.length && !shortComposerLayout ? (
+                <button type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)} className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
+                  <span
                     className="chat-pinned-main"
-                    onClick={() => revealPinnedMessage(orderedPinnedMessages[0].message.message_id)}
-                    type="button"
                   >
                     <span className="chat-pinned-marker">
                       <span className="material-symbols-outlined chat-pinned-icon">lock</span>
@@ -7981,12 +7984,12 @@ function LiveChatsPage({
                       </span>
                       <span className="chat-pinned-preview">{pinnedMessagePreview(orderedPinnedMessages[0])}</span>
                     </span>
-                  </button>
-                  <button aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
+                  </span>
+                  <span aria-hidden="true" className="chat-pinned-list-button">
                     <span className="chat-pinned-count">{orderedPinnedMessages.length}</span>
                     <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </div>
+                  </span>
+                </button>
               ) : null}
               <div
                 className={`chat-detail-scene chat-background-${chatBackgroundTheme} ${isClosingChatView ? "is-closing" : ""}`}

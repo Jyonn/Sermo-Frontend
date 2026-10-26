@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.27.7",
+  "id": "2026.10.27.8",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "紧凑导航更协调",
+      "title": "锁定消息入口更直接",
       "items": [
-        "修复平板宽度下的导航头像居中，矮屏隐藏底部头像，与输入框默认折叠共用高度判断"
+        "点击整条锁定栏即可查看锁定消息，矮屏时入口收进会话顶部菜单旁",
+        "修复平板导航头像居中，矮屏隐藏头像并默认折叠输入框"
       ]
     },
     "en": {
-      "title": "Better compact navigation",
+      "title": "Quicker access to pinned messages",
       "items": [
-        "Center tablet navigation avatars and hide the footer avatar on short screens using the same height threshold as the compact composer"
+        "Open pinned messages from the entire bar, or a header lock button on short screens",
+        "Center tablet navigation avatars and simplify navigation and composing on short screens"
       ]
     }
   }
