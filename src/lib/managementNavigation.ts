@@ -11,7 +11,7 @@ export function managementSection<T extends string>(value: string | null, sectio
 const settingsFields: Partial<Record<SpaceManagementSection, readonly string[]>> = {
   basics: ["name", "member_limit"],
   levels: ["level_names"],
-  features: ["group_square_enabled", "chat_enabled", "space_group_enabled", "square_free_post_enabled", "submission_enabled", "square_explore_enabled", "qq_binding_enabled", "oauth_developer_enabled"],
+  features: ["group_square_enabled", "chat_enabled", "space_group_enabled", "square_free_post_enabled", "submission_enabled", "research_enabled", "square_explore_enabled", "qq_binding_enabled", "oauth_developer_enabled"],
   access: ["unverified_group_policy"],
 };
 

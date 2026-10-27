@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import { MarkdownInput } from './MarkdownInput';
+import { MarkdownInput } from '../../src/components/ResearchMarkdownInput';
 import { checkImages } from './model';
 import { t } from './copy';
 export async function readFile(file: File): Promise<string> { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error); reader.readAsDataURL(file); }); }

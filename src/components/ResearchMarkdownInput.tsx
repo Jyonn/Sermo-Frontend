@@ -1,11 +1,14 @@
 import { useRef, useState } from 'react';
-import { Markdown } from './Markdown';
-import { t } from './copy';
-import { insertMarkdown, markdownTable } from './markdown-edit';
-import { SelectControl } from '../../src/components/SettingRow';
-import { TablePicker } from './TablePicker';
+import { Markdown } from './ResearchMarkdown';
+import { useI18n, type TranslationKey } from '../lib/language';
+import { insertMarkdown, markdownTable } from '../lib/researchMarkdownEdit';
+import { SelectControl } from './SettingRow';
+import { TablePicker } from './ResearchTablePicker';
+import './ResearchMarkdownInput.css';
 
 export function MarkdownInput({ value, onChange, required = false, rows = 6 }: { value?: string; onChange?: (value: string) => void; required?: boolean; rows?: number }) {
+  const {t:translate}=useI18n();
+  const t=(key:string)=>translate(('research.md.'+key) as TranslationKey);
   const [local, setLocal] = useState('');
   const [preview, setPreview] = useState(false);
   const [tableOpen,setTableOpen]=useState(false);
@@ -36,7 +39,7 @@ export function MarkdownInput({ value, onChange, required = false, rows = 6 }: {
       {tableOpen&&<TablePicker anchor={tableAnchor} onClose={()=>setTableOpen(false)} onSelect={(x,y)=>{const {start,end}=selection.current;const text=markdownTable(x,y,t('mdColumn'));change(body.slice(0,start)+text+body.slice(end));setTableOpen(false);requestAnimationFrame(()=>{ref.current?.focus();ref.current?.setSelectionRange(start+text.length,start+text.length);});}}/>}
       <button className="v3-md-preview-toggle" type="button" aria-pressed={preview} onClick={() => setPreview(!preview)}>{t(preview ? 'edit' : 'previewMd')}</button>
     </div>
-    <textarea ref={ref} name="body" aria-label={t('body')} rows={rows} required={required} value={body} onChange={e => change(e.target.value)} onInvalid={e => { if(preview) { e.preventDefault(); setPreview(false); requestAnimationFrame(() => { ref.current?.focus(); ref.current?.reportValidity(); }); } }} hidden={preview} placeholder={t('mdPlaceholder')}/>
+    <textarea ref={ref} name="body" aria-label={t('body')} rows={rows} maxLength={20000} required={required} value={body} onChange={e => change(e.target.value)} onInvalid={e => { if(preview) { e.preventDefault(); setPreview(false); requestAnimationFrame(() => { ref.current?.focus(); ref.current?.reportValidity(); }); } }} hidden={preview} placeholder={t('mdPlaceholder')}/>
     {preview && <div className="v3-editor-preview"><Markdown body={body || t('empty')}/></div>}
   </div>;
 }

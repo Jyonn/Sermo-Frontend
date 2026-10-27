@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { insertMarkdown, markdownTable } from './markdown-edit.ts';
+import { insertMarkdown, markdownTable } from '../../src/lib/researchMarkdownEdit.ts';
 test('formatting preserves text around the selected range', () => {
   assert.deepEqual(insertMarkdown('abc def', 4, 7, '**', '**', 'Text'), {body:'abc **def**', start:6, end:9});
 });

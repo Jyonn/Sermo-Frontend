@@ -79,6 +79,7 @@ export interface SpaceDTO {
   space_group_enabled?: boolean;
   square_free_post_enabled?: boolean;
   submission_enabled?: boolean;
+  research_enabled?: boolean;
   square_explore_enabled?: boolean;
   qq_binding_granted?: boolean;
   qq_binding_enabled?: boolean;
@@ -1418,7 +1419,7 @@ export interface ChatSyncStateDTO {
 export interface ChatDTO {
   chat_id: number;
   chat_type: number;
-  purpose?: "normal" | "submission";
+  purpose?: "normal" | "submission" | "research";
   title: string | null;
   owner: TinyUserDTO | null;
   members: UserDTO[];
@@ -1536,7 +1537,7 @@ export interface Chat {
   operator: boolean;
   members: number;
   type: "direct" | "group";
-  purpose?: "normal" | "submission";
+  purpose?: "normal" | "submission" | "research";
   submission?: SubmissionDTO | null;
   submissionRole?: SubmissionRole;
   submissionCounterparts?: TinyUserDTO[];

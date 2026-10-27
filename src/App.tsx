@@ -33,6 +33,7 @@ const ChatsPage = lazy(routeResources.chats);
 const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
 const MenuPage = lazy(routeResources.menu);
 const DeveloperPage = lazy(routeResources.developer);
+const ResearchPage = lazy(routeResources.research);
 const NotificationsPage = lazy(routeResources.notifications);
 const PlatformAdminPage = lazy(() => import("./pages/PlatformAdminPage"));
 const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPage"));
@@ -144,6 +145,10 @@ export default function App() {
               <RequireChatFeature><ChatsPage /></RequireChatFeature>
             </RequireAuth>
           }
+        />
+        <Route
+          path="/app/research"
+          element={<RequireAuth><ResearchPage /></RequireAuth>}
         />
         <Route
           path="/app/submissions"

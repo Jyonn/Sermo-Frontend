@@ -1,7 +1,9 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from './copy';
+import { useI18n, type TranslationKey } from '../lib/language';
 export function TablePicker({anchor,onClose,onSelect}:{anchor:RefObject<HTMLButtonElement|null>;onClose:()=>void;onSelect:(x:number,y:number)=>void}) {
+  const {t:translate}=useI18n();
+  const t=(key:string)=>translate(('research.md.'+key) as TranslationKey);
   const panel=useRef<HTMLDivElement>(null);
   const [size,setSize]=useState([1,1]);
   const [position,setPosition]=useState({left:12,top:12});

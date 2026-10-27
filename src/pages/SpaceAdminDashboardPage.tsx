@@ -95,6 +95,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsSpaceGroupEnabled, setSettingsSpaceGroupEnabled] = useState(false);
   const [settingsSquareFreePostEnabled, setSettingsSquareFreePostEnabled] = useState(true);
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
+  const [settingsResearchEnabled, setSettingsResearchEnabled] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
@@ -308,6 +309,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsSpaceGroupEnabled(dashboard.space.space_group_enabled === true);
     setSettingsSquareFreePostEnabled(dashboard.space.square_free_post_enabled !== false);
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
+    setSettingsResearchEnabled(dashboard.space.research_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
     setSettingsOauthDeveloperEnabled(dashboard.space.oauth_developer_enabled === true);
@@ -452,6 +454,7 @@ export default function SpaceAdminDashboardPage() {
         space_group_enabled: currentSpace.space_group_enabled ? 1 : 0,
         square_free_post_enabled: currentSpace.square_free_post_enabled !== false ? 1 : 0,
         submission_enabled: currentSpace.submission_enabled ? 1 : 0,
+        research_enabled: currentSpace.research_enabled ? 1 : 0,
         square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
         qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
@@ -465,6 +468,7 @@ export default function SpaceAdminDashboardPage() {
         space_group_enabled: settingsSpaceGroupEnabled ? 1 : 0,
         square_free_post_enabled: settingsSquareFreePostEnabled ? 1 : 0,
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
+        research_enabled: settingsResearchEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
@@ -475,6 +479,7 @@ export default function SpaceAdminDashboardPage() {
       setCachedSpaceFeatures(payload.space_id, {
         chatEnabled: payload.chat_enabled !== false,
         submissionEnabled: payload.submission_enabled === true,
+        researchEnabled: payload.research_enabled === true,
         squareEnabled: payload.group_square_enabled !== false,
         squareFreePostEnabled: payload.square_free_post_enabled !== false,
         squareExploreEnabled: payload.square_explore_enabled !== false,
@@ -917,6 +922,7 @@ export default function SpaceAdminDashboardPage() {
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (settingsSquareEnabled) setSettingsSubmissionEnabled(false); if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
+            <SettingRow title={t("research.title")} description={t("research.featureHint")} trailing={<SettingSwitch checked={settingsResearchEnabled} label={t("research.title")} onChange={setSettingsResearchEnabled}/>} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
           </SettingGroup>
           {(currentSpace?.qq_binding_granted || currentSpace?.oauth_developer_granted) ? <SettingGroup>

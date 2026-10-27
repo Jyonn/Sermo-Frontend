@@ -21,10 +21,12 @@ const mobileRoutes = [
   { key: "submissions", href: "/app/submissions", icon: "outbox", labelKey: "submission.title" },
   { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
   { key: "developer", href: "/app/developer", icon: "code", labelKey: "nav.developer" },
+  { key: "research", href: "/app/research", icon: "science", labelKey: "research.title" },
   { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
 ] as const;
 
 function activeKey(pathname: string) {
+  if (pathname.startsWith("/app/research")) return "research";
   if (pathname.startsWith("/app/chats")) return "chats";
   if (pathname.startsWith("/app/submissions")) return "submissions";
   if (pathname.startsWith("/app/square")) return "square";
@@ -234,6 +236,7 @@ export function AppBottomNav() {
 
   const current = activeKey(effectivePathname);
   const visibleRoutes = mobileRoutes.filter((route) => {
+    if (route.key === "research") return features.ready && features.researchEnabled === true;
     if (route.key === "developer") return canManageOAuthApplications(space, sessionSpaceId ?? undefined);
     if (route.key === "square") return features.squareEnabled;
     if (route.key === "submissions") return features.ready && features.submissionEnabled;

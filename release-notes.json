@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.27.11",
+  "id": "2026.10.27.12",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "好友二维码更清爽",
+      "title": "科研协作首版上线",
       "items": [
-        "优化好友二维码的排版与深色配色，支持下载完整邀请卡图片"
+        "空间管理员开启科研后，可创建课题、邀请成员、分配阶段任务并共享 Markdown 进度与回复",
+        "日程与会议明确标注尚未接通，不展示模拟日程"
       ]
     },
     "en": {
-      "title": "A cleaner friend QR card",
+      "title": "Research collaboration, first release",
       "items": [
-        "Refined friend QR cards with dark mode support and downloadable invitation images"
+        "Space admins can enable research projects with members, assigned tasks, Markdown progress and replies",
+        "Calendar and meeting integration is clearly marked as unavailable, with no simulated schedules"
       ]
     }
   }

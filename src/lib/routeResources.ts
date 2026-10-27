@@ -1,6 +1,7 @@
-type RouteResourceKey = "chats" | "square" | "notifications" | "menu" | "developer";
+type RouteResourceKey = "chats" | "square" | "notifications" | "menu" | "developer" | "research";
 
 const routeLoaders = {
+  research: () => import("../pages/ResearchPage"),
   chats: () => import("../pages/ChatsPage"),
   square: () => import("../pages/SquarePage"),
   notifications: () => import("../pages/NotificationsPage"),

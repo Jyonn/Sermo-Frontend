@@ -429,6 +429,10 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  researchList(signal?: AbortSignal) { return request<import('./research').ResearchSummary[]>('/research/', {auth:true,signal}); },
+  researchGet(id:number, signal?:AbortSignal) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,signal}); },
+  researchCreate(body:Record<string,unknown>) { return request<import('./research').ResearchProject>('/research/',{auth:true,method:'POST',body}); },
+  researchUpdate(id:number, revision:number, body:Record<string,unknown>) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,method:'POST',body:{...body,revision}}); },
   getOAuthMetadata(query: Record<string, string>) {
     return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
   },
@@ -559,7 +563,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; research_enabled?:0|1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,

@@ -3338,8 +3338,6 @@ function LiveChatsPage({
     return false;
   };
   const canCreateGroup = growthCapability("chat.group.create", 4).available;
-  const canInviteGroupMember = growthCapability("chat.group.invite", 4).available;
-  const canRenameGroup = growthCapability("chat.group.rename", 5).available;
   const canUseOnlineReminder = growthCapability("chat.reminder.online", 7).available;
   const canDownloadAudio = growthCapability("chat.message.download.audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
@@ -3712,6 +3710,8 @@ function LiveChatsPage({
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [activeChatRouteValue, chats, provisionalSubmissionChat]);
+  const canInviteGroupMember = selectedChat?.purpose !== "research" && growthCapability("chat.group.invite", 4).available;
+  const canRenameGroup = selectedChat?.purpose !== "research" && growthCapability("chat.group.rename", 5).available;
   const pendingMessageAppearance: PendingMessageAppearance = {
     isPermanentVip: currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip,
     chatBubbleStyle: currentUserMe?.chat_bubble_style ?? session?.user.chat_bubble_style,
@@ -8425,6 +8425,8 @@ function LiveChatsPage({
                     <div className="settings-actions" style={{ marginTop: 12 }}>
                       {selectedChat.purpose === "submission" ? (
                         <button className="ghost-button" onClick={() => setDetailsSheetOpen(true)} type="button">{t("submission.openDetails")}</button>
+                      ) : selectedChat.purpose === "research" ? (
+                        <Link className="ghost-button" to="/app/research">{t("research.members")}</Link>
                       ) : selectedChat.type === "group" ? (
                         <>
                           {selectedChat.isOwner ? (
@@ -8879,7 +8881,7 @@ function LiveChatsPage({
                     </button>
                   </FeatureDiscoveryTarget>
                 ) : null}
-                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                {selectedChat.type === "group" && selectedChat.isOwner && selectedChat.purpose !== "research" ? (
                   <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberRemover} type="button">
                     <span className="chat-detail-member-avatar chat-detail-member-avatar-add chat-detail-member-avatar-remove">
                       <svg aria-hidden="true" className="chat-detail-member-remove-icon" fill="none" viewBox="0 0 24 24">
@@ -8991,7 +8993,8 @@ function LiveChatsPage({
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
-                {selectedChat.type === "group" && selectedChat.isOwner && !selectedChat.isSpaceGroup && selectedChat.purpose !== "submission" ? (
+                {selectedChat.purpose === "research" ? <Link className="chat-detail-setting-row" to="/app/research">{t("research.members")}</Link> : null}
+                {selectedChat.type === "group" && selectedChat.isOwner && !selectedChat.isSpaceGroup && selectedChat.purpose !== "submission" && selectedChat.purpose !== "research" ? (
                   <button
                     className="chat-detail-setting-row"
                     onClick={openGroupOwnerTransfer}
@@ -9016,7 +9019,7 @@ function LiveChatsPage({
                   <div className="row-main"><strong>{t("submission.delete")}</strong></div>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
                 </button> : null}
-                {selectedChat.purpose !== "submission" && !(selectedChat.type === "group" && selectedChat.isOwner && selectedChat.isSpaceGroup) ? <button
+                {selectedChat.purpose !== "submission" && selectedChat.purpose !== "research" && !(selectedChat.type === "group" && selectedChat.isOwner && selectedChat.isSpaceGroup) ? <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
                   type="button"
