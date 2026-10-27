@@ -51,3 +51,9 @@ npm run dev -- --host 127.0.0.1 --port 8802
 使用隔壁 Chronelle 后端虚拟环境运行 `demos/research/run-chronelle-qa.py`。脚本创建全新临时 SQLite 和合成日历，监听 `127.0.0.1:8031`，打印四个 15 分钟展示 URL。打开 `/qa-session/` 建立固定合成查看者会话，再把 URL 填到 Frienden 联调配置中。仅测试真实 Chronelle shell/读取/消息协议，不测试生产登录、OAuth 同意或真实邀请，不连接生产数据库；不要部署此夹具。
 
 实际浏览器已验证默认本人、两人合并和重叠排版；自动化无法聚焦跨域网格，点击/拖选的实机回传仍需人工验证。协议解析和时长、来源、旧请求拒绝由测试覆盖。
+
+## 选区排版补丁
+
+`chronelle-selection.patch` 是针对 Chronelle iframe 的小范围上游补丁。隔壁仓库存在未提交工作，因此本分支不覆盖或提交其源文件；`prepare-chronelle-assets.py` 仅将原资产复制到临时目录并应用补丁，联调服务使用该副本。正式 Chronelle 页面未改变，也未部署。
+
+选区边框位于事件卡片下层，网格内不再显示选区文字；时间与状态显示在网格外。重叠标为警示色，部分可见且无已知重叠标为忙闲未知，其余只称待预约时间，不承诺空闲。运行 `node --test demos/research/selection-feedback.test.mjs` 验证相邻时间、重叠、全天、部分可见及挂载后的标签和消息逻辑。该测试需要隔壁 Chronelle 源码。

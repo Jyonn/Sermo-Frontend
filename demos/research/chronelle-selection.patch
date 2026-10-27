@@ -1,0 +1,39 @@
+--- a/bridge.mjs
++++ b/bridge.mjs
+@@ -68,0 +69,6 @@
++export function selectionFeedback(events,coverage,value){
++ const start=Date.parse(value.start),end=Date.parse(value.end);
++ const conflict=events.some(event=>Date.parse(event.start)<end&&Date.parse(event.end)>start);
++ return conflict?{tone:'conflict',label:'与已有日程重叠'}:coverage==='complete'?{tone:'neutral',label:'待预约时间'}:{tone:'unknown',label:'忙闲未知'};
++}
++
+@@ -73,1 +79,2 @@
+  let chosen=[],context=null,ready=false,expiry=null,timer=null,pointer=null,dragMode=false,renderedDay=null;
++ let visibleEvents=[],coverage='unknown';
+@@ -80,1 +87,2 @@
+   expiry=Date.parse(data.expires_at);if(expiry<=Date.now()){failure('permission-denied','display_expired');return;}
++  visibleEvents=data.events;coverage=data.coverage;
+@@ -102,2 +110,10 @@
+- function show(first,last=first){const value=selectionRange(day.value,first,last);if(!value)return null;const lo=Math.min(first,last),hi=first===last?Math.min(lo+2,48):Math.max(first,last)+1;range.hidden=false;range.style.top=lo*30+'px';range.style.height=(hi-lo)*30+'px';range.textContent=new Date(value.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' – '+new Date(value.end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return value;}
+- function emit(first,last,source){if(!ready||Date.now()>=expiry)return;const value=show(first,last);if(!value)return;selection.hidden=false;selection.textContent='已选择 '+range.textContent+' · 已回传接入应用';bridge.send('range-selected',{...value,selection_source:source});}
++ function show(first,last=first){
++  const value=selectionRange(day.value,first,last);if(!value)return null;
++  const lo=Math.min(first,last),hi=first===last?Math.min(lo+2,48):Math.max(first,last)+1;
++  const feedback=selectionFeedback(visibleEvents,coverage,value);
++  range.hidden=false;range.style.top=lo*30+'px';range.style.height=(hi-lo)*30+'px';range.textContent='';range.dataset.tone=feedback.tone;
++  selection.hidden=false;selection.dataset.tone=feedback.tone;
++  selection.textContent=new Date(value.start).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' – '+new Date(value.end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+feedback.label;
++  return value;
++ }
++ function emit(first,last,source){if(!ready||Date.now()>=expiry)return;const value=show(first,last);if(!value)return;selection.textContent+=' · 已回传接入应用';bridge.send('range-selected',{...value,selection_source:source});}
+--- a/shell.css
++++ b/shell.css
+@@ -5,0 +6,8 @@
++/* Selection stays behind event cards; its readable label lives above the grid. */
++:root{--selection-line:light-dark(#637a8a,#afbfcd);--conflict:light-dark(#a85d24,#f1b77f);--unknown:light-dark(#8b743d,#d9c38b)}
++#events{z-index:2}#range{z-index:1;padding:0;border-color:var(--selection-line);background:transparent;border-radius:5px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--selection-line) 12%,transparent)}
++#range[data-tone=conflict]{border-color:var(--conflict);background:repeating-linear-gradient(135deg,transparent 0px,transparent 8px,color-mix(in srgb,var(--conflict) 8%,transparent) 8px,color-mix(in srgb,var(--conflict) 8%,transparent) 9px)}
++#range[data-tone=unknown]{border-color:var(--unknown)}
++#selection{color:var(--ink);background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--selection-line);line-height:1.6}
++#selection[data-tone=conflict]{border-left-color:var(--conflict);color:var(--conflict)}#selection[data-tone=unknown]{border-left-color:var(--unknown);color:var(--unknown)}
++#calendar{scroll-padding-top:12px}

@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import tempfile
+import runpy
 from datetime import timedelta
 from pathlib import Path
 
@@ -18,6 +19,9 @@ directory = Path(tempfile.mkdtemp(prefix='frienden-chronelle-qa-'))
 settings.DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': str(directory / 'qa.sqlite3')}}
 import django
 django.setup()
+from calendar_extras import binding_display
+prepared = runpy.run_path(str(Path(__file__).with_name('prepare-chronelle-assets.py')))['prepare']()
+binding_display.__file__ = str(prepared / 'binding_display.py')
 from django.http import HttpResponse
 from django.urls import path
 from config.urls import urlpatterns as chronelle_urls
