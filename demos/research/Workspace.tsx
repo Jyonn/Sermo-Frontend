@@ -8,6 +8,8 @@ import { readProjects, saveProjects } from './storage';
 import { Markdown, safeUrl } from './Markdown';
 import { Editor, readFile } from './Editor';
 import { MarkdownInput } from './MarkdownInput';
+import { ResearchCalendars } from './ResearchCalendars';
+import { SelectControl } from '../../src/components/SettingRow';
 import { t, language, type CopyKey } from './copy';
 const Icon = ({ name }: {
     name: string;
@@ -178,7 +180,7 @@ export function Workspace() {
 </>}</div>
 </header>
       <div className="r-preview-label">
-<span>{t('preview')}</span>
+<span>{t('demoNotice')}</span>
 <span>{currentUser.name} · {t(owner ? 'mentor' : 'student')}</span>
 </div>
       {p ? <>
@@ -229,7 +231,7 @@ export function Workspace() {
 <Icon name="arrow_back"/>
 </button>
 <span className={`r-status ${task.status}`}>{t(task.status)}</span>
-<span className="v3-spacer"/>{owner && writable && <select aria-label={t('status')} value={task.status} onChange={e => update(p => ({ ...p, tasks: p.tasks.map(item => item.id === task.id ? { ...item, status: e.target.value as Task['status'] } : item) }))}>{(['todo', 'doing', 'done'] as const).map(status => <option value={status} key={status}>{t(status)}</option>)}</select>}</header>
+<span className="v3-spacer"/>{owner && writable && <SelectControl label={t('status')} value={task.status} options={(['todo','doing','done'] as const).map(value=>({value,label:t(value)}))} onChange={value=>update(p=>({...p,tasks:p.tasks.map(item=>item.id===task.id?{...item,status:value}:item)}))}/>}</header>
 <div className="v3-detail-scroll">
 <h1>{task.title}</h1>
 <div className="v3-task-info">
@@ -242,9 +244,7 @@ export function Workspace() {
 <AttachmentList assets={task.assets}/>
 <div className="v3-progress-heading">
 <h2>{t('progress')}</h2>
-<select aria-label={t('progress')} value={scope} onChange={e => setScope(e.target.value)}>
-<option value="mine">{t('mine')}</option>
-<option value="all">{t('everyone')}</option>{p.members.filter(m => m.id !== viewer).map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+<SelectControl label={t('progress')} value={scope} onChange={setScope} options={[{value:'mine',label:t('mine')},{value:'all',label:t('everyone')},...p.members.filter(m=>m.id!==viewer).map(m=>({value:String(m.id),label:m.name}))]}/>
 </div>
 <p className="v3-muted">{t('privateHint')}</p>
           {progressFor(task, scope === 'mine' ? viewer : Number(scope), scope === 'all' ? 'all' : 'mine').map(comment => <article className="v3-comment" key={comment.id}>
@@ -274,28 +274,11 @@ export function Workspace() {
         {tab === 'calendar' && <section className="v3-page">
 <div className="v3-page-heading">
 <div>
-<h1>{t('chronelle')}</h1>
-<p className="v3-muted">{t('scheduleHint')}</p>
+<h1>{t('liveCalendar')}</h1>
 </div>
 <input aria-label={t('date')} type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)}/>
 </div>
-<div className="v3-availability-wrap">
-<table className="v3-availability">
-<thead>
-<tr>
-<th>{t('selectTime')}</th>{p.members.map(m => <th key={m.id}>{m.name}</th>)}<th>{t('available')}</th>
-</tr>
-</thead>
-<tbody>{Array.from({ length: 8 }, (_, index) => index + 9).map((hour) => { const busy = p.members.map(m => (hour + m.id + new Date(scheduleDate + 'T12:00').getDay()) % 5 === 0 || meetingConflict(p,`${scheduleDate}T${String(hour).padStart(2,'0')}:00`,`${scheduleDate}T${String(hour+1).padStart(2,'0')}:00`,[m.id])); return <tr key={hour}>
-<th>{hour}:00</th>{p.members.map((m, index) => <td key={m.id}>
-<span className={busy[index] ? 'busy' : 'free'}>{t(busy[index] ? 'busy' : 'free')}</span>
-</td>)}<td>
-<button disabled={!owner || !writable || busy.some(Boolean) || !scheduleDate} onClick={() => { setSlot(`${scheduleDate}T${String(hour).padStart(2, '0')}:00`); open('meeting'); }}>{t('book')}</button>
-</td>
-</tr>; })}</tbody>
-</table>
-</div>
-<p className="v3-muted">{t('scheduleOnly')}</p>
+<ResearchCalendars key={p.id} project={p} date={scheduleDate} canBook={owner && writable && !!scheduleDate} onBook={value=>{setSlot(value);open('meeting');}}/>
 <div className="v3-page-heading">
 <h2>{t('upcoming')}</h2>{owner && writable && <button className="button secondary" onClick={() => open('meeting')}>{t('meeting')}</button>}</div>{[...p.meetings].sort((a,b)=>Date.parse(a.start)-Date.parse(b.start)).map(meeting => <article className="v3-meeting" key={meeting.id}>
 <button className="v3-meeting-toggle" aria-expanded={meetingId === meeting.id} onClick={() => setMeetingId(meetingId === meeting.id ? null : meeting.id)}>
