@@ -9,6 +9,7 @@ import { Markdown, safeUrl } from './Markdown';
 import { Editor, readFile } from './Editor';
 import { MarkdownInput } from './MarkdownInput';
 import { ResearchCalendars } from './ResearchCalendars';
+import { localInput } from './embed-bridge';
 import { SelectControl } from '../../src/components/SettingRow';
 import { t, language, type CopyKey } from './copy';
 const Icon = ({ name }: {
@@ -97,6 +98,7 @@ export function Workspace() {
         setPreference('light');
     else if (params.has('dark'))
         setPreference('dark'); }, []);
+    const [meetingDraft,setMeetingDraft]=useState<{end:string;members:number[]}|null>(null);
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -180,7 +182,7 @@ export function Workspace() {
 </>}</div>
 </header>
       <div className="r-preview-label">
-<span>{t('demoNotice')}</span>
+<span>{t('iframeDemoNotice')}</span>
 <span>{currentUser.name} · {t(owner ? 'mentor' : 'student')}</span>
 </div>
       {p ? <>
@@ -274,13 +276,13 @@ export function Workspace() {
         {tab === 'calendar' && <section className="v3-page">
 <div className="v3-page-heading">
 <div>
-<h1>{t('liveCalendar')}</h1>
+<h1>{t('iframeTitle')}</h1>
 </div>
 <input aria-label={t('date')} type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)}/>
 </div>
-<ResearchCalendars key={p.id} project={p} date={scheduleDate} canBook={owner && writable && !!scheduleDate} onBook={value=>{setSlot(value);open('meeting');}}/>
+<ResearchCalendars key={`${p.id}-${viewer}`} project={p} viewer={viewer} date={scheduleDate} canBook={owner && writable && !!scheduleDate} onBook={(range,members)=>{setSlot(localInput(range.start));setMeetingDraft({end:localInput(range.end),members});open('meeting');}}/>
 <div className="v3-page-heading">
-<h2>{t('upcoming')}</h2>{owner && writable && <button className="button secondary" onClick={() => open('meeting')}>{t('meeting')}</button>}</div>{[...p.meetings].sort((a,b)=>Date.parse(a.start)-Date.parse(b.start)).map(meeting => <article className="v3-meeting" key={meeting.id}>
+<h2>{t('upcoming')}</h2>{owner && writable && <button className="button secondary" onClick={() => {setMeetingDraft(null);open('meeting');}}>{t('meeting')}</button>}</div>{[...p.meetings].sort((a,b)=>Date.parse(a.start)-Date.parse(b.start)).map(meeting => <article className="v3-meeting" key={meeting.id}>
 <button className="v3-meeting-toggle" aria-expanded={meetingId === meeting.id} onClick={() => setMeetingId(meetingId === meeting.id ? null : meeting.id)}>
 <Icon name="event"/>
 <span>
@@ -379,9 +381,9 @@ export function Workspace() {
 </select>
 </label>
 </>}{panel === 'resource' && <AssetPicker assets={draftAssets} onChange={setDraftAssets} error={tell}/>}{panel === 'meeting' && <>
-<Period timed long={false} start={slot} end={`${slot.slice(0, 11)}${String(Number(slot.slice(11, 13)) + 1).padStart(2, '0')}:00`}/>
+<Period timed long={false} start={slot} end={meetingDraft?.end || localInput(new Date(new Date(slot).getTime()+3600000).toISOString())}/>
 <fieldset>
-<legend>{t('attendees')}</legend>{p?.members.map(member => <label className="v3-check" key={member.id}>{member.name}<input type="checkbox" name="member" value={member.id} defaultChecked/>
+<legend>{t('attendees')}</legend>{p?.members.map(member => <label className="v3-check" key={member.id}>{member.name}<input type="checkbox" name="member" value={member.id} defaultChecked={!meetingDraft||meetingDraft.members.includes(member.id)}/>
 </label>)}</fieldset>
 <label>{t('place')}<input name="place" required/>
 </label>
