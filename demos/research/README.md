@@ -30,7 +30,7 @@ npm run dev -- --host 127.0.0.1 --port 8802
 
 - 数据保存在 IndexedDB `frienden-research-demo-v3`。原型 v1/v2 不自动迁移，以免把旧版私密记录意外转换为共享评论。
 - 图片及文件读成本地 data URL，最大每个 8 MB。评论/回复最多 9 张图片。未上传服务器；不要输入敏感资料。
-- Markdown 是安全子集：标题、段落、粗体、行内/块代码、引用、列表、HTTP(S) 链接；不是完整 CommonMark，不执行 HTML。
+- Markdown 是安全子集：多级标题、段落、粗斜体、行内/块代码、引用、列表、表格、HTTP(S) 链接；不是完整 CommonMark，不执行 HTML。任务、评论、回复与会议复用格式工具栏和编辑/预览组件，选中文字后可包裹语法。
 - 创建群、邀请、会话消息、成员管理、退出/解散均只改变本地示例。正式版必须由服务端强制执行权限与课题/群的一致性。
 - Chronelle 的授权、实时日历、同步写入、通知与实际会议冲突检测尚未接入。忙闲矩阵明确标注模拟；当前冲突检测只针对本地课题会议。
 - 不复用旧版“关联现有群”逻辑，不复用旧版个人记录保密策略。
@@ -39,6 +39,6 @@ npm run dev -- --host 127.0.0.1 --port 8802
 
 `npx tsc -p demos/research/tsconfig.json`
 
-`node --test demos/research/model.test.ts`
+`node --test demos/research/model.test.ts demos/research/markdown-edit.test.ts`
 
 `npm run build` 检查正式应用不受影响；其入口不包含本 demo。

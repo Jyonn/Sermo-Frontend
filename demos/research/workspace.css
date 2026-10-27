@@ -30,3 +30,27 @@ html[data-theme="dark"] .v3-demo { --v3-green:#70d5b0; --v3-soft:#20392d; --v3-w
 @media(max-width:719px){.v3-demo .r-header { padding-bottom:10px; }.v3-demo .r-project-button strong { max-width:63vw; }.v3-context { margin:0 18px 12px;font-size:10px; }.v3-tabs { gap:24px;padding:0 18px; }.v3-tabs button { font-size:12px;padding-block:12px; }.v3-page,.v3-timeline-page { padding:24px 18px 40px; }.v3-page-heading { align-items:flex-start;gap:12px;flex-wrap:wrap; }.v3-page-heading h1 { font-size:21px; }.v3-timeline-page .v3-page-heading h1 { font-size:19px; }.v3-timeline article { grid-template-columns:82px 32px minmax(0,1fr);gap:10px; }.v3-timeline article:not(:last-child):before { left:107px; }.v3-timeline time { font-size:10px;padding-top:8px; }.v3-timeline-point { width:32px;height:32px;border-radius:11px; }.v3-timeline h3 { font-size:14px; }.v3-page>.v3-assets { grid-template-columns:1fr; }.v3-detail-top { min-height:48px;padding:6px 12px; }.v3-detail-scroll { padding:0 20px 30px; }.v3-task-info { margin-bottom:20px; }.v3-editor textarea { font-size:16px; }.v3-meeting-body { padding-left:0; }.v3-demo .r-preview-label { font-size:8px; }.v3-period { gap:10px; }.v3-drawer .r-form { padding:20px; }.v3-period input { font-size:12px;min-width:0; }}
 @media(max-height:500px) and (min-width:720px){.v3-demo .r-preview-label { display:none; }.v3-demo .r-header { padding-block:8px; }.v3-context { margin-bottom:6px; }.v3-tabs button { padding-block:9px; }.r-editor-backdrop>.side-drawer { top:12px;bottom:12px; }.v3-detail-top { min-height:44px;padding-block:4px; }}
 .v3-availability th:first-child { position:sticky;left:0;z-index:1;background:var(--bg-elevated); }
+.v3-md-input { border:1px solid var(--line-soft);border-radius:14px;overflow:hidden;background:var(--bg-canvas);min-width:0; }
+.v3-editor .v3-md-input { border:0;border-radius:0; }
+.v3-md-toolbar { display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--line-soft); }
+.v3-md-toolbar button,.v3-md-toolbar select { display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:5px;border:0;border-radius:8px;background:transparent;color:var(--text-secondary);font:inherit;font-size:12px; }
+.v3-md-toolbar button:hover,.v3-md-toolbar select:hover { background:var(--v3-soft);color:var(--v3-green); }
+.v3-md-toolbar button:focus-visible,.v3-md-toolbar select:focus-visible { outline:2px solid var(--v3-green);outline-offset:-2px; }
+.v3-md-toolbar .material-symbols-outlined { font-size:19px; }
+.v3-md-toolbar select,.r-form .v3-md-toolbar select { width:48px;min-width:48px;flex:0 0 48px;padding:5px;background:transparent;border:0; }
+.v3-md-toolbar .v3-md-preview-toggle { margin-left:auto;padding-inline:10px;color:var(--v3-green); }
+.v3-md-input textarea { display:block;width:100%;min-height:130px;max-height:400px;resize:vertical;border:0!important;border-radius:0!important;background:transparent!important;color:var(--text-primary);padding:16px!important;font:inherit;font-size:14px;line-height:1.85; }
+.v3-md-input textarea[hidden] { display:none; }
+.v3-field-label { font-size:13px;font-weight:700;margin:0 0 10px; }
+.v3-detail-scroll { scroll-padding-block:24px; }
+.v3-detail-scroll> .v3-markdown,.v3-detail-scroll> .v3-assets { max-width:780px; }
+.v3-comment { padding-block:24px; }
+.v3-comment>.v3-markdown,.v3-comment>.v3-quote,.v3-comment>.v3-comment-images { margin-left:40px; }
+.v3-comment>.r-text-button { margin:12px 0 0 40px; }
+.v3-comment>.v3-editor { margin-left:40px; }
+.v3-markdown h5,.v3-markdown h6 { font-size:14px;color:var(--text-primary);margin:16px 0 8px; }
+.v3-md-table { overflow:auto;margin-block:16px;max-width:100%;border:1px solid var(--line-soft);border-radius:10px; }
+.v3-md-table table { border-collapse:collapse;width:100%;font-size:13px;text-align:left; }
+.v3-md-table th,.v3-md-table td { padding:10px 14px;border-bottom:1px solid var(--line-soft);min-width:110px; }
+.v3-md-table th { color:var(--text-primary);background:var(--v3-soft); }.v3-md-table tr:last-child td { border-bottom:0; }
+@media(max-width:719px) { .v3-md-input textarea { font-size:16px; }.v3-comment>.v3-markdown,.v3-comment>.v3-quote,.v3-comment>.v3-comment-images,.v3-comment>.v3-editor { margin-left:0; }.v3-comment>.r-text-button { margin-left:0; }.v3-md-toolbar { gap:2px;padding:7px; }.v3-md-toolbar button,.v3-md-toolbar select { min-width:36px;height:36px; } }

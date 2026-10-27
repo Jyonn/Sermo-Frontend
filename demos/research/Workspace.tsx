@@ -7,6 +7,7 @@ import { seed, friends, mentor, createProject, inviteMembers, removeMember, tran
 import { readProjects, saveProjects } from './storage';
 import { Markdown, safeUrl } from './Markdown';
 import { Editor, readFile } from './Editor';
+import { MarkdownInput } from './MarkdownInput';
 import { t, language, type CopyKey } from './copy';
 const Icon = ({ name }: {
     name: string;
@@ -384,8 +385,7 @@ export function Workspace() {
 <legend>{t('assignees')}</legend>{p?.members.map(member => <label className="v3-check" key={member.id}>
 <Avatar name={member.name}/>{member.name}<input type="checkbox" name="member" value={member.id}/>
 </label>)}</fieldset>
-<label>{t('body')}<textarea name="body" rows={8} required/>
-</label>
+<div><p className="v3-field-label">{t('body')}</p><MarkdownInput rows={8} required/></div>
 <AssetPicker assets={draftAssets} onChange={setDraftAssets} error={tell}/>
 </>}{panel === 'node' && <>
 <label>{t('date')}<input name="date" type="date" required/>
@@ -402,8 +402,7 @@ export function Workspace() {
 </label>)}</fieldset>
 <label>{t('place')}<input name="place" required/>
 </label>
-<label>{t('agenda')}<textarea name="body" rows={5}/>
-</label>
+<div><p className="v3-field-label">{t('agenda')}</p><MarkdownInput rows={5}/></div>
 </>}<button className="button" type="submit">{t(panel === 'project' ? 'create' : 'save')}</button>
 </form>}
     </SideDrawer>
