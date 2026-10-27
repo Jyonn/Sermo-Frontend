@@ -1,36 +1,105 @@
-export type Status = 'planning' | 'active' | 'completed';
-export type TaskStatus = 'todo' | 'doing' | 'review' | 'done';
-export type Member = { id: number; name: string; role: 'mentor' | 'student' };
-export type Entry = { id: number; owner: number; recipient?: number; kind: 'progress' | 'summary' | 'feedback'; body: string; date: string };
-export type Task = { id: number; title: string; description: string; assignees: number[]; deadline: string; status: TaskStatus; entries: Entry[] };
-export type Meeting = { id: number; title: string; date: string; place: string; agenda: string; minutes: string };
-export type ResearchChat = { id: number; name: string; members: number[]; dedicated?: boolean };
-export const chatGroups: ResearchChat[] = [
-  { id: 101, name: '推荐系统研究小组', members: [0, 1, 2] },
-  { id: 102, name: '周四论文讨论', members: [0, 1, 2, 3] },
-  { id: 103, name: '可信问答探索', members: [0, 3] },
-];
-export type Project = { id: number; title: string; status: Status; description: string; members: Member[]; tasks: Task[]; meetings: Meeting[]; chat?: ResearchChat };
-export const friends: Member[] = [{ id: 1, name: '林澄', role: 'student' }, { id: 2, name: '周予', role: 'student' }, { id: 3, name: '许知夏', role: 'student' }, { id: 4, name: '沈言', role: 'student' }];
-export const mentor: Member = { id: 0, name: '陈知远', role: 'mentor' };
+export type Member = {
+    id: number;
+    name: string;
+};
+export type Asset = {
+    id: number;
+    name: string;
+    url: string;
+    kind: 'file' | 'link';
+};
+export type Progress = {
+    id: number;
+    owner: number;
+    body: string;
+    at: string;
+    images: string[];
+    replyTo?: number;
+};
+export type Task = {
+    id: number;
+    title: string;
+    body: string;
+    start: string;
+    end: string | null;
+    assignees: number[];
+    status: 'todo' | 'doing' | 'done';
+    assets: Asset[];
+    comments: Progress[];
+};
+export type Meeting = {
+    id: number;
+    title: string;
+    start: string;
+    end: string;
+    attendees: number[];
+    place: string;
+    agenda: string;
+    minutes: string;
+};
+export type Milestone = {
+    id: number;
+    title: string;
+    date: string;
+    kind: 'deadline' | 'milestone';
+};
+export type Project = {
+    id: number;
+    chatId: number;
+    title: string;
+    description: string;
+    status: 'planning' | 'active' | 'completed';
+    start: string;
+    end: string | null;
+    owner: number;
+    members: Member[];
+    tasks: Task[];
+    meetings: Meeting[];
+    timeline: Milestone[];
+    resources: Asset[];
+    messages: {
+        id: number;
+        owner: number;
+        body: string;
+    }[];
+};
+export const mentor = { id: 0, name: '陈知远' };
+export const friends = [{ id: 1, name: '林澄' }, { id: 2, name: '周予' }, { id: 3, name: '许知夏' }, { id: 4, name: '沈言' }];
+export function createProject(title: string, description: string, start: string, end: string | null, creator: Member, id = Date.now()): Project {
+    if (!title.trim() || !validRange(start, end))
+        throw new Error('invalid_project');
+    return { id, chatId: id + 100000, title: title.trim(), description, start, end, owner: creator.id, status: 'planning', members: [creator], tasks: [], meetings: [], timeline: [], resources: [], messages: [] };
+}
+export function validRange(start: string, end: string | null) { return Boolean(start && Number.isFinite(Date.parse(start)) && (!end || Number.isFinite(Date.parse(end)) && end >= start)); }
+export function inviteMembers(project: Project, members: Member[]) { return { ...project, members: [...new Map([...project.members, ...members].map(member => [member.id, member])).values()] }; }
+export function groupFor(project: Project) { return { id: project.chatId, owner: project.owner, members: project.members, title: project.title }; }
+export function progressFor(task: Task, viewer: number, scope: 'mine' | 'all') { return task.comments.filter(comment => scope === 'all' || comment.owner === viewer).sort((a, b) => Date.parse(b.at) - Date.parse(a.at) || b.id - a.id); }
+export function canManageGroupDirectly() { return false; }
+export function removeMember(project: Project, id: number) {
+    if (id === project.owner)
+        throw new Error('transfer_first');
+    return { ...project, members: project.members.filter(member => member.id !== id), tasks: project.tasks.map(task => ({ ...task, assignees: task.assignees.filter(assignee => assignee !== id) })) };
+}
+export function transferProject(project: Project, id: number) {
+    if (!project.members.some(member => member.id === id))
+        throw new Error('not_a_member');
+    return { ...project, owner: id };
+}
+export function checkImages(existing: number, incoming: number) { return existing + incoming <= 9; }
+export function meetingConflict(project: Project, start: string, end: string, members: number[]) {
+    return project.meetings.some(meeting => Date.parse(start) < Date.parse(meeting.end) && Date.parse(end) > Date.parse(meeting.start) && meeting.attendees.some(id => members.includes(id)));
+}
 export const seed: Project[] = [
-  { id: 1, title: '让推荐更懂人的意图', status: 'active', description: '探索大语言模型与序列推荐的协同，让每一次推荐都能回应真实的用户意图。', members: [mentor, ...friends.slice(0, 2)], tasks: [
-    { id: 11, title: '复现序列推荐基线', description: '在 MovieLens-1M 上复现 SASRec，固定数据划分和随机种子。\n\n交付：可复现脚本、实验配置，以及 Recall@20 / NDCG@20 的结果对照。\n\n先确认评估协议一致，再尝试改模型。', assignees: [1], deadline: '2026-10-30', status: 'doing', entries: [{ id: 111, owner: 1, kind: 'progress', body: '数据预处理已完成。发现原仓库负采样策略与论文描述不一致，正在核对评估脚本。', date: '2026-10-27 10:40' }, { id: 112, owner: 0, recipient: 1, kind: 'feedback', body: '先把两种评估协议的差异整理出来，周四组会一起确认，不急着跑完整实验。', date: '2026-10-27 11:20' }] },
-    { id: 12, title: '梳理意图建模相关工作', description: '阅读近两年意图建模与 LLM 推荐相关论文。按方法、数据、指标和局限整理对照表，提出一个值得验证的假设。', assignees: [2], deadline: '2026-10-29', status: 'review', entries: [{ id: 121, owner: 2, kind: 'summary', body: '完成 8 篇论文的对照。现有方法大多依赖长历史，下一步想研究短序列下的意图补全。对照表已整理，等待老师反馈。', date: '2026-10-26 20:15' }] },
-    { id: 13, title: '确定消融实验方案', description: '基线稳定后，对齐消融变量、实验预算与预期结论。', assignees: [1, 2], deadline: '2026-11-03', status: 'todo', entries: [] },
-    { id: 14, title: '明确研究问题与数据集', description: '完成问题定义，确定 MovieLens-1M 为第一阶段数据集。', assignees: [1, 2], deadline: '2026-10-23', status: 'done', entries: [] },
-  ], meetings: [{ id: 21, title: '本周进展与评估协议讨论', date: '2026-10-29T14:00', place: '计算机楼 402 · 线上可加入', agenda: '1. 基线复现遇到的评估差异\n2. 意图建模论文对照\n3. 确定下周的一个关键实验', minutes: '' }] },
-  { id: 2, title: '面向长文档的可信问答', status: 'planning', description: '从一个清晰的问题开始：回答的依据，如何被可靠地找到？', members: [mentor, friends[2]], tasks: [], meetings: [] },
-  { id: 3, title: '跨域推荐的表示对齐', status: 'completed', description: '阶段成果已归档，研究记录与讨论仍可回看。', members: [mentor, friends[0], friends[1]], tasks: [{ id: 31, title: '完成阶段报告与实验归档', description: '保留实验配置、报告和后续问题。', assignees: [1, 2], deadline: '2026-09-30', status: 'done', entries: [] }], meetings: [] },
+    { ...createProject('让推荐更懂人的意图', '以可复现实验为起点，探索大语言模型与序列推荐的协同。', '2026-10-12', '2027-05-31', mentor, 1), status: 'active', members: [mentor, ...friends.slice(0, 3)],
+        timeline: [{ id: 1, title: '评估协议确认', date: '2026-10-30', kind: 'milestone' }, { id: 2, title: '首轮消融实验', date: '2026-11-20', kind: 'milestone' }, { id: 3, title: 'SIGIR 投稿计划 · 截止占位，待官方确认', date: '2027-01-15', kind: 'deadline' }],
+        tasks: [
+            { id: 11, title: '复现序列推荐基线', start: '2026-10-12', end: '2026-10-30', status: 'doing', assignees: [1], body: '## 目标\n在 MovieLens-1M 上复现 **SASRec**，固定数据划分与随机种子。\n\n## 交付\n- 可复现脚本与实验配置\n- Recall@20 / NDCG@20 对照\n- 评估协议的差异说明\n\n> 先确认评估协议一致，再尝试改模型。\n\n```python\nseed = 2026\n```', assets: [{ id: 1, name: 'SASRec · 参考实现', kind: 'link', url: 'https://github.com/kang205/SASRec' }], comments: [{ id: 111, owner: 1, body: '完成数据预处理，发现**负采样策略**与论文描述不一致。\n\n下一步：核对评估脚本。', at: '2026-10-27T10:40:00+08:00', images: [] }, { id: 112, owner: 0, replyTo: 111, body: '先整理两种协议的差异，周四一起确认。', at: '2026-10-27T11:20:00+08:00', images: [] }, { id: 113, owner: 2, body: '我补充了相关工作的评估设置，可以一起对照。', at: '2026-10-27T13:00:00+08:00', images: [] }] },
+            { id: 12, title: '梳理意图建模相关工作', start: '2026-10-15', end: '2026-11-02', status: 'doing', assignees: [2, 3], body: '按**方法、数据、指标、局限**整理文献对照表。\n\n- 先阅读 8 篇相关论文\n- 提出一个值得验证的假设', assets: [], comments: [{ id: 121, owner: 2, body: '已完成第一轮对照，短序列的意图补全值得继续研究。', at: '2026-10-26T20:15:00+08:00', images: [] }] },
+            { id: 13, title: '确定消融实验方案', start: '2026-11-01', end: '2026-11-20', status: 'todo', assignees: [1, 2], body: '对齐实验变量、计算预算和预期结论。', assets: [], comments: [] },
+        ],
+        meetings: [{ id: 21, title: '本周进展与评估协议讨论', start: '2026-10-29T14:00', end: '2026-10-29T15:00', attendees: [0, 1, 2, 3], place: '计算机楼 402 / 线上', agenda: '1. 基线复现中的协议差异\n2. 相关工作对照\n3. 下周实验分工', minutes: '' }],
+        resources: [{ id: 1, name: '课题代码仓库', kind: 'link', url: 'https://github.com/kang205/SASRec' }, { id: 2, name: '文献与实验记录 · 示例链接', kind: 'link', url: 'https://arxiv.org/' }],
+        messages: [{ id: 1, owner: 0, body: '周四讨论先聚焦评估协议。个人研究记录不会自动发到群里，需要分享时再手动发送。' }, { id: 2, owner: 1, body: '收到，我会带上两份评估结果。' }],
+    },
+    { ...createProject('面向长文档的可信问答', '回答的依据，如何被可靠地找到？', '2026-11-01', null, mentor, 2), members: [mentor, friends[2]] },
 ];
-export function visibleEntries(task: Task, viewer: number, isMentor: boolean) {
-  return task.entries.filter(entry => isMentor || entry.owner === viewer || (entry.kind === 'feedback' && entry.recipient === viewer));
-}
-export function canWrite(project: Project) { return project.status !== 'completed'; }
-export function visibleTasks(project: Project, status: TaskStatus | 'all') {
-  return project.tasks.filter(task => status === 'all' || task.status === status);
-}
-export function canLinkChat(project: Project, chat: ResearchChat) {
-  const creator = project.members.find(member => member.role === 'mentor');
-  return Boolean(creator && chat.members.includes(creator.id));
-}

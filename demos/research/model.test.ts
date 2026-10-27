@@ -1,32 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { seed, visibleEntries, visibleTasks, chatGroups, canLinkChat, canWrite } from './model.ts';
-test('mentor sees all task records, student cannot see another student’s records', () => {
-  assert.equal(visibleEntries(seed[0].tasks[0], 0, true).length, 2);
-  assert.equal(visibleEntries(seed[0].tasks[0], 1, false).length, 2);
-  assert.equal(visibleEntries(seed[0].tasks[0], 2, false).length, 0);
-});
-test('completed projects are read-only', () => {
-  assert.equal(canWrite(seed[0]), true);
-  assert.equal(canWrite(seed[1]), true);
-  assert.equal(canWrite(seed[2]), false);
-});
-test('feedback remains private even on tasks with multiple assignees', () => {
-  const sharedTask = { ...seed[0].tasks[0], assignees: [1, 2] };
-  assert.equal(visibleEntries(sharedTask, 2, false).length, 0);
-  assert.equal(visibleEntries(sharedTask, 1, false).length, 2);
-});
-test('all project members can browse task briefs without exposing private entries', () => {
-  assert.equal(visibleTasks(seed[0], 'all').length, 4);
-  const peerTask = visibleTasks(seed[0], 'all').find(task => task.id === 12)!;
-  assert.ok(peerTask.description.length > 0);
-  assert.equal(visibleEntries(peerTask, 1, false).length, 0);
-  assert.equal(visibleEntries(peerTask, 2, false).length, 1);
-  assert.equal(visibleEntries(peerTask, 0, true).length, 1);
-});
-test('mentor can link an existing group without automatically adding project members', () => {
-  assert.equal(canLinkChat(seed[0], chatGroups[0]), true);
-  assert.equal(canLinkChat(seed[0], chatGroups[2]), true);
-  assert.equal(canLinkChat(seed[0], {...chatGroups[0],members:[1,2]}), false);
-  assert.deepEqual(chatGroups[2].members,[0,3]);
-});
+import { seed, mentor, friends, createProject, inviteMembers, validRange, progressFor, canManageGroupDirectly, removeMember, transferProject, checkImages, groupFor, meetingConflict } from './model.ts';
+test('project creation creates a special group with the same owner and membership', () => { const p = createProject('测试课题', '', '2026-10-27', null, mentor, 99); assert.notEqual(p.chatId, p.id); assert.deepEqual(p.members, [mentor]); const invited = inviteMembers(p, [friends[0], friends[0]]); assert.equal(new Set(invited.members.map(m => m.id)).size, 2); });
+test('periods require a start and allow an open end or distant future', () => { assert.ok(validRange('2026-10-27', null)); assert.ok(validRange('2026-10-27', '2099-12-31')); assert.equal(validRange('2026-11-01', '2026-10-01'), false); assert.equal(validRange('', null), false); });
+test('progress defaults to self and all-member view is newest first', () => { const task = seed[0].tasks[0]; assert.equal(progressFor(task, 1, 'mine').length, 1); assert.deepEqual(progressFor(task, 1, 'all').map(c => c.id), [113, 112, 111]); });
+test('bound group cannot perform independent sensitive operations', () => { assert.equal(canManageGroupDirectly(), false); assert.throws(() => removeMember(seed[0], 0)); assert.equal(transferProject(seed[0], 1).owner, 1); assert.equal(removeMember(seed[0], 1).tasks[0].assignees.length, 0); });
+test('comments and replies have a nine image limit', () => { assert.ok(checkImages(0, 9)); assert.equal(checkImages(8, 2), false); });
+test('special group shares project ownership and unique members', () => { const invited = inviteMembers(seed[0], [friends[3], friends[3]]); assert.equal(groupFor(invited).members.length, 5); assert.equal(groupFor(transferProject(invited, 1)).owner, 1); assert.equal(groupFor(removeMember(invited, 4)).members.length, 4); });
+test('progress sorting compares instants, not offset strings', () => { const task = { ...seed[0].tasks[0], comments: [{ ...seed[0].tasks[0].comments[0], id: 1, at: '2026-10-27T13:00:00+08:00' }, { ...seed[0].tasks[0].comments[0], id: 2, at: '2026-10-27T07:00:00Z' }] }; assert.deepEqual(progressFor(task, 1, 'all').map(c => c.id), [2, 1]); });
+test('meeting conflicts respect attendees and adjacent slots', () => { assert.equal(meetingConflict(seed[0], '2026-10-29T14:30', '2026-10-29T15:30', [1]), true); assert.equal(meetingConflict(seed[0], '2026-10-29T15:00', '2026-10-29T16:00', [1]), false); assert.equal(meetingConflict(seed[0], '2026-10-29T14:30', '2026-10-29T15:30', [4]), false); });
