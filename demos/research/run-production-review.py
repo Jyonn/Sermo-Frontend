@@ -33,6 +33,21 @@ student=User.create(space,'本地学生',verified=True)
 # Reuse normal policy rather than bypassing research authorization.
 from Friendship.models import FriendshipStatusChoice
 Friendship.objects.get_or_create(space=space,user_low=owner,user_high=student,defaults=dict(status=FriendshipStatusChoice.ACCEPTED,requested_by=owner))
+if os.environ.get('FRIENDEN_CHRONELLE_QA_FILE'):
+    import json
+    data=json.loads(Path(os.environ['FRIENDEN_CHRONELLE_QA_FILE']).read_text())
+    os.environ.update(CHRONELLE_BINDING_CLIENT_ID=data['client_id'],CHRONELLE_BINDING_CLIENT_SECRET=data['client_secret'],CHRONELLE_BINDING_STORAGE_KEY=data['storage_key'])
+    from User import chronelle_views,chronelle_account
+    from User.models import ChronelleAccount
+    from Chat.models import Chat,ChatMember,ResearchProject
+    chronelle_views.APP_ORIGINS.add('http://127.0.0.1:8804')
+    chronelle_views.BASE=chronelle_account.BASE='http://127.0.0.1:8035'
+    for user,account in zip([owner,student],data['accounts']):
+        row=ChronelleAccount.objects.create(user=user)
+        chronelle_account.store(row,{**account,'access_until':__import__('time').time()+account['expires_in']})
+    chat=Chat.objects.create(space=space,created_by=owner,chat_type=1,purpose=2,title='真实双服务本地联调')
+    for user,role in [(owner,1),(student,0)]:ChatMember.objects.create(chat=chat,user=user,role=role,status=1)
+    ResearchProject.objects.create(chat=chat,start='2026-10-27',calendar_policies={str(student.pk):{'detail':[],'busy':[data['accounts'][1]['group_id']]}})
 def bootstrap(request):
     data=auth.get_login_token(owner)
     return JsonResponse(dict(accessToken=data['auth'],user=data['data']))

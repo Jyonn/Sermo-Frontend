@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { displayURL,bridgeReply,trustedReply } from './embed-bridge.ts';
+import { displayURL,bridgeReply,trustedReply } from '../../src/lib/chronelleBridge.ts';
 const id='35c6deab-103d-4f60-9cf9-9f42c812cc5a';
 const message=(type:string,payload:object)=>({protocol:'chronelle.calendar',version:1,type,channel:'test-channel-123456',request_id:'request',payload});
 test('display URLs accept only official or isolated loopback shells without credentials',()=>{
@@ -15,8 +15,9 @@ test('replies must match protocol, version, channel and latest request',()=>{
 });
 test('range preserves duration and requires absolute valid times and timezone',()=>{
   const range={all_day:false,start:'2026-10-27T01:30:00Z',end:'2026-10-27T03:00:00Z',timezone:'Asia/Shanghai'};
-  assert.deepEqual(bridgeReply(message('range-selected',range),'test-channel-123456','request'),{type:'range-selected',payload:{start:range.start,end:range.end,timezone:range.timezone}});
-  for(const patch of [{end:range.start},{start:'bad'},{timezone:'Invalid/Timezone'},{all_day:true},{end:'2026-10-29T01:30:00Z'}])assert.equal(bridgeReply(message('range-selected',{...range,...patch}),'test-channel-123456','request'),null);
+  assert.deepEqual(bridgeReply(message('range-selected',range),'test-channel-123456','request'),{type:'range-selected',payload:range});
+  assert.ok(bridgeReply(message('range-selected',{...range,all_day:true}),'test-channel-123456','request'));
+  for(const patch of [{end:range.start},{start:'bad'},{timezone:'Invalid/Timezone'},{all_day:'yes'},{end:'2026-10-29T01:30:00Z'}])assert.equal(bridgeReply(message('range-selected',{...range,...patch}),'test-channel-123456','request'),null);
 });
 test('foreign origin and source window never reach the protocol receiver',()=>{
   const source={},data=message('state',{state:'ready'}),event={origin:'https://chronelle.jyonn.space',source,data};

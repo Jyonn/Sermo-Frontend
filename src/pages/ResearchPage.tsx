@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SelectControl } from '../components/SettingRow';
 import { Markdown } from '../components/ResearchMarkdown';
 import { MarkdownInput } from '../components/ResearchMarkdownInput';
+import { ResearchCalendar } from '../components/ResearchCalendar';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/language';
@@ -17,8 +18,9 @@ import './ResearchPage.css';
 
 export default function ResearchPage() {
   const {t}=useI18n(),{session}=useAuth(),features=useSpaceFeatures();
-  const [list,setList]=useState<ResearchSummary[]>([]),[project,setProject]=useState<ResearchProject|null>(null),[id,setId]=useState<number|null>(null),[taskId,setTaskId]=useState<string|null>(null);
-  const [panel,setPanel]=useState<'create'|'task'|'members'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState('tasks');
+  const returning=sessionStorage.getItem(`chronelle:return-project:${session?.user.user_id}`);
+  const [list,setList]=useState<ResearchSummary[]>([]),[project,setProject]=useState<ResearchProject|null>(null),[id,setId]=useState<number|null>(()=>Number(returning)||null),[taskId,setTaskId]=useState<string|null>(null);
+  const [panel,setPanel]=useState<'create'|'task'|'members'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning?'calendar':'tasks');
   const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[tick,setTick]=useState(0),[reply,setReply]=useState<string|null>(null),[confirm,setConfirm]=useState<string|null>(null);
   const userId=session?.user.user_id;
   const owner=project?.members.some(m=>m.id===userId&&m.owner)===true;
@@ -40,7 +42,7 @@ export default function ResearchPage() {
     <div className="research-project-bar"><SelectControl label={t('research.project')} value={String(id||'')} options={[{value:'',label:t('research.choose')},...list.map(p=>({value:String(p.id),label:p.title}))]} onChange={value=>{setId(value?Number(value):null);setTab('tasks');setError('');}}/>{project&&<><span>{project.start} → {project.end||t('research.openEnd')}</span><button className="ghost-button" onClick={()=>setPanel('members')} aria-label={t('research.members')}><span className="material-symbols-outlined">more_horiz</span></button></>}</div>
     {loading?<p className="research-empty" role="status">{t('common.loading')}</p>:!project?<div className="research-empty"><span className="material-symbols-outlined">science</span><h2>{t(list.length?'research.choose':'research.empty')}</h2><p>{t('research.intro')}</p><button className="primary-button" onClick={()=>setPanel('create')}>{t('research.create')}</button></div>:<>
       <div className="research-tabs" role="tablist">{(['tasks','calendar'] as const).map(key=><button role="tab" aria-selected={tab===key} key={key} onClick={()=>setTab(key)}>{t(key==='tasks'?'research.tasks':'research.calendar')}</button>)}</div>
-      {tab==='calendar'?<div className="research-empty"><span className="material-symbols-outlined">event</span><h2>{t('research.calendarPending')}</h2><p>{t('research.calendarHint')}</p></div>:<div className={`research-task-layout ${task?'has-detail':''}`}>
+      {tab==='calendar'?<ResearchCalendar key={`${project.id}-${userId}`} project={project} userId={userId!}/>:<div className={`research-task-layout ${task?'has-detail':''}`}>
         <aside><header><h2>{t('research.tasks')}</h2>{owner&&writable&&<button className="ghost-button" onClick={()=>setPanel('task')}>{t('research.addTask')}</button>}</header>{project.tasks.map(item=><button className={`research-task-row ${taskId===item.id?'selected':''}`} key={item.id} onClick={()=>{setTaskId(item.id);setReply(null);setScope('mine');}}><strong>{item.title}</strong><small>{item.assignees.map(memberName).join(' · ')}</small><small>{item.start} → {item.end||t('research.openEnd')}</small><span>{t(`research.${item.status}`)}</span></button>)}{!project.tasks.length&&<p className="research-muted">{t('research.noTasks')}</p>}</aside>
         <article className="research-task-detail">{task?<><header><button className="ghost-button research-back" onClick={()=>setTaskId(null)} aria-label={t('research.back')}><span className="material-symbols-outlined">arrow_back</span></button><span className="research-grow"/>{owner&&writable&&<SelectControl label={t('research.status')} disabled={busy} value={task.status} options={(['todo','doing','done'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'task_status',task_id:task.id,status}).then(()=>{})}/>}</header><div className="research-detail-scroll"><h1>{task.title}</h1><p className="research-muted">{task.assignees.map(memberName).join(' · ')}<br/>{task.start} → {task.end||t('research.openEnd')}</p><Markdown body={task.body}/>
           <div className="research-progress-head"><h2>{t('research.progress')}</h2><SelectControl label={t('research.progress')} value={scope} onChange={setScope} options={[{value:'mine',label:t('research.mine')},{value:'all',label:t('research.all')}]}/></div><p className="research-muted">{t('research.shared')}</p>

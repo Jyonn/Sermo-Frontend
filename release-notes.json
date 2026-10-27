@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.27.12",
+  "id": "2026.10.27.13",
   "publishedAt": "2026-10-27",
   "locales": {
     "zh-CN": {
-      "title": "科研协作首版上线",
+      "title": "科研接入 Chronelle 日程与会议",
       "items": [
-        "空间管理员开启科研后，可创建课题、邀请成员、分配阶段任务并共享 Markdown 进度与回复",
-        "日程与会议明确标注尚未接通，不展示模拟日程"
+        "完成 Chronelle 完整授权后，可查看本人日程并勾选课题成员合并查看",
+        "确认时间段后可发送多人会议邀请，支持结果核对，避免重复创建",
+        "日程类别组默认向课题成员隐藏，可由本人开放详情或仅忙闲"
       ]
     },
     "en": {
-      "title": "Research collaboration, first release",
+      "title": "Chronelle calendars and research meetings",
       "items": [
-        "Space admins can enable research projects with members, assigned tasks, Markdown progress and replies",
-        "Calendar and meeting integration is clearly marked as unavailable, with no simulated schedules"
+        "Bind Chronelle with explicit full authorization to view your calendar and merge selected project members",
+        "Confirm a time range to send meeting invitations, with safe delivery checks to prevent duplicates",
+        "Calendar groups are hidden from project members by default; choose details or busy-only visibility"
       ]
     }
   }

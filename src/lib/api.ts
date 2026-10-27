@@ -430,6 +430,11 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 
 export const api = {
   researchList(signal?: AbortSignal) { return request<import('./research').ResearchSummary[]>('/research/', {auth:true,signal}); },
+  researchCalendar(id:number,signal?:AbortSignal) { return request<import('./researchCalendar').CalendarSetup>(`/research/${id}/calendar/`,{auth:true,signal}); },
+  researchMeetings(id:number,signal?:AbortSignal) { return request<import('./researchCalendar').ResearchMeeting[]>(`/research/${id}/meetings/`,{auth:true,signal}); },
+  researchBookMeeting(id:number,body:Record<string,unknown>) { return request<import('./researchCalendar').ResearchMeeting>(`/research/${id}/meetings/`,{auth:true,method:'POST',body}); },
+  researchCalendarAction<T>(id:number,body:Record<string,unknown>,signal?:AbortSignal) { return request<T>(`/research/${id}/calendar/`,{auth:true,method:'POST',body,signal}); },
+  chronelleAccount(action?:string,confirmed?:boolean) { return request<{status:string;authorize_url?:string}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed}}:{})}); },
   researchGet(id:number, signal?:AbortSignal) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,signal}); },
   researchCreate(body:Record<string,unknown>) { return request<import('./research').ResearchProject>('/research/',{auth:true,method:'POST',body}); },
   researchUpdate(id:number, revision:number, body:Record<string,unknown>) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,method:'POST',body:{...body,revision}}); },

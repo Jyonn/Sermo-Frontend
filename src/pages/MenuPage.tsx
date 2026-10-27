@@ -16,7 +16,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
-import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
+import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { GrowthAtlas } from "../components/GrowthAtlas";
@@ -2234,7 +2234,7 @@ export default function MenuPage() {
           {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
             <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
               <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
-              <span><strong>{t("chronelle.title")}</strong><small>{t(me?.chronelle_calendar_id ? "chronelle.bound" : "chronelle.bind")}</small></span>
+              <span><strong>{t("chronelle.title")}</strong><small>{session ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setTravelMapOpen(true); }} type="button">
@@ -2370,7 +2370,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} /> : null}
+      {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} onChange={()=>setChronelleInfoOpen(false)} /> : null}
       {session ? <MyProfileCardDrawer onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} user={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }} /> : null}
 
       <BottomSheet open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")} className="bgm-info-sheet">
