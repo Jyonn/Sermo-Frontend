@@ -1,0 +1,24 @@
+.research-demo .r-discuss { max-width: 240px; min-width: 0; }
+.r-discuss > span:not(.material-symbols-outlined) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-inline-footer { flex-shrink: 0; max-height: 48%; overflow: auto; }
+.r-inline-composer { display: grid; gap: 10px; width: 100%; }
+.r-composer-top,.r-composer-actions { display: flex; align-items: center; gap: 12px; justify-content: space-between; font-size: 13px; }
+.r-composer-top .r-icon { height: 30px; min-width: 30px; margin-left: auto; }
+.r-composer-top select { max-width: 180px; padding: 6px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--bg-canvas); color: var(--text-primary); }
+.r-inline-composer textarea { width: 100%; resize: vertical; min-height: 74px; max-height: 180px; border-radius: 14px; padding: 12px 14px; font: inherit; font-size: 14px; line-height: 1.7; border: 1px solid var(--line-soft); background: var(--bg-canvas); color: var(--text-primary); }
+.r-inline-composer textarea:focus { outline: 2px solid color-mix(in srgb,var(--brand-primary) 30%,transparent); border-color: var(--brand-primary); }
+.r-composer-actions small { color: var(--text-muted); display: inline-flex; gap: 5px; align-items: center; font-size: 11px; }
+.r-composer-actions .material-symbols-outlined { font-size: 15px; }
+.r-meeting-inline.r-form { padding: 24px 0 32px 94px; border-bottom: 1px solid var(--line-soft); gap: 14px; }
+.r-meeting-inline h3,.r-meeting-inline p { margin: 0; }
+.r-meeting-inline .button { justify-self: end; min-width: 100px; }
+.r-linked-chat { display: flex; gap: 14px; align-items: center; padding: 18px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-canvas); }
+.r-linked-chat > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }.r-linked-chat small { display: block; margin-top: 6px; color: var(--text-muted); }
+.r-chat-choices { display: grid; }
+.r-chat-choices button { display: flex; gap: 12px; align-items: center; border: 0; border-bottom: 1px solid var(--line-soft); padding: 20px 0; text-align: left; background: transparent; color: var(--text-primary); }
+.r-chat-choices button:disabled { opacity: .45; cursor: not-allowed; }
+.r-chat-choices button > span:nth-child(2) { flex: 1; min-width: 0; }.r-chat-choices small { display: block; color: var(--text-muted); margin-top: 6px; font-size: 11px; }.r-create-group { display: grid; gap: 16px; }
+.r-editor .r-form > h2 { font-size: 20px; margin: 0; }
+.r-form .friend-request-tabs { margin: 0; }
+@media (max-width:719px) { .r-meeting-inline.r-form { padding-left: 0; }.r-inline-footer { max-height: 56%; padding: 12px 18px; }.r-inline-composer textarea { font-size: 16px; } }
+@media (max-height:500px) { .r-inline-footer:has(textarea) { max-height: 70%; }.r-inline-composer { gap: 4px; }.r-inline-composer textarea { min-height: 52px; height: 52px; }.r-inline-composer .button { min-height: 32px; }.r-detail-header { flex-shrink: 0; } }

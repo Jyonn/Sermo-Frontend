@@ -4,7 +4,13 @@ export type Member = { id: number; name: string; role: 'mentor' | 'student' };
 export type Entry = { id: number; owner: number; recipient?: number; kind: 'progress' | 'summary' | 'feedback'; body: string; date: string };
 export type Task = { id: number; title: string; description: string; assignees: number[]; deadline: string; status: TaskStatus; entries: Entry[] };
 export type Meeting = { id: number; title: string; date: string; place: string; agenda: string; minutes: string };
-export type Project = { id: number; title: string; status: Status; description: string; members: Member[]; tasks: Task[]; meetings: Meeting[] };
+export type ResearchChat = { id: number; name: string; members: number[]; dedicated?: boolean };
+export const chatGroups: ResearchChat[] = [
+  { id: 101, name: '推荐系统研究小组', members: [0, 1, 2] },
+  { id: 102, name: '周四论文讨论', members: [0, 1, 2, 3] },
+  { id: 103, name: '可信问答探索', members: [0, 3] },
+];
+export type Project = { id: number; title: string; status: Status; description: string; members: Member[]; tasks: Task[]; meetings: Meeting[]; chat?: ResearchChat };
 export const friends: Member[] = [{ id: 1, name: '林澄', role: 'student' }, { id: 2, name: '周予', role: 'student' }, { id: 3, name: '许知夏', role: 'student' }, { id: 4, name: '沈言', role: 'student' }];
 export const mentor: Member = { id: 0, name: '陈知远', role: 'mentor' };
 export const seed: Project[] = [
@@ -21,3 +27,10 @@ export function visibleEntries(task: Task, viewer: number, isMentor: boolean) {
   return task.entries.filter(entry => isMentor || entry.owner === viewer || (entry.kind === 'feedback' && entry.recipient === viewer));
 }
 export function canWrite(project: Project) { return project.status !== 'completed'; }
+export function visibleTasks(project: Project, status: TaskStatus | 'all') {
+  return project.tasks.filter(task => status === 'all' || task.status === status);
+}
+export function canLinkChat(project: Project, chat: ResearchChat) {
+  const creator = project.members.find(member => member.role === 'mentor');
+  return Boolean(creator && chat.members.includes(creator.id));
+}

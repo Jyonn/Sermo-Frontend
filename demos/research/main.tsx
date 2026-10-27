@@ -9,9 +9,10 @@ import { SideDrawer } from '../../src/components/SideDrawer';
 import { BottomSheet } from '../../src/components/BottomSheet';
 import { DrawerTabs } from '../../src/components/DrawerTabs';
 import { copy, type CopyKey } from './copy';
-import { seed, friends, mentor, visibleEntries, canWrite, type Project, type Task, type Meeting, type TaskStatus, type Entry } from './model';
+import { seed, friends, mentor, visibleEntries, visibleTasks, canLinkChat, chatGroups, canWrite, type Project, type Task, type Meeting, type TaskStatus, type Entry } from './model';
 import '../../styles.css';
 import './style.css';
+import './refinements.css';
 
 const STORE = 'frienden:research-demo:v2';
 const params = new URLSearchParams(location.search);
@@ -22,7 +23,7 @@ const Icon = ({ name }: { name: string }) => <span className="material-symbols-o
 const Avatar = ({ name }: { name: string }) => <span className="r-avatar" aria-hidden="true">{name.slice(0, 1)}</span>;
 function load(): Project[] { try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (Array.isArray(saved) && saved.length && saved.every(p => p.members && p.tasks && p.meetings)) return saved; } catch {} return structuredClone(seed); }
 type Panel = null | 'task' | 'meeting' | 'project' | 'settings' | 'invite' | 'chat';
-type Tab = 'tasks' | 'meetings' | 'records' | 'members';
+type Tab = 'tasks' | 'meetings' | 'members';
 function App() {
   const { resolvedTheme, setPreference } = useTheme();
   const [projects, setProjects] = useState(load);
@@ -36,22 +37,22 @@ function App() {
   const [meetingId, setMeetingId] = useState<number | null>(null);
   const [entryKind, setEntryKind] = useState<Entry['kind'] | null>(null);
   const [toast, setToast] = useState('');
-  const [attached, setAttached] = useState(false);
+  const [chatMode, setChatMode] = useState<'existing' | 'dedicated'>('existing');
   const project = projects.find(p => p.id === projectId) || projects[0];
   const isMentor = role === 'mentor';
   const viewer = isMentor ? mentor : project.members.find(member => member.role === 'student') || friends[0];
   const writable = canWrite(project);
   const task = project.tasks.find(item => item.id === selected);
   const meeting = project.meetings.find(item => item.id === meetingId);
-  const tasks = project.tasks.filter(item => (isMentor || item.assignees.includes(viewer.id)) && (filter === 'all' || item.status === filter));
-  const records = project.tasks.flatMap(item => visibleEntries(item, viewer.id, isMentor).map(entry => ({ ...entry, task: item })));
+  const tasks = visibleTasks(project, filter);
   const tell = (value: string) => setToast(value);
   const update = (change: (p: Project) => Project) => setProjects(previous => previous.map(p => p.id === project.id ? change(p) : p));
   const updateTask = (change: (value: Task) => Task) => update(p => ({ ...p, tasks: p.tasks.map(item => item.id === task?.id ? change(item) : item) }));
-  const close = () => { setPanel(null); setMeetingId(null); setEntryKind(null); setAttached(false); };
+  const close = () => { setPanel(null); setMeetingId(null); setEntryKind(null); };
   useEffect(() => { try { localStorage.setItem(STORE, JSON.stringify(projects)); } catch { tell(t('demoOnly')); } }, [projects]);
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 3500); return () => clearTimeout(timer); }, [toast]);
   useEffect(() => { if (params.has('dark')) setPreference('dark'); else if (params.has('light')) setPreference('light'); }, []);
+  useEffect(() => { setEntryKind(null); }, [selected, role, projectId]);
   function switchProject(id: number) { setProjectId(id); setSelected(null); setFilter('all'); setChooser(false); setTab('tasks'); }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +73,7 @@ function App() {
     } else if (panel === 'meeting' && !meeting && isMentor && writable) {
       update(p => ({ ...p, meetings: [...p.meetings, { id: Date.now(), title: value('title'), date: value('date'), place: value('place'), agenda: value('agenda'), minutes: '' }] }));
       setTab('meetings');
-    } else if (panel === 'meeting' && meeting && writable) {
+    } else if (data.get('intent') === 'minutes' && meeting && writable) {
       update(p => ({ ...p, meetings: p.meetings.map(item => item.id === meeting.id ? { ...item, minutes: value('minutes') } : item) }));
     } else if (panel === 'invite' && isMentor && writable) {
       if (!ids.length) return tell(t('emptySelection'));
@@ -83,8 +84,8 @@ function App() {
     }
     close(); tell(t('saved'));
   }
-  const label = entryKind ? t(entryKind) : panel === 'task' ? t('createTask') : panel === 'project' ? t('createProject') : panel === 'settings' ? t('projectSettings') : panel === 'invite' ? t('invite') : panel === 'meeting' ? t(meeting ? 'viewMeeting' : 'createMeeting') : t('chatPreview');
-  const panelOpen = Boolean(panel || entryKind);
+  const label = panel === 'task' ? t('createTask') : panel === 'project' ? t('createProject') : panel === 'settings' ? t('projectSettings') : panel === 'invite' ? t('invite') : panel === 'meeting' ? t('createMeeting') : t('linkedGroup');
+  const panelOpen = Boolean(panel);
   const canRecord = task && writable && task.assignees.includes(viewer.id);
   function entryCard(entry: Entry) { return <article className={`r-entry ${entry.kind === 'feedback' ? 'is-feedback' : ''}`} key={entry.id}>
     <div className="r-entry-meta"><Avatar name={project.members.find(m => m.id === entry.owner)?.name || mentor.name}/><strong>{project.members.find(m => m.id === entry.owner)?.name || mentor.name}</strong><span>{t(entry.kind)}</span><time>{entry.date}</time></div><p>{entry.body}</p>
@@ -94,33 +95,50 @@ function App() {
     <main className="r-workspace">
       <header className="r-header"><button className="r-project-button" onClick={() => setChooser(true)} aria-label={t('projects')}><span className="r-project-mark"><Icon name="science"/></span><span><small>{t('research')}<i className={`r-dot ${project.status}`}/>{t(project.status)}</small><strong>{project.title}</strong></span><Icon name="unfold_more"/></button><div className="r-header-actions"><button className="r-icon" title={t('switchRole')} aria-label={t('switchRole')} onClick={() => { setRole(isMentor ? 'student' : 'mentor'); setSelected(null); }}><Icon name="switch_account"/><span>{t(role)}</span></button><button className="r-icon" title={t('theme')} aria-label={t('theme')} onClick={() => setPreference(resolvedTheme === 'dark' ? 'light' : 'dark')}><Icon name={resolvedTheme === 'dark' ? 'light_mode' : 'dark_mode'}/></button><button className="r-icon" aria-label={t('projectSettings')} onClick={() => setPanel('settings')}><Icon name="more_horiz"/></button></div></header>
       <div className="r-preview-label"><span>{t('prototype')}</span><span>{t('roleHint')} · {viewer.name}</span></div>
-      <div className="r-topline"><DrawerTabs label={t('research')} items={(['tasks','meetings','records','members'] as Tab[]).map(value => ({ value, label: t(value) }))} value={tab} onChange={value => { setTab(value); setSelected(null); }}/><button className="r-discuss" aria-label={t('discussion')} onClick={() => setPanel('chat')}><Icon name="chat_bubble"/><span>{t('discussion')}</span></button></div>
+      <div className="r-topline"><DrawerTabs label={t('research')} items={(['tasks','meetings','members'] as Tab[]).map(value => ({ value, label: t(value) }))} value={tab} onChange={value => { setTab(value); setSelected(null); setMeetingId(null); }}/><button className="r-discuss" aria-label={t('discussion')} onClick={() => setPanel('chat')}><Icon name="chat_bubble"/><span>{project.chat?.name || t('chatLink')}</span></button></div>
       <div className={`r-content ${tab === 'tasks' ? 'is-task-view' : ''} ${task ? 'has-detail' : ''}`}>
         {tab === 'tasks' ? <>
           <section className="r-task-list" aria-label={t('taskList')}>
-            <div className="r-section-heading"><div><small>{t('activeTasks')}</small><h1>{t('milestone')}</h1></div>{isMentor && writable && <button className="r-icon r-new" aria-label={t('createTask')} onClick={() => setPanel('task')}><Icon name="add"/></button>}</div>
+            <div className="r-section-heading"><h1>{t('tasks')}</h1>{isMentor && writable && <button className="r-icon r-new" aria-label={t('createTask')} onClick={() => setPanel('task')}><Icon name="add"/></button>}</div>
             <div className="r-progress"><span><b>{project.tasks.filter(item => item.status === 'done').length}</b> / {project.tasks.length} {t('completedTasks')}</span><div><i style={{ width: `${project.tasks.length ? project.tasks.filter(item => item.status === 'done').length / project.tasks.length * 100 : 0}%` }}/></div></div>
             <div className="r-filters" aria-label={t('status')}>{(['all','doing','review','done'] as const).map(status => <button key={status} aria-pressed={filter === status} onClick={() => { setFilter(status); setSelected(null); }}>{t(status)}</button>)}</div>
             <div className="r-task-rows">{tasks.map(item => <button key={item.id} className={`r-task-row ${selected === item.id ? 'selected' : ''}`} onClick={() => setSelected(item.id)}><span className={`r-task-status ${item.status}`}><Icon name={item.status === 'done' ? 'check_circle' : item.status === 'review' ? 'rate_review' : 'radio_button_unchecked'}/></span><span className="r-task-row-body"><strong>{item.title}</strong><span>{item.assignees.map(id => project.members.find(m => m.id === id)?.name).join('、')}<i/> {date(item.deadline)}</span><small className={`r-status ${item.status}`}>{t(item.status)}</small></span><Icon name="chevron_right"/></button>)}{!tasks.length && <div className="r-empty"><Icon name="assignment"/><p>{t(project.tasks.length ? 'noResults' : 'noTasks')}</p>{isMentor && writable && <button className="button" onClick={() => setPanel('task')}>{t('createTask')}</button>}</div>}</div>
-            {project.meetings[0] && <button className="r-next-meeting" onClick={() => { setMeetingId(project.meetings[0].id); setPanel('meeting'); }}><Icon name="event"/><span><small>{t('next')} · {date(project.meetings[0].date)}</small><strong>{project.meetings[0].title}</strong></span><Icon name="arrow_forward"/></button>}
+            {project.meetings[0] && <button className="r-next-meeting" onClick={() => { setMeetingId(project.meetings[0].id); setTab('meetings'); }}><Icon name="event"/><span><small>{t('next')} · {date(project.meetings[0].date)}</small><strong>{project.meetings[0].title}</strong></span><Icon name="arrow_forward"/></button>}
             <p className="r-privacy"><Icon name="lock"/>{t('private')}</p>
           </section>
           <section className="r-task-detail" aria-label={t('detail')}>{task ? <>
             <header className="r-detail-header"><button className="r-icon r-back" aria-label={t('back')} onClick={() => setSelected(null)}><Icon name="arrow_back"/></button><span className={`r-status ${task.status}`}>{t(task.status)}</span><span className="r-spacer"/>{isMentor && writable ? <select aria-label={t('status')} value={task.status} onChange={event => updateTask(item => ({ ...item, status: event.target.value as TaskStatus }))}>{(['todo','doing','review','done'] as const).map(status => <option key={status} value={status}>{t(status)}</option>)}</select> : null}<button className="r-icon" aria-label={t('close')} onClick={() => setSelected(null)}><Icon name="close"/></button></header>
-            <div className="r-detail-scroll"><h2>{task.title}</h2><div className="r-task-meta"><span><Icon name="group"/>{task.assignees.map(id => project.members.find(m => m.id === id)?.name).join('、')}</span><span><Icon name="event"/>{t('due')} {date(task.deadline)}</span></div><div className="r-brief"><h3>{t('detail')}</h3><p>{task.description}</p></div><div className="r-section-line"><h3>{t('report')}</h3><span><Icon name="lock"/>{t('privateRecord')}</span></div>{visibleEntries(task, viewer.id, isMentor).map(entryCard)}{!visibleEntries(task, viewer.id, isMentor).length && <p className="r-muted">{t('noRecords')}</p>}<button className="r-text-button" onClick={() => setPanel('chat')}><Icon name="forum"/>{t('taskDiscussion')}<Icon name="arrow_outward"/></button></div>
-            {writable && <footer className="r-detail-footer">{isMentor ? <button className="button" onClick={() => setEntryKind('feedback')}>{t('feedback')}</button> : canRecord ? <><button className="button secondary" onClick={() => setEntryKind('summary')}>{t('writeSummary')}</button><button className="button" onClick={() => setEntryKind('progress')}>{t('writeProgress')}</button></> : <p>{t('readOnlyRecord')}</p>}</footer>}
+            <div className="r-detail-scroll">
+              <h2>{task.title}</h2>
+              <div className="r-task-meta"><span><Icon name="group"/>{task.assignees.map(id => project.members.find(m => m.id === id)?.name).join('、')}</span><span><Icon name="event"/>{t('due')} {date(task.deadline)}</span></div>
+              <div className="r-brief"><h3>{t('detail')}</h3><p>{task.description}</p></div>
+              <div className="r-section-line"><h3>{t('report')}</h3><span><Icon name="lock"/>{t('privateRecord')}</span></div>
+              {visibleEntries(task, viewer.id, isMentor).map(entryCard)}
+              {!visibleEntries(task, viewer.id, isMentor).length && <p className="r-muted">{t(!isMentor && !task.assignees.includes(viewer.id) ? 'privateHidden' : 'noRecords')}</p>}
+              <button className="r-text-button" onClick={() => setPanel('chat')}><Icon name="forum"/>{t('taskDiscussion')}<Icon name="arrow_outward"/></button>
+            </div>
+            {writable && (isMentor || canRecord) && <footer className="r-detail-footer r-inline-footer">
+              {entryKind ? <form className="r-inline-composer" onSubmit={submit} key={`${task.id}-${entryKind}`}><div className="r-composer-top"><strong>{t(entryKind)}</strong>{entryKind === 'feedback' && <select name="recipient" aria-label={t('owner')} required>{task.assignees.map(id => <option key={id} value={id}>{project.members.find(m => m.id === id)?.name}</option>)}</select>}<button className="r-icon" type="button" aria-label={t('cancel')} onClick={() => setEntryKind(null)}><Icon name="close"/></button></div><textarea name="body" aria-label={t('entryBody')} required maxLength={20000} rows={3} placeholder={t('contentPlaceholder')}/><div className="r-composer-actions"><small><Icon name="lock"/>{t('privateRecord')}</small><button className="button" type="submit">{t('save')}</button></div></form> : isMentor ? <button className="button" onClick={() => setEntryKind('feedback')}>{t('feedback')}</button> : <><button className="button secondary" onClick={() => setEntryKind('summary')}>{t('writeSummary')}</button><button className="button" onClick={() => setEntryKind('progress')}>{t('writeProgress')}</button></>}
+            </footer>}
           </> : <div className="r-idle"><div className="r-orbit"><Icon name="science"/></div><h2>{t('selectTask')}</h2><p>{project.description}</p><span>{project.members.length} {t('membersCount')} · {project.tasks.length} {t('taskCount')}</span></div>}</section>
         </> : <section className="r-page-section">
-          <div className="r-section-heading"><div><small>{project.title}</small><h1>{t(tab === 'records' ? 'report' : tab)}</h1></div>{isMentor && writable && (tab === 'meetings' || tab === 'members') && <button className="button" onClick={() => setPanel(tab === 'meetings' ? 'meeting' : 'invite')}><Icon name="add"/>{t(tab === 'meetings' ? 'createMeeting' : 'invite')}</button>}</div>
-          {tab === 'meetings' && <div className="r-meetings">{project.meetings.map(item => <button className="r-meeting-row" key={item.id} onClick={() => { setMeetingId(item.id); setPanel('meeting'); }}><span className="r-calendar-date"><small>{new Date(item.date).getMonth() + 1} /</small><strong>{new Date(item.date).getDate()}</strong></span><span><small>{item.date.slice(11)} · {item.place}</small><h2>{item.title}</h2><p>{item.agenda.split('\n')[0]}</p></span><Icon name="chevron_right"/></button>)}{!project.meetings.length && <div className="r-empty"><Icon name="event"/><p>{t('noMeetings')}</p></div>}</div>}
-          {tab === 'records' && <><p className="r-privacy"><Icon name="lock"/>{t(isMentor ? 'private' : 'peerPrivacy')}</p>{records.map(entry => <div className="r-record" key={entry.id}><button className="r-text-button" onClick={() => { setTab('tasks'); setSelected(entry.task.id); }}>{entry.task.title}<Icon name="arrow_forward"/></button>{entryCard(entry)}</div>)}{!records.length && <div className="r-empty">{t('noRecords')}</div>}</>}
+          <div className="r-section-heading"><h1>{t(tab)}</h1>{isMentor && writable && <button className="button" onClick={() => { setMeetingId(null); setPanel(tab === 'meetings' ? 'meeting' : 'invite'); }}><Icon name="add"/>{t(tab === 'meetings' ? 'createMeeting' : 'invite')}</button>}</div>
+          {tab === 'meetings' && <div className="r-meetings">{project.meetings.map(item => <article key={item.id}><button className="r-meeting-row" aria-expanded={meetingId === item.id} onClick={() => setMeetingId(meetingId === item.id ? null : item.id)}><span className="r-calendar-date"><small>{new Date(item.date).getMonth() + 1} /</small><strong>{new Date(item.date).getDate()}</strong></span><span><small>{item.date.slice(11)} · {item.place}</small><h2>{item.title}</h2><p>{item.agenda.split('\n')[0]}</p></span><Icon name={meetingId === item.id ? 'expand_less' : 'expand_more'}/></button>{meetingId === item.id && <form className="r-meeting-inline r-form" onSubmit={submit}><input type="hidden" name="intent" value="minutes"/><h3>{t('agenda')}</h3><p className="r-prewrap">{item.agenda}</p><label>{t('minutes')}<textarea name="minutes" rows={4} defaultValue={item.minutes} placeholder={t('blankMinutes')} readOnly={!writable}/></label>{writable && <button className="button" type="submit">{t('save')}</button>}</form>}</article>)}{!project.meetings.length && <div className="r-empty"><Icon name="event"/><p>{t('noMeetings')}</p></div>}</div>}
           {tab === 'members' && <><div className="r-member-list">{project.members.map(member => <div key={member.id} className="r-member-row"><Avatar name={member.name}/><span><strong>{member.name}</strong><small>{t(member.role === 'mentor' ? 'memberRole' : 'student')}</small></span><span className="r-muted">{project.tasks.filter(item => item.assignees.includes(member.id)).length} {t('taskCount')}</span></div>)}</div><p className="r-privacy"><Icon name="shield"/>{t('peerPrivacy')}</p></>}
         </section>}
       </div>
     </main>
     <BottomSheet open={chooser} title={t('projects')} onClose={() => setChooser(false)} className="r-sheet"><div className="r-project-list">{(['active','planning','completed'] as const).map(status => <section key={status}><h4>{t(status)}</h4>{projects.filter(p => p.status === status).map(p => <button className={p.id === project.id ? 'selected' : ''} key={p.id} onClick={() => switchProject(p.id)}><span className={`r-project-mark ${status}`}><Icon name={status === 'completed' ? 'inventory_2' : 'science'}/></span><span><strong>{p.title}</strong><small>{p.members.length} {t('membersCount')} · {p.tasks.length} {t('taskCount')}</small></span><Icon name={p.id === project.id ? 'check' : 'chevron_right'}/></button>)}</section>)}<button className="button secondary" onClick={() => { setChooser(false); setPanel('project'); }}><Icon name="add"/>{t('createProject')}</button></div></BottomSheet>
     <SideDrawer open={panelOpen} onClose={close} historyMode="route" title={label} className="r-editor" backdropClassName="r-editor-backdrop" headerAction={<button type="button" className="r-icon r-desktop-close" aria-label={t('close')} onClick={close}><Icon name="close"/></button>} trapFocus>
-      {panel === 'chat' ? <div className="r-form"><div className="r-chat-preview"><Icon name="forum"/><h2>{project.title}</h2><p>{t('chatBody')}</p><div className="r-chat-message"><Avatar name={mentor.name}/><p>{project.meetings[0]?.agenda || project.description}</p></div><button className="button secondary" onClick={close}>{t('close')}</button></div><small>{t('demoOnly')}</small></div> : <form className="r-form" key={`${panel}-${entryKind}-${meetingId}`} onSubmit={submit}>
+      {panel === 'chat' ? <div className="r-form">
+        {project.chat && <div className="r-linked-chat"><Icon name="forum"/><div><strong>{project.chat.name}</strong><small>{project.chat.members.length} {t('groupMembers')}</small></div><Icon name="check_circle"/></div>}
+        <p className="r-muted">{t('chatBoundary')}</p>
+        {isMentor && writable && <>
+          <DrawerTabs label={t('selectChat')} items={[{value:'existing',label:t('existingChat')},{value:'dedicated',label:t('dedicatedChat')}]} value={chatMode} onChange={setChatMode}/>
+          {chatMode === 'existing' ? <div className="r-chat-choices">{chatGroups.map(group => <button type="button" key={group.id} disabled={!canLinkChat(project,group)} onClick={() => { if (!canLinkChat(project,group)) return; update(p => ({...p,chat:group})); tell(t('chatLinked')); }}><Icon name="forum"/><span><strong>{group.name}</strong><small>{canLinkChat(project,group) ? `${group.members.length} ${t('groupMembers')}` : t('groupMismatch')}</small></span><Icon name={project.chat?.id === group.id ? 'check_circle' : 'link'}/></button>)}</div> : <form className="r-create-group" onSubmit={event => { event.preventDefault(); const data=new FormData(event.currentTarget); const name=String(data.get('groupName')||'').trim(); if(!name)return; update(p=>({...p,chat:{id:Date.now(),name,members:p.members.map(member=>member.id),dedicated:true}})); tell(t('chatLinked')); }}><label>{t('chatName')}<input name="groupName" defaultValue={project.title} required maxLength={80}/></label><p className="r-muted">{project.members.map(member=>member.name).join('、')}</p><button type="submit" className="button">{t('createChat')}</button></form>}
+        </>}
+        <small className="r-demo-disclaimer">{t('demoOnly')}</small>
+      </div> : <form className="r-form" key={`${panel}-${entryKind}-${meetingId}`} onSubmit={submit}>
         {(panel === 'task' || panel === 'project' || panel === 'settings' || (panel === 'meeting' && !meeting)) && <label>{t(panel === 'project' || panel === 'settings' ? 'name' : 'title')}<input name="title" required maxLength={160} defaultValue={panel === 'settings' ? project.title : ''} readOnly={panel === 'settings' && !isMentor}/></label>}
         {(panel === 'task' || panel === 'project' || panel === 'settings') && <label>{t('description')}<textarea name="description" rows={5} defaultValue={panel === 'settings' ? project.description : ''} placeholder={t('newProjectDescription')} readOnly={panel === 'settings' && !isMentor}/></label>}
         {panel === 'settings' && <label>{t('status')}<select name="status" defaultValue={project.status} disabled={!isMentor}>{(['planning','active','completed'] as const).map(status => <option key={status} value={status}>{t(status)}</option>)}</select></label>}
@@ -128,8 +146,6 @@ function App() {
         {panel === 'invite' && <><p className="r-muted">{t('inviteHelp')}</p>{friends.filter(friend => !project.members.some(m => m.id === friend.id)).map(friend => <label className="r-check" key={friend.id}><Avatar name={friend.name}/><span>{friend.name}</span><input type="checkbox" name="member" value={friend.id}/></label>)}{friends.every(friend => project.members.some(m => m.id === friend.id)) && <p>{t('noFriends')}</p>}</>}
         {panel === 'meeting' && !meeting && <><label>{t('date')}<input type="datetime-local" name="date" defaultValue="2026-10-30T14:00" required/></label><label>{t('place')}<input name="place" required/></label><label>{t('agenda')}<textarea name="agenda" rows={5} required/></label></>}
         {panel === 'meeting' && meeting && <><h2>{meeting.title}</h2><p className="r-muted">{meeting.date.replace('T', ' ')}<br/>{meeting.place}</p><h3>{t('agenda')}</h3><p className="r-prewrap">{meeting.agenda}</p><label>{t('minutes')}<textarea name="minutes" rows={8} defaultValue={meeting.minutes} placeholder={t('blankMinutes')} readOnly={!writable}/></label></>}
-        {entryKind && <><p className="r-muted">{task?.title}</p><label>{t('entryBody')}<textarea name="body" rows={10} required maxLength={20000} placeholder={t('contentPlaceholder')}/></label><button type="button" className="r-text-button" onClick={() => { setAttached(true); tell(t('fileAdded')); }}><Icon name="attach_file"/>{t(attached ? 'attachment' : 'addAttachment')}</button><p className="r-privacy"><Icon name="lock"/>{t('private')}</p></>}
-        {entryKind === 'feedback' && <label>{t('owner')}<select name="recipient" required>{task?.assignees.map(id => <option key={id} value={id}>{project.members.find(m => m.id === id)?.name}</option>)}</select></label>}
         <small className="r-demo-disclaimer">{t('demoOnly')}</small>
         {(panel === 'project' || (panel === 'settings' ? isMentor : writable)) && <button className="button" type="submit">{t(panel === 'invite' ? 'inviteAction' : panel === 'task' || (panel === 'meeting' && !meeting) ? 'publish' : 'save')}</button>}
       </form>}
