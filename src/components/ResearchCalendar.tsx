@@ -121,7 +121,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     </SideDrawer>
     <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId} onChange={()=>setTick(n=>n+1)}/>
     <ConfirmDialog open={revokeOpen} onClose={() => setRevokeOpen(false)} title={tr('unbind')} description={tr('unbindHint')} danger busy={busy} onConfirm={() => {
-      setBusy(true); void api.chronelleAccount('revoke', true).then(() => { setDisplays(null); setSettingsOpen(false); setRevokeOpen(false); setTick(n => n + 1); }).catch(e => setError(errorText(e.message))).finally(() => setBusy(false));
+      setBusy(true); void api.chronelleAccount('revoke', true).then(() => { setDisplays(null); setSettingsOpen(false); setRevokeOpen(false); setTick(n => n + 1); }).catch(e => {setRevokeOpen(false);setSettingsOpen(false);setError(errorText(e.message));}).finally(() => setBusy(false));
     }} />
     <SideDrawer open={!!range} onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
@@ -134,6 +134,7 @@ function MeetingForm({range,project,members,groups,resume,errorText,onDone,onAtt
   const tr=(key:string)=>t(('research.calendarUI.'+key) as TranslationKey);
   const [command,setCommand]=useState(()=>resume?.id||crypto.randomUUID());
   const [description,setDescription]=useState(resume?.description||'');
+  const [group,setGroup]=useState(String(resume?.group_id||groups[0]?.id||''));
   const [attempt,setAttempt]=useState<Record<string,unknown>|null>(resume?{...resume,command_id:resume.id}:null);
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   return <form className="research-form" onSubmit={async event=>{
@@ -142,7 +143,7 @@ function MeetingForm({range,project,members,groups,resume,errorText,onDone,onAtt
     let body=attempt;
     if(!body){
       const date=(key:string)=>new Date(String(form.get(key))+(range.all_day?'T00:00':'')).toISOString();
-      try{body={command_id:command,title:form.get('title'),location:form.get('location'),description,start:date('start'),end:date('end'),all_day:range.all_day,timezone:range.timezone,group_id:Number(form.get('group')),members};}
+      try{body={command_id:command,title:form.get('title'),location:form.get('location'),description,start:date('start'),end:date('end'),all_day:range.all_day,timezone:range.timezone,group_id:Number(group),members};}
       catch{setError(tr('invalidTime'));return;}
     }
     setAttempt(body);setBusy(true);setError('');
@@ -155,7 +156,7 @@ function MeetingForm({range,project,members,groups,resume,errorText,onDone,onAtt
       <label>{tr('meetingTitle')}<input name="title" required maxLength={160} defaultValue={resume?.title}/></label>
       <div className="research-period"><label>{t('research.start')}<input name="start" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.start).slice(0,range.all_day?10:16)}/></label><label>{t('research.end')}<input name="end" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.end).slice(0,range.all_day?10:16)}/></label></div>
       <label>{tr('location')}<input name="location" maxLength={1000} defaultValue={resume?.location}/></label>
-      <label>{tr('destination')}<select name="group" defaultValue={resume?.group_id||groups[0]?.id} required>{groups.map(group=><option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
+      <div className="research-calendar-policy"><strong>{tr('destination')}</strong><SelectControl label={tr('destination')} value={group} disabled={busy||!!attempt} options={groups.map(item=>({value:String(item.id),label:item.name}))} onChange={setGroup}/></div>
       <p className="research-muted">{(resume?.members||members).map(id=>project.members.find(m=>m.id===id)?.name||`#${id}`).join(' · ')}</p>
       <MarkdownInput value={description} onChange={setDescription}/>
     </fieldset>
