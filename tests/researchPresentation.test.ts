@@ -6,7 +6,7 @@ const source = (file: string) => readFileSync(new URL('../src/' + file, import.m
 
 test('research project panels preserve a real embedded conversation and onboarding', () => {
   const page=source('pages/ResearchPage.tsx');
-  assert.match(page,/historyKey="research-project"/);
+  assert.match(page,/research-direct-workspace/);
   assert.match(page,/historyKey="research-chat"/);
   assert.match(page,/<EmbeddedChats embeddedChat=/);
   assert.match(page,/setOnboarding\(true\)/);
@@ -108,8 +108,8 @@ test('Markdown tools are single-line, uniform and use a floating heading menu', 
 
 test('research preserves its root panel while nested drawers float, and shares Square comments', () => {
   const page=source('pages/ResearchPage.tsx');
-  assert.match(page,/<FloatingDrawerScope><div className="research-project-surface">/);
-  assert.match(page,/<FloatingDrawerScope><SideDrawer historyKey="research-chat"/);
+  assert.match(page,/<div className="research-project-surface">/);
+  assert.match(page,/<FloatingDrawerScope>[\s\S]*<SideDrawer historyKey="research-chat"/);
   const panels=source('components/DesktopPanelWorkspace.tsx');
   assert.match(panels,/createPortal\(<div className=\{.*detached-drawer-slot/);
   assert.match(panels,/document.body\) : null/);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CommentThread } from './CommentThread';
 import { CommentComposer } from './CommentComposer';
 import { Markdown } from './ResearchMarkdown';
@@ -13,9 +13,10 @@ import { useI18n } from '../lib/language';
 import type { ResearchProject, ResearchTask } from '../lib/research';
 import type { SquareStatementCommentDTO, TinyUserDTO } from '../types';
 
-export function ResearchComments({project,task,userId,scope,writable,busy,send}:{
+export function ResearchComments({project,task,userId,scope,writable,busy,send,children}:{
   project:ResearchProject;task:ResearchTask;userId:number;scope:string;writable:boolean;busy:boolean;
   send:(body:string,replyTo?:string)=>Promise<boolean>;
+  children?:ReactNode;
 }) {
   const {t}=useI18n();
   const [body,setBody]=useState(''),[reply,setReply]=useState<string|null>(null);
@@ -61,6 +62,11 @@ export function ResearchComments({project,task,userId,scope,writable,busy,send}:
     else setSendError(t('research.failed'));
   }
   return <section className="research-task-comments">
+    <div className="research-comments-scroll">
+      {children}
+      <div className="square-comment-list">{comments.map(comment=><CommentThread key={record(comment.comment_id).id} comment={comment} canInteract={writable} expanded={expanded===comment.comment_id} onToggleReplies={id=>setExpanded(current=>current===id?null:id)} onDelete={()=>{}} onOpenProfile={setProfile} onReply={entry=>{setReply(record(entry.comment_id).id);setExpanded(entry.parent_id||entry.comment_id);beginEditing();}} renderContent={(entry,onReply)=><div onClick={onReply}><Markdown body={entry.text}/></div>}/>)}</div>
+      {!comments.length&&<QuietState icon="forum" title={t('research.noProgress')} description={t('research.progressEmptyHint')}/>}
+    </div>
     {writable&&<CommentComposer onSubmit={event=>{event.preventDefault();void submit(body);}}>
       <UserAvatar className="square-comment-avatar" name={me.name} uri={me.avatar_uri} cacheKey={me.avatar_cache_key} frame={me.avatar_frame_style}/>
       <div className="square-comment-composer-main" ref={editor}>
@@ -70,8 +76,6 @@ export function ResearchComments({project,task,userId,scope,writable,busy,send}:
       </div>
     </CommentComposer>}
     {writable&&editing&&mobile&&<MarkdownEditorDialog title={t('research.progress')} initialValue={body} onChange={setBody} busy={busy} error={sendError} confirmLabel={t('square.sendComment')} onClose={cancelEditing} onSave={value=>void submit(value)}/>}
-    <div className="square-comment-list">{comments.map(comment=><CommentThread key={record(comment.comment_id).id} comment={comment} canInteract={writable} expanded={expanded===comment.comment_id} onToggleReplies={id=>setExpanded(current=>current===id?null:id)} onDelete={()=>{}} onOpenProfile={setProfile} onReply={entry=>{setReply(record(entry.comment_id).id);setExpanded(entry.parent_id||entry.comment_id);beginEditing();if(!mobile)editor.current?.scrollIntoView({block:'nearest'});}} renderContent={(entry,onReply)=><div onClick={onReply}><Markdown body={entry.text}/></div>}/>)}</div>
-    {!comments.length&&<QuietState icon="forum" title={t('research.noProgress')} description={t('research.progressEmptyHint')}/>}
     <SideDrawer headerless historyKey="research-comment-profile" open={!!profile} onClose={()=>setProfile(null)} title={t('profile.details')}>{profile&&<UserProfilePanel userId={profile.user_id} initialUser={profile}/>}</SideDrawer>
   </section>;
 }

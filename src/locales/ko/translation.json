@@ -1,4 +1,7 @@
 {
+  "research.switchProject": "과제 전환",
+  "research.manageProjects": "과제 관리",
+  "research.progressFilter": "진행 기록 필터",
   "copyShelf.title": "복사하고 싶은 메시지",
   "copyShelf.popular": "다른 멤버들이 복사 중",
   "copyShelf.recent": "최근 24시간",

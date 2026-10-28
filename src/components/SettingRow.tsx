@@ -51,7 +51,7 @@ export function SettingRow({
   return onClick ? <button className={classes} disabled={disabled} onClick={onClick} type="button">{content}</button> : <div className={classes}>{content}</div>;
 }
 
-export function SelectControl<T extends string>({ disabled = false, label, onChange, options, value, compact = false, onOpen }: {
+export function SelectControl<T extends string>({ disabled = false, label, onChange, options, value, compact = false, onOpen, triggerLabel }: {
   disabled?: boolean;
   label: string;
   onChange: (value: T) => void | Promise<void>;
@@ -59,6 +59,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
   value: T;
   compact?: boolean;
   onOpen?: () => void;
+  triggerLabel?: ReactNode;
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -95,7 +96,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(); }
     }}>
       {!compact && <span className="setting-select-label">{label}</span>}
-      <span className="setting-select-value">{selected?.label || t('select.choose')}</span><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
+      <span className="setting-select-value">{triggerLabel ?? (selected?.label || t('select.choose'))}</span><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
     </button>
     {open && createPortal(<div className="dialog-backdrop option-picker-backdrop" role="presentation" onClick={event => { event.stopPropagation(); close(); }}>
       <section ref={root} tabIndex={-1} className="option-picker-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={event => event.stopPropagation()}>

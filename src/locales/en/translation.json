@@ -1,4 +1,7 @@
 {
+  "research.switchProject": "Switch project",
+  "research.manageProjects": "Manage projects",
+  "research.progressFilter": "Filter progress",
   "research.calendarUI.meetings": "Meeting invitations",
   "research.calendarUI.meetingStatus.invited": "Invitation sent; participants must confirm",
   "research.calendarUI.meetingStatus.pending": "Confirming delivery",

@@ -1,4 +1,7 @@
 {
+  "research.switchProject": "切换课题",
+  "research.manageProjects": "管理课题",
+  "research.progressFilter": "筛选进度",
   "research.calendarUI.meetings": "会议邀请记录",
   "research.calendarUI.meetingStatus.invited": "已发送邀请，等待参与者确认",
   "research.calendarUI.meetingStatus.pending": "正在确认发送结果",

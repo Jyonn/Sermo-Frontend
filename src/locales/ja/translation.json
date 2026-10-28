@@ -1,4 +1,7 @@
 {
+  "research.switchProject": "課題を切り替え",
+  "research.manageProjects": "課題を管理",
+  "research.progressFilter": "進捗を絞り込む",
   "copyShelf.title": "コピーしたいメッセージ",
   "copyShelf.popular": "みんながコピーしています",
   "copyShelf.recent": "過去24時間",
