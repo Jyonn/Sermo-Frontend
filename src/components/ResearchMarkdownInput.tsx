@@ -33,7 +33,7 @@ export function MarkdownInput({ value, onChange, required = false, rows = 6 }: {
   ] as const;
   return <div className="v3-md-input">
     <div className="v3-md-toolbar" role="toolbar" aria-label={t('mdTools')}>
-      <SelectControl label={t('mdHeading')} value="" disabled={preview} options={[{value:'',label:'H'},...[1,2,3,4,5,6].map(n=>({value:'#'.repeat(n),label:`H${n}`}))]} onChange={value=>{if(value)insert(`\n${value} `);}}/>
+      <SelectControl compact label={t('mdHeading')} value="" disabled={preview} options={[{value:'',label:'H'},...[1,2,3,4,5,6].map(n=>({value:'#'.repeat(n),label:`H${n}`}))]} onChange={value=>{if(value)insert(`\n${value} `);}}/>
       {tools.map(([icon,key,before,after]) => <button key={key} type="button" title={t(key)} aria-label={t(key)} disabled={preview} onMouseDown={e => e.preventDefault()} onClick={() => insert(before,after)}><span className="material-symbols-outlined" aria-hidden="true">{icon}</span></button>)}
       <button type="button" ref={tableAnchor} aria-label={t('mdTable')} aria-expanded={tableOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{selection.current={start:ref.current?.selectionStart||0,end:ref.current?.selectionEnd||0};setTableOpen(!tableOpen);}}><span className="material-symbols-outlined" aria-hidden="true">table</span></button>
       {tableOpen&&<TablePicker anchor={tableAnchor} onClose={()=>setTableOpen(false)} onSelect={(x,y)=>{const {start,end}=selection.current;const text=markdownTable(x,y,t('mdColumn'));change(body.slice(0,start)+text+body.slice(end));setTableOpen(false);requestAnimationFrame(()=>{ref.current?.focus();ref.current?.setSelectionRange(start+text.length,start+text.length);});}}/>}

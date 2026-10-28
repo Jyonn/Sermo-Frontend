@@ -25,7 +25,7 @@ import { GrowthReport } from "../components/GrowthReport";
 import { signedGrowthPoints } from "../lib/growthPoints";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
-import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
+import { SelectControl, SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { BgmIcon } from "../components/BgmIcon";
 import { BgmEntranceSettings } from "../components/BgmEntranceSettings";
@@ -229,31 +229,8 @@ function PersonalizationOwnershipSelect({
   ownership: PersonalizationOwnershipFilter;
 }) {
   const { t } = useI18n();
-  const filterRef = useRef<HTMLDetailsElement | null>(null);
-  const filters: PersonalizationOwnershipFilter[] = ["all", "owned", "unowned"];
-  const filterLabel = (filter: PersonalizationOwnershipFilter) => t(`menu.personalizationFilter.${filter}` as TranslationKey);
-  return (
-    <details className="personalization-filter-menu" ref={filterRef}>
-      <summary><span>{filterLabel(ownership)}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></summary>
-      <div role="listbox">
-        {filters.map((filter) => (
-          <button
-            aria-selected={ownership === filter}
-            key={filter}
-            onClick={() => {
-              onOwnershipChange(filter);
-              filterRef.current?.removeAttribute("open");
-            }}
-            role="option"
-            type="button"
-          >
-            <span>{filterLabel(filter)}</span>
-            {ownership === filter ? <span aria-hidden="true">✓</span> : null}
-          </button>
-        ))}
-      </div>
-    </details>
-  );
+  const filters: PersonalizationOwnershipFilter[] = ['all', 'owned', 'unowned'];
+  return <SelectControl compact label={t('select.filter')} value={ownership} onChange={onOwnershipChange} options={filters.map(value=>({value,label:t(`menu.personalizationFilter.${value}` as TranslationKey)}))}/>;
 }
 
 function PersonalizationCatalogControls({

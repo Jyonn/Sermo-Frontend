@@ -1867,16 +1867,16 @@ html[data-theme="dark"] .personalization-bubble-stage {
 .setting-row > .switch, .setting-row-trailing > .switch { flex: 0 0 52px; }
 
 .setting-select { position: relative; min-width: 112px; z-index: 1; }
-.setting-select[open] { z-index: 12; }
+
 .setting-select.is-disabled { opacity: 0.48; pointer-events: none; }
-.setting-select summary { min-height: 36px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; padding: 0 8px 0 12px; border-radius: 11px; background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg-panel-strong)); color: var(--text-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; list-style: none; }
-.setting-select summary::-webkit-details-marker { display: none; }
-.setting-select summary .material-symbols-outlined { font-size: 18px; transition: transform 160ms ease; }
-.setting-select[open] summary .material-symbols-outlined { transform: rotate(180deg); }
-.setting-select-options { position: absolute; top: calc(100% + 7px); right: 0; width: max(100%, 156px); overflow: hidden; padding: 5px; border: 1px solid var(--line-soft); border-radius: 13px; background: var(--bg-panel-strong); box-shadow: var(--shadow-lg); }
-.setting-select-options button { width: 100%; min-height: 38px; display: grid; grid-template-columns: 1fr 18px; align-items: center; padding: 6px 9px; border: 0; border-radius: 9px; background: transparent; color: var(--text-primary); text-align: left; box-shadow: none; }
-.setting-select-options button:hover, .setting-select-options button[aria-selected="true"] { background: color-mix(in srgb, var(--brand-primary) 9%, transparent); }
-.setting-select-options i { color: var(--brand-primary); font-style: normal; font-weight: 800; text-align: center; }
+
+
+
+
+
+
+
+
 
 .feature-discovery-target.is-setting-row > .setting-row { width: 100%; }
 .setting-row.is-dependent::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: 12px; width: 2px; border-radius: 999px; background: color-mix(in srgb, var(--brand-primary) 28%, transparent); }

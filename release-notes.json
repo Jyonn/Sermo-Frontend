@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.2",
+  "id": "2026.10.28.3",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "科研日期与成员体验统一",
+      "title": "全站选择操作更统一",
       "items": [
-        "课题和任务日期使用年月日滚轮选择，支持不设结束日期",
-        "任务分配、邀请好友和日程成员选择使用统一的可搜索勾选面板",
-        "课题详情采用聊天详情式头像排列，成员头像展示各自的头像框"
+        "下拉框统一为带右箭头的操作栏，点击后在模态框中选择",
+        "长候选列表支持搜索，保留当前选项标记与键盘操作",
+        "同步统一菜单、科研、投稿筛选及管理面板，适配横竖屏和深色模式"
       ]
     },
     "en": {
-      "title": "Consistent research dates and member selection",
+      "title": "Consistent selection controls throughout the app",
       "items": [
-        "Choose project and task dates with year, month and day wheels, including open-ended periods",
-        "Assign tasks, invite friends and select calendar members with one searchable member picker",
-        "Project details use the chat member grid, showing real avatars and individual avatar frames"
+        "Dropdowns become action rows with right arrows and modal option lists",
+        "Search long lists with current-selection indicators and keyboard navigation",
+        "Unified menus, research, submission filters and management controls across screen sizes and themes"
       ]
     }
   }

@@ -9,7 +9,7 @@ import { CalendarFrame } from './ChronelleFrame';
 import { ChronellePluginDialog } from './ChronellePluginDialog';
 import { SideDrawer } from './SideDrawer';
 import { ConfirmDialog } from './ConfirmDialog';
-import { SelectControl } from './SettingRow';
+import { SettingSelect } from './SettingRow';
 import { MarkdownInput } from './ResearchMarkdownInput';
 import { DrawerTabs } from './DrawerTabs';
 import { UserAvatar } from './UserAvatar';
@@ -119,11 +119,10 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     <SideDrawer open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
       <div className="research-form">
         <p className="research-muted">{tr('policyHint')}</p>
-        {setup?.groups.map(group => <div className="research-calendar-policy" key={group.id}><strong>{group.name}</strong>
-          <SelectControl label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
+        {setup?.groups.map(group => <SettingSelect key={group.id} label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
             options={['hidden', 'busy', 'detail'].map(value => ({ value, label: tr(value) }))}
             onChange={value => setPolicy(current => ({ detail: [...current.detail.filter(id => id !== group.id), ...(value === 'detail' ? [group.id] : [])], busy: [...current.busy.filter(id => id !== group.id), ...(value === 'busy' ? [group.id] : [])] }))} />
-        </div>)}
+        )}
         <button className="button" disabled={busy} onClick={() => void savePolicy()}>{t('research.save')}</button>
         <button className="ghost-button" onClick={() => setRevokeOpen(true)}>{tr('unbind')}</button>
       </div>
@@ -165,7 +164,7 @@ function MeetingForm({range,project,members,groups,resume,errorText,onDone,onAtt
       <label>{tr('meetingTitle')}<input name="title" required maxLength={160} defaultValue={resume?.title}/></label>
       <div className="research-period"><label>{t('research.start')}<input name="start" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.start).slice(0,range.all_day?10:16)}/></label><label>{t('research.end')}<input name="end" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.end).slice(0,range.all_day?10:16)}/></label></div>
       <label>{tr('location')}<input name="location" maxLength={1000} defaultValue={resume?.location}/></label>
-      <div className="research-calendar-policy"><strong>{tr('destination')}</strong><SelectControl label={tr('destination')} value={group} disabled={busy||!!attempt} options={groups.map(item=>({value:String(item.id),label:item.name}))} onChange={setGroup}/></div>
+      <SettingSelect label={tr('destination')} value={group} disabled={busy||!!attempt} options={groups.map(item=>({value:String(item.id),label:item.name}))} onChange={setGroup}/>
       <p className="research-muted">{(resume?.members||members).map(id=>project.members.find(m=>m.id===id)?.name||`#${id}`).join(' · ')}</p>
       <MarkdownInput value={description} onChange={setDescription}/>
     </fieldset>

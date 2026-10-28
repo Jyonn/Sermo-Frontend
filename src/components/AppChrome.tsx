@@ -4,11 +4,10 @@ import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { SpaceAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
-import { preloadLanguageChoices } from "../lib/i18n";
-import type { SupportedLanguage } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { DesktopPanelWorkspace } from "./DesktopPanelWorkspace";
+import { LanguageSelectControl } from './LanguageSelectControl';
 
 interface AppChromeProps {
   workspaceSelected?: boolean;
@@ -79,21 +78,7 @@ export function AppChrome({
       </button>
       <label className="guest-language-tool" title={t("menu.language")}>
         <span className={`material-symbols-outlined${languageSwitching ? " is-loading" : ""}`} aria-hidden="true">{languageSwitching ? "progress_activity" : "translate"}</span>
-        <select
-          aria-label={t("menu.language")}
-          aria-busy={languageSwitching}
-          onFocus={preloadLanguageChoices}
-          onPointerDown={preloadLanguageChoices}
-          onChange={(event) => void setLanguagePreference(event.target.value as SupportedLanguage)}
-          value={language}
-        >
-          <option value="zh-CN">简体中文</option>{/* i18n-ignore: language names stay native */}
-          <option value="zh-TW">繁體中文</option>{/* i18n-ignore: language names stay native */}
-          <option value="en">English</option>
-          <option value="ja">日本語</option>{/* i18n-ignore: language names stay native */}
-          <option value="ko">한국어</option>
-          <option value="es">Español</option>
-        </select>
+        <LanguageSelectControl value={language} disabled={languageSwitching} onChange={setLanguagePreference}/>
       </label>
     </div>
   ) : null;

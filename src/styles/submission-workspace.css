@@ -4,7 +4,7 @@
 .submission-thread-row .chat-meta { gap: 6px; }
 .is-submission-list .tab-sticky-header { overflow: visible; }
 .is-submission-list .app-page-tabs { width: 100%; }
-.is-submission-list .app-page-tabs .setting-select-options { z-index: 24; max-height: min(360px, 60dvh); overflow-y: auto; }
+
 @media (min-width: 720px) {
   .desktop-panel-workspace.shell .mobile-chat-list-screen.is-submission-list { grid-template-rows: 110px minmax(0, 1fr); }
   .desktop-panel-workspace.shell .mobile-chat-list-screen.is-submission-list > .tab-sticky-header { display: grid; grid-template-rows: 65px 44px; height: 110px; min-height: 110px; }

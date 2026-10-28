@@ -31,7 +31,7 @@ test("Square no longer fetches submission lists or renders a mixed workspace", (
   const chats = read("pages/ChatsPage.tsx");
   assert.doesNotMatch(chats, /squareIntegrated|embeddedListOnly|onReturnToSquare|submission-avatar-stack|is-submission-item|submission-status-filters/);
   assert.match(chats, /<PageTabs label=\{t\("submission.switchView"\)\}/);
-  assert.match(chats, /<SelectControl label=\{t\("submission.filterLabel"\)\}/);
+  assert.match(chats, /<SelectControl compact label=\{t\("submission.filterLabel"\)\}/);
   assert.match(chats, /submission-thread-row/);
   assert.match(chats, /navigate\(`\/app\/submissions\?view=\$\{role\}`\)/);
 });
@@ -39,7 +39,7 @@ test("Square no longer fetches submission lists or renders a mixed workspace", (
 test("settings and submission filters share the same keyboard-accessible dropdown", () => {
   const source = read("components/SettingRow.tsx");
   assert.match(source, /export function SelectControl/);
-  assert.match(source, /trailing=\{<SelectControl \{\.\.\.props\} \/>\}/);
-  assert.match(source, /event.key === "Escape"/);
-  assert.match(source, /"ArrowDown", "ArrowUp", "Home", "End"/);
+  assert.match(source, /return <SelectControl \{\.\.\.props\} \/>/);
+  assert.match(source, /useModalFocus\(root, open, close\)/);
+  assert.match(source, /'ArrowDown','ArrowUp','Home','End'/);
 });

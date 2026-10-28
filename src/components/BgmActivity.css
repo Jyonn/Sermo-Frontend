@@ -81,8 +81,8 @@
 .bgm-rules li { margin-bottom:15px; }
 .bgm-settings { color:var(--text-primary); }
 .bgm-settings > .setting-row { padding:14px 0; overflow:visible; }
-.bgm-settings .setting-select summary { margin:0; font-size:12px; }
-.bgm-settings .setting-select-options { width:min(240px,calc(100vw - 56px)); max-height:260px; overflow-y:auto; }
+
+
 .bgm-settings p { font-size:11px; line-height:1.8; color:var(--text-muted); margin:18px 0; }
 html body .activity-drawer.is-custom-activity.is-bgm-activity.side-drawer > .drawer-body { background:linear-gradient(#fffaf14d,#fffaf14d),url('/activity/bgm/drawer-background-v2.png') center top/cover no-repeat; }
 html[data-theme="dark"] body .activity-drawer.is-custom-activity.is-bgm-activity.side-drawer > .drawer-body { background:linear-gradient(#101c18ed,#101c18ed),url('/activity/bgm/drawer-background-v2.png') center top/cover no-repeat; }
