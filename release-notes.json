@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.4",
+  "id": "2026.10.28.5",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "主角按键设置更顺手",
+      "title": "课题详情与聊天详情更统一",
       "items": [
-        "主角按键移至个人名片下方，统一入口卡片并提供独立设置面板",
-        "登场方式、音乐和接收设置即时保存，无需单独确认",
-        "修复嵌套设置中候选弹窗的关闭干扰"
+        "课题详情采用成员网格与分组操作栏，减少重复标题和多余留白",
+        "集中展示课题信息、状态和时间，底部独立放置转让与退出操作",
+        "统一横竖屏和深色模式的阅读体验"
       ]
     },
     "en": {
-      "title": "Simpler entrance key settings",
+      "title": "Project details aligned with chat details",
       "items": [
-        "A matching entrance key card below profile customization opens its own settings drawer",
-        "Entrance mode, music and playback preferences save immediately",
-        "Fixed dismissal interference in nested option dialogs"
+        "Member grids and grouped action rows replace excessive spacing and repeated headings",
+        "Project information, status and dates stay together, with ownership and exit actions below",
+        "Consistent portrait, landscape and dark mode layouts"
       ]
     }
   }

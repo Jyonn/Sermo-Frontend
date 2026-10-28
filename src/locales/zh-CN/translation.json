@@ -135,6 +135,7 @@
   "research.groupHint": "成员、负责人、转让和解散由课题统一管理。",
   "research.owner": "导师",
   "research.transfer": "转让",
+  "research.transferOwner": "转让课题负责人",
   "research.remove": "移除",
   "research.invite": "邀请好友加入",
   "research.dissolve": "解散课题",

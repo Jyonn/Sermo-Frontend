@@ -4,6 +4,18 @@ import { readFileSync } from 'node:fs';
 
 const source = (file: string) => readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
 
+test('project details reuse chat sections and shared settings groups', () => {
+  const text = source('components/ResearchProjectDetails.tsx');
+  assert.match(text, /chat-detail-panel research-project-details/);
+  assert.match(text, /chat-detail-people-section/);
+  assert.match(text, /chat-detail-danger-section/);
+  assert.match(text, /<ResearchMemberGrid/);
+  assert.match(text, /<SettingGroup>/);
+  assert.match(text, /tone="danger"/);
+  assert.doesNotMatch(text, /research-form|ghost-button|<h2/);
+  assert.match(source('pages/ResearchPage.tsx'), /limit=\{1\} allowEmpty=\{false\}/);
+});
+
 test('research and Square share date summaries and date wheels', () => {
   assert.match(source('components/SquareSearchDialog.tsx'), /<DateRangeSummary/);
   const range = source('components/DateRangeField.tsx');

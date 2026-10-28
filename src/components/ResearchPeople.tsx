@@ -4,7 +4,7 @@ import { useI18n } from '../lib/language';
 import { UserAvatar } from './UserAvatar';
 import { MemberPickerSheet } from './MemberPickerSheet';
 
-export function ResearchMemberGrid({ members, onMember, onAdd }: { members: ResearchMember[]; onMember?: (member: ResearchMember) => void; onAdd?: () => void }) {
+export function ResearchMemberGrid({ members, onMember, onAdd, onRemove }: { members: ResearchMember[]; onMember?: (member: ResearchMember) => void; onAdd?: () => void; onRemove?: () => void }) {
   const { t } = useI18n();
   return <div className="chat-detail-member-grid research-member-grid">
     {members.map(member => <button type="button" key={member.id} className={`chat-detail-member-item${member.owner ? ' is-owner' : ''}`} disabled={!onMember || member.owner} onClick={() => onMember?.(member)} title={member.name}>
@@ -12,6 +12,7 @@ export function ResearchMemberGrid({ members, onMember, onAdd }: { members: Rese
       <span className="chat-detail-member-name"><span className="chat-detail-member-label">{member.name}</span></span>
     </button>)}
     {onAdd && <button className="chat-detail-member-item chat-detail-member-add" type="button" onClick={onAdd}><span className="chat-detail-member-avatar chat-detail-member-avatar-add"><span className="material-symbols-outlined" aria-hidden="true">add</span></span><span className="chat-detail-member-name">{t('common.add')}</span></button>}
+    {onRemove && <button className="chat-detail-member-item chat-detail-member-remove" type="button" onClick={onRemove}><span className="chat-detail-member-avatar chat-detail-member-avatar-remove"><span className="material-symbols-outlined" aria-hidden="true">remove</span></span><span className="chat-detail-member-name">{t('research.remove')}</span></button>}
   </div>;
 }
 

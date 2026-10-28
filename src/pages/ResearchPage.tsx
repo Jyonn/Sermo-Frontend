@@ -13,7 +13,8 @@ import { PageTabs } from '../components/PageTabs';
 import { DrawerTabs } from '../components/DrawerTabs';
 import { DateRangeField } from '../components/DateRangeField';
 import { MemberPickerSheet } from '../components/MemberPickerSheet';
-import { ResearchAssigneesField, ResearchMemberGrid } from '../components/ResearchPeople';
+import { ResearchAssigneesField } from '../components/ResearchPeople';
+import { ResearchProjectDetails } from '../components/ResearchProjectDetails';
 import { UserAvatar } from '../components/UserAvatar';
 import { ActionSheet } from '../components/ActionSheet';
 import { api } from '../lib/api';
@@ -31,6 +32,7 @@ export default function ResearchPage() {
   const [panel,setPanel]=useState<'create'|'task'|'members'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning?'calendar':'overview');
   const [taskFilter,setTaskFilter]=useState('all');
   const [inviteOpen,setInviteOpen]=useState(false),[memberAction,setMemberAction]=useState<number|null>(null);
+  const [memberPickerAction,setMemberPickerAction]=useState<'transfer'|'remove'|null>(null);
   const [listLoading,setListLoading]=useState(true),[loading,setLoading]=useState(!!id),[busy,setBusy]=useState(false),[error,setError]=useState(''),[tick,setTick]=useState(0),[reply,setReply]=useState<string|null>(null),[confirm,setConfirm]=useState<string|null>(null);
   const userId=session?.user.user_id;
   const owner=project?.members.some(m=>m.id===userId&&m.owner)===true;
@@ -75,11 +77,9 @@ export default function ResearchPage() {
       </div>}
     </>}
     <SideDrawer open={panel!==null} fullscreen={panel==='task'} onClose={()=>setPanel(null)} title={t(panel==='members'?'research.members':panel==='task'?'research.addTask':'research.create')}>
-      {error&&<p className="research-error" role="alert">{error}</p>}{panel==='members'&&project?<div className="research-form"><ResearchMemberGrid members={project.members} onMember={owner&&!busy?member=>setMemberAction(member.id):undefined} onAdd={owner&&writable&&!busy?()=>setInviteOpen(true):undefined}/><h2>{project.title}</h2><p className="research-muted">{project.description}</p><Link className="ghost-button" to={`/app/chats/${project.chat_id}`}>{t('research.group')}</Link><SelectControl label={t('research.status')} disabled={!owner||busy} value={project.status} options={(['planning','active','completed'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'settings',status}).then(()=>{})}/>
-
-        <button className="ghost-button" disabled={busy} onClick={()=>setConfirm(owner?'dissolve':'leave')}>{t(owner?'research.dissolve':'research.leave')}</button>
-      </div>:<form className="research-form" key={panel} onSubmit={submit}><label>{t('research.name')}<input name="title" maxLength={panel==='task'?160:50} required/></label><DateRangeField/>{panel==='task'?<><ResearchAssigneesField members={project?.members||[]}/><MarkdownField name="body" required/></>:<label>{t('research.description')}<textarea name="description" rows={4} maxLength={20000}/></label>}<button className="button" disabled={busy}>{t('research.save')}</button></form>}
+      {error&&<p className="research-error" role="alert">{error}</p>}{panel==='members'&&project?<ResearchProjectDetails project={project} owner={owner} busy={busy} onMember={member=>setMemberAction(member.id)} onAdd={()=>setInviteOpen(true)} onRemove={()=>setMemberPickerAction('remove')} onTransfer={()=>setMemberPickerAction('transfer')} onDanger={()=>setConfirm(owner?'dissolve':'leave')} onStatus={async status=>{if(!await mutate({action:'settings',status}))throw new Error('Status update failed');}}/>:<form className="research-form" key={panel} onSubmit={submit}><label>{t('research.name')}<input name="title" maxLength={panel==='task'?160:50} required/></label><DateRangeField/>{panel==='task'?<><ResearchAssigneesField members={project?.members||[]}/><MarkdownField name="body" required/></>:<label>{t('research.description')}<textarea name="description" rows={4} maxLength={20000}/></label>}<button className="button" disabled={busy}>{t('research.save')}</button></form>}
     </SideDrawer>
+    {memberPickerAction&&project&&<MemberPickerSheet title={t(memberPickerAction==='transfer'?'research.transferOwner':'research.remove')} members={project.members.filter(member=>!member.owner)} initial={[]} limit={1} allowEmpty={false} actionLabel={t('common.next')} onClose={()=>setMemberPickerAction(null)} onApply={ids=>{setConfirm(`${memberPickerAction}:${ids[0]}`);}}/>}
     {inviteOpen&&project&&<MemberPickerSheet allowEmpty={false} title={t('research.invite')} initial={[]} actionLabel={t('common.add')} error={error} members={[...project.members.map(member=>({...member,locked:true})),...friends.filter(friend=>!project.members.some(member=>member.id===friend.user_id)).map(friend=>({id:friend.user_id,name:friend.name,avatar_uri:friend.avatar_uri,avatar_cache_key:friend.avatar_cache_key,avatar_frame_style:friend.avatar_frame_style,description:t(friend.is_alive?'presence.online':'presence.offline')}))]} onClose={()=>setInviteOpen(false)} onApply={inviteMembers}/>}
     <ActionSheet open={memberAction!==null} title={memberName(memberAction||0)} onClose={()=>setMemberAction(null)} actions={[{key:'transfer',label:t('research.transfer'),disabled:busy,onSelect:()=>setConfirm(`transfer:${memberAction}`)},{key:'remove',label:t('research.remove'),danger:true,disabled:busy,onSelect:()=>setConfirm(`remove:${memberAction}`)}]}/>
     <ConfirmDialog open={!!confirm} title={t('research.confirm')} description={t('research.sensitive')} danger onClose={()=>setConfirm(null)} onConfirm={()=>{const [action,user]=String(confirm).split(':');void mutate({action,...(user?{user_id:Number(user)}:{})}).then(ok=>{if(ok)setPanel(null);});setConfirm(null);}}/>

@@ -135,6 +135,7 @@
   "research.groupHint": "Membership and ownership are managed by the project.",
   "research.owner": "Supervisor",
   "research.transfer": "Transfer",
+  "research.transferOwner": "Transfer project ownership",
   "research.remove": "Remove",
   "research.invite": "Invite friends",
   "research.dissolve": "Dissolve project",
