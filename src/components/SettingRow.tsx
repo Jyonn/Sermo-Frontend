@@ -97,7 +97,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
       {!compact && <span className="setting-select-label">{label}</span>}
       <span className="setting-select-value">{selected?.label || t('select.choose')}</span><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
     </button>
-    {open && createPortal(<div className="dialog-backdrop option-picker-backdrop" role="presentation" onClick={close}>
+    {open && createPortal(<div className="dialog-backdrop option-picker-backdrop" role="presentation" onClick={event => { event.stopPropagation(); close(); }}>
       <section ref={root} tabIndex={-1} className="option-picker-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={event => event.stopPropagation()}>
         <header><h2 id={titleId}>{label}</h2><button type="button" className="option-picker-close" disabled={busy} aria-label={t('common.close')} onClick={close}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></header>
         {options.length > 8 && <label className="option-picker-search"><span className="material-symbols-outlined" aria-hidden="true">search</span><input aria-label={t('select.search')} placeholder={t('select.search')} value={query} onChange={event => setQuery(event.target.value)} disabled={busy}/></label>}

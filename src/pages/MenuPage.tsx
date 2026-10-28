@@ -2350,9 +2350,9 @@ export default function MenuPage() {
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} onChange={()=>setChronelleInfoOpen(false)} /> : null}
       {session ? <MyProfileCardDrawer onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} user={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }} /> : null}
 
-      <BottomSheet open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")} className="bgm-info-sheet">
+      <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
-      </BottomSheet>
+      </SideDrawer>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
@@ -2406,7 +2406,6 @@ export default function MenuPage() {
             <span><strong>{t("menu.chatPage")}</strong><small>{t("menu.chatPageHint")}</small></span>
             <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span>
           </button>
-          {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <SettingRow icon={<BgmIcon name="music_note" />} title={t("bgm.myKeychain")} value={t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)} onClick={() => setBgmSettingsOpen(true)} /> : null}
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`} onClick={() => setAvatarFrameDrawerOpen(true)} type="button">
             <span className="personalization-entry-preview avatar-frame-preview">
               <UserAvatar
@@ -2424,6 +2423,11 @@ export default function MenuPage() {
             <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
+          {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setBgmSettingsOpen(true)} type="button">
+            <span className="personalization-entry-preview bgm-key-entry-preview"><BgmIcon name="music_note" /></span>
+            <span><strong>{t("bgm.myKeychain")}</strong><small>{t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)}</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button> : null}
         </div>
       </SideDrawer>
 

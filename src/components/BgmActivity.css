@@ -80,6 +80,8 @@
 .bgm-rules ol { padding-left:20px; }
 .bgm-rules li { margin-bottom:15px; }
 .bgm-settings { color:var(--text-primary); }
+.bgm-key-entry-preview { color:var(--brand-primary); background:color-mix(in srgb,var(--brand-primary) 10%,var(--bg-panel-strong)); }
+.bgm-key-entry-preview > svg { width:48px; height:48px; }
 .bgm-settings > .setting-row { padding:14px 0; overflow:visible; }
 
 

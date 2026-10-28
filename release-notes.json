@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.3",
+  "id": "2026.10.28.4",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "全站选择操作更统一",
+      "title": "主角按键设置更顺手",
       "items": [
-        "下拉框统一为带右箭头的操作栏，点击后在模态框中选择",
-        "长候选列表支持搜索，保留当前选项标记与键盘操作",
-        "同步统一菜单、科研、投稿筛选及管理面板，适配横竖屏和深色模式"
+        "主角按键移至个人名片下方，统一入口卡片并提供独立设置面板",
+        "登场方式、音乐和接收设置即时保存，无需单独确认",
+        "修复嵌套设置中候选弹窗的关闭干扰"
       ]
     },
     "en": {
-      "title": "Consistent selection controls throughout the app",
+      "title": "Simpler entrance key settings",
       "items": [
-        "Dropdowns become action rows with right arrows and modal option lists",
-        "Search long lists with current-selection indicators and keyboard navigation",
-        "Unified menus, research, submission filters and management controls across screen sizes and themes"
+        "A matching entrance key card below profile customization opens its own settings drawer",
+        "Entrance mode, music and playback preferences save immediately",
+        "Fixed dismissal interference in nested option dialogs"
       ]
     }
   }

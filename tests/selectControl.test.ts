@@ -12,6 +12,7 @@ test('selection uses a portal dialog with a focus trap and current option',()=>{
   assert.match(text,/aria-selected=\{option.value === value\}/);
   assert.match(text,/catch \{ setError\(true\); \}/);
   assert.match(text,/await onChange\(next\); setOpen\(false\)/);
+  assert.match(text,/onClick=\{event => \{ event.stopPropagation\(\); close\(\); \}\}/);
 });
 
 test('long lists can be searched, empty options and compact controls are safe',()=>{
