@@ -12,6 +12,7 @@ test('entrance settings save each change without a separate save action', () => 
   assert.match(text, /saving.current/);
   assert.match(text, /catch \(error\).*throw error/);
   assert.ok(text.indexOf('await api.configureBgm') < text.indexOf('setMode(result'));
+  assert.match(text, /onUpdate\(result\);\s+if \(alive.current\)/);
 });
 
 test('key settings use their own drawer and a matching entry below the profile card', () => {

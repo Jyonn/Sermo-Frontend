@@ -24,11 +24,11 @@ export function BgmEntranceSettings({ activity, onUpdate }: { activity: Activity
     setBusy(true); setStatus("");
     try {
       const result = await api.configureBgm(activity.key, data.style, undefined, { mode, track, receive_audio: receiveAudio, ...next });
+      onUpdate(result);
       if (alive.current) {
         setMode(result.bgm?.mode ?? mode);
         setTrack(result.bgm?.track ?? track);
         setReceiveAudio(result.bgm?.receive_audio ?? receiveAudio);
-        onUpdate(result);
       }
     } catch (error) { if (alive.current) setStatus(t("bgm.saveFailed")); throw error; }
     finally { saving.current = false; if (alive.current) setBusy(false); }
