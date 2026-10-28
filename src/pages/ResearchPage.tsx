@@ -13,6 +13,7 @@ import { PageTabs } from '../components/PageTabs';
 import { FloatingDrawerScope } from '../components/DesktopPanelWorkspace';
 import { HeaderIconButton } from '../components/HeaderIconButton';
 import { ResearchCreateFlow, type ResearchDraft } from '../components/ResearchCreateFlow';
+import { MarkdownEditorDialog } from '../components/MarkdownEditorDialog';
 import { ResearchTaskItem } from '../components/ResearchTaskItem';
 import { ResearchComments } from '../components/ResearchComments';
 import { DateRangeField } from '../components/DateRangeField';
@@ -50,8 +51,7 @@ export default function ResearchPage() {
   useEffect(()=>{if(panel!=='members')return;const controller=new AbortController();setFriends([]);api.getFriends(controller.signal).then(setFriends).catch(e=>{if(!controller.signal.aborted)setError(e.message);});return()=>controller.abort();},[panel]);
   async function mutate(body:Record<string,unknown>){if(!project||busy)return;setBusy(true);setError('');try{const next=await api.researchUpdate(project.id,project.revision,body);if(['leave','dissolve'].includes(String(body.action))){setId(null);setProject(null);setTick(n=>n+1);}else {setProject(next);setList(items=>items.map(item=>item.id===next.id?next:item));if(body.action==='task'){const added=next.tasks.find(item=>!project.tasks.some(old=>old.id===item.id));if(added){setTaskId(added.id);setTab('tasks');}}}return true;}catch(e){setError(e instanceof Error?e.message:t('research.failed'));return false;}finally{setBusy(false);}}
   async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();if(busy)return;const data=new FormData(event.currentTarget);const body={title:String(data.get('title')||''),body:String(data.get('body')||''),description:String(data.get('description')||''),start:String(data.get('start')||''),end:String(data.get('end')||'')||null,assignees:data.getAll('member').map(Number)};
-    if(panel==='description'){if(await mutate({action:'settings',description:body.body}))setPanel(null);}
-    else if(await mutate({...body,action:'task'}))setPanel(null);
+    if(await mutate({...body,action:'task'}))setPanel(null);
   }
   async function createProject(body:ResearchDraft){
     if(busy)return false;setBusy(true);setError('');
@@ -95,19 +95,20 @@ export default function ResearchPage() {
     <FloatingDrawerScope><SideDrawer historyKey="research-chat" className="research-chat-drawer" headerless floatingBack={false} fullscreen open={chatOpen&&!!project} onClose={()=>setChatOpen(false)} title={t('research.group')}>
       {chatOpen&&project&&<Suspense fallback={<QuietState title={t('common.loading')}/>}><EmbeddedChats embeddedChat={{id:project.chat_id,onClose:()=>setChatOpen(false)}}/></Suspense>}
     </SideDrawer>
-    <SideDrawer historyKey={panel==='description'?'research-description':panel==='task'?'research-task-create':'research-members'} open={panel!==null&&panel!=='create'} fullscreen={panel==='task'||panel==='description'} onClose={()=>setPanel(null)} title={t(panel==='members'?'research.members':panel==='description'?'research.description':'research.addTask')}>
+    <SideDrawer historyKey={panel==='task'?'research-task-create':'research-members'} open={panel==='task'||panel==='members'} fullscreen={panel==='task'} onClose={()=>setPanel(null)} title={t(panel==='members'?'research.members':'research.addTask')}>
       {error&&<p className="research-error" role="alert">{error}</p>}
       {panel==='members'&&project?<ResearchProjectDetails project={project} owner={owner} busy={busy}
         onDescription={()=>setPanel('description')} onMember={member=>setMemberAction(member.id)} onAdd={()=>setInviteOpen(true)}
         onRemove={()=>setMemberPickerAction('remove')} onTransfer={()=>setMemberPickerAction('transfer')}
         onChat={()=>{setPanel(null);setChatOpen(true);}} onDanger={()=>setConfirm(owner?'dissolve':'leave')}
         onStatus={async status=>{if(!await mutate({action:'settings',status}))throw new Error('Status update failed');}}/>
-        :<form className="research-form" key={panel} onSubmit={submit}>{panel==='description'?<MarkdownInput value={undefined} initialValue={project?.description||''}/>:<><label>{t('research.name')}<input name="title" maxLength={160} required/></label><DateRangeField/><ResearchAssigneesField members={project?.members||[]}/><MarkdownField name="body" required/></>}<button className="button" disabled={busy}>{t('research.save')}</button></form>}
+        :<form className="research-form" key={panel} onSubmit={submit}><><label>{t('research.name')}<input name="title" maxLength={160} required/></label><DateRangeField/><ResearchAssigneesField members={project?.members||[]}/><MarkdownField name="body" required/></><button className="button" disabled={busy}>{t('research.save')}</button></form>}
     </SideDrawer>
     {memberPickerAction&&project&&<MemberPickerSheet title={t(memberPickerAction==='transfer'?'research.transferOwner':'research.remove')} members={project.members.filter(member=>!member.owner)} initial={[]} limit={1} allowEmpty={false} actionLabel={t('common.next')} onClose={()=>setMemberPickerAction(null)} onApply={ids=>{setConfirm(`${memberPickerAction}:${ids[0]}`);}}/>}
     {inviteOpen&&project&&<MemberPickerSheet allowEmpty={false} title={t('research.invite')} initial={[]} actionLabel={t('research.sendInvitation')} error={error} members={inviteCandidates} onClose={()=>setInviteOpen(false)} onApply={inviteMembers}/>}
     <ActionSheet open={memberAction!==null} title={memberName(memberAction||0)} onClose={()=>setMemberAction(null)} actions={[{key:'transfer',label:t('research.transfer'),disabled:busy,onSelect:()=>setConfirm(`transfer:${memberAction}`)},{key:'remove',label:t('research.remove'),danger:true,disabled:busy,onSelect:()=>setConfirm(`remove:${memberAction}`)}]}/>
     <ConfirmDialog open={!!confirm} title={t('research.confirm')} description={t('research.sensitive')} danger onClose={()=>setConfirm(null)} onConfirm={()=>{const [action,user]=String(confirm).split(':');void mutate({action,...(user?{user_id:Number(user)}:{})}).then(ok=>{if(ok)setPanel(null);});setConfirm(null);}}/>
+    {panel==='description'&&project&&<MarkdownEditorDialog title={t('research.description')} initialValue={project.description} busy={busy} error={error} onClose={()=>setPanel(null)} onSave={value=>{void mutate({action:'settings',description:value}).then(ok=>{if(ok)setPanel(null);});}}/>}
     {panel==='create'&&<ResearchCreateFlow busy={busy} error={error} onClose={()=>setPanel(null)} onCreate={createProject}/>}
     </FloatingDrawerScope>
   </section></AppChrome>;

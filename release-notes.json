@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.28.8",
+  "id": "2026.10.28.9",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "更轻松的课题创建与阅读",
+      "title": "更紧凑的课题说明编辑",
       "items": [
-        "课题分步填写名称、时间和可跳过的 Markdown 说明，之后也能继续编辑",
-        "统一科研列表与导航按钮，概览展示重叠头像，阶段任务信息更清晰",
-        "Markdown 工具栏单行滑动，标题使用浮动菜单，统一隐藏滚动条"
+        "课题说明改用居中模态框，新建和编辑保持一致",
+        "编辑区贴合弹框边缘，减少留白，并适配横竖屏和深色模式"
       ]
     },
     "en": {
-      "title": "Easier project setup and reading",
+      "title": "A more compact description editor",
       "items": [
-        "Create projects step by step with optional, editable Markdown descriptions",
-        "Refined lists and header controls, overlapping member avatars and clearer task summaries",
-        "A scrollable single-row Markdown toolbar with floating heading choices and hidden scrollbars"
+        "Create and edit project descriptions in the same centered modal",
+        "Edge-to-edge editing with less padding, adapted for portrait, landscape and dark mode"
       ]
     }
   }

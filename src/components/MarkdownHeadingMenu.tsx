@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
+import { useModalFocus } from '../lib/modalFocus';
 
 export function MarkdownHeadingMenu({anchor,label,onClose,onSelect}:{
   anchor:RefObject<HTMLButtonElement|null>;label:string;onClose:()=>void;onSelect:(level:number)=>void;
@@ -8,6 +9,7 @@ export function MarkdownHeadingMenu({anchor,label,onClose,onSelect}:{
   const close=useRef(onClose);
   close.current=onClose;
   const [position,setPosition]=useState({left:12,top:12});
+  useModalFocus(panel,true,onClose);
   useLayoutEffect(()=>{
     const place=()=>{
       const rect=anchor.current?.getBoundingClientRect(),box=panel.current?.getBoundingClientRect();
@@ -33,5 +35,5 @@ export function MarkdownHeadingMenu({anchor,label,onClose,onSelect}:{
       const next=event.key==='Home'?0:event.key==='End'?5:(index+(event.key==='ArrowDown'?1:5))%6;
       buttons[next]?.focus();
     }
-  }}>{[1,2,3,4,5,6].map(level=><button type="button" role="menuitem" key={level} onClick={()=>onSelect(level)}><strong>{`H${level}`}</strong></button>)}</div>,document.body);
+  }}>{[1,2,3,4,5,6].map(level=><button type="button" role="menuitem" key={level} onClick={()=>onSelect(level)}><strong>{`H${level}`}</strong></button>)}</div>,anchor.current?.closest('[aria-modal="true"]')||document.body);
 }

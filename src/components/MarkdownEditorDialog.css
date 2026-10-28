@@ -1,0 +1,15 @@
+.markdown-editor-dialog{display:flex;flex-direction:column;width:min(640px,calc(100vw - 32px));height:min(600px,calc(100dvh - 32px));min-height:0;padding:0;overflow:hidden;border:1px solid var(--line-soft);border-radius:24px;background:var(--bg-elevated);color:var(--text-primary);box-shadow:var(--shadow-lg)}
+.markdown-editor-dialog>header{display:flex;flex:0 0 auto;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-soft)}
+.markdown-editor-dialog>header>div{min-width:0}
+.markdown-editor-dialog h2{margin:0;font-size:17px;line-height:1.5}
+.markdown-editor-dialog>header p{margin:5px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.markdown-editor-dialog>header>button{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;padding:6px}
+.markdown-editor-dialog-body{display:flex;flex:1;min-height:0;padding:0}
+.markdown-editor-dialog-body>.v3-md-input{display:flex;flex:1;flex-direction:column;width:100%;min-height:0;border:0;border-radius:0}
+.markdown-editor-dialog-body .v3-md-toolbar{flex:0 0 auto}
+.markdown-editor-dialog-body .v3-md-input>textarea,.markdown-editor-dialog-body .v3-editor-preview{flex:1;min-height:0;max-height:none;height:100%;margin:0;border:0;border-radius:0;resize:none;overflow-y:auto}
+.markdown-editor-dialog>footer{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:12px;padding:12px 16px;border-top:1px solid var(--line-soft)}
+.markdown-editor-dialog>footer>.button{min-width:104px}
+.markdown-editor-dialog-error{flex:0 0 auto;max-height:72px;overflow-y:auto;margin:0;padding:8px 16px;color:var(--danger);font-size:12px}
+@media(max-height:500px){.dialog-backdrop.markdown-editor-backdrop{padding:8px}.markdown-editor-dialog{height:calc(100dvh - 16px);border-radius:18px}.markdown-editor-dialog>header{padding-block:8px}.markdown-editor-dialog>footer{padding-block:8px}}
+.dialog-backdrop.markdown-editor-backdrop{padding:16px;touch-action:auto}

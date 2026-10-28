@@ -72,11 +72,22 @@ test('project creation is progressive and description remains editable Markdown'
   assert.match(flow, /<InputDialog open=\{step==='name'\}/);
   assert.match(flow, /<DateRangeField value=\{range\} onChange=\{setRange\}/);
   assert.match(flow, /setStep\('description'\)/);
-  assert.match(flow, /description:skip\?'':description/);
+  assert.match(flow, /onSkip=\{\(\)=>void create\(\)\}/);
   assert.match(flow, /end:range.to\|\|null/);
   assert.match(source('components/ResearchWorkspace.tsx'), /<Markdown body=\{project.description\}/);
-  assert.match(source('pages/ResearchPage.tsx'), /action:'settings',description:body.body/);
+  assert.match(source('pages/ResearchPage.tsx'), /action:'settings',description:value/);
   assert.match(source('components/ResearchProjectDetails.tsx'), /chat-detail-member-grid|<ResearchMemberGrid/);
+});
+
+test('description editing and creation share an edge-to-edge modal, not a drawer', () => {
+  assert.match(source('components/ResearchCreateFlow.tsx'), /<MarkdownEditorDialog/);
+  assert.match(source('pages/ResearchPage.tsx'), /panel==='description'.*<MarkdownEditorDialog/);
+  assert.doesNotMatch(source('components/ResearchCreateFlow.tsx'), /SideDrawer/);
+  const dialog=source('components/MarkdownEditorDialog.tsx');
+  assert.match(dialog, /role="dialog" aria-modal="true"/);
+  assert.match(dialog, /useModalFocus\(root,true/);
+  assert.match(dialog, /if\(!busy\)onSave\(body\)/);
+  assert.match(source('components/MarkdownEditorDialog.css'), /markdown-editor-dialog-body\{[^}]*padding:0/);
 });
 
 test('Markdown tools are single-line, uniform and use a floating heading menu', () => {
