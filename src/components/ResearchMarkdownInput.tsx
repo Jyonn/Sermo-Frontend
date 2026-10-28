@@ -2,16 +2,18 @@ import { useRef, useState } from 'react';
 import { Markdown } from './ResearchMarkdown';
 import { useI18n, type TranslationKey } from '../lib/language';
 import { insertMarkdown, markdownTable } from '../lib/researchMarkdownEdit';
-import { SelectControl } from './SettingRow';
+import { MarkdownHeadingMenu } from './MarkdownHeadingMenu';
 import { TablePicker } from './ResearchTablePicker';
 import './ResearchMarkdownInput.css';
 
-export function MarkdownInput({ value, onChange, required = false, rows = 6 }: { value?: string; onChange?: (value: string) => void; required?: boolean; rows?: number }) {
+export function MarkdownInput({ value, initialValue = '', onChange, required = false, rows = 6 }: { value?: string; initialValue?:string; onChange?: (value: string) => void; required?: boolean; rows?: number }) {
   const {t:translate}=useI18n();
   const t=(key:string)=>translate(('research.md.'+key) as TranslationKey);
-  const [local, setLocal] = useState('');
+  const [local, setLocal] = useState(initialValue);
   const [preview, setPreview] = useState(false);
   const [tableOpen,setTableOpen]=useState(false);
+  const [headingOpen,setHeadingOpen]=useState(false);
+  const headingAnchor=useRef<HTMLButtonElement>(null);
   const tableAnchor=useRef<HTMLButtonElement>(null);
   const selection=useRef({start:0,end:0});
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -33,11 +35,12 @@ export function MarkdownInput({ value, onChange, required = false, rows = 6 }: {
   ] as const;
   return <div className="v3-md-input">
     <div className="v3-md-toolbar" role="toolbar" aria-label={t('mdTools')}>
-      <SelectControl compact label={t('mdHeading')} value="" disabled={preview} options={[{value:'',label:'H'},...[1,2,3,4,5,6].map(n=>({value:'#'.repeat(n),label:`H${n}`}))]} onChange={value=>{if(value)insert(`\n${value} `);}}/>
+      <button type="button" ref={headingAnchor} title={t('mdHeading')} aria-label={t('mdHeading')} aria-haspopup="menu" aria-expanded={headingOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{setTableOpen(false);setHeadingOpen(!headingOpen);}}><span className="material-symbols-outlined" aria-hidden="true">format_h1</span></button>
+      {headingOpen&&<MarkdownHeadingMenu anchor={headingAnchor} label={t('mdHeading')} onClose={()=>setHeadingOpen(false)} onSelect={level=>{insert(`\n${'#'.repeat(level)} `);setHeadingOpen(false);}}/>}
       {tools.map(([icon,key,before,after]) => <button key={key} type="button" title={t(key)} aria-label={t(key)} disabled={preview} onMouseDown={e => e.preventDefault()} onClick={() => insert(before,after)}><span className="material-symbols-outlined" aria-hidden="true">{icon}</span></button>)}
-      <button type="button" ref={tableAnchor} aria-label={t('mdTable')} aria-expanded={tableOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{selection.current={start:ref.current?.selectionStart||0,end:ref.current?.selectionEnd||0};setTableOpen(!tableOpen);}}><span className="material-symbols-outlined" aria-hidden="true">table</span></button>
+      <button type="button" ref={tableAnchor} title={t('mdTable')} aria-label={t('mdTable')} aria-expanded={tableOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{setHeadingOpen(false);selection.current={start:ref.current?.selectionStart||0,end:ref.current?.selectionEnd||0};setTableOpen(!tableOpen);}}><span className="material-symbols-outlined" aria-hidden="true">table</span></button>
       {tableOpen&&<TablePicker anchor={tableAnchor} onClose={()=>setTableOpen(false)} onSelect={(x,y)=>{const {start,end}=selection.current;const text=markdownTable(x,y,t('mdColumn'));change(body.slice(0,start)+text+body.slice(end));setTableOpen(false);requestAnimationFrame(()=>{ref.current?.focus();ref.current?.setSelectionRange(start+text.length,start+text.length);});}}/>}
-      <button className="v3-md-preview-toggle" type="button" aria-pressed={preview} onClick={() => setPreview(!preview)}>{t(preview ? 'edit' : 'previewMd')}</button>
+      <button className="v3-md-preview-toggle" type="button" title={t(preview ? 'edit' : 'previewMd')} aria-label={t(preview ? 'edit' : 'previewMd')} aria-pressed={preview} onClick={() => {setHeadingOpen(false);setTableOpen(false);setPreview(!preview);}}><span className="material-symbols-outlined" aria-hidden="true">{preview?'edit':'visibility'}</span></button>
     </div>
     <textarea ref={ref} name="body" aria-label={t('body')} rows={rows} maxLength={20000} required={required} value={body} onChange={e => change(e.target.value)} onInvalid={e => { if(preview) { e.preventDefault(); setPreview(false); requestAnimationFrame(() => { ref.current?.focus(); ref.current?.reportValidity(); }); } }} hidden={preview} placeholder={t('mdPlaceholder')}/>
     {preview && <div className="v3-editor-preview"><Markdown body={body || t('empty')}/></div>}

@@ -12,7 +12,7 @@ export function ResearchMemberGrid({ members, onMember, onAdd, onRemove }: { mem
       <span className="chat-detail-member-name"><span className="chat-detail-member-label">{member.name}</span></span>
     </button>)}
     {onAdd && <button className="chat-detail-member-item chat-detail-member-add" type="button" onClick={onAdd}><span className="chat-detail-member-avatar chat-detail-member-avatar-add"><span className="material-symbols-outlined" aria-hidden="true">add</span></span><span className="chat-detail-member-name">{t('common.add')}</span></button>}
-    {onRemove && <button className="chat-detail-member-item chat-detail-member-remove" type="button" onClick={onRemove}><span className="chat-detail-member-avatar chat-detail-member-avatar-remove"><span className="material-symbols-outlined" aria-hidden="true">remove</span></span><span className="chat-detail-member-name">{t('research.remove')}</span></button>}
+    {onRemove && <button className="chat-detail-member-item chat-detail-member-add" type="button" onClick={onRemove}><span className="chat-detail-member-avatar chat-detail-member-avatar-add chat-detail-member-avatar-remove"><svg aria-hidden="true" className="chat-detail-member-remove-icon" fill="none" viewBox="0 0 24 24"><path d="M6.5 12h11" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2"/></svg></span><span className="chat-detail-member-name">{t('research.remove')}</span></button>}
   </div>;
 }
 

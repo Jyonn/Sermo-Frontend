@@ -4,11 +4,12 @@ import { useI18n } from '../lib/language';
 import { ResearchMemberGrid } from './ResearchPeople';
 import { SettingGroup, SettingRow, SettingSelect } from './SettingRow';
 
-export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, onRemove, onTransfer, onDanger, onStatus, onChat }: {
+export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, onRemove, onTransfer, onDanger, onStatus, onChat, onDescription }: {
   project: ResearchProject; owner: boolean; busy: boolean;
   onMember: (member: ResearchMember) => void; onAdd: () => void;
   onRemove?: () => void;
   onChat?: () => void;
+  onDescription?: () => void;
   onTransfer: () => void; onDanger: () => void;
   onStatus: (status: ResearchProject['status']) => Promise<void>;
 }) {
@@ -28,7 +29,7 @@ export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, 
     <section className="chat-detail-settings-section">
       <SettingGroup>
         <SettingRow title={t('research.name')} description={project.title}/>
-        {project.description && <SettingRow title={t('research.description')} description={project.description}/>}
+        <SettingRow title={t('research.description')} description={t('research.descriptionHint')} onClick={owner?onDescription:undefined} disabled={busy}/>
         <SettingSelect label={t('research.status')} disabled={!owner || busy} value={project.status} options={(['active','archived'] as const).map(value => ({ value, label: t(`research.${value}`) }))} onChange={onStatus}/>
         <SettingRow title={t('research.start')} value={project.start}/>
         <SettingRow title={t('research.end')} value={project.end || t('research.openEnd')}/>

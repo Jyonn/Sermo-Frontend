@@ -26,9 +26,16 @@ export function DateRangeSummary({ from, to, onEdit, legend, startLabel, endLabe
   </fieldset>;
 }
 
-export function DateRangeField() {
+export type ResearchDateRange = { from:string; to:string };
+
+export function DateRangeField({value,onChange}:{value?:ResearchDateRange;onChange?:(value:ResearchDateRange)=>void} = {}) {
   const { t } = useI18n();
-  const [range, setRange] = useState({ from: new Intl.DateTimeFormat('sv-SE').format(new Date()), to: '' });
+  const [local, setLocal] = useState({ from: new Intl.DateTimeFormat('sv-SE').format(new Date()), to: '' });
+  const range=value??local;
+  const setRange=(next:ResearchDateRange|((current:ResearchDateRange)=>ResearchDateRange))=>{
+    const result=typeof next==='function'?next(range):next;
+    setLocal(result);onChange?.(result);
+  };
   const [side, setSide] = useState<'from' | 'to' | null>(null);
   const [draft, setDraft] = useState(range.from);
   const [error, setError] = useState(false);

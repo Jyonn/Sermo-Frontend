@@ -44,7 +44,7 @@
   border-right: 1px solid var(--line-soft);
   background: var(--bg-elevated);
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 .management-nav > button {
   position: relative;

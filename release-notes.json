@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.7",
+  "id": "2026.10.28.8",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "更连贯的课题与任务体验",
+      "title": "更轻松的课题创建与阅读",
       "items": [
-        "桌面子窗口浮动打开，保留当前课题面板",
-        "课题与任务统一为进行中、已存档，列表无需切换筛选",
-        "任务进度复用广场评论布局，支持 Markdown 与分层回复"
+        "课题分步填写名称、时间和可跳过的 Markdown 说明，之后也能继续编辑",
+        "统一科研列表与导航按钮，概览展示重叠头像，阶段任务信息更清晰",
+        "Markdown 工具栏单行滑动，标题使用浮动菜单，统一隐藏滚动条"
       ]
     },
     "en": {
-      "title": "A smoother project and task experience",
+      "title": "Easier project setup and reading",
       "items": [
-        "Nested desktop drawers float above the current project",
-        "Projects and tasks use Active and Archived states without filter tabs",
-        "Task progress shares Square comment layouts with Markdown and threaded replies"
+        "Create projects step by step with optional, editable Markdown descriptions",
+        "Refined lists and header controls, overlapping member avatars and clearer task summaries",
+        "A scrollable single-row Markdown toolbar with floating heading choices and hidden scrollbars"
       ]
     }
   }

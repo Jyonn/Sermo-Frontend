@@ -28,7 +28,7 @@
 .growth-workspace .growth-milestone:disabled { opacity:1;cursor:default; }
 .growth-workspace .growth-milestone.is-earned { color:var(--text-muted);background:transparent; }
 .growth-atlas { display:grid;gap:24px;min-width:0;padding:18px; }
-.growth-atlas-levels { display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;padding:4px 2px 10px;scrollbar-width:thin; }
+.growth-atlas-levels { display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;padding:4px 2px 10px;scrollbar-width:none; }
 .growth-atlas-levels>button { position:relative;display:grid;align-content:center;gap:4px;flex:0 0 54px;min-height:72px;border:1px solid var(--line-soft);border-radius:14px;background:var(--bg-elevated);color:var(--text-muted);font-family:inherit;font-weight:700;font-size:18px;line-height:1.1;cursor:pointer; }
 .growth-atlas-levels>button>span { font-size:9px;font-weight:500; }.growth-atlas-levels i { height:9px;font-size:9px;font-style:normal; }
 .growth-atlas-levels>button.is-earned { color:var(--text-primary); }

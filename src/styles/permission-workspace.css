@@ -6,7 +6,7 @@
 .permission-search { display: flex; flex: 0 0 40px; align-items: center; gap: 8px; margin: 0 4px 12px; padding: 0 10px; border: 1px solid var(--line-soft); border-radius: 10px; color: var(--text-muted); background: var(--bg-elevated); }
 .permission-search > span { font-size: 19px; }
 .permission-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text-primary); background: transparent; font: inherit; font-size: 13px; }
-.permission-tree { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.permission-tree { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .permission-tree-row { --indent: calc(var(--permission-depth) * 12px); display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; margin-left: var(--indent); border-radius: 9px; color: var(--text-secondary); }
 .permission-tree-row:hover { background: color-mix(in srgb, var(--brand-primary) 5%, transparent); }
 .permission-tree-row.is-selected { color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 10%, transparent); }

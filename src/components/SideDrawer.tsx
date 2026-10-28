@@ -90,6 +90,7 @@ export function SideDrawer({
   const routeRequested = historyMode === "stack" && routeIndex >= 0;
   const visible = open || routeRequested;
   const registeredRef = useRef(false);
+  const adoptedRef = useRef(false);
   const onCloseRef = useRef(onClose);
   const onRouteOpenRef = useRef(onRouteOpen);
   onCloseRef.current = onClose;
@@ -100,7 +101,10 @@ export function SideDrawer({
     registerPanel({ id: drawerId, depth: routeIndex >= 0 ? routeIndex : (window.history.state?.sermoDrawerStack?.length ?? 0), wide: fullscreen });
     return () => unregisterPanel(drawerId);
   }, [visible, desktopPanel, drawerId, routeIndex, fullscreen, registerPanel, unregisterPanel]);
-  useEffect(() => () => { activeDrawerIds.delete(drawerId); }, [drawerId]);
+  useEffect(() => {
+    if (visible) activeDrawerIds.add(drawerId);
+    return () => { activeDrawerIds.delete(drawerId); };
+  }, [drawerId, visible]);
 
   const getDrawerStack = () => {
     const value = window.history.state?.sermoDrawerStack;
@@ -124,10 +128,14 @@ export function SideDrawer({
       onCloseRef.current();
       return;
     }
-    if (routeRequested && !registeredRef.current) {
+    if (routeRequested && (!registeredRef.current || adoptedRef.current)) {
       const nextPath = routePath.slice(0, routeIndex);
+      const nextStack = getDrawerStack().slice(0, routeIndex);
+      activeDrawerIds.delete(drawerId);
+      registeredRef.current = false;
+      adoptedRef.current = false;
       window.history.replaceState(
-        { ...window.history.state, sermoDrawerStack: [], sermoDrawerPath: nextPath },
+        { ...window.history.state, sermoDrawerStack: nextStack, sermoDrawerPath: nextPath },
         "",
         urlForDrawerPath(nextPath)
       );
@@ -159,6 +167,20 @@ export function SideDrawer({
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (historyMode === "route") return;
+    // Reattach route-backed parents after a reload or a portal remount.
+    if (open && routeRequested && (!registeredRef.current || !getDrawerStack().includes(drawerId))) {
+      const nextStack = getDrawerStack().slice(0, routePath.length);
+      nextStack[routeIndex] = drawerId;
+      window.history.replaceState(
+        { ...window.history.state, sermoDrawerStack: nextStack, sermoDrawerPath: routePath },
+        "",
+        urlForDrawerPath(routePath)
+      );
+      activeDrawerIds.add(drawerId);
+      registeredRef.current = true;
+      adoptedRef.current = true;
+      return;
+    }
     if (open && !routeRequested && !registeredRef.current) {
       const storedStack = getDrawerStack();
       const activeStack = storedStack.filter((item) => activeDrawerIds.has(item));
@@ -180,6 +202,7 @@ export function SideDrawer({
       );
       activeDrawerIds.add(drawerId);
       registeredRef.current = true;
+      adoptedRef.current = false;
       return;
     }
     if (!open && registeredRef.current) {
@@ -206,7 +229,7 @@ export function SideDrawer({
       activeDrawerIds.delete(drawerId);
       registeredRef.current = false;
     }
-  }, [drawerId, historyMode, open, routeKey, routeRequested]);
+  }, [drawerId, historyMode, open, routeKey, routeRequested, routeIndex, location.search]);
 
   useEffect(() => {
     if (!visible || historyMode === "route") return;

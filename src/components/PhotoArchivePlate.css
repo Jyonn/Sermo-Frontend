@@ -32,7 +32,7 @@
 .photo-preview-details[open] summary .material-symbols-outlined:last-child { transform:rotate(180deg); }
 .photo-preview-details summary:focus-visible { outline:2px solid var(--brand-primary);outline-offset:-2px;border-radius:8px; }
 .photo-preview-details-body { display:grid;gap:12px;padding:8px 0; }
-.photo-archive-plate.is-long .photo-archive-image-scroll { display:block;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;touch-action:pan-x pan-y; }
+.photo-archive-plate.is-long .photo-archive-image-scroll { display:block;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;touch-action:pan-x pan-y; }
 .photo-archive-plate.is-long .media-preview-image-shell { display:block;height:auto;min-height:100%; }
 .photo-archive-plate.is-long .message-image-preview { width:100%;height:auto;max-height:none; }
 .message-image-preview-modal.is-photo-archive { color:var(--text-primary);background:var(--bg-canvas); }

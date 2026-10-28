@@ -3536,7 +3536,7 @@ html[data-theme="dark"] body .growth-level-detail {
 }
 .pwa-account-entry-fixed-header,
 .pwa-account-entry-fixed-footer { position: relative; z-index: 2; }
-.pwa-account-entry-scroll { min-height: 0; padding: 4px 2px 18px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scroll-padding-block: 4px 18px; scroll-snap-type: y proximity; scrollbar-width: thin; }
+.pwa-account-entry-scroll { min-height: 0; padding: 4px 2px 18px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scroll-padding-block: 4px 18px; scroll-snap-type: y proximity; scrollbar-width: none; }
 
 .pwa-account-entry-brand { display: flex; align-items: center; gap: 11px; }
 .pwa-account-entry-brand img { width: 44px; height: 44px; border-radius: 13px; box-shadow: 0 8px 22px rgba(31, 80, 64, .13); }

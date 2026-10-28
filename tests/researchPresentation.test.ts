@@ -61,7 +61,38 @@ test('research uses framed avatars and one member picker rather than initial pla
   const people = source('components/ResearchPeople.tsx');
   assert.match(people, /chat-detail-member-grid/);
   assert.match(people, /name="member" value=\{id\}/);
-  assert.match(source('components/ResearchWorkspace.tsx'), /<ResearchMemberGrid/);
+  const overview=source('components/ResearchWorkspace.tsx');
+  assert.match(overview, /research-member-stack/);
+  assert.match(overview, /<UserAvatar/);
+  assert.match(overview, /frame=\{member.avatar_frame_style\}/);
+});
+
+test('project creation is progressive and description remains editable Markdown', () => {
+  const flow=source('components/ResearchCreateFlow.tsx');
+  assert.match(flow, /<InputDialog open=\{step==='name'\}/);
+  assert.match(flow, /<DateRangeField value=\{range\} onChange=\{setRange\}/);
+  assert.match(flow, /setStep\('description'\)/);
+  assert.match(flow, /description:skip\?'':description/);
+  assert.match(flow, /end:range.to\|\|null/);
+  assert.match(source('components/ResearchWorkspace.tsx'), /<Markdown body=\{project.description\}/);
+  assert.match(source('pages/ResearchPage.tsx'), /action:'settings',description:body.body/);
+  assert.match(source('components/ResearchProjectDetails.tsx'), /chat-detail-member-grid|<ResearchMemberGrid/);
+});
+
+test('Markdown tools are single-line, uniform and use a floating heading menu', () => {
+  const input=source('components/ResearchMarkdownInput.tsx');
+  assert.match(input, /<MarkdownHeadingMenu/);
+  assert.doesNotMatch(input, /SelectControl/);
+  const menu=source('components/MarkdownHeadingMenu.tsx');
+  assert.match(menu, /role="menu"/);
+  assert.match(menu, /\[1,2,3,4,5,6\]/);
+  assert.match(menu, /ArrowDown/);
+  const css=source('components/ResearchMarkdownInput.css');
+  assert.match(css, /flex-wrap:nowrap;overflow-x:auto/);
+  assert.match(css, /flex:0 0 36px/);
+  assert.match(source('components/ResearchPeople.tsx'), /chat-detail-member-avatar-add chat-detail-member-avatar-remove/);
+  assert.match(source('pages/ResearchPage.tsx'), /<HeaderIconButton/);
+  assert.match(source('components/ResearchWorkspace.tsx'), /<ResearchTaskItem/);
 });
 
 test('research preserves its root panel while nested drawers float, and shares Square comments', () => {
@@ -71,6 +102,7 @@ test('research preserves its root panel while nested drawers float, and shares S
   const panels=source('components/DesktopPanelWorkspace.tsx');
   assert.match(panels,/createPortal\(<div className=\{.*detached-drawer-slot/);
   assert.match(panels,/document.body\) : null/);
+  assert.match(source('components/SideDrawer.tsx'), /nextStack\[routeIndex\] = drawerId/);
   assert.doesNotMatch(page,/taskFilter|<DrawerTabs/);
   assert.doesNotMatch(source('components/ResearchWorkspace.tsx'),/<PageTabs/);
   assert.match(source('components/ResearchComments.tsx'),/<CommentThread/);

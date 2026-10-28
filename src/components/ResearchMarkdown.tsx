@@ -1,4 +1,5 @@
 import React from 'react';
+import './ResearchMarkdown.css';
 export function safeUrl(url: string) { return /^https?:\/\//i.test(url) ? url : undefined; }
 function inline(text: string): React.ReactNode[] {
   return text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g).map((part,i)=>{
