@@ -85,7 +85,7 @@
 .research-page .v3-md-table th,.research-page .v3-md-table td{padding:10px 14px;border-bottom:1px solid var(--line-soft);text-align:left;min-width:100px}
 .research-page .v3-markdown a{color:var(--brand-primary)}
 /* Research uses the same flat lists and restrained navigation as chat and contacts. */
-.research-page{color:var(--text-primary);background:var(--bg-elevated);container-type:inline-size}
+.research-page{color:var(--text-primary);container-type:inline-size}
 @media(min-width:720px){.desktop-tab-shell>.research-page{width:min(100%,1160px);max-width:1160px;margin-inline:auto;padding:0;overflow:hidden}.desktop-tab-shell>.research-page>.tab-sticky-header{width:100%;margin:0;padding-inline:24px}}
 .research-page .ghost-button,.research-overview-actions .button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .research-page .material-symbols-outlined{flex-shrink:0;font-size:21px}

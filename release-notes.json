@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.28.11",
+  "id": "2026.10.28.12",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "更顺手的说明与进度编辑",
+      "title": "统一科研背景与广场空状态",
       "items": [
-        "Markdown 预览固定可见，手机从课题详情直接进入全屏说明编辑",
-        "任务进度改为评论式输入入口，修复评论等级标志与昵称错位"
+        "科研页移除独立背景，与其他 Tab 保持一致",
+        "好友圈无内容时展示“还没有发言”，不再提示在线人数"
       ]
     },
     "en": {
-      "title": "Smoother descriptions and progress updates",
+      "title": "Consistent research and empty feed styling",
       "items": [
-        "Markdown preview stays visible; project details open directly into full-screen editing on phones",
-        "Progress updates use a compact comment-style entry; comment level badges stay beside names"
+        "Research uses the same background as other tabs",
+        "Empty friend feeds now show no statements instead of online status"
       ]
     }
   }

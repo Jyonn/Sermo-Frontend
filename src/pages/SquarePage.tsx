@@ -2291,7 +2291,7 @@ export default function SquarePage() {
           {loading ? <ContentLoader label={t("common.loading")} rows={2} /> : null}
           {!loading && !statements.length && !error ? (
             <QuietState
-              icon={hasFeedFilters ? "search_off" : feedMode === "mine" ? "edit_note" : "explore"}
+              icon={hasFeedFilters ? "search_off" : "edit_note"}
               title={hasFeedFilters ? t("square.searchEmpty") : feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : feedMode === "mine" ? t("square.mineEmpty") : t("square.empty")}
               description={hasFeedFilters ? t("square.searchEmptyHint") : feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
