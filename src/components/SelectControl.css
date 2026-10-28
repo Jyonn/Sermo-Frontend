@@ -1,6 +1,9 @@
 .setting-select-trigger{display:flex;align-items:center;gap:12px;min-width:0;min-height:54px;width:100%;padding:14px;border:0;border-radius:12px;background:transparent;color:var(--text-primary);font:inherit;text-align:left;box-shadow:none;cursor:pointer}
 .setting-select.setting-select-trigger{min-width:0}
 .guest-language-tool>.setting-select-trigger,.management-language-control>.setting-select-trigger{min-height:32px;padding:4px 6px;border:0;background:transparent}
+body .guest-language-tool:has(>.setting-select-trigger),.management-header-actions>.management-language-control:has(>.setting-select-trigger){display:flex;align-items:center;justify-content:center;gap:4px;width:auto;flex-basis:auto;padding-inline:8px}
+.landing-facade-topbar .guest-language-tool:has(>.setting-select-trigger){width:auto;flex-basis:auto}
+.guest-language-tool .setting-select-trigger>.setting-select-value,.management-language-control .setting-select-trigger>.setting-select-value{max-width:9ch}
 .setting-select-label{flex:1;min-width:0;font-size:14px;font-weight:700;line-height:1.6;overflow-wrap:anywhere}
 .setting-select-value{min-width:0;max-width:50%;color:var(--text-muted);font-size:13px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .setting-select-trigger>.setting-row-chevron{font-size:20px;color:var(--text-muted);flex-shrink:0}
@@ -27,5 +30,6 @@
 .option-picker-error,.option-picker-status{flex-shrink:0;margin:0;padding:12px 24px;font-size:13px;line-height:1.7}.option-picker-error{color:var(--danger)}.option-picker-status{color:var(--text-muted)}
 .app-page-tabs-trailing .setting-select-trigger.is-compact>.setting-select-value{max-width:12ch}
 @media(max-width:719px){.option-picker-backdrop{padding:18px}.option-picker-dialog{border-radius:20px;max-height:80dvh}.option-picker-search input{font-size:16px}.setting-select-label{font-size:14px}}
+@media(max-width:480px){.guest-language-tool .setting-select-trigger>.setting-select-value,.management-language-control .setting-select-trigger>.setting-select-value{display:none}.guest-language-tool>.setting-select-trigger,.management-language-control>.setting-select-trigger{padding-inline:0;gap:0}}
 @media(max-height:500px){.option-picker-dialog{max-height:calc(100dvh - 24px)}.option-picker-backdrop{padding:12px}.option-picker-dialog>header{padding:12px 18px}.option-picker-list>button{min-height:44px;padding-block:10px}}
 @media(prefers-reduced-motion:reduce){.option-picker-dialog{animation:none}}
