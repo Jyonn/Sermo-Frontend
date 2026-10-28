@@ -11,6 +11,7 @@ import { SideDrawer } from './SideDrawer';
 import { ConfirmDialog } from './ConfirmDialog';
 import { SelectControl } from './SettingRow';
 import { MarkdownInput } from './ResearchMarkdownInput';
+import { DrawerTabs } from './DrawerTabs';
 import './ResearchCalendar.css';
 
 export function ResearchCalendar({ project, userId }: { project: ResearchProject; userId: number }) {
@@ -30,6 +31,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
   const [range, setRange] = useState<CalendarRange | null>(null);
   const [meetings,setMeetings]=useState<ResearchMeeting[]>([]);
   const [resume,setResume]=useState<ResearchMeeting|null>(null);
+  const [view,setView]=useState('schedule');
   const generation = useRef(0);
   const errorText = (code: string) => {
     const key = 'research.calendarUI.error.' + code;
@@ -85,15 +87,16 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
   const active = setup?.status === 'active';
   return <section className="research-calendar">
     <header className="research-calendar-controls">
-      <p>{tr('intro')}</p>
-      <button className="ghost-button" onClick={() => setTick(n => n + 1)} disabled={loading}>{t('common.retry')}</button>
-      {active && <button className="ghost-button" onClick={() => setSettingsOpen(true)}>{tr('visibility')}</button>}
+      <DrawerTabs label={t('research.calendar')} value={view} onChange={setView} items={[{value:'schedule',label:tr('schedule')},{value:'meetings',label:tr('meetings')}]}/>
+      <div className="research-calendar-tools"><button className="ghost-button" onClick={() => setTick(n => n + 1)} disabled={loading} aria-label={t('common.retry')}><span className="material-symbols-outlined" aria-hidden="true">refresh</span></button>
+      {active && <button className="ghost-button" onClick={() => setSettingsOpen(true)} aria-label={tr('visibility')}><span className="material-symbols-outlined" aria-hidden="true">tune</span><span>{tr('visibility')}</span></button>}</div>
     </header>
     {error && <p className="research-error" role="alert">{error}</p>}
-    {active && <div className="research-calendar-members" role="group" aria-label={tr('members')}>
+    {view==='schedule'&&<><p className="research-calendar-hint">{tr('intro')}</p>{active && <div className="research-calendar-members" role="group" aria-label={tr('members')}>
       {project.members.map(member => <label key={member.id}>
         <input type="checkbox" checked={selected.includes(member.id)} disabled={loading || (!selected.includes(member.id) && selected.length >= 20)}
           onChange={e => setSelected(ids => e.target.checked ? [...ids, member.id] : ids.filter(id => id !== member.id))} />
+        <span className="research-person-initial" aria-hidden="true">{Array.from(member.name)[0]}</span>
         {member.id === userId ? tr('self') : member.name}
       </label>)}
     </div>}
@@ -105,7 +108,8 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     </div> : !selected.length ? <p className="research-muted">{tr('choose')}</p> : displays?.displays.length ? <CalendarFrame
       url={displays.displays[0].url} ids={displays.displays.map(d => d.id)} date={new Date().toLocaleDateString('en-CA')}
       onRange={value=>{setResume(null);setRange(value);}} onRenew={() => setTick(n => n + 1)} /> : null}
-    {!!meetings.length&&<section className="research-meetings"><h3>{tr('meetings')}</h3>{meetings.map(item=><article key={item.id}><div><strong>{item.title}</strong><p>{new Date(item.start).toLocaleString()} → {new Date(item.end).toLocaleString()}</p><small>{tr('meetingStatus.'+item.status)}</small></div>{item.invitation_id?<a className="ghost-button" href={`${chronelleOrigin()}/#/invitations/${item.invitation_id}`} target="_blank" rel="noreferrer">{tr('openInvitation')}</a>:item.creator_id===userId?<button className="ghost-button" onClick={()=>{setResume(item);setRange({start:item.start,end:item.end,timezone:item.timezone,all_day:item.all_day});}}>{tr('retryMeeting')}</button>:null}</article>)}</section>}
+    </>}
+    {view==='meetings'&&<section className="research-meetings">{meetings.length?meetings.map(item=><article key={item.id}><span className="research-meeting-date"><strong>{new Date(item.start).getDate()}</strong><small>{new Date(item.start).toLocaleDateString(undefined,{month:'short'})}</small></span><div><strong>{item.title}</strong><p>{new Date(item.start).toLocaleString()} → {new Date(item.end).toLocaleString()}</p><small className="research-status">{tr('meetingStatus.'+item.status)}</small></div>{item.invitation_id?<a className="ghost-button" href={`${chronelleOrigin()}/#/invitations/${item.invitation_id}`} target="_blank" rel="noreferrer">{tr('openInvitation')}<span className="material-symbols-outlined" aria-hidden="true">north_east</span></a>:item.creator_id===userId?<button className="ghost-button" onClick={()=>{setResume(item);setRange({start:item.start,end:item.end,timezone:item.timezone,all_day:item.all_day});}}>{tr('retryMeeting')}</button>:null}</article>):<div className="research-calendar-state"><span className="material-symbols-outlined" aria-hidden="true">event_available</span><h2>{tr('noMeetings')}</h2><p>{tr('meetingHint')}</p><button className="ghost-button" onClick={()=>setView('schedule')}>{tr('schedule')}</button></div>}</section>}
 
     <SideDrawer open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
       <div className="research-form">
@@ -123,7 +127,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     <ConfirmDialog open={revokeOpen} onClose={() => setRevokeOpen(false)} title={tr('unbind')} description={tr('unbindHint')} danger busy={busy} onConfirm={() => {
       setBusy(true); void api.chronelleAccount('revoke', true).then(() => { setDisplays(null); setSettingsOpen(false); setRevokeOpen(false); setTick(n => n + 1); }).catch(e => {setRevokeOpen(false);setSettingsOpen(false);setError(errorText(e.message));}).finally(() => setBusy(false));
     }} />
-    <SideDrawer open={!!range} onClose={() => setRange(null)} title={tr('meeting')}>
+    <SideDrawer open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
     </SideDrawer>
   </section>;

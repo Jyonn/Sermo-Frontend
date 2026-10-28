@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.27.14",
-  "publishedAt": "2026-10-27",
+  "id": "2026.10.28.1",
+  "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "科研接入 Chronelle 日程与会议",
+      "title": "科研工作区焕新",
       "items": [
-        "完成 Chronelle 完整授权后，可查看本人日程并勾选课题成员合并查看",
-        "确认时间段后可发送多人会议邀请，支持结果核对，避免重复创建",
-        "日程类别组默认向课题成员隐藏，可由本人开放详情或仅忙闲"
+        "科研首页直接浏览并筛选课题，概览集中展示任务进度与课题组",
+        "阶段任务采用清晰的列表与详情布局，进度和回复统一使用 Markdown 编辑器",
+        "日程与会议记录分开展示，优化手机横竖屏及深色模式排版"
       ]
     },
     "en": {
-      "title": "Chronelle calendars and research meetings",
+      "title": "A clearer research workspace",
       "items": [
-        "Bind Chronelle with explicit full authorization to view your calendar and merge selected project members",
-        "Confirm a time range to send meeting invitations, with safe delivery checks to prevent duplicates",
-        "Calendar groups are hidden from project members by default; choose details or busy-only visibility"
+        "Browse and filter projects directly, with task progress and team information in a new overview",
+        "Read tasks in a focused list and detail layout, with shared Markdown editors for progress and replies",
+        "Separate calendars from meeting records, with improved portrait, landscape and dark-mode layouts"
       ]
     }
   }
