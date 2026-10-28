@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.29.1",
+  "id": "2026.10.29.2",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "科研工作区更聚焦",
+      "title": "科研手机端显示优化",
       "items": [
-        "进入科研直接打开当前课题，通过顶部切换或管理课题，不再常驻课题列表",
-        "任务导航更紧凑，详情信息集中展示，进度记录为主体，输入栏固定底部"
+        "修复手机端科研顶部未铺满屏幕的问题，保留内容两侧的舒适间距"
       ]
     },
     "en": {
-      "title": "A more focused research workspace",
+      "title": "Improved mobile research layout",
       "items": [
-        "Open directly into your current project, with switching and management in the header",
-        "Compact task navigation, clearer details and a bottom-docked progress composer"
+        "Fixed the research header to span the mobile screen while preserving comfortable content spacing"
       ]
     }
   }

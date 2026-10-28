@@ -41,8 +41,10 @@
   .research-task-detail .research-comment-send>.ghost-button{min-height:32px;padding:4px 8px}
 }
 @media(max-width:719px){
+  .shell-no-topbar.research-workspace-shell{width:100%;margin-inline:0}
+  .desktop-tab-shell>.research-direct-workspace>.tab-sticky-header{width:100%;margin-inline:0;padding-inline:24px;border-radius:0}
   .desktop-tab-shell>.research-direct-workspace>.tab-sticky-header>.page-toolbar{height:48px;min-height:48px}
-  .desktop-tab-shell>.research-direct-workspace{height:100dvh;min-height:0;padding-bottom:calc(78px + env(safe-area-inset-bottom));box-sizing:border-box}
+  .desktop-tab-shell>.research-direct-workspace{height:100dvh;min-height:0;padding-inline:0;padding-bottom:calc(78px + env(safe-area-inset-bottom));box-sizing:border-box}
   .research-current-project{gap:8px;min-height:52px;padding-bottom:8px}
   .research-current-project>div{gap:8px}
   .research-current-project strong{font-size:15px}
