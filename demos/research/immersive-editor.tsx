@@ -38,7 +38,7 @@ function Demo(){
       <section className="immersive-surface" aria-label="课题说明编辑器">
         <div className="immersive-topbar"><span className="immersive-label">Markdown</span><button type="button" onPointerDown={event=>event.preventDefault()} onClick={done}>完成<span className="material-symbols-outlined" aria-hidden="true">keyboard_hide</span></button></div>
         <div className="immersive-content" onFocusCapture={event=>{if(event.target instanceof HTMLTextAreaElement){setEditing(true);setSaved(false);}}}>
-          <MarkdownInput value={body} onChange={setBody} rows={10}/>
+          <MarkdownInput value={body} onChange={setBody} rows={10} mobileImmersive={false}/>
         </div>
       </section>
       <footer className="demo-footer"><span role="status">{saved?'已保存本次演示内容':'仅交互演示，不修改真实课题'}</span><button type="button" className="button" onClick={()=>setSaved(true)}>保存说明</button></footer>

@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.28.9",
+  "id": "2026.10.28.10",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "更紧凑的课题说明编辑",
+      "title": "手机 Markdown 沉浸编辑",
       "items": [
-        "课题说明改用居中模态框，新建和编辑保持一致",
-        "编辑区贴合弹框边缘，减少留白，并适配横竖屏和深色模式"
+        "手机聚焦 Markdown 输入后进入沉浸编辑，工具栏随键盘显示",
+        "支持横屏和深色模式，点击完成返回原页面，电脑端保持原有编辑方式"
       ]
     },
     "en": {
-      "title": "A more compact description editor",
+      "title": "Immersive Markdown on mobile",
       "items": [
-        "Create and edit project descriptions in the same centered modal",
-        "Edge-to-edge editing with less padding, adapted for portrait, landscape and dark mode"
+        "Focus a Markdown field on your phone for distraction-free editing with formatting tools",
+        "Supports landscape and dark mode; Done returns to the form while desktop editing stays unchanged"
       ]
     }
   }

@@ -4,9 +4,11 @@ import { useI18n, type TranslationKey } from '../lib/language';
 import { insertMarkdown, markdownTable } from '../lib/researchMarkdownEdit';
 import { MarkdownHeadingMenu } from './MarkdownHeadingMenu';
 import { TablePicker } from './ResearchTablePicker';
+import { useMobileMarkdownEditor } from '../lib/useMobileMarkdownEditor';
 import './ResearchMarkdownInput.css';
+import './MobileMarkdownEditor.css';
 
-export function MarkdownInput({ value, initialValue = '', onChange, required = false, rows = 6 }: { value?: string; initialValue?:string; onChange?: (value: string) => void; required?: boolean; rows?: number }) {
+export function MarkdownInput({ value, initialValue = '', onChange, required = false, rows = 6, mobileImmersive = true }: { value?: string; initialValue?:string; onChange?: (value: string) => void; required?: boolean; rows?: number; mobileImmersive?: boolean }) {
   const {t:translate}=useI18n();
   const t=(key:string)=>translate(('research.md.'+key) as TranslationKey);
   const [local, setLocal] = useState(initialValue);
@@ -17,6 +19,8 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
   const tableAnchor=useRef<HTMLButtonElement>(null);
   const selection=useRef({start:0,end:0});
   const ref = useRef<HTMLTextAreaElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const immersive = useMobileMarkdownEditor(root, mobileImmersive);
   const body = value ?? local;
   function change(next: string) { setLocal(next); onChange?.(next); }
   function insert(before: string, after = '', fallback = t('mdText')) {
@@ -33,7 +37,8 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
     ['format_list_bulleted', 'mdList', '\n- ', ''], ['format_list_numbered', 'mdOrdered', '\n1. ', ''],
     ['code', 'mdCode', '`', '`'], ['data_object', 'mdBlock', '\n```\n', '\n```\n'],
   ] as const;
-  return <div className="v3-md-input">
+  return <div ref={root} className={`v3-md-input${immersive.mobile?' v3-md-mobile':''}${immersive.active?' v3-md-immersive':''}`} role={immersive.active?'dialog':undefined} aria-modal={immersive.active||undefined} aria-label={immersive.active?t('body'):undefined}>
+    {immersive.active&&<button type="button" className="v3-md-done" onMouseDown={event=>event.preventDefault()} onClick={()=>{setHeadingOpen(false);setTableOpen(false);immersive.close();}}>{translate('common.done')}<span className="material-symbols-outlined" aria-hidden="true">keyboard_hide</span></button>}
     <div className="v3-md-toolbar" role="toolbar" aria-label={t('mdTools')}>
       <button type="button" ref={headingAnchor} title={t('mdHeading')} aria-label={t('mdHeading')} aria-haspopup="menu" aria-expanded={headingOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{setTableOpen(false);setHeadingOpen(!headingOpen);}}><span className="material-symbols-outlined" aria-hidden="true">format_h1</span></button>
       {headingOpen&&<MarkdownHeadingMenu anchor={headingAnchor} label={t('mdHeading')} onClose={()=>setHeadingOpen(false)} onSelect={level=>{insert(`\n${'#'.repeat(level)} `);setHeadingOpen(false);}}/>}
@@ -42,7 +47,7 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
       {tableOpen&&<TablePicker anchor={tableAnchor} onClose={()=>setTableOpen(false)} onSelect={(x,y)=>{const {start,end}=selection.current;const text=markdownTable(x,y,t('mdColumn'));change(body.slice(0,start)+text+body.slice(end));setTableOpen(false);requestAnimationFrame(()=>{ref.current?.focus();ref.current?.setSelectionRange(start+text.length,start+text.length);});}}/>}
       <button className="v3-md-preview-toggle" type="button" title={t(preview ? 'edit' : 'previewMd')} aria-label={t(preview ? 'edit' : 'previewMd')} aria-pressed={preview} onClick={() => {setHeadingOpen(false);setTableOpen(false);setPreview(!preview);}}><span className="material-symbols-outlined" aria-hidden="true">{preview?'edit':'visibility'}</span></button>
     </div>
-    <textarea ref={ref} name="body" aria-label={t('body')} rows={rows} maxLength={20000} required={required} value={body} onChange={e => change(e.target.value)} onInvalid={e => { if(preview) { e.preventDefault(); setPreview(false); requestAnimationFrame(() => { ref.current?.focus(); ref.current?.reportValidity(); }); } }} hidden={preview} placeholder={t('mdPlaceholder')}/>
+    <textarea ref={ref} name="body" aria-label={t('body')} rows={rows} maxLength={20000} required={required} value={body} onFocus={immersive.focus} onPointerDown={immersive.start} onChange={e => change(e.target.value)} onInvalid={e => { if(preview) { e.preventDefault(); setPreview(false); requestAnimationFrame(() => { ref.current?.focus(); ref.current?.reportValidity(); }); } }} hidden={preview} placeholder={t('mdPlaceholder')}/>
     {preview && <div className="v3-editor-preview"><Markdown body={body || t('empty')}/></div>}
   </div>;
 }
