@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.5",
+  "id": "2026.10.28.6",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "课题详情与聊天详情更统一",
+      "title": "科研协作流程与布局升级",
       "items": [
-        "课题详情采用成员网格与分组操作栏，减少重复标题和多余留白",
-        "集中展示课题信息、状态和时间，底部独立放置转让与退出操作",
-        "统一横竖屏和深色模式的阅读体验"
+        "课题采用列表与详情面板，群聊可直接在科研内打开",
+        "好友接受邀请卡片后才加入课题，随后引导连接日历和确认全局忙闲权限",
+        "支持类别组精细权限，优化负责人转让入口、任务日期和统一空状态"
       ]
     },
     "en": {
-      "title": "Project details aligned with chat details",
+      "title": "A more cohesive research workspace",
       "items": [
-        "Member grids and grouped action rows replace excessive spacing and repeated headings",
-        "Project information, status and dates stay together, with ownership and exit actions below",
-        "Consistent portrait, landscape and dark mode layouts"
+        "Projects open beside the list, with real group conversations inside research",
+        "Join through invitation cards, then connect your calendar and confirm global busy/free sharing",
+        "Fine-tune category permissions with clearer ownership actions, dates and empty states"
       ]
     }
   }

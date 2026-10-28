@@ -1561,6 +1561,7 @@ export interface SubmissionRecipientDTO {
 }
 
 export interface SubmissionInviteDTO {
+  project?: { id: number; title: string };
   invite_id: number;
   chat_id: number;
   role: Exclude<SubmissionRole, "member">;

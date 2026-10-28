@@ -9,14 +9,15 @@ import { CalendarFrame } from './ChronelleFrame';
 import { ChronellePluginDialog } from './ChronellePluginDialog';
 import { SideDrawer } from './SideDrawer';
 import { ConfirmDialog } from './ConfirmDialog';
-import { SettingSelect } from './SettingRow';
+import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from './SettingRow';
+import { QuietState } from './BoundaryState';
 import { MarkdownInput } from './ResearchMarkdownInput';
 import { DrawerTabs } from './DrawerTabs';
 import { UserAvatar } from './UserAvatar';
 import { MemberPickerSheet } from './MemberPickerSheet';
 import './ResearchCalendar.css';
 
-export function ResearchCalendar({ project, userId }: { project: ResearchProject; userId: number }) {
+export function ResearchCalendar({ project, userId, onboarding=false, onOnboarded }: { project: ResearchProject; userId: number; onboarding?:boolean;onOnboarded?:()=>void }) {
   const { t } = useI18n();
   const tr = (key: string) => t(('research.calendarUI.' + key) as TranslationKey);
   const [setup, setSetup] = useState<CalendarSetup | null>(null);
@@ -28,6 +29,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
   const [busy, setBusy] = useState(false);
   const [tick, setTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [defaultBusy,setDefaultBusy]=useState(true),[advanced,setAdvanced]=useState(false);
   const [consent, setConsent] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [range, setRange] = useState<CalendarRange | null>(null);
@@ -48,6 +50,8 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     api.researchCalendar(project.id, controller.signal).then(value => {
       if (controller.signal.aborted) return;
       setSetup(value); setPolicy(value.policy);
+      setDefaultBusy(value.default_busy ?? true);
+      if(onboarding&&value.status==='active'&&!value.policy_configured)setSettingsOpen(true);
     }).catch(e => { if (!controller.signal.aborted) setError(e.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -81,8 +85,9 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
   async function savePolicy() {
     setBusy(true); setError('');
     try {
-      await api.researchCalendarAction(project.id, { action: 'policy', ...policy });
+      await api.researchCalendarAction(project.id, { action: 'policy', ...policy, default_busy:defaultBusy });
       setSettingsOpen(false); setTick(n => n + 1);
+      onOnboarded?.();
     } catch (e) { setError(errorText(e instanceof Error ? e.message : 'unavailable')); }
     finally { setBusy(false); }
   }
@@ -95,7 +100,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
       {active && <button className="ghost-button" onClick={() => setSettingsOpen(true)} aria-label={tr('visibility')}><span className="material-symbols-outlined" aria-hidden="true">tune</span><span>{tr('visibility')}</span></button>}</div>
     </header>
     {error && <p className="research-error" role="alert">{error}</p>}
-    {view==='schedule'&&<><p className="research-calendar-hint">{tr('intro')}</p>{active && <div className="research-calendar-members" role="group" aria-label={tr('members')}>
+    {view==='schedule'&&<>{active && <div className="research-calendar-members" role="group" aria-label={tr('members')}>
       {project.members.map(member => <label key={member.id}>
         <input type="checkbox" checked={selected.includes(member.id)} disabled={loading || (!selected.includes(member.id) && selected.length >= 20)}
           onChange={e => setSelected(ids => e.target.checked ? [...ids, member.id] : ids.filter(id => id !== member.id))} />
@@ -104,25 +109,22 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
       </label>)}
       <button type="button" className="ghost-button" disabled={loading} onClick={()=>setMemberPicker(true)}><span className="material-symbols-outlined" aria-hidden="true">group_add</span>{t('research.selectMembers')}</button>
     </div>}
-    {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <div className="research-calendar-state">
-      <span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>
-      <h2>{errorText(setup?.status || 'chronelle_unavailable')}</h2>
-      <p>{tr('bindingHint')}</p>
-      {setup?.status !== 'integration_not_configured' && <button className="button" onClick={() => {sessionStorage.setItem(`chronelle:return-project:${userId}`,String(project.id));setConsent(true);}}>{tr('bind')}</button>}
-    </div> : !selected.length ? <p className="research-muted">{tr('choose')}</p> : displays?.displays.length ? <CalendarFrame
+    {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <QuietState icon="calendar_month" title={onboarding&&setup?.status==='binding_required'?t('research.connectCalendar'):errorText(setup?.status || 'chronelle_unavailable')} description={tr('bindingHint')} action={setup?.status !== 'integration_not_configured' ? <button className="button" onClick={() => {sessionStorage.setItem(`chronelle:return-project:${userId}`,String(project.id));setConsent(true);}}>{tr('bind')}</button> : undefined}/>
+    : !selected.length ? <QuietState icon="event_available" title={tr('choose')} description={tr('intro')}/> : displays?.displays.length ? <CalendarFrame
       url={displays.displays[0].url} ids={displays.displays.map(d => d.id)} date={new Date().toLocaleDateString('en-CA')}
       onRange={value=>{setResume(null);setRange(value);}} onRenew={() => setTick(n => n + 1)} /> : null}
     </>}
     {view==='meetings'&&<section className="research-meetings">{meetings.length?meetings.map(item=><article key={item.id}><span className="research-meeting-date"><strong>{new Date(item.start).getDate()}</strong><small>{new Date(item.start).toLocaleDateString(undefined,{month:'short'})}</small></span><div><strong>{item.title}</strong><p>{new Date(item.start).toLocaleString()} → {new Date(item.end).toLocaleString()}</p><small className="research-status">{tr('meetingStatus.'+item.status)}</small></div>{item.invitation_id?<a className="ghost-button" href={`${chronelleOrigin()}/#/invitations/${item.invitation_id}`} target="_blank" rel="noreferrer">{tr('openInvitation')}<span className="material-symbols-outlined" aria-hidden="true">north_east</span></a>:item.creator_id===userId?<button className="ghost-button" onClick={()=>{setResume(item);setRange({start:item.start,end:item.end,timezone:item.timezone,all_day:item.all_day});}}>{tr('retryMeeting')}</button>:null}</article>):<div className="research-calendar-state"><span className="material-symbols-outlined" aria-hidden="true">event_available</span><h2>{tr('noMeetings')}</h2><p>{tr('meetingHint')}</p><button className="ghost-button" onClick={()=>setView('schedule')}>{tr('schedule')}</button></div>}</section>}
 
     {memberPicker&&<MemberPickerSheet title={tr('members')} initial={selected} members={project.members.map(member=>({...member,description:member.id===userId?tr('self'):undefined}))} limit={20} onClose={()=>setMemberPicker(false)} onApply={setSelected}/>}
-    <SideDrawer open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
+    <SideDrawer historyKey="research-calendar-permissions" open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
       <div className="research-form">
         <p className="research-muted">{tr('policyHint')}</p>
-        {setup?.groups.map(group => <SettingSelect key={group.id} label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
+        <SettingGroup><SettingRow title={t('research.defaultBusy')} description={t('research.defaultBusyHint')} trailing={<SettingSwitch checked={defaultBusy} label={t('research.defaultBusy')} disabled={busy} onChange={value=>{setDefaultBusy(value);setPolicy({detail:[],busy:value?setup?.groups.map(g=>g.id)||[]:[]});}}/>}/><SettingRow title={t('research.finePermissions')} onClick={()=>setAdvanced(value=>!value)}/></SettingGroup>
+        {advanced&&<SettingGroup>{setup?.groups.map(group => <SettingSelect key={group.id} disabled={busy} label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
             options={['hidden', 'busy', 'detail'].map(value => ({ value, label: tr(value) }))}
             onChange={value => setPolicy(current => ({ detail: [...current.detail.filter(id => id !== group.id), ...(value === 'detail' ? [group.id] : [])], busy: [...current.busy.filter(id => id !== group.id), ...(value === 'busy' ? [group.id] : [])] }))} />
-        )}
+        )}</SettingGroup>}
         <button className="button" disabled={busy} onClick={() => void savePolicy()}>{t('research.save')}</button>
         <button className="ghost-button" onClick={() => setRevokeOpen(true)}>{tr('unbind')}</button>
       </div>
@@ -131,7 +133,7 @@ export function ResearchCalendar({ project, userId }: { project: ResearchProject
     <ConfirmDialog open={revokeOpen} onClose={() => setRevokeOpen(false)} title={tr('unbind')} description={tr('unbindHint')} danger busy={busy} onConfirm={() => {
       setBusy(true); void api.chronelleAccount('revoke', true).then(() => { setDisplays(null); setSettingsOpen(false); setRevokeOpen(false); setTick(n => n + 1); }).catch(e => {setRevokeOpen(false);setSettingsOpen(false);setError(errorText(e.message));}).finally(() => setBusy(false));
     }} />
-    <SideDrawer open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
+    <SideDrawer historyKey="research-meeting-create" open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
     </SideDrawer>
   </section>;

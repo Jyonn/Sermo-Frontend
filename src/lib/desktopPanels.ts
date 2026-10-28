@@ -1,8 +1,8 @@
 export type DesktopPanelMode = "floating" | "split" | null;
 
 export function desktopPanelMode(pathname: string): DesktopPanelMode {
-  if (/^\/app\/(menu|notifications|developer)(?:\/|$)/.test(pathname)) return "split";
-  if (/^\/app\/(chats|square|submissions|research)(?:\/|$)/.test(pathname)) return "floating";
+  if (/^\/app\/(menu|notifications|developer|research)(?:\/|$)/.test(pathname)) return "split";
+  if (/^\/app\/(chats|square|submissions)(?:\/|$)/.test(pathname)) return "floating";
   if (/^\/(admin|space\/dashboard)(?:\/|$)/.test(pathname)) return "floating";
   return null;
 }

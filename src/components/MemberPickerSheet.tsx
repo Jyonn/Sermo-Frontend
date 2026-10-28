@@ -5,7 +5,7 @@ import { BottomSheet } from './BottomSheet';
 import { UserAvatar } from './UserAvatar';
 import './SelectionSheet.css';
 
-export type PickerMember = { id: number; name: string; avatar_uri?: string; avatar_cache_key?: string; avatar_frame_style?: AvatarFrameStyle; description?: string; locked?: boolean };
+export type PickerMember = { id: number; name: string; avatar_uri?: string; avatar_cache_key?: string; avatar_frame_style?: AvatarFrameStyle; description?: string; locked?: boolean; lockedLabel?:string };
 
 export function MemberPickerSheet({ title, members, initial, onClose, onApply, limit, error, actionLabel, allowEmpty = true }: {
   title: string; members: PickerMember[]; initial: number[]; onClose: () => void;
@@ -36,7 +36,7 @@ export function MemberPickerSheet({ title, members, initial, onClose, onApply, l
         return <button type="button" key={member.id} className={`simple-row person-row checkbox-person-row${member.locked ? ' is-locked' : ''}`} aria-pressed={checked} disabled={disabled} onClick={() => setSelected(ids => checked ? ids.filter(id => id !== member.id) : [...ids, member.id])}>
           <UserAvatar className="mini-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style}/>
           <div className="row-main"><strong>{member.name}</strong>{member.description && <div className="row-subtle">{member.description}</div>}</div>
-          {member.locked ? <span className="member-picker-status member-picker-status-locked">{t('chat.alreadyInGroup')}</span> : <span className={`member-picker-check${checked ? ' is-selected' : ''}`} aria-hidden="true"/>}
+          {member.locked ? <span className="member-picker-status member-picker-status-locked">{member.lockedLabel||t('chat.alreadyInGroup')}</span> : <span className={`member-picker-check${checked ? ' is-selected' : ''}`} aria-hidden="true"/>}
         </button>;
       })}</div>
       {!candidates.length && <p className="research-muted">{t('research.noMatchingMembers')}</p>}

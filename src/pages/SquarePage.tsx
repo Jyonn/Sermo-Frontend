@@ -2120,7 +2120,7 @@ export default function SquarePage() {
         {comments.length ? <div className="square-comments-sort" role="group" aria-label={t("square.commentSortLabel")}><button className={commentSort === "hot" ? "is-active" : ""} onClick={() => setCommentSort("hot")} type="button">{t("square.commentsHot")}</button><button className={commentSort === "latest" ? "is-active" : ""} onClick={() => setCommentSort("latest")} type="button">{t("square.commentsLatest")}</button></div> : null}
       </div>
       {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
-      {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
+      {!commentsLoading && !comments.length ? <QuietState icon="forum" title={t("square.noComments")} description={canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}/> : null}
       <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
       {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
         if (commentStatementId === null) return;

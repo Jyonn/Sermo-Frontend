@@ -4,10 +4,11 @@ import { useI18n } from '../lib/language';
 import { ResearchMemberGrid } from './ResearchPeople';
 import { SettingGroup, SettingRow, SettingSelect } from './SettingRow';
 
-export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, onRemove, onTransfer, onDanger, onStatus }: {
+export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, onRemove, onTransfer, onDanger, onStatus, onChat }: {
   project: ResearchProject; owner: boolean; busy: boolean;
   onMember: (member: ResearchMember) => void; onAdd: () => void;
   onRemove?: () => void;
+  onChat?: () => void;
   onTransfer: () => void; onDanger: () => void;
   onStatus: (status: ResearchProject['status']) => Promise<void>;
 }) {
@@ -18,7 +19,7 @@ export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, 
     </section>
     <section className="chat-detail-settings-section">
       <SettingGroup>
-        <Link className="research-chat-detail-link" to={`/app/chats/${project.chat_id}`}>
+        <Link className="research-chat-detail-link" to={`/app/chats/${project.chat_id}`} onClick={event=>{if(onChat){event.preventDefault();onChat();}}}>
           <span className="setting-row-icon"><span className="material-symbols-outlined" aria-hidden="true">forum</span></span>
           <strong>{t('research.group')}</strong><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
         </Link>

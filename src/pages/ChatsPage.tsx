@@ -999,6 +999,7 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentio
 
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
+  if(message.payload?.invitation?.project)return i18n.t('research.invitation');
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
   const rawText = message.payload?.text || message.content;
   const text = kind === "text" ? chatPreviewMentionText(rawText, message.mentions ?? []) : rawText;
@@ -1847,6 +1848,11 @@ function renderMessageContent(
     if (!invitation) {
       return <span className="submission-invite-card-unavailable">{i18n.t("submission.inviteUnavailable")}</span>;
     }
+    if (invitation.project) return <button className={`message-submission-invite-card is-${invitation.status} ${groupClassName}`} type="button" onClick={event=>{event.stopPropagation();window.dispatchEvent(new CustomEvent('sermo:submission-invite',{detail:invitation}));}}>
+      <span className="message-submission-invite-heading"><span className="message-submission-invite-mark material-symbols-outlined" aria-hidden="true">science</span><span><small>{i18n.t('research.invitation')}</small><strong>{invitation.project.title}</strong></span></span>
+      <span className="message-submission-invite-people">{i18n.t('submission.invitedBy',{name:invitation.inviter.name})}</span>
+      <span className="message-submission-invite-status">{i18n.t(`submission.inviteStatus.${invitation.status}`)}</span>
+    </button>;
     const authorNames = invitation.submission.authors.map((user) => user.name).join(i18n.t("common.nameSeparator"));
     const reviewerNames = invitation.submission.reviewers.map((user) => user.name).join(i18n.t("common.nameSeparator"));
     return (
@@ -2833,8 +2839,10 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
 
 function LiveChatsPage({
   purpose = "normal",
+  embeddedChat,
 }: {
   purpose?: "normal" | "submission";
+  embeddedChat?: {id:number;onClose:()=>void};
 }) {
   const { t } = useI18n();
   const pageActive = usePageActive();
@@ -2846,7 +2854,7 @@ function LiveChatsPage({
   const submissionMode = purpose === "submission";
   const routeSearchParams = new URLSearchParams(location.search);
   const requestedSubmissionView = routeSearchParams.get("view");
-  const activeChatRouteValue = chatId;
+  const activeChatRouteValue = embeddedChat ? String(embeddedChat.id) : chatId;
   const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(
     requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
       ? requestedSubmissionView
@@ -4059,6 +4067,7 @@ function LiveChatsPage({
       return;
     }
     if (selectedChat || viewState === "idle" || viewState === "loading") return;
+    if (embeddedChat) return;
     redirectToChatListWithNotice(pageError ?? t("chat.accessDenied"), routeChatId);
   }, [activeChatRouteValue, routeChatId, selectedChat, viewState, pageError]);
 
@@ -4280,6 +4289,10 @@ function LiveChatsPage({
       const result = await api.acceptSubmissionInvite(invite.invite_id);
       setSubmissionInviteDetail(result.invitation);
       setSubmissionInviteSheetOpen(false);
+      if (result.invitation.project) {
+        navigate(`/app/research?project=${result.invitation.project.id}&onboarding=1`);
+        return;
+      }
       const canOpenImmediately = result.invitation.role === "author" || result.invitation.submission.status !== "draft";
       navigate(canOpenImmediately
         ? `/app/submissions/${result.invitation.chat_id}?view=${result.invitation.role}`
@@ -4324,6 +4337,7 @@ function LiveChatsPage({
   );
 
   const closeChatView = () => {
+    if (embeddedChat) { embeddedChat.onClose(); return; }
     if (!window.matchMedia("(max-width: 719px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setDetailsSheetOpen(false);
       setMessageMenu(null);
@@ -7842,6 +7856,7 @@ function LiveChatsPage({
 
   return (
     <AppChrome
+      embedded={!!embeddedChat}
       workspaceSelected={Boolean(displayedChat)}
       title={t(submissionMode ? "submission.title" : "chat.title")}
       hideTopbar={!displayedChat}
@@ -8516,7 +8531,7 @@ function LiveChatsPage({
           if (submissionInviteBusyId === null) setSubmissionInviteSheetOpen(false);
         }}
         open={submissionInviteSheetOpen}
-        title={t("submission.inviteSheetTitle")}
+        title={t(submissionInviteDetail?.project ? 'research.invitation' : "submission.inviteSheetTitle")}
       >
         {submissionInviteDetail ? (
           <div className={`submission-invite-sheet-content is-${submissionInviteDetail.status}`}>
@@ -8526,21 +8541,21 @@ function LiveChatsPage({
                 <small>{t("submission.invitedBy", { name: submissionInviteDetail.inviter.name })}</small>
                 <strong>{submissionInviteDetail.submission.title || t("submission.unnamed")}</strong>
               </div>
-              <span>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</span>
+              <span>{t(submissionInviteDetail.project ? 'research.team' : submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</span>
             </div>
             <dl className="submission-invite-sheet-meta">
-              <div><dt>{t("submission.authorsShort")}</dt><dd>{submissionInviteDetail.submission.authors.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
+              {submissionInviteDetail.project ? <div><dt>{t('research.owner')}</dt><dd>{submissionInviteDetail.inviter.name}</dd></div> : <><div><dt>{t("submission.authorsShort")}</dt><dd>{submissionInviteDetail.submission.authors.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
               <div><dt>{t("submission.reviewersShort")}</dt><dd>{submissionInviteDetail.submission.reviewers.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
-              <div><dt>{t("submission.invitedRole")}</dt><dd>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</dd></div>
+              <div><dt>{t("submission.invitedRole")}</dt><dd>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</dd></div></>}
               <div><dt>{t("submission.validity")}</dt><dd>{t("submission.validUntil", { date: new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "numeric", day: "numeric" }).format(submissionInviteDetail.expires_at * 1000) })}</dd></div>
             </dl>
             <div className={`submission-invite-sheet-status is-${submissionInviteDetail.status}`}>
               <span className="material-symbols-outlined" aria-hidden="true">{submissionInviteDetail.status === "accepted" ? "check_circle" : submissionInviteDetail.status === "expired" ? "schedule" : submissionInviteDetail.status === "conflict" ? "info" : "history"}</span>
-              <span><strong>{t(`submission.inviteStatus.${submissionInviteDetail.status}` as TranslationKey)}</strong><small>{t(submissionInviteDetail.status === "pending" && submissionInviteDetail.invitee.user_id !== currentUserId ? "submission.inviteStatusHint.sent" : `submission.inviteStatusHint.${submissionInviteDetail.status}` as TranslationKey)}</small></span>
+              <span><strong>{t(`submission.inviteStatus.${submissionInviteDetail.status}` as TranslationKey)}</strong><small>{submissionInviteDetail.project&&['pending','accepted'].includes(submissionInviteDetail.status)?t(submissionInviteDetail.status==='accepted'?'research.joinedHint':'research.invitationHint'):t(submissionInviteDetail.status === "pending" && submissionInviteDetail.invitee.user_id !== currentUserId ? "submission.inviteStatusHint.sent" : `submission.inviteStatusHint.${submissionInviteDetail.status}` as TranslationKey)}</small></span>
             </div>
             {submissionInviteDetail.can_accept ? (
               <button className="button submission-invite-confirm" disabled={submissionInviteBusyId !== null} onClick={() => void acceptSubmissionInvite()} type="button">
-                {submissionInviteBusyId !== null ? t("common.processing") : t("submission.confirmJoin")}
+                {submissionInviteBusyId !== null ? t("common.processing") : t(submissionInviteDetail.project?'research.acceptInvitation':"submission.confirmJoin")}
               </button>
             ) : null}
           </div>
@@ -10379,7 +10394,7 @@ export function ChatPreview({
   );
 }
 
-export default function ChatsPage({ preview, purpose }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission" }) {
+export default function ChatsPage({ preview, purpose, embeddedChat }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; embeddedChat?: {id:number;onClose:()=>void} }) {
   if (preview) return <PreviewChatConversation config={preview} />;
-  return <LiveChatsPage purpose={purpose} />;
+  return embeddedChat ? <div className="research-embedded-chat"><LiveChatsPage purpose={purpose} embeddedChat={embeddedChat}/></div> : <LiveChatsPage purpose={purpose}/>;
 }

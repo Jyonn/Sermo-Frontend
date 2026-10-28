@@ -1,4 +1,20 @@
 .research-page{min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.research-project-drawer>.drawer-body{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.research-project-surface{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden;container-type:inline-size;color:var(--text-primary)}
+.research-project-surface .research-overview-columns{grid-template-columns:minmax(0,1fr);gap:24px}
+.research-project-surface .research-overview-aside{border:0;padding:0}
+.research-project-intro>.research-member-grid{margin:24px 0;grid-template-columns:repeat(5,minmax(0,1fr));padding:0}
+.research-project-item.is-selected{background:color-mix(in srgb,var(--brand-primary) 8%,var(--bg-elevated));box-shadow:inset 3px 0 var(--brand-primary)}
+.research-embedded-chat{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.research-embedded-chat>.chat-mobile-layout{display:flex;flex:1;min-height:0;height:100%;width:100%;margin:0;padding:0;position:relative;inset:auto}
+.research-embedded-chat .mobile-chat-list-screen{display:none}
+.research-embedded-chat .chat-main-pane{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;height:100%;position:relative;inset:auto;transform:none;border:0;border-radius:0}
+.research-embedded-chat .desktop-conversation-header{display:flex;position:relative;flex-shrink:0}
+.research-chat-drawer.is-headerless>.drawer-body{padding:0;overflow:hidden;display:flex;flex-direction:column;align-content:stretch;height:100%}
+.research-chat-drawer>.drawer-floating-back{display:none}
+.research-embedded-chat>.chat-mobile-layout>.chat-main-pane{border:0;border-radius:0;box-shadow:none;outline:0}
+@media(max-width:719px){.research-embedded-chat .native-panel-back{display:inline-flex}.research-embedded-chat .native-panel-close{display:none}}
+@container(max-width:760px){.research-project-surface .research-back{display:inline-flex}}
 .research-page>.tab-sticky-header{width:100%;align-self:stretch;box-sizing:border-box;padding-inline:24px;flex-shrink:0}
 .research-page{gap:0;width:100%}
 .research-page button:disabled{opacity:.45;cursor:not-allowed}
@@ -77,12 +93,12 @@
 .research-project-heading>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .research-project-heading>.ghost-button{flex-shrink:0;padding:8px;min-height:36px}
 .research-project-navigation,.research-home-tabs{padding-inline:24px;border-bottom:1px solid var(--line-soft);flex-shrink:0}
-.research-home-scroll{min-height:0;flex:1;overflow-y:auto;padding:28px clamp(20px,4vw,56px) 40px}
+.research-home-scroll{min-height:0;flex:1;overflow-y:auto;padding:12px 16px 24px}
 .research-home-heading{display:flex;align-items:center;gap:14px;margin-bottom:24px}
 .research-home-heading h1{margin:4px 0 0;font-size:25px;line-height:1.5}
 .research-eyebrow{font-size:12px;color:var(--text-muted);margin:0}
 .research-count{font-size:13px;color:var(--text-muted);background:var(--bg-canvas);border-radius:20px;min-width:28px;padding:4px 8px;text-align:center}
-.research-project-list{border-top:1px solid var(--line-soft)}
+.research-project-list{border-top:0}
 .research-project-item{display:flex;align-items:center;gap:18px;width:100%;border:0;border-bottom:1px solid var(--line-soft);padding:24px 8px;background:transparent;color:var(--text-primary);font:inherit;text-align:left;transition:background .18s ease}
 .research-project-item:hover,.research-overview-task:hover{background:var(--bg-canvas)}
 .research-project-item:focus-visible,.research-task-row:focus-visible,.research-overview-task:focus-visible{outline:2px solid var(--brand-primary);outline-offset:-2px}
@@ -142,4 +158,5 @@
 @media(max-width:719px){.research-project-bar{padding:10px 18px;gap:10px}.research-project-bar>span{font-size:10px}.research-tabs{padding-inline:18px}.research-task-layout>aside{padding:16px}.research-detail-scroll{padding:0 20px 30px}.research-detail-scroll h1{font-size:23px}.research-form{padding:20px}.research-md-field textarea,.research-form textarea{font-size:16px}.research-period input{font-size:12px}.research-member{flex-wrap:wrap}.research-progress header{flex-wrap:wrap}}
 @media(max-height:500px){.research-project-bar{padding-block:5px}.research-tabs button{padding-block:9px}.research-empty{padding:20px}}
 @container(max-width:480px){.research-page .research-header-chat{display:none}}
+@container(max-width:480px){.research-home-scroll .research-project-item{display:grid;grid-template-columns:40px minmax(0,1fr) 16px;gap:8px 12px;padding:18px 12px}.research-home-scroll .research-project-copy{min-width:0;grid-column:2;grid-row:1}.research-home-scroll .research-project-copy strong{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.research-home-scroll .research-project-copy>span{display:none}.research-home-scroll .research-project-item>.research-status{grid-column:2;grid-row:2;margin:0}.research-home-scroll .research-project-item>.research-chevron{grid-column:3;grid-row:1 / span 2;margin:0}.research-home-scroll .research-project-symbol{grid-column:1;grid-row:1 / span 2}.research-page>.tab-sticky-header .ghost-button{font-size:0;gap:0;padding:8px}.research-project-navigation .app-page-tabs-trailing{display:none}}
 @media(max-height:500px){.research-page>.tab-sticky-header{height:auto;min-height:46px;padding-block:4px}.research-page>.tab-sticky-header .page-toolbar{height:auto;min-height:38px}.research-page>.tab-sticky-header .panel-title{font-size:19px}.research-page>.tab-sticky-header .ghost-button{min-height:32px;padding:6px 10px}.research-project-navigation .app-page-tabs{min-height:36px}.research-project-navigation .app-page-tabs-items>button{padding-block:7px}.research-task-layout>aside>header{min-height:42px;padding-block:4px}.research-task-filters{padding-bottom:6px}.research-task-filters .friend-request-tabs>button{padding-block:6px}.research-task-detail>header{min-height:44px;padding-block:4px}.research-task-row{padding-block:14px}.research-overview,.research-home-scroll{padding-top:20px}.research-project-intro{padding-bottom:20px}}

@@ -3368,7 +3368,7 @@ html[data-theme="dark"] body .growth-level-detail {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 7px;
+  gap: 10px;
   min-height: 180px;
   padding: 30px 20px;
   color: var(--text-primary);
