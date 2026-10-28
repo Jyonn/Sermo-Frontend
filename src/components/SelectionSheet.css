@@ -1,0 +1,4 @@
+.bottom-sheet.selection-sheet{display:flex;flex-direction:column;overflow:hidden}
+.selection-sheet>.sheet-header,.selection-sheet>.sheet-drag-zone{flex-shrink:0}
+.selection-sheet>.sheet-body{min-height:0;max-height:none;flex:1;overflow:auto}
+@media(max-height:500px){.bottom-sheet.selection-sheet{padding-top:6px;padding-bottom:12px}.selection-sheet>.sheet-header{padding-top:4px;padding-bottom:10px}.selection-sheet .research-date-editor{padding:0;gap:8px}.selection-sheet .research-date-editor footer>button{min-height:34px;padding:6px 12px}}

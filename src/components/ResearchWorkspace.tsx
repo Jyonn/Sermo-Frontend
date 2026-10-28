@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useI18n } from '../lib/language';
 import type { ResearchProject, ResearchSummary } from '../lib/research';
 import { PageTabs } from './PageTabs';
+import { ResearchMemberGrid } from './ResearchPeople';
 
 export function ResearchHome({ projects, open, create }: { projects: ResearchSummary[]; open: (id: number) => void; create: () => void }) {
   const { t } = useI18n();
@@ -36,6 +37,6 @@ export function ResearchOverview({ project, tasks, calendar, members, addTask, c
       {active.slice(0, 4).map(item => <button className="research-overview-task" key={item.id} onClick={() => tasks(item.id)}><span className={`research-task-dot is-${item.status}`} aria-hidden="true"/><span><strong>{item.title}</strong><small>{item.end || t('research.openEnd')}</small></span><span className={`research-status is-${item.status}`}>{t(`research.${item.status}`)}</span></button>)}
       {!active.length && <p className="research-muted research-inline-empty">{t(project.tasks.length ? 'research.allTasksDone' : 'research.noTasks')}</p>}
       {canEdit && <button className="ghost-button research-add-task" onClick={addTask}><span className="material-symbols-outlined" aria-hidden="true">add</span>{t('research.addTask')}</button>}
-    </section><aside className="research-overview-aside"><button className="research-calendar-shortcut" onClick={calendar}><span className="material-symbols-outlined" aria-hidden="true">calendar_month</span><strong>{t('research.calendar')}</strong><p>{t('research.calendarShortcut')}</p><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><div className="research-team-preview"><h2>{t('research.team')}</h2>{project.members.slice(0, 5).map(member => <div key={member.id}><span className="research-person-initial" aria-hidden="true">{Array.from(member.name)[0]}</span><span>{member.name}</span>{member.owner && <small>{t('research.owner')}</small>}</div>)}<button className="ghost-button" onClick={members}>{t('research.viewAll')}</button></div></aside></div>
+    </section><aside className="research-overview-aside"><button className="research-calendar-shortcut" onClick={calendar}><span className="material-symbols-outlined" aria-hidden="true">calendar_month</span><strong>{t('research.calendar')}</strong><p>{t('research.calendarShortcut')}</p><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><div className="research-team-preview"><h2>{t('research.team')}</h2><ResearchMemberGrid members={project.members.slice(0,5)}/><button className="ghost-button" onClick={members}>{t('research.viewAll')}</button></div></aside></div>
   </div>;
 }

@@ -30,6 +30,10 @@ owner.language='zh-CN'
 owner.growth_acknowledged_level=18
 owner.save()
 student=User.create(space,'本地学生',verified=True)
+owner.avatar_frame_style='orbit'
+owner.save(update_fields=['avatar_frame_style'])
+student.avatar_frame_style='aurora'
+student.save(update_fields=['avatar_frame_style'])
 # Reuse normal policy rather than bypassing research authorization.
 from Friendship.models import FriendshipStatusChoice
 Friendship.objects.get_or_create(space=space,user_low=owner,user_high=student,defaults=dict(status=FriendshipStatusChoice.ACCEPTED,requested_by=owner))

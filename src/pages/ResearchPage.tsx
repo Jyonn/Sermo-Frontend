@@ -11,6 +11,11 @@ import { ResearchCalendar } from '../components/ResearchCalendar';
 import { ResearchHome, ResearchOverview } from '../components/ResearchWorkspace';
 import { PageTabs } from '../components/PageTabs';
 import { DrawerTabs } from '../components/DrawerTabs';
+import { DateRangeField } from '../components/DateRangeField';
+import { MemberPickerSheet } from '../components/MemberPickerSheet';
+import { ResearchAssigneesField, ResearchMemberGrid } from '../components/ResearchPeople';
+import { UserAvatar } from '../components/UserAvatar';
+import { ActionSheet } from '../components/ActionSheet';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/language';
@@ -25,6 +30,7 @@ export default function ResearchPage() {
   const [list,setList]=useState<ResearchSummary[]>([]),[project,setProject]=useState<ResearchProject|null>(null),[id,setId]=useState<number|null>(()=>Number(returning)||null),[taskId,setTaskId]=useState<string|null>(null);
   const [panel,setPanel]=useState<'create'|'task'|'members'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning?'calendar':'overview');
   const [taskFilter,setTaskFilter]=useState('all');
+  const [inviteOpen,setInviteOpen]=useState(false),[memberAction,setMemberAction]=useState<number|null>(null);
   const [listLoading,setListLoading]=useState(true),[loading,setLoading]=useState(!!id),[busy,setBusy]=useState(false),[error,setError]=useState(''),[tick,setTick]=useState(0),[reply,setReply]=useState<string|null>(null),[confirm,setConfirm]=useState<string|null>(null);
   const userId=session?.user.user_id;
   const owner=project?.members.some(m=>m.id===userId&&m.owner)===true;
@@ -38,6 +44,19 @@ export default function ResearchPage() {
     if(panel==='create'){setBusy(true);setError('');try{const created=await api.researchCreate(body);setList(old=>[created,...old]);setId(created.id);setPanel(null);}catch(e){setError(e instanceof Error?e.message:t('research.failed'));}finally{setBusy(false);}}
     else if(await mutate({...body,action:'task'}))setPanel(null);
   }
+  async function inviteMembers(ids:number[]) {
+    if(!project||busy)return false;
+    setBusy(true);setError('');let current=project;
+    try {
+      for(const user_id of ids) {
+        if(current.members.some(member=>member.id===user_id))continue;
+        current=await api.researchUpdate(current.id,current.revision,{action:'invite',user_id});
+        setProject(current);
+      }
+      return true;
+    }catch(e){setError(e instanceof Error?e.message:t('research.failed'));return false;}
+    finally{setBusy(false);}
+  }
   if(features.ready&&!features.researchEnabled)return <Navigate replace to="/app/menu"/>;
   const memberName=(value:number)=>project?.members.find(m=>m.id===value)?.name||`#${value}`;
   return <AppChrome title={t('research.title')} hideTopbar shellClassName="desktop-tab-shell"><section className="page-stack research-page">
@@ -50,18 +69,19 @@ export default function ResearchPage() {
         <article className="research-task-detail">{task?<><header><button className="ghost-button research-back" onClick={()=>setTaskId(null)} aria-label={t('research.back')}><span className="material-symbols-outlined">arrow_back</span>{t('research.tasks')}</button><span className="research-grow"/><span className={`research-status is-${task.status}`}>{t(`research.${task.status}`)}</span>{owner&&writable&&<SelectControl label={t('research.status')} disabled={busy} value={task.status} options={(['todo','doing','done'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'task_status',task_id:task.id,status}).then(()=>{})}/>}</header><div className="research-detail-scroll"><h1>{task.title}</h1><div className="research-task-meta"><span><span className="material-symbols-outlined" aria-hidden="true">group</span>{task.assignees.map(memberName).join(' · ')||t('research.unassigned')}</span><span><span className="material-symbols-outlined" aria-hidden="true">date_range</span>{task.start} — {task.end||t('research.openEnd')}</span></div><div className="research-task-body"><Markdown body={task.body}/></div>
           <div className="research-progress-head"><h2>{t('research.progress')}</h2><SelectControl label={t('research.progress')} value={scope} onChange={setScope} options={[{value:'mine',label:t('research.mine')},{value:'all',label:t('research.all')}]}/></div><p className="research-muted">{t('research.shared')}</p>
           {writable&&!reply&&<ProgressEditor key={`${task.id}-${userId}`} busy={busy} send={async body=>await mutate({action:'progress',task_id:task.id,body})===true}/>}
-          {[...task.progress].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at)).filter(p=>scope==='all'||p.user_id===userId).map(p=><section className="research-progress" key={p.id}><header><span className="research-person-initial" aria-hidden="true">{Array.from(memberName(p.user_id))[0]}</span><strong>{memberName(p.user_id)}</strong><time>{new Date(p.created_at).toLocaleString()}</time></header><div className="research-progress-content">{p.reply_to&&<blockquote><Markdown body={task.progress.find(parent=>parent.id===p.reply_to)?.body||''}/></blockquote>}<Markdown body={p.body}/>{writable&&<button className="ghost-button" onClick={()=>setReply(p.id)}>{t('research.reply')}</button>}{reply===p.id&&<ProgressEditor key={p.id} busy={busy} cancel={()=>setReply(null)} send={async body=>{if(await mutate({action:'progress',task_id:task.id,body,reply_to:reply}))setReply(null);}}/>}</div></section>)}
+          {[...task.progress].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at)).filter(p=>scope==='all'||p.user_id===userId).map(p=><section className="research-progress" key={p.id}><header><UserAvatar className="research-progress-avatar" name={memberName(p.user_id)} uri={project.members.find(member=>member.id===p.user_id)?.avatar_uri} cacheKey={project.members.find(member=>member.id===p.user_id)?.avatar_cache_key} frame={project.members.find(member=>member.id===p.user_id)?.avatar_frame_style}/><strong>{memberName(p.user_id)}</strong><time>{new Date(p.created_at).toLocaleString()}</time></header><div className="research-progress-content">{p.reply_to&&<blockquote><Markdown body={task.progress.find(parent=>parent.id===p.reply_to)?.body||''}/></blockquote>}<Markdown body={p.body}/>{writable&&<button className="ghost-button" onClick={()=>setReply(p.id)}>{t('research.reply')}</button>}{reply===p.id&&<ProgressEditor key={p.id} busy={busy} cancel={()=>setReply(null)} send={async body=>{if(await mutate({action:'progress',task_id:task.id,body,reply_to:reply}))setReply(null);}}/>}</div></section>)}
           {!task.progress.some(p=>scope==='all'||p.user_id===userId)&&<p className="research-muted research-inline-empty">{t('research.noProgress')}</p>}
         </div></>:<div className="research-empty"><h2>{t('research.chooseTask')}</h2><p>{project.description}</p></div>}</article>
       </div>}
     </>}
     <SideDrawer open={panel!==null} fullscreen={panel==='task'} onClose={()=>setPanel(null)} title={t(panel==='members'?'research.members':panel==='task'?'research.addTask':'research.create')}>
-      {error&&<p className="research-error" role="alert">{error}</p>}{panel==='members'&&project?<div className="research-form"><h2>{project.title}</h2><p className="research-muted">{project.description}</p><p className="research-muted">{t('research.groupHint')}</p><Link className="ghost-button" to={`/app/chats/${project.chat_id}`}>{t('research.group')}</Link><SelectControl label={t('research.status')} disabled={!owner||busy} value={project.status} options={(['planning','active','completed'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'settings',status}).then(()=>{})}/>
-        {project.members.map(m=><div className="research-member" key={m.id}><span>{m.name}{m.owner?` · ${t('research.owner')}`:''}</span>{owner&&!m.owner&&<><button className="ghost-button" disabled={busy} onClick={()=>setConfirm(`transfer:${m.id}`)}>{t('research.transfer')}</button><button className="ghost-button" disabled={busy} onClick={()=>setConfirm(`remove:${m.id}`)}>{t('research.remove')}</button></>}</div>)}
-        {owner&&writable&&<><h3>{t('research.invite')}</h3>{friends.filter(f=>!project.members.some(m=>m.id===f.user_id)).map(f=><button key={f.user_id} className="research-invite" disabled={busy} onClick={()=>mutate({action:'invite',user_id:f.user_id})}>{f.name}<span className="material-symbols-outlined">person_add</span></button>)}</>}
+      {error&&<p className="research-error" role="alert">{error}</p>}{panel==='members'&&project?<div className="research-form"><ResearchMemberGrid members={project.members} onMember={owner&&!busy?member=>setMemberAction(member.id):undefined} onAdd={owner&&writable&&!busy?()=>setInviteOpen(true):undefined}/><h2>{project.title}</h2><p className="research-muted">{project.description}</p><Link className="ghost-button" to={`/app/chats/${project.chat_id}`}>{t('research.group')}</Link><SelectControl label={t('research.status')} disabled={!owner||busy} value={project.status} options={(['planning','active','completed'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'settings',status}).then(()=>{})}/>
+
         <button className="ghost-button" disabled={busy} onClick={()=>setConfirm(owner?'dissolve':'leave')}>{t(owner?'research.dissolve':'research.leave')}</button>
-      </div>:<form className="research-form" key={panel} onSubmit={submit}><label>{t('research.name')}<input name="title" maxLength={panel==='task'?160:50} required/></label><div className="research-period"><label>{t('research.start')}<input name="start" type="date" required/></label><label>{t('research.end')}<input name="end" type="date"/></label></div><p className="research-muted">{t('research.optionalEnd')}</p>{panel==='task'?<><fieldset><legend>{t('research.assignees')}</legend>{project?.members.map(m=><label className="research-check" key={m.id}><input type="checkbox" name="member" value={m.id}/>{m.name}</label>)}</fieldset><MarkdownField name="body" required/></>:<label>{t('research.description')}<textarea name="description" rows={4} maxLength={20000}/></label>}<button className="button" disabled={busy}>{t('research.save')}</button></form>}
+      </div>:<form className="research-form" key={panel} onSubmit={submit}><label>{t('research.name')}<input name="title" maxLength={panel==='task'?160:50} required/></label><DateRangeField/>{panel==='task'?<><ResearchAssigneesField members={project?.members||[]}/><MarkdownField name="body" required/></>:<label>{t('research.description')}<textarea name="description" rows={4} maxLength={20000}/></label>}<button className="button" disabled={busy}>{t('research.save')}</button></form>}
     </SideDrawer>
+    {inviteOpen&&project&&<MemberPickerSheet allowEmpty={false} title={t('research.invite')} initial={[]} actionLabel={t('common.add')} error={error} members={[...project.members.map(member=>({...member,locked:true})),...friends.filter(friend=>!project.members.some(member=>member.id===friend.user_id)).map(friend=>({id:friend.user_id,name:friend.name,avatar_uri:friend.avatar_uri,avatar_cache_key:friend.avatar_cache_key,avatar_frame_style:friend.avatar_frame_style,description:t(friend.is_alive?'presence.online':'presence.offline')}))]} onClose={()=>setInviteOpen(false)} onApply={inviteMembers}/>}
+    <ActionSheet open={memberAction!==null} title={memberName(memberAction||0)} onClose={()=>setMemberAction(null)} actions={[{key:'transfer',label:t('research.transfer'),disabled:busy,onSelect:()=>setConfirm(`transfer:${memberAction}`)},{key:'remove',label:t('research.remove'),danger:true,disabled:busy,onSelect:()=>setConfirm(`remove:${memberAction}`)}]}/>
     <ConfirmDialog open={!!confirm} title={t('research.confirm')} description={t('research.sensitive')} danger onClose={()=>setConfirm(null)} onConfirm={()=>{const [action,user]=String(confirm).split(':');void mutate({action,...(user?{user_id:Number(user)}:{})}).then(ok=>{if(ok)setPanel(null);});setConfirm(null);}}/>
   </section></AppChrome>;
 }

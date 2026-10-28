@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.1",
+  "id": "2026.10.28.2",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "科研工作区焕新",
+      "title": "科研日期与成员体验统一",
       "items": [
-        "科研首页直接浏览并筛选课题，概览集中展示任务进度与课题组",
-        "阶段任务采用清晰的列表与详情布局，进度和回复统一使用 Markdown 编辑器",
-        "日程与会议记录分开展示，优化手机横竖屏及深色模式排版"
+        "课题和任务日期使用年月日滚轮选择，支持不设结束日期",
+        "任务分配、邀请好友和日程成员选择使用统一的可搜索勾选面板",
+        "课题详情采用聊天详情式头像排列，成员头像展示各自的头像框"
       ]
     },
     "en": {
-      "title": "A clearer research workspace",
+      "title": "Consistent research dates and member selection",
       "items": [
-        "Browse and filter projects directly, with task progress and team information in a new overview",
-        "Read tasks in a focused list and detail layout, with shared Markdown editors for progress and replies",
-        "Separate calendars from meeting records, with improved portrait, landscape and dark-mode layouts"
+        "Choose project and task dates with year, month and day wheels, including open-ended periods",
+        "Assign tasks, invite friends and select calendar members with one searchable member picker",
+        "Project details use the chat member grid, showing real avatars and individual avatar frames"
       ]
     }
   }

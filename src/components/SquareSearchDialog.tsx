@@ -5,6 +5,7 @@ import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
 import "./SquareExperience.css";
 import { DateWheelPicker } from "./DateWheelPicker";
+import { DateRangeSummary } from "./DateRangeField";
 
 export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, onClear }: {
   open: boolean; keyword: string; from: string; to: string;
@@ -49,10 +50,7 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
         onApply(String(data.get("keyword") || ""), start, end);
       }}>
         <label className="square-search-field"><span>{t("square.keyword")}</span><input name="keyword" type="search" maxLength={100} placeholder={t("square.searchPlaceholder")} value={draft.keyword} onChange={(event) => setDraft({ ...draft, keyword: event.target.value })} /></label>
-        <fieldset className="square-search-range"><legend>{t("square.dateRange")}</legend>
-          {(["from", "to"] as const).map((side) => <button type="button" className="square-date-result" key={side} onClick={() => { setDate(draft[side] || new Intl.DateTimeFormat("sv-SE").format(new Date())); setEditing(side); setError(false); }}><span>{t(side === "from" ? "square.dateFrom" : "square.dateTo")}</span><strong>{draft[side] ? format(draft[side]) : t(side === "from" ? "square.distantPast" : "square.distantFuture")}</strong><small>{draft[side] ? format(draft[side], true) : t("square.unboundedDate")}</small></button>)}
-          <span className="square-date-arrow material-symbols-outlined" aria-hidden="true">chevron_right</span>
-        </fieldset>
+        <DateRangeSummary legend={t('square.dateRange')} from={draft.from} to={draft.to} onEdit={side => { setDate(draft[side] || new Intl.DateTimeFormat('sv-SE').format(new Date())); setEditing(side); setError(false); }}/>
         <input type="hidden" name="date_from" value={draft.from} /><input type="hidden" name="date_to" value={draft.to} />
         {error ? <p role="alert">{t("square.dateRangeInvalid")}</p> : null}
         <footer><button className="ghost-button" type="button" onClick={onClear}>{t("common.clear")}</button><button className="button" type="submit">{t("square.applySearch")}</button></footer>

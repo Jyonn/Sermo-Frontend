@@ -27,6 +27,7 @@
 .research-calendar-members label{border-radius:24px;padding:6px 12px 6px 6px;gap:7px;position:relative;cursor:pointer}
 .research-calendar-members input{accent-color:var(--brand-primary);width:14px;height:14px;margin:0 0 0 4px}
 .research-calendar-members .research-person-initial{width:26px;height:26px;border-radius:50%;font-size:11px}
+.research-calendar-members .research-calendar-avatar{width:26px;height:26px;border-radius:9px;font-size:10px;flex-shrink:0}.research-calendar-members>.ghost-button{font-size:12px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0}
 .research-calendar-frame{border-radius:14px;min-height:380px}
 .research-calendar-frame .v3-embed-status{font-size:11px;padding:8px 14px;background:var(--bg-canvas)}
 .research-calendar-state{padding:40px 20px;border:0;background:transparent}
