@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.28.12",
+  "id": "2026.10.28.13",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "统一科研背景与广场空状态",
+      "title": "课题群聊显示优化",
       "items": [
-        "科研页移除独立背景，与其他 Tab 保持一致",
-        "好友圈无内容时展示“还没有发言”，不再提示在线人数"
+        "补齐手机课题群聊顶部留白与安全区间距",
+        "修复桌面课题群聊四角露出浅色底的问题"
       ]
     },
     "en": {
-      "title": "Consistent research and empty feed styling",
+      "title": "Polished project group chats",
       "items": [
-        "Research uses the same background as other tabs",
-        "Empty friend feeds now show no statements instead of online status"
+        "Project chat headers now have proper mobile spacing and safe-area insets",
+        "Removed pale corner artifacts from embedded project chats on desktop"
       ]
     }
   }
