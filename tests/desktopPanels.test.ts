@@ -24,7 +24,7 @@ test("desktop container keeps scroll unlocked, uses a transparent dismiss layer 
   assert.match(source, /hidden=\{desktopPanel && panels\?\.topId !== drawerId\}/);
   assert.match(source, /onClick=\{desktopPanel \? undefined : requestClose\}/);
   assert.match(source, /panels\?\.topId === drawerId/);
-  assert.match(source, /className="desktop-panel-dismiss-mask" onClick=\{requestClose\}/);
+  assert.match(source, /desktop-panel-dismiss-mask.*onClick=\{requestClose\}/);
   assert.match(source, /desktopPanel && !panels\?\.single/);
   assert.match(source, /desktopPanel && panels\?\.floating && panels.topId === drawerId/);
   const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");

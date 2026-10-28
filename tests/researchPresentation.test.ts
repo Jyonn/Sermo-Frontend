@@ -51,7 +51,7 @@ test('research and Square share date summaries and date wheels', () => {
 });
 
 test('research uses framed avatars and one member picker rather than initial placeholders', () => {
-  for (const file of ['components/ResearchPeople.tsx', 'components/MemberPickerSheet.tsx', 'components/ResearchCalendar.tsx', 'pages/ResearchPage.tsx']) {
+  for (const file of ['components/ResearchPeople.tsx', 'components/MemberPickerSheet.tsx', 'components/ResearchCalendar.tsx']) {
     const text = source(file);
     assert.match(text, /<UserAvatar/);
     assert.match(text, /frame=\{/);
@@ -62,4 +62,20 @@ test('research uses framed avatars and one member picker rather than initial pla
   assert.match(people, /chat-detail-member-grid/);
   assert.match(people, /name="member" value=\{id\}/);
   assert.match(source('components/ResearchWorkspace.tsx'), /<ResearchMemberGrid/);
+});
+
+test('research preserves its root panel while nested drawers float, and shares Square comments', () => {
+  const page=source('pages/ResearchPage.tsx');
+  assert.match(page,/<FloatingDrawerScope><div className="research-project-surface">/);
+  assert.match(page,/<FloatingDrawerScope><SideDrawer historyKey="research-chat"/);
+  const panels=source('components/DesktopPanelWorkspace.tsx');
+  assert.match(panels,/createPortal\(<div className=\{.*detached-drawer-slot/);
+  assert.match(panels,/document.body\) : null/);
+  assert.doesNotMatch(page,/taskFilter|<DrawerTabs/);
+  assert.doesNotMatch(source('components/ResearchWorkspace.tsx'),/<PageTabs/);
+  assert.match(source('components/ResearchComments.tsx'),/<CommentThread/);
+  assert.match(source('components/ResearchComments.tsx'),/<CommentComposer/);
+  assert.match(source('pages/SquarePage.tsx'),/<CommentThread/);
+  assert.match(source('pages/SquarePage.tsx'),/<CommentComposer/);
+  assert.match(source('components/ResearchProjectDetails.tsx'),/\['active','archived'\]/);
 });

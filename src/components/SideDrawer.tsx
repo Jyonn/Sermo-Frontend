@@ -225,7 +225,8 @@ export function SideDrawer({
     if (!visible) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing && (!desktopPanel || panels?.topId === drawerId)) {
+      const stack = getDrawerStack();
+      if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing && (!stack.length || stack[stack.length - 1] === drawerId) && (!desktopPanel || panels?.topId === drawerId)) {
         if (desktopPanel) event.stopImmediatePropagation();
         requestClose();
       }
@@ -243,7 +244,7 @@ export function SideDrawer({
   const dismissIcon = desktopClose ? "close" : "arrow_back";
   return <>
     {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
-      <div className="desktop-panel-dismiss-mask" onClick={requestClose} aria-hidden="true" />,
+      <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} onClick={requestClose} aria-hidden="true" />,
       document.body
     ) : null}
     {createPortal(

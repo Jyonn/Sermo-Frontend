@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.28.6",
+  "id": "2026.10.28.7",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "科研协作流程与布局升级",
+      "title": "更连贯的课题与任务体验",
       "items": [
-        "课题采用列表与详情面板，群聊可直接在科研内打开",
-        "好友接受邀请卡片后才加入课题，随后引导连接日历和确认全局忙闲权限",
-        "支持类别组精细权限，优化负责人转让入口、任务日期和统一空状态"
+        "桌面子窗口浮动打开，保留当前课题面板",
+        "课题与任务统一为进行中、已存档，列表无需切换筛选",
+        "任务进度复用广场评论布局，支持 Markdown 与分层回复"
       ]
     },
     "en": {
-      "title": "A more cohesive research workspace",
+      "title": "A smoother project and task experience",
       "items": [
-        "Projects open beside the list, with real group conversations inside research",
-        "Join through invitation cards, then connect your calendar and confirm global busy/free sharing",
-        "Fine-tune category permissions with clearer ownership actions, dates and empty states"
+        "Nested desktop drawers float above the current project",
+        "Projects and tasks use Active and Archived states without filter tabs",
+        "Task progress shares Square comment layouts with Markdown and threaded replies"
       ]
     }
   }

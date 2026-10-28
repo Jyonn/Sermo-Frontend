@@ -2,6 +2,8 @@ import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type C
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
+import { CommentThread } from "../components/CommentThread";
+import { CommentComposer } from "../components/CommentComposer";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
@@ -53,7 +55,6 @@ import {
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
-import { visibleCommentReplyTarget } from "../lib/squareComments";
 import { animateSquareDetail, prepareDetailImages, type DetailMotionNodes } from "../lib/squareDetailMotion";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
@@ -469,58 +470,6 @@ function CommentContent({ comment, onOpenProfile, onReply }: {
   return <p onClick={onReply}><InlineRichText emoticons={comment.inline_emoticons} mentions={comment.mentions} onOpenProfile={onOpenProfile} text={comment.text} /></p>;
 }
 
-function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies }: {
-  comment: SquareStatementCommentDTO;
-  canInteract: boolean;
-  expanded?: boolean;
-  onDelete: (comment: SquareStatementCommentDTO) => void;
-  onLike: (comment: SquareStatementCommentDTO) => void;
-  onOpenProfile: (user: TinyUserDTO) => void;
-  onReply: (comment: SquareStatementCommentDTO) => void;
-  onToggleReplies?: (commentId: number) => void;
-}) {
-  const { t } = useI18n();
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!menuPosition) return;
-    const close = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuPosition(null);
-    };
-    window.addEventListener("pointerdown", close);
-    return () => window.removeEventListener("pointerdown", close);
-  }, [menuPosition]);
-  const beginReply = (event: ReactMouseEvent) => {
-    event.stopPropagation();
-    if (canInteract) onReply(comment);
-  };
-  const qqUser = isUnclaimedQqUser(comment.user);
-  const layerReplyTarget = visibleCommentReplyTarget(comment);
-  const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
-  const replyCount = Math.max(comment.reply_count || 0, comment.replies?.length || 0);
-  const hasExpandableReplies = !comment.parent_id && replyCount > 0;
-  const toggleReplies = (event: ReactMouseEvent) => {
-    event.stopPropagation();
-    if (hasExpandableReplies) onToggleReplies?.(comment.comment_id);
-  };
-  return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}${hasExpandableReplies ? " has-replies" : ""}`} onClick={comment.parent_id ? beginReply : toggleReplies}>
-    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
-    <div>
-      <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}>{qqUser ? <button className="square-comment-author-profile" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><strong>{displayName}</strong><QqSourceTag /></button> : <><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} name={comment.user.growth_level_name} /> : null}</>}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
-      <CommentContent comment={comment} onOpenProfile={onOpenProfile} onReply={beginReply} />
-      <div className="square-comment-footer">
-        <time>{formatRelativeTime(comment.created_at)}</time>
-        <div className="square-comment-actions">
-          {canInteract ? <button onClick={beginReply} type="button"><span>{t("square.reply")}</span></button> : null}
-          <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
-        </div>
-      </div>
-      {hasExpandableReplies ? <button aria-expanded={expanded} className="square-comment-replies-toggle" onClick={toggleReplies} type="button"><span>{expanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
-      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} />)}</div></div> : null}
-    </div>
-    {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
-  </article>;
-}
 
 function QqUserDialog({ onClose, user }: { onClose: () => void; user: TinyUserDTO }) {
   const { t } = useI18n();
@@ -2121,7 +2070,7 @@ export default function SquarePage() {
       </div>
       {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
       {!commentsLoading && !comments.length ? <QuietState icon="forum" title={t("square.noComments")} description={canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}/> : null}
-      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
+      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread renderContent={(comment, onReply) => <CommentContent comment={comment} onOpenProfile={openUserProfile} onReply={onReply}/>} canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
       {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
         if (commentStatementId === null) return;
         setCommentsLoading(true);
@@ -2130,7 +2079,7 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }} ref={commentComposerRef}>
+  const commentComposer = canPublish ? <CommentComposer anonymous={anonymousComment} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }} formRef={commentComposerRef}>
     {anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />}
     <div className="square-comment-composer-main">
       <ChatComposerTextRow
@@ -2175,7 +2124,7 @@ export default function SquarePage() {
         </div> : <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[commentEmojiPage].labelKey as TranslationKey)}>{EMOJI_PAGES[commentEmojiPage].emojis.map((emoji, index) => <button aria-label={t("emoji.insert", { emoji })} key={`${emoji}-${index}`} onClick={() => commentInputRef.current?.insertText(emoji)} type="button">{emoji}</button>)}</div>}
       </div> : null}
     </div>
-  </form> : null;
+  </CommentComposer> : null;
 
   const selectedFeedDateLabel = !selectedFeedDate ? "" : selectedFeedDate.length === 4
     ? t("datePicker.yearNumber", { year: Number(selectedFeedDate) })

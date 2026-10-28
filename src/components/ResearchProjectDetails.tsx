@@ -15,7 +15,7 @@ export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, 
   const { t } = useI18n();
   return <div className="chat-detail-panel research-project-details">
     <section className="chat-detail-people-section">
-      <ResearchMemberGrid members={project.members} onMember={owner && !busy ? onMember : undefined} onAdd={owner && project.status !== 'completed' && !busy ? onAdd : undefined} onRemove={owner && !busy && project.members.some(member => !member.owner) ? onRemove : undefined}/>
+      <ResearchMemberGrid members={project.members} onMember={owner && !busy ? onMember : undefined} onAdd={owner && project.status !== 'archived' && !busy ? onAdd : undefined} onRemove={owner && !busy && project.members.some(member => !member.owner) ? onRemove : undefined}/>
     </section>
     <section className="chat-detail-settings-section">
       <SettingGroup>
@@ -29,7 +29,7 @@ export function ResearchProjectDetails({ project, owner, busy, onMember, onAdd, 
       <SettingGroup>
         <SettingRow title={t('research.name')} description={project.title}/>
         {project.description && <SettingRow title={t('research.description')} description={project.description}/>}
-        <SettingSelect label={t('research.status')} disabled={!owner || busy} value={project.status} options={(['planning','active','completed'] as const).map(value => ({ value, label: t(`research.${value}`) }))} onChange={onStatus}/>
+        <SettingSelect label={t('research.status')} disabled={!owner || busy} value={project.status} options={(['active','archived'] as const).map(value => ({ value, label: t(`research.${value}`) }))} onChange={onStatus}/>
         <SettingRow title={t('research.start')} value={project.start}/>
         <SettingRow title={t('research.end')} value={project.end || t('research.openEnd')}/>
       </SettingGroup>

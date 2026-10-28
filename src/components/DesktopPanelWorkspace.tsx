@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useLayoutEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { conversationPanelLayout, desktopPanelLayout, desktopPanelMode, panelSizing, topDesktopPanel, type DesktopPanelLayer } from "../lib/desktopPanels";
 import "./DesktopPanelWorkspace.css";
 
@@ -19,10 +20,27 @@ interface PanelContext {
   topId?: string;
   single: boolean;
   floating: boolean;
+  detached?: boolean;
   register: (layer: DesktopPanelLayer) => void;
   unregister: (id: string) => void;
 }
 const DesktopPanels = createContext<PanelContext | null>(null);
+export function FloatingDrawerScope({ children }: { children: ReactNode }) {
+  const parent = useContext(DesktopPanels);
+  const [host, setHost] = useState<HTMLDivElement | null>(null);
+  const [layers, setLayers] = useState<DesktopPanelLayer[]>([]);
+  const register = useCallback((layer: DesktopPanelLayer) => setLayers(current => {
+    const old = current.find(item => item.id === layer.id);
+    return old?.depth === layer.depth && old.wide === layer.wide ? current : [...current.filter(item => item.id !== layer.id), layer];
+  }), []);
+  const unregister = useCallback((id: string) => setLayers(current => current.some(item => item.id === id) ? current.filter(item => item.id !== id) : current), []);
+  const top = topDesktopPanel(layers);
+  return <DesktopPanels.Provider value={parent ? { ...parent, host, topId: top?.id, single: false, floating: true, detached: true, register, unregister } : null}>
+    {children}
+    {typeof document !== "undefined" ? createPortal(<div className={`desktop-panel-slot detached-drawer-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!parent?.enabled || !top} />, document.body) : null}
+  </DesktopPanels.Provider>;
+}
+
 export const useDesktopPanels = () => useContext(DesktopPanels);
 
 export function DesktopPanelWorkspace({ children, className, selected = false, surfaceClassName }: { children: ReactNode; className: string; selected?: boolean; surfaceClassName?: string }) {
