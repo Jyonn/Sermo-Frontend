@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.29.2",
+  "id": "2026.10.29.3",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "科研手机端显示优化",
+      "title": "课题邀请更清晰",
       "items": [
-        "修复手机端科研顶部未铺满屏幕的问题，保留内容两侧的舒适间距"
+        "重新设计课题邀请卡片，清晰展示课题、邀请人和确认状态，适配深浅色模式"
       ]
     },
     "en": {
-      "title": "Improved mobile research layout",
+      "title": "Clearer project invitations",
       "items": [
-        "Fixed the research header to span the mobile screen while preserving comfortable content spacing"
+        "Redesigned project invitations with clearer titles, inviters and response status in light and dark modes"
       ]
     }
   }

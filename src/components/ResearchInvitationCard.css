@@ -1,0 +1,30 @@
+.message-research-invite-card {
+  --invite-accent: var(--brand-primary);
+  --invite-state-accent: var(--text-muted);
+  --invite-text: var(--text-primary);
+  --invite-muted: var(--text-muted);
+  --invite-icon-surface: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--bg-panel-strong);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.message-research-invite-card.is-accepted { --invite-state-accent: var(--brand-primary); }
+.message-research-invite-card .message-submission-invite-heading { grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 18px 18px 8px; }
+.message-research-invite-card .message-submission-invite-mark { width: 40px; height: 40px; border-radius: 13px; font-size: 23px; color: var(--brand-primary); }
+.message-research-invite-card .message-submission-invite-heading>span:nth-child(2) { gap: 4px; }
+.message-research-invite-card .message-submission-invite-heading small { font-size: 11px; font-weight: 600; letter-spacing: 0; }
+.message-research-invite-card .message-submission-invite-heading strong { font-size: 17px; line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
+.message-research-invite-by { padding: 0 18px 18px 70px; color: var(--text-muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.message-research-invite-card .message-submission-invite-footer { padding: 12px 18px; background: color-mix(in srgb, var(--brand-primary) 4%, transparent); font-size: 11px; }
+.message-research-invite-card:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
+@media(hover:hover) { .message-research-invite-card:hover { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--line-soft)); } }
