@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CommentThread } from './CommentThread';
 import { CommentComposer } from './CommentComposer';
 import { Markdown } from './ResearchMarkdown';
 import { MarkdownInput } from './ResearchMarkdownInput';
+import { MarkdownEditorDialog } from './MarkdownEditorDialog';
+import { useMobileMarkdownMode } from '../lib/useMobileMarkdownEditor';
 import { QuietState } from './BoundaryState';
 import { UserAvatar } from './UserAvatar';
 import { UserProfilePanel } from './UserProfilePanel';
@@ -17,12 +19,16 @@ export function ResearchComments({project,task,userId,scope,writable,busy,send}:
 }) {
   const {t}=useI18n();
   const [body,setBody]=useState(''),[reply,setReply]=useState<string|null>(null);
+  const [editing,setEditing]=useState(false),[sendError,setSendError]=useState('');
+  const mobile=useMobileMarkdownMode();
+  const draftBeforeEdit=useRef('');
   const [expanded,setExpanded]=useState<number|null>(null),[profile,setProfile]=useState<TinyUserDTO|null>(null);
   const commentIds=useRef(new Map<string,number>());
   for(const item of task.progress)if(!commentIds.current.has(item.id))commentIds.current.set(item.id,commentIds.current.size+1);
   const commentId=(id:string)=>commentIds.current.get(id)!;
   const record=(id:number)=>task.progress.find(item=>commentId(item.id)===id)!;
   const editor=useRef<HTMLDivElement>(null);
+  useEffect(()=>{if(editing&&!mobile)editor.current?.querySelector('textarea')?.focus({preventScroll:true});},[editing,mobile]);
   const user=(id:number):TinyUserDTO=>{
     const member=project.members.find(item=>item.id===id);
     return {user_id:id,name:member?.name||String(id),avatar_uri:member?.avatar_uri,avatar_cache_key:member?.avatar_cache_key,avatar_frame_style:member?.avatar_frame_style};
@@ -46,16 +52,25 @@ export function ResearchComments({project,task,userId,scope,writable,busy,send}:
   }).filter(comment=>scope==='all'||comment.user.user_id===userId||comment.replies.some(entry=>entry.user.user_id===userId));
   const target=reply?byId.get(reply):undefined;
   const me=user(userId);
+  function beginEditing(){draftBeforeEdit.current=body;setSendError('');setEditing(true);}
+  function cancelEditing(){setBody(draftBeforeEdit.current);setEditing(false);setSendError('');}
+  async function submit(value:string){
+    if(busy||!value.trim())return;
+    setSendError('');
+    if(await send(value,reply||undefined)){setBody('');setReply(null);setEditing(false);}
+    else setSendError(t('research.failed'));
+  }
   return <section className="research-task-comments">
-    {writable&&<CommentComposer onSubmit={async event=>{event.preventDefault();if(busy||!body.trim())return;if(await send(body,reply||undefined)){setBody('');setReply(null);}}}>
-      <UserAvatar className="square-comment-avatar" name={me.name} uri={me.avatar_uri} frame={me.avatar_frame_style}/>
+    {writable&&<CommentComposer onSubmit={event=>{event.preventDefault();void submit(body);}}>
+      <UserAvatar className="square-comment-avatar" name={me.name} uri={me.avatar_uri} cacheKey={me.avatar_cache_key} frame={me.avatar_frame_style}/>
       <div className="square-comment-composer-main" ref={editor}>
         {target&&<div className="square-reply-target"><span>{t('square.reply')} {user(target.user_id).name}</span><button className="ghost-button" type="button" onClick={()=>setReply(null)} aria-label={t('common.cancel')}><span className="material-symbols-outlined">close</span></button></div>}
-        <MarkdownInput value={body} onChange={setBody}/>
-        <div className="research-comment-send"><button className="square-comment-send" type="submit" disabled={busy||!body.trim()} aria-label={t('square.sendComment')}><span className="material-symbols-outlined">arrow_upward</span></button></div>
+        {editing&&!mobile?<><MarkdownInput value={body} onChange={setBody}/><div className="research-comment-send"><button className="ghost-button" type="button" onClick={cancelEditing} disabled={busy}>{t('common.cancel')}</button><button className="square-comment-send" type="submit" disabled={busy||!body.trim()} aria-label={t('square.sendComment')}><span className="material-symbols-outlined">arrow_upward</span></button></div></>:<div className="research-progress-compose-row"><button type="button" className="research-progress-trigger" disabled={busy} onClick={beginEditing}><span>{body||t('research.md.mdPlaceholder')}</span><span className="material-symbols-outlined" aria-hidden="true">edit_note</span></button><button className="square-comment-send" type="submit" disabled={busy||!body.trim()} aria-label={t('square.sendComment')}><span className="material-symbols-outlined">arrow_upward</span></button></div>}
+        {sendError&&!(editing&&mobile)&&<p className="research-comment-error" role="alert">{sendError}</p>}
       </div>
     </CommentComposer>}
-    <div className="square-comment-list">{comments.map(comment=><CommentThread key={record(comment.comment_id).id} comment={comment} canInteract={writable} expanded={expanded===comment.comment_id} onToggleReplies={id=>setExpanded(current=>current===id?null:id)} onDelete={()=>{}} onOpenProfile={setProfile} onReply={entry=>{setReply(record(entry.comment_id).id);setExpanded(entry.parent_id||entry.comment_id);editor.current?.scrollIntoView({block:'nearest'});editor.current?.querySelector('textarea')?.focus({preventScroll:true});}} renderContent={(entry,onReply)=><div onClick={onReply}><Markdown body={entry.text}/></div>}/>)}</div>
+    {writable&&editing&&mobile&&<MarkdownEditorDialog title={t('research.progress')} initialValue={body} onChange={setBody} busy={busy} error={sendError} confirmLabel={t('square.sendComment')} onClose={cancelEditing} onSave={value=>void submit(value)}/>}
+    <div className="square-comment-list">{comments.map(comment=><CommentThread key={record(comment.comment_id).id} comment={comment} canInteract={writable} expanded={expanded===comment.comment_id} onToggleReplies={id=>setExpanded(current=>current===id?null:id)} onDelete={()=>{}} onOpenProfile={setProfile} onReply={entry=>{setReply(record(entry.comment_id).id);setExpanded(entry.parent_id||entry.comment_id);beginEditing();if(!mobile)editor.current?.scrollIntoView({block:'nearest'});}} renderContent={(entry,onReply)=><div onClick={onReply}><Markdown body={entry.text}/></div>}/>)}</div>
     {!comments.length&&<QuietState icon="forum" title={t('research.noProgress')} description={t('research.progressEmptyHint')}/>}
     <SideDrawer headerless historyKey="research-comment-profile" open={!!profile} onClose={()=>setProfile(null)} title={t('profile.details')}>{profile&&<UserProfilePanel userId={profile.user_id} initialUser={profile}/>}</SideDrawer>
   </section>;

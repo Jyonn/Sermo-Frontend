@@ -3,20 +3,26 @@ import { useModalFocus } from './modalFocus';
 
 export const MOBILE_MARKDOWN_QUERY = '(max-width: 719px), (pointer: coarse) and (max-height: 500px)';
 
-export function useMobileMarkdownEditor(root: RefObject<HTMLDivElement | null>, enabled = true) {
+export function useMobileMarkdownMode(enabled = true) {
   const [mobile, setMobile] = useState(() => enabled && window.matchMedia(MOBILE_MARKDOWN_QUERY).matches);
-  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia(MOBILE_MARKDOWN_QUERY);
+    const sync = () => setMobile(enabled && media.matches);
+    sync(); media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, [enabled]);
+  return mobile;
+}
+
+export function useMobileMarkdownEditor(root: RefObject<HTMLDivElement | null>, enabled = true, autoStart = false, onCancel?: () => void) {
+  const mobile = useMobileMarkdownMode(enabled);
+  const [active, setActive] = useState(() => mobile && autoStart);
   const close = useCallback(() => {
     if (root.current?.contains(document.activeElement)) (document.activeElement as HTMLElement)?.blur();
     setActive(false);
   }, [root]);
-  useEffect(() => {
-    const media = window.matchMedia(MOBILE_MARKDOWN_QUERY);
-    const sync = () => { setMobile(enabled && media.matches); if (!enabled || !media.matches) close(); };
-    sync(); media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, [enabled, close]);
-  useModalFocus(root, active, close, { autoFocus: false, restoreFocus: false });
+  useEffect(() => { if (!mobile) close(); }, [mobile, close]);
+  useModalFocus(root, active, onCancel || close, { autoFocus: false, restoreFocus: false });
   useLayoutEffect(() => {
     const node = root.current;
     if (!active || !node) return;

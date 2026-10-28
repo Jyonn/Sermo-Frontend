@@ -85,7 +85,7 @@ test('description editing and creation share an edge-to-edge modal, not a drawer
   assert.doesNotMatch(source('components/ResearchCreateFlow.tsx'), /SideDrawer/);
   const dialog=source('components/MarkdownEditorDialog.tsx');
   assert.match(dialog, /role="dialog" aria-modal="true"/);
-  assert.match(dialog, /useModalFocus\(root,true/);
+  assert.match(dialog, /useModalFocus\(root,!mobile/);
   assert.match(dialog, /if\(!busy\)onSave\(body\)/);
   assert.match(source('components/MarkdownEditorDialog.css'), /markdown-editor-dialog-body\{[^}]*padding:0/);
 });

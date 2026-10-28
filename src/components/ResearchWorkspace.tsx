@@ -3,7 +3,6 @@ import type { ResearchProject, ResearchSummary } from '../lib/research';
 import { UserAvatar } from './UserAvatar';
 import { Markdown } from './ResearchMarkdown';
 import { ResearchTaskItem } from './ResearchTaskItem';
-import { HeaderIconButton } from './HeaderIconButton';
 import { QuietState } from './BoundaryState';
 import { SettingGroup, SettingRow } from './SettingRow';
 
@@ -21,7 +20,7 @@ export function ResearchHome({ projects, selected, open, create }: { projects: R
   </>;
 }
 
-export function ResearchOverview({ project, tasks, chat, calendar, members, editDescription, addTask, canEdit }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; editDescription:()=>void; addTask: () => void; canEdit: boolean }) {
+export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean }) {
   const { t } = useI18n();
   const done = project.tasks.filter(item => item.status === 'archived').length;
   const active = project.tasks.filter(item => item.status !== 'archived');
@@ -31,7 +30,7 @@ export function ResearchOverview({ project, tasks, chat, calendar, members, edit
         <span className="research-member-stack-avatars">{project.members.slice(0,6).map(member=><UserAvatar key={member.id} className="research-overview-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style}/>)}</span>
         <span className="research-member-stack-count">{project.members.length}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
       </button>
-      <div className="research-description">{canEdit&&<HeaderIconButton label={t('research.editDescription')} onClick={editDescription}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l5-1L20 8a2 2 0 0 0-5-5L4 14v6Z"/></svg></HeaderIconButton>}{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
+      <div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
       <SettingGroup><SettingRow title={t('research.group')} icon={<span className="material-symbols-outlined">forum</span>} onClick={chat}/></SettingGroup>
     </section>
     <div className="research-overview-columns"><section className="research-overview-tasks"><header className="research-section-heading"><h2>{t('research.tasks')}</h2><span className="research-muted">{done} / {project.tasks.length}</span><button className="ghost-button" onClick={() => tasks()}>{t('research.viewAll')}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></header>

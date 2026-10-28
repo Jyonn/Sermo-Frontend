@@ -165,7 +165,13 @@
 .research-task-comments .square-comment-composer { width: 100%; margin: 0 0 20px; grid-template-columns: 36px minmax(0, 1fr); align-items: start; }
 .research-task-comments .square-comment-composer-main { min-width: 0; }
 .research-task-comments .square-reply-target { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
-.research-comment-send { display: flex; justify-content: flex-end; margin-top: 8px; }
+.research-comment-send { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.research-progress-compose-row{display:flex;align-items:center;gap:8px;min-height:40px}
+.research-progress-trigger{display:flex;align-items:center;gap:12px;flex:1;min-width:0;min-height:40px;padding:8px 12px;border:1px solid var(--line-soft);border-radius:20px;background:var(--bg-canvas);color:var(--text-muted);font:inherit;font-size:14px;text-align:left}
+.research-progress-trigger>span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.research-progress-trigger>.material-symbols-outlined{font-size:21px;color:var(--text-secondary)}
+.research-progress-compose-row>.square-comment-send{flex:0 0 38px}
+.research-comment-error{margin:8px 0 0;color:var(--danger);font-size:12px}
 .research-status.is-archived { color: var(--text-muted); background: var(--bg-soft); }
 .research-task-dot.is-active { background: var(--brand-primary); }
 .research-task-dot.is-archived { background: var(--text-muted); }

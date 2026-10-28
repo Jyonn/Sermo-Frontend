@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.28.10",
+  "id": "2026.10.28.11",
   "publishedAt": "2026-10-28",
   "locales": {
     "zh-CN": {
-      "title": "手机 Markdown 沉浸编辑",
+      "title": "更顺手的说明与进度编辑",
       "items": [
-        "手机聚焦 Markdown 输入后进入沉浸编辑，工具栏随键盘显示",
-        "支持横屏和深色模式，点击完成返回原页面，电脑端保持原有编辑方式"
+        "Markdown 预览固定可见，手机从课题详情直接进入全屏说明编辑",
+        "任务进度改为评论式输入入口，修复评论等级标志与昵称错位"
       ]
     },
     "en": {
-      "title": "Immersive Markdown on mobile",
+      "title": "Smoother descriptions and progress updates",
       "items": [
-        "Focus a Markdown field on your phone for distraction-free editing with formatting tools",
-        "Supports landscape and dark mode; Done returns to the form while desktop editing stays unchanged"
+        "Markdown preview stays visible; project details open directly into full-screen editing on phones",
+        "Progress updates use a compact comment-style entry; comment level badges stay beside names"
       ]
     }
   }
