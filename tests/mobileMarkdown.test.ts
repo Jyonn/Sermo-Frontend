@@ -9,6 +9,7 @@ test('shared Markdown editing opts phones in without replacing the textarea',()=
   assert.match(input,/onFocus=\{immersive.focus\}/);
   assert.match(input,/onPointerDown=\{immersive.start\}/);
   assert.match(input,/translate\('common.done'\)/);
+  assert.match(input,/if\(immersive.mobile&&!immersive.active\)setPreview\(false\)/);
   assert.equal((input.match(/<textarea /g)||[]).length,1);
   assert.doesNotMatch(input,/createPortal/);
   for(const file of ['components/ResearchComments.tsx','components/ResearchCalendar.tsx','components/MarkdownEditorDialog.tsx','pages/ResearchPage.tsx'])assert.match(source(file),/<MarkdownInput/);

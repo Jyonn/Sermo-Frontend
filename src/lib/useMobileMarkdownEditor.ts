@@ -33,7 +33,12 @@ export function useMobileMarkdownEditor(root: RefObject<HTMLDivElement | null>, 
     const sibling = node.nextSibling;
     const popover = typeof node.showPopover === 'function';
     if (popover) { node.setAttribute('popover', 'manual'); node.showPopover(); }
-    else document.body.appendChild(node);
+    else {
+      const focused = document.activeElement as HTMLElement | null;
+      const keepFocus = focused && node.contains(focused);
+      document.body.appendChild(node);
+      if (keepFocus) focused.focus({ preventScroll: true });
+    }
     viewport?.addEventListener('resize', sync); viewport?.addEventListener('scroll', sync);
     window.addEventListener('resize', sync);
     const oldOverflow = document.documentElement.style.overflow;

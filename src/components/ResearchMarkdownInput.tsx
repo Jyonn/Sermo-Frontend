@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Markdown } from './ResearchMarkdown';
 import { useI18n, type TranslationKey } from '../lib/language';
 import { insertMarkdown, markdownTable } from '../lib/researchMarkdownEdit';
@@ -21,6 +21,7 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
   const ref = useRef<HTMLTextAreaElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const immersive = useMobileMarkdownEditor(root, mobileImmersive);
+  useEffect(()=>{if(immersive.mobile&&!immersive.active)setPreview(false);},[immersive.mobile,immersive.active]);
   const body = value ?? local;
   function change(next: string) { setLocal(next); onChange?.(next); }
   function insert(before: string, after = '', fallback = t('mdText')) {
