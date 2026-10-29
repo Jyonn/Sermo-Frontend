@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.29.3",
+  "id": "2026.10.29.4",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "课题邀请更清晰",
+      "title": "界面细节优化",
       "items": [
-        "重新设计课题邀请卡片，清晰展示课题、邀请人和确认状态，适配深浅色模式"
+        "修复在线圆点被头像裁切及评论等级标记远离昵称的问题",
+        "互动额度面板更紧凑，桌面侧栏折叠按钮更清晰"
       ]
     },
     "en": {
-      "title": "Clearer project invitations",
+      "title": "Interface refinements",
       "items": [
-        "Redesigned project invitations with clearer titles, inviters and response status in light and dark modes"
+        "Fixed clipped online indicators and kept comment level badges next to names",
+        "Made interaction quotas more compact and refreshed the desktop sidebar toggle"
       ]
     }
   }

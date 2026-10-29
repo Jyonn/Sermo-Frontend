@@ -268,8 +268,7 @@ export function AppBottomNav() {
           type="button"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M4.5 4.5h15v15h-15zM9 4.5v15" />
-            <path d="m16 9-3 3 3 3" />
+            <path d="m11 7-5 5 5 5M18 7l-5 5 5 5" />
           </svg>
         </button>
       </div>

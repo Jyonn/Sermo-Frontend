@@ -19,16 +19,19 @@ html[data-theme="dark"] .square-search-field input { color-scheme:dark; }
 .square-search-modal .square-search-range-hint { margin:-6px 0 0;color:var(--text-muted);font-size:12px;line-height:1.6; }
 .square-search-modal footer { display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px; }
 .square-search-modal [role="alert"] { margin:0;color:var(--danger);font-size:12px; }
-.square-quota-sheet .square-quota-panel .square-quota-hero { min-height:92px;border-color:var(--line-soft);border-radius:18px;background:var(--bg-elevated);color:var(--text-primary);box-shadow:none; }
+.square-quota-sheet .square-quota-panel { gap:12px; }
+.square-quota-sheet .square-quota-panel .square-quota-hero { min-height:64px;padding:14px 16px;border-color:var(--line-soft);border-radius:16px;background:var(--bg-elevated);color:var(--text-primary);box-shadow:none; }
 .square-quota-sheet .square-quota-hero>div>span { color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 10%,transparent); }
 .square-quota-sheet .square-quota-hero>.material-symbols-outlined { color:var(--brand-primary);font-size:32px; }
-.square-quota-sheet .square-quota-hero strong { font-size:21px; }
-.square-quota-sheet .square-quota-track { border:0;border-radius:0;background:transparent;gap:12px; }
-.square-quota-sheet .square-quota-track article { padding:16px;border:1px solid var(--line-soft);border-radius:18px;background:var(--bg-elevated); }
+.square-quota-sheet .square-quota-hero strong { font-size:18px; }
+.square-quota-sheet .square-quota-track { border:1px solid var(--line-soft);border-radius:16px;background:var(--bg-elevated);gap:0; }
+.square-quota-sheet .square-quota-track article { padding:14px 16px;gap:8px;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;background:transparent; }
+.square-quota-sheet .square-quota-track article:last-child { border-bottom:0; }
 .square-quota-sheet .square-quota-track-copy strong { font-size:14px; }
 .square-quota-sheet .square-quota-track-copy small { white-space:normal;font-size:11px;line-height:1.6; }
 .square-quota-sheet .square-quota-track article>b { font-size:13px; }
-.square-quota-windows { display:grid;grid-column:1/-1;gap:12px;margin-top:6px; }
+.square-quota-windows { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-column:1/-1;gap:16px;margin-top:2px; }
+.square-quota-windows>.is-unlimited .square-quota-meter { display:none; }
 .square-quota-windows>div>span { display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;font-size:11px;color:var(--text-muted); }
 .square-quota-windows b { color:var(--text-secondary);font-weight:500;font-variant-numeric:tabular-nums; }
 .square-quota-sheet .square-quota-meter { height:4px; }

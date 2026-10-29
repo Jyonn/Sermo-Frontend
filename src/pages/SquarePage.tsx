@@ -269,7 +269,7 @@ export function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean
           <span className="material-symbols-outlined square-quota-track-icon">{item.icon}</span>
           <div className="square-quota-track-copy"><strong>{item.label}</strong></div>
           <b>{item.remaining === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining })}</b>
-          <div className="square-quota-windows">{[{ label: t("square.quota24Hours"), used: item.used, limit: item.limit }, { label: t("square.quota7Days"), used: item.weeklyUsed, limit: item.weeklyLimit }].map((window) => <div key={window.label}><span>{window.label}<b>{window.used} / {window.limit ?? "∞"}</b></span><div className="square-quota-meter"><i style={{ transform: `scaleX(${window.limit === null ? 0 : Math.min(1, window.used / Math.max(1, window.limit))})` }} /></div></div>)}</div>
+          <div className="square-quota-windows">{[{ label: t("square.quota24Hours"), used: item.used, limit: item.limit }, { label: t("square.quota7Days"), used: item.weeklyUsed, limit: item.weeklyLimit }].map((window) => <div className={window.limit === null ? "is-unlimited" : undefined} key={window.label}><span>{window.label}<b>{window.used} / {window.limit ?? "∞"}</b></span><div className="square-quota-meter"><i style={{ transform: `scaleX(${window.limit === null ? 0 : Math.min(1, window.used / Math.max(1, window.limit))})` }} /></div></div>)}</div>
         </article>;
       })}
       {quota.statements.anonymous_available && quota.statements.anonymous_weekly_limit !== null ? <article className="square-quota-anonymous-card">

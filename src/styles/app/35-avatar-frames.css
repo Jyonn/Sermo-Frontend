@@ -33,6 +33,9 @@
   box-shadow: 0 0 0 1px rgba(17, 38, 31, .1), 0 4px 14px rgba(17, 19, 24, .1);
 }
 
+.user-avatar.status-online { overflow: visible; }
+.user-avatar.status-online::after { z-index: 2; }
+
 .avatar-frame-clip {
   position: absolute;
   inset: 0;
