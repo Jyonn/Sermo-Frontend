@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.29.9",
+  "id": "2026.10.29.10",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "Chronelle 日程可见范围",
+      "title": "嵌套窗口层级修复",
       "items": [
-        "绑定后引导设置日程权限，也可从插件 Chronelle 再次进入",
-        "陌生人和好友默认可看忙闲，支持全局及类别组设置，好友权限不低于陌生人",
-        "精简绑定说明，收紧权限时及时撤销旧展示"
+        "修复日期、成员选择等新窗口被原 Drawer 遮挡的问题",
+        "统一抽屉和模态窗口的打开顺序与遮罩层级"
       ]
     },
     "en": {
-      "title": "Chronelle calendar visibility",
+      "title": "Nested overlay fixes",
       "items": [
-        "Set visibility after binding or revisit it through the Chronelle plugin",
-        "Friends and strangers see availability by default, with global and per-group controls and a friend-access floor",
-        "Clearer binding copy and revocation of outdated displays when restricting access"
+        "Fixed date and member pickers appearing behind existing drawers",
+        "Unified stacking order and backdrops for drawers and dialogs"
       ]
     }
   }

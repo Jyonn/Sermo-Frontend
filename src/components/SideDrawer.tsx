@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { useDesktopPanels } from "./DesktopPanelWorkspace";
+import {useOverlayLayer} from '../lib/overlayLayer';
 import { useModalFocus } from "../lib/modalFocus";
 
 const activeDrawerIds = new Set<string>();
@@ -259,7 +260,8 @@ export function SideDrawer({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [requestClose, visible, desktopPanel, panels?.topId, drawerId]);
 
-  useModalFocus(surfaceRef, visible && trapFocus, requestClose);
+  const overlayLevel=useOverlayLayer(surfaceRef,visible&&(!desktopPanel||Boolean(panels?.floating&&panels.topId===drawerId)),panels?.host);
+  useModalFocus(surfaceRef, visible && trapFocus, requestClose,{manageLayer:false});
   if (!visible || typeof document === "undefined") return null;
 
   const desktopClose = desktopPanel && !panels?.single && dismissAction !== "back";
@@ -267,7 +269,7 @@ export function SideDrawer({
   const dismissIcon = desktopClose ? "close" : "arrow_back";
   return <>
     {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
-      <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} onClick={requestClose} aria-hidden="true" />,
+      <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} style={overlayLevel?{zIndex:overlayLevel-1}:undefined} onClick={requestClose} aria-hidden="true" />,
       document.body
     ) : null}
     {createPortal(

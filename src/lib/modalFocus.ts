@@ -1,10 +1,12 @@
 import { useEffect, useRef, type RefObject } from "react";
+import {useOverlayLayer} from './overlayLayer';
 
 const layers: symbol[] = [];
 const focusable = 'button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])';
 
-export function useModalFocus(root: RefObject<HTMLElement | null>, open: boolean, onEscape?: () => void, options: { autoFocus?: boolean; restoreFocus?: boolean } = {}) {
+export function useModalFocus(root: RefObject<HTMLElement | null>, open: boolean, onEscape?: () => void, options: { autoFocus?: boolean; restoreFocus?: boolean; manageLayer?:boolean } = {}) {
   const { autoFocus = true, restoreFocus = true } = options;
+  useOverlayLayer(root,open&&options.manageLayer!==false);
   const escape = useRef(onEscape);
   escape.current = onEscape;
   useEffect(() => {
