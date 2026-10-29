@@ -5,6 +5,23 @@ export const notificationCategories = [
   {id:'submission',title:'notification.submissionType',hint:'notification.submissionTypeHint',icon:'article',topics:[7]},
   {id:'research',title:'notification.researchType',hint:'notification.researchTypeHint',icon:'science',topics:[8,9,10]},
 ] as const;
+type NotificationSpaceFeatures = {
+  ready:boolean;
+  chatEnabled:boolean;
+  squareEnabled:boolean;
+  submissionEnabled:boolean;
+  researchEnabled?:boolean;
+};
+export function notificationCategoriesForSpace(features:NotificationSpaceFeatures) {
+  if (!features.ready) return [];
+  const enabled = {
+    chat:features.chatEnabled,
+    square:features.squareEnabled,
+    submission:features.submissionEnabled,
+    research:features.researchEnabled === true,
+  };
+  return notificationCategories.filter(category=>enabled[category.id]);
+}
 export const notificationTopicLabels:Record<NotificationTopic,string> = {
   1:'notification.messages',2:'notification.statementLikes',3:'notification.statementComments',4:'notification.commentLikes',
   5:'notification.commentReplies',6:'notification.onlineType',7:'notification.submissionActivity',8:'notification.researchTasks',

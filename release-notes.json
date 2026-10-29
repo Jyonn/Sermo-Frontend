@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.20",
+  "id": "2026.10.29.21",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "科研资源空间",
+      "title": "通知设置更贴合当前空间",
       "items": [
-        "课题与任务均可上传文件、添加链接，课题支持两级目录",
-        "成员共享资源，上传者与课题负责人可删除，存档后保留只读访问"
+        "通知与提醒只展示当前空间已开放的聊天、广场、投稿和科研类别",
+        "按类型与按渠道保持一致，隐藏类别的原有偏好仍会保留"
       ]
     },
     "en": {
-      "title": "Research resource spaces",
+      "title": "Notifications tailored to your space",
       "items": [
-        "Upload files and add links to projects and tasks, with two folder levels for projects",
-        "Share resources with members; uploaders and project owners can remove them, while archived spaces stay read-only"
+        "Notification settings only show Chat, Square, Submissions and Research when enabled in the current space",
+        "Type and channel views stay consistent, while preferences for hidden categories are preserved"
       ]
     }
   }

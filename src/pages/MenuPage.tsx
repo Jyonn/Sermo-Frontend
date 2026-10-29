@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
 import { DrawerTabs } from "../components/DrawerTabs";
-import { notificationCategories, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
+import { notificationCategoriesForSpace, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
 import "./MenuSections.css";
 import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
@@ -388,6 +388,7 @@ export default function MenuPage() {
   const navigate = useNavigate();
   const { session, logout, patchSessionUser, setSession } = useAuth();
   const spaceFeatures = useSpaceFeatures();
+  const visibleNotificationCategories = notificationCategoriesForSpace(spaceFeatures);
   const { setSession: setAdminSession } = useAdminAuth();
   const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
   const currentUserId = session?.user.user_id;
@@ -2007,7 +2008,8 @@ export default function MenuPage() {
   };
 
   const renderChannelTopicControls = (channel: 0 | 1 | 2 | 3) => {
-    const groups = notificationCategories.map(category=>({label:t(category.title as TranslationKey),pairs:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])}));
+    if (!spaceFeatures.ready) return <ContentLoader label={t('common.loading')} rows={2}/>;
+    const groups = visibleNotificationCategories.map(category=>({label:t(category.title as TranslationKey),pairs:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])}));
     return <div className="menu-pref-list notification-channel-topics">
       {groups.map((group) => {
         const supportedPairs = group.pairs.filter(([topic, audience]) => topicSupported(channel, topic, audience));
@@ -2956,7 +2958,7 @@ export default function MenuPage() {
       <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
         <div className="notification-routing-drawer menu-settings-section">
           <DrawerTabs label={t("menu.notifications")} value={notificationSettingsMode} onChange={setNotificationSettingsMode} items={[{ value: "type", label: t("notification.byType") }, { value: "channel", label: t("notification.byChannel") }]} />
-          {notificationSettingsMode === "channel" ? (
+          {!spaceFeatures.ready ? <ContentLoader label={t('common.loading')} rows={2}/> : notificationSettingsMode === "channel" ? (
             <div className="notification-routing-grid" role="tabpanel" aria-label={t("notification.byChannel")}>
               <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">{standalonePwa ? "desktop_windows" : "language"}</span><div><strong>{standalonePwa ? t("channel.system") : t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
               <button className="notification-channel-card is-email" onClick={() => emailVerified ? openPrefDrawer("email") : openBindingFromNotifications("email")} type="button">
@@ -2973,7 +2975,7 @@ export default function MenuPage() {
           ) : (
             <div className="notification-type-stack" role="tabpanel" aria-label={t("notification.byType")}>
               <div className="notification-channel-legend" aria-hidden="true"><span>{standalonePwa ? t("channel.system") : t("channel.web")}</span><span>{t("channel.email")}</span><span>{t("channel.instant")}</span></div>
-              {notificationCategories.map(category=>({title:t(category.title as TranslationKey),hint:t(category.hint as TranslationKey),icon:category.icon,topics:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])})).map((section) => (
+              {visibleNotificationCategories.map(category=>({title:t(category.title as TranslationKey),hint:t(category.hint as TranslationKey),icon:category.icon,topics:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])})).map((section) => (
                 <section className="notification-type-card" key={section.title}>
                   <header><strong><span className="material-symbols-outlined" aria-hidden="true">{section.icon}</span>{section.title}</strong><small>{section.hint}</small></header>
                   {section.topics.map(([topic, audience]) => {
