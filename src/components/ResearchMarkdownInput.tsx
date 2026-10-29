@@ -32,7 +32,7 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
   function focus(){if(!immersive.active)snapshot.current=body;immersive.focus();}
   function start(){if(!immersive.active)snapshot.current=body;immersive.start();}
   useLayoutEffect(()=>{if(mobileSession&&immersive.mobile)ref.current?.focus({preventScroll:true});},[Boolean(mobileSession),immersive.mobile]);
-  const previewButton=<button className="v3-md-preview-toggle" type="button" title={t(preview ? 'edit' : 'previewMd')} aria-label={t(preview ? 'edit' : 'previewMd')} aria-pressed={preview} onMouseDown={event=>event.preventDefault()} onClick={() => {setHeadingOpen(false);setTableOpen(false);setPreview(!preview);if(preview)requestAnimationFrame(()=>ref.current?.focus({preventScroll:true}));}}><span className="material-symbols-outlined" aria-hidden="true">{preview?'edit':'visibility'}</span></button>;
+  const previewButton=<button className="v3-md-preview-toggle" type="button" title={t(preview ? 'edit' : 'previewMd')} aria-label={t(preview ? 'edit' : 'previewMd')} aria-pressed={preview} onMouseDown={event=>event.preventDefault()} onClick={event => {if(!immersive.mobile)event.currentTarget.focus({preventScroll:true});setHeadingOpen(false);setTableOpen(false);setPreview(!preview);if(preview)requestAnimationFrame(()=>ref.current?.focus({preventScroll:true}));}}><span className="material-symbols-outlined" aria-hidden="true">{preview?'edit':'visibility'}</span></button>;
   function insert(before: string, after = '', fallback = t('mdText')) {
     const input = ref.current;
     if (!input) return;

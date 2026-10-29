@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.2",
+  "id": "2026.10.30.3",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "拖入上传与深色体验优化",
+      "title": "任务讨论与日程视图优化",
       "items": [
-        "资源空间支持拖入多个文件上传，添加资源标题区更紧凑",
-        "聊天拖入提示和文件确认框适配深色主题，科研导航移至通讯前"
+        "任务评论与回复更紧凑，Markdown 编辑失焦自动收起并保留草稿",
+        "科研日程支持单日与一周切换，以及逐日选择会议时间"
       ]
     },
     "en": {
-      "title": "File drops and dark-mode refinements",
+      "title": "Task discussions and calendar views",
       "items": [
-        "Drop multiple files into resource libraries and enjoy a more compact add-resource menu",
-        "Chat drop hints and file previews follow dark mode; Research now appears before Contacts"
+        "Refined task discussions with compact replies and draft-preserving editor collapse",
+        "Switch research calendars between day and week views and select meeting times on any day"
       ]
     }
   }

@@ -21,7 +21,7 @@ export function useMobileMarkdownEditor(root: RefObject<HTMLDivElement | null>, 
     if (root.current?.contains(document.activeElement)) (document.activeElement as HTMLElement)?.blur();
     setActive(false);
   }, [root]);
-  useEffect(() => { if (!mobile) close(); }, [mobile, close]);
+  useEffect(() => { if (!mobile && active) close(); }, [mobile, active, close]);
   useModalFocus(root, active, onCancel || close, { autoFocus: false, restoreFocus: false });
   useLayoutEffect(() => {
     const node = root.current;
