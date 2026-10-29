@@ -8,6 +8,7 @@ import { getDetectedSpaceSlug } from '../lib/spaceEntry';
 import chronelleIcon from '../assets/chronelle-icon.png';
 import { ConfirmDialog } from './ConfirmDialog';
 import './ChronellePluginDialog.css';
+import {ChronellePermissionsDrawer} from './ChronellePermissionsDrawer';
 
 export function ChronelleAccountSummary({userId,refresh}:{userId:number;refresh:boolean}) {
   const {t}=useI18n(),[active,setActive]=useState(false);
@@ -21,10 +22,11 @@ export function ChronellePluginDialog({open,onClose,userId,onChange,rebind=false
   const storageKey=`chronelle:full-pending:${userId}`;
   const [pending,setPending]=useState(()=>Number(sessionStorage.getItem(storageKey))>Date.now());
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
-  const [active,setActive]=useState(false),[unlinkOpen,setUnlinkOpen]=useState(false);
+  const [active,setActive]=useState(false);
+  const [checking,setChecking]=useState(true);
   const callback=useRef(onChange);callback.current=onChange;
   const errorText=(code:string)=>{const key=('research.calendarUI.error.'+code) as TranslationKey;const value=t(key);return value===key?tr('unavailable'):value;};
-  useEffect(()=>{if(!open)return;let live=true;api.chronelleAccount().then(value=>{if(live)setActive(value.status==='active');}).catch(()=>{});return()=>{live=false;};},[open]);
+  useEffect(()=>{if(!open){setChecking(true);return;}let live=true;setChecking(true);api.chronelleAccount().then(value=>{if(live)setActive(value.status==='active');}).catch(()=>{}).finally(()=>{if(live)setChecking(false);});return()=>{live=false;};},[open]);
   useEffect(()=>{
     if(!pending)return;
     let stopped=false,polling=false;
@@ -36,7 +38,7 @@ export function ChronellePluginDialog({open,onClose,userId,onChange,rebind=false
         const result=await api.chronelleAccount();
         if(stopped||result.status==='binding_required'||result.status==='pending')return;
         sessionStorage.removeItem(storageKey);sessionStorage.removeItem(`chronelle:return-project:${userId}`);setPending(false);
-        if(result.status==='active'){callback.current();showToast(t('chronelle.bound'));onClose();}
+        if(result.status==='active'){setActive(true);window.dispatchEvent(new Event('chronelle:bound'));showToast(t('chronelle.bound'));}
         else setError(errorText(result.status));
       }catch(e){if(!stopped){sessionStorage.removeItem(storageKey);setPending(false);setError(errorText(e instanceof Error?e.message:'binding_required'));}}
       finally{polling=false;}
@@ -57,7 +59,7 @@ export function ChronellePluginDialog({open,onClose,userId,onChange,rebind=false
     }catch(e){popup?.close();setError(errorText(e instanceof Error?e.message:'binding_required'));}
     finally{setBusy(false);}
   }
-  return <><ConfirmDialog open={open&&!unlinkOpen} onClose={onClose} onConfirm={()=>void authorize()} busy={busy} title={rebind?t('chronelle.rebindTitle'):tr('bind')} description={rebind?t('chronelle.rebindHint'):tr('consent')} confirmLabel={tr(pending?'continueBinding':'bind')}>
-    <div className="chronelle-binding-consent"><img alt="" src={chronelleIcon}/><div><strong>{tr('visibility')}</strong><span>{tr('policyHint')}</span></div>{pending&&<p role="status">{tr('pending')}</p>}{error&&<p role="alert">{error}</p>}{active&&<button type="button" className="chronelle-binding-unbind" disabled={busy} onClick={()=>setUnlinkOpen(true)}>{tr('unbind')}</button>}</div>
-  </ConfirmDialog><ConfirmDialog open={open&&unlinkOpen} onClose={()=>setUnlinkOpen(false)} title={tr('unbind')} description={tr('unbindHint')} danger busy={busy} onConfirm={()=>{setBusy(true);void api.chronelleAccount('revoke',true).then(()=>{setActive(false);setUnlinkOpen(false);sessionStorage.removeItem(storageKey);setPending(false);callback.current();onClose();}).catch(e=>{setUnlinkOpen(false);setError(errorText(e.message));}).finally(()=>setBusy(false));}}/></>;
+  return <><ChronellePermissionsDrawer open={open&&active&&!checking} onClose={onClose} onChange={()=>{callback.current();window.dispatchEvent(new Event('chronelle:bound'));}} onRebind={()=>setActive(false)}/><ConfirmDialog open={open&&!active&&!checking} onClose={onClose} onConfirm={()=>void authorize()} busy={busy} title={rebind?t('chronelle.rebindTitle'):tr('bind')} description={t('chronelle.bindingConsentShort')} confirmLabel={tr(pending?'continueBinding':'bind')}>
+    <div className="chronelle-binding-consent"><img alt="" src={chronelleIcon}/><div><strong>{tr('visibility')}</strong><span>{t('chronelle.defaultVisibilityShort')}</span></div>{pending&&<p role="status">{tr('pending')}</p>}{error&&<p role="alert">{error}</p>}</div>
+  </ConfirmDialog></>;
 }

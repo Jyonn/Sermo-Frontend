@@ -5,12 +5,14 @@ import {showToast} from '../lib/toast';
 import {ChronellePluginDialog} from './ChronellePluginDialog';
 import {clearChronelleReturn,isChronelleReturn,readChronelleReturn} from '../lib/chronelleReturn';
 import {FeedbackState} from './FeedbackState';
+import {ChronellePermissionsDrawer} from './ChronellePermissionsDrawer';
 
 // A callback is one-shot even if React remounts the authenticated shell.
 const exchanges=new Map<string,ReturnType<typeof api.chronelleAccount>>();
 export function ChronelleBindingGate({userId}:{userId:number}) {
   const {t}=useI18n();
   const [open,setOpen]=useState(false);
+  const [permissionsOpen,setPermissionsOpen]=useState(false);
   const [callback]=useState(()=>{const url=new URL(location.href);return isChronelleReturn(url)?{state:url.searchParams.get('state')||'',code:url.searchParams.get('code')||undefined,error:url.searchParams.get('error')||undefined}:null;});
   useEffect(()=>{
     let live=true;
@@ -22,11 +24,11 @@ export function ChronelleBindingGate({userId}:{userId:number}) {
       clearChronelleReturn(callback.state,localStorage);
       let exchange=exchanges.get(callback.state);
       if(!exchange){exchange=api.chronelleAccount('claim',undefined,callback);exchanges.set(callback.state,exchange);}
-      void exchange.then(value=>{if(!live)return;if(value.status==='active'){sessionStorage.removeItem(`chronelle:full-pending:${userId}`);window.dispatchEvent(new Event('chronelle:bound'));showToast(t('chronelle.bound'));}else showToast(t('chronelle.rebindFailed'));}).catch(()=>{if(live)showToast(t('chronelle.rebindFailed'));});
-    }else void api.chronelleAccount().then(value=>{if(live&&value.rebind_required&&sessionStorage.getItem(`chronelle:rebind-dismissed:${userId}`)!=='1')setOpen(true);}).catch(()=>{});
+      void exchange.then(value=>{if(!live)return;if(value.status==='active'){sessionStorage.removeItem(`chronelle:full-pending:${userId}`);window.dispatchEvent(new Event('chronelle:bound'));showToast(t('chronelle.bound'));setPermissionsOpen(true);}else showToast(t('chronelle.rebindFailed'));}).catch(()=>{if(live)showToast(t('chronelle.rebindFailed'));});
+    }else void api.chronelleAccount().then(value=>{if(!live)return;if(value.status==='active'&&value.permissions_review_required)setPermissionsOpen(true);else if(value.rebind_required&&sessionStorage.getItem(`chronelle:rebind-dismissed:${userId}`)!=='1')setOpen(true);}).catch(()=>{});
     return()=>{live=false;};
   },[userId,callback]);
-  return open?<ChronellePluginDialog open rebind userId={userId} onClose={()=>{setOpen(false);sessionStorage.setItem(`chronelle:rebind-dismissed:${userId}`,'1');}} onChange={()=>window.dispatchEvent(new Event('chronelle:bound'))}/>:null;
+  return <><ChronellePermissionsDrawer open={permissionsOpen} onClose={()=>setPermissionsOpen(false)} onRebind={()=>{setPermissionsOpen(false);setOpen(true);}}/>{open?<ChronellePluginDialog open rebind userId={userId} onClose={()=>{setOpen(false);sessionStorage.setItem(`chronelle:rebind-dismissed:${userId}`,'1');}} onChange={()=>window.dispatchEvent(new Event('chronelle:bound'))}/>:null}</>;
 }
 
 export function ChronelleReturnFailure() {

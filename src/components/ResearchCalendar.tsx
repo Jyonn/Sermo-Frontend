@@ -3,13 +3,13 @@ import { api, ApiError } from '../lib/api';
 import { useI18n, type TranslationKey } from '../lib/language';
 import { chronelleOrigin } from '../lib/chronelleOrigin';
 import type { ResearchProject } from '../lib/research';
-import type { CalendarDisplays, CalendarPolicy, CalendarSetup, ResearchMeeting } from '../lib/researchCalendar';
+import type { CalendarDisplays, CalendarSetup, ResearchMeeting } from '../lib/researchCalendar';
 import { localInput, type CalendarRange } from '../lib/chronelleBridge';
 import { CalendarFrame } from './ChronelleFrame';
 import { ChronellePluginDialog } from './ChronellePluginDialog';
 import { SideDrawer } from './SideDrawer';
-import { ConfirmDialog } from './ConfirmDialog';
-import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from './SettingRow';
+import { SettingSelect } from './SettingRow';
+import { ChronellePermissionsDrawer } from './ChronellePermissionsDrawer';
 import { QuietState } from './BoundaryState';
 import { MarkdownInput } from './ResearchMarkdownInput';
 import { DrawerTabs } from './DrawerTabs';
@@ -23,15 +23,11 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   const [setup, setSetup] = useState<CalendarSetup | null>(null);
   const [selected, setSelected] = useState<number[]>([userId]);
   const [displays, setDisplays] = useState<CalendarDisplays | null>(null);
-  const [policy, setPolicy] = useState<CalendarPolicy>({ detail: [], busy: [] });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
   const [tick, setTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [defaultBusy,setDefaultBusy]=useState(true),[advanced,setAdvanced]=useState(false);
   const [consent, setConsent] = useState(false);
-  const [revokeOpen, setRevokeOpen] = useState(false);
   const [range, setRange] = useState<CalendarRange | null>(null);
   const [meetings,setMeetings]=useState<ResearchMeeting[]>([]);
   const [resume,setResume]=useState<ResearchMeeting|null>(null);
@@ -39,6 +35,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   const [memberPicker,setMemberPicker]=useState(false);
   const generation = useRef(0);
   useEffect(()=>{const reload=()=>setTick(n=>n+1);window.addEventListener('chronelle:bound',reload);return()=>window.removeEventListener('chronelle:bound',reload);},[]);
+  useEffect(()=>{const reload=()=>{setTick(n=>n+1);if(onboarding)onOnboarded?.();};window.addEventListener('chronelle:permissions-saved',reload);return()=>window.removeEventListener('chronelle:permissions-saved',reload);},[onboarding,onOnboarded]);
   const errorText = (code: string) => {
     const key = 'research.calendarUI.error.' + code;
     const message = t(key as TranslationKey);
@@ -50,9 +47,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     setLoading(true); setError(''); setDisplays(null);
     api.researchCalendar(project.id, controller.signal).then(value => {
       if (controller.signal.aborted) return;
-      setSetup(value); setPolicy(value.policy);
-      setDefaultBusy(value.default_busy ?? true);
-      if(value.status==='active'&&!value.policy_configured)setSettingsOpen(true);
+      setSetup(value);
     }).catch(e => { if (!controller.signal.aborted) setError(e.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -66,7 +61,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   },[project.id,tick]);
   useEffect(() => {
     setRange(null); setDisplays(null);
-    if (setup?.status !== 'active' || !setup.policy_configured || !selected.length) return;
+    if (setup?.status !== 'active' || !selected.length) return;
     const controller = new AbortController();
     const request = ++generation.current;
     setLoading(true); setError('');
@@ -82,16 +77,6 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     const timer = window.setTimeout(() => setTick(n => n + 1), displays.renew_after * 1000);
     return () => window.clearTimeout(timer);
   }, [displays,range]);
-
-  async function savePolicy() {
-    setBusy(true); setError('');
-    try {
-      await api.researchCalendarAction(project.id, { action: 'policy', ...policy, default_busy:defaultBusy });
-      setSettingsOpen(false); setTick(n => n + 1);
-      onOnboarded?.();
-    } catch (e) { setError(errorText(e instanceof Error ? e.message : 'unavailable')); }
-    finally { setBusy(false); }
-  }
 
   const active = setup?.status === 'active';
   return <section className="research-calendar">
@@ -118,23 +103,8 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     {view==='meetings'&&<section className="research-meetings">{meetings.length?meetings.map(item=><article key={item.id}><span className="research-meeting-date"><strong>{new Date(item.start).getDate()}</strong><small>{new Date(item.start).toLocaleDateString(undefined,{month:'short'})}</small></span><div><strong>{item.title}</strong><p>{new Date(item.start).toLocaleString()} → {new Date(item.end).toLocaleString()}</p><small className="research-status">{tr('meetingStatus.'+item.status)}</small></div>{item.invitation_id?<a className="ghost-button" href={`${chronelleOrigin()}/#/invitations/${item.invitation_id}`} target="_blank" rel="noreferrer">{tr('openInvitation')}<span className="material-symbols-outlined" aria-hidden="true">north_east</span></a>:item.creator_id===userId?<button className="ghost-button" onClick={()=>{setResume(item);setRange({start:item.start,end:item.end,timezone:item.timezone,all_day:item.all_day});}}>{tr('retryMeeting')}</button>:null}</article>):<div className="research-calendar-state"><span className="material-symbols-outlined" aria-hidden="true">event_available</span><h2>{tr('noMeetings')}</h2><p>{tr('meetingHint')}</p><button className="ghost-button" onClick={()=>setView('schedule')}>{tr('schedule')}</button></div>}</section>}
 
     {memberPicker&&<MemberPickerSheet title={tr('members')} initial={selected} members={project.members.map(member=>({...member,description:member.id===userId?tr('self'):undefined}))} limit={20} onClose={()=>setMemberPicker(false)} onApply={setSelected}/>}
-    <SideDrawer historyKey="research-calendar-permissions" open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
-      <div className="research-form">
-        <p className="research-muted">{tr('policyHint')}</p>
-        <p className="research-muted">{t('chronelle.privacyRevocationHint')}</p>
-        <SettingGroup><SettingRow title={t('research.defaultBusy')} description={t('research.defaultBusyHint')} trailing={<SettingSwitch checked={defaultBusy} label={t('research.defaultBusy')} disabled={busy} onChange={value=>{setDefaultBusy(value);setPolicy({detail:[],busy:value?setup?.groups.map(g=>g.id)||[]:[]});}}/>}/><SettingRow title={t('research.finePermissions')} onClick={()=>setAdvanced(value=>!value)}/></SettingGroup>
-        {advanced&&<SettingGroup>{setup?.groups.map(group => <SettingSelect key={group.id} disabled={busy} label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
-            options={['hidden', 'busy', 'detail'].map(value => ({ value, label: tr(value) }))}
-            onChange={value => setPolicy(current => ({ detail: [...current.detail.filter(id => id !== group.id), ...(value === 'detail' ? [group.id] : [])], busy: [...current.busy.filter(id => id !== group.id), ...(value === 'busy' ? [group.id] : [])] }))} />
-        )}</SettingGroup>}
-        <button className="button" disabled={busy} onClick={() => void savePolicy()}>{t('research.save')}</button>
-        <button className="ghost-button" onClick={() => setRevokeOpen(true)}>{tr('unbind')}</button>
-      </div>
-    </SideDrawer>
+    <ChronellePermissionsDrawer open={settingsOpen} onClose={()=>setSettingsOpen(false)} onRebind={()=>{setSettingsOpen(false);setConsent(true);}}/>
     <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId} onChange={()=>setTick(n=>n+1)}/>
-    <ConfirmDialog open={revokeOpen} onClose={() => setRevokeOpen(false)} title={tr('unbind')} description={tr('unbindHint')} danger busy={busy} onConfirm={() => {
-      setBusy(true); void api.chronelleAccount('revoke', true).then(() => { setDisplays(null); setSettingsOpen(false); setRevokeOpen(false); setTick(n => n + 1); }).catch(e => {setRevokeOpen(false);setSettingsOpen(false);setError(errorText(e.message));}).finally(() => setBusy(false));
-    }} />
     <SideDrawer historyKey="research-meeting-create" open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
     </SideDrawer>

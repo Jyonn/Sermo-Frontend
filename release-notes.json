@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.29.8",
+  "id": "2026.10.29.9",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "Chronelle 授权返回修复",
+      "title": "Chronelle 日程可见范围",
       "items": [
-        "Chronelle 授权返回后恢复原空间并完成绑定，不再误入空间管理页",
-        "无法恢复原空间或账号时提供明确的重新绑定提示"
+        "绑定后引导设置日程权限，也可从插件 Chronelle 再次进入",
+        "陌生人和好友默认可看忙闲，支持全局及类别组设置，好友权限不低于陌生人",
+        "精简绑定说明，收紧权限时及时撤销旧展示"
       ]
     },
     "en": {
-      "title": "Chronelle authorization return fix",
+      "title": "Chronelle calendar visibility",
       "items": [
-        "Chronelle authorization returns to the original space instead of space administration",
-        "Clear recovery guidance when the original space or account is unavailable"
+        "Set visibility after binding or revisit it through the Chronelle plugin",
+        "Friends and strangers see availability by default, with global and per-group controls and a friend-access floor",
+        "Clearer binding copy and revocation of outdated displays when restricting access"
       ]
     }
   }
