@@ -1286,7 +1286,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   place-items: center;
   border: 2px dashed color-mix(in srgb, var(--brand-primary) 58%, transparent);
   border-radius: 24px;
-  background: color-mix(in srgb, var(--surface-primary, #fffdf8) 82%, transparent);
+  background: color-mix(in srgb, var(--bg-canvas) 82%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(1.08);
   backdrop-filter: blur(16px) saturate(1.08);
   pointer-events: none;
@@ -1301,7 +1301,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   padding: 28px 34px;
   border: 1px solid color-mix(in srgb, var(--brand-primary) 22%, transparent);
   border-radius: 20px;
-  background: color-mix(in srgb, var(--surface-primary, #fffdf8) 90%, transparent);
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
   box-shadow: 0 20px 48px rgba(18, 72, 58, 0.14);
 }
 
@@ -1420,7 +1420,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   padding: 8px;
   border: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
   border-radius: 14px;
-  background: rgba(248, 250, 252, 0.82);
+  background: var(--bg-elevated);
 }
 
 .chat-clipboard-item img,

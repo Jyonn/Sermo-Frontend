@@ -2,6 +2,7 @@
 .action-sheet { width: min(100%, 480px); max-height: calc(100dvh - 32px); overflow: auto; outline: none; color: var(--text-primary); animation: pattern-rise 220ms cubic-bezier(.22,1,.36,1); }
 .action-sheet-group { overflow: hidden; border: 1px solid var(--line-soft); border-radius: 22px; background: var(--bg-elevated); }
 .action-sheet-group header { padding: 18px 20px; text-align: center; }
+.action-sheet.has-compact-header header { padding: 12px 20px; text-align: left; }
 .action-sheet-group h2 { margin: 0; font-size: 15px; }
 .action-sheet-group p { margin: 6px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
 .action-sheet-group > button { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 58px; padding: 14px 20px; border-top: 1px solid var(--line-soft); color: var(--text-primary); background: transparent; text-align: left; }

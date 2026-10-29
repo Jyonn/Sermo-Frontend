@@ -20,6 +20,7 @@ import {
 import { createPortal, flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { FileDropGuide } from "../components/FileDropGuide";
 import { BaxianBubbleTransition, BaxianCharacterRunner } from "../components/BaxianBubbleRunner";
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -8302,15 +8303,7 @@ function LiveChatsPage({
               <strong>{t("chat.selectConversation")}</strong>
             </div>
           )}
-          {fileDropActive ? (
-            <div className="chat-file-drop-guide" role="status">
-              <div className="chat-file-drop-guide-card">
-                <span className="chat-file-drop-guide-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
-                <strong>{t("clipboard.dropToSend")}</strong>
-                <span>{t("clipboard.dropToReview")}</span>
-              </div>
-            </div>
-          ) : null}
+          {fileDropActive ? <FileDropGuide/> : null}
           {clipboardUpload ? (
             <div className="chat-clipboard-backdrop" role="presentation">
               <section aria-modal="true" className="chat-clipboard-dialog" role="dialog">

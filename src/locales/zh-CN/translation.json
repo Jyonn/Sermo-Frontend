@@ -3663,4 +3663,6 @@
   ,"bgm.stopPlayback": "停止播放"
   ,"bgm.myKeychain": "主角按键"
   ,"bgm.manageKeychain": "管理曲库、装配与进会话音效"
+  ,"resources.dropToUpload": "松开以上传文件"
+  ,"resources.dropHint": "文件将添加到当前目录"
 }

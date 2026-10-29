@@ -11,6 +11,7 @@ import { HeaderIconButton } from './HeaderIconButton';
 import { PageTabs } from './PageTabs';
 import { SelectControl } from './SettingRow';
 import { ActionSheet } from './ActionSheet';
+import { FileDropGuide } from './FileDropGuide';
 import './ResearchResources.css';
 
 const symbol=(kind:string)=>kind==='folder'?'folder':kind==='link'?'link':'description';
@@ -23,6 +24,13 @@ export function ResearchResources({projectId,taskId='',title,members=[],onClose}
   const [adding,setAdding]=useState<'folder'|'link'|null>(null),[name,setName]=useState(''),[url,setUrl]=useState('');
   const [deleting,setDeleting]=useState<ResearchResource|null>(null);
   const fileInput=useRef<HTMLInputElement>(null);
+  const [dragging,setDragging]=useState(false);
+  const dragDepth=useRef(0),uploadQueue=useRef(false);
+  async function uploadFiles(files:File[]){
+    if(uploadQueue.current||busy||!space?.writable)return;
+    uploadQueue.current=true;setBusy(true);
+    try{for(const file of files){if(!await upload(file))break;}}finally{uploadQueue.current=false;setBusy(false);}
+  }
   useEffect(()=>{const controller=new AbortController();api.researchResources(projectId,taskId,controller.signal).then(setSpace).catch(e=>{if(!controller.signal.aborted)setError(e.message);});return()=>controller.abort();},[projectId,taskId]);
   const path=resourcePath(space?.items||[],parent);
   const items=visibleResources(space?.items||[],parent,query,kind,sort);
@@ -33,12 +41,13 @@ export function ResearchResources({projectId,taskId='',title,members=[],onClose}
   async function reload(){setSpace(await api.researchResources(projectId,taskId));}
   function failed(e:unknown){const message=e instanceof Error?e.message:t('research.failed');setError(message==='Directory is not empty'?t('resources.folderNotEmpty'):message==='Directory already exists'?t('resources.folderExists'):message);}
   async function change(body:Record<string,unknown>){setBusy(true);setError('');try{await api.researchResourceAction(projectId,taskId,body);await reload();if(body.action==='add'){setQuery('');setKind('all');}setAdding(null);setDeleting(null);}catch(e){failed(e);}finally{setBusy(false);}}
-  async function upload(file:File){setBusy(true);setProgress(0);setUploadName(file.name);setError('');try{const uploaded=await uploadMessageMedia(file,'file',setProgress);await api.researchResourceAction(projectId,taskId,{action:'add',kind:'file',parent_id:parent,name:file.name,resource_id:uploaded.resource.resource_id});await reload();setQuery('');setKind('all');}catch(e){failed(e);}finally{setBusy(false);setUploadName('');}}
+  async function upload(file:File){setProgress(0);setUploadName(file.name);setError('');try{const uploaded=await uploadMessageMedia(file,'file',setProgress);await api.researchResourceAction(projectId,taskId,{action:'add',kind:'file',parent_id:parent,name:file.name,resource_id:uploaded.resource.resource_id});await reload();setQuery('');setKind('all');return true;}catch(e){failed(e);return false;}finally{setUploadName('');}}
   async function open(item:ResearchResource){if(item.kind==='folder'){navigate(item.id);return;}const popup=window.open('about:blank','_blank');if(popup)popup.opener=null;setError('');try{const result=await api.researchResourceAction<{url:string}>(projectId,taskId,{action:'open',id:item.id});if(popup)popup.location.href=result.url;else setError(t('resources.popup'));}catch(e){popup?.close();failed(e);}}
   function add(value:'folder'|'link'){setName('');setUrl('');setError('');setAdding(value);}
   function more(item:ResearchResource){return <button className="resource-more" aria-label={t('resources.actions',{name:item.name})} disabled={busy} onClick={()=>setSelected(item)}><span className="material-symbols-outlined" aria-hidden="true">more_horiz</span></button>;}
   return <SideDrawer open className="research-resource-drawer" title={title} historyKey={`research-resources-${taskId||'project'}`} headerAction={space?.writable?<HeaderIconButton label={t('resources.add')} disabled={busy} onClick={()=>setAddMenu(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>:undefined} onClose={()=>{if(!busy)onClose();}}>
-    <div className="resource-library">
+    <div className="resource-library" onDragEnter={event=>{if(event.dataTransfer.types.includes('Files')){event.preventDefault();dragDepth.current++;if(space?.writable&&!busy&&!uploadQueue.current)setDragging(true);}}} onDragOver={event=>{if(event.dataTransfer.types.includes('Files')){event.preventDefault();event.dataTransfer.dropEffect=space?.writable&&!busy&&!uploadQueue.current?'copy':'none';}}} onDragLeave={event=>{event.preventDefault();dragDepth.current=Math.max(0,dragDepth.current-1);if(!dragDepth.current)setDragging(false);}} onDrop={event=>{event.preventDefault();dragDepth.current=0;setDragging(false);void uploadFiles(Array.from(event.dataTransfer.files));}}>
+      {dragging&&<FileDropGuide resource/>}
       <header className="resource-library-intro"><span className="resource-library-mark material-symbols-outlined" aria-hidden="true">{taskId?'assignment':'folder_special'}</span><div><span className="resource-eyebrow">{t(taskId?'resources.task':'resources.project')}</span><h2>{path[path.length-1]?.name||t('resources.library')}</h2><p>{t('resources.inventory',{files:fileCount,links:linkCount})}</p></div>{space&&!space.writable&&<span className="resource-readonly"><span className="material-symbols-outlined" aria-hidden="true">lock</span>{t('resources.archived')}</span>}</header>
       {!taskId&&<nav className="resource-breadcrumbs" aria-label={t('resources.location')}><button onClick={()=>navigate(null)} aria-current={parent===null?'page':undefined}>{t('resources.title')}</button>{path.map(item=><span key={item.id}><span aria-hidden="true">/</span><button aria-current={parent===item.id?'page':undefined} onClick={()=>navigate(item.id)}>{item.name}</button></span>)}</nav>}
       <label className="search-box resource-search"><span className="material-symbols-outlined" aria-hidden="true">search</span><input aria-label={t('resources.search')} placeholder={t('resources.search')} value={query} onChange={event=>setQuery(event.target.value)}/></label>
@@ -53,9 +62,9 @@ export function ResearchResources({projectId,taskId='',title,members=[],onClose}
         })}</div></section>}
         {!items.length&&<QuietState icon={query?'search_off':'folder_open'} title={t(query?'resources.noResults':'resources.empty')} description={t(query?'resources.searchHint':taskId?'resources.taskHint':'resources.projectHint')} action={!query&&space.writable?<button className="button" onClick={()=>setAddMenu(true)}>{t('resources.add')}</button>:undefined}/>}
       </>}
-      <input ref={fileInput} type="file" hidden onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void upload(file);}}/>
+      <input ref={fileInput} type="file" multiple hidden onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';void uploadFiles(files);}}/>
     </div>
-    <ActionSheet open={addMenu} title={t('resources.add')} description={path[path.length-1]?.name||t(taskId?'resources.task':'resources.project')} onClose={()=>setAddMenu(false)} actions={[
+    <ActionSheet compactHeader open={addMenu} title={t('resources.add')} onClose={()=>setAddMenu(false)} actions={[
       {key:'file',label:t('resources.upload'),description:t('resources.uploadHint'),icon:<span className="material-symbols-outlined">upload_file</span>,onSelect:()=>fileInput.current?.click()},
       {key:'link',label:t('resources.addLink'),description:t('resources.linkHint'),icon:<span className="material-symbols-outlined">add_link</span>,onSelect:()=>add('link')},
       ...(!taskId?[{key:'folder',label:t('resources.addFolder'),description:t('resources.projectHint'),disabled:path.length>=2,icon:<span className="material-symbols-outlined">create_new_folder</span>,onSelect:()=>add('folder')}]:[]),

@@ -1,5 +1,6 @@
 .research-resource-drawer>.drawer-body{padding:0}
-.resource-library{padding:24px;min-width:0;color:var(--text-primary)}
+.resource-library{position:relative;min-height:100%;padding:24px;min-width:0;color:var(--text-primary)}
+.resource-library .resource-drop-guide{display:grid;position:absolute;inset:12px}
 .resource-library-intro{display:flex;align-items:center;gap:14px;margin-bottom:24px}
 .resource-library-intro>div{flex:1;min-width:0}
 .resource-library-mark{display:grid;place-items:center;width:56px;height:64px;flex:none;border-radius:16px 16px 24px 16px;background:color-mix(in srgb,var(--brand-primary) 10%,var(--bg-elevated));color:var(--brand-primary);font-size:30px}

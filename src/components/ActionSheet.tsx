@@ -16,7 +16,7 @@ export interface SheetAction {
   onSelect: () => void | Promise<void>;
 }
 
-export function ActionSheet({ open, title, description, actions, onClose }: { open: boolean; title: string; description?: string; actions: SheetAction[]; onClose: () => void }) {
+export function ActionSheet({ open, title, description, actions, onClose, compactHeader=false }: { open: boolean; title: string; description?: string; actions: SheetAction[]; onClose: () => void; compactHeader?: boolean }) {
   const { t } = useI18n();
   const titleId = useId();
   const root = useRef<HTMLElement | null>(null);
@@ -35,7 +35,7 @@ export function ActionSheet({ open, title, description, actions, onClose }: { op
     finally { running.current = false; setBusy(null); }
   }
   return createPortal(<div className="pattern-backdrop" onClick={() => { if (!running.current) onClose(); }} role="presentation">
-    <section className="action-sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={root} onClick={(event) => event.stopPropagation()}>
+    <section className={`action-sheet${compactHeader?' has-compact-header':''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={root} onClick={(event) => event.stopPropagation()}>
       <div className="action-sheet-group"><header><h2 id={titleId}>{title}</h2>{description ? <p>{description}</p> : null}</header>
         {actions.map((action) => <button key={action.key} className={action.danger ? "is-danger" : ""} disabled={Boolean(busy) || action.disabled} onClick={() => void select(action)} type="button">
           {action.icon ? <span className="action-sheet-icon" aria-hidden="true">{action.icon}</span> : null}<span><strong>{action.label}</strong>{action.description ? <small>{action.description}</small> : null}</span>{busy === action.key ? <span className="media-wait-spinner" aria-hidden="true" /> : null}

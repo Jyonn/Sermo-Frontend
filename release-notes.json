@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.1",
+  "id": "2026.10.30.2",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "科研资源空间焕新",
+      "title": "拖入上传与深色体验优化",
       "items": [
-        "资源空间新增目录卡片、搜索、分类与排序，概览和任务页展示资源摘要",
-        "群聊入口移至成员头像右侧，群聊详情中的课题入口独立展示，完善负责人转让流程"
+        "资源空间支持拖入多个文件上传，添加资源标题区更紧凑",
+        "聊天拖入提示和文件确认框适配深色主题，科研导航移至通讯前"
       ]
     },
     "en": {
-      "title": "A refined research library",
+      "title": "File drops and dark-mode refinements",
       "items": [
-        "Browse folder cards, search and filter resources, with resource summaries in project and task views",
-        "Open group chat beside member avatars, access project settings in a separate section, and transfer ownership more reliably"
+        "Drop multiple files into resource libraries and enjoy a more compact add-resource menu",
+        "Chat drop hints and file previews follow dark mode; Research now appears before Contacts"
       ]
     }
   }

@@ -3663,4 +3663,6 @@
   ,"bgm.stopPlayback": "Stop playback"
   ,"bgm.myKeychain": "Character keychain"
   ,"bgm.manageKeychain": "Manage tracks, keys and entrance sounds"
+  ,"resources.dropToUpload": "Drop files to upload"
+  ,"resources.dropHint": "Add files to the current folder"
 }

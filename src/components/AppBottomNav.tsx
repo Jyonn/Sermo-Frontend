@@ -19,9 +19,9 @@ const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
   { key: "square", href: "/app/square", icon: "explore", labelKey: "nav.square" },
   { key: "submissions", href: "/app/submissions", icon: "outbox", labelKey: "submission.title" },
+  { key: "research", href: "/app/research", icon: "science", labelKey: "research.title" },
   { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
   { key: "developer", href: "/app/developer", icon: "code", labelKey: "nav.developer" },
-  { key: "research", href: "/app/research", icon: "science", labelKey: "research.title" },
   { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
 ] as const;
 
