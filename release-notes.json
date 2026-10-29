@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.29.18",
+  "id": "2026.10.29.19",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "名片遵循广场开关",
+      "title": "通知与提醒升级",
       "items": [
-        "关闭广场的空间不再展示个人名片中的最近发言、查看发言和发言提醒"
+        "通知按聊天、广场、投稿和科研分类，上线提醒归入聊天",
+        "广场统一沿用原好友设置，投稿可独立控制，科研任务和进度支持通知直达"
       ]
     },
     "en": {
-      "title": "Profiles respect Square settings",
+      "title": "Notification settings redesigned",
       "items": [
-        "Profiles now hide recent posts, post links and post reminders when Square is disabled"
+        "Organized notifications into Chat, Square, Submissions and Research, with online reminders under Chat",
+        "Unified Square preferences using previous friend settings; added independent submission controls and research task notifications"
       ]
     }
   }

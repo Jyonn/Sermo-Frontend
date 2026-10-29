@@ -268,7 +268,7 @@ self.addEventListener("push", (event) => {
     payload = { body: event.data ? event.data.text() : "你收到了一条新消息" };
   }
   const spacePrefix = payload.space_slug ? `/${encodeURIComponent(payload.space_slug)}` : "";
-  const url = payload.chat_id ? `${spacePrefix}/app/chats/${payload.chat_id}` : `${spacePrefix}/app/chats`;
+  const url = payload.project_id ? `${spacePrefix}/app/research?project=${encodeURIComponent(payload.project_id)}${payload.task_id ? `&task=${encodeURIComponent(payload.task_id)}` : ''}` : payload.chat_id ? `${spacePrefix}/app/chats/${payload.chat_id}` : payload.statement_id ? `${spacePrefix}/app/square/statements/${payload.statement_id}` : `${spacePrefix}/app/chats`;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       const hasVisibleClient = clients.some((client) => client.visibilityState === "visible");

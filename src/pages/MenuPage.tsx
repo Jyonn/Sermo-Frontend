@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
 import { DrawerTabs } from "../components/DrawerTabs";
+import { notificationCategories, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
 import "./MenuSections.css";
 import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
@@ -421,7 +422,7 @@ export default function MenuPage() {
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
   const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
-  const [notificationSettingsMode, setNotificationSettingsMode] = useState<NotificationSettingsMode>("channel");
+  const [notificationSettingsMode, setNotificationSettingsMode] = useState<NotificationSettingsMode>("type");
   const [notificationTopics, setNotificationTopics] = useState<NotificationTopicPreferenceDTO[]>([]);
   const [notificationTopicsSaving, setNotificationTopicsSaving] = useState(false);
   const [instantEndpoints, setInstantEndpoints] = useState<InstantNotificationEndpointDTO[]>([]);
@@ -1892,7 +1893,7 @@ export default function MenuPage() {
     return topicPreference(channel, topic, audience)?.enabled ?? channel !== 2;
   };
 
-  const toggleNotificationTopic = async (channel: 0 | 1 | 2 | 3, topic: 1 | 2 | 3 | 4 | 5 | 6, audience: 0 | 1 | 2) => {
+  const toggleNotificationTopic = async (channel: 0 | 1 | 2 | 3, topic: NotificationTopic, audience: 0 | 1 | 2) => {
     if (notificationTopicsSaving || channel === 2 || !topicSupported(channel, topic, audience)) return;
     const enabled = !topicEnabled(channel, topic, audience);
     const patch: NotificationTopicPreferenceDTO = { channel, topic, audience, enabled };
@@ -1909,7 +1910,7 @@ export default function MenuPage() {
     }
   };
 
-  const setNotificationTopicGroup = async (channel: 0 | 1 | 2 | 3, pairs: Array<[1 | 2 | 3 | 4 | 5 | 6, 0 | 1 | 2]>) => {
+  const setNotificationTopicGroup = async (channel: 0 | 1 | 2 | 3, pairs: Array<[NotificationTopic, 0 | 1 | 2]>) => {
     if (notificationTopicsSaving || channel === 2) return;
     const supportedPairs = pairs.filter(([topic, audience]) => topicSupported(channel, topic, audience));
     if (supportedPairs.length === 0) return;
@@ -2006,11 +2007,7 @@ export default function MenuPage() {
   };
 
   const renderChannelTopicControls = (channel: 0 | 1 | 2 | 3) => {
-    const groups: Array<{ label: string; pairs: Array<[1 | 2 | 3 | 4 | 5 | 6, 0 | 1 | 2]> }> = [
-      { label: t("notification.chatType"), pairs: [[1, 0]] },
-      { label: t("notification.squareType"), pairs: [[2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2]] },
-      { label: t("notification.onlineType"), pairs: [[6, 0]] },
-    ];
+    const groups = notificationCategories.map(category=>({label:t(category.title as TranslationKey),pairs:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])}));
     return <div className="menu-pref-list notification-channel-topics">
       {groups.map((group) => {
         const supportedPairs = group.pairs.filter(([topic, audience]) => topicSupported(channel, topic, audience));
@@ -2958,7 +2955,7 @@ export default function MenuPage() {
 
       <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
         <div className="notification-routing-drawer menu-settings-section">
-          <DrawerTabs label={t("menu.notifications")} value={notificationSettingsMode} onChange={setNotificationSettingsMode} items={[{ value: "channel", label: t("notification.byChannel") }, { value: "type", label: t("notification.byType") }]} />
+          <DrawerTabs label={t("menu.notifications")} value={notificationSettingsMode} onChange={setNotificationSettingsMode} items={[{ value: "type", label: t("notification.byType") }, { value: "channel", label: t("notification.byChannel") }]} />
           {notificationSettingsMode === "channel" ? (
             <div className="notification-routing-grid" role="tabpanel" aria-label={t("notification.byChannel")}>
               <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">{standalonePwa ? "desktop_windows" : "language"}</span><div><strong>{standalonePwa ? t("channel.system") : t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
@@ -2976,17 +2973,13 @@ export default function MenuPage() {
           ) : (
             <div className="notification-type-stack" role="tabpanel" aria-label={t("notification.byType")}>
               <div className="notification-channel-legend" aria-hidden="true"><span>{standalonePwa ? t("channel.system") : t("channel.web")}</span><span>{t("channel.email")}</span><span>{t("channel.instant")}</span></div>
-              {([
-                { title: t("notification.chatType"), hint: t("notification.chatTypeHint"), topics: [[1, 0]] },
-                { title: t("notification.squareType"), hint: t("notification.squareTypeHint"), topics: [[2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2]] },
-                { title: t("notification.onlineType"), hint: t("notification.onlineTypeHint"), topics: [[6, 0]] },
-              ] as Array<{ title: string; hint: string; topics: Array<[number, number]> }>).map((section) => (
+              {notificationCategories.map(category=>({title:t(category.title as TranslationKey),hint:t(category.hint as TranslationKey),icon:category.icon,topics:category.topics.map(topic=>[topic,0] as [NotificationTopic,0])})).map((section) => (
                 <section className="notification-type-card" key={section.title}>
-                  {section.topics.length > 1 ? <header><strong>{section.title}</strong><small>{section.hint}</small></header> : null}
+                  <header><strong><span className="material-symbols-outlined" aria-hidden="true">{section.icon}</span>{section.title}</strong><small>{section.hint}</small></header>
                   {section.topics.map(([topic, audience]) => {
-                    const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
-                    return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : <small>{section.hint}</small>}</div><div className="notification-topic-channels">
-                      {([0, 1, 3] as Array<0 | 1 | 3>).map((channel) => <button aria-label={`${labels[topic]}${audience ? ` · ${audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}` : ""} · ${channel === 0 ? (standalonePwa ? t("channel.system") : t("channel.web")) : channel === 1 ? t("channel.email") : t("channel.instant")}`} aria-pressed={topicEnabled(channel, topic, audience)} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || (channel === 1 && !emailVerified) || (channel === 3 && instantEndpoints.length === 0) || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? (standalonePwa ? "desktop_windows" : "language") : channel === 1 ? "mail" : "notifications_active"}</span></button>)}
+                    const labels = Object.fromEntries(Object.entries(notificationTopicLabels).map(([key,value])=>[key,t(value as TranslationKey)]));
+                    return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{topic===6?<small>{t('notification.onlineChannelHint')}</small>:null}</div><div className="notification-topic-channels">
+                      {([0, 1, 3] as Array<0 | 1 | 3>).map((channel) => <button aria-label={`${labels[topic]} · ${channel === 0 ? (standalonePwa ? t("channel.system") : t("channel.web")) : channel === 1 ? t("channel.email") : t("channel.instant")}`} aria-pressed={topicEnabled(channel, topic, audience)} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || (channel === 1 && !emailVerified) || (channel === 3 && instantEndpoints.length === 0) || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic, audience)} type="button"><span className="material-symbols-outlined">{channel === 0 ? (standalonePwa ? "desktop_windows" : "language") : channel === 1 ? "mail" : "notifications_active"}</span></button>)}
                     </div></div>;
                   })}
                 </section>
