@@ -30,6 +30,7 @@ import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
 import { useShortViewport } from "../lib/compactViewport";
+import { useOverlayLayer } from "../lib/overlayLayer";
 import { ComposerMoreActions } from "../components/ComposerMoreActions";
 import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
@@ -3153,6 +3154,7 @@ function LiveChatsPage({
   const localObjectUrlsRef = useRef(new Set<string>());
   const mentionEditorRef = useRef<MentionComposerHandle | null>(null);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
+  useOverlayLayer(messageMenuRef, Boolean(messageMenu && !messageMenu.confirmDelete));
   const replyingToRef = useRef<QuotedMessageDTO | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);

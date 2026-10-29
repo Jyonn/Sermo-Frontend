@@ -31,3 +31,8 @@ test('all focus-managed dialogs and both floating drawer paths use the same allo
   assert.match(read('lib/overlayLayer.ts'),/node.dataset.overlayOwner!==owner/);
   assert.match(read('lib/overlayLayer.ts'),/\.desktop-panel-slot/);
 });
+test('chat message actions open above research chat drawers',()=>{
+  const source=readFileSync(new URL('../src/pages/ChatsPage.tsx',import.meta.url),'utf8');
+  assert.match(source,/useOverlayLayer\(messageMenuRef, Boolean\(messageMenu && !messageMenu.confirmDelete\)\)/);
+  assert.ok(nextOverlayLevel(70,[nextOverlayLevel(31,[])])>100);
+});

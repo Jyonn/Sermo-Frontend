@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.29.11",
+  "id": "2026.10.29.12",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "嵌套窗口层级修复",
+      "title": "群聊消息操作修复",
       "items": [
-        "修复日期、成员选择等新窗口被原 Drawer 遮挡的问题",
-        "统一抽屉和模态窗口的打开顺序与遮罩层级"
+        "修复桌面课题群聊的消息操作栏被遮挡，恢复撤回等操作入口"
       ]
     },
     "en": {
-      "title": "Nested overlay fixes",
+      "title": "Group chat message actions",
       "items": [
-        "Fixed date and member pickers appearing behind existing drawers",
-        "Unified stacking order and backdrops for drawers and dialogs"
+        "Fixed hidden message actions in desktop research group chats, restoring access to recall and other actions"
       ]
     }
   }
