@@ -21,6 +21,7 @@ export interface ApiEnvelope<T> {
 }
 
 export interface TinyUserDTO {
+  signature?: string;
   growth_honor?: GrowthHonorDTO | null;
   growth_level_name?: string;
   founder_medal_years?: number[];
@@ -198,6 +199,7 @@ export interface GrowthRewardDTO {
 }
 
 export interface AccessPayload {
+  signature?: string;
   avatar_cache_key?: string;
   user_id: number;
   name: string;
@@ -1523,6 +1525,7 @@ export interface ChatDetail {
 }
 
 export interface Chat {
+  signature?: string;
   id: number;
   title: string;
   avatarUri?: string;

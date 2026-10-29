@@ -1,4 +1,12 @@
 {
+  "signature.title": "个性签名",
+  "signature.hint": "签名会显示在私聊昵称下方。",
+  "signature.custom": "自定义签名",
+  "signature.clear": "不设置签名",
+  "signature.selected": "已选择",
+  "signature.unset": "未设置",
+  "signature.limit": "最多 {{count}} 个字，支持清空。",
+  "signature.saved": "签名已更新",
   "webPush.accountScopeHint": "仅控制当前账户在此设备上的系统消息，不影响其他账户。",
   "webPush.accountChanged": "账户已切换，请在当前账户下重试。",
   "resources.title": "资源空间",

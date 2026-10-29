@@ -5,6 +5,7 @@ import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
 import { DrawerTabs } from "../components/DrawerTabs";
 import { notificationCategoriesForSpace, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
+import { SignatureSettings } from '../components/SignatureSettings';
 import "./MenuSections.css";
 import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
@@ -521,6 +522,7 @@ export default function MenuPage() {
   const [qqIdentityExpiresIn, setQqIdentityExpiresIn] = useState(0);
   const [qqEmailBindConfirmOpen, setQqEmailBindConfirmOpen] = useState(false);
   const [basicEditSaving, setBasicEditSaving] = useState(false);
+  const [signatureOpen,setSignatureOpen] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [friendInviteLink, setFriendInviteLink] = useState("");
   const [friendInviteQrUri, setFriendInviteQrUri] = useState("");
@@ -2342,6 +2344,7 @@ export default function MenuPage() {
               <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
               <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
             </button> : null}
+            <button className="simple-row menu-link-row" onClick={()=>setSignatureOpen(true)} type="button"><div className="row-main menu-key-cell"><strong>{t('signature.title')}</strong></div><div className="menu-detail-value menu-detail-text menu-summary-clamp">{(me?.signature??session?.user.signature)||t('signature.unset')}</div><span className="material-symbols-outlined">chevron_right</span></button>
           </div>
           <section className="list-section" aria-label={t("profile.myCard")}>
             <div className="simple-list">
@@ -2963,6 +2966,7 @@ export default function MenuPage() {
         </div>
       </BottomSheet>
 
+      <SignatureSettings key={`${session?.user.space_id}:${currentUserId}`} open={signatureOpen} onOpen={()=>setSignatureOpen(true)} value={me?.signature??session?.user.signature??''} onClose={()=>setSignatureOpen(false)} onSave={async signature=>{const account=webPushAccountRef.current;const payload=await api.updateUserSignature(signature);if(account!==webPushAccountRef.current||payload.user_id!==currentUserId)throw new Error(t('webPush.accountChanged'));setMe(current=>current?{...current,signature:payload.signature}:current);patchSessionUser({signature:payload.signature});showToast(t('signature.saved'));}}/>
       <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
         <div className="notification-routing-drawer menu-settings-section">
           <DrawerTabs label={t("menu.notifications")} value={notificationSettingsMode} onChange={setNotificationSettingsMode} items={[{ value: "type", label: t("notification.byType") }, { value: "channel", label: t("notification.byChannel") }]} />

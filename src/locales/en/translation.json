@@ -1,4 +1,12 @@
 {
+  "signature.title": "Signature",
+  "signature.hint": "Shown below your name in private chats.",
+  "signature.custom": "Custom signature",
+  "signature.clear": "No signature",
+  "signature.selected": "Selected",
+  "signature.unset": "Not set",
+  "signature.limit": "Up to {{count}} characters. Leave empty to clear.",
+  "signature.saved": "Signature updated",
   "webPush.accountScopeHint": "Controls system notifications for this account on this device only, without affecting other accounts.",
   "webPush.accountChanged": "Your account changed. Please try again in the current account.",
   "resources.title": "Resources",

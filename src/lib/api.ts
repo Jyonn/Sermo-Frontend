@@ -711,6 +711,10 @@ export const api = {
     });
   },
 
+  updateUserSignature(signature:string) {
+    return request<UserMeDTO>('/users/me/signature',{method:'POST',auth:true,retryOn401:false,body:{signature}});
+  },
+
   deleteAccount(payload: { password?: string; name_confirmation?: string }) {
     return request<Record<string, never>>("/users/me", {
       method: "DELETE",

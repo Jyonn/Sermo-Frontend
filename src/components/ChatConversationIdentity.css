@@ -1,0 +1,9 @@
+.chat-identity-avatar{flex:0 0 auto}
+.chat-conversation-topbar>.chat-topbar-meta{flex:1;min-width:0}
+.chat-topbar-signature{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;line-height:1.35}
+.chat-inline-presence{display:none;flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--text-muted);margin-right:4px}
+.chat-inline-presence.is-online{background:var(--brand-primary)}
+@media(min-width:901px){
+  .desktop-chat-conversation-topbar .chat-identity-avatar{display:none}
+  .desktop-chat-conversation-topbar .chat-inline-presence{display:inline-block}
+}

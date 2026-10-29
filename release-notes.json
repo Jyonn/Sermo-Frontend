@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.22",
+  "id": "2026.10.29.23",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "系统消息支持多账户独立开关",
+      "title": "私聊签名与标题栏优化",
       "items": [
-        "同一个 WebAPP 内，不同空间账户可分别开启或关闭系统消息",
-        "关闭只影响当前账户；重新登录和订阅恢复不会自动打开已关闭的账户"
+        "菜单基础信息新增个性签名，支持六条预设与自定义，在私聊昵称下方展示",
+        "窄屏桌面聊天恢复头像，宽屏桌面在线状态移至昵称左侧"
       ]
     },
     "en": {
-      "title": "Independent system notifications for each account",
+      "title": "Chat signatures and clearer headers",
       "items": [
-        "Enable or disable system notifications independently for accounts in different spaces within one WebAPP",
-        "Turning off one account leaves others connected; signing in again or restoring push keeps opted-out accounts off"
+        "Set a private-chat signature in Basic Info using six presets or your own text",
+        "Restored avatars in narrow desktop chats and added presence indicators beside names on wide desktops"
       ]
     }
   }

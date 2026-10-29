@@ -55,6 +55,7 @@ import { OperatorBadge } from "../components/OperatorBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
 import { ChatImagePreview } from "../components/ChatImagePreview";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
+import { ChatConversationIdentity } from '../components/ChatConversationIdentity';
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
 import { RelativeDateSections } from "../components/RelativeDateSections";
 import { ResourceFileRow } from "../components/ResourceFileRow";
@@ -2698,6 +2699,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     avatarCacheKey: submissionCounterpart?.avatar_cache_key ?? peer?.avatar_cache_key,
     avatarFrameStyle: submissionCounterpart?.avatar_frame_style ?? peer?.avatar_frame_style,
     subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
+    signature: chat.group ? '' : peer?.signature || '',
     preview: previewFromDto(chat.last_message),
     time: formatChatListTime(lastActivity),
     lastActivity,
@@ -7889,32 +7891,7 @@ function LiveChatsPage({
                 <span className="chat-back-unread" aria-hidden="true">{otherChatsUnreadCount > 99 ? "99+" : otherChatsUnreadCount}</span>
               ) : null}
             </button>
-            <div className="avatar-wrap">
-              <UserAvatar
-                className={`avatar ${displayedChat.online ? "status-online" : ""}`}
-                groupMembers={
-                  displayedChat.type === "group" && displayedChat.purpose !== "submission"
-                    ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
-                    : undefined
-                }
-                name={displayedChat.title}
-                uri={displayedChat.avatarUri}
-                frame={displayedChat.avatarFrameStyle}
-              />
-            </div>
-            <div className="chat-topbar-meta">
-              <strong className="chat-topbar-name">
-                {displayedChat.type === "group" && displayedChat.purpose !== "submission" ? (
-                  <>
-                    <span className="chat-topbar-title-text">{displayedChat.title}</span>
-                    <span className="chat-topbar-title-count">({displayedChat.members})</span>
-                  </>
-                ) : (
-                  displayedChat.title
-                )}
-              </strong>
-              {displayedChat.type !== "group" || displayedChat.purpose === "submission" ? <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.subtitle}</div> : null}
-            </div>
+            <ChatConversationIdentity chat={displayedChat} submissionStatus={submissionStatusLabel(displayedChat.submission?.status)}/>
           </div>
         ) : undefined
       }
@@ -7966,13 +7943,7 @@ function LiveChatsPage({
                   </div>
                 ) : <div className="chat-conversation-topbar desktop-chat-conversation-topbar">
                   <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
-                  <div className="chat-topbar-meta">
-                    <strong className="chat-topbar-name">
-                      <span className="chat-topbar-title-text">{displayedChat.title}</span>
-                      {displayedChat.type === "group" && displayedChat.purpose !== "submission" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
-                    </strong>
-              {displayedChat.type !== "group" || displayedChat.purpose === "submission" ? <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.subtitle}</div> : null}
-                  </div>
+                  <ChatConversationIdentity chat={displayedChat} submissionStatus={submissionStatusLabel(displayedChat.submission?.status)}/>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
                   : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
