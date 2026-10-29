@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.29.13",
+  "id": "2026.10.29.14",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "科研时间编辑优化",
+      "title": "课题邀请气泡适配",
       "items": [
-        "负责人可修改课题和阶段任务的起止时间",
-        "优化选择窗口顶部按钮的留白和悬停样式"
+        "课题邀请卡片随聊天气泡切换配色、材质和圆角，兼顾双方消息与深浅模式"
       ]
     },
     "en": {
-      "title": "Research date editing",
+      "title": "Themed research invitations",
       "items": [
-        "Project owners can edit project and task dates",
-        "Improved spacing and hover states for selection dialog actions"
+        "Research invitation cards now match chat bubble colors, textures and shapes for incoming and outgoing messages"
       ]
     }
   }

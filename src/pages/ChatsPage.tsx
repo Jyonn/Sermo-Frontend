@@ -1850,7 +1850,7 @@ function renderMessageContent(
     if (!invitation) {
       return <span className="submission-invite-card-unavailable">{i18n.t("submission.inviteUnavailable")}</span>;
     }
-    if (invitation.project) return <button className={`message-research-invite-card is-${invitation.status} ${groupClassName}`} type="button" onClick={event=>{event.stopPropagation();window.dispatchEvent(new CustomEvent('sermo:submission-invite',{detail:invitation}));}}>
+    if (invitation.project) return <button className={`message-submission-invite-card message-research-invite-card is-${invitation.status} ${groupClassName}`} type="button" onClick={event=>{event.stopPropagation();window.dispatchEvent(new CustomEvent('sermo:submission-invite',{detail:invitation}));}}>
       <span className="message-submission-invite-heading"><span className="message-submission-invite-mark material-symbols-outlined" aria-hidden="true">science</span><span><small>{i18n.t('research.invitation')}</small><strong>{invitation.project.title}</strong></span></span>
       <span className="message-research-invite-by">{i18n.t('submission.invitedBy',{name:invitation.inviter.name})}</span>
       <span className="message-submission-invite-footer"><span>{i18n.t(`submission.inviteStatus.${invitation.status}`)}</span><span>{i18n.t('submission.viewInvite')}</span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
