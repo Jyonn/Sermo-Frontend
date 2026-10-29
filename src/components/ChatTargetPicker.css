@@ -7,7 +7,7 @@
 .chat-target-picker-sheet > :is(.sheet-header,.sheet-drag-zone) { flex:0 0 auto; }
 .chat-target-picker-sheet > .chat-target-picker-body { height:auto; max-height:none; flex:1 1 0; gap:10px; }
 .chat-target-picker-body > .chat-target-picker-heading { margin:0 2px; }
-.chat-target-picker-body > .chat-target-picker-submit { padding-top:8px; }
+.chat-target-picker-body > .chat-target-picker-submit { padding-top:8px; background:transparent; }
 .chat-target-picker-body > .chat-target-picker-preview {
   flex:0 1 auto;
   min-height:0;
