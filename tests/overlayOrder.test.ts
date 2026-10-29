@@ -17,6 +17,12 @@ test('closed layers do not cause unbounded growth and invalid CSS levels are ign
   assert.equal(nextOverlayLevel(30,[]),100);
   assert.equal(nextOverlayLevel(NaN,[NaN,Infinity]),100);
 });
+test('responsive portal reparenting does not raise an existing drawer above its child dialog',()=>{
+  const drawer=nextOverlayLevel(31,[]);
+  const dialog=nextOverlayLevel(60,[drawer]);
+  assert.equal(nextOverlayLevel(31,[dialog],drawer),drawer);
+  assert.ok(nextOverlayLevel(31,[drawer,dialog])>dialog);
+});
 test('all focus-managed dialogs and both floating drawer paths use the same allocator',()=>{
   const read=(path:string)=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
   assert.match(read('lib/modalFocus.ts'),/useOverlayLayer\(root,open/);

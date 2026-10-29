@@ -1,4 +1,4 @@
-import {useLayoutEffect,useState,type RefObject} from 'react';
+import {useLayoutEffect,useRef,useState,type RefObject} from 'react';
 import {nextOverlayLevel} from './overlayOrder';
 
 const surfaces='.drawer-backdrop,.sheet-backdrop,.dialog-backdrop,.detached-drawer-slot,.pattern-backdrop,.tour-layer,[data-overlay-layer]';
@@ -16,12 +16,16 @@ function layerSurface(root:HTMLElement){
 
 export function useOverlayLayer(root:RefObject<HTMLElement|null>,open:boolean,scope?:unknown){
   const [level,setLevel]=useState(0);
+  const allocation=useRef<number>();
   useLayoutEffect(()=>{
-    if(!open||!root.current)return;
+    if(!open){allocation.current=undefined;return;}
+    if(!root.current)return;
     const node=layerSurface(root.current);
     const candidates=new Set(Array.from(document.querySelectorAll<HTMLElement>(surfaces+',[role="dialog"],[role="alertdialog"]')).map(layerSurface));
     const visible=Array.from(candidates).filter(other=>other!==node&&!node.contains(other)&&!other.closest('[hidden],[aria-hidden="true"]')&&other.getClientRects().length>0&&getComputedStyle(other).visibility!=='hidden');
-    const index=nextOverlayLevel(Number.parseInt(getComputedStyle(node).zIndex)||0,visible.map(other=>Number.parseInt(getComputedStyle(other).zIndex)||0));
+    const index=nextOverlayLevel(Number.parseInt(getComputedStyle(node).zIndex)||0,visible.map(other=>Number.parseInt(getComputedStyle(other).zIndex)||0),allocation.current);
+    // Changing the desktop portal host is not a new opening: keep children above it.
+    allocation.current=index;
     const previous=node.style.getPropertyValue('z-index');
     const previousLayer=node.dataset.overlayLayer,previousOwner=node.dataset.overlayOwner;
     const owner=String(++serial);
