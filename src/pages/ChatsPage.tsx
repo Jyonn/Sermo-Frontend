@@ -2846,7 +2846,7 @@ function LiveChatsPage({
   embeddedChat,
 }: {
   purpose?: "normal" | "submission";
-  embeddedChat?: {id:number;onClose:()=>void};
+  embeddedChat?: {id:number;onClose:()=>void;onProjectDetails?:()=>void};
 }) {
   const { t } = useI18n();
   const pageActive = usePageActive();
@@ -7857,6 +7857,11 @@ function LiveChatsPage({
   }}><ComposerSvgIcon kind="plus" /></button>;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
+  function openResearchProjectDetails(){
+    if(!selectedChat)return;
+    if(embeddedChat?.onProjectDetails)embeddedChat.onProjectDetails();
+    else navigate(`/app/research?chat=${selectedChat.id}&details=1`);
+  }
   const pinnedHeaderButton = shortComposerLayout && orderedPinnedMessages.length ? <button className="chat-details-button chat-header-pinned-button" type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} title={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></button> : null;
 
   return (
@@ -8415,7 +8420,7 @@ function LiveChatsPage({
                       {selectedChat.purpose === "submission" ? (
                         <button className="ghost-button" onClick={() => setDetailsSheetOpen(true)} type="button">{t("submission.openDetails")}</button>
                       ) : selectedChat.purpose === "research" ? (
-                        <Link className="ghost-button" to="/app/research">{t("research.members")}</Link>
+                        <button className="ghost-button" onClick={openResearchProjectDetails} type="button">{t("research.members")}</button>
                       ) : selectedChat.type === "group" ? (
                         <>
                           {selectedChat.isOwner ? (
@@ -8905,6 +8910,7 @@ function LiveChatsPage({
               </SettingGroup>
             </section> : null}
 
+            {selectedChat.purpose === "research" ? <section className="chat-detail-settings-section research-chat-project-section"><SettingGroup><SettingRow title={t('research.members')} description={t('research.projectSettingsHint')} icon={<span className="material-symbols-outlined" aria-hidden="true">science</span>} onClick={openResearchProjectDetails}/></SettingGroup></section> : null}
             {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
                 {selectedChat.type === "group" && selectedChat.isOwner ? (
@@ -8982,7 +8988,6 @@ function LiveChatsPage({
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
-                {selectedChat.purpose === "research" ? <Link className="chat-detail-setting-row" to="/app/research">{t("research.members")}</Link> : null}
                 {selectedChat.type === "group" && selectedChat.isOwner && !selectedChat.isSpaceGroup && selectedChat.purpose !== "submission" && selectedChat.purpose !== "research" ? (
                   <button
                     className="chat-detail-setting-row"
@@ -10368,7 +10373,7 @@ export function ChatPreview({
   );
 }
 
-export default function ChatsPage({ preview, purpose, embeddedChat }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; embeddedChat?: {id:number;onClose:()=>void} }) {
+export default function ChatsPage({ preview, purpose, embeddedChat }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; embeddedChat?: {id:number;onClose:()=>void;onProjectDetails?:()=>void} }) {
   if (preview) return <PreviewChatConversation config={preview} />;
   return embeddedChat ? <div className="research-embedded-chat"><LiveChatsPage purpose={purpose} embeddedChat={embeddedChat}/></div> : <LiveChatsPage purpose={purpose}/>;
 }

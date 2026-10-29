@@ -1,0 +1,19 @@
+.research-team-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
+.research-team-bar .research-member-stack{margin:0;min-width:0;flex-shrink:1;gap:10px}
+.research-team-chat{display:inline-flex;align-items:center;gap:8px;flex:none;padding:10px 12px;border:1px solid color-mix(in srgb,var(--brand-primary) 20%,var(--line-soft));border-radius:12px;background:color-mix(in srgb,var(--brand-primary) 7%,transparent);color:var(--brand-primary);font:inherit;font-weight:650;font-size:12px}
+.research-team-chat>.material-symbols-outlined{font-size:19px}
+.research-team-chat>.material-symbols-outlined:last-child{font-size:16px}
+.research-project-surface .research-overview-columns{grid-template-columns:minmax(0,1.25fr) minmax(260px,.8fr);gap:32px;align-items:start}
+.research-project-surface .research-overview-aside{display:grid;gap:18px;min-width:0}
+.research-overview-aside>.setting-group{margin:0}
+.research-overview-aside .setting-row{padding:18px 20px}
+.research-overview-aside .setting-row-copy>strong{font-size:14px}
+.research-overview-aside .setting-row-copy>small{font-size:12px;line-height:1.6}
+.research-project-intro .research-description{max-width:880px;margin-bottom:0}
+.research-overview-tasks{min-width:0}
+.research-overview-tasks>.research-task-row{padding:18px 0}
+.research-overview-tasks>.research-section-heading{gap:10px}
+.research-overview-tasks>.research-section-heading h2{font-size:16px}
+.research-overview-tasks>.research-section-heading>.research-muted{font-size:12px}
+@container(max-width:820px){.research-project-surface .research-overview-columns{grid-template-columns:minmax(0,1fr);gap:28px}.research-project-surface .research-overview-aside{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:430px){.research-team-bar{gap:10px}.research-team-bar .research-overview-avatar{width:38px;height:38px;flex-basis:38px}.research-team-bar .research-overview-avatar+.research-overview-avatar{margin-inline-start:-14px}.research-team-chat{padding:9px}.research-team-chat>.material-symbols-outlined:last-child{display:none}.research-team-bar .research-member-stack-count{font-size:11px;gap:0}}

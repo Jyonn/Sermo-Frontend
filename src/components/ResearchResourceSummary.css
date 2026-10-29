@@ -1,0 +1,18 @@
+.research-resource-summary{border:1px solid var(--line-soft);border-radius:20px;overflow:hidden;background:linear-gradient(125deg,color-mix(in srgb,var(--brand-primary) 4%,var(--bg-elevated)),var(--bg-elevated));min-width:0}
+.research-resource-summary>header{display:flex;align-items:center;gap:12px;padding:20px}
+.resource-summary-icon{display:grid;place-items:center;flex:none;width:44px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--brand-primary) 9%,transparent);color:var(--brand-primary);font-size:25px}
+.research-resource-summary>header>div{flex:1;min-width:0}
+.research-resource-summary h2{font-size:15px;margin:0 0 6px;letter-spacing:-.02em}
+.research-resource-summary p{font-size:11px;color:var(--text-muted);margin:0}
+.research-resource-summary>header>.ghost-button{min-width:36px;min-height:36px;padding:6px;border:0;box-shadow:none;background:transparent}
+.resource-summary-recent{border-top:1px solid var(--line-soft);padding:4px 20px 10px}
+.resource-summary-recent>button{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:12px 0;border:0;background:transparent;text-align:left;color:var(--text-secondary);font:inherit}
+.resource-summary-recent>button>.material-symbols-outlined{font-size:19px;color:var(--brand-primary)}
+.resource-summary-recent>button>span:nth-child(2){flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resource-summary-recent small{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:10px}
+.resource-summary-empty{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 20px;border:0;border-top:1px solid var(--line-soft);background:transparent;color:var(--text-secondary);text-align:left;font:inherit;font-size:12px}
+.resource-summary-empty>.material-symbols-outlined{font-size:19px;color:var(--brand-primary)}
+.research-resource-summary.is-task{margin-top:24px;border-radius:16px}
+.research-resource-summary.is-task>header{padding:16px}
+.research-resource-summary.is-task .resource-summary-icon{width:36px;height:40px;font-size:22px}
+@media(hover:hover){.resource-summary-recent>button:hover,.resource-summary-empty:hover{color:var(--brand-primary)}}

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.29.24",
-  "publishedAt": "2026-10-29",
+  "id": "2026.10.30.1",
+  "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "新建课题条件提示更清楚",
+      "title": "科研资源空间焕新",
       "items": [
-        "新建课题前会检查权限，用提示明确说明所需等级或账户验证条件"
+        "资源空间新增目录卡片、搜索、分类与排序，概览和任务页展示资源摘要",
+        "群聊入口移至成员头像右侧，群聊详情中的课题入口独立展示，完善负责人转让流程"
       ]
     },
     "en": {
-      "title": "Clearer project creation requirements",
+      "title": "A refined research library",
       "items": [
-        "Project creation checks permissions up front and explains required levels or account verification in a toast"
+        "Browse folder cards, search and filter resources, with resource summaries in project and task views",
+        "Open group chat beside member avatars, access project settings in a separate section, and transfer ownership more reliably"
       ]
     }
   }

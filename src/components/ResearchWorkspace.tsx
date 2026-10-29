@@ -5,6 +5,7 @@ import { Markdown } from './ResearchMarkdown';
 import { ResearchTaskItem } from './ResearchTaskItem';
 import { QuietState } from './BoundaryState';
 import { SettingGroup, SettingRow } from './SettingRow';
+import { ResearchResourceSummary } from './ResearchResourceSummary';
 
 export function ResearchHome({ projects, selected, open, create }: { projects: ResearchSummary[]; selected?: number|null; open: (id: number) => void; create: () => void }) {
   const { t } = useI18n();
@@ -20,24 +21,23 @@ export function ResearchHome({ projects, selected, open, create }: { projects: R
   </>;
 }
 
-export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit, resources }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean; resources:()=>void }) {
+export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit, resources, resourceRefresh=0 }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean; resources:()=>void; resourceRefresh?:number }) {
   const { t } = useI18n();
   const done = project.tasks.filter(item => item.status === 'archived').length;
   const active = project.tasks.filter(item => item.status !== 'archived');
   return <div className="research-overview">
     <section className="research-project-intro">
-      <button type="button" className="research-member-stack" onClick={members} aria-label={`${t('research.team')} · ${project.members.length}`}>
+      <div className="research-team-bar"><button type="button" className="research-member-stack" onClick={members} aria-label={`${t('research.team')} · ${project.members.length}`}>
         <span className="research-member-stack-avatars">{project.members.slice(0,6).map(member=><UserAvatar key={member.id} className="research-overview-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style}/>)}</span>
         <span className="research-member-stack-count">{project.members.length}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
-      </button>
+      </button><button className="research-team-chat" onClick={chat} aria-label={t('research.group')}><span className="material-symbols-outlined" aria-hidden="true">forum</span><span>{t('research.groupShort')}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div>
       <div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
-      <SettingGroup><SettingRow title={t('research.group')} icon={<span className="material-symbols-outlined">forum</span>} onClick={chat}/><SettingRow title={t('resources.project')} description={t('resources.projectHint')} icon={<span className="material-symbols-outlined">folder_open</span>} onClick={resources}/></SettingGroup>
     </section>
     <div className="research-overview-columns"><section className="research-overview-tasks"><header className="research-section-heading"><h2>{t('research.tasks')}</h2><span className="research-muted">{done} / {project.tasks.length}</span><button className="ghost-button" onClick={() => tasks()}>{t('research.viewAll')}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></header>
       <progress className="research-completion" value={done} max={project.tasks.length || 1} aria-label={t('research.tasks')}/>
       {active.slice(0, 4).map(item => <ResearchTaskItem key={item.id} task={item} members={project.members} onClick={()=>tasks(item.id)}/>)}
       {!active.length && <QuietState icon="assignment_turned_in" title={t(project.tasks.length ? 'research.allTasksDone' : 'research.noTasks')} description={t('research.taskEmptyHint')}/>}
       {canEdit && <button className="ghost-button research-add-task" onClick={addTask}><span className="material-symbols-outlined" aria-hidden="true">add</span>{t('research.addTask')}</button>}
-    </section><aside className="research-overview-aside"><SettingGroup><SettingRow title={t('research.calendar')} description={t('research.calendarShortcut')} icon={<span className="material-symbols-outlined">calendar_month</span>} onClick={calendar}/></SettingGroup></aside></div>
+    </section><aside className="research-overview-aside"><ResearchResourceSummary projectId={project.id} refresh={resourceRefresh} onOpen={resources}/><SettingGroup><SettingRow title={t('research.calendar')} description={t('research.calendarShortcut')} icon={<span className="material-symbols-outlined">calendar_month</span>} onClick={calendar}/></SettingGroup></aside></div>
   </div>;
 }
