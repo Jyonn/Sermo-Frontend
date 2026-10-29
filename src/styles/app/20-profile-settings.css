@@ -182,6 +182,7 @@
   width: 44%;
 }
 .user-profile-primary-actions .button:only-child { grid-column: 1 / -1; }
+.user-profile-reminders button:only-child { grid-column: 1 / -1; }
 
 .user-profile-reminders button {
   min-width: 0;

@@ -11,6 +11,7 @@ import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { UserProfileCard } from "./UserProfileCard";
 import { ChronelleCalendar } from "./ChronelleCalendar";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
@@ -69,6 +70,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const features = useSpaceFeatures();
+  const squareEnabled = features.ready && features.squareEnabled;
   const isSelfAccount = session?.user.user_id === userId;
   const isSelf = isSelfAccount && !previewAudience;
   const preview = Boolean(previewAudience);
@@ -184,6 +187,12 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   }, [cacheScope, isSelfAccount, userId]);
 
   useEffect(() => {
+    if (!squareEnabled) {
+      recentStatementRef.current = null;
+      setRecentStatement(null);
+      setRecentState("ready");
+      return;
+    }
     const controller = new AbortController();
     const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
     recentStatementRef.current = cached?.recentStatement?.is_anonymous ? null : cached?.recentStatement ?? null;
@@ -203,7 +212,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       })
       .catch(() => { if (!controller.signal.aborted) setRecentState("error"); });
     return () => controller.abort();
-  }, [cacheScope, isSelfAccount, userId, recentReload]);
+  }, [cacheScope, isSelfAccount, userId, recentReload, squareEnabled]);
 
   const presence = useMemo(() => {
     if (!user) return "";
@@ -224,13 +233,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   };
 
   const openStatements = () => {
-    if (!user) return;
+    if (!user || !squareEnabled) return;
     const params = new URLSearchParams({ user_id: String(user.user_id), user_name: user.name });
     navigate(`/app/square?${params.toString()}`);
   };
 
   const openRecentStatement = () => {
-    if (!recentStatement) return;
+    if (!recentStatement || !squareEnabled) return;
     navigate(`/app/square/statements/${recentStatement.statement_id}`);
   };
 
@@ -327,7 +336,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   };
 
   const updateReminder = async (kind: "online" | "statement", enabled: boolean) => {
-    if (!user || reminderSaving) return;
+    if (!user || reminderSaving || (kind === "statement" && !squareEnabled)) return;
     setReminderSaving(kind);
     try {
       const chatId = directChatId ?? (await api.createDirectChat(user.user_id)).chat_id;
@@ -389,12 +398,12 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
             {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>
         ) : null}
-        <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
+        {squareEnabled && <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>}
       </div>
 
       <ChronelleCalendar key={`${cacheScope}:${userId}:${previewAudience||''}`} ownerId={userId} previewAudience={previewAudience} />
 
-      <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} disabled={recentState === "loading" && !recentStatement} onClick={recentState === "error" ? () => setRecentReload((value) => value + 1) : recentStatement ? openRecentStatement : openStatements} type="button">
+      {squareEnabled && <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} disabled={recentState === "loading" && !recentStatement} onClick={recentState === "error" ? () => setRecentReload((value) => value + 1) : recentStatement ? openRecentStatement : openStatements} type="button">
         <small>
           {t("profile.recentStatement")}
           {recentStatement ? ` · ${formatRelativeTime(recentStatement.created_at)}` : ""}
@@ -402,7 +411,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         <strong>{recentStatement ? recentStatement.text || t("profile.mediaStatement") : t(recentState === "loading" ? "common.loading" : recentState === "error" ? "profile.loadFailed" : "profile.noRecentStatement")}</strong>
         <span>{t(recentState === "error" ? "common.retry" : recentStatement ? "profile.enterStatement" : "profile.viewStatements")} ›</span>
         <i className="material-symbols-outlined" aria-hidden="true">campaign</i>
-      </button>
+      </button>}
 
       {isFriend === true ? (
         <section className="user-profile-reminders" aria-label={t("profile.reminders")}>
@@ -410,10 +419,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
             <span className="material-symbols-outlined">notifications_active</span>
             <span><strong>{t("profile.onlineReminder")}</strong><small>{t(onlineReminder ? "profile.enabled" : "profile.disabled")}</small></span>
           </button>
-          <button className={statementReminder ? "is-active" : ""} disabled={preview || reminderSaving !== null} onClick={() => void updateReminder("statement", !statementReminder)} type="button">
+          {squareEnabled && <button className={statementReminder ? "is-active" : ""} disabled={preview || reminderSaving !== null} onClick={() => void updateReminder("statement", !statementReminder)} type="button">
             <span className="material-symbols-outlined">campaign</span>
             <span><strong>{t("profile.statementReminder")}</strong><small>{t(statementReminder ? "profile.enabled" : "profile.disabled")}</small></span>
-          </button>
+          </button>}
         </section>
       ) : null}
 
