@@ -3431,6 +3431,8 @@
   ,"chronelle.untitled": "Untitled event"
   ,"chronelle.moreEvents": "{{count}} more — open calendar"
   ,"chronelle.publicOnly": "Only public schedules are shown. Visibility is managed in Chronelle."
+  ,"chronelle.permissionFiltered": "Shown according to calendar visibility permissions."
+  ,"chronelle.limitedVisibility": "Only some calendars are visible. Full availability is unknown."
   ,"chronelle.description": "Authorize on Chronelle, then return to link automatically."
   ,"chronelle.waiting": "Waiting for Chronelle authorization. Return to this page after approval to finish binding automatically."
   ,"chronelle.continue": "Continue authorization"

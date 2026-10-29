@@ -5,8 +5,9 @@ import { CalendarAvailabilityBar } from "./CalendarAvailabilityBar";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
 import { chronelleOrigin } from "../lib/chronelleOrigin";
+import { api } from "../lib/api";
 
-export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { calendarId?: string; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
+export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEvents = fetchAgenda }: { calendarId?: string; ownerId?:number; previewAudience?:'friend'|'stranger'; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
   const { t, language } = useI18n();
   const [selectedDay, setSelectedDay] = useState(() => agendaDay());
   const [queue, setQueue] = useState<(number | Date)[]>([]);
@@ -14,7 +15,10 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
   const [step, setStep] = useState(0);
   const viewport = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<number | undefined>(undefined);
-  const cache = useRef(new Map<string, { rows: AgendaEvent[]; at: number }>());
+  const cache = useRef(new Map<string, { rows: AgendaEvent[]; at: number; known:boolean }>());
+  const [hidden,setHidden] = useState(false);
+  const [known,setKnown] = useState(true);
+  useEffect(()=>{const refresh=()=>{cache.current.clear();setHidden(false);setReload(value=>value+1);};window.addEventListener('chronelle:bound',refresh);return()=>window.removeEventListener('chronelle:bound',refresh);},[]);
   const keyboardFocus = useRef(false);
   useLayoutEffect(() => {
     const element = viewport.current;
@@ -28,7 +32,7 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
       keyboardFocus.current = false;
     }
     return () => observer.disconnect();
-  }, [selectedDay, calendarId]);
+  }, [selectedDay, calendarId, ownerId, hidden]);
   useEffect(() => () => window.clearTimeout(scrollTimer.current), []);
   const scrollDates = () => {
     const element = viewport.current;
@@ -92,8 +96,8 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const days = agendaCenteredDays(selectedDay, 20);
   const start = agendaWindowStart(selectedDay).getTime();
-  const requestKey = `${calendarId}:${start}`;
-  const valid = Boolean(calendarId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(calendarId));
+  const requestKey = `${ownerId||calendarId}:${previewAudience||''}:${start}`;
+  const valid = Boolean(ownerId || calendarId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(calendarId));
   useEffect(() => {
     if (!valid) return;
     const controller = new AbortController();
@@ -101,7 +105,7 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     const timeout = window.setTimeout(() => controller.abort(), 12000);
     const cached = cache.current.get(requestKey);
     if (cached && Date.now() - cached.at < 60000) {
-      setEvents(cached.rows); setLoadedKey(requestKey); setState("ready");
+      setEvents(cached.rows); setKnown(cached.known); setLoadedKey(requestKey); setState("ready");
       window.clearTimeout(timeout);
       return () => { active = false; controller.abort(); };
     }
@@ -110,20 +114,20 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     const end = new Date(start);
     end.setDate(end.getDate() + 28);
     const params = new URLSearchParams({ share: calendarId!, start: new Date(start).toISOString(), end: end.toISOString() });
-    const debounce = window.setTimeout(() => { void loadEvents(params, controller.signal)
+    const debounce = window.setTimeout(() => { void (ownerId ? api.chronelleProfile(ownerId,new URLSearchParams({start:params.get('start')!,end:params.get('end')!,...(previewAudience?{audience:previewAudience}:{})}),controller.signal).then(result=>{if(active){setHidden(result.status==='hidden');setKnown(result.availability==='known');}return result.events;}) : loadEvents(params, controller.signal))
       .then(normalizeAgenda)
       .then((rows) => { if (active) {
         cache.current.delete(requestKey);
-        cache.current.set(requestKey, { rows, at: Date.now() });
+        if(!ownerId)cache.current.set(requestKey, { rows, at: Date.now(),known:true });
         if (cache.current.size > 6) cache.current.delete(cache.current.keys().next().value!);
         setEvents(rows); setLoadedKey(requestKey); setState("ready");
       } })
       .catch(() => { if (active) setState("error"); })
       .finally(() => window.clearTimeout(timeout)); }, 150);
     return () => { active = false; controller.abort(); window.clearTimeout(timeout); window.clearTimeout(debounce); };
-  }, [calendarId, valid, start, requestKey, reload, loadEvents]);
-  if (!valid) return null;
-  const shareUrl = `${chronelleOrigin()}/#/share/${calendarId}`;
+  }, [calendarId, ownerId, previewAudience, valid, start, requestKey, reload, loadEvents]);
+  if (!valid || hidden) return null;
+  const shareUrl = ownerId ? `${chronelleOrigin()}/#/` : `${chronelleOrigin()}/#/share/${calendarId}`;
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
   const items = loadedKey === requestKey ? agendaEventsOn(events, selectedDay) : [];
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
@@ -142,12 +146,12 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
       </div>
     </div>
     <div className="chronelle-agenda" aria-busy={displayState === "loading"}>
-      {displayState === "ready" ? <div className="chronelle-availability">
+      {displayState === "ready" && known ? <div className="chronelle-availability">
         <CalendarAvailabilityBar events={items} day={selectedDay} />
       </div> : null}
-      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { cache.current.delete(requestKey); setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t("chronelle.noEvents")}</p> : <ol>{items.slice(0, 5).map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
-      {displayState === "ready" && items.length > 5 ? <a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.moreEvents", { count: items.length - 5 })} ↗</a> : null}
+      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { cache.current.delete(requestKey); setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.slice(0, ownerId?items.length:5).map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
+      {!ownerId && displayState === "ready" && items.length > 5 ? <a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.moreEvents", { count: items.length - 5 })} ↗</a> : null}
     </div>
-    <small className="row-subtle">{t("chronelle.publicOnly")}</small>
+    <small className="row-subtle">{t(ownerId?"chronelle.permissionFiltered":"chronelle.publicOnly")}</small>
   </section>;
 }

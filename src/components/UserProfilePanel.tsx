@@ -392,7 +392,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
 
-      <ChronelleCalendar calendarId={user.chronelle_calendar_id} />
+      <ChronelleCalendar key={`${userId}:${previewAudience||''}`} ownerId={userId} previewAudience={previewAudience} />
 
       <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} disabled={recentState === "loading" && !recentStatement} onClick={recentState === "error" ? () => setRecentReload((value) => value + 1) : recentStatement ? openRecentStatement : openStatements} type="button">
         <small>

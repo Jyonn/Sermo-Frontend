@@ -3431,6 +3431,8 @@
   ,"chronelle.untitled": "未命名日程"
   ,"chronelle.moreEvents": "还有 {{count}} 项，打开日历查看"
   ,"chronelle.publicOnly": "仅展示公开日程，公开范围由 Chronelle 控制。"
+  ,"chronelle.permissionFiltered": "按日历可见权限展示。"
+  ,"chronelle.limitedVisibility": "仅可查看部分日历，无法判断完整忙闲。"
   ,"chronelle.description": "前往 Chronelle 授权，返回后自动绑定。"
   ,"chronelle.waiting": "等待 Chronelle 授权，请在完成后返回此页面，将自动完成绑定。"
   ,"chronelle.continue": "继续授权"
