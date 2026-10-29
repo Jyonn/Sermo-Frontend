@@ -1715,13 +1715,6 @@ export default function SquarePage() {
     else void sendComment();
   };
 
-  useEffect(() => {
-    if (!externalMediaDialogOpen || externalMediaInput) return;
-    void navigator.clipboard?.readText().then((clipboardText) => {
-      if (clipboardText.trim()) setExternalMediaInput(clipboardText.trim());
-    }).catch(() => undefined);
-  }, [externalMediaDialogOpen, externalMediaInput]);
-
   const resolveExternalMedia = async () => {
     const candidate = externalMediaInput.trim();
     if (!candidate || externalMediaResolving) return;

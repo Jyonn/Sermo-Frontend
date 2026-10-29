@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.6",
+  "id": "2026.10.29.7",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "转发会话选择修复",
+      "title": "外部媒体入口优化",
       "items": [
-        "修复转发面板会话列表无法显示的问题",
-        "统一转发按钮底栏背景，改善手机与桌面布局"
+        "外部媒体入口说明更简洁",
+        "打开链接输入框时不再自动读取剪贴板，避免手机系统粘贴提示干扰"
       ]
     },
     "en": {
-      "title": "Forwarding conversation picker fixes",
+      "title": "External media improvements",
       "items": [
-        "Fixed conversations disappearing from the forwarding panel",
-        "Removed the contrasting footer background and improved mobile and desktop layouts"
+        "Simplified the external media description",
+        "Opening the link dialog no longer reads the clipboard automatically or triggers a mobile paste prompt"
       ]
     }
   }

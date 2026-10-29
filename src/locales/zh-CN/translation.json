@@ -930,7 +930,7 @@
   "square.locationNoResultsHint": "换一个更短的关键词试试",
   "square.addMedia": "添加多媒体",
   "square.externalMedia": "外部媒体",
-  "square.externalMediaHint": "网易云、QQ、酷我、酷狗、Apple Music、汽水音乐或抖音",
+  "square.externalMediaHint": "网易云、Apple Music等",
   "square.externalMediaDescription": "粘贴分享文案或链接，其他文字会被自动忽略",
   "square.externalMediaPlaceholder": "粘贴音乐或抖音分享链接",
   "square.externalMediaUnsupported": "暂未识别到支持的外部媒体",

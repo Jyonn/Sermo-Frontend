@@ -434,7 +434,7 @@
   "square.locationNoResultsHint": "試試較短的關鍵字",
   "square.addMedia": "新增多媒體",
   "square.externalMedia": "外部媒體",
-  "square.externalMediaHint": "網易雲、QQ、酷我、酷狗、Apple Music、汽水音樂或抖音",
+  "square.externalMediaHint": "網易雲、Apple Music等",
   "square.externalMediaDescription": "貼上分享文字或連結，其他文字會自動忽略",
   "square.externalMediaPlaceholder": "貼上音樂或抖音分享連結",
   "square.externalMediaUnsupported": "未識別到支援的外部媒體",
