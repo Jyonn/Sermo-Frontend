@@ -5,6 +5,7 @@ const read=(path:string)=>readFileSync(new URL('../src/'+path,import.meta.url),'
 test('profile calendar uses authenticated OAuth projection instead of the retired share ID',()=>{
   const profile=read('components/UserProfilePanel.tsx');
   assert.match(profile,/ownerId={userId} previewAudience={previewAudience}/);
+  assert.match(profile,/<ChronelleCalendar key={`\$\{cacheScope\}:/);
   assert.ok(!profile.includes('calendarId={user.chronelle_calendar_id}'));
   assert.match(read('components/ChronelleCalendar.tsx'),/api.chronelleProfile\(ownerId/);
 });
