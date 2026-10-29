@@ -392,6 +392,8 @@ export default function MenuPage() {
   const { setSession: setAdminSession } = useAdminAuth();
   const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
   const currentUserId = session?.user.user_id;
+  const webPushAccountRef = useRef('');
+  webPushAccountRef.current = `${session?.user.space_id}:${currentUserId}`;
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [isDesktopViewport, setIsDesktopViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches
@@ -980,7 +982,7 @@ export default function MenuPage() {
     if (!webReminderDrawerOpen) return;
     let active = true;
     setWebPushState("checking");
-    void getWebPushState()
+    void getWebPushState(webPushAccountRef.current)
       .then((state) => {
         if (active) setWebPushState(state);
       })
@@ -990,20 +992,26 @@ export default function MenuPage() {
     return () => {
       active = false;
     };
-  }, [webReminderDrawerOpen]);
+  }, [webReminderDrawerOpen, session?.user.space_id, currentUserId]);
 
   const toggleWebPush = async () => {
     if (webPushSaving || webPushState === "checking") return;
+    const account = webPushAccountRef.current;
     setWebPushSaving(true);
     try {
       if (webPushState === "on") {
-        await disableWebPush();
+        await disableWebPush(account);
       } else {
-        await enableWebPush();
+        await enableWebPush(account);
       }
-      setWebPushState(await getWebPushState());
+      if (account !== webPushAccountRef.current) return;
+      const next = await getWebPushState(account);
+      if (account === webPushAccountRef.current) setWebPushState(next);
     } catch (pushError) {
-      setWebPushState(await getWebPushState().catch((): WebPushState => "off"));
+      if (account !== webPushAccountRef.current) return;
+      const next = await getWebPushState(account).catch((): WebPushState => "off");
+      if (account !== webPushAccountRef.current) return;
+      setWebPushState(next);
       setError(pushError instanceof Error ? pushError.message : t("webPush.settingFailed"));
     } finally {
       setWebPushSaving(false);
@@ -1015,8 +1023,8 @@ export default function MenuPage() {
     unsupported: t("webPush.browserUnsupported"),
     "needs-install": t("webPush.addToHomeFirst"),
     denied: t("webPush.allowInSettings"),
-    off: null,
-    on: null,
+    off: t('webPush.accountScopeHint'),
+    on: t('webPush.accountScopeHint'),
   }[webPushState];
 
   useEffect(() => {

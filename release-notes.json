@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.21",
+  "id": "2026.10.29.22",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "通知设置更贴合当前空间",
+      "title": "系统消息支持多账户独立开关",
       "items": [
-        "通知与提醒只展示当前空间已开放的聊天、广场、投稿和科研类别",
-        "按类型与按渠道保持一致，隐藏类别的原有偏好仍会保留"
+        "同一个 WebAPP 内，不同空间账户可分别开启或关闭系统消息",
+        "关闭只影响当前账户；重新登录和订阅恢复不会自动打开已关闭的账户"
       ]
     },
     "en": {
-      "title": "Notifications tailored to your space",
+      "title": "Independent system notifications for each account",
       "items": [
-        "Notification settings only show Chat, Square, Submissions and Research when enabled in the current space",
-        "Type and channel views stay consistent, while preferences for hidden categories are preserved"
+        "Enable or disable system notifications independently for accounts in different spaces within one WebAPP",
+        "Turning off one account leaves others connected; signing in again or restoring push keeps opted-out accounts off"
       ]
     }
   }

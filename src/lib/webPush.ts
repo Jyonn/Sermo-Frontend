@@ -1,144 +1,101 @@
-import { api } from "./api";
-import { i18n } from "./language";
+import { api } from './api';
+import { i18n } from './language';
+import { authStorage } from './storage';
 
-export type WebPushState = "checking" | "unsupported" | "needs-install" | "denied" | "off" | "on";
+export type WebPushState = 'checking'|'unsupported'|'needs-install'|'denied'|'off'|'on';
+const DEVICE_ENDPOINT_KEY='sermo.web-push.endpoint';
+const reconciliations=new Map<string,Promise<void>>();
 
-const WEB_PUSH_ENDPOINT_KEY = "sermo.web-push.endpoint";
-let reconciliation: Promise<void> | null = null;
+function accountScope() {
+  const user=authStorage.get()?.user;
+  return user?`${user.space_id}:${user.user_id}`:null;
+}
+function assertAccount(scope:string|null) {
+  if(!scope||accountScope()!==scope)throw new Error(i18n.t('webPush.accountChanged'));
+}
+function endpointKey(scope:string){return `${DEVICE_ENDPOINT_KEY}:${scope}`;}
+function storedEndpoint(scope:string){return window.localStorage.getItem(endpointKey(scope))||window.localStorage.getItem(DEVICE_ENDPOINT_KEY);}
+function rememberEndpoint(scope:string,endpoint:string){assertAccount(scope);window.localStorage.setItem(endpointKey(scope),endpoint);window.localStorage.setItem(DEVICE_ENDPOINT_KEY,endpoint);}
+function isIos(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||Boolean((navigator as Navigator&{standalone?:boolean}).standalone);}
+function decodeApplicationServerKey(value:string){const raw=window.atob((value+'='.repeat((4-value.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,char=>char.charCodeAt(0));}
+export function canUseWebPush(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;}
 
-function isIos() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+async function register(scope:string,subscription:PushSubscription,restoreOnly:boolean,previousEndpoint?:string) {
+  const data=subscription.toJSON();
+  if(!data.endpoint||!data.keys?.p256dh||!data.keys.auth)throw new Error(i18n.t('webPush.subscriptionFailed'));
+  assertAccount(scope);
+  const saved=await api.registerWebPush({endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,origin:window.location.origin,restore_only:restoreOnly,previous_endpoint:previousEndpoint||''});
+  assertAccount(scope);
+  if(saved?.opted_in!==false&&saved?.enabled)rememberEndpoint(scope,data.endpoint);
 }
 
-function isStandalone() {
-  return window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+export async function getWebPushState(expectedScope?:string):Promise<WebPushState> {
+  if(!canUseWebPush())return 'unsupported';
+  if(isIos()&&!isStandalone())return 'needs-install';
+  if(Notification.permission==='denied')return 'denied';
+  const scope=expectedScope||accountScope();if(!scope)return 'off';assertAccount(scope);
+  await reconcileWebPushSubscription();
+  assertAccount(scope);
+  const info=await api.getWebPushInfo();
+  assertAccount(scope);
+  const registration=await navigator.serviceWorker.getRegistration();
+  const subscription=await registration?.pushManager.getSubscription();
+  assertAccount(scope);
+  return subscription&&info.subscriptions.some(item=>item.endpoint===subscription.endpoint&&item.enabled&&item.opted_in!==false)?'on':'off';
 }
 
-function decodeApplicationServerKey(value: string) {
-  const padding = "=".repeat((4 - (value.length % 4)) % 4);
-  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = window.atob(base64);
-  return Uint8Array.from(raw, (character) => character.charCodeAt(0));
+export async function enableWebPush(expectedScope?:string) {
+  if(!canUseWebPush())throw new Error(i18n.t('webPush.unsupported'));
+  if(isIos()&&!isStandalone())throw new Error(i18n.t('webPush.installFirst'));
+  const scope=expectedScope||accountScope();assertAccount(scope);
+  const permission=await Notification.requestPermission();assertAccount(scope);
+  if(permission!=='granted')throw new Error(i18n.t('webPush.permissionDenied'));
+  const info=await api.getWebPushInfo();assertAccount(scope);
+  if(!info.public_key)throw new Error(i18n.t('webPush.notConfigured'));
+  await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
+  const registration=await navigator.serviceWorker.ready;
+  const existing=await registration.pushManager.getSubscription();assertAccount(scope);
+  const subscription=existing??await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeApplicationServerKey(info.public_key)});
+  await register(scope!,subscription,false,storedEndpoint(scope!)||undefined);
 }
 
-export function canUseWebPush() {
-  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-}
-
-export async function getWebPushState(): Promise<WebPushState> {
-  if (!canUseWebPush()) return "unsupported";
-  if (isIos() && !isStandalone()) return "needs-install";
-  if (Notification.permission === "denied") return "denied";
-  let registration = await navigator.serviceWorker.getRegistration();
-  let subscription = registration ? await registration.pushManager.getSubscription() : null;
-  if (!subscription && Notification.permission === "granted" && window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY)) {
-    await reconcileWebPushSubscription();
-    registration = await navigator.serviceWorker.getRegistration();
-    subscription = registration ? await registration.pushManager.getSubscription() : null;
-  }
-  return subscription ? "on" : "off";
-}
-
-export async function enableWebPush() {
-  if (!canUseWebPush()) throw new Error(i18n.t("webPush.unsupported"));
-  if (isIos() && !isStandalone()) throw new Error(i18n.t("webPush.installFirst"));
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") throw new Error(i18n.t("webPush.permissionDenied"));
-
-  const info = await api.getWebPushInfo();
-  if (!info.public_key) throw new Error(i18n.t("webPush.notConfigured"));
-  await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
-  const registration = await navigator.serviceWorker.ready;
-  const existing = await registration.pushManager.getSubscription();
-  const subscription = existing ?? await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: decodeApplicationServerKey(info.public_key),
-  });
-  const serialized = subscription.toJSON();
-  if (!serialized.endpoint || !serialized.keys?.p256dh || !serialized.keys.auth) {
-    throw new Error(i18n.t("webPush.subscriptionFailed"));
-  }
-  await api.registerWebPush({
-    endpoint: serialized.endpoint,
-    p256dh: serialized.keys.p256dh,
-    auth: serialized.keys.auth,
-    origin: window.location.origin,
-  });
-  window.localStorage.setItem(WEB_PUSH_ENDPOINT_KEY, serialized.endpoint);
-}
-
-export async function disableWebPush() {
-  if (!canUseWebPush()) return;
-  const registration = await navigator.serviceWorker.getRegistration();
-  const subscription = registration ? await registration.pushManager.getSubscription() : null;
-  const endpoint = subscription?.endpoint || window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
-  if (endpoint) await api.deleteWebPush(endpoint);
-  if (subscription) await subscription.unsubscribe();
-  window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
+export async function disableWebPush(expectedScope?:string) {
+  if(!canUseWebPush())return;
+  const scope=expectedScope||accountScope();assertAccount(scope);
+  const registration=await navigator.serviceWorker.getRegistration();
+  const subscription=await registration?.pushManager.getSubscription();assertAccount(scope);
+  const previous=storedEndpoint(scope!);
+  const endpoint=subscription?.endpoint||previous;
+  if(endpoint){assertAccount(scope);await api.deleteWebPush(endpoint,previous||'');}
+  // Keep the shared browser subscription alive for other signed-in accounts.
 }
 
 export async function reconcileWebPushSubscription() {
-  if (reconciliation) return reconciliation;
-  reconciliation = reconcileWebPushSubscriptionOnce().finally(() => {
-    reconciliation = null;
-  });
-  return reconciliation;
+  const scope=accountScope();if(!scope)return;
+  const pending=reconciliations.get(scope);if(pending)return pending;
+  const work=reconcile(scope).finally(()=>reconciliations.delete(scope));
+  reconciliations.set(scope,work);return work;
 }
 
-async function reconcileWebPushSubscriptionOnce() {
-  if (!canUseWebPush()) return;
-  const storedEndpoint = window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
-  let registration = await navigator.serviceWorker.getRegistration();
-  let subscription = registration ? await registration.pushManager.getSubscription() : null;
-
-  if (Notification.permission === "denied") {
-    if (storedEndpoint) {
-      await api.deleteWebPush(storedEndpoint);
-      window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
-    }
-    return;
+async function reconcile(scope:string) {
+  if(!canUseWebPush()||Notification.permission!=='granted'||(isIos()&&!isStandalone()))return;
+  assertAccount(scope);
+  const info=await api.getWebPushInfo();assertAccount(scope);
+  const previous=storedEndpoint(scope);
+  let registration=await navigator.serviceWorker.getRegistration();
+  let subscription=await registration?.pushManager.getSubscription();assertAccount(scope);
+  const bindings=info.bindings||info.subscriptions;
+  const current=bindings.find(item=>item.endpoint===subscription?.endpoint);
+  const prior=bindings.find(item=>item.endpoint===previous);
+  // Browser permission and another account's endpoint are not consent for this account.
+  const binding=current||prior;
+  if(!binding||binding.opted_in===false)return;
+  if(!registration)registration=await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
+  assertAccount(scope);
+  if(!subscription){
+    if(!info.public_key)return;
+    subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeApplicationServerKey(info.public_key)});
   }
-
-  // `getRegistration()` can briefly return nothing while iOS restores or
-  // replaces the service worker. A transient lifecycle state must never be
-  // interpreted as the user disabling notifications.
-  if (Notification.permission !== "granted") return;
-  if (!registration) {
-    try {
-      registration = await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
-      subscription = await registration.pushManager.getSubscription();
-    } catch {
-      return;
-    }
-  }
-
-  // A stored endpoint is our durable record of explicit opt-in. Browsers may
-  // rotate or discard the actual subscription after an OS/WebApp update, so
-  // restore it while permission remains granted instead of switching it off.
-  if (!subscription && storedEndpoint) {
-    try {
-      const info = await api.getWebPushInfo();
-      if (!info.public_key) return;
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: decodeApplicationServerKey(info.public_key),
-      });
-    } catch {
-      return;
-    }
-  }
-  if (!subscription) return;
-
-  const serialized = subscription.toJSON();
-  if (!serialized.endpoint || !serialized.keys?.p256dh || !serialized.keys.auth) return;
-  await api.registerWebPush({
-    endpoint: serialized.endpoint,
-    p256dh: serialized.keys.p256dh,
-    auth: serialized.keys.auth,
-    origin: window.location.origin,
-  });
-  if (storedEndpoint && storedEndpoint !== serialized.endpoint) {
-    await api.deleteWebPush(storedEndpoint).catch(() => undefined);
-  }
-  window.localStorage.setItem(WEB_PUSH_ENDPOINT_KEY, serialized.endpoint);
+  await register(scope,subscription,true,binding.endpoint);
 }

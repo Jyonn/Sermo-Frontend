@@ -1,4 +1,6 @@
 {
+  "webPush.accountScopeHint": "仅控制当前账户在此设备上的系统消息，不影响其他账户。",
+  "webPush.accountChanged": "账户已切换，请在当前账户下重试。",
   "resources.title": "资源空间",
   "resources.project": "课题资源",
   "resources.task": "任务资源",

@@ -35,7 +35,7 @@ export function PwaRecommendation() {
         const standalone = isStandalonePwa();
         const nextKind: RecommendationKind = standalone ? "push" : "install";
         if (wasPwaRecommendationShown(slug, nextKind)) return;
-        if (standalone && await getWebPushState() === "on") return;
+        if (standalone && await getWebPushState(`${session.user.space_id}:${session.user.user_id}`).catch(()=> 'off') === "on") return;
         markPwaRecommendationShown(slug, nextKind);
         if (active) setKind(nextKind);
       })();
@@ -70,7 +70,7 @@ export function PwaRecommendation() {
           setKind(null);
         }
       } else {
-        await enableWebPush();
+        await enableWebPush(`${session?.user.space_id}:${session?.user.user_id}`);
         setKind(null);
       }
     } catch (actionError) {

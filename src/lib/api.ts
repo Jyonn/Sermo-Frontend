@@ -1774,23 +1774,26 @@ export const api = {
   getWebPushInfo(signal?: AbortSignal) {
     return request<WebPushInfoDTO>("/users/me/web-push", {
       auth: true,
+      retryOn401: false,
       signal,
     });
   },
 
-  registerWebPush(payload: { endpoint: string; p256dh: string; auth: string; origin: string }) {
-    return request<WebPushSubscriptionDTO>("/users/me/web-push", {
+  registerWebPush(payload: { endpoint: string; p256dh: string; auth: string; origin: string; restore_only?:boolean; previous_endpoint?:string }) {
+    return request<WebPushSubscriptionDTO|null>("/users/me/web-push", {
       method: "POST",
       auth: true,
+      retryOn401: false,
       body: payload,
     });
   },
 
-  deleteWebPush(endpoint: string) {
+  deleteWebPush(endpoint: string, previous_endpoint = '') {
     return request<null>("/users/me/web-push", {
       method: "DELETE",
       auth: true,
-      body: { endpoint },
+      retryOn401: false,
+      body: { endpoint, previous_endpoint },
     });
   },
 

@@ -718,6 +718,7 @@ export interface StickerPrepareDTO {
 }
 
 export interface WebPushSubscriptionDTO {
+  opted_in?: boolean;
   endpoint: string;
   origin: string;
   enabled: boolean;
@@ -725,6 +726,7 @@ export interface WebPushSubscriptionDTO {
 }
 
 export interface WebPushInfoDTO {
+  bindings?: WebPushSubscriptionDTO[];
   public_key: string;
   subscriptions: WebPushSubscriptionDTO[];
 }

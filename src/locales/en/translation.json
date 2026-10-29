@@ -1,4 +1,6 @@
 {
+  "webPush.accountScopeHint": "Controls system notifications for this account on this device only, without affecting other accounts.",
+  "webPush.accountChanged": "Your account changed. Please try again in the current account.",
   "resources.title": "Resources",
   "resources.project": "Project resources",
   "resources.task": "Task resources",
