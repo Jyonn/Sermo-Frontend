@@ -1,7 +1,7 @@
 import {useLayoutEffect,useRef,useState,type RefObject} from 'react';
 import {nextOverlayLevel} from './overlayOrder';
 
-const surfaces='.drawer-backdrop,.sheet-backdrop,.dialog-backdrop,.detached-drawer-slot,.pattern-backdrop,.tour-layer,[data-overlay-layer]';
+const surfaces='.drawer-backdrop,.sheet-backdrop,.dialog-backdrop,.desktop-panel-slot,.pattern-backdrop,.tour-layer,[data-overlay-layer]';
 let serial=0;
 
 function layerSurface(root:HTMLElement){

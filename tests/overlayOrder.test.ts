@@ -29,4 +29,5 @@ test('all focus-managed dialogs and both floating drawer paths use the same allo
   assert.match(read('components/SideDrawer.tsx'),/panels\?\.floating&&panels.topId===drawerId/);
   assert.match(read('components/SideDrawer.tsx'),/zIndex:overlayLevel-1/);
   assert.match(read('lib/overlayLayer.ts'),/node.dataset.overlayOwner!==owner/);
+  assert.match(read('lib/overlayLayer.ts'),/\.desktop-panel-slot/);
 });
