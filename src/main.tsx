@@ -13,6 +13,7 @@ import { LanguageProvider } from "./lib/language";
 import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
+import { chronelleReturnDestination } from './lib/chronelleReturn';
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { initializeScheduledSiteTheme } from "./lib/siteTheme";
@@ -51,6 +52,11 @@ document.addEventListener("visibilitychange", () => {
   });
 });
 
+// Restore the space before the router basename and scoped authentication are read.
+try {
+  const destination = chronelleReturnDestination(new URL(window.location.href), window.localStorage);
+  if (destination) window.history.replaceState(window.history.state, '', destination);
+} catch { /* Missing local context is handled by the callback recovery screen. */ }
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
 initializeTheme();

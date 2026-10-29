@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.7",
+  "id": "2026.10.29.8",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "外部媒体入口优化",
+      "title": "Chronelle 授权返回修复",
       "items": [
-        "外部媒体入口说明更简洁",
-        "打开链接输入框时不再自动读取剪贴板，避免手机系统粘贴提示干扰"
+        "Chronelle 授权返回后恢复原空间并完成绑定，不再误入空间管理页",
+        "无法恢复原空间或账号时提供明确的重新绑定提示"
       ]
     },
     "en": {
-      "title": "External media improvements",
+      "title": "Chronelle authorization return fix",
       "items": [
-        "Simplified the external media description",
-        "Opening the link dialog no longer reads the clipboard automatically or triggers a mobile paste prompt"
+        "Chronelle authorization returns to the original space instead of space administration",
+        "Clear recovery guidance when the original space or account is unavailable"
       ]
     }
   }

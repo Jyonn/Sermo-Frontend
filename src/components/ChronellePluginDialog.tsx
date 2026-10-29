@@ -3,6 +3,8 @@ import { api } from '../lib/api';
 import { useI18n, type TranslationKey } from '../lib/language';
 import { showToast } from '../lib/toast';
 import { chronelleOrigin } from '../lib/chronelleOrigin';
+import { rememberChronelleReturn } from '../lib/chronelleReturn';
+import { getDetectedSpaceSlug } from '../lib/spaceEntry';
 import chronelleIcon from '../assets/chronelle-icon.png';
 import { ConfirmDialog } from './ConfirmDialog';
 import './ChronellePluginDialog.css';
@@ -49,6 +51,7 @@ export function ChronellePluginDialog({open,onClose,userId,onChange,rebind=false
       const result=await api.chronelleAccount('authorize',true);
       const target=new URL(result.authorize_url||'');
       if(target.origin!==chronelleOrigin()||target.pathname!=='/oauth/authorize/'||target.hash||target.username||target.password||target.searchParams.get('authorization_type')!=='account_binding')throw Error('invalid_response');
+      rememberChronelleReturn(target.searchParams.get('state')||'',getDetectedSpaceSlug(),userId,localStorage);
       sessionStorage.setItem(storageKey,String(Date.now()+600000));setPending(true);
       if(popup)popup.location.replace(target.href);else window.location.assign(target.href);
     }catch(e){popup?.close();setError(errorText(e instanceof Error?e.message:'binding_required'));}

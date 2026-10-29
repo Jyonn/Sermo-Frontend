@@ -5,6 +5,7 @@
   "chronelle.rebindTitle": "重新绑定 Chronelle",
   "chronelle.rebindHint": "Chronelle 已升级授权机制，旧绑定无法继续使用。重新绑定后，Frienden 可读取和管理你的全部日历业务数据；向其他成员展示的范围仍由你的忙闲与类别组设置决定。",
   "chronelle.rebindFailed": "Chronelle 绑定未完成，请重新发起授权。",
+  "chronelle.returnContextMissing": "无法恢复发起授权的空间或账号。请返回原空间，以原账号重新发起 Chronelle 绑定。",
   "research.switchProject": "切换课题",
   "research.manageProjects": "管理课题",
   "research.progressFilter": "筛选进度",

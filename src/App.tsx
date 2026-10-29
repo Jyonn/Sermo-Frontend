@@ -2,7 +2,8 @@ import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
-import { ChronelleBindingGate } from './components/ChronelleBindingGate';
+import { ChronelleBindingGate, ChronelleReturnFailure } from './components/ChronelleBindingGate';
+import { isChronelleReturn } from './lib/chronelleReturn';
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
@@ -83,6 +84,7 @@ export default function App() {
   const { ready, session } = useAuth();
   const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
+  const [rootChronelleReturn] = useState(() => window.location.pathname === '/app/research' && isChronelleReturn(new URL(window.location.href)));
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
   const isDesignLab = location.pathname.startsWith("/design/");
   const routeLocation = showFriendInviteOverlay
@@ -94,6 +96,8 @@ export default function App() {
         key: `${location.key}-invite-background`,
       }
     : location;
+
+  if (rootChronelleReturn && !session) return ready ? <><ChronelleReturnFailure/><AppToast/></> : <RouteResourceState status="loading"/>;
 
   return (
     <>

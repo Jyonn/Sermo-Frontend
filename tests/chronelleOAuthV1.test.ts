@@ -17,7 +17,8 @@ test('callback is one-shot, strips codes from URL and never persists credentials
   assert.match(gate,/exchanges.get\(callback.state\)/);
   assert.match(gate,/\['code','state','error','error_description'\]/);
   assert.match(gate,/rebind_required/);
-  assert.doesNotMatch(gate,/localStorage|access_token|refresh_token|client_secret/);
+  assert.doesNotMatch(gate,/access_token|refresh_token|client_secret/);
+  assert.match(gate,/context\.userId!==userId/);
   const frame=read('components/ChronelleFrame.tsx');
   assert.match(frame,/version:2/);assert.match(frame,/tokens:latest.current.tokens/);
   assert.doesNotMatch(frame,/display_ids|localStorage|sessionStorage/);

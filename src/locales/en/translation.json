@@ -5,6 +5,7 @@
   "chronelle.rebindTitle": "Reconnect Chronelle",
   "chronelle.rebindHint": "Chronelle has upgraded authorization. Previous connections must be renewed. Frienden can read and manage your full calendar data; what others see remains controlled by your availability and category-group settings.",
   "chronelle.rebindFailed": "Chronelle connection was not completed. Please authorize again.",
+  "chronelle.returnContextMissing": "The original space or account could not be restored. Return to that space and start Chronelle binding again with the same account.",
   "research.switchProject": "Switch project",
   "research.manageProjects": "Manage projects",
   "research.progressFilter": "Filter progress",
