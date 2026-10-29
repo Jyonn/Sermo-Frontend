@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.29.12",
+  "id": "2026.10.29.13",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "群聊消息操作修复",
+      "title": "科研时间编辑优化",
       "items": [
-        "修复桌面课题群聊的消息操作栏被遮挡，恢复撤回等操作入口"
+        "负责人可修改课题和阶段任务的起止时间",
+        "优化选择窗口顶部按钮的留白和悬停样式"
       ]
     },
     "en": {
-      "title": "Group chat message actions",
+      "title": "Research date editing",
       "items": [
-        "Fixed hidden message actions in desktop research group chats, restoring access to recall and other actions"
+        "Project owners can edit project and task dates",
+        "Improved spacing and hover states for selection dialog actions"
       ]
     }
   }

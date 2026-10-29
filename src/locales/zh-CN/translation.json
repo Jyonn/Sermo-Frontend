@@ -153,6 +153,7 @@
   "research.editDescription": "编辑课题说明",
   "research.noDescription": "还没有课题说明",
   "research.descriptionHint": "用 Markdown 记录研究方向、目标与协作约定。",
+  "research.editDates": "修改起止时间",
   "research.project": "切换课题",
   "research.choose": "选择课题",
   "research.empty": "从一个课题开始",

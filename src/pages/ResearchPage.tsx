@@ -48,6 +48,7 @@ export default function ResearchPage() {
   const owner=project?.members.some(m=>m.id===userId&&m.owner)===true;
   const writable=project?.status!=='archived';
   const task=project?.tasks.find(task=>task.id===taskId);
+  const [dates,setDates]=useState<{taskId?:string;from:string;to:string}|null>(null);
   function openProject(value:number){setId(value);setTab('overview');setScope('mine');setOnboarding(false);setError('');setPanel(null);setChatOpen(false);}
   useEffect(()=>{if(listLoading)return;const next=selectResearchProject(list,id);if(next!==id){setId(next);setError('');}},[list,listLoading,id]);
   useEffect(()=>{if(id)localStorage.setItem(memoryKey,String(id));},[id,memoryKey]);
@@ -93,7 +94,7 @@ export default function ResearchPage() {
         <aside><header><span className="research-muted">{project.tasks.length} {t('research.tasks')}</span>{owner&&writable&&<HeaderIconButton label={t('research.addTask')} onClick={()=>setPanel('task')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}</header>{[...project.tasks].sort((a,b)=>Number(a.status==='archived')-Number(b.status==='archived')).map(item=><ResearchTaskItem key={item.id} task={item} members={project.members} selected={taskId===item.id} onClick={()=>{setTaskId(item.id);setScope('mine');}}/>)}{!project.tasks.length&&<QuietState icon="assignment" title={t('research.noTasks')} description={t('research.taskEmptyHint')}/>}</aside>
         <article className="research-task-detail">{task?<ResearchComments key={task.id} project={project} task={task} userId={userId!} scope={scope} writable={writable&&task.status!=='archived'} busy={busy} send={async (body,reply_to)=>await mutate({action:'progress',task_id:task.id,body,reply_to})===true}>
           <header className="research-task-heading"><button className="ghost-button research-back" onClick={()=>setTaskId(null)} aria-label={t('research.back')}><span className="material-symbols-outlined">arrow_back</span></button><h1>{task.title}</h1>{owner&&writable?<SelectControl compact label={t('research.status')} disabled={busy} value={task.status} options={(['active','archived'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'task_status',task_id:task.id,status}).then(()=>{})}/>:<span className={`research-status is-${task.status}`}>{t(`research.${task.status}`)}</span>}</header>
-          <div className="research-task-meta"><span><span className="material-symbols-outlined" aria-hidden="true">group</span>{task.assignees.map(memberName).join(' · ')||t('research.unassigned')}</span><span><span className="material-symbols-outlined" aria-hidden="true">date_range</span>{task.start} — {task.end||t('research.openEnd')}</span></div><div className="research-task-body"><Markdown body={task.body}/></div>
+          <div className="research-task-meta"><span><span className="material-symbols-outlined" aria-hidden="true">group</span>{task.assignees.map(memberName).join(' · ')||t('research.unassigned')}</span><button type="button" className="research-task-dates" disabled={!owner||!writable||busy} aria-label={t('research.editDates')} onClick={()=>setDates({taskId:task.id,from:task.start,to:task.end||''})}><span className="material-symbols-outlined" aria-hidden="true">date_range</span>{task.start} — {task.end||t('research.openEnd')}{owner&&writable&&<span className="material-symbols-outlined" aria-hidden="true">edit</span>}</button></div><div className="research-task-body"><Markdown body={task.body}/></div>
           <div className="research-progress-head"><h2 title={t('research.shared')}>{t('research.progress')}</h2><SelectControl compact label={t('research.progressFilter')} value={scope} onChange={setScope} options={[{value:'mine',label:t('research.mine')},{value:'all',label:t('research.all')}]}/></div>
         </ResearchComments>:<QuietState icon="assignment" title={t('research.chooseTask')} description={t('research.taskEmptyHint')}/>}</article>
       </div>}
@@ -107,6 +108,7 @@ export default function ResearchPage() {
     <SideDrawer historyKey={panel==='task'?'research-task-create':'research-members'} open={panel==='task'||panel==='members'} fullscreen={panel==='task'} onClose={()=>setPanel(null)} title={t(panel==='members'?'research.members':'research.addTask')}>
       {error&&<p className="research-error" role="alert">{error}</p>}
       {panel==='members'&&project?<ResearchProjectDetails project={project} owner={owner} busy={busy}
+        onDates={()=>setDates({from:project.start,to:project.end||''})}
         onDescription={()=>setPanel('description')} onMember={member=>setMemberAction(member.id)} onAdd={()=>setInviteOpen(true)}
         onRemove={()=>setMemberPickerAction('remove')} onTransfer={()=>setMemberPickerAction('transfer')}
         onChat={()=>{setPanel(null);setChatOpen(true);}} onDanger={()=>setConfirm(owner?'dissolve':'leave')}
@@ -119,6 +121,10 @@ export default function ResearchPage() {
     <ConfirmDialog open={!!confirm} title={t('research.confirm')} description={t('research.sensitive')} danger onClose={()=>setConfirm(null)} onConfirm={()=>{const [action,user]=String(confirm).split(':');void mutate({action,...(user?{user_id:Number(user)}:{})}).then(ok=>{if(ok)setPanel(null);});setConfirm(null);}}/>
     {panel==='description'&&project&&<MarkdownEditorDialog title={t('research.description')} initialValue={project.description} busy={busy} error={error} onClose={()=>setPanel(null)} onSave={value=>{void mutate({action:'settings',description:value}).then(ok=>{if(ok)setPanel(null);});}}/>}
     {panel==='create'&&<ResearchCreateFlow busy={busy} error={error} onClose={()=>setPanel(null)} onCreate={createProject}/>}
+    <ConfirmDialog open={!!dates} title={t('research.editDates')} description="" busy={busy} confirmLabel={t('research.save')} onClose={()=>setDates(null)} onConfirm={()=>{if(dates)void mutate({action:dates.taskId?'task_dates':'settings',...(dates.taskId?{task_id:dates.taskId}:{}),start:dates.from,end:dates.to||null}).then(ok=>{if(ok)setDates(null);});}}>
+      {dates&&<DateRangeField value={dates} onChange={range=>setDates(current=>current?{...current,...range}:null)}/>}
+      {error&&<p className="research-error" role="alert">{error}</p>}
+    </ConfirmDialog>
     </FloatingDrawerScope>
   </section></AppChrome>;
 }

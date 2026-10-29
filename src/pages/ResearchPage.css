@@ -207,3 +207,4 @@
   .desktop-panel-workspace.panel-mode-split>.research-page{padding-inline:0}
   .desktop-panel-workspace.panel-mode-split>.research-page>.tab-sticky-header{margin-inline:0;padding-inline:24px;width:100%}
 }
+.research-task-dates{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:8px;padding:4px 6px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}.research-task-dates:hover:not(:disabled){background:var(--control-surface);color:var(--text-primary)}.research-task-dates:disabled{opacity:1;cursor:default}

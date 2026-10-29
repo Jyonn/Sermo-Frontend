@@ -141,6 +141,7 @@
   "research.editDescription": "Edit project description",
   "research.noDescription": "No project description yet",
   "research.descriptionHint": "Use Markdown for research goals, direction and team agreements.",
+  "research.editDates": "Edit dates",
   "research.project": "Switch project",
   "research.choose": "Choose a project",
   "research.empty": "Start a project",

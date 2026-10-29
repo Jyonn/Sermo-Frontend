@@ -4545,17 +4545,28 @@ html[data-theme="dark"] .growth-scroll-score strong {
 
 .sheet-toolbar-button {
   min-width: 0;
-  padding: 0;
+  min-height: 40px;
+  padding: 8px 12px;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
 .sheet-toolbar .button.sheet-toolbar-button {
-  min-height: 0;
-  padding: 0;
+  min-height: 40px;
+  padding: 8px 12px;
   color: var(--brand-primary);
   font-weight: 700;
+}
+
+.sheet-toolbar .sheet-toolbar-button:not(.submission-invite-send-button):hover:not(:disabled) {
+  background: var(--control-surface);
+  box-shadow: none;
+}
+
+.sheet-toolbar .sheet-toolbar-button:disabled {
+  background: transparent;
+  box-shadow: none;
 }
 
 .chat-member-picker-search {
