@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
+import { ChronelleBindingGate } from './components/ChronelleBindingGate';
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
@@ -96,6 +97,7 @@ export default function App() {
 
   return (
     <>
+      {ready&&session&&<ChronelleBindingGate key={session.user.user_id} userId={session.user.user_id}/>}
       <RouteResourceBoundary>
         <Suspense fallback={<RouteResourceState status="loading" />}>
           <Routes location={routeLocation}>

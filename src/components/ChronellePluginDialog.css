@@ -1,0 +1,6 @@
+.chronelle-binding-consent{display:grid;grid-template-columns:40px minmax(0,1fr);align-items:start;gap:12px;margin:0 0 20px}
+.chronelle-binding-consent>img{box-sizing:border-box;width:40px;height:40px;padding:8px;border-radius:12px;background:color-mix(in srgb,var(--brand-primary) 8%,var(--bg-elevated))}
+.chronelle-binding-consent>div{display:grid;gap:6px;font-size:12px;line-height:1.6;color:var(--text-primary)}
+.chronelle-binding-consent>div>span{color:var(--text-muted)}
+.chronelle-binding-consent>p{grid-column:1/-1;margin:0;color:var(--text-secondary);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.chronelle-binding-unbind{grid-column:1/-1;justify-self:start;padding:8px 12px;border:1px solid var(--line-soft);border-radius:10px;background:transparent;color:var(--danger);font:inherit;font-size:12px;cursor:pointer}

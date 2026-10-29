@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.4",
+  "id": "2026.10.29.5",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "界面细节优化",
+      "title": "Chronelle 新版账户绑定",
       "items": [
-        "修复在线圆点被头像裁切及评论等级标记远离昵称的问题",
-        "互动额度面板更紧凑，桌面侧栏折叠按钮更清晰"
+        "接入 Chronelle 新版授权，旧绑定用户登录后可重新确认连接",
+        "科研日程改用新版安全嵌入，支持合并成员日程与预约会议"
       ]
     },
     "en": {
-      "title": "Interface refinements",
+      "title": "New Chronelle account binding",
       "items": [
-        "Fixed clipped online indicators and kept comment level badges next to names",
-        "Made interaction quotas more compact and refreshed the desktop sidebar toggle"
+        "Connect through the new Chronelle authorization flow; previous connections require renewed consent",
+        "Research calendars use the new secure embed for merged schedules and meeting invitations"
       ]
     }
   }

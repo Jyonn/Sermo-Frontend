@@ -20,7 +20,7 @@ test('research project panels preserve a real embedded conversation and onboardi
 test('calendar consent is global and explicit, and empty views reuse the same component', () => {
   const calendar=source('components/ResearchCalendar.tsx');
   assert.match(calendar,/default_busy:defaultBusy/);
-  assert.match(calendar,/onboarding.*!value.policy_configured/);
+  assert.match(calendar,/value.status==='active'&&!value.policy_configured/);
   assert.match(calendar,/research.finePermissions/);
   assert.match(source('pages/SquarePage.tsx'),/<QuietState icon="forum" title=\{t\("square.noComments"\)\}/);
   assert.match(source('components/SquareExperience.css'),/grid-template-columns:minmax\(0,1fr\) 24px minmax\(0,1fr\)/);

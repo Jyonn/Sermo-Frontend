@@ -38,6 +38,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   const [view,setView]=useState('schedule');
   const [memberPicker,setMemberPicker]=useState(false);
   const generation = useRef(0);
+  useEffect(()=>{const reload=()=>setTick(n=>n+1);window.addEventListener('chronelle:bound',reload);return()=>window.removeEventListener('chronelle:bound',reload);},[]);
   const errorText = (code: string) => {
     const key = 'research.calendarUI.error.' + code;
     const message = t(key as TranslationKey);
@@ -51,7 +52,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
       if (controller.signal.aborted) return;
       setSetup(value); setPolicy(value.policy);
       setDefaultBusy(value.default_busy ?? true);
-      if(onboarding&&value.status==='active'&&!value.policy_configured)setSettingsOpen(true);
+      if(value.status==='active'&&!value.policy_configured)setSettingsOpen(true);
     }).catch(e => { if (!controller.signal.aborted) setError(e.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -65,7 +66,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   },[project.id,tick]);
   useEffect(() => {
     setRange(null); setDisplays(null);
-    if (setup?.status !== 'active' || !selected.length) return;
+    if (setup?.status !== 'active' || !setup.policy_configured || !selected.length) return;
     const controller = new AbortController();
     const request = ++generation.current;
     setLoading(true); setError('');
@@ -111,7 +112,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     </div>}
     {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <QuietState icon="calendar_month" title={onboarding&&setup?.status==='binding_required'?t('research.connectCalendar'):errorText(setup?.status || 'chronelle_unavailable')} description={tr('bindingHint')} action={setup?.status !== 'integration_not_configured' ? <button className="button" onClick={() => {sessionStorage.setItem(`chronelle:return-project:${userId}`,String(project.id));setConsent(true);}}>{tr('bind')}</button> : undefined}/>
     : !selected.length ? <QuietState icon="event_available" title={tr('choose')} description={tr('intro')}/> : displays?.displays.length ? <CalendarFrame
-      url={displays.displays[0].url} ids={displays.displays.map(d => d.id)} date={new Date().toLocaleDateString('en-CA')}
+      url={displays.displays[0].url} tokens={displays.displays.map(d => d.token)} date={new Date().toLocaleDateString('en-CA')}
       onRange={value=>{setResume(null);setRange(value);}} onRenew={() => setTick(n => n + 1)} /> : null}
     </>}
     {view==='meetings'&&<section className="research-meetings">{meetings.length?meetings.map(item=><article key={item.id}><span className="research-meeting-date"><strong>{new Date(item.start).getDate()}</strong><small>{new Date(item.start).toLocaleDateString(undefined,{month:'short'})}</small></span><div><strong>{item.title}</strong><p>{new Date(item.start).toLocaleString()} → {new Date(item.end).toLocaleString()}</p><small className="research-status">{tr('meetingStatus.'+item.status)}</small></div>{item.invitation_id?<a className="ghost-button" href={`${chronelleOrigin()}/#/invitations/${item.invitation_id}`} target="_blank" rel="noreferrer">{tr('openInvitation')}<span className="material-symbols-outlined" aria-hidden="true">north_east</span></a>:item.creator_id===userId?<button className="ghost-button" onClick={()=>{setResume(item);setRange({start:item.start,end:item.end,timezone:item.timezone,all_day:item.all_day});}}>{tr('retryMeeting')}</button>:null}</article>):<div className="research-calendar-state"><span className="material-symbols-outlined" aria-hidden="true">event_available</span><h2>{tr('noMeetings')}</h2><p>{tr('meetingHint')}</p><button className="ghost-button" onClick={()=>setView('schedule')}>{tr('schedule')}</button></div>}</section>}
@@ -120,6 +121,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     <SideDrawer historyKey="research-calendar-permissions" open={settingsOpen} onClose={() => setSettingsOpen(false)} title={tr('visibility')}>
       <div className="research-form">
         <p className="research-muted">{tr('policyHint')}</p>
+        <p className="research-muted">{t('chronelle.privacyRevocationHint')}</p>
         <SettingGroup><SettingRow title={t('research.defaultBusy')} description={t('research.defaultBusyHint')} trailing={<SettingSwitch checked={defaultBusy} label={t('research.defaultBusy')} disabled={busy} onChange={value=>{setDefaultBusy(value);setPolicy({detail:[],busy:value?setup?.groups.map(g=>g.id)||[]:[]});}}/>}/><SettingRow title={t('research.finePermissions')} onClick={()=>setAdvanced(value=>!value)}/></SettingGroup>
         {advanced&&<SettingGroup>{setup?.groups.map(group => <SettingSelect key={group.id} disabled={busy} label={group.name} value={policy.detail.includes(group.id) ? 'detail' : policy.busy.includes(group.id) ? 'busy' : 'hidden'}
             options={['hidden', 'busy', 'detail'].map(value => ({ value, label: tr(value) }))}

@@ -1,4 +1,10 @@
 {
+  "research.calendarFrame.embedExpired": "表示認可の期限が切れました。更新するか Chronelle を再連携してください。",
+  "research.calendarUI.error.authorization_paused": "Chronelle の認可は一時停止中です。再開または再連携してください。",
+  "chronelle.privacyRevocationHint": "有効な共有表示がある場合、権限変更で古いアクセスを直ちに停止するため連携を取り消します。その後、再連携が必要です。",
+  "chronelle.rebindTitle": "Chronelle を再連携",
+  "chronelle.rebindHint": "認可方式が更新されたため再連携が必要です。Frienden は全カレンダーデータの読み取りと管理が可能になります。他のメンバーへの公開範囲は空き時間とカテゴリグループの設定に従います。",
+  "chronelle.rebindFailed": "連携が完了しませんでした。再度認可してください。",
   "research.switchProject": "課題を切り替え",
   "research.manageProjects": "課題を管理",
   "research.progressFilter": "進捗を絞り込む",

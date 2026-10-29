@@ -1,4 +1,10 @@
 {
+  "research.calendarFrame.embedExpired": "展示授權已過期，請重新整理；若綁定已失效，需重新綁定 Chronelle。",
+  "research.calendarUI.error.authorization_paused": "Chronelle 授權已暫停，請恢復或重新綁定。",
+  "chronelle.privacyRevocationHint": "若仍有有效的共享展示，修改權限會撤銷相應綁定以立即停止舊存取，之後需重新綁定。",
+  "chronelle.rebindTitle": "重新綁定 Chronelle",
+  "chronelle.rebindHint": "Chronelle 已升級授權機制，舊綁定需要重新確認。Frienden 可讀取與管理你的全部日曆業務資料；其他成員可見範圍仍由你的忙閒與類別群組設定決定。",
+  "chronelle.rebindFailed": "Chronelle 綁定未完成，請重新授權。",
   "research.switchProject": "切換課題",
   "research.manageProjects": "管理課題",
   "research.progressFilter": "篩選進度",

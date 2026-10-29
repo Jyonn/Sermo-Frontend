@@ -1,4 +1,10 @@
 {
+  "research.calendarFrame.embedExpired": "표시 권한이 만료되었습니다. 새로고침하거나 Chronelle을 다시 연결해 주세요.",
+  "research.calendarUI.error.authorization_paused": "Chronelle 승인이 일시 중지되었습니다. 재개하거나 다시 연결해 주세요.",
+  "chronelle.privacyRevocationHint": "활성 공유 화면이 있으면 권한 변경 시 기존 접근을 즉시 중단하기 위해 연결을 해제합니다. 이후 다시 연결해야 합니다.",
+  "chronelle.rebindTitle": "Chronelle 다시 연결",
+  "chronelle.rebindHint": "인증 방식이 변경되어 다시 연결해야 합니다. Frienden은 전체 일정 데이터를 읽고 관리할 수 있으며 다른 멤버의 공개 범위는 바쁨 여부 및 카테고리 그룹 설정을 따릅니다.",
+  "chronelle.rebindFailed": "연결이 완료되지 않았습니다. 다시 승인해 주세요.",
   "research.switchProject": "과제 전환",
   "research.manageProjects": "과제 관리",
   "research.progressFilter": "진행 기록 필터",

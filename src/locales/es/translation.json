@@ -1,4 +1,10 @@
 {
+  "research.calendarFrame.embedExpired": "La autorización de visualización ha caducado. Actualiza o vuelve a conectar Chronelle.",
+  "research.calendarUI.error.authorization_paused": "La autorización está pausada. Reanúdala en Chronelle o vuelve a conectar.",
+  "chronelle.privacyRevocationHint": "Si hay vistas compartidas activas, cambiar permisos revoca la conexión para detener el acceso anterior de inmediato. Después será necesario volver a conectar.",
+  "chronelle.rebindTitle": "Volver a conectar Chronelle",
+  "chronelle.rebindHint": "Chronelle ha actualizado la autorización. Debes renovar la conexión. Frienden podrá leer y gestionar todos tus calendarios; la visibilidad para otros miembros seguirá tus ajustes de disponibilidad y grupos.",
+  "chronelle.rebindFailed": "No se completó la conexión. Vuelve a autorizar.",
   "research.switchProject": "Cambiar proyecto",
   "research.manageProjects": "Gestionar proyectos",
   "research.progressFilter": "Filtrar avances",

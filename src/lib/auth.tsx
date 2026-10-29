@@ -120,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     if (slug) forgetPwaAccountSession(current, slug);
+    if(current){try{sessionStorage.removeItem(`chronelle:rebind-dismissed:${current.user.user_id}`);}catch{/* Logout must remain available if browser storage is blocked. */}}
     authStorage.set(null);
     setSessionState(null);
     setReady(true);

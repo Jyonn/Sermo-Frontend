@@ -1,9 +1,8 @@
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function displayURL(value:string) {
   try {const url=new URL(value);const local=['127.0.0.1','localhost'].includes(url.hostname);
     if(!(local&&url.protocol==='http:')&&!(url.protocol==='https:'&&['chronelle.jyonn.space','chronelle.6-79.cn'].includes(url.hostname)))return null;
     if(url.username||url.password||url.search||url.hash)return null;
-    const match=url.pathname.match(/^\/binding-embed\/([^/]+)\/$/);if(!match||!uuid.test(match[1]))return null;
+    const match=url.pathname.match(/^\/oauth\/embed\/(coapp_[A-Za-z0-9_-]{16,80})\/$/);if(!match)return null;
     return {url:url.href,origin:url.origin,id:match[1]};
   }catch{return null;}
 }
@@ -15,9 +14,9 @@ export function trustedReply(event:{origin:string;source:unknown;data:unknown},s
 export function bridgeReply(value:unknown,channel:string,request:string):BridgeReply|null {
   if(!value||typeof value!=='object')return null;
   const v=value as Record<string,any>;
-  if(v.protocol!=='chronelle.calendar'||v.version!==1||v.channel!==channel||v.request_id!==request||!v.payload||typeof v.payload!=='object')return null;
+  if(v.protocol!=='chronelle.calendar'||v.version!==2||v.channel!==channel||v.request_id!==request||!v.payload||typeof v.payload!=='object')return null;
   const p=v.payload;
-  if(v.type==='state'&&['loading','ready','permission-denied','login-expired','load-failed'].includes(p.state))return {type:'state',payload:{state:p.state,coverage:p.coverage,availability:p.availability,code:typeof p.code==='string'?p.code:undefined}};
+  if(v.type==='state'&&['loading','ready','permission-denied','authorization-expired','load-failed'].includes(p.state))return {type:'state',payload:{state:p.state,coverage:p.coverage,availability:p.availability,code:typeof p.code==='string'?p.code:undefined}};
   if(v.type==='range-selected'&&typeof p.all_day==='boolean'&&typeof p.start==='string'&&typeof p.end==='string'&&typeof p.timezone==='string'&&/T.*(?:Z|[+-]\d{2}:\d{2})$/.test(p.start)&&/T.*(?:Z|[+-]\d{2}:\d{2})$/.test(p.end)&&Number.isFinite(Date.parse(p.start))&&Date.parse(p.end)>Date.parse(p.start)&&Date.parse(p.end)-Date.parse(p.start)<=90000000){
     try{new Intl.DateTimeFormat('en',{timeZone:p.timezone});}catch{return null;}
     return {type:'range-selected',payload:{start:p.start,end:p.end,timezone:p.timezone,all_day:p.all_day}};
