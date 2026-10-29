@@ -119,10 +119,11 @@ const GROUP_BACKGROUND_OPTIONS: Array<[Exclude<ChatBackgroundTheme, "custom">, T
   ["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"],
   ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"],
   ["starry-night", "menu.themeStarryNight"],
+  ["explorer-duality", "explorer.reward.3"],
   ["noir-film", "menu.themeNoirFilm"],
 ];
 const DARK_CHAT_BACKGROUND_THEMES = new Set<ChatBackgroundTheme>([
-  "dragon", "aurora-sky", "frienden-night", "starry-night", "noir-film", "custom",
+  "dragon", "aurora-sky", "frienden-night", "starry-night", "explorer-duality", "noir-film", "custom",
 ]);
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const MESSAGE_PAGE_SIZE = 30;
@@ -298,7 +299,7 @@ function visibleBubbleStyle(style?: string) {
     "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
     "typewriter", "newspaper", "receipt", "niko", "fufu",
     "baxian-lv", "baxian-zhongli", "baxian-he",
-    "city-jdz", "city-shanghai", "city-nyc", "city-beijing",
+    "city-jdz", "city-shanghai", "city-nyc", "city-beijing", "explorer-ai",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
@@ -308,6 +309,7 @@ const MENTION_SELECTION_ACCENTS: Record<ChatBubbleStyle, string> = {
   vip: "#b67b22",
   niko: "#916846",
   fufu: "#747a28",
+  "explorer-ai": "#697d91",
   "baxian-lv": "#2f78ad",
   "baxian-zhongli": "#b34f39",
   "baxian-he": "#ad3e78",
@@ -8004,7 +8006,7 @@ function LiveChatsPage({
                   event.preventDefault();
                 }}
               >
-              {narrowComposerLayout ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
+              {narrowComposerLayout || chatBackgroundTheme === "explorer-duality" ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
               {selectedChat?.type === "group" && !submissionMode ? <GroupCopyShelf key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId}/> : null}
               <div
                 ref={messageScrollRef}

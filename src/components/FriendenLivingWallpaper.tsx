@@ -106,6 +106,8 @@ export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: 
     };
   }, [theme]);
 
+  if (theme === "explorer-duality") return <svg ref={sceneRef} aria-hidden="true" className={`explorer-living-wallpaper${compact ? " is-compact" : ""}`} preserveAspectRatio="xMidYMid slice" viewBox="0 0 1024 1536"><image width="1024" height="1536" href="/activity/explorer-2026/conan-night.webp" /><image className="explorer-transform-state" width="1024" height="1536" href="/activity/explorer-2026/shinichi-night.webp" /></svg>;
+
   if (theme === "starry-night") return <svg aria-hidden="true" className={`frienden-starry-wallpaper is-active is-visible${compact ? " is-compact" : ""}`} preserveAspectRatio="xMidYMid slice" viewBox="0 0 941 1672">
     <defs><clipPath id="starry-sky-boundary"><rect height={compact ? 820 : 1037} width="941" x="0" y="0" /></clipPath></defs>
     <image height="1672" href="/assets/frienden-wallpapers/layers/starry-night/environment.webp" width="941" />

@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.3",
+  "id": "2026.10.30.4",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "任务讨论与日程视图优化",
+      "title": "2026 探索者开启",
       "items": [
-        "任务评论与回复更紧凑，Markdown 编辑失焦自动收起并保留草稿",
-        "科研日程支持单日与一周切换，以及逐日选择会议时间"
+        "探索基础、安全、应用、广场和活动五个主题，逐步领取五件年度奖励",
+        "新增像素侦探主题头像框、气泡、变换背景、动态名片与年度徽章，活动至 12 月 31 日"
       ]
     },
     "en": {
-      "title": "Task discussions and calendar views",
+      "title": "Meet the 2026 Explorer",
       "items": [
-        "Refined task discussions with compact replies and draft-preserving editor collapse",
-        "Switch research calendars between day and week views and select meeting times on any day"
+        "Explore five themes and manually collect five annual rewards as you progress",
+        "Discover pixel-detective frames, bubbles, a shifting background, an animated profile and an annual medal through December 31"
       ]
     }
   }

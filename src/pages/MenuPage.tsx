@@ -129,6 +129,7 @@ const personalizationOptions = {
     ["baxian-lv", "menu.styleBaxianLv"], ["baxian-zhongli", "menu.styleBaxianZhongli"], ["baxian-he", "menu.styleBaxianHe"],
     ["city-jdz", "menu.styleCityJingdezhen"], ["city-shanghai", "menu.styleCityShanghai"], ["city-nyc", "menu.styleCityNewYork"], ["city-beijing", "menu.styleCityBeijing"],
     ["vip", "menu.styleVip"],
+    ["explorer-ai", "explorer.reward.2"],
   ],
   avatar_frame_style: [
     ["none", "menu.frameNone"],
@@ -137,6 +138,7 @@ const personalizationOptions = {
     ["polaroid", "menu.framePolaroid"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
     ["spider-web", "menu.frameSpiderWeb"],
+    ["explorer-conan", "explorer.reward.1"],
   ],
 } as const;
 
@@ -152,13 +154,14 @@ const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclu
   { label: "menu.collectionMaterial", items: [["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"]] },
   { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"], ["starry-night", "menu.themeStarryNight"]] },
   { label: "menu.collectionFantasy", items: [["noir-film", "menu.themeNoirFilm"]] },
+  { label: "menu.collectionIdentity", items: [["explorer-duality", "explorer.reward.3"]] },
 ];
 
 const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.chat_bubble_style[number]> }> = [
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["niko", "fufu"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["niko", "fufu", "explorer-ai"].includes(value)) },
   { label: "menu.collectionBaxian", items: personalizationOptions.chat_bubble_style.filter(([value]) => value.startsWith("baxian-")) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
@@ -167,14 +170,15 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "polaroid"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["orbit", "papercut", "mechanical"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => value === "aurora") },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "spider-web"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "spider-web", "explorer-conan"].includes(value)) },
 ];
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
-const activityBubbleStyles = new Set<ChatBubbleStyle>(["baxian-lv", "baxian-zhongli", "baxian-he"]);
-const activityAvatarFrameStyles = new Set<PersonalizationDTO["avatar_frame_style"]>(["spider-web"]);
+const activityBubbleStyles = new Set<ChatBubbleStyle>(["baxian-lv", "baxian-zhongli", "baxian-he", "explorer-ai"]);
+const activityAvatarFrameStyles = new Set<PersonalizationDTO["avatar_frame_style"]>(["spider-web", "explorer-conan"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
 const bubbleRarityOverrides: Partial<Record<ChatBubbleStyle, GrowthRewardDTO["rarity"]>> = {
+  "explorer-ai": "rare",
   zen: "common",
   mosaic: "common",
   newspaper: "common",
@@ -566,6 +570,8 @@ export default function MenuPage() {
     rewardFor(category, assetKey)?.level ?? 1;
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string): GrowthRewardDTO["rarity"] => {
     if (category === "background" && assetKey === "starry-night") return "legendary";
+    if (category === "background" && assetKey === "explorer-duality") return "epic";
+    if (category === "frame" && assetKey === "explorer-conan") return "uncommon";
     if (category === "bubble") {
       const override = bubbleRarityOverrides[assetKey as ChatBubbleStyle];
       if (override) return override;
@@ -748,6 +754,9 @@ export default function MenuPage() {
     }
     if (params.get("section") === "bubbles" && drawerPathFromSearch(location.search).includes("chat-page")) {
       setChatPersonalizationPanel("bubble");
+    }
+    if (params.get("section") === "backgrounds" && drawerPathFromSearch(location.search).includes("chat-page")) {
+      setChatPersonalizationPanel("background");
     }
   }, [location.pathname, location.search, navigate]);
 
@@ -2458,6 +2467,7 @@ export default function MenuPage() {
               <UserProfileCard
                 avatarFrame={me?.avatar_frame_style}
                 avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+                explorerBadgeYears={me?.explorer_badge_years}
                 growthLevel={growthLevel}
                 isOnline
                 isPermanentVip={permanentVip}
@@ -2471,12 +2481,12 @@ export default function MenuPage() {
             </div>
           </div>
           <div className="profile-card-theme-list">
-            {(["default", "level-12", "vip", "spider-city"] as const).map((theme) => {
-              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : theme === "spider-city" ? !ownsInventoryResource("profile", "spider-city") : false;
+            {(["default", "level-12", "vip", "spider-city", "explorer-romance"] as const).map((theme) => {
+              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : theme === "spider-city" || theme === "explorer-romance" ? !ownsInventoryResource("profile", theme) : false;
               return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${locked ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
                 <span><i /><b /></span>
                 <strong>{t(`menu.profileCardTheme.${theme}` as TranslationKey)}</strong>
-                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : theme === "spider-city" ? "menu.activityUnlock" : "menu.levelUnlock", theme === "level-12" ? { level: 12 } : undefined) : t(theme === "level-12" ? "growth.rarity.rare" : theme === "vip" || theme === "spider-city" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
+                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : theme === "spider-city" || theme === "explorer-romance" ? "menu.activityUnlock" : "menu.levelUnlock", theme === "level-12" ? { level: 12 } : undefined) : t(theme === "explorer-romance" ? "growth.rarity.legendary" : theme === "level-12" ? "growth.rarity.rare" : theme === "vip" || theme === "spider-city" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
               </button>;
             })}
           </div>

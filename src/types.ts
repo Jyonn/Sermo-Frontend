@@ -25,6 +25,7 @@ export interface TinyUserDTO {
   growth_honor?: GrowthHonorDTO | null;
   growth_level_name?: string;
   founder_medal_years?: number[];
+  explorer_badge_years?: number[];
   user_id: number;
   name: string;
   official?: boolean;
@@ -277,10 +278,10 @@ export interface UserResourceInventoryDTO {
   acquired_at: number;
 }
 
-export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
-export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "frienden-night" | "frienden-garden" | "starry-night" | "noir-film" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "spider-web";
-export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city";
+export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing" | "explorer-ai";
+export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "frienden-night" | "frienden-garden" | "starry-night" | "noir-film" | "explorer-duality" | "custom";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "spider-web" | "explorer-conan";
+export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city" | "explorer-romance";
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
@@ -953,6 +954,12 @@ export interface ActivityMilestoneDTO {
 }
 
 export interface ActivityCampaignDTO {
+  explorer?: {
+    year: number;
+    completed_count: number;
+    themes: Array<{ key: "basic" | "security" | "apps" | "square" | "activity"; completed: boolean; checks: Array<{ key: string; completed: boolean }> }>;
+    rewards: Array<{ tier: number; resource_type: string; reward_id: string; resource_key: string; rarity: string; claimed: boolean; unlocked: boolean; claimable: boolean }>;
+  };
   presentation?: import("./lib/activityPresentation").ActivityPresentation;
   bgm?: {
     joined: boolean; style: "blue" | "pink" | null; slots: string[];

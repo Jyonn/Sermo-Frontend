@@ -14,6 +14,7 @@ interface UserProfileCardProps {
   growthLevel?: number;
   growthLevelName?: string;
   founderMedalYears?: number[];
+  explorerBadgeYears?: number[];
   growthHonor?: UserDTO["growth_honor"];
   isOnline?: boolean;
   isPermanentVip?: boolean;
@@ -33,6 +34,7 @@ export function UserProfileCard({
   growthLevel,
   growthLevelName,
   founderMedalYears,
+  explorerBadgeYears,
   growthHonor,
   isOnline,
   isPermanentVip,
@@ -79,7 +81,8 @@ export function UserProfileCard({
         {isPermanentVip && permanentVipLabel ? <span className="is-vip">{permanentVipLabel}</span> : null}
         {relationshipLabel ? <span className="is-relationship">{relationshipLabel}</span> : null}
       </div>
-      {growthHonor || founderMedalYears?.length ? <div className="user-profile-awards">
+      {growthHonor || founderMedalYears?.length || explorerBadgeYears?.length ? <div className="user-profile-awards">
+        {explorerBadgeYears?.filter((year) => year === 2026).map((year) => <div className="explorer-profile-medal" key={year}><img src="/activity/explorer-2026/badge.webp" alt="" /><span><small>{year}</small><strong>{t("explorer.reward.5")}</strong></span></div>)}
         {growthHonor ? <GrowthHonor honor={growthHonor} /> : null}
         {founderMedalYears?.map(year => <div className="founder-medal" aria-label={t("profile.founderMedal", { year })} key={year}><span className="material-symbols-outlined" aria-hidden="true">workspace_premium</span><span><small>{year}</small><strong>{t("profile.founderMedalName")}</strong></span></div>)}
       </div> : null}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { avatarResourceKey, loadAvatarSource, peekAvatarSource } from "../lib/avatarCache";
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AvatarFrameStyle } from "../types";
+import "./ExplorerPersonalization.css";
 
 interface GroupAvatarMember {
   name: string;
@@ -20,7 +21,7 @@ interface UserAvatarProps {
 }
 
 const supportedAvatarFrames = new Set<AvatarFrameStyle>([
-  "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "spider-web",
+  "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "spider-web", "explorer-conan",
 ]);
 
 function avatarLabel(name: string) {

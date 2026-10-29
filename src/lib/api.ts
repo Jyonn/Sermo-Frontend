@@ -1051,6 +1051,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
+  claimExplorerReward(key: string, tier: number) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/explorer/rewards/${tier}/claim`, { method: "POST", auth: true });
+  },
+
   getNumberDuel(key: string, matchId?: string, signal?: AbortSignal, roomCode?: string) {
     return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, query: roomCode ? { room_code: roomCode } : matchId ? { match_id: matchId } : undefined });
   },
