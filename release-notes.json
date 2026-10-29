@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.29.14",
+  "id": "2026.10.29.15",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "课题邀请气泡适配",
+      "title": "Chronelle 绑定稳定性修复",
       "items": [
-        "课题邀请卡片随聊天气泡切换配色、材质和圆角，兼顾双方消息与深浅模式"
+        "修复多个空间账户绑定同一 Chronelle 后互相影响的问题",
+        "优化续期检查，避免并发请求误提示重新绑定；各账户可见权限保持独立"
       ]
     },
     "en": {
-      "title": "Themed research invitations",
+      "title": "More reliable Chronelle bindings",
       "items": [
-        "Research invitation cards now match chat bubble colors, textures and shapes for incoming and outgoing messages"
+        "Fixed linked space accounts interfering with the same Chronelle binding",
+        "Coordinated token renewal to avoid false rebind prompts while keeping visibility settings independent"
       ]
     }
   }
