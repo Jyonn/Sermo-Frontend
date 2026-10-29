@@ -1,6 +1,8 @@
 .explorer-activity { --explorer-ink: #142d3b; --explorer-paper: #fff4d9; --explorer-gold: #e7bb64; color: var(--explorer-ink); background: var(--explorer-paper); min-height: 100%; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 .side-drawer.activity-drawer:has(.explorer-activity) { background: #0c2130; }
 .side-drawer.activity-drawer:has(.explorer-activity) > .drawer-topbar { --ink: #fff4d9; --muted: #c7d1d7; color: #fff4d9; background: transparent; border-color: transparent; }
+.side-drawer.activity-drawer:has(.explorer-activity) .drawer-topbar :is(.drawer-back-button, .activity-drawer-share) { color: #fff4d9; background: #fff4d91a; border: 1px solid #fff4d933; border-radius: 50%; }
+.side-drawer.activity-drawer:has(.explorer-activity) .drawer-topbar .material-symbols-outlined { color: #fff4d9; }
 .explorer-hero { position: relative; min-height: 390px; overflow: hidden; color: #fff4d9; background: #0d2436; }
 .explorer-hero-scene { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: 50% 68%; }
 .explorer-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #0a1c2fe8 0%, #0a1c2f55 60%, transparent), linear-gradient(0deg, #0b2338, transparent 45%); }
