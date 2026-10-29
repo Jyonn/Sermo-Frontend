@@ -20,7 +20,7 @@ export function ResearchHome({ projects, selected, open, create }: { projects: R
   </>;
 }
 
-export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean }) {
+export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit, resources }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean; resources:()=>void }) {
   const { t } = useI18n();
   const done = project.tasks.filter(item => item.status === 'archived').length;
   const active = project.tasks.filter(item => item.status !== 'archived');
@@ -31,7 +31,7 @@ export function ResearchOverview({ project, tasks, chat, calendar, members, addT
         <span className="research-member-stack-count">{project.members.length}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
       </button>
       <div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
-      <SettingGroup><SettingRow title={t('research.group')} icon={<span className="material-symbols-outlined">forum</span>} onClick={chat}/></SettingGroup>
+      <SettingGroup><SettingRow title={t('research.group')} icon={<span className="material-symbols-outlined">forum</span>} onClick={chat}/><SettingRow title={t('resources.project')} description={t('resources.projectHint')} icon={<span className="material-symbols-outlined">folder_open</span>} onClick={resources}/></SettingGroup>
     </section>
     <div className="research-overview-columns"><section className="research-overview-tasks"><header className="research-section-heading"><h2>{t('research.tasks')}</h2><span className="research-muted">{done} / {project.tasks.length}</span><button className="ghost-button" onClick={() => tasks()}>{t('research.viewAll')}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></header>
       <progress className="research-completion" value={done} max={project.tasks.length || 1} aria-label={t('research.tasks')}/>

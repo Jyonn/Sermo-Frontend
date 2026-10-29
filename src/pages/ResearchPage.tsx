@@ -16,6 +16,8 @@ import { ResearchCreateFlow, type ResearchDraft } from '../components/ResearchCr
 import { MarkdownEditorDialog } from '../components/MarkdownEditorDialog';
 import { ResearchTaskItem } from '../components/ResearchTaskItem';
 import { ResearchComments } from '../components/ResearchComments';
+import { ResearchResources } from '../components/ResearchResources';
+import { SettingRow } from '../components/SettingRow';
 import { DateRangeField } from '../components/DateRangeField';
 import { MemberPickerSheet } from '../components/MemberPickerSheet';
 import { ResearchAssigneesField } from '../components/ResearchPeople';
@@ -40,6 +42,7 @@ export default function ResearchPage() {
   const memoryKey=`research:current:${session?.user.user_id}`;
   const [list,setList]=useState<ResearchSummary[]>([]),[project,setProject]=useState<ResearchProject|null>(null),[id,setId]=useState<number|null>(()=>Number(search.get('project')||returning||localStorage.getItem(memoryKey))||null),[taskId,setTaskId]=useState<string|null>(null);
   const [chatOpen,setChatOpen]=useState(false),[onboarding,setOnboarding]=useState(!!returning||search.has('onboarding'));
+  const [resourceScope,setResourceScope]=useState<string|null>(null);
   const [panel,setPanel]=useState<'create'|'manage'|'task'|'members'|'description'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning||search.has('onboarding')?'calendar':search.has('task')?'tasks':'overview');
   const [inviteOpen,setInviteOpen]=useState(false),[memberAction,setMemberAction]=useState<number|null>(null);
   const [memberPickerAction,setMemberPickerAction]=useState<'transfer'|'remove'|null>(null);
@@ -92,17 +95,19 @@ export default function ResearchPage() {
     <FloatingDrawerScope><div className="research-project-surface">
     {listLoading||loading?<p className="research-empty" role="status">{t('common.loading')}</p>:!list.length?<ResearchHome projects={[]} open={openProject} create={()=>setPanel('create')}/>:!project?<QuietState icon="science" title={t('research.failed')}/>:<>
       <div className="research-project-navigation"><PageTabs label={t('research.project')} value={tab} onChange={setTab} items={(['overview','tasks','calendar'] as const).map(value=>({value,label:t(`research.${value}`)}))}/></div>
-      {tab==='overview'?<ResearchOverview project={project} chat={()=>setChatOpen(true)} tasks={value=>{setTaskId(value||null);setTab('tasks');}} calendar={()=>setTab('calendar')} members={()=>setPanel('members')} addTask={()=>setPanel('task')} canEdit={owner&&writable}/>:tab==='calendar'?<ResearchCalendar key={`${project.id}-${userId}`} project={project} userId={userId!} onboarding={onboarding} onOnboarded={completeOnboarding}/>:<div className={`research-task-layout ${task?'has-detail':''}`}>
+      {tab==='overview'?<ResearchOverview project={project} resources={()=>setResourceScope('')} chat={()=>setChatOpen(true)} tasks={value=>{setTaskId(value||null);setTab('tasks');}} calendar={()=>setTab('calendar')} members={()=>setPanel('members')} addTask={()=>setPanel('task')} canEdit={owner&&writable}/>:tab==='calendar'?<ResearchCalendar key={`${project.id}-${userId}`} project={project} userId={userId!} onboarding={onboarding} onOnboarded={completeOnboarding}/>:<div className={`research-task-layout ${task?'has-detail':''}`}>
         <aside><header><span className="research-muted">{project.tasks.length} {t('research.tasks')}</span>{owner&&writable&&<HeaderIconButton label={t('research.addTask')} onClick={()=>setPanel('task')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}</header>{[...project.tasks].sort((a,b)=>Number(a.status==='archived')-Number(b.status==='archived')).map(item=><ResearchTaskItem key={item.id} task={item} members={project.members} selected={taskId===item.id} onClick={()=>{setTaskId(item.id);setScope('mine');}}/>)}{!project.tasks.length&&<QuietState icon="assignment" title={t('research.noTasks')} description={t('research.taskEmptyHint')}/>}</aside>
         <article className="research-task-detail">{task?<ResearchComments key={task.id} project={project} task={task} userId={userId!} scope={scope} writable={writable&&task.status!=='archived'} busy={busy} send={async (body,reply_to)=>await mutate({action:'progress',task_id:task.id,body,reply_to})===true}>
           <header className="research-task-heading"><button className="ghost-button research-back" onClick={()=>setTaskId(null)} aria-label={t('research.back')}><span className="material-symbols-outlined">arrow_back</span></button><h1>{task.title}</h1>{owner&&writable?<SelectControl compact label={t('research.status')} disabled={busy} value={task.status} options={(['active','archived'] as const).map(value=>({value,label:t(`research.${value}`)}))} onChange={status=>mutate({action:'task_status',task_id:task.id,status}).then(()=>{})}/>:<span className={`research-status is-${task.status}`}>{t(`research.${task.status}`)}</span>}</header>
           <div className="research-task-meta"><span><span className="material-symbols-outlined" aria-hidden="true">group</span>{task.assignees.map(memberName).join(' · ')||t('research.unassigned')}</span><button type="button" className="research-task-dates" disabled={!owner||!writable||busy} aria-label={t('research.editDates')} onClick={()=>setDates({taskId:task.id,from:task.start,to:task.end||''})}><span className="material-symbols-outlined" aria-hidden="true">date_range</span>{task.start} — {task.end||t('research.openEnd')}{owner&&writable&&<span className="material-symbols-outlined" aria-hidden="true">edit</span>}</button></div><div className="research-task-body"><Markdown body={task.body}/></div>
+          <SettingRow title={t('resources.task')} icon={<span className="material-symbols-outlined">folder_open</span>} onClick={()=>setResourceScope(task.id)}/>
           <div className="research-progress-head"><h2 title={t('research.shared')}>{t('research.progress')}</h2><SelectControl compact label={t('research.progressFilter')} value={scope} onChange={setScope} options={[{value:'mine',label:t('research.mine')},{value:'all',label:t('research.all')}]}/></div>
         </ResearchComments>:<QuietState icon="assignment" title={t('research.chooseTask')} description={t('research.taskEmptyHint')}/>}</article>
       </div>}
     </>}
     </div></FloatingDrawerScope>
     <FloatingDrawerScope>
+    {resourceScope!==null&&project&&<ResearchResources key={`${project.id}-${resourceScope}`} projectId={project.id} taskId={resourceScope} title={`${resourceScope?project.tasks.find(item=>item.id===resourceScope)?.title:project.title} · ${t('resources.title')}`} onClose={()=>setResourceScope(null)}/>}
     <SideDrawer historyKey="research-manage" open={panel==='manage'} onClose={()=>setPanel(null)} title={t('research.manageProjects')} headerAction={<HeaderIconButton label={t('research.create')} onClick={()=>setPanel('create')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}><ResearchHome projects={list} selected={id} open={openProject} create={()=>setPanel('create')}/></SideDrawer>
     <SideDrawer historyKey="research-chat" className="research-chat-drawer" headerless floatingBack={false} fullscreen open={chatOpen&&!!project} onClose={()=>setChatOpen(false)} title={t('research.group')}>
       {chatOpen&&project&&<Suspense fallback={<QuietState title={t('common.loading')}/>}><EmbeddedChats embeddedChat={{id:project.chat_id,onClose:()=>setChatOpen(false)}}/></Suspense>}

@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.29.19",
+  "id": "2026.10.29.20",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "通知与提醒升级",
+      "title": "科研资源空间",
       "items": [
-        "通知按聊天、广场、投稿和科研分类，上线提醒归入聊天",
-        "广场统一沿用原好友设置，投稿可独立控制，科研任务和进度支持通知直达"
+        "课题与任务均可上传文件、添加链接，课题支持两级目录",
+        "成员共享资源，上传者与课题负责人可删除，存档后保留只读访问"
       ]
     },
     "en": {
-      "title": "Notification settings redesigned",
+      "title": "Research resource spaces",
       "items": [
-        "Organized notifications into Chat, Square, Submissions and Research, with online reminders under Chat",
-        "Unified Square preferences using previous friend settings; added independent submission controls and research task notifications"
+        "Upload files and add links to projects and tasks, with two folder levels for projects",
+        "Share resources with members; uploaders and project owners can remove them, while archived spaces stay read-only"
       ]
     }
   }

@@ -429,6 +429,8 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  researchResources(id:number,task_id:string,signal?:AbortSignal) {return request<import('./research').ResearchResourceSpace>(`/research/${id}/resources/`,{auth:true,query:{task_id},signal});},
+  researchResourceAction<T>(id:number,task_id:string,body:Record<string,unknown>) {return request<T>(`/research/${id}/resources/`,{auth:true,method:'POST',body:{...body,task_id}});},
   chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<{status:'active'|'hidden';events:unknown[];availability:'known'|'unknown'}>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
   researchList(signal?: AbortSignal) { return request<import('./research').ResearchSummary[]>('/research/', {auth:true,signal}); },
   researchCalendar(id:number,signal?:AbortSignal) { return request<import('./researchCalendar').CalendarSetup>(`/research/${id}/calendar/`,{auth:true,signal}); },
