@@ -13,3 +13,9 @@ test('drawer conversation picker receives remaining height rather than an intrin
 test('picker submit footer inherits its surrounding surface', () => {
   assert.match(read('src/components/ChatTargetPicker.css'), /\.chat-target-picker-body > \.chat-target-picker-submit\s*\{[^}]*background:transparent;/);
 });
+
+test('short landscape drawers share the sheet two-column layout', () => {
+  const css = read('src/components/ChatTargetPicker.css');
+  assert.match(css, /:is\(\.chat-target-picker-sheet,\.chat-target-picker-drawer \.drawer-body\)/);
+  assert.match(css, /\.chat-target-picker-drawer \.forward-route-switch \{ grid-template-columns:minmax\(0,1fr\); \}/);
+});

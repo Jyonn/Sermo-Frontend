@@ -24,12 +24,14 @@
   .chat-target-picker-submit > .button { min-height:40px; }
 }
 @media (min-width:600px) and (max-height:500px) {
-  .chat-target-picker-sheet > .chat-target-picker-body:has(> .chat-target-picker-preview) {
+  :is(.chat-target-picker-sheet,.chat-target-picker-drawer .drawer-body) > .chat-target-picker-body:has(> .chat-target-picker-preview) {
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     grid-template-rows:auto minmax(0,1fr) auto;
     column-gap:16px;
   }
+  .chat-target-picker-drawer .chat-target-picker-body > .card-subtitle { display:none; }
+  .chat-target-picker-drawer .forward-route-switch { grid-template-columns:minmax(0,1fr); }
   .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-preview { grid-column:1; grid-row:1 / -1; max-height:100%; }
   .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-heading { grid-column:2; grid-row:1; }
   .chat-target-picker-body:has(> .chat-target-picker-preview) > .chat-target-picker-list { grid-column:2; grid-row:2; }
