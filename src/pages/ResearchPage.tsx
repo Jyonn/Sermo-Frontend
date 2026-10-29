@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { AppChrome } from '../components/AppChrome';
 import { TabPageHeader } from '../components/TabPageHeader';
@@ -24,7 +24,10 @@ import { ResearchAssigneesField } from '../components/ResearchPeople';
 import { ResearchProjectDetails } from '../components/ResearchProjectDetails';
 import { ActionSheet } from '../components/ActionSheet';
 import { QuietState } from '../components/BoundaryState';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
+import { showToast } from '../lib/toast';
+import { authStorage } from '../lib/storage';
+import { researchCreateRestriction } from '../lib/researchCreatePermission';
 import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/language';
 import { useSpaceFeatures } from '../lib/spaceFeatures';
@@ -48,6 +51,20 @@ export default function ResearchPage() {
   const [memberPickerAction,setMemberPickerAction]=useState<'transfer'|'remove'|null>(null);
   const [listLoading,setListLoading]=useState(true),[loading,setLoading]=useState(!!id),[busy,setBusy]=useState(false),[error,setError]=useState(''),[tick,setTick]=useState(0),[confirm,setConfirm]=useState<string|null>(null);
   const userId=session?.user.user_id;
+  const checkingCreate=useRef(false);
+  async function startCreate(){
+    if(checkingCreate.current||busy)return;
+    checkingCreate.current=true;
+    try {
+      const me=await api.getUserMe();
+      const current=authStorage.get()?.user;
+      if(!current||current.user_id!==userId||current.space_id!==session?.user.space_id)return;
+      const restriction=researchCreateRestriction(me);
+      if(restriction){showToast(t(restriction.key,restriction.values),'error',4000);return;}
+      setError('');setPanel('create');
+    }catch(e){showToast(e instanceof Error?e.message:t('research.failed'),'error');}
+    finally{checkingCreate.current=false;}
+  }
   const owner=project?.members.some(m=>m.id===userId&&m.owner)===true;
   const writable=project?.status!=='archived';
   const task=project?.tasks.find(task=>task.id===taskId);
@@ -69,7 +86,14 @@ export default function ResearchPage() {
   async function createProject(body:ResearchDraft){
     if(busy)return false;setBusy(true);setError('');
     try{const created=await api.researchCreate(body);setList(old=>[created,...old]);setId(created.id);setTab('calendar');setOnboarding(true);setPanel(null);return true;}
-    catch(e){setError(e instanceof Error?e.message:t('research.failed'));return false;}
+    catch(e){
+      let message=e instanceof Error?e.message:t('research.failed');
+      if(e instanceof ApiError&&e.status===403){
+        message=t('research.createDenied');
+        try{const restriction=researchCreateRestriction(await api.getUserMe());if(restriction)message=t(restriction.key,restriction.values);}catch{/* Keep the explicit permission fallback if refresh fails. */}
+      }
+      setError(message);showToast(message,'error',4000);return false;
+    }
     finally{setBusy(false);}
   }
   async function inviteMembers(ids:number[]) {
@@ -90,10 +114,10 @@ export default function ResearchPage() {
   const memberName=(value:number)=>project?.members.find(m=>m.id===value)?.name||`#${value}`;
   const inviteCandidates=project?[...project.members.map(member=>({...member,locked:true})),...friends.filter(friend=>!project.members.some(member=>member.id===friend.user_id)).map(friend=>({id:friend.user_id,name:friend.name,avatar_uri:friend.avatar_uri,avatar_cache_key:friend.avatar_cache_key,avatar_frame_style:friend.avatar_frame_style,locked:project.pending_invitee_ids?.includes(friend.user_id),lockedLabel:t('research.invited'),description:t(friend.is_alive?'presence.online':'presence.offline')}))]:[];
   return <AppChrome title={t('research.title')} hideTopbar shellClassName="desktop-tab-shell research-workspace-shell"><section className="page-stack research-page research-direct-workspace">
-    <TabPageHeader title={t('research.title')} actions={<><HeaderIconButton label={t('research.create')} onClick={()=>{setError('');setPanel('create');}}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>{project&&<HeaderIconButton label={t('research.members')} onClick={()=>setPanel('members')}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></HeaderIconButton>}</>} secondary={id&&list.length?<div className="research-current-project"><div><strong>{project?.title||list.find(item=>item.id===id)?.title}</strong>{project&&<span className={`research-status is-${project.status}`}>{t(`research.${project.status}`)}</span>}</div><SelectControl compact label={t('research.switchProject')} triggerLabel={<><span className="material-symbols-outlined" aria-hidden="true">swap_horiz</span>{t('research.switchProject')}</>} value={String(id)} options={[...list.map(p=>({value:String(p.id),label:`${p.title} · ${t(`research.${p.status}`)}`})),{value:'manage',label:t('research.manageProjects')}]} onChange={value=>{if(value==='manage')setPanel('manage');else openProject(Number(value));}}/></div>:undefined}/>
+    <TabPageHeader title={t('research.title')} actions={<><HeaderIconButton label={t('research.create')} onClick={()=>void startCreate()}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>{project&&<HeaderIconButton label={t('research.members')} onClick={()=>setPanel('members')}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></HeaderIconButton>}</>} secondary={id&&list.length?<div className="research-current-project"><div><strong>{project?.title||list.find(item=>item.id===id)?.title}</strong>{project&&<span className={`research-status is-${project.status}`}>{t(`research.${project.status}`)}</span>}</div><SelectControl compact label={t('research.switchProject')} triggerLabel={<><span className="material-symbols-outlined" aria-hidden="true">swap_horiz</span>{t('research.switchProject')}</>} value={String(id)} options={[...list.map(p=>({value:String(p.id),label:`${p.title} · ${t(`research.${p.status}`)}`})),{value:'manage',label:t('research.manageProjects')}]} onChange={value=>{if(value==='manage')setPanel('manage');else openProject(Number(value));}}/></div>:undefined}/>
     {error&&<div className="research-error" role="alert">{error}<button type="button" className="ghost-button" onClick={()=>setTick(n=>n+1)}>{t('common.retry')}</button></div>}
     <FloatingDrawerScope><div className="research-project-surface">
-    {listLoading||loading?<p className="research-empty" role="status">{t('common.loading')}</p>:!list.length?<ResearchHome projects={[]} open={openProject} create={()=>setPanel('create')}/>:!project?<QuietState icon="science" title={t('research.failed')}/>:<>
+    {listLoading||loading?<p className="research-empty" role="status">{t('common.loading')}</p>:!list.length?<ResearchHome projects={[]} open={openProject} create={()=>void startCreate()}/>:!project?<QuietState icon="science" title={t('research.failed')}/>:<>
       <div className="research-project-navigation"><PageTabs label={t('research.project')} value={tab} onChange={setTab} items={(['overview','tasks','calendar'] as const).map(value=>({value,label:t(`research.${value}`)}))}/></div>
       {tab==='overview'?<ResearchOverview project={project} resources={()=>setResourceScope('')} chat={()=>setChatOpen(true)} tasks={value=>{setTaskId(value||null);setTab('tasks');}} calendar={()=>setTab('calendar')} members={()=>setPanel('members')} addTask={()=>setPanel('task')} canEdit={owner&&writable}/>:tab==='calendar'?<ResearchCalendar key={`${project.id}-${userId}`} project={project} userId={userId!} onboarding={onboarding} onOnboarded={completeOnboarding}/>:<div className={`research-task-layout ${task?'has-detail':''}`}>
         <aside><header><span className="research-muted">{project.tasks.length} {t('research.tasks')}</span>{owner&&writable&&<HeaderIconButton label={t('research.addTask')} onClick={()=>setPanel('task')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}</header>{[...project.tasks].sort((a,b)=>Number(a.status==='archived')-Number(b.status==='archived')).map(item=><ResearchTaskItem key={item.id} task={item} members={project.members} selected={taskId===item.id} onClick={()=>{setTaskId(item.id);setScope('mine');}}/>)}{!project.tasks.length&&<QuietState icon="assignment" title={t('research.noTasks')} description={t('research.taskEmptyHint')}/>}</aside>
@@ -108,7 +132,7 @@ export default function ResearchPage() {
     </div></FloatingDrawerScope>
     <FloatingDrawerScope>
     {resourceScope!==null&&project&&<ResearchResources key={`${project.id}-${resourceScope}`} projectId={project.id} taskId={resourceScope} title={`${resourceScope?project.tasks.find(item=>item.id===resourceScope)?.title:project.title} · ${t('resources.title')}`} onClose={()=>setResourceScope(null)}/>}
-    <SideDrawer historyKey="research-manage" open={panel==='manage'} onClose={()=>setPanel(null)} title={t('research.manageProjects')} headerAction={<HeaderIconButton label={t('research.create')} onClick={()=>setPanel('create')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}><ResearchHome projects={list} selected={id} open={openProject} create={()=>setPanel('create')}/></SideDrawer>
+    <SideDrawer historyKey="research-manage" open={panel==='manage'} onClose={()=>setPanel(null)} title={t('research.manageProjects')} headerAction={<HeaderIconButton label={t('research.create')} onClick={()=>void startCreate()}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>}><ResearchHome projects={list} selected={id} open={openProject} create={()=>void startCreate()}/></SideDrawer>
     <SideDrawer historyKey="research-chat" className="research-chat-drawer" headerless floatingBack={false} fullscreen open={chatOpen&&!!project} onClose={()=>setChatOpen(false)} title={t('research.group')}>
       {chatOpen&&project&&<Suspense fallback={<QuietState title={t('common.loading')}/>}><EmbeddedChats embeddedChat={{id:project.chat_id,onClose:()=>setChatOpen(false)}}/></Suspense>}
     </SideDrawer>

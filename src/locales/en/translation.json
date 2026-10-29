@@ -1,4 +1,8 @@
 {
+  "research.createNeedsLevel": "Creating a project requires LV {{level}}. Your current level is LV {{current}}.",
+  "research.createNeedsLevelAndVerification": "Creating a project requires LV {{level}} and a verified account. Your current level is LV {{current}}.",
+  "research.createNeedsVerification": "Verify your account before creating a project.",
+  "research.createDenied": "This account cannot create projects. Contact your space administrator.",
   "signature.title": "Signature",
   "signature.hint": "Shown below your name in private chats.",
   "signature.custom": "Custom signature",

@@ -1,4 +1,8 @@
 {
+  "research.createNeedsLevel": "新建课题需要达到 LV {{level}}，当前为 LV {{current}}。",
+  "research.createNeedsLevelAndVerification": "新建课题需要达到 LV {{level}} 并完成账户验证，当前为 LV {{current}}。",
+  "research.createNeedsVerification": "新建课题需要先完成账户验证。",
+  "research.createDenied": "当前账户没有新建课题权限，请联系空间管理员。",
   "signature.title": "个性签名",
   "signature.hint": "签名会显示在私聊昵称下方。",
   "signature.custom": "自定义签名",

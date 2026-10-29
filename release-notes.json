@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.29.23",
+  "id": "2026.10.29.24",
   "publishedAt": "2026-10-29",
   "locales": {
     "zh-CN": {
-      "title": "私聊签名与标题栏优化",
+      "title": "新建课题条件提示更清楚",
       "items": [
-        "菜单基础信息新增个性签名，支持六条预设与自定义，在私聊昵称下方展示",
-        "窄屏桌面聊天恢复头像，宽屏桌面在线状态移至昵称左侧"
+        "新建课题前会检查权限，用提示明确说明所需等级或账户验证条件"
       ]
     },
     "en": {
-      "title": "Chat signatures and clearer headers",
+      "title": "Clearer project creation requirements",
       "items": [
-        "Set a private-chat signature in Basic Info using six presets or your own text",
-        "Restored avatars in narrow desktop chats and added presence indicators beside names on wide desktops"
+        "Project creation checks permissions up front and explains required levels or account verification in a toast"
       ]
     }
   }
