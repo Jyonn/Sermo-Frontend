@@ -31,11 +31,11 @@ test('resource metadata formats files and links safely',()=>{
 test('project and task reuse library summaries, and group details use an independent settings section',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
   const overview=readFileSync(new URL('../src/components/ResearchWorkspace.tsx',import.meta.url),'utf8');
-  const chat=readFileSync(new URL('../src/pages/ChatsPage.tsx',import.meta.url),'utf8');
+  const chat=readFileSync(new URL('../src/components/ResearchChat.tsx',import.meta.url),'utf8');
   assert.match(page,/ResearchResourceSummary/);
   assert.match(overview,/research-team-bar/);
   assert.match(overview,/ResearchResourceSummary/);
   assert.match(chat,/research-chat-project-section/);
-  assert.match(chat,/if\(embeddedChat\?\.onProjectDetails\)embeddedChat.onProjectDetails\(\)/);
+  assert.match(chat,/if \(onProjectDetails\) onProjectDetails\(\)/);
   assert.match(page,/busy=\{busy\} onClose=\{\(\)=>\{setConfirm\(null\)/);
 });

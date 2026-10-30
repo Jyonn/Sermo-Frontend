@@ -71,7 +71,7 @@ import { UnsupportedContentNotice } from "../components/UnsupportedContentNotice
 import { TabPageHeader } from "../components/TabPageHeader";
 import { PageTabs } from "../components/PageTabs";
 import "../styles/submission-workspace.css";
-import "../components/ResearchInvitationCard.css";
+import { ChatInvitationSheet, ResearchChatProjectLink, ResearchInvitationCard, researchInvitationPreview } from "../components/ResearchChat";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
@@ -925,7 +925,8 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentio
 
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
-  if(message.payload?.invitation?.project)return i18n.t('research.invitation');
+  const researchPreview = researchInvitationPreview(message.payload?.invitation);
+  if (researchPreview) return researchPreview;
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
   const rawText = message.payload?.text || message.content;
   const text = kind === "text" ? chatPreviewMentionText(rawText, message.mentions ?? []) : rawText;
@@ -1774,11 +1775,7 @@ function renderMessageContent(
     if (!invitation) {
       return <span className="submission-invite-card-unavailable">{i18n.t("submission.inviteUnavailable")}</span>;
     }
-    if (invitation.project) return <button className={`message-submission-invite-card message-research-invite-card is-${invitation.status} ${groupClassName}`} type="button" onClick={event=>{event.stopPropagation();window.dispatchEvent(new CustomEvent('sermo:submission-invite',{detail:invitation}));}}>
-      <span className="message-submission-invite-heading"><span className="message-submission-invite-mark material-symbols-outlined" aria-hidden="true">science</span><span><small>{i18n.t('research.invitation')}</small><strong>{invitation.project.title}</strong></span></span>
-      <span className="message-research-invite-by">{i18n.t('submission.invitedBy',{name:invitation.inviter.name})}</span>
-      <span className="message-submission-invite-footer"><span>{i18n.t(`submission.inviteStatus.${invitation.status}`)}</span><span>{i18n.t('submission.viewInvite')}</span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
-    </button>;
+    if (invitation.project) return <ResearchInvitationCard invitation={invitation} groupClassName={groupClassName} />;
     const authorNames = invitation.submission.authors.map((user) => user.name).join(i18n.t("common.nameSeparator"));
     const reviewerNames = invitation.submission.reviewers.map((user) => user.name).join(i18n.t("common.nameSeparator"));
     return (
@@ -2839,10 +2836,6 @@ function LiveChatsPage({
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
-  const [submissionInviteBusyId, setSubmissionInviteBusyId] = useState<number | null>(null);
-  const [submissionInviteSheetOpen, setSubmissionInviteSheetOpen] = useState(false);
-  const [submissionInviteDetail, setSubmissionInviteDetail] = useState<SubmissionInviteDTO | null>(null);
-  const [submissionInviteDetailLoading, setSubmissionInviteDetailLoading] = useState(false);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
   const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
@@ -4193,50 +4186,6 @@ function LiveChatsPage({
     return () => controller.abort();
   }, [canManageSubmissionMembers, chatMemberPickerMode, chatMemberPickerOpen, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
 
-  useEffect(() => {
-    const openSubmissionInvite = (event: Event) => {
-      const invite = (event as CustomEvent<SubmissionInviteDTO>).detail;
-      if (!invite?.invite_id) return;
-      setSubmissionInviteDetail(invite);
-      setSubmissionInviteSheetOpen(true);
-      setSubmissionInviteDetailLoading(true);
-      api.getSubmissionInvite(invite.invite_id)
-        .then(setSubmissionInviteDetail)
-        .catch((error) => showToast(error instanceof ApiError ? error.message : t("submission.inviteLoadFailed"), "error"))
-        .finally(() => setSubmissionInviteDetailLoading(false));
-    };
-    window.addEventListener("sermo:submission-invite", openSubmissionInvite);
-    return () => window.removeEventListener("sermo:submission-invite", openSubmissionInvite);
-  }, [t]);
-
-  const acceptSubmissionInvite = async () => {
-    const invite = submissionInviteDetail;
-    if (!invite?.can_accept || submissionInviteBusyId !== null) return;
-    setSubmissionInviteBusyId(invite.invite_id);
-    try {
-      const result = await api.acceptSubmissionInvite(invite.invite_id);
-      setSubmissionInviteDetail(result.invitation);
-      setSubmissionInviteSheetOpen(false);
-      if (result.invitation.project) {
-        navigate(`/app/research?project=${result.invitation.project.id}&onboarding=1`);
-        return;
-      }
-      const canOpenImmediately = result.invitation.role === "author" || result.invitation.submission.status !== "draft";
-      navigate(canOpenImmediately
-        ? `/app/submissions/${result.invitation.chat_id}?view=${result.invitation.role}`
-        : `/app/submissions?view=${result.invitation.role}`);
-      showToast(t("submission.inviteApproved"), "success");
-    } catch (error) {
-      try {
-        setSubmissionInviteDetail(await api.getSubmissionInvite(invite.invite_id));
-      } catch {
-        // Keep the card context visible while showing the original acceptance error.
-      }
-      showToast(error instanceof ApiError ? error.message : t("submission.inviteReviewFailed"), "error");
-    } finally {
-      setSubmissionInviteBusyId(null);
-    }
-  };
 
   useEffect(() => {
     return;
@@ -7780,11 +7729,6 @@ function LiveChatsPage({
   }}><ComposerSvgIcon kind="plus" /></button>;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
-  function openResearchProjectDetails(){
-    if(!selectedChat)return;
-    if(embeddedChat?.onProjectDetails)embeddedChat.onProjectDetails();
-    else navigate(`/app/research?chat=${selectedChat.id}&details=1`);
-  }
   const pinnedHeaderButton = shortComposerLayout && orderedPinnedMessages.length ? <button className="chat-details-button chat-header-pinned-button" type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} title={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></button> : null;
 
   return (
@@ -8335,7 +8279,7 @@ function LiveChatsPage({
                       {selectedChat.purpose === "submission" ? (
                         <button className="ghost-button" onClick={() => setDetailsSheetOpen(true)} type="button">{t("submission.openDetails")}</button>
                       ) : selectedChat.purpose === "research" ? (
-                        <button className="ghost-button" onClick={openResearchProjectDetails} type="button">{t("research.members")}</button>
+                        <ResearchChatProjectLink chatId={selectedChat.id} navigate={navigate} onProjectDetails={embeddedChat?.onProjectDetails} />
                       ) : selectedChat.type === "group" ? (
                         <>
                           {selectedChat.isOwner ? (
@@ -8418,43 +8362,7 @@ function LiveChatsPage({
         </div>
       </BottomSheet>
 
-      <BottomSheet
-        bodyClassName="submission-invite-sheet-body"
-        className="submission-invite-sheet"
-        onClose={() => {
-          if (submissionInviteBusyId === null) setSubmissionInviteSheetOpen(false);
-        }}
-        open={submissionInviteSheetOpen}
-        title={t(submissionInviteDetail?.project ? 'research.invitation' : "submission.inviteSheetTitle")}
-      >
-        {submissionInviteDetail ? (
-          <div className={`submission-invite-sheet-content is-${submissionInviteDetail.status}`}>
-            <div className="submission-invite-sheet-title">
-              <span className="material-symbols-outlined" aria-hidden="true">outbox</span>
-              <div>
-                <small>{t("submission.invitedBy", { name: submissionInviteDetail.inviter.name })}</small>
-                <strong>{submissionInviteDetail.submission.title || t("submission.unnamed")}</strong>
-              </div>
-              <span>{t(submissionInviteDetail.project ? 'research.team' : submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</span>
-            </div>
-            <dl className="submission-invite-sheet-meta">
-              {submissionInviteDetail.project ? <div><dt>{t('research.owner')}</dt><dd>{submissionInviteDetail.inviter.name}</dd></div> : <><div><dt>{t("submission.authorsShort")}</dt><dd>{submissionInviteDetail.submission.authors.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
-              <div><dt>{t("submission.reviewersShort")}</dt><dd>{submissionInviteDetail.submission.reviewers.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
-              <div><dt>{t("submission.invitedRole")}</dt><dd>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</dd></div></>}
-              <div><dt>{t("submission.validity")}</dt><dd>{t("submission.validUntil", { date: new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "numeric", day: "numeric" }).format(submissionInviteDetail.expires_at * 1000) })}</dd></div>
-            </dl>
-            <div className={`submission-invite-sheet-status is-${submissionInviteDetail.status}`}>
-              <span className="material-symbols-outlined" aria-hidden="true">{submissionInviteDetail.status === "accepted" ? "check_circle" : submissionInviteDetail.status === "expired" ? "schedule" : submissionInviteDetail.status === "conflict" ? "info" : "history"}</span>
-              <span><strong>{t(`submission.inviteStatus.${submissionInviteDetail.status}` as TranslationKey)}</strong><small>{submissionInviteDetail.project&&['pending','accepted'].includes(submissionInviteDetail.status)?t(submissionInviteDetail.status==='accepted'?'research.joinedHint':'research.invitationHint'):t(submissionInviteDetail.status === "pending" && submissionInviteDetail.invitee.user_id !== currentUserId ? "submission.inviteStatusHint.sent" : `submission.inviteStatusHint.${submissionInviteDetail.status}` as TranslationKey)}</small></span>
-            </div>
-            {submissionInviteDetail.can_accept ? (
-              <button className="button submission-invite-confirm" disabled={submissionInviteBusyId !== null} onClick={() => void acceptSubmissionInvite()} type="button">
-                {submissionInviteBusyId !== null ? t("common.processing") : t(submissionInviteDetail.project?'research.acceptInvitation':"submission.confirmJoin")}
-              </button>
-            ) : null}
-          </div>
-        ) : submissionInviteDetailLoading ? <FeedbackState tone="loading" title={t("common.loading")} description={t("submission.inviteLoadingHint")} /> : <FeedbackState tone="error" icon="link_off" title={t("submission.inviteUnavailable")} description={t("submission.inviteUnavailableHint")} />}
-      </BottomSheet>
+      <ChatInvitationSheet currentUserId={currentUserId} />
 
       <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
         <div className="submission-review-actions">
@@ -8825,7 +8733,7 @@ function LiveChatsPage({
               </SettingGroup>
             </section> : null}
 
-            {selectedChat.purpose === "research" ? <section className="chat-detail-settings-section research-chat-project-section"><SettingGroup><SettingRow title={t('research.members')} description={t('research.projectSettingsHint')} icon={<span className="material-symbols-outlined" aria-hidden="true">science</span>} onClick={openResearchProjectDetails}/></SettingGroup></section> : null}
+            {selectedChat.purpose === "research" ? <ResearchChatProjectLink chatId={selectedChat.id} navigate={navigate} onProjectDetails={embeddedChat?.onProjectDetails} settings /> : null}
             {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
                 {selectedChat.type === "group" && selectedChat.isOwner ? (

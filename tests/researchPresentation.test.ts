@@ -14,7 +14,8 @@ test('research project panels preserve a real embedded conversation and onboardi
   const chats=source('pages/ChatsPage.tsx');
   assert.match(chats,/embedded=\{!!embeddedChat\}/);
   assert.match(chats,/if \(embeddedChat\) \{ embeddedChat.onClose\(\); return; \}/);
-  assert.match(chats,/result.invitation.project.id/);
+  assert.match(chats,/<ChatInvitationSheet currentUserId=\{currentUserId\}/);
+  assert.match(source('components/ResearchChat.tsx'), /researchInvitationDestination\(result.invitation\)/);
 });
 
 test('calendar consent is global and explicit, and empty views reuse the same component', () => {

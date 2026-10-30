@@ -67,6 +67,6 @@ test('quota error exposes a real retry callback, while loading never exposes a s
 
 test('known unavailable and loading business states no longer fall back to neutral info', () => {
   assert.match(read('src/components/UserProfilePanel.tsx'), /<FeedbackState tone="error" title=\{t\("profile.unavailable"\)/);
-  assert.match(read('src/pages/ChatsPage.tsx'), /submissionInviteDetailLoading \? <FeedbackState tone="loading"/);
+  assert.match(read('src/components/ResearchChat.tsx'), /submissionInviteDetailLoading \? <FeedbackState tone="loading"/);
   assert.match(read('src/pages/SpaceAdminDashboardPage.tsx'), /activitiesState === "error" \? <FeedbackState tone="error"/);
 });

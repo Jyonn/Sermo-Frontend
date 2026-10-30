@@ -1,3 +1,4 @@
+import { createResearchApi } from "./researchApi";
 import { mergeSessionUser } from "./sessionUser";
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
@@ -429,20 +430,11 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
-  researchResources(id:number,task_id:string,signal?:AbortSignal) {return request<import('./research').ResearchResourceSpace>(`/research/${id}/resources/`,{auth:true,query:{task_id},signal});},
-  researchResourceAction<T>(id:number,task_id:string,body:Record<string,unknown>) {return request<T>(`/research/${id}/resources/`,{auth:true,method:'POST',body:{...body,task_id}});},
+  ...createResearchApi(request),
   chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<{status:'active'|'hidden';events:unknown[];availability:'known'|'unknown'}>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
-  researchList(signal?: AbortSignal) { return request<import('./research').ResearchSummary[]>('/research/', {auth:true,signal}); },
-  researchCalendar(id:number,signal?:AbortSignal) { return request<import('./researchCalendar').CalendarSetup>(`/research/${id}/calendar/`,{auth:true,signal}); },
-  researchMeetings(id:number,signal?:AbortSignal) { return request<import('./researchCalendar').ResearchMeeting[]>(`/research/${id}/meetings/`,{auth:true,signal}); },
-  researchBookMeeting(id:number,body:Record<string,unknown>) { return request<import('./researchCalendar').ResearchMeeting>(`/research/${id}/meetings/`,{auth:true,method:'POST',body}); },
-  researchCalendarAction<T>(id:number,body:Record<string,unknown>,signal?:AbortSignal) { return request<T>(`/research/${id}/calendar/`,{auth:true,method:'POST',body,signal}); },
   chronelleAccount(action?:string,confirmed?:boolean,callback?:{code?:string;state:string;error?:string}) { return request<{status:string;authorize_url?:string;rebind_required?:boolean;permissions_review_required?:boolean}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed,...callback}}:{})}); },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},
-  researchGet(id:number, signal?:AbortSignal) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,signal}); },
-  researchCreate(body:Record<string,unknown>) { return request<import('./research').ResearchProject>('/research/',{auth:true,method:'POST',body}); },
-  researchUpdate(id:number, revision:number, body:Record<string,unknown>) { return request<import('./research').ResearchProject>(`/research/${id}/`,{auth:true,method:'POST',body:{...body,revision}}); },
   getOAuthMetadata(query: Record<string, string>) {
     return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
   },

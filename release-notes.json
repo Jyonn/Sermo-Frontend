@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.30.8",
+  "id": "2026.10.30.9",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "聊天消息处理优化",
+      "title": "科研协作维护更新",
       "items": [
-        "减少聊天消息合并时的临时内存开销，保留现有发送与同步体验"
+        "完成科研协作维护更新，项目、邀请和日历保持原有操作方式"
       ]
     },
     "en": {
-      "title": "Chat message processing improvements",
+      "title": "Research workspace maintenance",
       "items": [
-        "Reduced temporary memory use when merging chat messages while preserving sending and sync behavior"
+        "Research workspace maintenance with the same project, invitation and calendar workflows"
       ]
     }
   }
