@@ -46,7 +46,7 @@
   "explorer.check.checkin": "Check in at one place",
   "explorer.check.publish": "Publish a post or submit a contribution after launch",
   "explorer.check.complete_activity": "Collect every reward from another activity",
-  "explorer.welcomeLevel": "Welcome messages follow the existing LV6 requirement.",
+  "explorer.welcomeLevel": "Unlocks at LV6. Custom text, images, voice, files or stickers count; default messages do not.",
   "explorer.reward.1": "Conan · Pixel Detective",
   "explorer.reward.2": "Ai · Quiet Reasoning",
   "explorer.reward.3": "Conan / Shinichi · After Dark",
@@ -2105,13 +2105,11 @@
   "account.enterNicknameToDelete": "Enter your current nickname to confirm account deletion.",
   "account.deleteFailed": "Could not delete account",
   "profile.nicknameUpdated": "Nickname updated",
-  "profile.welcomeUpdated": "Welcome message updated",
   "profile.greetingUpdated": "Square greeting updated",
   "profile.nicknameUpdateFailed": "Could not update nickname",
   "profile.nicknameTooLong": "Nicknames can contain up to {{count}} characters",
   "profile.nicknameLengthHint": "Up to {{count}} characters",
   "profile.welcomeUpdateFailed": "Could not update welcome message",
-  "profile.noWelcome": "No welcome message yet",
   "common.linkCopied": "Link copied",
   "common.copyFailed": "Copy failed",
   "invite.permanent": "No expiration",
@@ -2273,7 +2271,6 @@
   "profile.avatar": "Avatar",
   "profile.nickname": "Nickname",
   "growth.unlockAtLevel": "Unlocks at Lv.{{level}}",
-  "profile.welcome": "Welcome message",
   "profile.plazaGreeting": "Square greeting",
   "profile.defaultPlazaGreeting": "Hi, nice to meet you.",
   "common.custom": "Custom",
@@ -2377,13 +2374,10 @@
   "avatar.unlockAtLevel": "Custom avatar unlocks at Lv.{{level}}",
   "avatar.setPasswordToUpload": "Set a password to upload",
   "profile.saveNickname": "Save nickname",
-  "profile.saveWelcome": "Save welcome message",
   "profile.saveGreeting": "Save greeting",
   "profile.nicknamePlaceholder": "Enter a new nickname",
-  "profile.welcomePlaceholder": "Enter a new welcome message",
   "profile.greetingPlaceholder": "Enter a square greeting",
   "profile.editNickname": "Edit nickname",
-  "profile.editWelcome": "Edit welcome message",
   "account.deleteConfirmTitle": "Delete account?",
   "account.deleteConfirmHint": "You will leave this space, and your friendships and group memberships will be removed.",
   "account.continueDelete": "Continue",
@@ -3374,6 +3368,10 @@
   ,"activity.starry.rewardClaimed": "Starry Rotation was added to your collection"
   ,"activity.starry.rewardClaimFailed": "The Collector background could not be claimed"
   ,"profile.welcomeMessages": "Welcome messages"
+  ,"profile.welcomeMessageCount_one": "{{count}} welcome message"
+  ,"profile.welcomeMessageCount": "Welcome messages: {{count}}"
+  ,"profile.welcomeMessageCount_other": "{{count}} welcome messages"
+  ,"profile.noWelcomeMessages": "No welcome messages set"
   ,"profile.welcomeAutoSend": "Sent automatically to new friends"
   ,"profile.welcomeAutoSendHint": "These messages are sent in order after your friend request is accepted"
   ,"profile.welcomeDeleteFirst": "Delete {{count}} message(s) to reach your current limit before adding more"

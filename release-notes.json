@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.17",
+  "id": "2026.10.30.18",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "冷静推理 · 气泡排版优化",
+      "title": "欢迎消息 · 探索任务修复",
       "items": [
-        "统一小哀气泡的单行高度，改善连续消息的文字对齐",
-        "调整小哀肖像大小、底部位置和文字留白"
+        "欢迎消息入口显示完整消息数量，支持文字与多媒体内容",
+        "2026 探索者按欢迎消息列表判断任务完成，默认消息不计入"
       ]
     },
     "en": {
-      "title": "Quiet Deduction · Better bubble alignment",
+      "title": "Welcome messages · Explorer task fix",
       "items": [
-        "Aligned single-line Ai bubbles for consistent spacing across consecutive messages",
-        "Refined Ai’s portrait size, bottom alignment and text spacing"
+        "Welcome settings show the full message count, including text and media",
+        "The 2026 Explorer task checks your welcome message list and excludes default messages"
       ]
     }
   }

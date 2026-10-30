@@ -38,7 +38,7 @@
   "explorer.theme.apps": "应用",
   "explorer.theme.square": "广场",
   "explorer.theme.activity": "活动",
-  "explorer.check.welcome": "修改欢迎语",
+  "explorer.check.welcome": "自定义欢迎消息",
   "explorer.check.signature": "设置个性签名",
   "explorer.check.phone": "绑定并验证手机",
   "explorer.check.email": "绑定并验证邮箱",
@@ -46,7 +46,7 @@
   "explorer.check.checkin": "至少打卡一处地点",
   "explorer.check.publish": "活动开始后发言或投稿一次",
   "explorer.check.complete_activity": "领取另一个活动的全部奖励",
-  "explorer.welcomeLevel": "欢迎语修改沿用现有 LV6 权限。",
+  "explorer.welcomeLevel": "LV6 解锁；自定义文字、图片、语音、文件或表情均可完成，默认消息不计入。",
   "explorer.reward.1": "柯南 · 像素侦探",
   "explorer.reward.2": "灰原哀 · 冷静推理",
   "explorer.reward.3": "柯南与新一 · 月下变奏",
@@ -2018,7 +2018,7 @@
   "growth.unlockVideo": "发送视频",
   "growth.unlockGroupName": "修改群名称",
   "growth.unlockAnnualNickname": "昵称每年可改",
-  "growth.unlockWelcome": "自定义欢迎语",
+  "growth.unlockWelcome": "自定义欢迎消息",
   "growth.unlockPlazaGreeting": "广场招呼",
   "growth.unlockMonthlyNickname": "昵称每月可改",
   "growth.unlockShowcase": "橱窗主题",
@@ -2097,7 +2097,7 @@
   "personalization.updateFailed": "个性化更新失败",
   "avatar.uploaded": "头像上传成功",
   "profile.nicknamePasswordRequired": "设置密码后，才能修改昵称。",
-  "profile.welcomePasswordRequired": "设置密码后，才能修改欢迎语。",
+  "profile.welcomePasswordRequired": "设置密码后，才能修改欢迎消息。",
   "profile.greetingPasswordRequired": "设置密码后，才能修改广场招呼。",
   "growth.levelRequired": "达到 Lv.{{level}} 后可使用",
   "profile.nextChange": "下次可修改：{{date}}",
@@ -2105,13 +2105,11 @@
   "account.enterNicknameToDelete": "请输入当前昵称以确认注销。",
   "account.deleteFailed": "注销账户失败",
   "profile.nicknameUpdated": "昵称已更新",
-  "profile.welcomeUpdated": "欢迎语已更新",
   "profile.greetingUpdated": "广场招呼已更新",
   "profile.nicknameUpdateFailed": "昵称更新失败",
   "profile.nicknameTooLong": "昵称最多 {{count}} 个字符",
   "profile.nicknameLengthHint": "最多 {{count}} 个字符",
-  "profile.welcomeUpdateFailed": "欢迎语更新失败",
-  "profile.noWelcome": "还没有设置欢迎语",
+  "profile.welcomeUpdateFailed": "欢迎消息更新失败",
   "common.linkCopied": "链接已复制",
   "common.copyFailed": "复制失败",
   "invite.permanent": "长期有效",
@@ -2273,7 +2271,6 @@
   "profile.avatar": "头像",
   "profile.nickname": "昵称",
   "growth.unlockAtLevel": "Lv.{{level}} 解锁",
-  "profile.welcome": "欢迎语",
   "profile.plazaGreeting": "广场招呼",
   "profile.defaultPlazaGreeting": "嗨，认识一下？",
   "common.custom": "自定义",
@@ -2377,13 +2374,10 @@
   "avatar.unlockAtLevel": "Lv.{{level}} 解锁自定义头像",
   "avatar.setPasswordToUpload": "设置密码后可上传",
   "profile.saveNickname": "保存昵称",
-  "profile.saveWelcome": "保存欢迎语",
   "profile.saveGreeting": "保存招呼",
   "profile.nicknamePlaceholder": "输入新的昵称",
-  "profile.welcomePlaceholder": "输入新的欢迎语",
   "profile.greetingPlaceholder": "输入广场招呼",
   "profile.editNickname": "修改昵称",
-  "profile.editWelcome": "修改欢迎语",
   "account.deleteConfirmTitle": "确认注销账户？",
   "account.deleteConfirmHint": "注销后，你会离开当前空间，好友关系和群聊成员关系也会被移除。",
   "account.continueDelete": "继续注销",
@@ -3374,6 +3368,10 @@
   ,"activity.starry.rewardClaimed": "星夜回旋已收入收藏"
   ,"activity.starry.rewardClaimFailed": "典藏背景暂时未能领取"
   ,"profile.welcomeMessages": "欢迎消息"
+  ,"profile.welcomeMessageCount": "{{count}} 条欢迎消息"
+  ,"profile.welcomeMessageCount_one": "{{count}} 条欢迎消息"
+  ,"profile.welcomeMessageCount_other": "{{count}} 条欢迎消息"
+  ,"profile.noWelcomeMessages": "还没有设置欢迎消息"
   ,"profile.welcomeAutoSend": "新好友会自动收到"
   ,"profile.welcomeAutoSendHint": "对方接受好友申请后，按这里的顺序发送"
   ,"profile.welcomeDeleteFirst": "当前权益需先删除 {{count}} 条，之后才能继续添加"

@@ -112,7 +112,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     if (!open) return;
     const controller = new AbortController();
     setLoading(true);
-    api.getWelcomeMessage(controller.signal)
+    api.getWelcomeMessages(controller.signal)
       .then(setState)
       .catch((error) => showToast(error instanceof ApiError ? error.message : t("profile.welcomeLoadFailed"), "error"))
       .finally(() => setLoading(false));

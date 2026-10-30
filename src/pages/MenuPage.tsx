@@ -1094,7 +1094,6 @@ export default function MenuPage() {
           verified: meInfo.verified,
           avatar_type: meInfo.avatar_type,
           avatar_uri: meInfo.avatar_uri,
-          welcome_message: meInfo.welcome_message,
           email: meInfo.email,
           phone: meInfo.phone,
           email_verified_at: meInfo.email_verified_at,
@@ -1435,7 +1434,6 @@ export default function MenuPage() {
         verified: nextMe.verified,
         avatar_type: nextMe.avatar_type,
         avatar_uri: nextMe.avatar_uri,
-        welcome_message: nextMe.welcome_message,
         email: nextMe.email,
         phone: nextMe.phone,
         email_verified_at: nextMe.email_verified_at,
@@ -1873,9 +1871,9 @@ export default function MenuPage() {
   };
 
   const welcomeSummary = useMemo(() => {
-    const value = (me?.welcome_message ?? session?.user?.welcome_message ?? "").trim();
-    return value || t("profile.noWelcome");
-  }, [me?.welcome_message, session?.user?.welcome_message]);
+    const count = me?.welcome_message_count ?? 0;
+    return count ? t("profile.welcomeMessageCount", { count }) : t("profile.noWelcomeMessages");
+  }, [me?.welcome_message_count, t]);
 
   useEffect(() => {
     if (!growthLevelsOpen) return;
@@ -2348,7 +2346,7 @@ export default function MenuPage() {
             </button> : null}
             {canEditWelcome ? <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.welcome", () => openBasicEditDialog("welcome"))} type="button">
               <div className="row-main menu-key-cell">
-                <strong>{t("profile.welcome")}</strong>
+                <strong>{t("profile.welcomeMessages")}</strong>
               </div>
               <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
               <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
@@ -3504,8 +3502,7 @@ export default function MenuPage() {
         name={session?.user.name ?? t("brand.user")}
         onClose={() => setWelcomeEditorOpen(false)}
         onSaved={(payload) => {
-          setMe((current) => current ? { ...current, welcome_message: payload.welcome_message } : current);
-          patchSessionUser({ welcome_message: payload.welcome_message });
+          setMe((current) => current ? { ...current, welcome_message_count: payload.messages.length } : current);
         }}
         open={welcomeEditorOpen}
         userId={session?.user.user_id ?? -1}

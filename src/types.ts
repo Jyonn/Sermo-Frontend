@@ -56,7 +56,6 @@ export interface UserDTO extends TinyUserDTO {
   is_alive: boolean;
   verified: boolean;
   last_heartbeat: number;
-  welcome_message?: string;
   plaza_greeting?: string;
   growth_level?: number;
   growth_level_name?: string;
@@ -211,7 +210,6 @@ export interface AccessPayload {
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
   growth_level?: number;
-  welcome_message?: string;
   email?: string | null;
   phone?: string | null;
   last_heartbeat?: number;
@@ -238,7 +236,7 @@ export interface UserMeDTO extends UserDTO {
   official?: boolean;
   language?: string;
   language_preference?: import("./lib/i18n").SupportedLanguage | "system";
-  welcome_message?: string;
+  welcome_message_count?: number;
   email?: string | null;
   phone?: string | null;
   email_unbound_at?: number | null;
@@ -1333,7 +1331,6 @@ export interface WelcomeTemplateMessageDTO {
 }
 
 export interface WelcomeTemplateDTO {
-  welcome_message: string;
   messages: WelcomeTemplateMessageDTO[];
   max_messages: number;
   can_add: boolean;

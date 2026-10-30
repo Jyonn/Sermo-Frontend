@@ -1884,7 +1884,7 @@ export const api = {
     });
   },
 
-  getWelcomeMessage(signal?: AbortSignal) {
+  getWelcomeMessages(signal?: AbortSignal) {
     return request<WelcomeTemplateDTO>("/users/me/welcome-message", {
       auth: true,
       signal,

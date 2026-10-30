@@ -16,7 +16,7 @@ test("my card uses the same full-bleed drawer composition as other profiles", ()
 });
 test("my card entry follows the basic fields in its own section", () => {
   const basic = menu.slice(menu.indexOf('<SideDrawer historyKey="basic-info"'), menu.indexOf('<MyProfileCardDrawer'));
-  assert.ok(basic.indexOf('aria-label={t("profile.myCard")}') > basic.indexOf('t("profile.welcome")'));
+  assert.ok(basic.indexOf('aria-label={t("profile.myCard")}') > basic.indexOf('t("profile.welcomeMessages")'));
 });
 test("preview relationship controls cannot mutate the current user's friendships", () => {
   for (const action of ["openChat", "sendRequest", "updateReminder", "openGroupPicker", "setRemoveConfirmOpen"]) {
