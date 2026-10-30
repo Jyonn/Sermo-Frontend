@@ -44,6 +44,7 @@ const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage")
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 const MentionMobileLabPage = lazy(() => import("./pages/MentionMobileLabPage"));
 const InteractionPatternsPage = lazy(() => import("./pages/InteractionPatternsPage"));
+const ExplorerActivityLabPage = lazy(() => import("./pages/ExplorerActivityLabPage"));
 const OAuthAuthorizePage = lazy(() => import("./pages/OAuthAuthorizePage"));
 
 function RootEntryRedirect() {
@@ -114,6 +115,7 @@ export default function App() {
         <Route path="/oauth/authorize" element={<OAuthAuthorizePage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/design/interactions" element={<InteractionPatternsPage />} />
+        <Route path="/design/explorer" element={<ExplorerActivityLabPage />} />
         <Route
           path="/design/square-composer"
           element={<Suspense fallback={<FeedbackState title="Loading design study" tone="loading" />}><SquareComposerLabPage /></Suspense>}

@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.30.10",
+  "id": "2026.10.30.11",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "聊天日历恢复显示",
+      "title": "探索者年度藏品焕新",
       "items": [
-        "聊天顶部日历与用户名片统一，支持新版 Chronelle 绑定",
-        "遵循对方日历可见权限，信息不完整时不再误报空闲"
+        "探索者活动换上月夜新主视觉，转发卡片同步使用完整横幅",
+        "五件年度藏品全面升级，可逐件查看头像框、双向气泡、变换背景与动态名片的实际效果",
+        "优化手机与深色模式展示，修复头像框装饰被裁切的问题"
       ]
     },
     "en": {
-      "title": "Chat calendar visibility restored",
+      "title": "A new look for Explorer collectibles",
       "items": [
-        "Chat headers now show calendars from current Chronelle bindings, just like profiles",
-        "Calendar visibility follows sharing permissions without reporting incomplete schedules as free"
+        "A moonlit Explorer visual now carries through the event and full-width shared cards",
+        "Discover five refreshed collectibles with real avatar, chat bubble, shifting wallpaper and animated profile previews",
+        "Improved mobile and dark-mode layouts, with complete avatar-frame ornaments"
       ]
     }
   }

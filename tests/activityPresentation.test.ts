@@ -13,6 +13,15 @@ test("unknown campaigns never inherit Baxian artwork", () => {
   assert.equal(activityPresentation({ key: "new-event" }).artwork_url, undefined);
   assert.match(activityPresentation({ key: "main-character-bgm-2026" }).title_art_url!, /title-zh/);
 });
+
+test("Explorer forwards retain the full banner even with old or missing server artwork", () => {
+  for (const activity of [{ key: "explorer-2026" }, { theme: "explorer" }, { key: "explorer-2026", presentation: { artwork_url: "/activity/explorer-2026/conan-night.webp" } }]) {
+    const visual = activityPresentation(activity);
+    assert.equal(visual.artwork_url, "/activity/explorer-2026/banner-v2.webp");
+    assert.equal(visual.title_art_url, "/activity/explorer-2026/title.webp");
+    assert.equal(visual.artwork_layout, "image");
+  }
+});
 test("custom campaign metadata allows only public image URLs", () => {
   for (const value of ["javascript:alert(1)", "//evil.test/a", "https://user:pass@example.test/a", "http://example.test/a"]) assert.equal(safeActivityImage(value), undefined);
   assert.equal(safeActivityImage("/activity/custom.png"), "/activity/custom.png");

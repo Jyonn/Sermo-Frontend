@@ -1,10 +1,10 @@
-.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan {
+.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan {
   --avatar-frame-inset: 12%;
   --avatar-frame-paint: transparent;
   overflow: visible;
   background: transparent;
 }
-.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: -13%; background: url("/activity/explorer-2026/frame.webp") center/contain no-repeat; pointer-events: none; }
+.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: -9%; background: url("/activity/explorer-2026/frame-v2.webp") center/contain no-repeat; pointer-events: none; }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
 :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
   --bubble-skin-other-bg: #f0eee4;
@@ -20,7 +20,7 @@
   --bubble-skin-border-width: 2px;
 }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding-right: 64px; min-height: 60px; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; inset: auto 1px 0 auto; width: 58px; height: 62px; background: url("/activity/explorer-2026/ai.webp") center bottom/contain no-repeat; border: 0; transform: none; pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; inset: auto 1px 0 auto; width: 58px; height: 62px; background: url("/activity/explorer-2026/ai-v2.webp") center bottom/contain no-repeat; border: 0; transform: none; pointer-events: none; }
 html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
   --bubble-skin-other-bg: #27313e;
   --bubble-skin-other-color: #f2eadd;
@@ -28,24 +28,24 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
   --bubble-skin-self-bg: #294239;
   --bubble-skin-self-color: #ecf3e4;
 }
-.field-chat_bubble_style .personalization-option.preview-explorer-ai > i { background: #e8e9da url("/activity/explorer-2026/ai.webp") right bottom/contain no-repeat; border: 2px solid #7b8696; border-radius: 7px; box-shadow: 2px 2px 0 #526175; }
+.field-chat_bubble_style .personalization-option.preview-explorer-ai > i { background: #e8e9da url("/activity/explorer-2026/ai-v2.webp") right bottom/contain no-repeat; border: 2px solid #7b8696; border-radius: 7px; box-shadow: 2px 2px 0 #526175; }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 .explorer-transform-state { opacity: 0; animation: explorer-duality 12s ease-in-out infinite; animation-play-state: paused; }
 .explorer-living-wallpaper.is-visible.is-active .explorer-transform-state { animation-play-state: running; }
-:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night.webp") center/cover no-repeat; }
-:is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night.webp") center 75%/cover no-repeat; }
+:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center/cover no-repeat; }
+:is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 75%/cover no-repeat; }
 .chat-background-explorer-duality { --chat-chrome-surface: #0e253be8; --chat-chrome-border: #c4d6e42b; --chat-chrome-text: #f3eee2; --chat-input-surface: #162f46; }
 .user-profile-panel.profile-theme-explorer-romance { --profile-page: #f5efdf; --profile-card: #fffbef; --profile-card-soft: #e9e5d9; --profile-ink: #203443; --profile-muted: #6a7680; --profile-line: #28425724; --profile-deep: #203b52; --profile-action: #a75d4f; background: var(--profile-page); color: var(--profile-ink); }
 html[data-theme="dark"] .user-profile-panel.profile-theme-explorer-romance { --profile-page: #12202d; --profile-card: #1a2b39; --profile-card-soft: #223644; --profile-ink: #fff3dd; --profile-muted: #b4c3ce; --profile-line: #bdcbd82a; --profile-deep: #e8d4ae; --profile-action: #e7ae92; }
 .user-profile-panel.profile-theme-explorer-romance .user-profile-cover,
 html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance .user-profile-cover { height: 190px; background: radial-gradient(ellipse at 85% 40%, #53616b, #182f43 65%); }
-.profile-theme-explorer-romance .user-profile-cover::before { content: ""; position: absolute; inset: -10px 0 0; width: auto; height: auto; border: 0; border-radius: 0; background: url("/activity/explorer-2026/romance.webp") right 40%/auto 112% no-repeat; opacity: 1; animation: explorer-romance-float 7s ease-in-out infinite; }
+.profile-theme-explorer-romance .user-profile-cover::before { content: ""; position: absolute; inset: -4px; width: auto; height: auto; border: 0; border-radius: 0; background: url("/activity/explorer-2026/romance-v2.webp") center 42%/cover no-repeat; opacity: 1; animation: explorer-romance-float 7s ease-in-out infinite; }
 .profile-theme-explorer-romance .user-profile-cover::after { content: ""; position: absolute; inset: -100% 0; width: auto; height: auto; border: 0; border-radius: 0; background: repeating-linear-gradient(115deg, transparent 0 40px, #d8e4ef24 41px 42px, transparent 43px 83px); animation: explorer-rain 3s linear infinite; pointer-events: none; }
 .profile-theme-explorer-romance .user-profile-social-card { background: transparent; box-shadow: none; }
 .profile-theme-explorer-romance .user-profile-avatar-wrap { background: var(--profile-page); box-shadow: 0 0 0 1px var(--profile-line); }
 .profile-theme-explorer-romance .user-profile-copy h2 { color: var(--profile-ink); }.profile-theme-explorer-romance .user-profile-copy p { color: var(--profile-muted); }
 .profile-theme-explorer-romance .user-profile-recent-statement { background: var(--profile-card); border-color: var(--profile-line); color: var(--profile-ink); }
-:is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("/activity/explorer-2026/romance.webp") right center/cover no-repeat; }
+:is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("/activity/explorer-2026/romance-v2.webp") right center/cover no-repeat; }
 .profile-card-theme-option.theme-explorer-romance > span::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 20px, #d8e4ef30 21px 22px, transparent 23px 43px); animation: explorer-rain 3s linear infinite; }
 .explorer-profile-medal { display: flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px; border-radius: 12px; border: 1px solid #b89a5d45; background: #b89a5d0c; }
 .explorer-profile-medal img { width: 58px; height: 58px; object-fit: contain; }.explorer-profile-medal span { display: grid; gap: 3px; }.explorer-profile-medal small { color: var(--muted); font-size: 10px; }.explorer-profile-medal strong { font-size: 12px; }

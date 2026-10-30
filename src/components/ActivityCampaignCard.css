@@ -37,3 +37,9 @@ html[data-theme="dark"] body .side-drawer.activity-drawer.activity-transparent-h
 .activity-drawer.activity-transparent-header .drawer-back-button { flex-basis:44px; width:44px; height:44px; border:1px solid rgba(255,255,255,.78); background:rgba(170,226,198,.72); color:#204d3d; box-shadow:inset 0 1px 0 rgba(255,255,255,.24); }
 .activity-transparent-header .drawer-back-button .material-symbols-outlined { font-size:26px; }
 html[data-theme="dark"] .activity-drawer.activity-transparent-header .drawer-back-button { border-color:rgba(183,234,207,.4); background:rgba(102,178,140,.25); color:#dbf6e8; }
+.campaign-card.campaign-card.is-explorer { border-color:#c4a06166; color:#f7e9cc; background:#0b2036; }
+.campaign-card.is-explorer::before { content:""; position:absolute; z-index:-1; inset:0; background:linear-gradient(90deg,#071a32e0,#071a3240 68%,transparent),linear-gradient(0deg,#071a3277,transparent 70%); }
+.campaign-card.is-explorer .campaign-card-object.is-image { z-index:-2; inset:0; width:100%; height:100%; aspect-ratio:auto; background-size:cover; background-position:center 65%; }
+.campaign-card.is-explorer .campaign-card-copy { width:61%; }
+.campaign-card.is-explorer .campaign-card-copy > span { color:#e1d5bf; }
+.campaign-card.is-explorer .campaign-card-arrow { color:#efd39d; }

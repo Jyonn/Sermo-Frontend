@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { explorerRewardPath, explorerTaskPath } from "../src/lib/explorer.ts";
+import { EXPLORER_ART, explorerRewardArt, explorerRewardPath, explorerRewardThumbnail, explorerTaskPath } from "../src/lib/explorer.ts";
 
 test("all reward destinations use existing menu drawers", () => {
   assert.equal(explorerRewardPath(1), "/app/menu?panel=personalization/avatar-frames");
@@ -28,4 +28,30 @@ test("Explorer bubbles use the shared skin contract for both senders", () => {
   assert.ok(css.includes(".is-forward-bundle"));
   assert.ok(css.includes("@keyframes explorer-duality"));
   assert.ok(css.includes("prefers-reduced-motion: reduce"));
+});
+
+test("all five collectibles resolve to shipped final art and preserve the matched background pair", () => {
+  assert.equal(new Set([1, 2, 3, 4, 5].map(explorerRewardArt)).size, 5);
+  for (const tier of [1, 2, 3, 4, 5]) {
+    const thumbnail = readFileSync(new URL(`../public${explorerRewardThumbnail(tier)}`, import.meta.url));
+    assert.ok(thumbnail.length < 15_000, `tier ${tier} thumbnail exceeds the mobile budget`);
+  }
+  for (const asset of Object.values(EXPLORER_ART)) {
+    const bytes = readFileSync(new URL(`../public${asset}`, import.meta.url));
+    assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
+    assert.ok(bytes.length < 500_000, `${asset} exceeds the mobile asset budget`);
+  }
+  const scene = readFileSync(new URL("../src/components/FriendenLivingWallpaper.tsx", import.meta.url), "utf8");
+  assert.ok(scene.includes(EXPLORER_ART.background));
+  assert.ok(scene.includes(EXPLORER_ART.backgroundAlternate));
+});
+
+test("avatar frames stay outside the shared clip and gallery previews use real wearable components", () => {
+  const css = readFileSync(new URL("../src/components/ExplorerPersonalization.css", import.meta.url), "utf8");
+  assert.match(css, /\.user-avatar\.has-avatar-frame > \.avatar-frame-clip\.avatar-frame-explorer-conan \{[^}]*overflow: visible;/);
+  const gallery = readFileSync(new URL("../src/components/ExplorerRewardGallery.tsx", import.meta.url), "utf8");
+  assert.match(gallery, /<UserAvatar className="explorer-avatar-preview" frame="explorer-conan"/);
+  assert.match(gallery, /<FriendenLivingWallpaper theme="explorer-duality"/);
+  assert.match(gallery, /<UserProfileCard/);
+  assert.match(gallery, /aria-pressed=\{item.tier === reward.tier\}/);
 });

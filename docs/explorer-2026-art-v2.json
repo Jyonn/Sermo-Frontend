@@ -1,0 +1,43 @@
+{
+  "mode": "built-in image_gen",
+  "delivery": "WebP quality 88; transparent alpha preserved for frame, bubble ornament and medal",
+  "thumbnail_paths": [
+    "public/activity/explorer-2026/frame-thumb-v2.webp",
+    "public/activity/explorer-2026/ai-thumb-v2.webp",
+    "public/activity/explorer-2026/conan-night-thumb-v2.webp",
+    "public/activity/explorer-2026/romance-thumb-v2.webp",
+    "public/activity/explorer-2026/badge-thumb-v2.webp"
+  ],
+  "assets": [
+    {
+      "path": "public/activity/explorer-2026/banner-v2.webp",
+      "prompt": "Use case: stylized-concept\nAsset type: premium mobile social-app annual event panoramic banner, landscape 3:2 composition.\nPrimary request: Create the key visual for a 2026 detective exploration collectible event, starring Detective Conan (Conan Edogawa). Handcrafted premium 16-bit pixel art with crisp deliberate pixels, cinematic atmospheric depth. Moonlit Japanese city rooftops, deep ink navy, warm amber windows, subtle antique brass detective details. Conan with blue jacket, red bow tie and glasses stands confidently on the lower right rooftop, magnifying glass catching a small warm glint; huge moon behind clouds high right. An understated gold route line and a few investigation clues connect rooftops, no clutter. Left 50 percent and top-left are calm dark blue sky reserved for separately placed typography. Rich balanced scene, legible at a small banner size. Full bleed background, no text, no letters, no UI, no logo, no frame, no watermark. Art must extend to all four edges."
+    },
+    {
+      "path": "public/activity/explorer-2026/frame-v2.webp",
+      "prompt": "Use case: stylized-concept\nAsset type: final equippable avatar-frame game collectible, square transparent PNG.\nPrimary request: Refined Detective Conan pixel-art avatar frame. Complete continuous rounded-square midnight navy and antique brass frame with all four sides intact, consistent balanced border thickness, central opening must be fully transparent and occupy 64 percent of width and height. Conan chibi face and small red bow tie at bottom-right, small magnifying glass at upper-left, subtle film perforations and four tiny stars in border. Premium 16-bit pixel craft, precise clean silhouettes, visually symmetrical opening. Center hole and exterior background truly transparent; no portrait, no display pedestal, no text, no backdrop, no checkerboard. Keep ornament compact within square canvas; frame opening centered."
+    },
+    {
+      "path": "public/activity/explorer-2026/ai-v2.webp",
+      "prompt": "Use case: stylized-concept\nAsset type: transparent ornament for an equippable chat bubble.\nPrimary request: Premium 16-bit pixel art chibi Ai Haibara from Detective Conan, short auburn bob hair, calm intelligent expression, pale lilac coat. She sits sideways on a tiny closed detective notebook, holding a small magnifying glass, legs and shoes fully visible. Compact full-body figure angled gently toward the left to look toward nearby chat text. Beautiful precise readable pixel face and hair, muted plum, cream, ink navy with a tiny brass glint. One isolated character, no speech bubble, no lettering, no background, no ground plane, no watermark. True transparent background. Use most of the canvas without cropped edges."
+    },
+    {
+      "path": "public/activity/explorer-2026/badge-v2.webp",
+      "prompt": "Use case: stylized-concept\nAsset type: transparent final annual collectible enamel medal.\nPrimary request: A complete beautifully crafted 16-bit pixel-art Detective Boys annual medal for a social app. Circular antique gold and deep navy enamel medallion with five recognizable small chibi Detective Conan children arranged as a coherent group: Conan with glasses and red bow tie in front center, Ai Haibara with short auburn hair, Ayumi, Mitsuhiko, Genta behind. Five-point compass star behind them, fine laurel and navy ribbon below. Exact only text on ribbon: \"2026\". Precious collectible feel, warm metal highlights, deliberate crisp pixel-grid edges, clear at 80px. Full round medal visible, no cropping, exterior truly transparent, no backdrop, no pedestal, no extra text, no watermark."
+    },
+    {
+      "path": "public/activity/explorer-2026/conan-night-v2.webp",
+      "reference": "banner generation",
+      "prompt": "Use case: stylized-concept. Asset type: final portrait 2:3 equippable mobile chat wallpaper, premium pixel art. Reference image: the provided rooftop illustration defines the exact blue-gold palette and crisp pixel craft. Create a tall wallpaper scene extending this world. Calm deep midnight navy starry sky fills upper 60 percent for legible chat messages, moon and thin soft clouds at upper right. Dense blue rooftop city and warm amber windows in bottom 35 percent. Small full-body Conan Edogawa, blue jacket, glasses, red bow tie, standing on bottom-right roof with a golden magnifying glass; character must occupy only lower quarter of image, not a giant portrait. Cinematic nocturnal light, fine pixel stars, subtle brass route clues, coherent perspective. No text, no UI, no border, no letters. Full bleed portrait composition. This is one frame of a matched scene crossfade; keep fixed moon and roof layout."
+    },
+    {
+      "path": "public/activity/explorer-2026/romance-v2.webp",
+      "prompt": "Use case: stylized-concept. Asset type: final premium animated-profile cover background for a Detective Conan collectible. Landscape 3:2, full bleed illustrated scene, no UI or text. High-quality handcrafted 16-bit pixel illustration. Shinichi Kudo and Ran Mouri share a deep blue umbrella on a moonlit rainy Japanese street, both complete upper bodies with natural charming recognizable faces, lovingly rendered. They stand together in the right third, slightly turned toward each other, Shinichi in navy jacket, Ran with long dark hair and pale cream cardigan. Warm amber lamplight and rain reflections, deep ink navy sky and muted dusty rose accents. Left 45 percent is atmospheric rainy town street with subtle bokeh pixels and large calm dark space, allowing a user name/avatar to overlap below. Restrained warm romance, strong silhouette, pixel-perfect craft, beautiful readable composition. Extend the artwork to every edge, no standalone sticker, no border, no extra characters, no watermark. Preserve clean subject faces and understated colors suitable for a social-app profile."
+    },
+    {
+      "path": "public/activity/explorer-2026/shinichi-night-v2.webp",
+      "reference": "conan-night-v2 generation",
+      "prompt": "Use case: precise-object-edit. Edit target is the provided portrait pixel-art rooftop wallpaper. Create its second crossfade frame by changing ONLY the small Conan at bottom-right into Shinichi Kudo, a slim teenage detective with dark hair and blue suit, standing on that exact rooftop. Keep the camera and every background pixel unchanged: same tall 2:3 canvas, moon, clouds, navy sky, city, glowing windows, roof tiles, cat and golden clue line. Preserve upper 60% calm sky for chat messages. Shinichi remains entirely in the lower-right quarter with a small golden magnifying glass. Crisp premium 16-bit pixel art. No text or UI, no new objects, no watermark."
+    }
+  ]
+}

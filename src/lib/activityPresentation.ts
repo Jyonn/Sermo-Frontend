@@ -1,3 +1,5 @@
+import { EXPLORER_ART } from "./explorer.ts";
+
 export interface ActivityPresentation {
   palette?: "sage" | "rose" | "ocean" | "gold";
   artwork_url?: string;
@@ -17,11 +19,12 @@ export function safeActivityImage(value: unknown): string | undefined {
 export function activityPresentation(activity?: { key?: string; theme?: string; presentation?: ActivityPresentation } | null): ActivityPresentation {
   const bgm = activity?.theme === "bgm" || activity?.key === "main-character-bgm-2026";
   const duel = activity?.theme === "number_duel" || activity?.key === "number-duel-2026";
+  const explorer = activity?.theme === "explorer" || activity?.key === "explorer-2026";
   const custom = activity?.presentation;
   return {
-    palette: ["sage", "rose", "ocean", "gold"].includes(custom?.palette ?? "") ? custom!.palette : "sage",
+    palette: ["sage", "rose", "ocean", "gold"].includes(custom?.palette ?? "") ? custom!.palette : explorer ? "ocean" : "sage",
     artwork_layout: custom?.artwork_layout === "keychain-sheet" || (!custom?.artwork_url && bgm) ? "keychain-sheet" : "image",
-    artwork_url: safeActivityImage(custom?.artwork_url) ?? (bgm ? "/activity/bgm/keychains-v1.png" : undefined),
-    title_art_url: safeActivityImage(custom?.title_art_url) ?? (bgm ? "/activity/bgm/title-zh-v1.png" : duel ? "/activity/number-duel/title-zh-v1.webp" : undefined),
+    artwork_url: explorer ? EXPLORER_ART.banner : safeActivityImage(custom?.artwork_url) ?? (bgm ? "/activity/bgm/keychains-v1.png" : undefined),
+    title_art_url: safeActivityImage(custom?.title_art_url) ?? (explorer ? EXPLORER_ART.title : bgm ? "/activity/bgm/title-zh-v1.png" : duel ? "/activity/number-duel/title-zh-v1.webp" : undefined),
   };
 }
