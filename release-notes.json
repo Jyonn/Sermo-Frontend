@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.30.7",
+  "id": "2026.10.30.8",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "2026 探索者开启",
+      "title": "聊天消息处理优化",
       "items": [
-        "探索基础、安全、应用、广场和活动五个主题，逐步领取五件年度奖励",
-        "新增像素侦探主题头像框、气泡、变换背景、动态名片与年度徽章，活动至 12 月 31 日"
+        "减少聊天消息合并时的临时内存开销，保留现有发送与同步体验"
       ]
     },
     "en": {
-      "title": "Meet the 2026 Explorer",
+      "title": "Chat message processing improvements",
       "items": [
-        "Explore five themes and manually collect five annual rewards as you progress",
-        "Discover pixel-detective frames, bubbles, a shifting background, an animated profile and an annual medal through December 31"
+        "Reduced temporary memory use when merging chat messages while preserving sending and sync behavior"
       ]
     }
   }

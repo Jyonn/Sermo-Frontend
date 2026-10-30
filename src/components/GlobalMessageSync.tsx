@@ -3,7 +3,7 @@ import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
-import { normalizeStableResourceUri } from "../lib/stableResource";
+import { preserveStableMediaUri } from "../lib/chatMessageReconciliation";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
 import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
@@ -70,36 +70,6 @@ function formatPresence(user: UserDTO | null) {
 
 function sortMessages(items: ChatMessage[]) {
   return [...items].sort((left, right) => Number(left.id) - Number(right.id));
-}
-
-function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
-  if (!existing) return incoming;
-  const reconciled = {
-    ...incoming,
-    clientId: existing.clientId,
-    localPreviewUri: existing.localPreviewUri,
-    isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
-    chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
-    avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
-    submissionRound: incoming.submissionRound ?? existing.submissionRound,
-    submissionVisible: incoming.submissionVisible ?? existing.submissionVisible,
-  };
-  if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
-  if (existing.kind !== incoming.kind) return reconciled;
-  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio" || existing.kind === "file")) return reconciled;
-
-  const existingResource = normalizeStableResourceUri(existing.payload.uri);
-  const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
-  if (!existingResource || existingResource !== incomingResource) return reconciled;
-  if (existing.payload.uri === incoming.payload.uri) return reconciled;
-
-  return {
-    ...reconciled,
-    payload: {
-      ...incoming.payload,
-      uri: existing.payload.uri,
-    },
-  };
 }
 
 function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
