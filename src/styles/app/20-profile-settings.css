@@ -1167,6 +1167,9 @@ html[data-theme="dark"] .user-profile-panel {
 
 .account-switch-list {
   padding-bottom: env(safe-area-inset-bottom);
+  max-height: min(60dvh, 520px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .list-screen,

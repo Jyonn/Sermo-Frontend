@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { activityBannerStops as computeActivityBannerStops } from "../lib/activityBannerStops";
 import { AppChrome } from "../components/AppChrome";
 import { CommentThread } from "../components/CommentThread";
 import { CommentComposer } from "../components/CommentComposer";
@@ -696,6 +697,7 @@ export default function SquarePage() {
   const [vipCampaignOpen, setVipCampaignOpen] = useState(false);
   const [vipClaiming, setVipClaiming] = useState(false);
   const [activityBannerSlide, setActivityBannerSlide] = useState(0);
+  const [activityBannerStops, setActivityBannerStops] = useState<number[]>([0]);
   const activityBannerTrackRef = useRef<HTMLElement>(null);
   const [activityClaiming, setActivityClaiming] = useState(false);
   const [personalRewardClaiming, setPersonalRewardClaiming] = useState(false);
@@ -838,18 +840,32 @@ export default function SquarePage() {
   const activityBannerCount = Math.min(1, regularActivities.length) + (explorerActivity ? 1 : 0) + (spiderManActivity ? 1 : 0) + (starryNightActivity ? 1 : 0) + (bgmActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
 
   useEffect(() => {
-    if (hasFeedFilters || activityBannerCount < 2 || feedMode !== "all") return;
+    const track = activityBannerTrackRef.current;
+    if (!track) return;
+    const sync = () => {
+      const offsets = Array.from(track.children, (slide) => (slide as HTMLElement).offsetLeft - track.offsetLeft);
+      const stops = computeActivityBannerStops(track.clientWidth, track.scrollWidth, offsets);
+      setActivityBannerStops(stops.length ? stops : [0]);
+      setActivityBannerSlide((current) => Math.min(current, Math.max(0, stops.length - 1)));
+    };
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [activityBannerCount, feedMode, hasFeedFilters]);
+
+  useEffect(() => {
+    if (hasFeedFilters || activityBannerStops.length < 2 || feedMode !== "all") return;
     const timer = window.setInterval(() => {
       if (document.hidden) return;
       const track = activityBannerTrackRef.current;
       if (!track) return;
-      const slides = Array.from(track.children) as HTMLElement[];
-      const next = (activityBannerSlide + 1) % slides.length;
-      track.scrollTo({ behavior: "smooth", left: slides[next].offsetLeft - track.offsetLeft });
+      const next = (activityBannerSlide + 1) % activityBannerStops.length;
+      track.scrollTo({ behavior: "smooth", left: activityBannerStops[next] });
       setActivityBannerSlide(next);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [activityBannerCount, activityBannerSlide, feedMode, hasFeedFilters]);
+  }, [activityBannerStops, activityBannerSlide, feedMode, hasFeedFilters]);
 
   const claimPermanentVip = async () => {
     if (!vipCampaign?.eligible || vipClaiming) return;
@@ -2199,8 +2215,7 @@ export default function SquarePage() {
           </div> : null}
           {!hasFeedFilters && feedMode === "all" && activityBannerCount ? <div className="square-activity-carousel"><section className="square-activity-rail" aria-label={t("activity.active")} onScroll={(event) => {
             const track = event.currentTarget;
-            const slides = Array.from(track.children) as HTMLElement[];
-            const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
+            const nearest = activityBannerStops.reduce((best, offset, index) => Math.abs(offset - track.scrollLeft) < Math.abs(activityBannerStops[best] - track.scrollLeft) ? index : best, 0);
             setActivityBannerSlide(nearest);
           }} ref={activityBannerTrackRef}>
             {bgmActivity ? <BgmBanner activity={bgmActivity} onClick={() => navigate(`/app/square/activities/${bgmActivity.key}`)} /> : null}
@@ -2270,10 +2285,9 @@ export default function SquarePage() {
                 <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
               </button>;
             })}
-          </section>{activityBannerCount > 1 ? <div className="square-activity-pagination" aria-label={t("activity.active")}>{Array.from({ length: activityBannerCount }, (_, index) => <button aria-current={activityBannerSlide === index ? "true" : undefined} className={activityBannerSlide === index ? "is-active" : ""} key={index} onClick={() => {
+          </section>{activityBannerStops.length > 1 ? <div className="square-activity-pagination" aria-label={t("activity.active")}>{activityBannerStops.map((offset, index) => <button aria-label={`${t("activity.active")} ${index + 1}`} aria-current={activityBannerSlide === index ? "true" : undefined} className={activityBannerSlide === index ? "is-active" : ""} key={index} onClick={() => {
             const track = activityBannerTrackRef.current;
-            const slide = track?.children[index] as HTMLElement | undefined;
-            if (track && slide) track.scrollTo({ behavior: "smooth", left: slide.offsetLeft - track.offsetLeft });
+            track?.scrollTo({ behavior: "smooth", left: offset });
           }} type="button" />)}</div> : null}</div> : null}
           {!hasFeedFilters && feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">

@@ -6,7 +6,9 @@ import JoinSpacePage from "./JoinSpacePage";
 import "./PwaAccountEntryPage.css";
 import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
-import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccounts, setDefaultPwaAccountKey } from "../lib/pwaAccounts";
+import { activatePwaCachedAccount, getDefaultPwaAccountKey, listPwaCachedAccounts, refreshPwaCachedAccounts, setDefaultPwaAccountKey } from "../lib/pwaAccounts";
+import { pwaLaunchAccount } from "../lib/pwaLaunch";
+import { ContentLoader } from "../components/BoundaryState";
 import { listRecentSpaces, rememberRecentSpace } from "../lib/recentSpaces";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 import { isOAuthLoginPending, completeOAuthLogin, readOAuthRequest, oauthReturnForAccount } from "../lib/oauthPending";
@@ -32,12 +34,20 @@ export default function PwaAccountEntryPage() {
   const [spaceSlug, setSpaceSlug] = useState("");
   const [launching, setLaunching] = useState(false);
   const [loginBusy, setLoginBusy] = useState(false);
-  const [otherLoginOpen, setOtherLoginOpen] = useState(accounts.length === 0);
+  const [otherLoginOpen, setOtherLoginOpen] = useState(accounts.length === 0 || new URLSearchParams(window.location.search).get("choose") === "1");
   const activeSpace = spaces.find((space) => space.slug === activeSpaceSlug) ?? null;
 
   useEffect(() => {
     const controller = new AbortController();
-    void refreshPwaCachedAccounts(controller.signal).then(setAccounts).catch(() => undefined);
+    const autoAccount = pwaLaunchAccount(accounts, window.location.search, getDefaultPwaAccountKey(), isOAuthLoginPending());
+    if (autoAccount) setLaunching(true);
+    void refreshPwaCachedAccounts(controller.signal).then((refreshed) => {
+      if (controller.signal.aborted) return;
+      setAccounts(refreshed);
+      const account = autoAccount && refreshed.find(({ key }) => key === autoAccount.key);
+      if (account) openAccount(account);
+      else setLaunching(false);
+    }).catch(() => { if (!controller.signal.aborted) setLaunching(false); });
     void Promise.allSettled(spaces.map(async (space) => {
       const detail = await api.getSpaceBySlug(space.slug, controller.signal);
       rememberRecentSpace(detail);
@@ -113,6 +123,7 @@ export default function PwaAccountEntryPage() {
 
         <div className={`pwa-account-entry-content${activeSpace && otherLoginOpen ? " is-login-open" : ""}`}>
         <div className="pwa-account-entry-scroll">
+          {launching ? <div role="status"><ContentLoader label={t("account.switching")} rows={1} /></div> : null}
           {accounts.length ? activeSpace ? (
             <div className="pwa-account-rail" role="list" aria-label={t("pwa.cachedAccounts")}>
               {activeSpace.accounts.map((account) => (

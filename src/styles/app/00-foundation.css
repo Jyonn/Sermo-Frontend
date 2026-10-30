@@ -7684,6 +7684,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-context-more.is-open {
+  padding-top: 4px;
   grid-template-rows: 1fr;
   opacity: 1;
   visibility: visible;
@@ -7692,7 +7693,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-context-menu.above .message-context-actions.is-secondary {
-  margin: 0 0 8px;
+  margin: 0;
   padding: 0;
   border: 0;
 }
@@ -7728,12 +7729,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-context-actions.is-secondary {
-  margin-top: 8px;
+  margin: 0;
   padding-top: 0;
   border: 0;
   width: fit-content;
   max-width: calc(100vw - 42px);
 }
+
+.message-context-menu.above .message-context-more.is-open { padding: 0 0 4px; transform: none; }
 
 .message-context-button .material-symbols-outlined {
   font-size: 1.12rem;

@@ -44,6 +44,7 @@ export function rememberPwaAccountSession(session: AuthSession, slug: string) {
     { key, slug, session, lastVisitedAt: Date.now() },
     ...readAccountVault().filter((account) => account.key !== key),
   ]);
+  setDefaultPwaAccountKey(key);
 }
 
 export function forgetPwaAccountSession(session: AuthSession | null, slug: string) {
@@ -111,7 +112,15 @@ async function performAccountRefresh(): Promise<PwaCachedAccount[]> {
       const session = await refreshDetachedAuthSession(account.session);
       return { ...account, key: `${account.slug}:${session.user.user_id}`, session };
     } catch (error) {
-      return error instanceof ApiError && error.status === 401 ? null : account;
+      if (error instanceof ApiError && error.status === 401) {
+        const storageKey = `${AUTH_STORAGE_PREFIX}${account.slug}`;
+        try {
+          const scoped = JSON.parse(window.localStorage.getItem(storageKey) || "null") as AuthSession | null;
+          if (scoped?.refreshToken === account.session.refreshToken) window.localStorage.removeItem(storageKey);
+        } catch { /* Leave malformed scoped storage to the regular login flow. */ }
+        return null;
+      }
+      return account;
     }
   }));
 

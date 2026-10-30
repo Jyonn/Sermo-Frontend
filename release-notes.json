@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.30.29",
+  "id": "2026.10.30.30",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "探索者外观 · 小哀表情",
+      "title": "菜单、账号与活动展示优化",
       "items": [
-        "修正右侧小哀表情与首行文字的垂直对齐，普通和引用气泡保持一致",
-        "带表情的首条气泡不再显示 APTX 药丸，后续气泡保留药丸装饰"
+        "长按菜单边距更均衡，活动横幅限制高度并在宽屏并排展示",
+        "切换账号先选空间，多身份再选择；加载时提供反馈",
+        "新增登录其他账号入口，WebApp 启动自动恢复上次使用的账号"
       ]
     },
     "en": {
-      "title": "Explorer styles · Ai expressions",
+      "title": "Menu, account and activity improvements",
       "items": [
-        "Right-side Ai expressions align with the first text line in both regular and reply bubbles",
-        "First bubbles with expressions no longer show an APTX capsule; later bubbles keep the capsule accent"
+        "Balanced message menu spacing and height-limited activity banners that sit side by side on wide screens",
+        "Choose a space first when switching accounts, then an identity if needed, with loading feedback",
+        "A separate sign-in entry and automatic restoration of the last account on WebApp launch"
       ]
     }
   }

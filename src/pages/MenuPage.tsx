@@ -13,6 +13,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { AccountSwitchList } from "../components/AccountSwitchList";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -811,6 +812,7 @@ export default function MenuPage() {
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
+    if (switchingUserId !== null) return;
     setSwitchingUserId(account.user.user_id);
     try {
       const payload = await api.createAccountSwitchTicket(account.user.user_id);
@@ -2191,6 +2193,14 @@ export default function MenuPage() {
 
         <section className="list-section">
           <div className="simple-list">
+            <button className="simple-row menu-link-row" onClick={() => window.location.assign(new URL("/pwa?choose=1", window.location.origin).toString())} type="button">
+              <div className="row-main"><strong>{t("pwa.otherAccount")}</strong></div>
+              <span className="material-symbols-outlined">person_add</span>
+            </button>
+          </div>
+        </section>
+        <section className="list-section">
+          <div className="simple-list">
             <button className="simple-row menu-link-row danger-row menu-danger-row" onClick={() => setLeaveConfirmOpen(true)} type="button">
               <div className="row-main">
                 <strong>{t("auth.logout")}</strong>
@@ -2943,36 +2953,7 @@ export default function MenuPage() {
           setAccountSwitcherOpen(false);
         }}
       >
-        <div className="simple-list account-switch-list">
-          {accountSwitcherLoading ? (
-            <ContentLoader label={t("account.finding")} rows={3} />
-          ) : switchAccounts.length ? (
-            switchAccounts.map((account) => (
-              <button
-                key={`${account.space.space_id}-${account.user.user_id}`}
-                className="simple-row person-row"
-                disabled={switchingUserId !== null}
-                onClick={() => void switchAccount(account)}
-                type="button"
-              >
-                <UserAvatar className="mini-avatar" name={account.user.name} uri={account.user.avatar_uri} />
-                <div className="row-main">
-                  <strong>{account.user.name}</strong>
-                  <div className="row-subtle">
-                    {account.space.name}{account.user.official ? t("account.adminSuffix") : ""}
-                  </div>
-                </div>
-                {switchingUserId === account.user.user_id ? (
-                  <HeaderSyncIndicator syncing />
-                ) : (
-                  <span className="material-symbols-outlined">chevron_right</span>
-                )}
-              </button>
-            ))
-          ) : (
-            <QuietState icon="switch_account" title={t("account.noSwitchable")} description={t("account.privateHidden")} />
-          )}
-        </div>
+        <AccountSwitchList key={String(accountSwitcherOpen)} accounts={switchAccounts} loading={accountSwitcherLoading} switchingUserId={switchingUserId} onSelect={(account) => void switchAccount(account)} />
       </BottomSheet>
 
       <SignatureSettings key={`${session?.user.space_id}:${currentUserId}`} open={signatureOpen} onOpen={()=>setSignatureOpen(true)} value={me?.signature??session?.user.signature??''} onClose={()=>setSignatureOpen(false)} onSave={async signature=>{const account=webPushAccountRef.current;const payload=await api.updateUserSignature(signature);if(account!==webPushAccountRef.current||payload.user_id!==currentUserId)throw new Error(t('webPush.accountChanged'));setMe(current=>current?{...current,signature:payload.signature}:current);patchSessionUser({signature:payload.signature});showToast(t('signature.saved'));}}/>
