@@ -50,7 +50,7 @@ export function explorerPortraitPixels(portrait: ExplorerPortrait) {
       const u = 1 - t;
       return [3 * u * u * t * a[0] + 3 * u * t * t * b[0] + t * t * t * end[0], 3 * u * u * t * a[1] + 3 * u * t * t * b[1] + t * t * t * end[1]];
     });
-    pixels.push({ x, y, size, curve, lag: ((bottom - y) / (bottom - top)) * .22 + seed * .1 });
+    pixels.push({ x, y, size, curve, control: [a, b, end], lag: ((bottom - y) / (bottom - top)) * .22 + seed * .1 });
   }
   return pixels;
 }

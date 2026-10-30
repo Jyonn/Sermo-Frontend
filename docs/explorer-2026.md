@@ -124,6 +124,28 @@ stickers and rich preview cards retain their original rendering. The old sprite
 is preserved for stale clients. Asset paths and the complete built-in imagegen
 prompt are in [explorer-2026-ai-v5.json](explorer-2026-ai-v5.json).
 
+## Bounded renderer / 2026.10.30.16
+
+The previous 456 animated SVG uses and their nested image clips caused an
+unacceptable paint/compositing load. Explorer now uses a single local Canvas
+and pre-cropped portrait atlases, with the environment remaining a static CSS
+image. The backing store is capped at 160,000 pixels and 512 pixels per side,
+independent of devicePixelRatio. Only the two-second transition requests frames,
+at up to 30 paints/second; the sixteen-second hold has no RAF callbacks.
+
+Intersection and document visibility cancel both pending timers and frames.
+A shared lease permits only one eligible Explorer scene to animate. Reduced
+motion, data saver, <=4 logical cores or <=4 GiB reported device memory start
+with the static original image and skip animation resources. Missing Canvas,
+image failures, three slow paints (>12ms), or three missed RAF intervals
+(>64ms) also settle into a still scene. Cleanup releases atlas canvases.
+
+Focused tests cover idle work, mid-transition cancellation, overload fallback,
+device/raster limits and single-scene ownership. Runtime diagnostics on the
+Canvas update only at rest, exposing aggregate frame count and JS paint times;
+they are not a GPU or battery measurement. Physical phone crash recovery still
+needs verification on the affected device.
+
 ## Initial release
 
 Backend migration Activity.0019 seeds configuration only. No account data is

@@ -27,7 +27,7 @@ test("Explorer bubbles use the shared skin contract for both senders", () => {
     }
   }
   assert.ok(css.includes(".is-forward-bundle"));
-  assert.ok(css.includes("@keyframes explorer-duality"));
+  assert.ok(!css.includes("@keyframes explorer-duality"));
   assert.ok(css.includes("prefers-reduced-motion: reduce"));
 });
 
@@ -47,14 +47,15 @@ test("all five collectibles resolve to shipped final art and preserve the matche
   assert.ok(scene.includes("EXPLORER_ART.backgroundAlternate"));
 });
 
-test("Explorer motion uses unique tile clips and pauses offscreen; profile scenes are opt-in", () => {
+test("Explorer uses one bounded canvas and profile scenes remain opt-in", () => {
   const tiles = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
-  assert.match(tiles, /useId\(\)/);
-  assert.match(tiles, /clipPath=/);
+  assert.match(tiles, /<canvas ref=\{canvasRef\}/);
+  assert.ok(!tiles.includes("<use "));
+  assert.ok(!tiles.includes("<clipPath"));
   const css = readFileSync(new URL("../src/components/ExplorerPersonalization.css", import.meta.url), "utf8");
   assert.match(css, /animation-play-state: paused/);
   assert.match(css, /\.explorer-living-wallpaper \{[^}]*background: #0c2138;/);
-  assert.match(css, /\.explorer-pixel-portrait \{ display: none/);
+  assert.ok(!css.includes("@keyframes explorer-duality"));
   assert.match(css, /inset: 14%; width: 72%; height: 72%; border-radius: 12%/);
   assert.ok(!css.includes('background: url("/activity/explorer-2026/ai-v2.webp")'));
   const card = readFileSync(new URL("../src/components/UserProfileCard.tsx", import.meta.url), "utf8");
@@ -78,7 +79,7 @@ test("fine portrait pixels cover both silhouettes without moving sky or city til
     assert.ok(Math.abs(a[0]*b[1]-a[1]*b[0]) > 1, "particle trajectory must curve rather than travel on one straight vector");
   }
   const scene = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
-  assert.match(scene, /className="explorer-wallpaper-environment"/);
+  assert.match(scene, /root\.dataset\.ready/);
   assert.ok(readFileSync(new URL("../public/activity/explorer-2026/roof-night-v4.webp", import.meta.url)).length < 500_000);
 });
 

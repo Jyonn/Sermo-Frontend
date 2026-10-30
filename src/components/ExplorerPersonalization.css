@@ -50,10 +50,11 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
 .explorer-wearables-lab > .profile-card-preview-scale { zoom: 1; box-sizing: border-box; }
 .explorer-wearables-lab > .chat-conversation-preview { height: auto; max-height: none; }
 .explorer-wearables-lab .chat-conversation-preview .chat-detail-scene, .explorer-wearables-lab .chat-conversation-preview .message-scroll { height: 100%; max-height: none; }
-.explorer-wallpaper-still { opacity: 0; }
-.explorer-pixel-tile { animation: explorer-duality 14s linear infinite both; animation-delay: calc(-14s + var(--burst-lag)); animation-play-state: paused; transform-box: view-box; }
-.explorer-pixel-portrait.is-shinichi .explorer-pixel-tile { animation-delay: calc(-7s + var(--burst-lag)); }
-.explorer-living-wallpaper.is-visible.is-active .explorer-pixel-tile { animation-play-state: running; }
+.explorer-wallpaper-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.explorer-portrait-canvas { position: absolute; display: none; pointer-events: none; }
+.explorer-living-wallpaper[data-ready="true"] { background: #0c2138 url("/activity/explorer-2026/roof-night-v4.webp") center/cover no-repeat; }
+.explorer-living-wallpaper[data-ready="true"] .explorer-wallpaper-still { visibility: hidden; }
+.explorer-living-wallpaper[data-ready="true"] .explorer-portrait-canvas { display: block; }
 :is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center/cover no-repeat; }
 :is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 75%/cover no-repeat; }
 .chat-background-explorer-duality { --chat-chrome-surface: #0e253be8; --chat-chrome-border: #c4d6e42b; --chat-chrome-text: #f3eee2; --chat-input-surface: #162f46; }
@@ -89,19 +90,10 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .profile-card-theme-option.theme-explorer-romance > span::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 20px, #d8e4ef30 21px 22px, transparent 23px 43px); animation: explorer-rain 3s linear infinite; }
 .explorer-profile-medal { display: flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px; border-radius: 12px; border: 1px solid #b89a5d45; background: #b89a5d0c; }
 .explorer-profile-medal img { width: 58px; height: 58px; object-fit: contain; }.explorer-profile-medal span { display: grid; gap: 3px; }.explorer-profile-medal small { color: var(--muted); font-size: 10px; }.explorer-profile-medal strong { font-size: 12px; }
-@keyframes explorer-duality {
-  0%, 34%, 100% { opacity: 1; transform: translate(0, 0) scale(1); }
-  36%, 97% { opacity: 1; transform: translate(var(--curve-1-x), var(--curve-1-y)) scale(1); }
-  38%, 94% { opacity: .96; transform: translate(var(--curve-2-x), var(--curve-2-y)) scale(.95); }
-  40%, 91% { opacity: .85; transform: translate(var(--curve-3-x), var(--curve-3-y)) scale(.85); }
-  42%, 88% { opacity: .7; transform: translate(var(--curve-4-x), var(--curve-4-y)) scale(.7); }
-  45%, 86% { opacity: .35; transform: translate(var(--curve-5-x), var(--curve-5-y)) scale(.5); }
-  48%, 84% { opacity: 0; transform: translate(var(--curve-6-x), var(--curve-6-y)) scale(.2); }
-}
 @keyframes explorer-city-drift { to { transform: scale(1.12) translateX(-6px); } }
 @keyframes explorer-umbrella-sway { 0%, 100% { transform: rotate(-.6deg) translateY(1px); } 50% { transform: rotate(.7deg) translateY(-3px); } }
 @keyframes explorer-water-ring { from { opacity: .65; transform: scale(.15); } to { opacity: 0; transform: scale(1.4); } }
 @keyframes explorer-lamp-breathe { from { opacity: .35; transform: scale(.9); } to { opacity: .9; transform: scale(1.2); } }
 @keyframes explorer-petal-fall { to { transform: translate(-90px, 240px) rotate(230deg); } }
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
-@media (prefers-reduced-motion: reduce) { .explorer-wallpaper-still { opacity: 1; }.explorer-pixel-portrait { display: none; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-portrait-canvas { display: none; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }

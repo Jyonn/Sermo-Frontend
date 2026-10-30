@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.15",
+  "id": "2026.10.30.16",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "灰原哀 · 冷静推理气泡重绘",
+      "title": "月下变奏 · 流畅与省电修复",
       "items": [
-        "全新灰原哀半身立绘融入气泡边角，保留标志性的赤茶短发、眼神与白大褂",
-        "象牙白与暗梅色双向气泡，连续消息末尾展示角色，阅读更紧凑"
+        "重做人物切换渲染，降低卡顿、发热和手机页面崩溃风险",
+        "人物停留、后台及离屏时停止动画；低性能设备和省流模式使用静态背景"
       ]
     },
     "en": {
-      "title": "Ai Haibara · Quiet Reasoning, redrawn",
+      "title": "After Dark · Smoother, lighter motion",
       "items": [
-        "A new Ai Haibara portrait joins the bubble edge, with her auburn bob, cool gaze and lab coat",
-        "Ivory and plum bubbles place the portrait at the end of each message group for compact reading"
+        "Rebuilt portrait transitions to reduce stuttering, heat and mobile page crashes",
+        "Motion stops while portraits rest, offscreen and in the background; lower-power devices and data saver use a still wallpaper"
       ]
     }
   }
