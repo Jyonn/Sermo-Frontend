@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="22" viewBox="0 0 48 22">
+  <defs><clipPath id="pill"><rect x="1" y="1" width="46" height="20" rx="10"/></clipPath></defs>
+  <g clip-path="url(#pill)">
+    <path fill="#af4254" d="M0 0h24v22H0z"/><path fill="#fff2df" d="M24 0h24v22H24z"/>
+    <path fill="#fff" opacity=".24" d="M8 3h31a7 7 0 0 1 6 4H3a7 7 0 0 1 5-4"/>
+    <path stroke="#783b45" stroke-opacity=".5" d="M24 1v20"/>
+    <text x="5" y="14" fill="#fff5e8" font-family="Arial,sans-serif" font-size="6" font-weight="700">APTX</text>
+    <text x="28" y="14" fill="#79444b" font-family="Arial,sans-serif" font-size="6" font-weight="700">4869</text>
+  </g>
+  <rect x="1" y="1" width="46" height="20" rx="10" fill="none" stroke="#8c4e52" stroke-width="1.5"/>
+</svg>

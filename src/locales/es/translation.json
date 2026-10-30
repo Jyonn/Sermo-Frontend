@@ -9,7 +9,7 @@
 "explorer.lab.echo.description": "Ambas figuras se superponen brevemente y se enfocan.",
 "explorer.lab.replay": "Repetir",
 "explorer.lab.addMessage": "Añadir mensaje de ejemplo",
-  "explorer.lab.expressionHint": "10 retratos transparentes. Cada mensaje conserva una expresión aleatoria del mismo tamaño dentro de la burbuja.",
+  "explorer.lab.expressionHint": "10 expresiones transparentes. Cada mensaje de texto conserva una expresión aleatoria del tamaño de un emoji al inicio.",
 "explorer.expression.yawn": "Bostezo",
 "explorer.expression.cool": "Seriedad",
 "explorer.expression.smile": "Alegría",

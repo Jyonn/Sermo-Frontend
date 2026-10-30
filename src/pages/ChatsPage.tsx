@@ -1211,7 +1211,6 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
 });
 
 const MessageImageGallery = memo(function MessageImageGallery({
-  bubbleStyle,
   from,
   isEntering,
   isFirst,
@@ -1224,7 +1223,6 @@ const MessageImageGallery = memo(function MessageImageGallery({
   selectedClientIds,
   selectionMode,
 }: {
-  bubbleStyle?: ChatBubbleStyle;
   from: "self" | "other";
   isEntering: boolean;
   isFirst: boolean;
@@ -1282,7 +1280,6 @@ const MessageImageGallery = memo(function MessageImageGallery({
           className={`message-image-gallery message-media-frame ${groupClassName}`}
           style={{ "--message-gallery-columns": columns } as CSSProperties}
         >
-          <ExplorerAiExpression messageKey={messages[0].clientId} bubbleStyle={bubbleStyle}>
           <div className="message-image-gallery-grid">
             {visibleMessages.map((message, index) => {
               const uri = fullUris[index];
@@ -1353,7 +1350,6 @@ const MessageImageGallery = memo(function MessageImageGallery({
               );
             })}
           </div>
-          </ExplorerAiExpression>
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
           <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
@@ -1397,7 +1393,7 @@ function MentionedMessageText({ mentions, text }: { mentions: TinyUserDTO[]; tex
   return <>{nodes}</>;
 }
 
-function LinkedMessageText({ hiddenUrl, mentions = [], text }: { hiddenUrl?: string; mentions?: TinyUserDTO[]; text: string }) {
+function LinkedMessageText({ hiddenUrl, mentions = [], text, prefix }: { hiddenUrl?: string; mentions?: TinyUserDTO[]; text: string; prefix?: ReactNode }) {
   const parts: Array<{ key: string; text: string; href?: string }> = [];
   let lastIndex = 0;
   const normalizedHiddenUrl = hiddenUrl ? normalizeMessageUrl(hiddenUrl) : null;
@@ -1422,10 +1418,11 @@ function LinkedMessageText({ hiddenUrl, mentions = [], text }: { hiddenUrl?: str
     parts.push({ key: `text:end:${lastIndex}`, text: text.slice(lastIndex) });
   }
 
-  if (parts.length === 0) return <span className="message-text"><MentionedMessageText mentions={mentions} text={text} /></span>;
+  if (parts.length === 0) return <span className="message-text">{prefix}<MentionedMessageText mentions={mentions} text={text} /></span>;
 
   return (
     <span className="message-text">
+      {prefix}
       {parts.map((part) =>
         part.href ? (
           <a
@@ -1646,6 +1643,7 @@ function renderMessageContent(
   groupClassName: string,
   forwardBundlePreviewDepth: number,
   onRetry?: () => void,
+  bubbleStyle?: ChatBubbleStyle,
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
@@ -1825,11 +1823,12 @@ function renderMessageContent(
   }
 
   const text = message.payload?.text ?? message.text;
+  const prefix = <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle ?? message.chatBubbleStyle} />;
   const linkPreview = message.payload?.link_preview;
   const rawPreviewUrl = extractFirstMessageUrl(text);
   const previewUrl = linkPreview?.url ?? rawPreviewUrl ?? undefined;
   if (!previewUrl) {
-    return <LinkedMessageText mentions={message.mentions} text={text} />;
+    return <LinkedMessageText mentions={message.mentions} text={text} prefix={prefix} />;
   }
 
   const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, rawPreviewUrl ?? previewUrl);
@@ -1838,7 +1837,7 @@ function renderMessageContent(
     <div className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
       {hasTextBesidePreview ? (
         <span className={`message-bubble message-text-chip ${groupClassName}`.trim()}>
-          <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} />
+          <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} prefix={prefix} />
         </span>
       ) : null}
       <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} />
@@ -2018,7 +2017,6 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
-          <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={message.kind === "sticker" ? undefined : bubbleStyle}>
           {message.replyTo ? (
             <button
               className="message-reply-preview"
@@ -2033,8 +2031,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message))}
-          </ExplorerAiExpression>
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message), bubbleStyle)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
@@ -2269,7 +2266,6 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           {rows.map((row) => row.kind === "gallery" ? (
             <Fragment key={`gallery:${row.messages[0].clientId}`}>
               <MessageImageGallery
-                bubbleStyle={group.chatBubbleStyle}
                 from={group.from}
                 isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
                 isFirst={row.startIndex === 0}

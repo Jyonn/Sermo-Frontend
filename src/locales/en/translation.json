@@ -9,7 +9,7 @@
 "explorer.lab.echo.description": "Both identities briefly overlap and drift into focus.",
 "explorer.lab.replay": "Replay",
 "explorer.lab.addMessage": "Add a sample message",
-  "explorer.lab.expressionHint": "10 transparent portraits. Each message keeps a random expression at a consistent size inside the bubble.",
+  "explorer.lab.expressionHint": "10 transparent expressions. Each text message keeps a random emoji-sized expression at its start.",
 "explorer.expression.yawn": "Yawning",
 "explorer.expression.cool": "Cool",
 "explorer.expression.smile": "Happy",

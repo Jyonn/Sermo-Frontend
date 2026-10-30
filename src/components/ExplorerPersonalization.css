@@ -96,16 +96,10 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
 @media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-transformation-stage { visibility: hidden; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
 
-.message-group.bubble-style-explorer-ai .message-bubble:has(> .explorer-ai-layout) { padding: 0; }
-.explorer-ai-layout { --ai-panel-size: 52px; display: flex; align-items: center; min-width: 0; max-width: 100%; position: relative; z-index: 1; }
-.message-group.other .explorer-ai-layout { flex-direction: row-reverse; }
-.explorer-ai-expression { width: var(--ai-panel-size); height: var(--ai-panel-size); flex: 0 0 var(--ai-panel-size); display: grid; place-items: center; pointer-events: none; user-select: none; }
-.explorer-ai-expression > img { width: 40px; height: 40px; object-fit: contain; }
-.explorer-ai-content { position: relative; min-width: 0; min-height: 48px; box-sizing: border-box; flex: 1 1 auto; padding: 12px 16px; }
-.explorer-ai-content::before { content: ""; position: absolute; left: 0; top: 50%; width: 3px; height: 20px; border-radius: 2px; transform: translateY(-50%); background: currentColor; opacity: .38; pointer-events: none; }
-.message-group.other .explorer-ai-content::before { left: auto; right: 0; }
-.message-group.bubble-style-explorer-ai :is(.is-media, .message-image-gallery) > .explorer-ai-layout > .explorer-ai-content { padding: 0; }
-.message-group.bubble-style-explorer-ai .message-bubble-shell > :is(.message-bubble, .message-image-gallery) { min-width: 0; }
+.explorer-ai-expression { display: inline-block; width: 1em; height: 1em; margin-inline-end: .25em; vertical-align: -.12em; object-fit: contain; pointer-events: none; user-select: none; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
+.message-group.bubble-style-explorer-ai.self .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { right: auto; left: -12px; transform: translateY(-50%) rotate(60deg); }
 .explorer-transformation-sweep, .explorer-transformation-ring { opacity: 0; }
 .explorer-wearables-lab > .explorer-motion-controls { flex: 0 0 auto; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .explorer-motion-controls > div { display: flex; gap: 6px; }

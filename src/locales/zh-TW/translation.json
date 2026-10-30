@@ -9,7 +9,7 @@
 "explorer.lab.echo.description": "兩個身影短暫交疊，輕微錯位後恢復清晰。",
 "explorer.lab.replay": "重新播放",
 "explorer.lab.addMessage": "新增範例訊息",
-  "explorer.lab.expressionHint": "10 張透明大頭照。每則訊息隨機分配，在氣泡內側以統一大小顯示。",
+  "explorer.lab.expressionHint": "10 張透明表情。每則文字訊息隨機分配一個，以 emoji 大小顯示在開頭。",
 "explorer.expression.yawn": "打哈欠",
 "explorer.expression.cool": "冷峻",
 "explorer.expression.smile": "開心",

@@ -9,7 +9,7 @@
 "explorer.lab.echo.description": "二つの姿が一瞬重なり、ずれながら鮮明になります。",
 "explorer.lab.replay": "再生",
 "explorer.lab.addMessage": "サンプルを追加",
-  "explorer.lab.expressionHint": "背景透過の顔画像10種類。各メッセージの吹き出し内側に、同じ大きさの表情をランダム表示します。",
+  "explorer.lab.expressionHint": "背景透過の表情10種類。各テキストメッセージの先頭に、絵文字サイズでランダム表示します。",
 "explorer.expression.yawn": "あくび",
 "explorer.expression.cool": "クール",
 "explorer.expression.smile": "笑顔",

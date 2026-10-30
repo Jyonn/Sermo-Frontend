@@ -9,7 +9,7 @@
 "explorer.lab.echo.description": "두 모습이 잠시 겹친 뒤 선명해집니다.",
 "explorer.lab.replay": "다시 재생",
 "explorer.lab.addMessage": "예시 메시지 추가",
-  "explorer.lab.expressionHint": "투명 얼굴 이미지 10종. 메시지마다 임의의 표정을 말풍선 안쪽에 같은 크기로 표시합니다.",
+  "explorer.lab.expressionHint": "투명 표정 이미지 10종. 텍스트 메시지 앞에 이모지 크기로 임의의 표정을 표시합니다.",
 "explorer.expression.yawn": "하품",
 "explorer.expression.cool": "냉정",
 "explorer.expression.smile": "기쁨",
