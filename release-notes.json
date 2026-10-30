@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.30.27",
+  "id": "2026.10.30.28",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "带小哀表情的首条气泡不再显示 APTX 药丸，后续气泡保留药丸装饰"
+        "对方首条气泡的小哀表情移至右侧，自己的仍在左侧",
+        "带表情的首条气泡不再显示 APTX 药丸，后续气泡保留药丸装饰"
       ]
     },
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "First bubbles with Ai expressions no longer show an APTX capsule; later bubbles keep the capsule accent"
+        "Ai expressions move to the right of incoming first bubbles and remain on the left of your own",
+        "First bubbles with expressions no longer show an APTX capsule; later bubbles keep the capsule accent"
       ]
     }
   }
