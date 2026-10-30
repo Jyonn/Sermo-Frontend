@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.30.23",
+  "id": "2026.10.30.24",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "小哀表情放大为文字的三倍，保持文字上边距和行高不变",
-        "为表情预留横向与外部空间，避免遮挡相邻消息和引用文字"
+        "小哀表情向左延伸至气泡内边距，保持在边框以内，为文字留出更多空间"
       ]
     },
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "Ai expressions are three times the text size while preserving text top padding and line height",
-        "Inline and external spacing keeps portraits clear of neighboring messages and quoted text"
+        "Ai expressions extend into the left padding while staying inside the bubble border, leaving more room for text"
       ]
     }
   }

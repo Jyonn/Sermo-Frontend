@@ -98,7 +98,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 
 /* Reserve the portrait's width but only one em of line height. The artwork
    grows upward, leaving the text's original padding and baseline unchanged. */
-.explorer-ai-expression { display: inline-block; position: relative; width: 3em; height: 1em; margin-inline-end: .25em; vertical-align: -.12em; pointer-events: none; user-select: none; }
+.explorer-ai-expression { display: inline-block; position: relative; width: 3em; height: 1em; margin-inline-start: -8px; margin-inline-end: .25em; vertical-align: -.12em; pointer-events: none; user-select: none; }
 .explorer-ai-expression > img { position: absolute; inset-inline-start: 0; bottom: 0; width: 3em; height: 3em; object-fit: contain; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply:has(> .message-text > .explorer-ai-expression) { row-gap: 1.9em; }
 .message-group.bubble-style-explorer-ai .message-bubble-wrap:has(.message-bubble:not(.has-reply) > .message-text > .explorer-ai-expression) { margin-top: max(0px, calc(1.8em - 14px)); }
