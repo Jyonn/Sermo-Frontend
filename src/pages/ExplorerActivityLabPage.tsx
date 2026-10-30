@@ -38,6 +38,7 @@ export default function ExplorerActivityLabPage() {
       <button type="button" onClick={() => setWearable("frame")}>{t("menu.avatarFrame")}</button>
       <button type="button" onClick={() => setWearable("chat")}>{t("menu.chatPage")}</button>
       <button type="button" onClick={() => setWearable("profile")}>{t("menu.profileCard")}</button>
+      <button type="button" aria-label={t("menu.appearance")} onClick={() => setPreference(resolvedTheme === "dark" ? "light" : "dark")}><span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span></button>
     </nav>
     {wearable === "chat" ? <ChatsPage preview={{ avatarName: t("explorer.previewName"), backgroundTheme: "explorer-duality", bubbleStyle: "explorer-ai", demo: { kind: "text" }, selfOnly: true }} /> : wearable === "frame" ? <div className="personalization-avatar-stage"><UserAvatar className="personalization-avatar-stage-image" name={t("explorer.previewName")} frame="explorer-conan" uri="/activity/explorer-2026/conan-night-thumb-v2.webp" /><strong>{t("explorer.previewName")}</strong></div> : <div className="user-profile-panel profile-card-preview-scale profile-theme-explorer-romance"><UserProfileCard profileTheme="explorer-romance" name={t("explorer.previewName")} avatarFrame="explorer-conan" presence={t("explorer.profileSignature")} avatarUri="/activity/explorer-2026/conan-night-thumb-v2.webp" growthLevel={16} /></div>}
   </main>;

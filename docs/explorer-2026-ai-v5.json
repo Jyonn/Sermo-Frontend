@@ -1,0 +1,11 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "path": "public/activity/explorer-2026/ai-portrait-v5.webp",
+      "thumbnail": "public/activity/explorer-2026/ai-portrait-thumb-v5.webp",
+      "prompt": "Use case: stylized-concept. Asset type: transparent character corner ornament integrated into an elegant chat bubble skin. Primary request: an unmistakable portrait of Ai Haibara (灰原哀 / Sherry) from Detective Conan, chest-up, her iconic short chin-length auburn / reddish-brown bob with the precise angular side-parted fringe, cool blue-gray half-lidded eyes and composed slightly sardonic expression. White scientist lab coat over a muted plum turtleneck. Her shoulders face forward and both delicate hands rest on an imaginary horizontal ledge at the very bottom; face slightly turned left toward the message. Premium crisp pixel-art visual-novel portrait, expressive readable eyes, fine 1-3 pixel clusters and a refined thin dark outline, no oversized chibi head, no kawaii smile. Bust occupies nearly the whole square canvas with only 3% transparent padding, hair fully visible at top, hands at lower edge. Palette auburn hair, ivory coat, charcoal and muted plum; warm ivory rim highlights. Genuinely transparent alpha around the entire silhouette; no background, no glow, no sticker border, no frame, no speech bubble, no laboratory objects, no text or watermark. Deliver one single isolated Ai portrait, not a sprite sheet. This will be painted at 50-60 CSS pixels in the corner of a resizable bubble, so character identity must be legible at that size."
+    }
+  ],
+  "delivery": "512px transparent WebP quality 90; 128px thumbnail quality 85. CSS paints the portrait at the group-end bubble edge and in the shared catalog and reward gallery."
+}

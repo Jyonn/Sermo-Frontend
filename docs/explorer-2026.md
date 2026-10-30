@@ -111,6 +111,19 @@ pause and reduced-motion fallback. Geometry tests check coverage, unique cells,
 foreground bounds and non-collinear motion. The built-in imagegen clean-plate
 prompt and asset path are in [explorer-2026-art-v4.json](explorer-2026-art-v4.json).
 
+## Ai character bubble / 2026.10.30.15
+
+The generic molecular corner is replaced at each message group's end by a new
+recognizable Ai Haibara bust: auburn bob, half-lidded blue-gray eyes, ivory lab
+coat and plum turtleneck. Her hands meet the bubble edge. Earlier lines remain
+compact, while the final line reserves a separate portrait gutter so text never
+overlaps her face. Red-and-ivory capsule marks decorate earlier lines. Ivory
+and plum sender palettes, auburn rules and the same
+portrait carry through the actual chat, Menu catalog and reward gallery. Images,
+stickers and rich preview cards retain their original rendering. The old sprite
+is preserved for stale clients. Asset paths and the complete built-in imagegen
+prompt are in [explorer-2026-ai-v5.json](explorer-2026-ai-v5.json).
+
 ## Initial release
 
 Backend migration Activity.0019 seeds configuration only. No account data is

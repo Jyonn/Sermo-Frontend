@@ -10,35 +10,38 @@
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 14%; width: 72%; height: 72%; border-radius: 12%; object-fit: cover; }
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
+/* Ai's ivory lab coat, auburn hair and muted plum form the whole skin.
+   The portrait closes each message group instead of repeating on every line. */
 :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
-  --bubble-skin-other-bg: #f7eee1;
-  --bubble-skin-other-color: #493735;
-  --bubble-skin-other-border: #9e7362;
-  --bubble-skin-other-shadow: inset 0 0 0 3px #fff8eb, 0 3px 0 #6b48456b;
-  --bubble-skin-self-bg: #254a48;
-  --bubble-skin-self-color: #f3f0dc;
-  --bubble-skin-self-border: #a6bfa5;
-  --bubble-skin-self-shadow: inset 0 0 0 3px #183a39, 0 3px 0 #122e3970;
-  --bubble-skin-other-radius: 5px 19px 19px 19px;
-  --bubble-skin-self-radius: 19px 5px 19px 19px;
+  --bubble-skin-other-bg: #faf1e5;
+  --bubble-skin-other-color: #493339;
+  --bubble-skin-other-border: #b17f69;
+  --bubble-skin-other-shadow: inset 0 0 0 3px #fff9ed, 0 3px 0 #70445042;
+  --bubble-skin-self-bg: #493448;
+  --bubble-skin-self-color: #fff3e4;
+  --bubble-skin-self-border: #c59882;
+  --bubble-skin-self-shadow: inset 0 0 0 3px #35273c, 0 3px 0 #251e3260;
+  --bubble-skin-other-radius: 5px 18px 18px 18px;
+  --bubble-skin-self-radius: 18px 5px 18px 18px;
   --bubble-skin-border-width: 1px;
 }
-.message-group.bubble-style-explorer-ai { --ai-accent: #bd8c66; --ai-detail: #89655c; }
-.message-group.bubble-style-explorer-ai.self { --ai-accent: #b6cda6; --ai-detail: #aec5b0; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 30px 12px 16px; min-height: 0; background-image: radial-gradient(circle at calc(100% - 12px) 12px, var(--ai-accent) 0 2px, transparent 2.5px), linear-gradient(135deg, transparent 55%, #c4ad8630); }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::before { content: ""; position: absolute; z-index: 0; inset: 6px; border: 1px solid var(--ai-detail); border-radius: inherit; opacity: .22; pointer-events: none; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 1; inset: auto 7px 8px auto; width: 10px; height: 12px; border: 1px solid var(--ai-accent); border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--ai-accent) 0 1.5px, transparent 2px); box-shadow: 3px -2px 0 -2px var(--ai-accent); transform: rotate(35deg); opacity: .8; pointer-events: none; }
-.message-group.bubble-style-explorer-ai .message-bubble > * { position: relative; }
+.message-group.bubble-style-explorer-ai { --ai-accent: #a76e55; --ai-detail: #986a68; }
+.message-group.bubble-style-explorer-ai.self { --ai-accent: #e0b89c; --ai-detail: #e5b7a5; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 25px 12px 16px; min-height: 0; background-image: linear-gradient(135deg, #c1866424, transparent 45%), radial-gradient(ellipse at 100% 100%, #ab73782b, transparent 70%); }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::before { content: ""; position: absolute; z-index: 0; inset: 5px; border: 1px solid var(--ai-detail); border-radius: inherit; opacity: .26; pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 1; inset: auto 8px 10px auto; width: 12px; height: 6px; border: 1px solid #994c58; border-radius: 5px; background: linear-gradient(90deg, #b64a5e 50%, #fff0dd 50%); transform: rotate(-35deg); opacity: .8; pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { min-height: 54px; padding-right: 70px; }
+.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { inset: auto 3px 0 auto; width: 58px; height: 58px; border: 0; border-radius: 0; background: url("/activity/explorer-2026/ai-portrait-v5.webp") center bottom/contain no-repeat; transform: none; opacity: 1; }
 html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
-  --bubble-skin-other-bg: #493936;
+  --bubble-skin-other-bg: #46353b;
   --bubble-skin-other-color: #fff1df;
   --bubble-skin-other-border: #bd947b;
-  --bubble-skin-other-shadow: inset 0 0 0 3px #382c2b, 0 3px 0 #1e202766;
-  --bubble-skin-self-bg: #244643;
-  --bubble-skin-self-color: #f0f1da;
+  --bubble-skin-other-shadow: inset 0 0 0 3px #352a33, 0 3px 0 #1e202766;
+  --bubble-skin-self-bg: #3e3046;
+  --bubble-skin-self-color: #fff0de;
 }
-.personalization-option.preview-explorer-ai > i { background: #254a48; border: 1px solid #a6bfa5; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #183a39, 0 3px 0 #122e3970; }
-.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 12px; height: 16px; right: 10px; top: 8px; border: 1px solid #b6cda6; border-radius: 50%; transform: rotate(35deg); background: radial-gradient(circle, #b6cda6 0 2px, transparent 2.5px); }
+.personalization-option.preview-explorer-ai > i { background: linear-gradient(120deg, #f5e8d5 0 34%, #493448 35%); border: 1px solid #bd8b73; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #c38d6d30, 0 3px 0 #35273c30; }
+.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 46px; height: 46px; right: 2px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-portrait-v5.webp") center bottom/contain no-repeat; }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #0c2138; pointer-events: none; }
 .explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
 .explorer-wearables-lab > nav { display: flex; gap: 8px; padding: 12px; flex-shrink: 0; background: var(--surface); }
