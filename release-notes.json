@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.16",
+  "id": "2026.10.30.17",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "月下变奏 · 流畅与省电修复",
+      "title": "冷静推理 · 气泡排版优化",
       "items": [
-        "重做人物切换渲染，降低卡顿、发热和手机页面崩溃风险",
-        "人物停留、后台及离屏时停止动画；低性能设备和省流模式使用静态背景"
+        "统一小哀气泡的单行高度，改善连续消息的文字对齐",
+        "调整小哀肖像大小、底部位置和文字留白"
       ]
     },
     "en": {
-      "title": "After Dark · Smoother, lighter motion",
+      "title": "Quiet Deduction · Better bubble alignment",
       "items": [
-        "Rebuilt portrait transitions to reduce stuttering, heat and mobile page crashes",
-        "Motion stops while portraits rest, offscreen and in the background; lower-power devices and data saver use a still wallpaper"
+        "Aligned single-line Ai bubbles for consistent spacing across consecutive messages",
+        "Refined Ai’s portrait size, bottom alignment and text spacing"
       ]
     }
   }
