@@ -20,7 +20,7 @@ export interface ChatCalendarData {
 }
 
 // Loaded once by ChatsPage; mobile and desktop buttons share this resource.
-export function useChatCalendarAvailability(peerId?: number): ChatCalendarData | null {
+export function useChatCalendarAvailability(peerId?: number): { data: ChatCalendarData | null; loading: boolean } {
   const { session } = useAuth();
   const activePage = usePageActive();
   const now = useCalendarClock(Boolean(peerId));
@@ -28,6 +28,7 @@ export function useChatCalendarAvailability(peerId?: number): ChatCalendarData |
   const minute = Math.floor(now.getTime() / 60000);
   const scope = `${session?.user.space_id}:${session?.user.user_id}:${peerId}:${dayKey}`;
   const [data, setData] = useState<Omit<ChatCalendarData, "now"> | null>(null);
+  const [settledScope, setSettledScope] = useState("");
   useEffect(() => {
     if (!session || !peerId || !activePage) return;
     const controller = new AbortController();
@@ -40,10 +41,10 @@ export function useChatCalendarAvailability(peerId?: number): ChatCalendarData |
     }).catch((error: unknown) => {
       const denied = error instanceof ApiError && (error.status === 401 || error.status === 403);
       if (active) setData(current => !denied && current?.scope === scope ? { ...current, error: true } : { scope, ownerId: peerId, events: null, known: false, error: true });
-    }).finally(() => window.clearTimeout(timer));
+    }).finally(() => { window.clearTimeout(timer); if (active) setSettledScope(scope); });
     return () => { active = false; controller.abort(); window.clearTimeout(timer); };
   }, [session?.accessToken, scope, peerId, dayKey, minute, activePage]);
-  return data?.scope === scope ? { ...data, now } : null;
+  return { data: data?.scope === scope ? { ...data, now } : null, loading: Boolean(session && peerId && settledScope !== scope) };
 }
 
 export function ChatCalendarAvailability({ data, quick = false }: { data: ChatCalendarData; quick?: boolean }) {

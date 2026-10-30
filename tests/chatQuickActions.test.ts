@@ -63,6 +63,7 @@ test("the shared row retains one to four ordered actions, routes actions and nev
     if (name === "../lib/language") return { useI18n: () => ({ t: (key: string) => key }) };
     if (name === "./UserAvatar") return { UserAvatar: Avatar };
     if (name === "./ChatActionIcon") return { ChatActionIcon: () => null };
+    if (name === "../lib/useQuickActionLayout") return { useQuickActionLayout: () => ({ current: null }) };
     if (name.endsWith(".css")) return {};
     return require(name);
   } });
@@ -72,8 +73,9 @@ test("the shared row retains one to four ordered actions, routes actions and nev
   for (let count = 1; count <= 4; count++) {
     const row = exports.ChatQuickActions({ ...props, actions: DEFAULT_CHAT_ACTIONS.slice(0, count), calendar: React.createElement("button", null, "calendar") });
     assert.equal(row.props.style, undefined);
-    assert.equal(React.Children.count(row.props.children), count);
-    assert.deepEqual(React.Children.toArray(row.props.children).map((child: any) => child.props["data-action"]), DEFAULT_CHAT_ACTIONS.slice(0, count));
+    const actions = React.Children.toArray(row.props.children).filter((child: any) => child.props["data-action"]);
+    assert.equal(actions.length, count);
+    assert.deepEqual(actions.map((child: any) => child.props["data-action"]), DEFAULT_CHAT_ACTIONS.slice(0, count));
   }
   const row = exports.ChatQuickActions({ ...props, actions: ["status", "copy", "locked"] });
   const buttons = elements(row).filter(node => node.type === "button");
@@ -82,5 +84,14 @@ test("the shared row retains one to four ordered actions, routes actions and nev
   const avatars = elements(row).filter(node => node.type === Avatar);
   assert.equal(avatars.length, 5);
   assert.ok(avatars.every(node => node.props.frame === undefined));
-  assert.equal(exports.ChatQuickActions({ ...props, actions: [] }), null);
+  const hidden = exports.ChatQuickActions({ ...props, actions: [] });
+  assert.equal(hidden.props["aria-hidden"], true);
+  assert.equal(hidden.props.inert, "");
+  const loading = exports.ChatQuickActions({ ...props, actions: [], loading: true });
+  assert.equal(loading.props["aria-busy"], true);
+  assert.equal(loading.props["aria-hidden"], false);
+  const collapsed = exports.ChatQuickActions({ ...props, actions: ["locked"], open: false });
+  assert.equal(collapsed.props["aria-hidden"], true);
+  assert.equal(elements(collapsed).filter(node => node.type === "button").length, 1, "keep children mounted for the exit transition");
+  assert.equal(collapsed.props.inert, "", "collapsed controls cannot receive input or focus");
 });

@@ -36,7 +36,7 @@ test("profiles use a fine line and both chat headers share one resource and popo
   assert.doesNotMatch(gate, /getFriends|calendarId|fetchAgenda|publicCalendarForFriend/);
   assert.match(gate, /data.known && data.events/);
   assert.match(gate, /data\?\.scope === scope/);
-  assert.equal(chat.match(/const chatCalendar = useChatCalendarAvailability\(/g)?.length, 1);
+  assert.equal(chat.match(/data: chatCalendar, loading: calendarLoading \} = useChatCalendarAvailability\(/g)?.length, 1);
   assert.equal(chat.match(/<ChatCalendarAvailability data=\{chatCalendar\}/g)?.length, 1);
   assert.match(chat, /calendar=\{chatCalendar \? <ChatCalendarAvailability data=\{chatCalendar\} quick/);
   assert.doesNotMatch(chat, /chat-pinned-bar/);

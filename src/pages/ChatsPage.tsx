@@ -2932,6 +2932,7 @@ function LiveChatsPage({
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinnedScope, setPinnedScope] = useState("");
+  const [pinnedLoadedScope, setPinnedLoadedScope] = useState("");
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [myCardOpen, setMyCardOpen] = useState(false);
@@ -3769,7 +3770,7 @@ function LiveChatsPage({
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
-  const chatCalendar = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
+  const { data: chatCalendar, loading: calendarLoading } = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
   const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`, displayedChat?.type === "direct" ? "direct" : "group");
   const copySuggestions = useGroupCopySuggestions(displayedChat?.type === "group" && displayedChat.purpose !== "submission" ? displayedChat.id : undefined, currentUserId);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(false);
@@ -3809,6 +3810,7 @@ function LiveChatsPage({
         .catch(() => undefined)
         .finally(() => {
           syncing = false;
+          if (!controller.signal.aborted) setPinnedLoadedScope(`${currentUserId}:${selectedChat.id}`);
         });
     };
     sync();
@@ -7764,8 +7766,14 @@ function LiveChatsPage({
     setMessageSearchOpen(true);
   };
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat) }) : [];
-  const showQuickActions = !messageSelectionMode && effectiveQuickActions.length > 0 && (!shortComposerLayout || quickActionsExpanded);
-  const quickActionsHeaderButton = shortComposerLayout && effectiveQuickActions.length ? <button className="chat-details-button" type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
+  const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
+    preferredQuickActions.includes("locked") && pinnedLoadedScope !== `${currentUserId}:${displayedChat.id}` ||
+    preferredQuickActions.includes("calendar") && calendarLoading ||
+    preferredQuickActions.includes("copy") && copySuggestions.loading
+  ));
+  const hasQuickActions = effectiveQuickActions.length > 0 || quickActionsLoading;
+  const showQuickActions = !messageSelectionMode && hasQuickActions && (!shortComposerLayout || quickActionsExpanded);
+  const quickActionsHeaderButton = shortComposerLayout && hasQuickActions ? <button className={`chat-details-button quick-actions-toggle${quickActionsExpanded ? " is-expanded" : ""}`} type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
 
   return (
     <AppChrome
@@ -7883,7 +7891,7 @@ function LiveChatsPage({
                 }}
               >
               {narrowComposerLayout || chatBackgroundTheme === "explorer-duality" ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
-              {showQuickActions && displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
+              {displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} open={showQuickActions} loading={quickActionsLoading} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
               <div
                 ref={messageScrollRef}
                 className="message-scroll"

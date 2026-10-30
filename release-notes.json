@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.31.4",
+  "id": "2026.10.31.5",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "荣誉徽章焕新",
+      "title": "聊天快捷栏动态优化",
       "items": [
-        "创始人奖章升级为金色珐琅徽章，名片与领取仪式同步展示",
-        "统一年度徽章的年份字体、图案尺寸与文字排版，并将活动徽章更名为探索者徽章"
+        "快捷栏显示加载反馈，按钮准备好后依次轻盈进入",
+        "展开、收起快捷栏更加流畅，并适配减少动态效果设置"
       ]
     },
     "en": {
-      "title": "Refreshed honor medals",
+      "title": "Smoother chat quick actions",
       "items": [
-        "A new gold and green Founder Medal appears on profiles and in the award ceremony",
-        "Annual medals share matching typography, artwork sizes and layouts; the activity medal is now the Explorer Badge"
+        "Quick actions show loading feedback and gently enter as their data becomes ready",
+        "Opening and closing the toolbar feels smoother and respects reduced motion preferences"
       ]
     }
   }
