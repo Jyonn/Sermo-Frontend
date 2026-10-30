@@ -1,0 +1,11 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "path": "public/activity/explorer-2026/roof-night-v4.webp",
+      "edit_target": "public/activity/explorer-2026/conan-night-v2.webp",
+      "prompt": "Use case: precise-object-edit. Input image: edit target, the supplied 960x1440 Conan moonlit rooftop illustration. Asset type: CLEAN BACKGROUND PLATE for a layered animated wallpaper. Remove ONLY the boy detective Conan and his handheld magnifying glass/glowing lens at lower right (approximately x610..860, y980..1270). Inpaint the missing roof tiles and distant buildings naturally. Preserve the black cat at x870,y1055, the string lights, sky, stars, full moon, cloud shapes, city skyline, Tokyo tower, lake reflections, all existing roof architecture, perspective, composition, color, pixel-art style, and every other detail unchanged. No people or human silhouettes anywhere. No text, no borders. Output same full vertical scene and framing; it will stay stationary under separately animated character layers."
+    }
+  ],
+  "delivery": "960×1440 WebP quality 88. Static environment only. Original portrait images are clipped by code into foreground silhouettes; 16px grains follow cubic Bézier samples."
+}

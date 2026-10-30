@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.30.13",
+  "id": "2026.10.30.14",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "探索者外观与动态效果升级",
+      "title": "月下变奏 · 人物像素切换",
       "items": [
-        "修正柯南头像框与头像的贴合，重做小哀气泡的双色材质与推理细节",
-        "柯南与新一聊天背景通过像素碎裂、聚合完成切换",
-        "新一与小兰名片加入独立人物、城市、雨幕、灯光与水波动态层"
+        "夜景保持静止，仅让新一与柯南的人物区域变换",
+        "更细的方形像素沿弧线卷散、聚合，切换更轻盈自然"
       ]
     },
     "en": {
-      "title": "Explorer skins come to life",
+      "title": "After Dark · A finer transformation",
       "items": [
-        "A fitted Conan frame and redesigned Ai bubbles with two-tone materials and detective details",
-        "Conan and Shinichi wallpapers now switch through a pixel burst and reassembly",
-        "Shinichi and Ran profiles gain layered characters, city, rain, lights and water motion"
+        "The night scene stays still while only Conan and Shinichi transform",
+        "Finer square pixels curl apart and gather along curved trails"
       ]
     }
   }

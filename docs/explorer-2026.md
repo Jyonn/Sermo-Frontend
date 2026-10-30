@@ -99,6 +99,18 @@ Two new built-in imagegen assets and prompts are recorded in
 `/design/explorer?wearables=1` renders the actual ChatsPage preview and profile
 card for checking the same skins used in the Menu editor.
 
+## Character-only transformation / 2026.10.30.14
+
+The environment is now one stationary, inpainted clean plate. Source portraits
+are clipped to their own silhouettes and lenses, rather than tiling the whole
+photo. The sky, moon, skyline, cat and rooftop are never part of the moving grid.
+Foreground grains are 16 × 16 source pixels (about 6 CSS pixels on a 390px-wide
+view). Each follows six samples of a cubic Bézier curl, shrinking as it leaves
+and gathering along the reverse trail. Both roles retain the shared visibility
+pause and reduced-motion fallback. Geometry tests check coverage, unique cells,
+foreground bounds and non-collinear motion. The built-in imagegen clean-plate
+prompt and asset path are in [explorer-2026-art-v4.json](explorer-2026-art-v4.json).
+
 ## Initial release
 
 Backend migration Activity.0019 seeds configuration only. No account data is
