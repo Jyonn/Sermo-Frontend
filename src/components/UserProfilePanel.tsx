@@ -37,7 +37,6 @@ export interface UserProfileSeed {
   growth_honor?: UserDTO["growth_honor"];
   avatar_frame_style?: UserDTO["avatar_frame_style"];
   profile_card_theme?: UserDTO["profile_card_theme"];
-  chronelle_calendar_id?: string;
 }
 
 interface UserProfilePanelProps {

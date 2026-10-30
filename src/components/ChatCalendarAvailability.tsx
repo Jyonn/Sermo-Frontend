@@ -4,16 +4,18 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
-import { agendaAvailability, agendaDay, agendaDayDistance, fetchAgenda, normalizeAgenda, publicCalendarForFriend, type AgendaEvent } from "../lib/chronelleAgenda";
+import { agendaAvailability, agendaDay, agendaDayDistance, type AgendaEvent } from "../lib/chronelleAgenda";
+import { profileAgenda } from "../lib/chronelleProfile";
 import { CalendarAvailabilityBar, useCalendarClock } from "./CalendarAvailabilityBar";
 import { ChronelleCalendar } from "./ChronelleCalendar";
 import "./ChatCalendarAvailability.css";
 
 export interface ChatCalendarData {
   scope: string;
-  calendarId: string;
+  ownerId: number;
   events: AgendaEvent[] | null;
   error: boolean;
+  known: boolean;
   now: Date;
 }
 
@@ -30,20 +32,14 @@ export function useChatCalendarAvailability(peerId?: number): ChatCalendarData |
     if (!session || !peerId || !activePage) return;
     const controller = new AbortController();
     let active = true;
-    let calendarId: string | null = null;
     const timer = window.setTimeout(() => controller.abort(), 12000);
-    void api.getFriends(controller.signal).then(async (friends) => {
-      if (!active || controller.signal.aborted) return null;
-      calendarId = publicCalendarForFriend(friends, peerId);
-      if (!calendarId) return null;
-      const id = calendarId;
-      setData((previous) => previous?.scope === scope && previous.calendarId === id ? previous : { scope, calendarId: id, events: null, error: false });
-      const start = new Date(dayKey);
-      const params = new URLSearchParams({ share: id, start: start.toISOString(), end: agendaDay(start, 3).toISOString() });
-      return normalizeAgenda(await fetchAgenda(params, controller.signal));
-    }).then((events) => {
-      if (active && !controller.signal.aborted) setData(events && calendarId ? { scope, calendarId, events, error: false } : null);
-    }).catch(() => { if (active) setData(calendarId ? { scope, calendarId, events: null, error: true } : null); }).finally(() => window.clearTimeout(timer));
+    const start = new Date(dayKey);
+    const params = new URLSearchParams({ start: start.toISOString(), end: agendaDay(start, 3).toISOString() });
+    void api.chronelleProfile(peerId, params, controller.signal).then(profileAgenda).then((result) => {
+      if (active && !controller.signal.aborted) setData(result.hidden ? null : { scope, ownerId: peerId, events: result.events, known: result.known, error: false });
+    }).catch(() => {
+      if (active) setData({ scope, ownerId: peerId, events: null, known: false, error: true });
+    }).finally(() => window.clearTimeout(timer));
     return () => { active = false; controller.abort(); window.clearTimeout(timer); };
   }, [session?.accessToken, scope, peerId, dayKey, minute, activePage]);
   return data?.scope === scope ? { ...data, now } : null;
@@ -59,11 +55,11 @@ export function ChatCalendarAvailability({ data }: { data: ChatCalendarData }) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const backButton = useRef<HTMLButtonElement>(null);
   const id = useId();
-  const summary = useMemo(() => data.events ? agendaAvailability(data.events, data.now) : null, [data.events, data.now]);
+  const summary = useMemo(() => data.known && data.events ? agendaAvailability(data.events, data.now) : null, [data.known, data.events, data.now]);
   const tone = summary?.tone ?? "unknown";
-  const toneLabel = t(tone === "full" ? "chronelle.loadFull" : tone === "balanced" ? "chronelle.loadBalanced" : tone === "light" ? "chronelle.loadLight" : data.error ? "chronelle.title" : "chronelle.loading");
-  const status = summary ? t(summary.busy ? "chronelle.busyNow" : "chronelle.freeNow") : t(data.error ? "chronelle.loadFailed" : "chronelle.loading");
-  const scope = `${data.scope}:${data.calendarId}`;
+  const toneLabel = t(tone === "full" ? "chronelle.loadFull" : tone === "balanced" ? "chronelle.loadBalanced" : tone === "light" ? "chronelle.loadLight" : "chronelle.title");
+  const status = summary ? t(summary.busy ? "chronelle.busyNow" : "chronelle.freeNow") : t(data.error ? "chronelle.loadFailed" : data.events ? "chronelle.limitedVisibility" : "chronelle.loading");
+  const scope = `${data.scope}:${data.ownerId}`;
   const positioned = position !== null;
   useLayoutEffect(() => { setOpen(false); setExpanded(false); }, [scope]);
   useEffect(() => { if (open && positioned) (expanded ? backButton : closeButton).current?.focus({ preventScroll: true }); }, [open, expanded, positioned]);
@@ -142,7 +138,7 @@ export function ChatCalendarAvailability({ data }: { data: ChatCalendarData }) {
         <button ref={closeButton} type="button" aria-label={t("common.close")} onClick={() => { setOpen(false); button.current?.focus({ preventScroll: true }); }}><span className="material-symbols-outlined">close</span></button>
       </header>
       <div className="chat-calendar-popover-content">
-        {expanded ? <ChronelleCalendar calendarId={data.calendarId} /> : <>
+        {expanded ? <ChronelleCalendar key={data.scope} ownerId={data.ownerId} /> : <>
           <div className="chat-calendar-status-hero">
             <div className="chat-calendar-day-dial" aria-hidden="true"><svg viewBox="0 0 64 64"><circle className="chat-calendar-dial-track" cx="32" cy="32" r="27" /><circle className="chat-calendar-dial-fill" cx="32" cy="32" r="27" pathLength="100" strokeDasharray={`${(summary?.busyRatio ?? 0) * 100} 100`} /></svg><span className="material-symbols-outlined">{summary ? summary.busy ? "schedule" : "check" : "calendar_month"}</span></div>
             <div><small>{toneLabel}</small><strong>{status}</strong>{summary ? <span>{summary.busy ? t("chronelle.busyUntil", { time: formatTime(summary.busyUntil!) }) : t("chronelle.readyToChat")}</span> : null}</div>
@@ -151,7 +147,7 @@ export function ChatCalendarAvailability({ data }: { data: ChatCalendarData }) {
             <div className="chat-calendar-day-overview"><span>{t("chronelle.todayOverview")}</span><small>{t("chronelle.busyPercent", { percent: Math.round(summary.busyRatio * 100) })}</small></div>
             <CalendarAvailabilityBar events={data.events} day={agendaDay(data.now)} now={data.now} />
             <div className="chat-calendar-forecast"><span className="material-symbols-outlined" aria-hidden="true">{summary.busy ? "east" : "hourglass_empty"}</span><p>{forecast}</p></div>
-          </> : <p className="chat-calendar-unavailable" role="status">{t(data.error ? "chronelle.loadFailed" : "chronelle.loading")}</p>}
+          </> : <p className="chat-calendar-unavailable" role="status">{status}</p>}
           <button className="chat-calendar-open-details" type="button" onClick={() => setExpanded(true)}><span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>{t("chronelle.viewSchedule")}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
         </>}
       </div>

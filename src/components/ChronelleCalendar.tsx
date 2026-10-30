@@ -1,13 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useI18n } from "../lib/language";
-import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaDay, agendaTimeRange, agendaEventsOn, normalizeAgenda, fetchAgenda, type AgendaEvent } from "../lib/chronelleAgenda";
+import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaDay, agendaTimeRange, agendaEventsOn, type AgendaEvent } from "../lib/chronelleAgenda";
 import { CalendarAvailabilityBar } from "./CalendarAvailabilityBar";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
 import { chronelleOrigin } from "../lib/chronelleOrigin";
 import { api } from "../lib/api";
+import { profileAgenda } from "../lib/chronelleProfile";
 
-export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEvents = fetchAgenda }: { calendarId?: string; ownerId?:number; previewAudience?:'friend'|'stranger'; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
+export function ChronelleCalendar({ ownerId, previewAudience }: { ownerId: number; previewAudience?: 'friend' | 'stranger' }) {
   const { t, language } = useI18n();
   const [selectedDay, setSelectedDay] = useState(() => agendaDay());
   const [queue, setQueue] = useState<(number | Date)[]>([]);
@@ -15,10 +16,9 @@ export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEv
   const [step, setStep] = useState(0);
   const viewport = useRef<HTMLDivElement>(null);
   const scrollTimer = useRef<number | undefined>(undefined);
-  const cache = useRef(new Map<string, { rows: AgendaEvent[]; at: number; known:boolean }>());
   const [hidden,setHidden] = useState(false);
   const [known,setKnown] = useState(true);
-  useEffect(()=>{const refresh=()=>{cache.current.clear();setHidden(false);setReload(value=>value+1);};window.addEventListener('chronelle:bound',refresh);return()=>window.removeEventListener('chronelle:bound',refresh);},[]);
+  useEffect(()=>{const refresh=()=>{setHidden(false);setReload(value=>value+1);};window.addEventListener('chronelle:bound',refresh);return()=>window.removeEventListener('chronelle:bound',refresh);},[]);
   const keyboardFocus = useRef(false);
   useLayoutEffect(() => {
     const element = viewport.current;
@@ -32,7 +32,7 @@ export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEv
       keyboardFocus.current = false;
     }
     return () => observer.disconnect();
-  }, [selectedDay, calendarId, ownerId, hidden]);
+  }, [selectedDay, ownerId, hidden]);
   useEffect(() => () => window.clearTimeout(scrollTimer.current), []);
   const scrollDates = () => {
     const element = viewport.current;
@@ -96,38 +96,34 @@ export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEv
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const days = agendaCenteredDays(selectedDay, 20);
   const start = agendaWindowStart(selectedDay).getTime();
-  const requestKey = `${ownerId||calendarId}:${previewAudience||''}:${start}`;
-  const valid = Boolean(ownerId || calendarId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(calendarId));
+  const requestKey = `${ownerId}:${previewAudience||''}:${start}`;
+  const valid = Number.isInteger(ownerId) && ownerId > 0;
   useEffect(() => {
     if (!valid) return;
     const controller = new AbortController();
     let active = true;
     const timeout = window.setTimeout(() => controller.abort(), 12000);
-    const cached = cache.current.get(requestKey);
-    if (cached && Date.now() - cached.at < 60000) {
-      setEvents(cached.rows); setKnown(cached.known); setLoadedKey(requestKey); setState("ready");
-      window.clearTimeout(timeout);
-      return () => { active = false; controller.abort(); };
-    }
     setState("loading");
     setEvents([]);
     const end = new Date(start);
     end.setDate(end.getDate() + 28);
-    const params = new URLSearchParams({ share: calendarId!, start: new Date(start).toISOString(), end: end.toISOString() });
-    const debounce = window.setTimeout(() => { void (ownerId ? api.chronelleProfile(ownerId,new URLSearchParams({start:params.get('start')!,end:params.get('end')!,...(previewAudience?{audience:previewAudience}:{})}),controller.signal).then(result=>{if(active){setHidden(result.status==='hidden');setKnown(result.availability==='known');}return result.events;}) : loadEvents(params, controller.signal))
-      .then(normalizeAgenda)
-      .then((rows) => { if (active) {
-        cache.current.delete(requestKey);
-        if(!ownerId)cache.current.set(requestKey, { rows, at: Date.now(),known:true });
-        if (cache.current.size > 6) cache.current.delete(cache.current.keys().next().value!);
-        setEvents(rows); setLoadedKey(requestKey); setState("ready");
+    const params = new URLSearchParams({ start: new Date(start).toISOString(), end: end.toISOString(), ...(previewAudience ? { audience: previewAudience } : {}) });
+    const debounce = window.setTimeout(() => {
+      void api.chronelleProfile(ownerId, params, controller.signal)
+      .then(profileAgenda)
+      .then((result) => { if (active) {
+        setHidden(result.hidden);
+        setKnown(result.known);
+        setEvents(result.events);
+        setLoadedKey(requestKey);
+        setState("ready");
       } })
       .catch(() => { if (active) setState("error"); })
       .finally(() => window.clearTimeout(timeout)); }, 150);
     return () => { active = false; controller.abort(); window.clearTimeout(timeout); window.clearTimeout(debounce); };
-  }, [calendarId, ownerId, previewAudience, valid, start, requestKey, reload, loadEvents]);
+  }, [ownerId, previewAudience, valid, start, requestKey, reload]);
   if (!valid || hidden) return null;
-  const shareUrl = ownerId ? `${chronelleOrigin()}/#/` : `${chronelleOrigin()}/#/share/${calendarId}`;
+  const shareUrl = `${chronelleOrigin()}/#/`;
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
   const items = loadedKey === requestKey ? agendaEventsOn(events, selectedDay) : [];
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
@@ -149,9 +145,8 @@ export function ChronelleCalendar({ calendarId, ownerId, previewAudience, loadEv
       {displayState === "ready" && known ? <div className="chronelle-availability">
         <CalendarAvailabilityBar events={items} day={selectedDay} />
       </div> : null}
-      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { cache.current.delete(requestKey); setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.slice(0, ownerId?items.length:5).map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
-      {!ownerId && displayState === "ready" && items.length > 5 ? <a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.moreEvents", { count: items.length - 5 })} ↗</a> : null}
+      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
     </div>
-    <small className="row-subtle">{t(ownerId?"chronelle.permissionFiltered":"chronelle.publicOnly")}</small>
+    <small className="row-subtle">{t("chronelle.permissionFiltered")}</small>
   </section>;
 }

@@ -13,5 +13,6 @@ test('partial visibility never renders a complete availability bar or says no ev
   const source=read('components/ChronelleCalendar.tsx');
   assert.match(source,/displayState === "ready" && known/);
   assert.match(source,/known\?"chronelle.noEvents":"chronelle.limitedVisibility"/);
-  assert.match(source,/if\(!ownerId\)cache.current.set/);
+  assert.match(source,/\.then\(profileAgenda\)/);
+  assert.doesNotMatch(source,/calendarId|fetchAgenda|loadEvents|cache.current/);
 });

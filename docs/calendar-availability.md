@@ -4,7 +4,7 @@ The profile calendar and the direct-chat calendar popover use `CalendarAvailabil
 Busy intervals are normalized, clipped to the selected local day and merged.
 Per the product decision on October 20, 2026, gaps between returned intervals
 are displayed as free in both contexts. This is a display convention over the
-existing public API, not a change to Chronelle's visibility or authorization.
+permission-filtered projection, not a change to Chronelle's visibility or authorization.
 
 Busy periods use muted green on an 8px track. Past time is gently faded without
 hatching. Today's track has a single 1px vertical now marker with no visible
@@ -18,19 +18,22 @@ busy fraction (light below 3 occupied hours, balanced below 8 hours, full from
 8 hours onward). The ring and percentage use the actual local-day duration.
 A status dot supplements
 the accessible label; the popover also uses explicit text and a clock/check glyph.
-Only ordinary direct chats qualify. The authenticated friends list must
-contain the peer and a valid public calendar ID before a public calendar read
-is attempted. An existing conversation alone does not grant eligibility.
+Only ordinary direct chats qualify. Both the header and profile read
+`/users/{ownerId}/chronelle/calendar` through the authenticated API transport.
+The backend resolves the current OAuth binding and viewer-specific permissions;
+the header does not require a friendship or a retired public calendar ID.
 
-While visible, a single resource shared by both header buttons refreshes friendship,
-binding and the next three local days' events
+While visible, a single resource shared by both header buttons refreshes binding,
+permissions and the next three local days' events
 once per minute. Hidden pages stop requests. Returning to the page revalidates;
 changing account, peer or local date cannot display the preceding scope's data.
-Unbound/non-friend results remove the button; a confirmed binding with a failed
-calendar read shows a neutral unavailable state, never an empty/free day.
-Public calendar reads use `credentials: omit`
-and no authorization headers or read keys. Locked event titles and locations
-remain stripped. No backend schema, OAuth scopes or plugin permissions change.
+Hidden/unbound results remove the button; failed reads show a neutral unavailable
+state, never an empty/free day. Partial visibility keeps the calendar accessible
+but suppresses complete busy/free summaries, load ratios and forecasts.
+Header and profile use the same projection normalizer, strip locked event titles
+and locations, and do not cache OAuth calendar responses. Retired share-ID reads
+and unused legacy binding methods have been removed from the frontend.
+No backend schema, OAuth scopes or plugin permissions change.
 
 The popover shows the current busy/free state, merged busy interval end and next
 real free window. Adjacent and overlapping periods are merged before forecasting.

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.30.9",
+  "id": "2026.10.30.10",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "科研协作维护更新",
+      "title": "聊天日历恢复显示",
       "items": [
-        "完成科研协作维护更新，项目、邀请和日历保持原有操作方式"
+        "聊天顶部日历与用户名片统一，支持新版 Chronelle 绑定",
+        "遵循对方日历可见权限，信息不完整时不再误报空闲"
       ]
     },
     "en": {
-      "title": "Research workspace maintenance",
+      "title": "Chat calendar visibility restored",
       "items": [
-        "Research workspace maintenance with the same project, invitation and calendar workflows"
+        "Chat headers now show calendars from current Chronelle bindings, just like profiles",
+        "Calendar visibility follows sharing permissions without reporting incomplete schedules as free"
       ]
     }
   }

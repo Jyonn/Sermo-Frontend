@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { agendaAvailability, agendaBusyRanges, agendaDayProgress, fetchAgenda, normalizeAgenda, publicCalendarForFriend } from "../src/lib/chronelleAgenda.ts";
+import { agendaAvailability, agendaBusyRanges, agendaDayProgress, normalizeAgenda } from "../src/lib/chronelleAgenda.ts";
 
 test("elapsed time is clipped and the live marker only belongs to today", () => {
   const day = new Date(2026, 9, 20);
@@ -25,43 +25,23 @@ test("elapsed fraction follows the real duration of daylight-saving days", () =>
     assert.ok(Math.abs(agendaDayProgress(new Date(2026, 10, 1), new Date(2026, 10, 1, 12)).elapsed - 13 / 25 * 100) < 1e-9);
   } finally { if (previous === undefined) delete process.env.TZ; else process.env.TZ = previous; }
 });
-test("only a matching current friend with a valid binding supplies a calendar", () => {
-  const id = "00000000-0000-4000-8000-000000000001";
-  assert.equal(publicCalendarForFriend([{ user_id: 2, chronelle_calendar_id: id }], 2), id);
-  assert.equal(publicCalendarForFriend([{ user_id: 2, chronelle_calendar_id: id }], 3), null);
-  assert.equal(publicCalendarForFriend([], 2), null);
-  assert.equal(publicCalendarForFriend([{ user_id: 2 }], 2), null);
-  assert.equal(publicCalendarForFriend([{ user_id: 2, chronelle_calendar_id: "https://other.example/" }], 2), null);
-});
-test("public calendar fetch sends no cookies or authorization headers and forwards cancellation", async () => {
-  const original = globalThis.fetch;
-  const controller = new AbortController();
-  globalThis.fetch = async (url, options) => {
-    assert.equal(new URL(String(url)).origin, "https://chronelle.jyonn.space");
-    assert.equal(options?.credentials, "omit");
-    assert.equal(options?.referrerPolicy, "no-referrer");
-    assert.equal(options?.headers, undefined);
-    assert.equal(options?.signal, controller.signal);
-    return new Response("[]", { status: 200 });
-  };
-  try { assert.deepEqual(await fetchAgenda(new URLSearchParams({ share: "public-id" }), controller.signal), []); }
-  finally { globalThis.fetch = original; }
-});
 test("profiles use a fine line and both chat headers share one resource and popover", () => {
   const profile = readFileSync(new URL("../src/components/ChronelleCalendar.tsx", import.meta.url), "utf8");
   const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
   const gate = readFileSync(new URL("../src/components/ChatCalendarAvailability.tsx", import.meta.url), "utf8");
   assert.match(profile, /<CalendarAvailabilityBar events=\{items\}/);
   assert.match(gate, /<CalendarAvailabilityBar events=\{data.events\}/);
-  assert.match(gate, /api.getFriends\(controller.signal\)/);
-  assert.match(gate, /if \(!calendarId\) return null/);
+  assert.match(gate, /api.chronelleProfile\(peerId, params, controller.signal\)/);
+  assert.match(gate, /result.hidden \? null/);
+  assert.doesNotMatch(gate, /getFriends|calendarId|fetchAgenda|publicCalendarForFriend/);
+  assert.match(gate, /data.known && data.events/);
   assert.match(gate, /data\?\.scope === scope/);
   assert.equal(chat.match(/const chatCalendar = useChatCalendarAvailability\(/g)?.length, 1);
   assert.equal(chat.match(/<ChatCalendarAvailability data=\{chatCalendar\}/g)?.length, 2);
   const headerEnd = chat.indexOf("className={`chat-pinned-bar");
   assert.doesNotMatch(chat.slice(chat.lastIndexOf("</header>", headerEnd), headerEnd), /ChatCalendarAvailability/);
   assert.match(chat, /displayedChat\?\.purpose === "normal" \? displayedDirectPeerId : undefined/);
-  assert.match(gate, /<ChronelleCalendar calendarId=\{data.calendarId\}/);
+  assert.match(gate, /<ChronelleCalendar key=\{data.scope\} ownerId=\{data.ownerId\}/);
   assert.match(gate, /event.key === "Escape"/);
   assert.match(gate, /pointerdown/);
   const css = readFileSync(new URL("../src/components/CalendarAvailabilityBar.css", import.meta.url), "utf8");

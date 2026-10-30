@@ -431,7 +431,7 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 
 export const api = {
   ...createResearchApi(request),
-  chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<{status:'active'|'hidden';events:unknown[];availability:'known'|'unknown'}>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
+  chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<import('./chronelleProfile').ChronelleProfileDTO>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
   chronelleAccount(action?:string,confirmed?:boolean,callback?:{code?:string;state:string;error?:string}) { return request<{status:string;authorize_url?:string;rebind_required?:boolean;permissions_review_required?:boolean}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed,...callback}}:{})}); },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},
@@ -1582,18 +1582,6 @@ export const api = {
       auth: true,
       signal,
     });
-  },
-
-  authorizeChronelle() {
-    return request<{ authorize_url: string }>("/users/me/chronelle/authorize", { auth: true, method: "POST" });
-  },
-
-  claimChronelle() {
-    return request<{ status: "pending" | "approved" | "denied" | "expired"; chronelle_calendar_id?: string }>("/users/me/chronelle/claim", { auth: true, method: "POST" });
-  },
-
-  unbindChronelle() {
-    return request("/users/me/chronelle", { auth: true, method: "DELETE" });
   },
 
   getWechatMiniProgramBinding(signal?: AbortSignal) {

@@ -1,5 +1,3 @@
-import { chronelleOrigin } from "./chronelleOrigin.ts";
-
 export interface AgendaEvent {
   id: string;
   start: string;
@@ -47,17 +45,6 @@ export function agendaAvailability(events: AgendaEvent[], now: Date) {
     busyMinutes,
     tone: busyMinutes >= 480 ? "full" as const : busyMinutes >= 180 ? "balanced" as const : "light" as const,
   };
-}
-
-export function publicCalendarForFriend(friends: Array<{ user_id: number; chronelle_calendar_id?: string }>, peerId: number) {
-  const id = friends.find((friend) => friend.user_id === peerId)?.chronelle_calendar_id;
-  return id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null;
-}
-
-export async function fetchAgenda(params: URLSearchParams, signal: AbortSignal): Promise<unknown> {
-  const response = await fetch(`${chronelleOrigin()}/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
-  if (!response.ok) throw new Error("Calendar unavailable");
-  return response.json();
 }
 
 export function agendaDay(day = new Date(), delta = 0) {
