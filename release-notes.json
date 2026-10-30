@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.30.26",
+  "id": "2026.10.30.27",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "小哀表情仅在消息组的第一条气泡显示，后续消息更清爽",
-        "表情不再增加气泡间距，引用消息继续使用 1em 表情"
+        "带小哀表情的首条气泡不再显示 APTX 药丸，后续气泡保留药丸装饰"
       ]
     },
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "Ai expressions appear only on the first bubble in each message group",
-        "Expressions no longer add space between bubbles; replies keep 1em expressions"
+        "First bubbles with Ai expressions no longer show an APTX capsule; later bubbles keep the capsule accent"
       ]
     }
   }

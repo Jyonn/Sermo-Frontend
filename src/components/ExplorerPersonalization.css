@@ -106,6 +106,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
 .message-group.bubble-style-explorer-ai.self .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { right: auto; left: -12px; transform: translateY(-50%) rotate(60deg); }
+.message-group.bubble-style-explorer-ai .message-bubble:is(.group-start, :has(.explorer-ai-expression))::after { content: none; }
 .explorer-transformation-sweep, .explorer-transformation-ring { opacity: 0; }
 .explorer-wearables-lab > .explorer-motion-controls { flex: 0 0 auto; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .explorer-motion-controls > div { display: flex; gap: 6px; }
