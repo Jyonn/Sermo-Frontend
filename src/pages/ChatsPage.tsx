@@ -1823,7 +1823,9 @@ function renderMessageContent(
   }
 
   const text = message.payload?.text ?? message.text;
-  const prefix = <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle ?? message.chatBubbleStyle} />;
+  const prefix = groupClassName.split(" ").includes("group-start")
+    ? <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle ?? message.chatBubbleStyle} />
+    : null;
   const linkPreview = message.payload?.link_preview;
   const rawPreviewUrl = extractFirstMessageUrl(text);
   const previewUrl = linkPreview?.url ?? rawPreviewUrl ?? undefined;

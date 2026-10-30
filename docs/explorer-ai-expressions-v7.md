@@ -1,6 +1,8 @@
 # Ai expression set v7 and local transformation studies
 
-Status: production design, updated for release 2026.10.30.25.
+Status: production design, updated for release 2026.10.30.26.
+
+Release 26 supersedes the per-message placement and external headroom described below: only the first bubble in each message group receives an expression, using the existing group-start boundary. Later bubbles receive no portrait or placeholder. Portrait-specific external headroom is removed from actual message rows and reward previews, so artwork adds no spacing between bubbles. First-bubble replies retain 1em expressions; ordinary first bubbles retain 3em expressions.
 
 Preview: `http://127.0.0.1:5173/design/explorer?wearables=1` (`npm run dev -- --host 127.0.0.1`). The chat tab switches between Moonlight sweep, Lens flash and Double exposure; Replay restarts the three-second initial hold. The expression tab displays all ten portraits. Add a sample message exercises stable per-message choices.
 

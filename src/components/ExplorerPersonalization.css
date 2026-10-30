@@ -103,8 +103,6 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression { width: 1em; margin-inline-start: 0; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression > img { width: 1em; height: 1em; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply { row-gap: 6px; }
-.message-group.bubble-style-explorer-ai .message-bubble-wrap:has(> .message-bubble-shell > .message-bubble:not(.has-reply) .explorer-ai-expression) { margin-top: max(0px, calc(1.8em - 14px)); }
-.explorer-sample-message .explorer-bubble-preview { margin-top: .8em; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
 .message-group.bubble-style-explorer-ai.self .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { right: auto; left: -12px; transform: translateY(-50%) rotate(60deg); }

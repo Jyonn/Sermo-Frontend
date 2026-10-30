@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.30.25",
+  "id": "2026.10.30.26",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "普通消息保留 3em 小哀表情并向左延伸至内边距，保持在边框以内",
-        "引用消息恢复 1em 表情和紧凑间距，与引用内容对齐"
+        "小哀表情仅在消息组的第一条气泡显示，后续消息更清爽",
+        "表情不再增加气泡间距，引用消息继续使用 1em 表情"
       ]
     },
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "Regular messages keep 3em Ai expressions extending into the left padding, within the bubble border",
-        "Replies use 1em expressions with compact spacing, aligned with the quoted content"
+        "Ai expressions appear only on the first bubble in each message group",
+        "Expressions no longer add space between bubbles; replies keep 1em expressions"
       ]
     }
   }
