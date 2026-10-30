@@ -1,4 +1,5 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
+import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {
   createContext,
   memo,
@@ -1210,6 +1211,7 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
 });
 
 const MessageImageGallery = memo(function MessageImageGallery({
+  bubbleStyle,
   from,
   isEntering,
   isFirst,
@@ -1222,6 +1224,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   selectedClientIds,
   selectionMode,
 }: {
+  bubbleStyle?: ChatBubbleStyle;
   from: "self" | "other";
   isEntering: boolean;
   isFirst: boolean;
@@ -1354,6 +1357,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
+        <ExplorerAiExpression messageKey={messages[0].clientId} bubbleStyle={bubbleStyle} />
       </div>
     </div>
   );
@@ -1882,6 +1886,7 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
 }
 
 const MessageBubbleRow = memo(function MessageBubbleRow({
+  bubbleStyle,
   from,
   isEntering,
   isFirst,
@@ -2033,6 +2038,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
+        <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle} />
       </div>
     </div>
   );
@@ -2261,6 +2267,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           {rows.map((row) => row.kind === "gallery" ? (
             <Fragment key={`gallery:${row.messages[0].clientId}`}>
               <MessageImageGallery
+                bubbleStyle={group.chatBubbleStyle}
                 from={group.from}
                 isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
                 isFirst={row.startIndex === 0}
@@ -2278,6 +2285,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           ) : (
             <Fragment key={row.message.clientId}>
               <MessageBubbleRow
+                bubbleStyle={group.chatBubbleStyle}
                 from={group.from}
                 isEntering={enteringMessageIds.includes(row.message.clientId)}
                 isFirst={row.startIndex === 0}
@@ -2431,6 +2439,7 @@ function estimateMessageGroupHeight(group: MessageGroup) {
 }
 
 interface MessageBubbleRowProps {
+  bubbleStyle?: ChatBubbleStyle;
   from: "self" | "other";
   isEntering: boolean;
   isFirst: boolean;
@@ -9941,7 +9950,7 @@ function previewDemoGroups(config: ChatsPagePreviewConfig, t: ReturnType<typeof 
 
 function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig }) {
   const { t } = useI18n();
-  if (config.selfOnly) {
+  if (config.selfOnly || config.dialogue?.length) {
     const demoGroups = previewDemoGroups(config, t);
     const dialogue = config.dialogue?.length ? config.dialogue : [{ from: "self" as const, text: t("menu.bubblePreviewSelf") }];
     const groups = demoGroups.length ? demoGroups : dialogue.reduce<MessageGroup[]>((result, item, index) => {

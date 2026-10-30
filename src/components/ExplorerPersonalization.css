@@ -10,8 +10,7 @@
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 14%; width: 72%; height: 72%; border-radius: 12%; object-fit: cover; }
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
-/* Ai's ivory lab coat, auburn hair and muted plum form the whole skin.
-   The portrait closes each message group instead of repeating on every line. */
+/* Ai portraits sit beside each bubble, toward the conversation center. */
 :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
   --bubble-skin-other-bg: #faf1e5;
   --bubble-skin-other-color: #493339;
@@ -27,13 +26,8 @@
 }
 .message-group.bubble-style-explorer-ai { --ai-accent: #a76e55; --ai-detail: #986a68; }
 .message-group.bubble-style-explorer-ai.self { --ai-accent: #e0b89c; --ai-detail: #e5b7a5; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 25px 12px 16px; min-height: 0; background-image: linear-gradient(135deg, #c1866424, transparent 45%), radial-gradient(ellipse at 100% 100%, #ab73782b, transparent 70%); }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 16px; min-height: 0; background-image: linear-gradient(135deg, #c1866424, transparent 45%), radial-gradient(ellipse at 100% 100%, #ab73782b, transparent 70%); }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::before { content: ""; position: absolute; z-index: 0; inset: 5px; border: 1px solid var(--ai-detail); border-radius: inherit; opacity: .26; pointer-events: none; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 1; inset: auto 8px 10px auto; width: 12px; height: 6px; border: 1px solid #994c58; border-radius: 5px; background: linear-gradient(90deg, #b64a5e 50%, #fff0dd 50%); transform: rotate(-35deg); opacity: .8; pointer-events: none; }
-/* A narrow standing figure leaves room for text. Hair may peek above the rim;
-   the decoration never changes the message height or line spacing. */
-.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding-right: 38px; overflow: visible; }
-.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { inset: auto 5px 1px auto; width: 24px; height: 60px; border: 0; border-radius: 0; background: url("/activity/explorer-2026/ai-fullbody-v6.webp") center bottom/contain no-repeat; transform: none; opacity: 1; }
 html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
   --bubble-skin-other-bg: #46353b;
   --bubble-skin-other-color: #fff1df;
@@ -43,11 +37,11 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
   --bubble-skin-self-color: #fff0de;
 }
 .personalization-option.preview-explorer-ai > i { background: linear-gradient(120deg, #f5e8d5 0 34%, #493448 35%); border: 1px solid #bd8b73; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #c38d6d30, 0 3px 0 #35273c30; }
-.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 24px; height: 60px; right: 4px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-fullbody-v6.webp") center bottom/contain no-repeat; }
+.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 36px; height: 36px; right: -8px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-expressions-v7/cool.webp") center bottom/contain no-repeat; }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #0c2138; pointer-events: none; }
 .explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
-.explorer-wearables-lab > nav { display: flex; gap: 8px; padding: 12px; flex-shrink: 0; background: var(--surface); }
-.explorer-wearables-lab > nav button { flex: 1; padding: 10px 4px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); background: var(--surface); }
+.explorer-wearables-lab > nav { display: flex; gap: 4px; padding: 8px; flex-shrink: 0; background: var(--surface); }
+.explorer-wearables-lab > nav button { flex: 1; padding: 10px 2px; font-size: 12px; white-space: nowrap; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); background: var(--surface); }
 .explorer-wearables-lab > :not(nav) { flex: 1; min-height: 0; }
 .explorer-wearables-lab > .profile-card-preview-scale { zoom: 1; box-sizing: border-box; }
 .explorer-wearables-lab > .chat-conversation-preview { height: auto; max-height: none; }
@@ -102,3 +96,22 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 @keyframes explorer-petal-fall { to { transform: translate(-90px, 240px) rotate(230deg); } }
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
 @media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-transformation-stage { visibility: hidden; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
+
+.explorer-ai-expression { width: 40px; height: 40px; flex: 0 0 40px; object-fit: contain; align-self: flex-end; pointer-events: none; user-select: none; }
+.message-bubble-shell.self > .explorer-ai-expression { order: -1; }
+.message-group.bubble-style-explorer-ai .message-bubble-shell { gap: 6px; }
+.message-group.bubble-style-explorer-ai .message-bubble-shell > .message-bubble { min-width: 0; }
+.explorer-transformation-sweep, .explorer-transformation-ring { opacity: 0; }
+.explorer-wearables-lab > .explorer-motion-controls { flex: 0 0 auto; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.explorer-motion-controls > div { display: flex; gap: 6px; }
+.explorer-motion-controls button { flex: 1; padding: 9px 4px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); background: var(--surface); font-size: 12px; }
+.explorer-motion-controls button[aria-pressed="true"] { background: #203b52; border-color: #6489a3; color: #fff5e3; }
+.explorer-motion-controls p { font-size: 12px; line-height: 1.5; margin: 8px 0; color: var(--muted); }
+.explorer-motion-controls footer { display: flex; gap: 8px; }
+.explorer-expression-gallery { overflow: auto; padding: 18px; background: var(--surface); }
+.explorer-expression-gallery h2 { font-size: 20px; margin: 0 0 8px; }
+.explorer-expression-gallery p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.explorer-expression-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.explorer-expression-grid figure { margin: 0; padding: 14px 10px 10px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-soft, #d9c6b518); text-align: center; }
+.explorer-expression-grid img { display: block; width: 100%; height: 115px; object-fit: contain; margin-bottom: 10px; }
+.explorer-expression-grid figcaption { font-size: 12px; color: var(--text-primary); }

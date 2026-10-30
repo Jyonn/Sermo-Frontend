@@ -16,7 +16,7 @@ export const EXPLORER_ART = {
   banner: "/activity/explorer-2026/banner-v2.webp",
   title: "/activity/explorer-2026/title.webp",
   frame: "/activity/explorer-2026/frame-v2.webp",
-  bubble: "/activity/explorer-2026/ai-fullbody-v6.webp",
+  bubble: "/activity/explorer-2026/ai-expressions-v7/cool.webp",
   background: "/activity/explorer-2026/conan-night-v2.webp",
   backgroundAlternate: "/activity/explorer-2026/shinichi-night-v2.webp",
   profile: "/activity/explorer-2026/romance-v2.webp",
@@ -28,5 +28,6 @@ export function explorerRewardArt(tier: number) {
 }
 
 export function explorerRewardThumbnail(tier: number) {
+  if (tier === 2) return "/activity/explorer-2026/ai-expressions-v7/cool-thumb.webp";
   return explorerRewardArt(tier).replace(/(-v\d+)\.webp$/, "-thumb$1.webp");
 }

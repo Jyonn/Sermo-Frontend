@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.30.20",
+  "id": "2026.10.30.21",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "探索者外观 · 金光变身",
+      "title": "探索者外观 · 小哀表情",
       "items": [
-        "小哀气泡改为窄幅全身肖像，减少文字占位，保持气泡高度一致",
-        "新一与柯南改为人物全身闪金光后切换，手机端也可播放",
-        "移除粒子逐帧绘制，后台和离屏时停止动画"
+        "新增十款小哀表情，每条消息在气泡外的内侧展示一款固定表情",
+        "移除药丸装饰和气泡内肖像，为文字留出完整空间"
       ]
     },
     "en": {
-      "title": "Explorer styles · Golden transformation",
+      "title": "Explorer styles · Ai expressions",
       "items": [
-        "Ai bubbles use a narrow full-body portrait with more room for text and consistent bubble heights",
-        "Shinichi and Conan switch identities through a full-body golden flash, including on phones",
-        "Removed per-frame particle drawing; motion stops in the background and offscreen"
+        "Ten Ai expressions appear outside message bubbles, toward the center, with a stable choice per message",
+        "Removed pill decorations and in-bubble portraits to give text its full space"
       ]
     }
   }
