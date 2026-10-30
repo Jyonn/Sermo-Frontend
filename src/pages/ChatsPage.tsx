@@ -1282,6 +1282,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           className={`message-image-gallery message-media-frame ${groupClassName}`}
           style={{ "--message-gallery-columns": columns } as CSSProperties}
         >
+          <ExplorerAiExpression messageKey={messages[0].clientId} bubbleStyle={bubbleStyle}>
           <div className="message-image-gallery-grid">
             {visibleMessages.map((message, index) => {
               const uri = fullUris[index];
@@ -1352,12 +1353,12 @@ const MessageImageGallery = memo(function MessageImageGallery({
               );
             })}
           </div>
+          </ExplorerAiExpression>
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
           <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
-        <ExplorerAiExpression messageKey={messages[0].clientId} bubbleStyle={bubbleStyle} />
       </div>
     </div>
   );
@@ -2017,6 +2018,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
+          <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={message.kind === "sticker" ? undefined : bubbleStyle}>
           {message.replyTo ? (
             <button
               className="message-reply-preview"
@@ -2032,13 +2034,13 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             </button>
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message))}
+          </ExplorerAiExpression>
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
           <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
-        <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle} />
       </div>
     </div>
   );

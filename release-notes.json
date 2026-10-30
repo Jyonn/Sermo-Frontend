@@ -5,7 +5,7 @@
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "新增十款小哀表情，以贴边探头的方式装饰气泡内侧，保留完整文字空间",
+        "新增十款小哀表情，统一大小置于气泡内侧方形区域，以居中短线分隔文字",
         "新一与柯南改用月光掠影切换，修复新一左脚被裁掉的问题",
         "移除药丸装饰和旧版金光效果"
       ]
@@ -13,7 +13,7 @@
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "Ten Ai expressions peek around the inner bubble edge, keeping text unobstructed",
+        "Ten uniformly sized Ai expressions sit in a square compartment on the inner side of each bubble, separated from text by a centered short line",
         "Shinichi and Conan switch through a moonlight sweep; Shinichi's left foot is no longer cropped out",
         "Removed pill decorations and the previous gold effect"
       ]
