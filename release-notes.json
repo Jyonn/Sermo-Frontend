@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.30.21",
+  "id": "2026.10.30.22",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
       "title": "探索者外观 · 小哀表情",
       "items": [
-        "新增十款小哀表情，以文字同等大小显示在消息开头，自然随文字换行",
-        "新一与柯南改用月光掠影切换，修复新一左脚被裁掉的问题",
-        "气泡边框新增 APTX 药丸装饰，移除头像分区、分隔线和旧版金光效果"
+        "小哀表情放大为文字的两倍，保持文字上边距和行高不变",
+        "为表情预留横向空间，避免遮挡消息文字"
       ]
     },
     "en": {
       "title": "Explorer styles · Ai expressions",
       "items": [
-        "Ten Ai expressions appear at the start of messages, matching the text size and flowing naturally with it",
-        "Shinichi and Conan switch through a moonlight sweep; Shinichi's left foot is no longer cropped out",
-        "Added APTX capsules to bubble borders; removed portrait compartments, dividers and the previous gold effect"
+        "Ai expressions are twice the text size while preserving text top padding and line height",
+        "Dedicated inline space keeps enlarged expressions clear of message text"
       ]
     }
   }

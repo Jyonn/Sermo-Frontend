@@ -37,7 +37,12 @@ export default function ExplorerActivityLabPage() {
   const [variant, setVariant] = useState<ExplorerTransformationVariant>("moonlight");
   const [replay, setReplay] = useState(0);
   const [messageCount, setMessageCount] = useState(4);
-  const dialogue = Array.from({ length: messageCount }, (_, index) => ({ from: (index % 4 < 2 ? "other" : "self") as "self" | "other", text: t(index % 2 ? "explorer.previewReply" : "explorer.previewLine") }));
+  const dialogue = Array.from({ length: messageCount }, (_, index) => ({
+    from: (index % 4 < 2 ? "other" : "self") as "self" | "other",
+    text: t(index % 2 ? "explorer.previewReply" : "explorer.previewLine"),
+    replyTo: index % 2 === 0 && new URLSearchParams(window.location.search).has("reply")
+      ? { message_id: 1, user: { user_id: 2, name: t("explorer.previewName") }, type: 1, content: t("explorer.previewReply"), is_deleted: false } : undefined,
+  }));
   const activity = sampleActivity(completed);
   if (new URLSearchParams(window.location.search).has("wearables")) return <main className="explorer-wearables-lab">
     <nav aria-label={t("menu.personalization")}>

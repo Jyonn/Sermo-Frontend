@@ -96,7 +96,11 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
 @media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-transformation-stage { visibility: hidden; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
 
-.explorer-ai-expression { display: inline-block; width: 1em; height: 1em; margin-inline-end: .25em; vertical-align: -.12em; object-fit: contain; pointer-events: none; user-select: none; }
+/* Reserve the portrait's width but only one em of line height. The artwork
+   grows upward, leaving the text's original padding and baseline unchanged. */
+.explorer-ai-expression { display: inline-block; position: relative; width: 2em; height: 1em; margin-inline-end: .25em; vertical-align: -.12em; pointer-events: none; user-select: none; }
+.explorer-ai-expression > img { position: absolute; inset-inline-start: 0; bottom: 0; width: 2em; height: 2em; object-fit: contain; }
+.message-group.bubble-style-explorer-ai .message-bubble.has-reply:has(> .message-text > .explorer-ai-expression) { row-gap: .9em; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
 .message-group.bubble-style-explorer-ai.self .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { right: auto; left: -12px; transform: translateY(-50%) rotate(60deg); }

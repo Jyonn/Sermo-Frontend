@@ -3,5 +3,5 @@ import { explorerExpressionForMessage, explorerExpressionSrc } from "../lib/expl
 
 export function ExplorerAiExpression({ messageKey, bubbleStyle, children }: { messageKey: string; bubbleStyle?: string; children?: ReactNode }) {
   const expression = explorerExpressionForMessage(messageKey);
-  return <>{bubbleStyle === "explorer-ai" ? <img aria-hidden="true" className="explorer-ai-expression" data-expression={expression} alt="" src={explorerExpressionSrc(expression)} width="20" height="20" decoding="async" draggable={false} /> : null}{children}</>;
+  return <>{bubbleStyle === "explorer-ai" ? <span aria-hidden="true" className="explorer-ai-expression" data-expression={expression}><img alt="" src={explorerExpressionSrc(expression)} width="40" height="40" decoding="async" draggable={false} /></span> : null}{children}</>;
 }

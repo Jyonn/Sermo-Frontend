@@ -9760,6 +9760,7 @@ export interface ChatsPagePreviewConfig {
   dialogue?: Array<{
     from: "self" | "other";
     text: string;
+    replyTo?: QuotedMessageDTO;
     kind?: "text" | "location";
     latitude?: number;
     longitude?: number;
@@ -9953,7 +9954,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
     const dialogue = config.dialogue?.length ? config.dialogue : [{ from: "self" as const, text: t("menu.bubblePreviewSelf") }];
     const groups = demoGroups.length ? demoGroups : dialogue.reduce<MessageGroup[]>((result, item, index) => {
       const kind = item.kind ?? "text";
-      const preview = previewMessage(kind, item.from, index + 1, config);
+      const preview = { ...previewMessage(kind, item.from, index + 1, config), replyTo: item.replyTo };
       const message: ChatMessage = kind === "location"
         ? { ...preview, payload: { ...preview.payload, kind: "location", latitude: item.latitude ?? 24.4798, longitude: item.longitude ?? 118.0894, address: item.text } }
         : { ...preview, text: item.text };
