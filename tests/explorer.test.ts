@@ -64,7 +64,7 @@ test("Explorer uses two local portrait layers and profile scenes remain opt-in",
   assert.match(profile, /profileTheme=\{user.profile_card_theme\}/);
 });
 
-test("gold flash bounds contain complete bodies without covering the sky or city", () => {
+test("portrait bounds contain complete bodies without covering the sky or city", () => {
   for (const name of ["conan", "shinichi"] as const) {
     const bounds = explorerPortraitBounds(name);
     assert.ok(bounds.width < 300 && bounds.height < 550);
@@ -78,6 +78,20 @@ test("gold flash bounds contain complete bodies without covering the sky or city
   assert.ok(!scene.includes("getContext"));
   assert.ok(!scene.includes("hardwareConcurrency"));
   assert.ok(readFileSync(new URL("../public/activity/explorer-2026/roof-night-v4.webp", import.meta.url)).length < 500_000);
+});
+
+test("Shinichi crop preserves both shoes and keeps the space between his legs clear", () => {
+  const contains = ([x, y]: number[]) => EXPLORER_SILHOUETTES.shinichi.some((polygon) => {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [xi, yi] = polygon[i], [xj, yj] = polygon[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  });
+  // Landmarks in the 960 x 1440 source art: left toe, left heel, right shoe.
+  for (const point of [[687,1230], [747,1231], [805,1250], [738,1190]]) assert.ok(contains(point), `body crop excludes ${point}`);
+  assert.ok(!contains([770,1200]), "roof between the legs must not become part of the actor");
 });
 
 test("landscape keeps the standing figure inside the viewport and cover layers aligned", () => {

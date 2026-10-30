@@ -4,9 +4,9 @@ import { EXPLORER_ART } from "../lib/explorer";
 import { createExplorerMotionLease, createExplorerPlayback, explorerMotionAllowed, EXPLORER_TRANSITION_MS } from "../lib/explorerPlayback";
 
 const lease = createExplorerMotionLease();
-export type ExplorerTransformationVariant = "gold" | "moonlight" | "lens" | "echo";
-// Local comparison can override this without changing the released preference.
-export const ExplorerTransformationContext = createContext<ExplorerTransformationVariant>("gold");
+export type ExplorerTransformationVariant = "moonlight" | "lens" | "echo";
+// The selected effect is also used by real chats and personalization previews.
+export const ExplorerTransformationContext = createContext<ExplorerTransformationVariant>("moonlight");
 const portraits = (["conan", "shinichi"] as const).map((name, index) => ({
   name, index, bounds: explorerPortraitBounds(name),
   image: index === 0 ? EXPLORER_ART.background : EXPLORER_ART.backgroundAlternate,
@@ -39,12 +39,6 @@ export function ExplorerTransformationWallpaper({ compact }: { compact: boolean 
           const incoming = Number(actor.dataset.index) === to;
           const opacity = incoming ? [0, 0, 1, 1] : [1, 1, 0, 0];
           if (variant !== "echo") animations.push(actor.animate(opacity.map((value, index) => ({ opacity: value, offset: [0, .46, .54, 1][index] })), options));
-          const gold = variant === "gold" ? actor.querySelector<SVGGElement>(".explorer-transformation-gold") : null;
-          if (gold) animations.push(gold.animate([
-            { opacity: 0, offset: 0 }, { opacity: .65, offset: .22 },
-            { opacity: 1, offset: .42 }, { opacity: 1, offset: .60 },
-            { opacity: .3, offset: .8 }, { opacity: 0, offset: 1 },
-          ], options));
           if (variant === "moonlight") {
             const sweep = actor.querySelector<SVGElement>(".explorer-transformation-sweep");
             if (sweep) animations.push(sweep.animate([
@@ -133,9 +127,6 @@ export function ExplorerTransformationWallpaper({ compact }: { compact: boolean 
         viewBox={`${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}`}>
         <defs>
           <clipPath id={`${id}-${name}-clip`}>{EXPLORER_SILHOUETTES[name].map((polygon, part) => <polygon key={part} points={polygon.map((point) => point.join(",")).join(" ")} />)}</clipPath>
-          <linearGradient id={`${id}-${name}-gold`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#fff4b2" /><stop offset=".48" stopColor="#ffda67" /><stop offset="1" stopColor="#d89a28" />
-          </linearGradient>
           <linearGradient id={`${id}-${name}-moon`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor="#a0dcff" stopOpacity="0" /><stop offset=".5" stopColor="#effcff" stopOpacity=".95" /><stop offset="1" stopColor="#a0dcff" stopOpacity="0" />
           </linearGradient>
@@ -144,9 +135,6 @@ export function ExplorerTransformationWallpaper({ compact }: { compact: boolean 
           </radialGradient>
         </defs>
         <image href={image} width="960" height="1440" clipPath={`url(#${id}-${name}-clip)`} />
-        <g className="explorer-transformation-gold" fill={`url(#${id}-${name}-gold)`} stroke="#ffeaa5" strokeWidth="6" strokeLinejoin="round">
-          {EXPLORER_SILHOUETTES[name].map((polygon, part) => <polygon key={part} points={polygon.map((point) => point.join(",")).join(" ")} />)}
-        </g>
         <g clipPath={`url(#${id}-${name}-clip)`}><rect className="explorer-transformation-sweep" x={bounds.left} y={bounds.top + bounds.height / 2 - 60} width={bounds.width} height="120" fill={`url(#${id}-${name}-moon)`} /></g>
         <g className="explorer-transformation-ring" style={{ transformOrigin: "center", transformBox: "fill-box" }} fill="none" stroke="#d4eeff">
           <ellipse cx="740" cy={bounds.top + bounds.height / 2} rx={bounds.width * .6} ry={bounds.height * .52} fill={`url(#${id}-${name}-lens)`} stroke="none" />
