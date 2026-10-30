@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.30.11",
+  "id": "2026.10.30.12",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "探索者年度藏品焕新",
+      "title": "探索者外观与动态效果升级",
       "items": [
-        "探索者活动换上月夜新主视觉，转发卡片同步使用完整横幅",
-        "五件年度藏品全面升级，可逐件查看头像框、双向气泡、变换背景与动态名片的实际效果",
-        "优化手机与深色模式展示，修复头像框装饰被裁切的问题"
+        "修正柯南头像框与头像的贴合，重做小哀气泡的双色材质与推理细节",
+        "柯南与新一聊天背景通过像素碎裂、聚合完成切换",
+        "新一与小兰名片加入独立人物、城市、雨幕、灯光与水波动态层"
       ]
     },
     "en": {
-      "title": "A new look for Explorer collectibles",
+      "title": "Explorer skins come to life",
       "items": [
-        "A moonlit Explorer visual now carries through the event and full-width shared cards",
-        "Discover five refreshed collectibles with real avatar, chat bubble, shifting wallpaper and animated profile previews",
-        "Improved mobile and dark-mode layouts, with complete avatar-frame ornaments"
+        "A fitted Conan frame and redesigned Ai bubbles with two-tone materials and detective details",
+        "Conan and Shinichi wallpapers now switch through a pixel burst and reassembly",
+        "Shinichi and Ran profiles gain layered characters, city, rain, lights and water motion"
       ]
     }
   }

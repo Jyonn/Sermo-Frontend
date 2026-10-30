@@ -101,13 +101,12 @@
 .explorer-chat-display { display: flex; flex-direction: column; gap: 24px; padding: 24px; }
 .explorer-showcase > .explorer-chat-display.personalization-bubble-stage { margin: 0; border: 0; border-radius: 0; background: transparent; }
 .explorer-specimen-label { position: relative; z-index: 1; display: block; color: #e4d2a9; font-size: 9px; letter-spacing: .12em; }
-.explorer-sample-message { display: flex; align-items: flex-start; gap: 12px; }
+.explorer-chat-display .explorer-sample-message { display: flex; align-items: flex-start; gap: 12px; }
 .explorer-sample-avatar { flex: 0 0 34px; width: 34px; height: 34px; border-radius: 9px; }
 .explorer-sample-avatar .avatar-label { color: #22394c; background: #e9dfcb; }
 .explorer-sample-message > div { min-width: 0; }
 .explorer-sample-message small { display: block; margin-bottom: 6px; color: #d0d8db; font-size: 10px; }
-.explorer-bubble-preview { position: relative; min-height: 62px; padding: 15px 65px 15px 14px; border: 1px solid var(--bubble-skin-other-border); border-radius: var(--bubble-skin-other-radius); color: var(--bubble-skin-other-color); background: var(--bubble-skin-other-bg); box-shadow: var(--bubble-skin-other-shadow); font-size: 12px; line-height: 1.7; }
-.explorer-bubble-preview::after { content: ""; position: absolute; right: 1px; bottom: 0; width: 58px; height: 65px; background: url("/activity/explorer-2026/ai-v2.webp") right bottom/contain no-repeat; pointer-events: none; }
+.explorer-bubble-preview { position: relative; border: 1px solid var(--bubble-skin-other-border); border-radius: var(--bubble-skin-other-radius); color: var(--bubble-skin-other-color); background: var(--bubble-skin-other-bg); box-shadow: var(--bubble-skin-other-shadow); font-size: 12px; line-height: 1.7; }
 .explorer-sample-message.self { align-self: flex-end; max-width: 83%; }
 .explorer-sample-message.self .explorer-bubble-preview { color: var(--bubble-skin-self-color); background: var(--bubble-skin-self-bg); border-color: var(--bubble-skin-self-border); border-radius: var(--bubble-skin-self-radius); box-shadow: var(--bubble-skin-self-shadow); }
 .explorer-showcase > .explorer-wallpaper-display { position: relative; width: 190px; height: 260px; overflow: hidden; border: 1px solid #d8b66f77; border-radius: 13px; box-shadow: 0 12px 24px #020d2499; }

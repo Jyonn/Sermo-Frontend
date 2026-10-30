@@ -6,8 +6,10 @@ import type { UserDTO } from "../types";
 import { useI18n } from "../lib/language";
 import "./FounderMedals.css";
 import { GrowthHonor } from "./GrowthHonor";
+import { ExplorerProfileScene } from "./ExplorerProfileScene";
 
 interface UserProfileCardProps {
+  profileTheme?: UserDTO["profile_card_theme"];
   avatarLabel?: string;
   avatarFrame?: UserDTO["avatar_frame_style"];
   avatarUri?: string;
@@ -28,6 +30,7 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({
+  profileTheme,
   avatarLabel,
   avatarFrame,
   avatarUri,
@@ -49,7 +52,7 @@ export function UserProfileCard({
   const { t } = useI18n();
   return (
     <section className="user-profile-social-card">
-      <div className="user-profile-cover" aria-hidden="true" />
+      <div className="user-profile-cover" aria-hidden="true">{profileTheme === "explorer-romance" ? <ExplorerProfileScene /> : null}</div>
       <div className="user-profile-identity">
         <button
           aria-disabled={!onAvatarClick}

@@ -1,55 +1,99 @@
 .user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan {
-  --avatar-frame-inset: 12%;
+  --avatar-frame-inset: 0%;
   --avatar-frame-paint: transparent;
   overflow: visible;
   background: transparent;
 }
-.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: -9%; background: url("/activity/explorer-2026/frame-v2.webp") center/contain no-repeat; pointer-events: none; }
+.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: 0; background: url("/activity/explorer-2026/frame-v2.webp") center/100% 100% no-repeat; pointer-events: none; }
+/* The painted aperture is x/y 16–84%. Bleed the portrait under its inner rim;
+   inheriting the app's 28% avatar radius leaves four visible empty corners. */
+.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 14%; width: 72%; height: 72%; border-radius: 12%; object-fit: cover; }
+.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
 :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
-  --bubble-skin-other-bg: #f0eee4;
-  --bubble-skin-other-color: #263242;
-  --bubble-skin-other-border: #7b8696;
-  --bubble-skin-other-shadow: 3px 3px 0 #526175;
-  --bubble-skin-self-bg: #dce9dc;
-  --bubble-skin-self-color: #243d36;
-  --bubble-skin-self-border: #617a72;
-  --bubble-skin-self-shadow: 3px 3px 0 #445f57;
-  --bubble-skin-other-radius: 10px 10px 4px 10px;
-  --bubble-skin-self-radius: 10px 10px 4px 10px;
-  --bubble-skin-border-width: 2px;
+  --bubble-skin-other-bg: #f7eee1;
+  --bubble-skin-other-color: #493735;
+  --bubble-skin-other-border: #9e7362;
+  --bubble-skin-other-shadow: inset 0 0 0 3px #fff8eb, 0 3px 0 #6b48456b;
+  --bubble-skin-self-bg: #254a48;
+  --bubble-skin-self-color: #f3f0dc;
+  --bubble-skin-self-border: #a6bfa5;
+  --bubble-skin-self-shadow: inset 0 0 0 3px #183a39, 0 3px 0 #122e3970;
+  --bubble-skin-other-radius: 5px 19px 19px 19px;
+  --bubble-skin-self-radius: 19px 5px 19px 19px;
+  --bubble-skin-border-width: 1px;
 }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding-right: 64px; min-height: 60px; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; inset: auto 1px 0 auto; width: 58px; height: 62px; background: url("/activity/explorer-2026/ai-v2.webp") center bottom/contain no-repeat; border: 0; transform: none; pointer-events: none; }
+.message-group.bubble-style-explorer-ai { --ai-accent: #bd8c66; --ai-detail: #89655c; }
+.message-group.bubble-style-explorer-ai.self { --ai-accent: #b6cda6; --ai-detail: #aec5b0; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 30px 12px 16px; min-height: 0; background-image: radial-gradient(circle at calc(100% - 12px) 12px, var(--ai-accent) 0 2px, transparent 2.5px), linear-gradient(135deg, transparent 55%, #c4ad8630); }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::before { content: ""; position: absolute; z-index: 0; inset: 6px; border: 1px solid var(--ai-detail); border-radius: inherit; opacity: .22; pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 1; inset: auto 7px 8px auto; width: 10px; height: 12px; border: 1px solid var(--ai-accent); border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--ai-accent) 0 1.5px, transparent 2px); box-shadow: 3px -2px 0 -2px var(--ai-accent); transform: rotate(35deg); opacity: .8; pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble > * { position: relative; }
 html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
-  --bubble-skin-other-bg: #27313e;
-  --bubble-skin-other-color: #f2eadd;
-  --bubble-skin-other-border: #85939f;
-  --bubble-skin-self-bg: #294239;
-  --bubble-skin-self-color: #ecf3e4;
+  --bubble-skin-other-bg: #493936;
+  --bubble-skin-other-color: #fff1df;
+  --bubble-skin-other-border: #bd947b;
+  --bubble-skin-other-shadow: inset 0 0 0 3px #382c2b, 0 3px 0 #1e202766;
+  --bubble-skin-self-bg: #244643;
+  --bubble-skin-self-color: #f0f1da;
 }
-.field-chat_bubble_style .personalization-option.preview-explorer-ai > i { background: #e8e9da url("/activity/explorer-2026/ai-v2.webp") right bottom/contain no-repeat; border: 2px solid #7b8696; border-radius: 7px; box-shadow: 2px 2px 0 #526175; }
+.personalization-option.preview-explorer-ai > i { background: #254a48; border: 1px solid #a6bfa5; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #183a39, 0 3px 0 #122e3970; }
+.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 12px; height: 16px; right: 10px; top: 8px; border: 1px solid #b6cda6; border-radius: 50%; transform: rotate(35deg); background: radial-gradient(circle, #b6cda6 0 2px, transparent 2.5px); }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-.explorer-transform-state { opacity: 0; animation: explorer-duality 12s ease-in-out infinite; animation-play-state: paused; }
-.explorer-living-wallpaper.is-visible.is-active .explorer-transform-state { animation-play-state: running; }
+.explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
+.explorer-wearables-lab > nav { display: flex; gap: 8px; padding: 12px; flex-shrink: 0; background: var(--surface); }
+.explorer-wearables-lab > nav button { flex: 1; padding: 10px 4px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); background: var(--surface); }
+.explorer-wearables-lab > :not(nav) { flex: 1; min-height: 0; }
+.explorer-wearables-lab > .profile-card-preview-scale { zoom: 1; box-sizing: border-box; }
+.explorer-wearables-lab > .chat-conversation-preview { height: auto; max-height: none; }
+.explorer-wearables-lab .chat-conversation-preview .chat-detail-scene, .explorer-wearables-lab .chat-conversation-preview .message-scroll { height: 100%; max-height: none; }
+.explorer-wallpaper-still { opacity: 0; }
+.explorer-pixel-tile { animation: explorer-duality 14s cubic-bezier(.22,.7,.2,1) infinite both; animation-delay: calc(-14s + var(--burst-lag)); animation-play-state: paused; transform-box: view-box; }
+.explorer-pixel-portrait.is-shinichi .explorer-pixel-tile { animation-delay: calc(-7s + var(--burst-lag)); }
+.explorer-pixel-sparks { fill: #d9c396; }
+.explorer-pixel-sparks rect { opacity: 0; animation: explorer-pixel-sparks 7s ease-out infinite; animation-delay: var(--burst-lag); animation-play-state: paused; }
+.explorer-living-wallpaper.is-visible.is-active :is(.explorer-pixel-tile, .explorer-pixel-sparks rect) { animation-play-state: running; }
 :is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center/cover no-repeat; }
 :is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 75%/cover no-repeat; }
 .chat-background-explorer-duality { --chat-chrome-surface: #0e253be8; --chat-chrome-border: #c4d6e42b; --chat-chrome-text: #f3eee2; --chat-input-surface: #162f46; }
 .user-profile-panel.profile-theme-explorer-romance { --profile-page: #f5efdf; --profile-card: #fffbef; --profile-card-soft: #e9e5d9; --profile-ink: #203443; --profile-muted: #6a7680; --profile-line: #28425724; --profile-deep: #203b52; --profile-action: #a75d4f; background: var(--profile-page); color: var(--profile-ink); }
 html[data-theme="dark"] .user-profile-panel.profile-theme-explorer-romance { --profile-page: #12202d; --profile-card: #1a2b39; --profile-card-soft: #223644; --profile-ink: #fff3dd; --profile-muted: #b4c3ce; --profile-line: #bdcbd82a; --profile-deep: #e8d4ae; --profile-action: #e7ae92; }
-.user-profile-panel.profile-theme-explorer-romance .user-profile-cover,
+.user-profile-panel.profile-theme-explorer-romance .user-profile-social-card .user-profile-cover,
 html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance .user-profile-cover { height: 190px; background: radial-gradient(ellipse at 85% 40%, #53616b, #182f43 65%); }
-.profile-theme-explorer-romance .user-profile-cover::before { content: ""; position: absolute; inset: -4px; width: auto; height: auto; border: 0; border-radius: 0; background: url("/activity/explorer-2026/romance-v2.webp") center 42%/cover no-repeat; opacity: 1; animation: explorer-romance-float 7s ease-in-out infinite; }
-.profile-theme-explorer-romance .user-profile-cover::after { content: ""; position: absolute; inset: -100% 0; width: auto; height: auto; border: 0; border-radius: 0; background: repeating-linear-gradient(115deg, transparent 0 40px, #d8e4ef24 41px 42px, transparent 43px 83px); animation: explorer-rain 3s linear infinite; pointer-events: none; }
+.profile-theme-explorer-romance .user-profile-cover::before, .profile-theme-explorer-romance .user-profile-cover::after { content: none; }
+.explorer-profile-scene, .explorer-profile-scene > div { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.explorer-profile-city { background: #183347 url("/activity/explorer-2026/romance-city-v3.webp") center 58%/cover; transform: scale(1.06); animation: explorer-city-drift 18s ease-in-out infinite alternate; }
+.explorer-profile-couple { background: url("/activity/explorer-2026/romance-couple-v3.webp") right bottom/auto 110% no-repeat; transform-origin: 78% 100%; animation: explorer-umbrella-sway 6s ease-in-out infinite; }
+.explorer-profile-vignette { background: linear-gradient(90deg, #182f4340, transparent 50%), linear-gradient(0deg, #142e4266, transparent 35%); }
+.explorer-profile-rain { background: repeating-linear-gradient(111deg, transparent 0 34px, #dbe4ed40 35px, transparent 36px 67px); transform: translateY(-36px); animation: explorer-rain .9s linear infinite; }
+.explorer-profile-rain.is-back { opacity: .3; background-size: 81px 100%; animation-duration: 1.7s; }
+.explorer-profile-rain.is-front { opacity: .45; }
+.explorer-profile-water i { position: absolute; left: 10%; bottom: 13%; width: 80px; height: 7px; border: 1px solid #e2c79980; border-radius: 50%; animation: explorer-water-ring 3s ease-out infinite; }
+.explorer-profile-water i:nth-child(2) { left: 40%; bottom: 26%; animation-delay: -1s; }.explorer-profile-water i:nth-child(3) { left: 24%; bottom: 38%; animation-delay: -2s; }
+.explorer-profile-lanterns i { position: absolute; left: 12%; top: 52%; width: 70px; height: 70px; background: radial-gradient(circle, #ffc77d55, transparent 70%); animation: explorer-lamp-breathe 3.7s ease-in-out infinite alternate; }
+.explorer-profile-lanterns i:nth-child(2) { left: 37%; top: 40%; animation-delay: -2s; }.explorer-profile-lanterns i:nth-child(3) { left: 63%; top: 30%; animation-delay: -1s; }
+.explorer-profile-petals i { position: absolute; left: 65%; top: -8px; width: 6px; height: 4px; border-radius: 65% 15%; background: #e4b4a0; animation: explorer-petal-fall 8s linear infinite; }
+.explorer-profile-petals i:nth-child(2) { left: 40%; animation-delay: -2s; }.explorer-profile-petals i:nth-child(3) { left: 80%; animation-delay: -4s; }.explorer-profile-petals i:nth-child(4) { left: 15%; animation-delay: -6s; }
+.explorer-profile-scene *, .explorer-profile-scene > div { animation-play-state: paused; }
+.explorer-profile-scene.is-active.is-visible *, .explorer-profile-scene.is-active.is-visible > div { animation-play-state: running; }
 .profile-theme-explorer-romance .user-profile-social-card { background: transparent; box-shadow: none; }
 .profile-theme-explorer-romance .user-profile-avatar-wrap { background: var(--profile-page); box-shadow: 0 0 0 1px var(--profile-line); }
 .profile-theme-explorer-romance .user-profile-copy h2 { color: var(--profile-ink); }.profile-theme-explorer-romance .user-profile-copy p { color: var(--profile-muted); }
 .profile-theme-explorer-romance .user-profile-recent-statement { background: var(--profile-card); border-color: var(--profile-line); color: var(--profile-ink); }
+.profile-theme-explorer-romance .user-profile-social-card { background-image: radial-gradient(ellipse at 100% 60%, #ab79641a, transparent 70%), repeating-linear-gradient(0deg, transparent 0 5px, #9a795b04 6px); }
+.profile-theme-explorer-romance .user-profile-facts > span { border: 1px solid #ad806442; background: var(--profile-card); color: var(--profile-ink); box-shadow: 0 2px 0 #a2775414; }
+.profile-theme-explorer-romance .user-profile-primary-actions .button { color: var(--profile-card); background: var(--profile-deep); border-color: var(--profile-deep); }
+.profile-theme-explorer-romance .user-profile-reminders { border-color: var(--profile-line); background: var(--profile-card-soft); }
 :is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("/activity/explorer-2026/romance-v2.webp") right center/cover no-repeat; }
 .profile-card-theme-option.theme-explorer-romance > span::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 20px, #d8e4ef30 21px 22px, transparent 23px 43px); animation: explorer-rain 3s linear infinite; }
 .explorer-profile-medal { display: flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px; border-radius: 12px; border: 1px solid #b89a5d45; background: #b89a5d0c; }
 .explorer-profile-medal img { width: 58px; height: 58px; object-fit: contain; }.explorer-profile-medal span { display: grid; gap: 3px; }.explorer-profile-medal small { color: var(--muted); font-size: 10px; }.explorer-profile-medal strong { font-size: 12px; }
-@keyframes explorer-romance-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes explorer-duality { 0%, 30%, 100% { opacity: 0; } 45%, 80% { opacity: 1; } }
+@keyframes explorer-duality { 0%, 36% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); } 48%, 83% { opacity: 0; transform: translate(var(--burst-x), var(--burst-y)) rotate(var(--burst-turn)) scale(.35); } 85% { opacity: 0; transform: translate(calc(var(--burst-x) * -.7), calc(var(--burst-y) * -.7)) rotate(calc(var(--burst-turn) * -1)) scale(.45); } 98%, 100% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); } }
+@keyframes explorer-pixel-sparks { 0%, 68%, 100% { opacity: 0; transform: translate(0, 0); } 73% { opacity: .8; } 93% { opacity: 0; transform: translate(var(--burst-x), var(--burst-y)); } }
+@keyframes explorer-city-drift { to { transform: scale(1.12) translateX(-6px); } }
+@keyframes explorer-umbrella-sway { 0%, 100% { transform: rotate(-.6deg) translateY(1px); } 50% { transform: rotate(.7deg) translateY(-3px); } }
+@keyframes explorer-water-ring { from { opacity: .65; transform: scale(.15); } to { opacity: 0; transform: scale(1.4); } }
+@keyframes explorer-lamp-breathe { from { opacity: .35; transform: scale(.9); } to { opacity: .9; transform: scale(1.2); } }
+@keyframes explorer-petal-fall { to { transform: translate(-90px, 240px) rotate(230deg); } }
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
-@media (prefers-reduced-motion: reduce) { .explorer-transform-state, .profile-theme-explorer-romance .user-profile-cover::before, .profile-theme-explorer-romance .user-profile-cover::after, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .explorer-wallpaper-still { opacity: 1; }.explorer-pixel-portrait, .explorer-pixel-sparks { display: none; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }

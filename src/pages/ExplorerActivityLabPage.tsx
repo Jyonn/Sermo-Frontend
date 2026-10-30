@@ -5,6 +5,9 @@ import { SideDrawer } from "../components/SideDrawer";
 import { useI18n } from "../lib/language";
 import { useTheme } from "../lib/theme";
 import type { ActivityCampaignDTO } from "../types";
+import ChatsPage from "./ChatsPage";
+import { UserProfileCard } from "../components/UserProfileCard";
+import { UserAvatar } from "../components/UserAvatar";
 
 function sampleActivity(completed: number): ActivityCampaignDTO {
   const resourceTypes = ["frame", "bubble", "background", "profile", "identity"];
@@ -28,7 +31,16 @@ export default function ExplorerActivityLabPage() {
   const { resolvedTheme, setPreference } = useTheme();
   const [completed, setCompleted] = useState(3);
   const [open, setOpen] = useState(true);
+  const [wearable, setWearable] = useState<"frame" | "chat" | "profile">("chat");
   const activity = sampleActivity(completed);
+  if (new URLSearchParams(window.location.search).has("wearables")) return <main className="explorer-wearables-lab">
+    <nav aria-label={t("menu.personalization")}>
+      <button type="button" onClick={() => setWearable("frame")}>{t("menu.avatarFrame")}</button>
+      <button type="button" onClick={() => setWearable("chat")}>{t("menu.chatPage")}</button>
+      <button type="button" onClick={() => setWearable("profile")}>{t("menu.profileCard")}</button>
+    </nav>
+    {wearable === "chat" ? <ChatsPage preview={{ avatarName: t("explorer.previewName"), backgroundTheme: "explorer-duality", bubbleStyle: "explorer-ai", demo: { kind: "text" }, selfOnly: true }} /> : wearable === "frame" ? <div className="personalization-avatar-stage"><UserAvatar className="personalization-avatar-stage-image" name={t("explorer.previewName")} frame="explorer-conan" uri="/activity/explorer-2026/conan-night-thumb-v2.webp" /><strong>{t("explorer.previewName")}</strong></div> : <div className="user-profile-panel profile-card-preview-scale profile-theme-explorer-romance"><UserProfileCard profileTheme="explorer-romance" name={t("explorer.previewName")} avatarFrame="explorer-conan" presence={t("explorer.profileSignature")} avatarUri="/activity/explorer-2026/conan-night-thumb-v2.webp" growthLevel={16} /></div>}
+  </main>;
   return <main style={{ maxWidth: 720, margin: "0 auto", padding: "32px 20px" }}>
     <h1>{t("explorer.title")}</h1>
     <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>

@@ -1,0 +1,14 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "path": "public/activity/explorer-2026/romance-couple-v3.webp",
+      "prompt": "Use case: stylized-concept. Asset type: transparent foreground layer for a layered animated personal profile banner in a detective-themed social app. Primary request: Shinichi Kudo and Ran Mouri standing close under one transparent umbrella, seen waist up, affectionate restrained expression, his dark blue jacket and her ivory coat with pale rose scarf, windswept strands and scarf trailing left. Detailed elegant pixel art, crisp hand-placed clusters like premium narrative game, navy / warm amber / cream palette, warm rim light from right. Composition: horizontal 3:2 transparent canvas, couple grouped on right 60%, umbrella extends across top, all hands and umbrella handle anatomically clear; lower edge ends naturally at waist. Only the couple and their umbrella, isolated on genuinely transparent alpha; no floor, no scenery, no rain, no lettering, no border, no watermark. This is an independently moving foreground sprite, not a flattened scene."
+    },
+    {
+      "path": "public/activity/explorer-2026/romance-city-v3.webp",
+      "prompt": "Use case: stylized-concept. Asset type: background environment layer for an animated detective romance profile banner. Primary request: a cinematic pixel-art canal city at rainy blue hour, warm amber street lamps and shop windows reflecting in wet cobblestones and canal water, a distant arched stone bridge, dark navy rooftops, a few pale rose flower petals, beautifully detailed premium narrative game art. Horizontal 3:2 composition, spacious dark blue sky in top third, bridge and city in middle, wet quay foreground at bottom. No people, no characters, no umbrellas, no lettering, no UI, no border, no watermark. Environment only: foreground characters and animated rain will be separate layers in the app. Palette deep ink blue, muted mauve clouds, luminous amber highlights; crisp pixel clusters, no blur."
+    }
+  ],
+  "delivery": "WebP quality 88, 1100×733. Preserve foreground alpha. Motion is implemented in shared code; no video or flattened animation."
+}

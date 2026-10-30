@@ -370,6 +370,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   return (
     <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}${isSelf ? " is-self" : ""}`}>
       <UserProfileCard
+        profileTheme={user.profile_card_theme}
         avatarLabel={t("profile.avatarLabel", { name: user.name })}
         avatarFrame={user.avatar_frame_style}
         avatarUri={user.avatar_uri}

@@ -41,9 +41,25 @@ test("all five collectibles resolve to shipped final art and preserve the matche
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
     assert.ok(bytes.length < 500_000, `${asset} exceeds the mobile asset budget`);
   }
-  const scene = readFileSync(new URL("../src/components/FriendenLivingWallpaper.tsx", import.meta.url), "utf8");
+  const scene = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
   assert.ok(scene.includes(EXPLORER_ART.background));
   assert.ok(scene.includes(EXPLORER_ART.backgroundAlternate));
+});
+
+test("Explorer motion uses unique tile clips and pauses offscreen; profile scenes are opt-in", () => {
+  const tiles = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
+  assert.match(tiles, /useId\(\)/);
+  assert.match(tiles, /length: 150/);
+  assert.match(tiles, /clipPath=/);
+  const css = readFileSync(new URL("../src/components/ExplorerPersonalization.css", import.meta.url), "utf8");
+  assert.match(css, /animation-play-state: paused/);
+  assert.match(css, /\.explorer-pixel-portrait, \.explorer-pixel-sparks \{ display: none/);
+  assert.match(css, /inset: 14%; width: 72%; height: 72%; border-radius: 12%/);
+  assert.ok(!css.includes('background: url("/activity/explorer-2026/ai-v2.webp")'));
+  const card = readFileSync(new URL("../src/components/UserProfileCard.tsx", import.meta.url), "utf8");
+  assert.match(card, /profileTheme === "explorer-romance" \? <ExplorerProfileScene/);
+  const profile = readFileSync(new URL("../src/components/UserProfilePanel.tsx", import.meta.url), "utf8");
+  assert.match(profile, /profileTheme=\{user.profile_card_theme\}/);
 });
 
 test("avatar frames stay outside the shared clip and gallery previews use real wearable components", () => {

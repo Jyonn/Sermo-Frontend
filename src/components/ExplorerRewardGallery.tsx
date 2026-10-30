@@ -21,15 +21,15 @@ export function ExplorerRewardPreview({ tier }: { tier: number }) {
       <strong>{name}</strong><span>{t("explorer.specimen.frame")}</span>
     </div> : tier === 2 ? <div className="explorer-chat-display personalization-bubble-stage bubble-style-explorer-ai">
       <span className="explorer-specimen-label">{t("explorer.specimen.bubble")}</span>
-      <div className="explorer-sample-message other"><UserAvatar className="explorer-sample-avatar" name={name} uri={session?.user.avatar_uri} /><div><small>{name}</small><div className="explorer-bubble-preview"><span>{t("explorer.previewLine")}</span></div></div></div>
-      <div className="explorer-sample-message self"><div className="explorer-bubble-preview"><span>{t("explorer.previewReply")}</span></div></div>
+      <div className="explorer-sample-message message-group bubble-style-explorer-ai other"><UserAvatar className="explorer-sample-avatar" name={name} uri={session?.user.avatar_uri} /><div><small>{name}</small><div className="message-bubble explorer-bubble-preview"><span>{t("explorer.previewLine")}</span></div></div></div>
+      <div className="explorer-sample-message message-group bubble-style-explorer-ai self"><div className="message-bubble explorer-bubble-preview"><span>{t("explorer.previewReply")}</span></div></div>
     </div> : tier === 3 ? <div className="explorer-wallpaper-display">
       <FriendenLivingWallpaper theme="explorer-duality" />
       <span className="explorer-specimen-label">{t("explorer.specimen.background")}</span>
       <div className="explorer-wallpaper-messages"><span>{t("explorer.previewLine")}</span><span>{t("explorer.previewReply")}</span></div>
       <span className="explorer-scene-caption">{t("explorer.sceneTransition")}</span>
     </div> : tier === 4 ? <div className="explorer-profile-display user-profile-panel profile-theme-explorer-romance">
-      <UserProfileCard name={name} avatarUri={session?.user.avatar_uri} avatarFrame="explorer-conan" presence={t("explorer.profileSignature")} />
+      <UserProfileCard profileTheme="explorer-romance" name={name} avatarUri={session?.user.avatar_uri} avatarFrame="explorer-conan" presence={t("explorer.profileSignature")} />
     </div> : <div className="explorer-medal-display">
       <span className="explorer-display-orbit" aria-hidden="true" />
       <img alt={t("explorer.reward.5")} src={EXPLORER_ART.medal} />

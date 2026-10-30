@@ -75,6 +75,29 @@ server-owned and unchanged. Old image filenames remain for stale clients.
 `/design/explorer` is a synthetic, non-claiming preview for desktop/mobile,
 appearance modes, incomplete and completed collection states.
 
+## Personalization correction / 2026.10.30.12
+
+Reviewed the live Menu → Language & personalization editors, including Dragon
+bubbles and the Friendly Neighborhood profile. The previous Explorer bubble
+repeated a large character sticker on every line and inflated short messages;
+the avatar inherited a 28% corner radius that did not match the artwork aperture.
+The frame now bleeds the portrait beneath the measured inner rim. Ai bubbles use
+two-tone material, offset corners, fine inner rules and a small molecular motif,
+with no repeated character sticker or fixed message height.
+
+The shared wallpaper renderer now assembles both portraits from 150 unique,
+instance-scoped SVG clips. Tiles disperse, rotate and reassemble on a 14-second
+cycle, with small pixel sparks. The shared profile card opts into a separate
+layered scene: generated transparent couple, generated city, rain planes,
+water rings, lamp breathing and falling petals. Animation pauses offscreen or
+when the document is hidden; reduced motion shows a still wallpaper and scene.
+All three profile consumers pass the same theme to the same card component.
+
+Two new built-in imagegen assets and prompts are recorded in
+[explorer-2026-art-v3.json](explorer-2026-art-v3.json). The non-claiming study at
+`/design/explorer?wearables=1` renders the actual ChatsPage preview and profile
+card for checking the same skins used in the Menu editor.
+
 ## Initial release
 
 Backend migration Activity.0019 seeds configuration only. No account data is
