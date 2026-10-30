@@ -25,7 +25,7 @@ export function ChatQuickActionSettings() {
   };
   return <div className="quick-action-settings">
     <DrawerTabs label={t("quickActions.title")} value={kind} items={[{ value: "direct", label: t("quickActions.direct") }, { value: "group", label: t("quickActions.group") }]} onChange={value => { setKind(value); setDraft(null); setDragging(null); drag.current = null; }} />
-    <div className="quick-settings-preview" aria-hidden="true"><div className="quick-settings-preview-heading"><span>{t("quickActions.preview")}</span><span>{shown.length} / 4</span></div><div className="quick-settings-preview-bar" style={{ gridTemplateColumns: "repeat(" + shown.length + ", minmax(0, 1fr))" }}>{shown.map(key => <span key={key}><ChatActionIcon action={key}/>{key === "status" ? <b>8</b> : null}</span>)}</div><i/><i/></div>
+    <div className="quick-settings-preview" aria-hidden="true"><div className="quick-settings-preview-heading"><span>{t("quickActions.preview")}</span><span>{shown.length} / 4</span></div><div className="quick-settings-preview-bar">{shown.map(key => <span key={key} data-action={key}><ChatActionIcon action={key}/>{key === "status" ? <b>8</b> : null}</span>)}</div><i/><i/></div>
     <div className="quick-settings-heading"><strong>{t("quickActions.selected")}</strong><span>{t("quickActions.dragHint")}</span></div>
     <div className="quick-settings-list" ref={list} role="list" aria-label={t("quickActions.order")}>
       {shown.map(key => <div className={"quick-settings-row" + (dragging === key ? " is-dragging" : "")} key={key} data-action={key} role="listitem">

@@ -55,7 +55,7 @@ test("quick action copy is available in every supported language", () => {
   }
 });
 
-test("the shared row expands one to four equal slots, routes actions and never passes avatar frames", () => {
+test("the shared row retains one to four ordered actions, routes actions and never passes avatar frames", () => {
   const require = createRequire(import.meta.url); const exports: Record<string, any> = {};
   const Avatar = () => null;
   const source = fs.readFileSync(new URL("../src/components/ChatQuickActions.tsx", import.meta.url), "utf8");
@@ -71,8 +71,9 @@ test("the shared row expands one to four equal slots, routes actions and never p
   const props = { lockedCount: 3, lockedPreview: "locked", lockedBy: "author", copyCount: 2, copyPreview: "copy", members: Array.from({ length: 8 }, (_, userId) => ({ userId, name: "member", online: userId < 6 })), onLocked: () => selected.push("locked"), onCopy: () => selected.push("copy"), onStatus: () => selected.push("status") };
   for (let count = 1; count <= 4; count++) {
     const row = exports.ChatQuickActions({ ...props, actions: DEFAULT_CHAT_ACTIONS.slice(0, count), calendar: React.createElement("button", null, "calendar") });
-    assert.equal(row.props.style.gridTemplateColumns, `repeat(${count}, minmax(0, 1fr))`);
+    assert.equal(row.props.style, undefined);
     assert.equal(React.Children.count(row.props.children), count);
+    assert.deepEqual(React.Children.toArray(row.props.children).map((child: any) => child.props["data-action"]), DEFAULT_CHAT_ACTIONS.slice(0, count));
   }
   const row = exports.ChatQuickActions({ ...props, actions: ["status", "copy", "locked"] });
   const buttons = elements(row).filter(node => node.type === "button");

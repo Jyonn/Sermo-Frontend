@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.31.1",
+  "id": "2026.10.31.2",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
       "title": "聊天快捷操作",
       "items": [
-        "快捷按钮以透明毛玻璃悬浮在消息上方，不再压缩聊天区域",
-        "私聊和群聊独立配置、拖动排序，私聊移除在线状态",
-        "简化个性化入口并提前展示，整理详情中的独立操作分组"
+        "快捷按钮增高并从左排列，不再撑满整行",
+        "锁定、复制、搜索固定为圆角正方形，日历和状态随空间展开信息"
       ]
     },
     "en": {
       "title": "Chat quick actions",
       "items": [
-        "Translucent blurred buttons float over messages without reducing the conversation area",
-        "Separate direct and group layouts support drag ordering; direct chats no longer show presence",
-        "A concise Personalization entry appears earlier, with cleaner standalone action groups in details"
+        "Taller quick actions align from the left without stretching across the row",
+        "Lock, copy and search stay rounded squares; calendar and presence adapt their information to the available width"
       ]
     }
   }

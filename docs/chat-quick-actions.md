@@ -1,5 +1,7 @@
 # Chat quick actions
 
+Release 2026.10.31.2: buttons are 46px tall and flow left without stretching across the row. Lock, copy and search always use 46px rounded squares. Calendar and presence shrink with available space, capped at 300px and 260px respectively; their own container widths control short, medium and full information. The settings preview uses the same shapes. Browser measurements confirm fixed squares and no overflow at 320px.
+
 Release 2026.10.31.1 refinement: the row is an absolutely positioned glass overlay. The message scroller still begins at the header and keeps its full height; a content inset keeps the first message clear while subsequent scrolling passes under the buttons. Direct and group preferences are stored independently in v2 storage, with v1 arrays migrated through each kind's eligibility filter. Direct chats have no presence action. Personalization places the compact illustrated entry before Chat page; the editor uses two tabs, a live preview, pointer/touch drag handles and keyboard arrow ordering. Conversation action sections are siblings of notification settings, with no nested SettingGroup surfaces.
 
 Release 2026.10.30.31 replaces the full-width locked-message banner and the floating copy bookmark with one shared row. The row stays separate from the header, uses 40px rounded buttons and distributes its width equally among eligible actions. Unavailable preferences leave no empty slots.
@@ -8,7 +10,7 @@ Defaults are locked messages, calendar, suggested copies and member status. Mess
 
 Locked messages require a nonempty list. Calendar requires the existing visible Chronelle projection for a direct normal conversation. Copy suggestions require a group and nonempty server-approved candidates. Status and search are available for ordinary conversations. Submission workflows retain their dedicated header.
 
-Each button uses its own CSS container width: compact mode shows icons (status retains the online count); medium mode adds counts, a calendar duration, or two unframed online avatars; wide mode adds message attribution/previews, the next busy event, or up to five online avatars. Locked calendar titles remain redacted. There is no animation loop or per-frame layout measurement.
+Calendar and presence use their own CSS container widths: compact mode shows the calendar icon or online count; medium mode adds a calendar duration or two unframed online avatars; wide mode adds the next busy event or up to five online avatars. Lock and copy previews remain available through accessible labels and tooltips. Locked calendar titles remain redacted. There is no animation loop or per-frame layout measurement.
 
 The existing 500px short-viewport boundary collapses the row to one action icon immediately before the header's details button. Expanding it reveals the same shared row. Message selection hides the row. Conversation changes reset expansion and panels, and stale suggestion responses are rejected. Locked results are scoped to the active conversation.
 
@@ -16,4 +18,4 @@ Conversation details place conversation pinning, locked-message access and sugge
 
 Copy suggestions preserve the existing ranking, 24-hour expiration, successful-copy reporting and removal reconciliation. They refresh on relevant message changes and at a bounded interval. Permission failures clear cached suggestions; transient calendar errors can retain already-visible availability, while authentication/permission failures clear it.
 
-Validation covers preference normalization, eligibility/order, 1–4 equal slots, action routing, avatars without frames, delayed responses across conversations, changes during suggestion loading, existing calendar/privacy behavior and message reconciliation. Browser studies use synthetic data and the production components: mobile compact, two-button medium, one-button full, desktop full and 390px-high collapsed/expanded states.
+Validation covers preference normalization, eligibility/order, 1–4 ordered actions, action routing, avatars without frames, delayed responses across conversations, changes during suggestion loading, existing calendar/privacy behavior and message reconciliation. Browser studies use synthetic data and the production components: short/medium/full shapes, mobile compact, desktop full and 390px-high collapsed/expanded states.
