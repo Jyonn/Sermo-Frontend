@@ -102,7 +102,9 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .explorer-ai-expression > img { position: absolute; inset-inline-start: 0; bottom: 0; width: 3em; height: 3em; object-fit: contain; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression { width: 1em; margin-inline-start: 0; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression > img { width: 1em; height: 1em; }
-.message-group.bubble-style-explorer-ai.other .explorer-ai-expression { float: right; margin-inline-start: .25em; margin-inline-end: -8px; }
+/* Floats start at the line box top; match the original inline baseline without
+   changing the slot's height, text padding, or spacing between bubbles. */
+.message-group.bubble-style-explorer-ai.other .explorer-ai-expression { float: right; margin-inline-start: .25em; margin-inline-end: -8px; transform: translateY(calc((1lh - 1em) / 2 + .035em)); }
 .message-group.bubble-style-explorer-ai.other .message-bubble.has-reply .explorer-ai-expression { margin-inline-start: .25em; margin-inline-end: 0; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply { row-gap: 6px; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
