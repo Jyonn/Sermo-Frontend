@@ -1524,6 +1524,7 @@ export interface ChatDetail {
     groupChatMute?: ChatMuteState;
     submissionRole?: SubmissionRole | null;
     joinedAt?: number;
+    online?: boolean;
   }>;
 }
 

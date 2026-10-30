@@ -27,19 +27,16 @@ test('reports happen only after clipboard success, never for link-only or own-me
   const source=readFileSync(new URL('../src/pages/ChatsPage.tsx',import.meta.url),'utf8');
   assert.match(source,/!linkOnly && selectedChat\?\.type === "group" && messageMenu.message.from !== "self"/);
   assert.match(source,/if \(!copied\) throw[\s\S]{0,260}reportGroupCopies/);
-  assert.match(source,/<GroupCopyShelf key=/);
-  const panel=readFileSync(new URL('../src/components/GroupCopyShelf.tsx',import.meta.url),'utf8');
-  assert.match(panel,/if\(!await copyText\(item.content\)\)throw[\s\S]{0,80}reportGroupCopies/);
-  assert.match(panel,/CHAT_SYNC_EVENT/);
+  assert.match(source,/<GroupCopySheet key=/);
+  const panel=readFileSync(new URL('../src/components/GroupCopySheet.tsx',import.meta.url),'utf8');
+  assert.match(panel,/if \(!await copyText\(item.content\)\) throw[\s\S]{0,80}reportGroupCopies/);
+  const hook=readFileSync(new URL('../src/lib/useGroupCopySuggestions.ts',import.meta.url),'utf8');
+  assert.match(hook,/CHAT_SYNC_EVENT/);
 });
-test('bookmark and panel share a persistent morphing shell for reversible transitions',()=>{
-  const source=readFileSync(new URL('../src/components/GroupCopyShelf.tsx',import.meta.url),'utf8');
-  const css=readFileSync(new URL('../src/styles/app/70-square-composer.css',import.meta.url),'utf8');
-  assert.match(source,/className="group-copy-surface"/);
-  assert.doesNotMatch(source,/open \? <section/);
-  assert.match(source,/element.inert=!open/);
-  assert.match(source,/observer.observe\(element\)/);
-  assert.match(css,/transition: width 360ms/);
-  assert.match(css,/prefers-reduced-motion: reduce/);
-  assert.doesNotMatch(css,/animation: desktop-tool-popover-left-in 180ms ease-out both/);
+test('copy suggestions use the shared sheet with loading, empty and error recovery',()=>{
+  const source=readFileSync(new URL('../src/components/GroupCopySheet.tsx',import.meta.url),'utf8');
+  assert.match(source,/<BottomSheet open=\{open\}/);
+  assert.match(source,/ContentLoader/);
+  assert.match(source,/quickActions.noCopies/);
+  assert.match(source,/onClick=\{retry\}/);
 });

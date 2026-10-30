@@ -14,6 +14,7 @@ import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { AccountSwitchList } from "../components/AccountSwitchList";
+import { ChatQuickActionSettings } from "../components/ChatQuickActionSettings";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -470,6 +471,7 @@ export default function MenuPage() {
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string; activity: ActivityCampaignDTO } | null>(null);
   const [bgmSettingsOpen, setBgmSettingsOpen] = useState(false);
+  const [quickActionsSettingsOpen, setQuickActionsSettingsOpen] = useState(false);
   useEffect(() => {
     if (!personalizationDrawerOpen || !session) return;
     const controller = new AbortController();
@@ -2380,6 +2382,7 @@ export default function MenuPage() {
       <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
       </SideDrawer>
+      <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => setQuickActionsSettingsOpen(false)} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
@@ -2433,6 +2436,7 @@ export default function MenuPage() {
             <span><strong>{t("menu.chatPage")}</strong><small>{t("menu.chatPageHint")}</small></span>
             <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span>
           </button>
+          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><span className="material-symbols-outlined">dashboard_customize</span><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.settingsHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`} onClick={() => setAvatarFrameDrawerOpen(true)} type="button">
             <span className="personalization-entry-preview avatar-frame-preview">
               <UserAvatar

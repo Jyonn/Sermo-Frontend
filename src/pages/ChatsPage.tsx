@@ -41,7 +41,12 @@ import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
 import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
-import { GroupCopyShelf, reportGroupCopies } from "../components/GroupCopyShelf";
+import { reportGroupCopies } from "../components/GroupCopyReporting";
+import { GroupCopySheet } from "../components/GroupCopySheet";
+import { ChatQuickActions } from "../components/ChatQuickActions";
+import { availableChatActions } from "../lib/chatQuickActions";
+import { useChatQuickActions } from "../lib/useChatQuickActions";
+import { useGroupCopySuggestions } from "../lib/useGroupCopySuggestions";
 import { GROUP_COPY_REMOVED } from "../lib/groupCopy";
 import { EMOJI_PAGES } from "../lib/composerEmojis";
 import { StickerImage } from "../components/StickerImage";
@@ -2670,6 +2675,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           groupChatMute: member.group_chat_mute,
           submissionRole: member.submission_role,
           joinedAt: member.joined_at ?? chat.created_at,
+          online: Boolean(member.is_alive),
         }))
       ),
     },
@@ -2925,6 +2931,7 @@ function LiveChatsPage({
   const [messageSearchCalendarLoading, setMessageSearchCalendarLoading] = useState(false);
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
+  const [pinnedScope, setPinnedScope] = useState("");
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [myCardOpen, setMyCardOpen] = useState(false);
@@ -3763,6 +3770,12 @@ function LiveChatsPage({
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
   const chatCalendar = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
+  const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`);
+  const copySuggestions = useGroupCopySuggestions(displayedChat?.type === "group" && displayedChat.purpose !== "submission" ? displayedChat.id : undefined, currentUserId);
+  const [quickActionsExpanded, setQuickActionsExpanded] = useState(false);
+  const [groupCopyOpen, setGroupCopyOpen] = useState(false);
+  useEffect(() => { setQuickActionsExpanded(false); setGroupCopyOpen(false); }, [displayedChat?.id, currentUserId]);
+  useEffect(() => { setQuickActionsExpanded(false); }, [shortComposerLayout]);
   const routeChatId = useMemo(() => {
     if (!activeChatRouteValue) return null;
     const numericChatId = Number(activeChatRouteValue);
@@ -3773,10 +3786,12 @@ function LiveChatsPage({
     [displayedChat, messages]
   );
   const orderedPinnedMessages = useMemo(
-    () => [...pinnedMessages].sort((left, right) => right.pinned_at - left.pinned_at || right.pin_id - left.pin_id),
-    [pinnedMessages]
+    () => pinnedScope === `${currentUserId}:${displayedChat?.id}` ? [...pinnedMessages].sort((left, right) => right.pinned_at - left.pinned_at || right.pin_id - left.pin_id) : [],
+    [pinnedMessages, pinnedScope, currentUserId, displayedChat?.id]
   );
   const canManagePinnedMessages = Boolean(selectedChat);
+
+  useLayoutEffect(() => { setPinnedMessages([]); setPinnedScope(`${currentUserId}:${selectedChat?.id}`); setPinnedDrawerOpen(false); }, [currentUserId, selectedChat?.id]);
 
   useEffect(() => {
     if (!selectedChat) {
@@ -3790,7 +3805,7 @@ function LiveChatsPage({
       if (syncing || controller.signal.aborted) return;
       syncing = true;
       api.getPinnedMessages(selectedChat.id, controller.signal)
-        .then(setPinnedMessages)
+        .then((items) => { if (!controller.signal.aborted) { setPinnedMessages(items); setPinnedScope(`${currentUserId}:${selectedChat.id}`); } })
         .catch(() => undefined)
         .finally(() => {
           syncing = false;
@@ -3802,7 +3817,7 @@ function LiveChatsPage({
       controller.abort();
       window.clearInterval(interval);
     };
-  }, [historyReloadVersion, pageActive, selectedChat?.id]);
+  }, [historyReloadVersion, pageActive, selectedChat?.id, currentUserId]);
 
   useEffect(() => {
     setReplyTarget(null);
@@ -7738,7 +7753,10 @@ function LiveChatsPage({
   }}><ComposerSvgIcon kind="plus" /></button>;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
-  const pinnedHeaderButton = shortComposerLayout && orderedPinnedMessages.length ? <button className="chat-details-button chat-header-pinned-button" type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} title={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></button> : null;
+  const openMessageSearch = () => { setMessageSearchKeyword(""); setMessageSearchType(null); setMessageSearchResults([]); setMessageSearchState("idle"); setQuickActionsExpanded(false); setDetailsSheetOpen(false); setMessageSearchOpen(true); };
+  const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: Boolean(displayedChat), search: Boolean(displayedChat) }) : [];
+  const showQuickActions = !messageSelectionMode && effectiveQuickActions.length > 0 && (!shortComposerLayout || quickActionsExpanded);
+  const quickActionsHeaderButton = shortComposerLayout && effectiveQuickActions.length ? <button className="chat-details-button" type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
 
   return (
     <AppChrome
@@ -7783,8 +7801,7 @@ function LiveChatsPage({
           </button>
         ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
-            {chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
-            {pinnedHeaderButton}
+            {quickActionsHeaderButton}
             <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />
           </div>
         ) : undefined
@@ -7827,8 +7844,8 @@ function LiveChatsPage({
                   <ChatConversationIdentity chat={displayedChat} submissionStatus={submissionStatusLabel(displayedChat.submission?.status)}/>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
-                    {pinnedHeaderButton}
+                  : !messageSelectionMode ? <div className="conversation-header-actions">
+                    {quickActionsHeaderButton}
                     <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>
                 {submissionWorkflowBar}
@@ -7838,31 +7855,8 @@ function LiveChatsPage({
                   </div>
                 ) : null}
               </header>
-              {orderedPinnedMessages.length && !shortComposerLayout ? (
-                <button type="button" aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} onClick={() => setPinnedDrawerOpen(true)} className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
-                  <span
-                    className="chat-pinned-main"
-                  >
-                    <span className="chat-pinned-marker">
-                      <span className="material-symbols-outlined chat-pinned-icon">lock</span>
-                    </span>
-                    <span className="chat-pinned-copy">
-                      <span className="chat-pinned-kicker">
-                        <strong>{t("pin.label")}</strong>
-                        <i />
-                        <span>{pinnedByLabel(orderedPinnedMessages[0])}</span>
-                      </span>
-                      <span className="chat-pinned-preview">{pinnedMessagePreview(orderedPinnedMessages[0])}</span>
-                    </span>
-                  </span>
-                  <span aria-hidden="true" className="chat-pinned-list-button">
-                    <span className="chat-pinned-count">{orderedPinnedMessages.length}</span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </span>
-                </button>
-              ) : null}
               <div
-                className={`chat-detail-scene chat-background-${chatBackgroundTheme} ${isClosingChatView ? "is-closing" : ""}`}
+                className={`chat-detail-scene chat-background-${chatBackgroundTheme}${showQuickActions ? " has-quick-actions" : ""} ${isClosingChatView ? "is-closing" : ""}`}
                 onAnimationEnd={(event) => {
                 if (!isClosingChatView) return;
                 if (!(event.target instanceof HTMLElement) || !event.target.classList.contains("chat-detail-scene")) return;
@@ -7880,7 +7874,7 @@ function LiveChatsPage({
                 }}
               >
               {narrowComposerLayout || chatBackgroundTheme === "explorer-duality" ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
-              {selectedChat?.type === "group" && !submissionMode ? <GroupCopyShelf key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId}/> : null}
+              {showQuickActions && displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
@@ -8550,6 +8544,7 @@ function LiveChatsPage({
         </ForwardBundlePresentationContext.Provider>
       </SideDrawer>
 
+      {selectedChat?.type === "group" ? <GroupCopySheet key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId} open={groupCopyOpen} onClose={() => setGroupCopyOpen(false)} {...copySuggestions} /> : null}
       <SideDrawer
         className={`pinned-message-drawer chat-background-${currentUserMe?.chat_background_theme ?? "default"}`}
         historyKey="pinned-messages"
@@ -8729,13 +8724,7 @@ function LiveChatsPage({
               <SettingGroup>
                 <SettingRow
                   icon={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
-                  onClick={() => {
-                    setMessageSearchKeyword("");
-                    setMessageSearchType(null);
-                    setMessageSearchResults([]);
-                    setMessageSearchState("idle");
-                    setMessageSearchOpen(true);
-                  }}
+                  onClick={openMessageSearch}
                   description={t("messageSearch.hint")}
                   title={t("messageSearch.action")}
                 />
@@ -8761,7 +8750,6 @@ function LiveChatsPage({
                     trailing={<SettingSwitch checked={selectedChat.usePersonalBackground} disabled={preferenceSaving !== null || !selectedChat.groupBackgroundTheme} label={t("chat.togglePersonalBackground")} onChange={(next) => void updateSelectedChatPreference("background", next)} />}
                   />
                 ) : null}
-                <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
                   <FeatureDiscoveryTarget
                     className="is-setting-row"
@@ -8771,6 +8759,14 @@ function LiveChatsPage({
                   <SettingRow title={t("chat.onlineReminder")} trailing={<SettingSwitch checked={selectedChat.onlineReminderEnabled} disabled={preferenceSaving !== null} label={t("chat.toggleOnlineReminder")} onChange={(next) => void updateSelectedChatPreference("online", next)} />} />
                   </FeatureDiscoveryTarget>
                 ) : null}
+                <section className="quick-detail-actions" aria-label={t("quickActions.detailActions")}>
+                  <h3>{t("quickActions.detailActions")}</h3>
+                  <SettingGroup>
+                    <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
+                    {orderedPinnedMessages.length ? <SettingRow title={t("pin.viewAll", { count: orderedPinnedMessages.length })} icon={<span className="material-symbols-outlined">lock</span>} onClick={() => { setDetailsSheetOpen(false); setPinnedDrawerOpen(true); }} /> : null}
+                    {selectedChat.type === "group" ? <SettingRow title={t("copyShelf.title")} icon={<span className="material-symbols-outlined">content_copy</span>} onClick={() => { setDetailsSheetOpen(false); setGroupCopyOpen(true); }} /> : null}
+                  </SettingGroup>
+                </section>
                 {selectedChat.type === "group" ? (
                   <SettingRow description={t("chat.muteNotificationsHint")} title={t("chat.muteNotifications")} trailing={<SettingSwitch checked={selectedChat.notificationsMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteNotifications")} onChange={(next) => void updateSelectedChatPreference("mute", next)} />} />
                 ) : null}

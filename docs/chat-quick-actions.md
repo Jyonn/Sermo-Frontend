@@ -1,0 +1,17 @@
+# Chat quick actions
+
+Release 2026.10.30.31 replaces the full-width locked-message banner and the floating copy bookmark with one shared row. The row stays separate from the header, uses 40px rounded buttons and distributes its width equally among eligible actions. Unavailable preferences leave no empty slots.
+
+Defaults are locked messages, calendar, suggested copies and member status. Message search is an optional replacement. Personalization → Chat quick actions supports 1–4 selections, ordering and restoring defaults. Preferences are isolated by space/user and stored on this device; they do not alter server permissions or other devices.
+
+Locked messages require a nonempty list. Calendar requires the existing visible Chronelle projection for a direct normal conversation. Copy suggestions require a group and nonempty server-approved candidates. Status and search are available for ordinary conversations. Submission workflows retain their dedicated header.
+
+Each button uses its own CSS container width: compact mode shows icons (status retains the online count); medium mode adds counts, a calendar duration, or two unframed online avatars; wide mode adds message attribution/previews, the next busy event, or up to five online avatars. Locked calendar titles remain redacted. There is no animation loop or per-frame layout measurement.
+
+The existing 500px short-viewport boundary collapses the row to one action icon immediately before the header's details button. Expanding it reveals the same shared row. Message selection hides the row. Conversation changes reset expansion and panels, and stale suggestion responses are rejected. Locked results are scoped to the active conversation.
+
+Conversation details place conversation pinning, locked-message access and suggested copies in a separate section below online reminders. Pinning a conversation and locking individual messages remain distinct actions. All entry points reuse existing search/calendar/locked views or the shared BottomSheet.
+
+Copy suggestions preserve the existing ranking, 24-hour expiration, successful-copy reporting and removal reconciliation. They refresh on relevant message changes and at a bounded interval. Permission failures clear cached suggestions; transient calendar errors can retain already-visible availability, while authentication/permission failures clear it.
+
+Validation covers preference normalization, eligibility/order, 1–4 equal slots, action routing, avatars without frames, delayed responses across conversations, changes during suggestion loading, existing calendar/privacy behavior and message reconciliation. Browser studies use synthetic data and the production components: mobile compact, two-button medium, one-button full, desktop full and 390px-high collapsed/expanded states.

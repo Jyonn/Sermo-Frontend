@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.30.30",
+  "id": "2026.10.30.31",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "菜单、账号与活动展示优化",
+      "title": "聊天快捷操作",
       "items": [
-        "长按菜单边距更均衡，活动横幅限制高度并在宽屏并排展示",
-        "切换账号先选空间，多身份再选择；加载时提供反馈",
-        "新增登录其他账号入口，WebApp 启动自动恢复上次使用的账号"
+        "锁定、日历、推荐复制与成员状态合为浮动快捷栏，可在个性化中选择和排序",
+        "按钮随可用空间展示更多信息，矮屏收起至聊天右上角",
+        "聊天详情集中收纳会话置顶、锁定消息和推荐复制入口"
       ]
     },
     "en": {
-      "title": "Menu, account and activity improvements",
+      "title": "Chat quick actions",
       "items": [
-        "Balanced message menu spacing and height-limited activity banners that sit side by side on wide screens",
-        "Choose a space first when switching accounts, then an identity if needed, with loading feedback",
-        "A separate sign-in entry and automatic restoration of the last account on WebApp launch"
+        "A floating bar combines locked messages, calendar, suggested copies and member status; choose and reorder it in Personalization",
+        "Buttons reveal more information when space allows and collapse into the header on short screens",
+        "Conversation details group pinning, locked messages and suggested copies together"
       ]
     }
   }

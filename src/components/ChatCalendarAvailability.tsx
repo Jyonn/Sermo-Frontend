@@ -1,6 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { api } from "../lib/api";
+import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
@@ -37,15 +37,16 @@ export function useChatCalendarAvailability(peerId?: number): ChatCalendarData |
     const params = new URLSearchParams({ start: start.toISOString(), end: agendaDay(start, 3).toISOString() });
     void api.chronelleProfile(peerId, params, controller.signal).then(profileAgenda).then((result) => {
       if (active && !controller.signal.aborted) setData(result.hidden ? null : { scope, ownerId: peerId, events: result.events, known: result.known, error: false });
-    }).catch(() => {
-      if (active) setData({ scope, ownerId: peerId, events: null, known: false, error: true });
+    }).catch((error: unknown) => {
+      const denied = error instanceof ApiError && (error.status === 401 || error.status === 403);
+      if (active) setData(current => !denied && current?.scope === scope ? { ...current, error: true } : { scope, ownerId: peerId, events: null, known: false, error: true });
     }).finally(() => window.clearTimeout(timer));
     return () => { active = false; controller.abort(); window.clearTimeout(timer); };
   }, [session?.accessToken, scope, peerId, dayKey, minute, activePage]);
   return data?.scope === scope ? { ...data, now } : null;
 }
 
-export function ChatCalendarAvailability({ data }: { data: ChatCalendarData }) {
+export function ChatCalendarAvailability({ data, quick = false }: { data: ChatCalendarData; quick?: boolean }) {
   const { t, language } = useI18n();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -127,10 +128,16 @@ export function ChatCalendarAvailability({ data }: { data: ChatCalendarData }) {
       if (summary.nextBusyUntil !== null) forecast += ` · ${t("chronelle.busyUntil", { time: formatTime(summary.nextBusyUntil) })}`;
     }
   }
+  const nextEvent = data.events?.filter(event => new Date(event.start).getTime() > data.now.getTime()).sort((a, b) => a.start.localeCompare(b.start))[0];
+  const nextEventLabel = nextEvent ? `${formatTime(new Date(nextEvent.start).getTime())} · ${nextEvent.locked ? t("chronelle.busy") : nextEvent.title || t("chronelle.untitled")}` : summary ? t("chronelle.restDayFree") : status;
+  const quickStatus = summary ? summary.restOfDayFree ? t("chronelle.restDayFree") : `${status} · ${t("chronelle.durationMinutes", { minutes: summary.changeMinutes })}` : status;
   return <>
-    <button ref={button} className={`chat-details-button chat-calendar-trigger tone-${tone}`} type="button" aria-label={`${t("chronelle.chatCalendar")} · ${toneLabel} · ${status}`} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} onClick={() => { setExpanded(false); setPosition(null); setOpen(!open); }}>
+    <button ref={button} className={`${quick ? "chat-quick-button" : "chat-details-button"} chat-calendar-trigger tone-${tone}`} type="button" aria-label={`${t("chronelle.chatCalendar")} · ${toneLabel} · ${status}`} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} onClick={() => { setExpanded(false); setPosition(null); setOpen(!open); }}>
+      <span className={quick ? "chat-quick-body" : undefined}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M7.5 3v4M16.5 3v4M4 10h16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />{Array.from({ length: 6 }, (_, i) => <rect key={i} x={7 + i % 3 * 4} y={13 + Math.floor(i / 3) * 4} width="2" height="2" rx=".4" fill="currentColor" opacity={summary && i < Math.ceil(summary.busyRatio * 6) ? 1 : .22} />)}</svg>
       {summary ? <span aria-hidden="true" className={`chat-calendar-status-dot${summary.busy ? " is-busy" : ""}`} /> : null}
+      {quick ? <><span className="quick-medium quick-action-preview quick-calendar-summary">{quickStatus}</span><span className="quick-full quick-action-preview">{nextEventLabel}</span></> : null}
+      </span>
     </button>
     {open ? createPortal(<div ref={panel} id={id} role="dialog" aria-label={t("chronelle.chatCalendar")} className={`chat-calendar-popover tone-${tone}`} style={position ?? { visibility: "hidden" }}>
       <header className="chat-calendar-popover-header">

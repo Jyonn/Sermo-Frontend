@@ -6,7 +6,7 @@ html[data-theme="dark"] :is(.chat-calendar-trigger, .chat-calendar-popover).tone
 html[data-theme="dark"] :is(.chat-calendar-trigger, .chat-calendar-popover).tone-balanced { --calendar-tone: #d9b56e; }
 html[data-theme="dark"] :is(.chat-calendar-trigger, .chat-calendar-popover).tone-full { --calendar-tone: #d8a18c; }
 .chat-calendar-trigger.chat-details-button[class] { position: relative; color: var(--calendar-tone); }
-.chat-calendar-trigger > svg { width: 23px; height: 23px; }
+.chat-calendar-trigger svg { width: 23px; height: 23px; }
 .chat-calendar-trigger:focus-visible { outline: 2px solid var(--calendar-tone); outline-offset: 3px; }
 .chat-calendar-status-dot { position: absolute; right: 6px; bottom: 6px; width: 6px; height: 6px; border-radius: 50%; background: #4e8170; box-shadow: 0 0 0 2px var(--bg-canvas); }
 .chat-calendar-status-dot.is-busy { background: #a36d55; }

@@ -37,9 +37,9 @@ test("profiles use a fine line and both chat headers share one resource and popo
   assert.match(gate, /data.known && data.events/);
   assert.match(gate, /data\?\.scope === scope/);
   assert.equal(chat.match(/const chatCalendar = useChatCalendarAvailability\(/g)?.length, 1);
-  assert.equal(chat.match(/<ChatCalendarAvailability data=\{chatCalendar\}/g)?.length, 2);
-  const headerEnd = chat.indexOf("className={`chat-pinned-bar");
-  assert.doesNotMatch(chat.slice(chat.lastIndexOf("</header>", headerEnd), headerEnd), /ChatCalendarAvailability/);
+  assert.equal(chat.match(/<ChatCalendarAvailability data=\{chatCalendar\}/g)?.length, 1);
+  assert.match(chat, /calendar=\{chatCalendar \? <ChatCalendarAvailability data=\{chatCalendar\} quick/);
+  assert.doesNotMatch(chat, /chat-pinned-bar/);
   assert.match(chat, /displayedChat\?\.purpose === "normal" \? displayedDirectPeerId : undefined/);
   assert.match(gate, /<ChronelleCalendar key=\{data.scope\} ownerId=\{data.ownerId\}/);
   assert.match(gate, /event.key === "Escape"/);
