@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { EXPLORER_ART, explorerRewardArt, explorerRewardPath, explorerRewardThumbnail, explorerTaskPath } from "../src/lib/explorer.ts";
-import { EXPLORER_PIXEL_SIZE, EXPLORER_SILHOUETTES, explorerPortraitPixels, insideExplorerSilhouette } from "../src/lib/explorerMotion.ts";
+import { EXPLORER_SILHOUETTES, explorerPortraitBounds, explorerSceneLayout } from "../src/lib/explorerMotion.ts";
 
 test("all reward destinations use existing menu drawers", () => {
   assert.equal(explorerRewardPath(1), "/app/menu?panel=personalization/avatar-frames");
@@ -42,16 +42,16 @@ test("all five collectibles resolve to shipped final art and preserve the matche
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
     assert.ok(bytes.length < 500_000, `${asset} exceeds the mobile asset budget`);
   }
-  const scene = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
+  const scene = readFileSync(new URL("../src/components/ExplorerTransformationWallpaper.tsx", import.meta.url), "utf8");
   assert.ok(scene.includes("EXPLORER_ART.background"));
   assert.ok(scene.includes("EXPLORER_ART.backgroundAlternate"));
 });
 
-test("Explorer uses one bounded canvas and profile scenes remain opt-in", () => {
-  const tiles = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
-  assert.match(tiles, /<canvas ref=\{canvasRef\}/);
+test("Explorer uses two local portrait layers and profile scenes remain opt-in", () => {
+  const tiles = readFileSync(new URL("../src/components/ExplorerTransformationWallpaper.tsx", import.meta.url), "utf8");
+  assert.match(tiles, /className="explorer-transformation-actor"/);
   assert.ok(!tiles.includes("<use "));
-  assert.ok(!tiles.includes("<clipPath"));
+  assert.ok(!tiles.includes("requestAnimationFrame"));
   const css = readFileSync(new URL("../src/components/ExplorerPersonalization.css", import.meta.url), "utf8");
   assert.match(css, /animation-play-state: paused/);
   assert.match(css, /\.explorer-living-wallpaper \{[^}]*background: #0c2138;/);
@@ -64,23 +64,32 @@ test("Explorer uses one bounded canvas and profile scenes remain opt-in", () => 
   assert.match(profile, /profileTheme=\{user.profile_card_theme\}/);
 });
 
-test("fine portrait pixels cover both silhouettes without moving sky or city tiles", () => {
-  assert.equal(EXPLORER_PIXEL_SIZE, 16);
+test("gold flash bounds contain complete bodies without covering the sky or city", () => {
   for (const name of ["conan", "shinichi"] as const) {
-    const pixels = explorerPortraitPixels(name);
-    assert.ok(pixels.length > 100 && pixels.length < 500);
-    assert.equal(new Set(pixels.map(({x,y}) => `${x}:${y}`)).size, pixels.length);
-    assert.ok(pixels.every(({x,y,size,curve}) => x >= 600 && x + size <= 880 && y >= 736 && y + size <= 1280 && curve.every(([dx,dy]) => Number.isFinite(dx) && Number.isFinite(dy))));
-    for (let y = 740; y < 1280; y += 4) for (let x = 600; x < 880; x += 4) {
-      if (!EXPLORER_SILHOUETTES[name].some((polygon) => insideExplorerSilhouette(x,y,polygon))) continue;
-      assert.ok(pixels.some((pixel) => x >= pixel.x && x <= pixel.x + pixel.size && y >= pixel.y && y <= pixel.y + pixel.size), `${name} has a missing foreground pixel at ${x},${y}`);
+    const bounds = explorerPortraitBounds(name);
+    assert.ok(bounds.width < 300 && bounds.height < 550);
+    for (const [x,y] of EXPLORER_SILHOUETTES[name].flat()) {
+      assert.ok(x > bounds.left && x < bounds.left + bounds.width);
+      assert.ok(y > bounds.top && y < bounds.top + bounds.height);
     }
-    const [a,b] = pixels[0].curve;
-    assert.ok(Math.abs(a[0]*b[1]-a[1]*b[0]) > 1, "particle trajectory must curve rather than travel on one straight vector");
   }
-  const scene = readFileSync(new URL("../src/components/ExplorerPixelWallpaper.tsx", import.meta.url), "utf8");
+  const scene = readFileSync(new URL("../src/components/ExplorerTransformationWallpaper.tsx", import.meta.url), "utf8");
   assert.match(scene, /root\.dataset\.ready/);
+  assert.ok(!scene.includes("getContext"));
+  assert.ok(!scene.includes("hardwareConcurrency"));
   assert.ok(readFileSync(new URL("../public/activity/explorer-2026/roof-night-v4.webp", import.meta.url)).length < 500_000);
+});
+
+test("landscape keeps the standing figure inside the viewport and cover layers aligned", () => {
+  for (const [width, height] of [[390,768],[438,314],[844,314],[1440,900]]) {
+    const layout = explorerSceneLayout(width, height);
+    const cover = layout.width / 960;
+    const feet = layout.top + 1266 * cover;
+    const head = feet - 516 * cover * layout.figureScale;
+    assert.ok(head >= 0 && feet <= height, `${width}x${height} clips the standing figure`);
+    assert.ok(layout.width >= width && layout.height >= height);
+    assert.ok(layout.figureScale > 0 && layout.figureScale <= 1);
+  }
 });
 
 test("avatar frames stay outside the shared clip and gallery previews use real wearable components", () => {

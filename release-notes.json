@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.30.19",
+  "id": "2026.10.30.20",
   "publishedAt": "2026-10-30",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息与应用绑定 · 探索任务修复",
+      "title": "探索者外观 · 金光变身",
       "items": [
-        "欢迎消息入口显示完整消息数量，支持文字与多媒体内容",
-        "2026 探索者按欢迎消息列表判断任务完成，默认消息不计入",
-        "Chronelle 统一使用新版账号绑定，修复授权过期、撤销与跨空间状态判定"
+        "小哀气泡改为窄幅全身肖像，减少文字占位，保持气泡高度一致",
+        "新一与柯南改为人物全身闪金光后切换，手机端也可播放",
+        "移除粒子逐帧绘制，后台和离屏时停止动画"
       ]
     },
     "en": {
-      "title": "Welcome messages and app binding · Explorer fixes",
+      "title": "Explorer styles · Golden transformation",
       "items": [
-        "Welcome settings show the full message count, including text and media",
-        "The 2026 Explorer task checks your welcome message list and excludes default messages",
-        "Chronelle uses current account-binding OAuth with corrected expiry, revocation and cross-space checks"
+        "Ai bubbles use a narrow full-body portrait with more room for text and consistent bubble heights",
+        "Shinichi and Conan switch identities through a full-body golden flash, including on phones",
+        "Removed per-frame particle drawing; motion stops in the background and offscreen"
       ]
     }
   }

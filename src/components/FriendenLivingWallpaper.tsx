@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import type { ChatBackgroundTheme } from "../types";
-import { ExplorerPixelWallpaper } from "./ExplorerPixelWallpaper";
+import { ExplorerTransformationWallpaper } from "./ExplorerTransformationWallpaper";
 
 type LivingTheme = Extract<ChatBackgroundTheme, "frienden-night" | "frienden-garden">;
 type LayerKind = "back" | "actor" | "front";
@@ -107,7 +107,7 @@ export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: 
     };
   }, [theme]);
 
-  if (theme === "explorer-duality") return <ExplorerPixelWallpaper compact={compact} />;
+  if (theme === "explorer-duality") return <ExplorerTransformationWallpaper compact={compact} />;
 
   if (theme === "starry-night") return <svg aria-hidden="true" className={`frienden-starry-wallpaper is-active is-visible${compact ? " is-compact" : ""}`} preserveAspectRatio="xMidYMid slice" viewBox="0 0 941 1672">
     <defs><clipPath id="starry-sky-boundary"><rect height={compact ? 820 : 1037} width="941" x="0" y="0" /></clipPath></defs>

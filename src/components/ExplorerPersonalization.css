@@ -30,10 +30,10 @@
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding: 12px 25px 12px 16px; min-height: 0; background-image: linear-gradient(135deg, #c1866424, transparent 45%), radial-gradient(ellipse at 100% 100%, #ab73782b, transparent 70%); }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::before { content: ""; position: absolute; z-index: 0; inset: 5px; border: 1px solid var(--ai-detail); border-radius: inherit; opacity: .26; pointer-events: none; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 1; inset: auto 8px 10px auto; width: 12px; height: 6px; border: 1px solid #994c58; border-radius: 5px; background: linear-gradient(90deg, #b64a5e 50%, #fff0dd 50%); transform: rotate(-35deg); opacity: .8; pointer-events: none; }
-/* Keep the same text geometry as earlier messages; the decoration must not
-   impose a taller last bubble. Cap it for compact previews and long messages. */
-.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding-right: 62px; }
-.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { inset: auto 4px 1px auto; width: 48px; height: 48px; max-height: calc(100% + 2px); border: 0; border-radius: 0; background: url("/activity/explorer-2026/ai-portrait-v5.webp") center bottom/contain no-repeat; transform: none; opacity: 1; }
+/* A narrow standing figure leaves room for text. Hair may peek above the rim;
+   the decoration never changes the message height or line spacing. */
+.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { padding-right: 38px; overflow: visible; }
+.message-group.bubble-style-explorer-ai .message-bubble.group-end:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { inset: auto 5px 1px auto; width: 24px; height: 60px; border: 0; border-radius: 0; background: url("/activity/explorer-2026/ai-fullbody-v6.webp") center bottom/contain no-repeat; transform: none; opacity: 1; }
 html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubble-style-explorer-ai {
   --bubble-skin-other-bg: #46353b;
   --bubble-skin-other-color: #fff1df;
@@ -43,7 +43,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
   --bubble-skin-self-color: #fff0de;
 }
 .personalization-option.preview-explorer-ai > i { background: linear-gradient(120deg, #f5e8d5 0 34%, #493448 35%); border: 1px solid #bd8b73; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #c38d6d30, 0 3px 0 #35273c30; }
-.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 46px; height: 46px; right: 2px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-portrait-v5.webp") center bottom/contain no-repeat; }
+.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 24px; height: 60px; right: 4px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-fullbody-v6.webp") center bottom/contain no-repeat; }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #0c2138; pointer-events: none; }
 .explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
 .explorer-wearables-lab > nav { display: flex; gap: 8px; padding: 12px; flex-shrink: 0; background: var(--surface); }
@@ -52,12 +52,15 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
 .explorer-wearables-lab > .profile-card-preview-scale { zoom: 1; box-sizing: border-box; }
 .explorer-wearables-lab > .chat-conversation-preview { height: auto; max-height: none; }
 .explorer-wearables-lab .chat-conversation-preview .chat-detail-scene, .explorer-wearables-lab .chat-conversation-preview .message-scroll { height: 100%; max-height: none; }
-.explorer-wallpaper-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.explorer-portrait-canvas { position: absolute; display: none; pointer-events: none; }
-.explorer-living-wallpaper[data-ready="true"] { background: #0c2138 url("/activity/explorer-2026/roof-night-v4.webp") center/cover no-repeat; }
+.explorer-wallpaper-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 90%; }
+.explorer-transformation-stage { position: absolute; visibility: hidden; pointer-events: none; }
+.explorer-transformation-actor { position: absolute; opacity: 0; overflow: visible; transform: scale(var(--explorer-figure-scale, 1)); }
+.explorer-transformation-gold { opacity: 0; }
+.explorer-transformation-stage[data-portrait="0"] .explorer-transformation-actor[data-index="0"], .explorer-transformation-stage[data-portrait="1"] .explorer-transformation-actor[data-index="1"] { opacity: 1; }
+.explorer-living-wallpaper[data-ready="true"] { background: #0c2138 url("/activity/explorer-2026/roof-night-v4.webp") center 90%/cover no-repeat; }
 .explorer-living-wallpaper[data-ready="true"] .explorer-wallpaper-still { visibility: hidden; }
-.explorer-living-wallpaper[data-ready="true"] .explorer-portrait-canvas { display: block; }
-:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center/cover no-repeat; }
+.explorer-living-wallpaper[data-ready="true"] .explorer-transformation-stage { visibility: visible; }
+:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 90%/cover no-repeat; }
 :is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 75%/cover no-repeat; }
 .chat-background-explorer-duality { --chat-chrome-surface: #0e253be8; --chat-chrome-border: #c4d6e42b; --chat-chrome-text: #f3eee2; --chat-input-surface: #162f46; }
 .user-profile-panel.profile-theme-explorer-romance { --profile-page: #f5efdf; --profile-card: #fffbef; --profile-card-soft: #e9e5d9; --profile-ink: #203443; --profile-muted: #6a7680; --profile-line: #28425724; --profile-deep: #203b52; --profile-action: #a75d4f; background: var(--profile-page); color: var(--profile-ink); }
@@ -98,4 +101,4 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 @keyframes explorer-lamp-breathe { from { opacity: .35; transform: scale(.9); } to { opacity: .9; transform: scale(1.2); } }
 @keyframes explorer-petal-fall { to { transform: translate(-90px, 240px) rotate(230deg); } }
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
-@media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-portrait-canvas { display: none; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-transformation-stage { visibility: hidden; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
