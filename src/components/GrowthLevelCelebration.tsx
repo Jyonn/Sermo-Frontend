@@ -9,6 +9,7 @@ import { GrowthRewardPreview } from "./GrowthRewardPreview";
 import { usePageActive } from "../lib/pageActivity";
 import { useModalFocus } from "../lib/modalFocus";
 import "./FounderMedals.css";
+import { FounderMedalArtwork } from "./AnnualMedal";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -161,7 +162,7 @@ export function GrowthLevelCelebration() {
   if (pendingFounderYear) return <div ref={founderRoot} tabIndex={-1} aria-labelledby="founder-ceremony-title" aria-modal="true" role="dialog" className="growth-celebration growth-ceremony stage-legendary founder-ceremony">
     <header className="growth-ceremony-topbar"><strong>FRIENDEN 友间</strong><span>{pendingFounderYear}</span></header>
     <main className="founder-ceremony-main">
-      <div className="founder-ceremony-emblem" aria-hidden="true"><span className="material-symbols-outlined">workspace_premium</span></div>
+      <div className="founder-ceremony-emblem" aria-hidden="true"><FounderMedalArtwork /></div>
       <small>{t("profile.founderHonored")}</small>
       <h1 id="founder-ceremony-title">{t("profile.founderMedal", { year: pendingFounderYear })}</h1>
       <p>{session?.user.name}</p><p>{t("profile.founderThanks")}</p>

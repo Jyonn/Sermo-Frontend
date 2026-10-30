@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.31.3",
+  "id": "2026.10.31.4",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天搜索修复",
+      "title": "荣誉徽章焕新",
       "items": [
-        "修复从聊天详情打开搜索聊天记录时抽屉无法保持显示的问题"
+        "创始人奖章升级为金色珐琅徽章，名片与领取仪式同步展示",
+        "统一年度徽章的年份字体、图案尺寸与文字排版，并将活动徽章更名为探索者徽章"
       ]
     },
     "en": {
-      "title": "Chat search fix",
+      "title": "Refreshed honor medals",
       "items": [
-        "Fixed message search closing immediately when opened from chat details"
+        "A new gold and green Founder Medal appears on profiles and in the award ceremony",
+        "Annual medals share matching typography, artwork sizes and layouts; the activity medal is now the Explorer Badge"
       ]
     }
   }

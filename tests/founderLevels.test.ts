@@ -12,9 +12,10 @@ test('level labels preserve custom space names without a dangling separator', ()
 test('public profiles display translated annual medals and all Square badges receive names', async () => {
   const profile = await readFile(new URL('../src/components/UserProfileCard.tsx', import.meta.url), 'utf8');
   const square = await readFile(new URL('../src/pages/SquarePage.tsx', import.meta.url), 'utf8');
+  const comments = await readFile(new URL('../src/components/CommentThread.tsx', import.meta.url), 'utf8');
   assert.match(profile, /t\("profile.founderMedal", \{ year \}\)/);
   assert.match(square, /name=\{statement.user.growth_level_name\}/);
-  assert.match(square, /name=\{comment.user.growth_level_name\}/);
+  assert.match(comments, /name=\{comment.user.growth_level_name\}/);
 });
 test('the founder poster uses server acknowledgement before the level ceremony', async () => {
   const source = await readFile(new URL('../src/components/GrowthLevelCelebration.tsx', import.meta.url), 'utf8');

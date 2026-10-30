@@ -86,8 +86,6 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .profile-theme-explorer-romance .user-profile-reminders { border-color: var(--profile-line); background: var(--profile-card-soft); }
 :is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("/activity/explorer-2026/romance-v2.webp") right center/cover no-repeat; }
 .profile-card-theme-option.theme-explorer-romance > span::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 20px, #d8e4ef30 21px 22px, transparent 23px 43px); animation: explorer-rain 3s linear infinite; }
-.explorer-profile-medal { display: flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px; border-radius: 12px; border: 1px solid #b89a5d45; background: #b89a5d0c; }
-.explorer-profile-medal img { width: 58px; height: 58px; object-fit: contain; }.explorer-profile-medal span { display: grid; gap: 3px; }.explorer-profile-medal small { color: var(--muted); font-size: 10px; }.explorer-profile-medal strong { font-size: 12px; }
 @keyframes explorer-city-drift { to { transform: scale(1.12) translateX(-6px); } }
 @keyframes explorer-umbrella-sway { 0%, 100% { transform: rotate(-.6deg) translateY(1px); } 50% { transform: rotate(.7deg) translateY(-3px); } }
 @keyframes explorer-water-ring { from { opacity: .65; transform: scale(.15); } to { opacity: 0; transform: scale(1.4); } }
