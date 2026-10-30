@@ -1,10 +1,10 @@
 # Ai expression set v7 and local transformation studies
 
-Status: local design review only; no production release.
+Status: approved for production release 2026.10.30.21.
 
 Preview: `http://127.0.0.1:5173/design/explorer?wearables=1` (`npm run dev -- --host 127.0.0.1`). The chat tab switches between Moonlight sweep, Lens flash and Double exposure; Replay restarts the three-second initial hold. The expression tab displays all ten portraits. Add a sample message exercises stable per-message choices.
 
-The selected transformation is now Moonlight sweep in both actual chat and personalization previews; the old gold effect has been removed. The other two studies remain available only through the comparison lab. All studies use bounded SVG portrait layers with native opacity/transform animation, the shared visibility lease and explicit reduced-motion/data-saving fallbacks. No particle renderer, canvas or JavaScript frame loop was added. Release notes 2026.10.30.21 are prepared for a future release, not deployed.
+The selected transformation is now Moonlight sweep in both actual chat and personalization previews; the old gold effect has been removed. The other two studies remain available only through the comparison lab. All studies use bounded SVG portrait layers with native opacity/transform animation, the shared visibility lease and explicit reduced-motion/data-saving fallbacks. No particle renderer, canvas or JavaScript frame loop was added. Release notes 2026.10.30.21 track the selected production design.
 
 Ai uses one shared inline expression component in actual message text and reward previews. A hash of the random stable client message ID selects a face; reconciliation retains that ID after delivery. Each text message starts with a 1em-square portrait, aligned to the text baseline with a .25em trailing space. It is part of normal inline layout and appears only before the first line, including message text beside link previews. Quoted text and non-text media do not get an extra expression. Portrait compartments, dividers and all size measurements have been removed. A small red/ivory APTX 4869 capsule SVG sits on the inner vertical bubble border, clear of text and adjacent messages. The asset is editable native SVG; no new image generation was needed.
 
