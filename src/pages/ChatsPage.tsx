@@ -3770,7 +3770,7 @@ function LiveChatsPage({
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
   const chatCalendar = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
-  const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`);
+  const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`, displayedChat?.type === "direct" ? "direct" : "group");
   const copySuggestions = useGroupCopySuggestions(displayedChat?.type === "group" && displayedChat.purpose !== "submission" ? displayedChat.id : undefined, currentUserId);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(false);
   const [groupCopyOpen, setGroupCopyOpen] = useState(false);
@@ -7754,7 +7754,7 @@ function LiveChatsPage({
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
   const openMessageSearch = () => { setMessageSearchKeyword(""); setMessageSearchType(null); setMessageSearchResults([]); setMessageSearchState("idle"); setQuickActionsExpanded(false); setDetailsSheetOpen(false); setMessageSearchOpen(true); };
-  const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: Boolean(displayedChat), search: Boolean(displayedChat) }) : [];
+  const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat) }) : [];
   const showQuickActions = !messageSelectionMode && effectiveQuickActions.length > 0 && (!shortComposerLayout || quickActionsExpanded);
   const quickActionsHeaderButton = shortComposerLayout && effectiveQuickActions.length ? <button className="chat-details-button" type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
 
@@ -8732,8 +8732,8 @@ function LiveChatsPage({
             </section> : null}
 
             {selectedChat.purpose === "research" ? <ResearchChatProjectLink chatId={selectedChat.id} navigate={navigate} onProjectDetails={embeddedChat?.onProjectDetails} settings /> : null}
-            {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
-              <SettingGroup>
+            {selectedChat.purpose !== "submission" ? <>
+              {selectedChat.type === "group" || canUseOnlineReminder ? <section className="chat-detail-settings-section"><SettingGroup>
                 {selectedChat.type === "group" && selectedChat.isOwner ? (
                   <SettingRow
                     icon={<span className="material-symbols-outlined" aria-hidden="true">wallpaper</span>}
@@ -8759,7 +8759,8 @@ function LiveChatsPage({
                   <SettingRow title={t("chat.onlineReminder")} trailing={<SettingSwitch checked={selectedChat.onlineReminderEnabled} disabled={preferenceSaving !== null} label={t("chat.toggleOnlineReminder")} onChange={(next) => void updateSelectedChatPreference("online", next)} />} />
                   </FeatureDiscoveryTarget>
                 ) : null}
-                <section className="quick-detail-actions" aria-label={t("quickActions.detailActions")}>
+                </SettingGroup></section> : null}
+              <section className="chat-detail-settings-section quick-detail-actions" aria-label={t("quickActions.detailActions")}>
                   <h3>{t("quickActions.detailActions")}</h3>
                   <SettingGroup>
                     <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
@@ -8767,6 +8768,7 @@ function LiveChatsPage({
                     {selectedChat.type === "group" ? <SettingRow title={t("copyShelf.title")} icon={<span className="material-symbols-outlined">content_copy</span>} onClick={() => { setDetailsSheetOpen(false); setGroupCopyOpen(true); }} /> : null}
                   </SettingGroup>
                 </section>
+              {selectedChat.type === "group" ? <section className="chat-detail-settings-section"><SettingGroup>
                 {selectedChat.type === "group" ? (
                   <SettingRow description={t("chat.muteNotificationsHint")} title={t("chat.muteNotifications")} trailing={<SettingSwitch checked={selectedChat.notificationsMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteNotifications")} onChange={(next) => void updateSelectedChatPreference("mute", next)} />} />
                 ) : null}
@@ -8791,8 +8793,8 @@ function LiveChatsPage({
                   </div>
                   </FeatureDiscoveryTarget>
                 ) : null}
-              </SettingGroup>
-            </section> : null}
+              </SettingGroup></section> : null}
+            </> : null}
 
             {historyRecoveryStatus && historyRecoveryStatus.hidden_count > 0 ? (
               <section className="chat-detail-settings-section">

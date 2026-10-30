@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.30.31",
-  "publishedAt": "2026-10-30",
+  "id": "2026.10.31.1",
+  "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
       "title": "聊天快捷操作",
       "items": [
-        "锁定、日历、推荐复制与成员状态合为浮动快捷栏，可在个性化中选择和排序",
-        "按钮随可用空间展示更多信息，矮屏收起至聊天右上角",
-        "聊天详情集中收纳会话置顶、锁定消息和推荐复制入口"
+        "快捷按钮以透明毛玻璃悬浮在消息上方，不再压缩聊天区域",
+        "私聊和群聊独立配置、拖动排序，私聊移除在线状态",
+        "简化个性化入口并提前展示，整理详情中的独立操作分组"
       ]
     },
     "en": {
       "title": "Chat quick actions",
       "items": [
-        "A floating bar combines locked messages, calendar, suggested copies and member status; choose and reorder it in Personalization",
-        "Buttons reveal more information when space allows and collapse into the header on short screens",
-        "Conversation details group pinning, locked messages and suggested copies together"
+        "Translucent blurred buttons float over messages without reducing the conversation area",
+        "Separate direct and group layouts support drag ordering; direct chats no longer show presence",
+        "A concise Personalization entry appears earlier, with cleaner standalone action groups in details"
       ]
     }
   }

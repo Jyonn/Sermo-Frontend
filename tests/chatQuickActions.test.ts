@@ -5,7 +5,7 @@ import vm from "node:vm";
 import { createRequire } from "node:module";
 import React from "react";
 import ts from "typescript";
-import { DEFAULT_CHAT_ACTIONS, availableChatActions, normalizeChatActions } from "../src/lib/chatQuickActions.ts";
+import { DEFAULT_CHAT_ACTIONS, availableChatActions, normalizeChatActions, actionsForKind, reorderChatActions } from "../src/lib/chatQuickActions.ts";
 
 test("preferences recover safely from stale or malformed storage and retain user order", () => {
   for (const value of [null, {}, "locked", [], ["retired"]]) assert.deepEqual(normalizeChatActions(value), [...DEFAULT_CHAT_ACTIONS]);
@@ -19,8 +19,36 @@ test("unavailable actions vanish while remaining actions retain their configured
   assert.deepEqual(availableChatActions(["calendar"], { status: true }), []);
   assert.deepEqual(availableChatActions([...DEFAULT_CHAT_ACTIONS], {}), []);
 });
+test("legacy preferences migrate separately and direct chats never contain presence", () => {
+  assert.deepEqual(actionsForKind([...DEFAULT_CHAT_ACTIONS], "direct"), ["locked", "calendar"]);
+  assert.deepEqual(actionsForKind([...DEFAULT_CHAT_ACTIONS], "group"), ["locked", "copy", "status"]);
+  const value = { direct: ["search", "calendar"], group: ["status", "locked"] };
+  assert.deepEqual(actionsForKind(value, "direct"), ["search", "calendar"]);
+  assert.deepEqual(actionsForKind(value, "group"), ["status", "locked"]);
+  assert.deepEqual(actionsForKind(["status"], "direct"), ["locked", "calendar"]);
+});
+test("dragging retains neighbors and neither duplicates nor loses actions", () => {
+  assert.deepEqual(reorderChatActions(["locked", "copy", "status"], "status", "locked"), ["status", "locked", "copy"]);
+  assert.deepEqual(reorderChatActions(["locked", "copy", "status"], "locked", "status"), ["copy", "status", "locked"]);
+  assert.deepEqual(reorderChatActions(["locked"], "search", "locked"), ["locked"]);
+});
+test("saving either tab preserves the other tab and isolates account storage", () => {
+  const values = new Map<string, string>(); const exports: Record<string, any> = {};
+  const source = fs.readFileSync(new URL("../src/lib/useChatQuickActions.ts", import.meta.url), "utf8");
+  values.set("frienden:chat-quick-actions:v1:space:user", JSON.stringify(["status", "calendar", "locked", "copy"]));
+  vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, {
+    exports, Event, window: { dispatchEvent() {} }, localStorage: { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) },
+    require(name: string) { if (name === "react") return { useMemo: (fn: () => unknown) => fn(), useSyncExternalStore: (_subscribe: unknown, snapshot: () => unknown) => snapshot() }; if (name === "./chatQuickActions") return { actionsForKind }; throw new Error(name); },
+  });
+  assert.deepEqual(exports.useChatQuickActions("space:user", "direct").actions, ["calendar", "locked"]);
+  assert.equal(exports.useChatQuickActions("space:user", "direct").save(["search"]), true);
+  assert.deepEqual(exports.useChatQuickActions("space:user", "group").actions, ["status", "locked", "copy"]);
+  exports.useChatQuickActions("space:user", "group").save(["copy", "status"]);
+  assert.deepEqual(exports.useChatQuickActions("space:user", "direct").actions, ["search"]);
+  assert.deepEqual(exports.useChatQuickActions("space:other", "direct").actions, ["locked", "calendar"]);
+});
 test("quick action copy is available in every supported language", () => {
-  const keys = ["title", "status", "settingsHint", "order", "moveUp", "moveDown", "reset", "noCopies", "online", "onlineCount", "detailActions"];
+  const keys = ["title", "status", "entryHint", "order", "dragHint", "direct", "group", "selected", "available", "remove", "preview", "reset", "noCopies", "online", "onlineCount", "detailActions"];
   for (const language of ["zh-CN", "zh-TW", "en", "ja", "ko", "es"]) {
     const copy = JSON.parse(fs.readFileSync(new URL(`../src/locales/${language}/translation.json`, import.meta.url), "utf8"));
     for (const key of keys) assert.ok(copy[`quickActions.${key}`]?.trim(), `${language}:${key}`);
@@ -34,6 +62,7 @@ test("the shared row expands one to four equal slots, routes actions and never p
   vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText, { exports, require(name: string) {
     if (name === "../lib/language") return { useI18n: () => ({ t: (key: string) => key }) };
     if (name === "./UserAvatar") return { UserAvatar: Avatar };
+    if (name === "./ChatActionIcon") return { ChatActionIcon: () => null };
     if (name.endsWith(".css")) return {};
     return require(name);
   } });

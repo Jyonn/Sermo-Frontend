@@ -1,0 +1,5 @@
+import type { ChatQuickAction } from "../lib/chatQuickActions";
+export function ChatActionIcon({ action }: { action: ChatQuickAction }) {
+  return <svg className="chat-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{action === "locked" ? <><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></> : action === "calendar" ? <><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 10h16m-12 4h3m3 0h2m-8 3h3"/></> : action === "copy" ? <><rect x="8" y="7" width="12" height="14" rx="3"/><path d="M16 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h2"/></> : action === "status" ? <><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m1-15a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v2"/></> : <><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></>}</svg>;
+}
+export function ChatQuickActionsMark() { return <span className="quick-actions-entry-mark" aria-hidden="true">{(["locked", "calendar", "search"] as const).map(action => <i key={action}><ChatActionIcon action={action}/></i>)}</span>; }

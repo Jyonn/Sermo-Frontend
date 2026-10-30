@@ -1,5 +1,7 @@
 # Chat quick actions
 
+Release 2026.10.31.1 refinement: the row is an absolutely positioned glass overlay. The message scroller still begins at the header and keeps its full height; a content inset keeps the first message clear while subsequent scrolling passes under the buttons. Direct and group preferences are stored independently in v2 storage, with v1 arrays migrated through each kind's eligibility filter. Direct chats have no presence action. Personalization places the compact illustrated entry before Chat page; the editor uses two tabs, a live preview, pointer/touch drag handles and keyboard arrow ordering. Conversation action sections are siblings of notification settings, with no nested SettingGroup surfaces.
+
 Release 2026.10.30.31 replaces the full-width locked-message banner and the floating copy bookmark with one shared row. The row stays separate from the header, uses 40px rounded buttons and distributes its width equally among eligible actions. Unavailable preferences leave no empty slots.
 
 Defaults are locked messages, calendar, suggested copies and member status. Message search is an optional replacement. Personalization → Chat quick actions supports 1–4 selections, ordering and restoring defaults. Preferences are isolated by space/user and stored on this device; they do not alter server permissions or other devices.

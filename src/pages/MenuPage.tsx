@@ -15,6 +15,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { AccountSwitchList } from "../components/AccountSwitchList";
 import { ChatQuickActionSettings } from "../components/ChatQuickActionSettings";
+import { ChatQuickActionsMark } from "../components/ChatActionIcon";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -2422,6 +2423,7 @@ export default function MenuPage() {
               />}
             />
           </SettingGroup>
+          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
             className="personalization-background-entry personalization-feature-entry personalization-chat-page-entry"
             onClick={() => discoverThen("capability.custom_background", () => {
@@ -2436,7 +2438,6 @@ export default function MenuPage() {
             <span><strong>{t("menu.chatPage")}</strong><small>{t("menu.chatPageHint")}</small></span>
             <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span>
           </button>
-          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><span className="material-symbols-outlined">dashboard_customize</span><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.settingsHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`} onClick={() => setAvatarFrameDrawerOpen(true)} type="button">
             <span className="personalization-entry-preview avatar-frame-preview">
               <UserAvatar
