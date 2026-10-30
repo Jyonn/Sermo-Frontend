@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.31.2",
+  "id": "2026.10.31.3",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天快捷操作",
+      "title": "聊天搜索修复",
       "items": [
-        "快捷按钮增高并从左排列，不再撑满整行",
-        "锁定、复制、搜索固定为圆角正方形，日历和状态随空间展开信息"
+        "修复从聊天详情打开搜索聊天记录时抽屉无法保持显示的问题"
       ]
     },
     "en": {
-      "title": "Chat quick actions",
+      "title": "Chat search fix",
       "items": [
-        "Taller quick actions align from the left without stretching across the row",
-        "Lock, copy and search stay rounded squares; calendar and presence adapt their information to the available width"
+        "Fixed message search closing immediately when opened from chat details"
       ]
     }
   }

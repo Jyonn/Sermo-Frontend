@@ -7753,7 +7753,16 @@ function LiveChatsPage({
   }}><ComposerSvgIcon kind="plus" /></button>;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
-  const openMessageSearch = () => { setMessageSearchKeyword(""); setMessageSearchType(null); setMessageSearchResults([]); setMessageSearchState("idle"); setQuickActionsExpanded(false); setDetailsSheetOpen(false); setMessageSearchOpen(true); };
+  const openMessageSearch = () => {
+    setMessageSearchKeyword("");
+    setMessageSearchType(null);
+    setMessageSearchResults([]);
+    setMessageSearchState("idle");
+    setQuickActionsExpanded(false);
+    // Keep an open details drawer as the parent in the drawer history stack.
+    // Closing it here races its history.back() against the search drawer push.
+    setMessageSearchOpen(true);
+  };
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat) }) : [];
   const showQuickActions = !messageSelectionMode && effectiveQuickActions.length > 0 && (!shortComposerLayout || quickActionsExpanded);
   const quickActionsHeaderButton = shortComposerLayout && effectiveQuickActions.length ? <button className="chat-details-button" type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
