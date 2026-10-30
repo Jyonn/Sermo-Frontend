@@ -53,6 +53,7 @@ test("Explorer motion uses unique tile clips and pauses offscreen; profile scene
   assert.match(tiles, /clipPath=/);
   const css = readFileSync(new URL("../src/components/ExplorerPersonalization.css", import.meta.url), "utf8");
   assert.match(css, /animation-play-state: paused/);
+  assert.match(css, /\.explorer-living-wallpaper \{[^}]*background: #0c2138;/);
   assert.match(css, /\.explorer-pixel-portrait, \.explorer-pixel-sparks \{ display: none/);
   assert.match(css, /inset: 14%; width: 72%; height: 72%; border-radius: 12%/);
   assert.ok(!css.includes('background: url("/activity/explorer-2026/ai-v2.webp")'));

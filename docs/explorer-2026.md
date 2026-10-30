@@ -75,7 +75,7 @@ server-owned and unchanged. Old image filenames remain for stale clients.
 `/design/explorer` is a synthetic, non-claiming preview for desktop/mobile,
 appearance modes, incomplete and completed collection states.
 
-## Personalization correction / 2026.10.30.12
+## Personalization correction / 2026.10.30.13
 
 Reviewed the live Menu → Language & personalization editors, including Dragon
 bubbles and the Friendly Neighborhood profile. The previous Explorer bubble
@@ -87,7 +87,8 @@ with no repeated character sticker or fixed message height.
 
 The shared wallpaper renderer now assembles both portraits from 150 unique,
 instance-scoped SVG clips. Tiles disperse, rotate and reassemble on a 14-second
-cycle, with small pixel sparks. The shared profile card opts into a separate
+cycle, with small pixel sparks and an opaque navy stage so gaps never expose
+the light chat surface during a burst. The shared profile card opts into a separate
 layered scene: generated transparent couple, generated city, rain planes,
 water rings, lamp breathing and falling petals. Animation pauses offscreen or
 when the document is hidden; reduced motion shows a still wallpaper and scene.

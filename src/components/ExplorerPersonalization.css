@@ -39,7 +39,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
 }
 .personalization-option.preview-explorer-ai > i { background: #254a48; border: 1px solid #a6bfa5; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #183a39, 0 3px 0 #122e3970; }
 .personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 12px; height: 16px; right: 10px; top: 8px; border: 1px solid #b6cda6; border-radius: 50%; transform: rotate(35deg); background: radial-gradient(circle, #b6cda6 0 2px, transparent 2.5px); }
-.explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #0c2138; pointer-events: none; }
 .explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
 .explorer-wearables-lab > nav { display: flex; gap: 8px; padding: 12px; flex-shrink: 0; background: var(--surface); }
 .explorer-wearables-lab > nav button { flex: 1; padding: 10px 4px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); background: var(--surface); }
