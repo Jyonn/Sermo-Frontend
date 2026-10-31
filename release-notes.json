@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.31.5",
+  "id": "2026.10.31.6",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天快捷栏动态优化",
+      "title": "视频预览焕新",
       "items": [
-        "快捷栏显示加载反馈，按钮准备好后依次轻盈进入",
-        "展开、收起快捷栏更加流畅，并适配减少动态效果设置"
+        "视频预览沿用图片预览的统一布局、发送者信息与顶部操作栏",
+        "视频详情收纳为可展开面板，保留播放、进度、下载和全屏功能"
       ]
     },
     "en": {
-      "title": "Smoother chat quick actions",
+      "title": "Refreshed video previews",
       "items": [
-        "Quick actions show loading feedback and gently enter as their data becomes ready",
-        "Opening and closing the toolbar feels smoother and respects reduced motion preferences"
+        "Video previews share the photo viewer layout, sender context and top toolbar",
+        "Video details are collapsible, with playback, seeking, downloads and fullscreen retained"
       ]
     }
   }

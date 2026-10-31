@@ -140,6 +140,8 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
       {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} metadata={images.map((image) => image.metadata)} owner={statement.user} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} posterUris={images.map((image) => image.thumbnail_uri)} uris={images.map((image) => image.uri)} /> : null}
       {videoOpen && video ? <MediaLightbox altPrefix={t("square.video")} index={0} items={[{
         kind: "video",
+        owner: statement.user,
+        createdAt: statement.created_at,
         uri: video.uri,
         posterUri: video.thumbnail_uri,
         width: video.metadata?.pixel_width,

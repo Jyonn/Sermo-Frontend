@@ -357,13 +357,14 @@ function formatPlaybackTime(value: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?: string | null; src: string }) {
+function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: boolean; poster?: string | null; src: string; width?: number | null; height?: number | null }) {
   const { t } = useI18n();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [phase, setPhase] = useState<MediaWaitPhase>("idle");
+  const [aspectRatio, setAspectRatio] = useState(width && height ? width / height : 16 / 9);
 
   useEffect(() => {
     if (!active) videoRef.current?.pause();
@@ -380,9 +381,10 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
   const progress = duration ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   return (
-    <div className="message-video-player" onClick={(event) => event.stopPropagation()}>
+    <div className="message-video-player" style={{ "--video-aspect": aspectRatio } as CSSProperties} onClick={(event) => event.stopPropagation()}>
       <video
         className="message-video-preview"
+        onLoadedMetadata={(event) => { const video = event.currentTarget; if (video.videoWidth && video.videoHeight) setAspectRatio(video.videoWidth / video.videoHeight); }}
         onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
         onEnded={() => setPlaying(false)}
         onError={() => setPhase("error")}
@@ -621,7 +623,7 @@ export function MediaLightbox({
   navigationLabel,
 }: MediaLightboxProps) {
   const { t, locale } = useI18n();
-  const resolvedAltPrefix = altPrefix || t("media.imagePreview");
+  const resolvedAltPrefix = altPrefix || t(items[index]?.kind === "video" ? "media.video" : "media.imagePreview");
   const modalRef = useRef<HTMLElement | null>(null);
   useBodyScrollLock(items.length > 0);
   useModalFocus(modalRef, items.length > 0, onClose);
@@ -660,6 +662,7 @@ export function MediaLightbox({
   const sentAt = activeItem.createdAt ? new Date(activeItem.createdAt * 1000) : null;
   const sentTime = sentAt && Number.isFinite(sentAt.getTime()) ? new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(sentAt) : "";
   const close = () => onClose();
+  const downloadLabel = activeItem.kind === "video" ? `${t("common.download")}${activeItem.downloadLabel ? ` · ${activeItem.downloadLabel}` : ""}` : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage");
   const move = (direction: -1 | 1) => {
     const next = index + direction;
     if (next >= 0 && next < items.length) onIndexChange(next);
@@ -667,7 +670,7 @@ export function MediaLightbox({
   };
   const actions = <div className="photo-archive-actions" onClick={(event) => event.stopPropagation()}>
     {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
-    <button aria-label={downloading ? t("media.downloading") : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} title={activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
+    <button aria-label={downloading ? t("media.downloading") : downloadLabel} title={downloadLabel} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
       {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
     </button>
     <button aria-label={t("common.fullscreen")} title={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg></button>
@@ -686,7 +689,7 @@ export function MediaLightbox({
       const gesture = gestureRef.current;
       if (gesture && Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 8) gesture.moved = true;
     }} role="presentation">
-      <section ref={modalRef} tabIndex={-1} aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog" onKeyDown={(event) => {
+      <section ref={modalRef} tabIndex={-1} aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${!immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog" onKeyDown={(event) => {
         if (immersive || event.target instanceof HTMLElement && event.target.closest('input,textarea,select,video')) return;
         if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1); }
       }}>
@@ -699,10 +702,10 @@ export function MediaLightbox({
           }
         }} ref={trackRef}>
           {items.map((item, itemIndex) => <div aria-hidden={itemIndex !== index} className="message-image-preview-slide" key={item.id ?? `${item.uri}:${itemIndex}`}>
-            {item.kind === "image" && !immersive ? <PhotoArchivePlate
+            {!immersive ? <PhotoArchivePlate kind={item.kind}
               metadata={item.imageMetadata} owner={item.owner} detail={item.detail}
               width={item.width || imageSizes[item.uri]?.width} height={item.height || imageSizes[item.uri]?.height}
-            ><PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} onSize={(width, height) => setImageSizes((current) => current[item.uri]?.width === width && current[item.uri]?.height === height ? current : { ...current, [item.uri]: { width, height } })} /></PhotoArchivePlate> : <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
+            >{item.kind === "video" ? <ArchiveVideoPlayer active={itemIndex === index} poster={item.posterUri} src={item.uri} width={item.width} height={item.height} /> : <PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} onSize={(width, height) => setImageSizes((current) => current[item.uri]?.width === width && current[item.uri]?.height === height ? current : { ...current, [item.uri]: { width, height } })} />}</PhotoArchivePlate> : <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
               <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`}>
                 {item.kind === "video"
                   ? immersive && itemIndex === index
@@ -717,7 +720,7 @@ export function MediaLightbox({
           </div>)}
         </div>
         {!immersive && sharedDetail ? <div className="message-image-preview-shared-detail" onClick={(event) => event.stopPropagation()}>{sharedDetail}</div> : null}
-        {!immersive && activeItem.kind === "image" ? <div className="photo-archive-navigation" onClick={(event) => event.stopPropagation()}>
+        {!immersive ? <div className="photo-archive-navigation" onClick={(event) => event.stopPropagation()}>
           <div className="photo-preview-context">
             {activeItem.owner ? <UserAvatar className="photo-preview-sender-avatar" name={activeItem.owner.name} uri={activeItem.owner.avatar_uri} cacheKey={activeItem.owner.avatar_cache_key} /> : null}
             <div className="photo-preview-sender-copy"><strong title={activeItem.owner?.name}>{activeItem.owner?.name || resolvedAltPrefix}</strong>
@@ -731,18 +734,6 @@ export function MediaLightbox({
         {!immersive && (items.length > 1 || hasPrevious || hasNext) ? <div className="photo-preview-paging" onClick={(event) => event.stopPropagation()}>
           <button type="button" aria-label={t("media.previousImage")} disabled={index === 0 && (!hasPrevious || loading)} onClick={() => move(-1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
           <button type="button" aria-label={t("media.nextImage")} disabled={index === items.length - 1 && (!hasNext || loading)} onClick={() => move(1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
-        </div> : null}
-        {!immersive && activeItem.kind === "video" ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
-          {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
-          {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
-          <button aria-label={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg>
-          </button>
-          {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
-          <button aria-label={downloading ? t("media.downloading") : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
-            {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
-            {downloading ? <span>{t("media.downloading")}</span> : activeItem.downloadLabel ? <span>{activeItem.downloadLabel}</span> : null}
-          </button>
         </div> : null}
       </section>
     </div>,

@@ -8,7 +8,8 @@ function positive(value?: number | null): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
 
-export function PhotoArchivePlate({ metadata, owner, width, height, children, actions, detail }: {
+export function PhotoArchivePlate({ kind = "image", metadata, owner, width, height, children, actions, detail }: {
+  kind?: "image" | "video";
   metadata?: ImageMetadataDTO | null;
   owner?: TinyUserDTO | null;
   width?: number | null;
@@ -40,7 +41,7 @@ export function PhotoArchivePlate({ metadata, owner, width, height, children, ac
   const imageWidth = width || data?.pixel_width || 0;
   const imageHeight = height || data?.pixel_height || 0;
   const expanded = imageWidth > 0 && imageHeight / imageWidth > 1.05;
-  const long = imageWidth > 0 && imageHeight / imageWidth > 2;
+  const long = kind === "image" && imageWidth > 0 && imageHeight / imageWidth > 2;
   const hasTechnical = Boolean(camera || lens || exposure.length);
   const location = address || coordinate ? <div className="photo-archive-location">
     {hasCoordinates ? <button aria-label={t("location.viewOnMap")} onClick={() => openMediaLocationMap({ location: {
@@ -57,13 +58,13 @@ export function PhotoArchivePlate({ metadata, owner, width, height, children, ac
     {exposure.length ? <div className="photo-archive-exposure"><span className="photo-archive-label">{t("media.exposureLabel")}</span><span className="photo-archive-exposure-values">{exposure.map((value, index) => <span key={value}>{index > 0 ? `/ ${value}` : value}</span>)}</span></div> : null}
   </header> : null;
 
-  return <article className={`photo-archive-plate${expanded ? " is-expanded" : ""}${long ? " is-long" : ""}${hasTechnical ? " has-technical" : ""}${location ? " has-location" : ""}`} onClick={(event) => {
+  return <article className={`photo-archive-plate${kind === "video" ? " is-video" : ""}${expanded ? " is-expanded" : ""}${long ? " is-long" : ""}${hasTechnical ? " has-technical" : ""}${location ? " has-location" : ""}`} onClick={(event) => {
     if ((event.target as HTMLElement).closest('button,a,.photo-preview-details,.photo-archive-extra')) event.stopPropagation();
   }}>
     <div className="photo-archive-visual">
       <div className="photo-archive-image-scroll">{children}</div>
     </div>
-    {detail ? <div className="photo-archive-extra">{detail}</div> : null}
+    {detail ? kind === "video" ? <details className="photo-preview-details"><summary><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("media.videoRecord")}<span className="material-symbols-outlined" aria-hidden="true">expand_more</span></summary><div className="photo-preview-details-body">{detail}</div></details> : <div className="photo-archive-extra">{detail}</div> : null}
     {hasTechnical || location || date ? <details className="photo-preview-details">
       <summary tabIndex={0}><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("media.photoDetails")}<span className="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
       <div className="photo-preview-details-body">{technical}{location}{date ? <div className="photo-archive-date"><span className="photo-archive-label">{t("media.dateLabel")}</span><time dateTime={takenAt!.toISOString()}>{date}</time></div> : null}</div>

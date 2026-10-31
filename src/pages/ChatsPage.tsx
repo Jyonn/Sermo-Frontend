@@ -7765,6 +7765,7 @@ function LiveChatsPage({
     // Closing it here races its history.back() against the search drawer push.
     setMessageSearchOpen(true);
   };
+  const videoPreviewMessage = videoPreview?.messageId ? selectedMessages.find(message => message.id === videoPreview.messageId) : undefined;
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat) }) : [];
   const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
     preferredQuickActions.includes("locked") && pinnedLoadedScope !== `${currentUserId}:${displayedChat.id}` ||
@@ -9477,16 +9478,21 @@ function LiveChatsPage({
       ) : null}
       {videoPreview ? (
         <MediaLightbox
+          key={videoPreview.uri}
           index={0}
           items={[{
             uri: videoPreview.uri,
             kind: "video",
+            posterUri: videoPreviewMessage?.payload?.thumbnail_uri,
+            owner: videoPreviewMessage ? { user_id: videoPreviewMessage.userId ?? 0, name: videoPreviewMessage.name, avatar_uri: videoPreviewMessage.avatarUri, avatar_cache_key: videoPreviewMessage.avatarCacheKey } : undefined,
+            createdAt: videoPreviewMessage?.createdAt,
             width: videoPreview.metadata?.pixel_width,
             height: videoPreview.metadata?.pixel_height,
             detail: <MediaMetadataPanel kind="video" metadata={videoPreview.metadata} />,
             downloadLabel: formatImageFileSize(videoPreview.metadata?.file_size),
           }]}
           onClose={() => setVideoPreview(null)}
+          onJumpToMessage={videoPreview.messageId ? () => { const id = videoPreview.messageId; setVideoPreview(null); if (id) revealMessageFromSearch(id); } : undefined}
           onIndexChange={() => undefined}
         />
       ) : null}
