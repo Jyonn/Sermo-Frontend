@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.31.8",
+  "id": "2026.10.31.9",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天快捷栏细节优化",
+      "title": "头像框尺寸优化",
       "items": [
-        "群聊在线人数按钮随内容收缩，不再占用多余空间",
-        "恢复私聊日历按钮的毛玻璃效果"
+        "佩戴头像框后头像保持原有大小，装饰向外延展"
       ]
     },
     "en": {
-      "title": "Refined chat shortcuts",
+      "title": "Consistent avatar sizing",
       "items": [
-        "Group presence buttons fit their content without taking extra space",
-        "Restored the frosted-glass background on private-chat calendar buttons"
+        "Framed avatars keep their original portrait size, with decorations extending outward"
       ]
     }
   }

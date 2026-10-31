@@ -1,6 +1,10 @@
 .user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan {
   --avatar-frame-inset: 0%;
   --avatar-frame-paint: transparent;
+  /* Its 72% painted aperture must retain the unframed portrait size. */
+  inset: -19.444444%;
+  width: 138.888889%;
+  height: 138.888889%;
   overflow: visible;
   background: transparent;
 }

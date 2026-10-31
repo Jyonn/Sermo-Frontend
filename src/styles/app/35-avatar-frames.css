@@ -1,4 +1,4 @@
-/* Avatar frame protocol: fixed footprint, proportional inset, shared silhouette. */
+/* The layout footprint belongs to the portrait; frame bands extend outward. */
 @keyframes avatar-frame-turn { to { transform: rotate(1turn); } }
 @keyframes avatar-blossom { to { transform: rotate(12deg) scale(1.1); } }
 @keyframes avatar-wing { to { scale: .75 1; opacity: .75; } }
@@ -57,7 +57,9 @@
 
 .user-avatar.has-avatar-frame > .avatar-frame-clip {
   position: absolute;
-  inset: 0;
+  inset: calc(0% - var(--avatar-frame-inset));
+  width: calc(100% + var(--avatar-frame-inset) * 2);
+  height: calc(100% + var(--avatar-frame-inset) * 2);
   box-sizing: border-box;
   padding: var(--avatar-frame-inset);
   overflow: hidden;
