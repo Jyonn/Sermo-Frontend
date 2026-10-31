@@ -1,5 +1,6 @@
 import type { ChatMessage } from "../types.ts";
-import { normalizeStableResourceUri } from "./stableResource.ts";
+import { normalizeStableResourceUri, preferFreshResourceUri } from "./stableResource.ts";
+import { retainLocalMedia, sameMediaAsset } from "./messageMedia.ts";
 
 function isMediaMessageKind(kind: ChatMessage["kind"]) {
   return kind === "image" || kind === "video" || kind === "audio" || kind === "file";
@@ -29,15 +30,19 @@ function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
 
 export function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
   if (!existing) return incoming;
+  const keepLocal = Boolean(existing.localPreviewUri && incoming.payload?.uri && existing.kind === incoming.kind && isMediaMessageKind(incoming.kind)
+    && (existing.payload?.uri?.startsWith("blob:") || sameMediaAsset(existing.payload?.uri ?? "", incoming.payload.uri)));
+  if (keepLocal) retainLocalMedia(incoming.payload!.uri!, existing.localPreviewUri!);
   const reconciled = {
     ...incoming,
     clientId: existing.clientId,
-    localPreviewUri: existing.localPreviewUri,
+    localPreviewUri: keepLocal ? existing.localPreviewUri : incoming.localPreviewUri,
     isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
     chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
     avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
     submissionRound: incoming.submissionRound ?? existing.submissionRound,
     submissionVisible: incoming.submissionVisible ?? existing.submissionVisible,
+    payload: incoming.payload ? { ...incoming.payload, pixel_width: incoming.payload.pixel_width ?? existing.payload?.pixel_width, pixel_height: incoming.payload.pixel_height ?? existing.payload?.pixel_height } : incoming.payload,
   };
   if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
   if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return reconciled;
@@ -52,7 +57,8 @@ export function preserveStableMediaUri(existing: ChatMessage | undefined, incomi
     ...reconciled,
     payload: {
       ...incoming.payload,
-      uri: existing.payload.uri,
+      ...reconciled.payload,
+      uri: preferFreshResourceUri(existing.payload.uri, incoming.payload.uri),
     },
   };
 }

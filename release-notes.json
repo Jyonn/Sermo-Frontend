@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.31.6",
+  "id": "2026.10.31.7",
   "publishedAt": "2026-10-31",
   "locales": {
     "zh-CN": {
-      "title": "视频预览焕新",
+      "title": "聊天媒体更稳定",
       "items": [
-        "视频预览沿用图片预览的统一布局、发送者信息与顶部操作栏",
-        "视频详情收纳为可展开面板，保留播放、进度、下载和全屏功能"
+        "改善刚上传图片与视频的预览衔接，遇到临时加载或缓存问题时自动恢复",
+        "图片与视频统一按比例控制气泡尺寸，减少上传确认前后的尺寸跳动"
       ]
     },
     "en": {
-      "title": "Refreshed video previews",
+      "title": "More reliable chat media",
       "items": [
-        "Video previews share the photo viewer layout, sender context and top toolbar",
-        "Video details are collapsible, with playback, seeking, downloads and fullscreen retained"
+        "New uploads keep a working preview and recover automatically from temporary loading or cache failures",
+        "Photos and videos share proportional thumbnail limits with steadier sizing across upload confirmation"
       ]
     }
   }

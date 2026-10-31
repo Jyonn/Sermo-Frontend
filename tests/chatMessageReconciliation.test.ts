@@ -33,11 +33,11 @@ test("sticker confirmation matches content hashes and failed text can be confirm
   assert.equal(mergeMessages([message({ status: "failed" })], [message({ id: 2, clientId: "server:2" })]).length, 1);
 });
 
-test("signed media URL refresh preserves the loaded resource and local appearance", () => {
+test("signed media URL refresh keeps fresh credentials and local appearance", () => {
   const existing = message({ kind: "image", localPreviewUri: "blob:preview", isPermanentVip: true, payload: { kind: "image", uri: "https://media.test/photo?e=1&token=old" } });
   const incoming = message({ kind: "image", payload: { kind: "image", uri: "https://media.test/photo?e=2&token=new" } });
   const result = preserveStableMediaUri(existing, incoming);
-  assert.equal(result.payload?.uri, existing.payload?.uri);
+  assert.equal(result.payload?.uri, incoming.payload?.uri);
   assert.equal(result.localPreviewUri, "blob:preview");
   assert.equal(result.isPermanentVip, true);
   assert.equal(preserveStableMediaUri(existing, { ...incoming, payload: { kind: "image", uri: "https://media.test/different" } }).payload?.uri, "https://media.test/different");

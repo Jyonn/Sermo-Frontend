@@ -23,6 +23,11 @@ export function normalizeStableResourceUri(value?: string | null) {
   }
 }
 
+export function preferFreshResourceUri(existing: string, incoming: string) {
+  const expiration = (url: string) => Number(new URLSearchParams(url.split("?")[1] ?? "").get("e")) || 0;
+  return expiration(incoming) > 0 && expiration(existing) > expiration(incoming) ? existing : incoming;
+}
+
 export function resolveStableResourceUri(value?: string | null) {
   const trimmed = value?.trim();
   if (!trimmed) return undefined;
@@ -31,10 +36,10 @@ export function resolveStableResourceUri(value?: string | null) {
   if (!key) return trimmed;
 
   const cached = stableResourceMap.get(key);
-  if (cached) return cached;
+  const preferred = cached ? preferFreshResourceUri(cached, trimmed) : trimmed;
 
-  stableResourceMap.set(key, trimmed);
-  return trimmed;
+  stableResourceMap.set(key, preferred);
+  return preferred;
 }
 
 export function forgetStableResourceUri(value?: string | null) {

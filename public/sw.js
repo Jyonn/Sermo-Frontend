@@ -110,12 +110,14 @@ async function enforceMediaLimit() {
 async function persistMediaResponse(request, identity, response) {
   if (blockedMediaSlugs.has(identity.slug)) return;
   if (!response.ok || response.type === "opaque" || response.status === 206) return;
+  const contentType = response.headers.get("Content-Type") || "";
+  if ((["image", "video"].includes(request.destination) || identity.variant.startsWith("thumbnail")) && /text\/html|application\/(?:json|problem\+json)/i.test(contentType)) return;
   const contentLength = Number(response.headers.get("Content-Length") || 0);
   let size = contentLength;
   if (!size && response.type !== "opaque") {
     size = (await response.clone().blob()).size;
   }
-  if (size > MEDIA_MAX_ITEM_BYTES) return;
+  if (!size || size > MEDIA_MAX_ITEM_BYTES) return;
   if (blockedMediaSlugs.has(identity.slug)) return;
   const cache = await caches.open(MEDIA_CACHE_NAME);
   await cache.put(mediaCacheRequest(identity), response);
@@ -129,8 +131,9 @@ async function rangedMediaResponse(cached, rangeHeader) {
   if (!match) return cached;
   const blob = await cached.blob();
   if (!blob.size) return cached;
-  const start = match[1] ? Number(match[1]) : 0;
-  const end = match[2] ? Math.min(Number(match[2]), blob.size - 1) : blob.size - 1;
+  const suffix = !match[1] && match[2] ? Number(match[2]) : null;
+  const start = suffix !== null ? Math.max(0, blob.size - suffix) : match[1] ? Number(match[1]) : 0;
+  const end = suffix !== null ? blob.size - 1 : match[2] ? Math.min(Number(match[2]), blob.size - 1) : blob.size - 1;
   if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || start >= blob.size) {
     return new Response(null, {
       status: 416,
@@ -162,7 +165,9 @@ async function fetchFullMedia(request, identity) {
 async function handleMediaRequest(request, identity) {
   const cache = await caches.open(MEDIA_CACHE_NAME);
   const key = mediaCacheRequest(identity);
-  const cached = await cache.match(key);
+  const retry = new URL(request.url).searchParams.has("sermo_retry");
+  if (retry) await cache.delete(key);
+  const cached = retry ? null : await cache.match(key);
   if (cached) {
     return {
       response: rangedMediaResponse(cached, request.headers.get("Range")),
@@ -172,7 +177,7 @@ async function handleMediaRequest(request, identity) {
         .catch(() => undefined),
     };
   }
-  const response = await fetch(request);
+  const response = await fetch(retry ? new Request(request, { cache: "reload" }) : request);
   return {
     response,
     maintenance:

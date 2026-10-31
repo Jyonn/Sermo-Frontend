@@ -23,7 +23,7 @@ test('video previews reuse the photo shell and toolbar without the retired secon
   assert.doesNotMatch(preview, /className="message-image-preview-toolbar"/);
   assert.match(plate, /kind === "video" \? <details className="photo-preview-details"/);
   assert.match(plate, /kind === "image" && imageWidth > 0 && imageHeight \/ imageWidth > 2/);
-  assert.match(preview, /if \(!active\) videoRef.current\?\.pause\(\)/);
+  assert.match(preview, /if \(!active\) \{ wantsPlayback.current = false; videoRef.current\?\.pause\(\)/);
   assert.match(preview, /onChange=\{\(event\) => \{\s*const video = videoRef.current;\s*if \(video\) video.currentTime/);
 });
 test('chat and search previews share sender identity, sending time and message navigation', async () => {

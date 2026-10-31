@@ -44,6 +44,8 @@ import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
 import { reportGroupCopies } from "../components/GroupCopyReporting";
 import { GroupCopySheet } from "../components/GroupCopySheet";
 import { ChatQuickActions } from "../components/ChatQuickActions";
+import { RetryingMediaImage, MessageMediaImage, MessageMediaVideo } from "../components/ChatMedia";
+import { readLocalMediaSize, releaseLocalMedia } from "../lib/messageMedia";
 import { availableChatActions } from "../lib/chatQuickActions";
 import { useChatQuickActions } from "../lib/useChatQuickActions";
 import { useGroupCopySuggestions } from "../lib/useGroupCopySuggestions";
@@ -973,247 +975,6 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
 }
 
-const MEDIA_IMAGE_RETRY_DELAYS = [350, 900, 1800, 3600];
-
-function retryableMediaUri(uri: string, attempt: number) {
-  const resolved = resolveStableResourceUri(uri) ?? uri;
-  if (!attempt || resolved.startsWith("blob:") || resolved.startsWith("data:")) return resolved;
-
-  try {
-    const parsed = new URL(resolved, window.location.href);
-    if (!parsed.pathname.includes("/messages/blob/")) return resolved;
-    parsed.searchParams.set("sermo_retry", `${attempt}-${Date.now()}`);
-    return parsed.toString();
-  } catch {
-    return resolved;
-  }
-}
-
-const RetryingMediaImage = memo(function RetryingMediaImage({
-  alt,
-  ariaHidden,
-  className,
-  fallbackSrc,
-  loading = "lazy",
-  onFinalError,
-  onLoad,
-  src,
-}: {
-  alt: string;
-  ariaHidden?: boolean;
-  className?: string;
-  fallbackSrc?: string;
-  loading?: "eager" | "lazy";
-  onFinalError?: () => void;
-  onLoad?: () => void;
-  src: string;
-}) {
-  const [activeSrc, setActiveSrc] = useState(src);
-  const [attempt, setAttempt] = useState(0);
-  const retryTimerRef = useRef<number | null>(null);
-  const usableFallback = fallbackSrc && fallbackSrc !== activeSrc ? fallbackSrc : undefined;
-  const displaySrc = retryableMediaUri(activeSrc, attempt);
-
-  useEffect(() => {
-    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
-    retryTimerRef.current = null;
-    setActiveSrc(src);
-    setAttempt(0);
-  }, [src, fallbackSrc]);
-
-  useEffect(() => () => {
-    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
-  }, []);
-
-  const handleError = () => {
-    forgetStableResourceUri(activeSrc);
-    if (activeSrc.startsWith("blob:") && usableFallback) {
-      setActiveSrc(usableFallback);
-      setAttempt(0);
-      return;
-    }
-    if (attempt < MEDIA_IMAGE_RETRY_DELAYS.length) {
-      retryTimerRef.current = window.setTimeout(() => {
-        retryTimerRef.current = null;
-        setAttempt((current) => current + 1);
-      }, MEDIA_IMAGE_RETRY_DELAYS[attempt]);
-      return;
-    }
-    if (usableFallback) {
-      setActiveSrc(usableFallback);
-      setAttempt(0);
-      return;
-    }
-    onFinalError?.();
-  };
-
-  return (
-    <img
-      key={`${activeSrc}:${attempt}`}
-      alt={alt}
-      aria-hidden={ariaHidden}
-      className={className}
-      loading={loading}
-      src={displaySrc}
-      onError={handleError}
-      onLoad={onLoad}
-    />
-  );
-});
-
-const MessageMediaImage = memo(function MessageMediaImage({
-  failed,
-  groupClassName,
-  localPreviewUri,
-  metadata,
-  messageId,
-  onOpenImage,
-  onRetry,
-  thumbnailUri,
-  uri,
-}: {
-  failed?: boolean;
-  groupClassName: string;
-  localPreviewUri?: string;
-  metadata?: ImageMetadataDTO | null;
-  messageId?: number;
-  onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
-  onRetry?: () => void;
-  thumbnailUri?: string;
-  uri: string;
-}) {
-  const [loaded, setLoaded] = useState(false);
-  const resolvedUri = resolveStableResourceUri(uri) ?? uri;
-  const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
-  const displayUri = localPreviewUri ?? resolvedUri;
-  const fallbackUri = localPreviewUri ? resolvedThumbnailUri ?? resolvedUri : resolvedThumbnailUri;
-  const imageAspect = metadata?.pixel_width && metadata.pixel_height
-    ? metadata.pixel_width / metadata.pixel_height
-    : null;
-  const frameStyle = imageAspect
-    ? { "--message-image-aspect": imageAspect } as CSSProperties
-    : undefined;
-
-  useEffect(() => {
-    setLoaded(false);
-  }, [displayUri]);
-
-  return (
-    <button
-      aria-label={failed ? i18n.t("message.retrySend") : i18n.t("message.image")}
-      className={`message-media-frame image-button ${imageAspect ? "has-intrinsic-size" : ""} ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
-      onClick={() => failed ? onRetry?.() : onOpenImage?.([resolvedUri], 0, [metadata ?? null], [messageId ?? null])}
-      style={frameStyle}
-      type="button"
-    >
-      {resolvedThumbnailUri ? <RetryingMediaImage alt="" ariaHidden className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
-      <RetryingMediaImage
-        alt={i18n.t("message.image")}
-        className="message-media-image message-media-image-main"
-        fallbackSrc={fallbackUri}
-        src={displayUri}
-        onFinalError={() => setLoaded(true)}
-        onLoad={() => setLoaded(true)}
-      />
-    </button>
-  );
-});
-
-const MessageMediaVideo = memo(function MessageMediaVideo({
-  groupClassName,
-  messageId,
-  metadata,
-  onOpenVideo,
-  thumbnailUri,
-  uri,
-}: {
-  groupClassName: string;
-  messageId?: number;
-  metadata?: VideoMetadataDTO | null;
-  onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
-  thumbnailUri?: string;
-  uri: string;
-}) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const previewPosterOnly = uri === "preview://video";
-  const metadataAspectRatio = metadata?.pixel_width && metadata.pixel_height
-    && Number.isFinite(metadata.pixel_width) && Number.isFinite(metadata.pixel_height)
-    && metadata.pixel_width > 0 && metadata.pixel_height > 0
-    ? metadata.pixel_width / metadata.pixel_height
-    : null;
-  const hasPoster = Boolean(thumbnailUri);
-  const [loaded, setLoaded] = useState(previewPosterOnly || hasPoster);
-  const [duration, setDuration] = useState(0);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(metadataAspectRatio);
-  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
-  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
-  const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
-
-  useEffect(() => {
-    setLoaded(previewPosterOnly || hasPoster);
-    setDuration(0);
-    setAspectRatio(metadataAspectRatio);
-    setRetryWithFreshUri(false);
-  }, [hasPoster, metadataAspectRatio, previewPosterOnly, uri]);
-
-  return (
-    <div
-      className={`message-media-frame message-video-card ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
-      style={aspectRatio ? { "--message-video-aspect": aspectRatio } as CSSProperties : undefined}
-    >
-      <button
-        aria-label={i18n.t("video.view")}
-        className="message-video-surface"
-        onClick={() => onOpenVideo?.(resolvedUri, metadata ?? null, messageId ?? null)}
-        type="button"
-      >
-        {previewPosterOnly ? (
-          <img alt="" aria-hidden="true" className="message-media-video message-video-preview-poster" src={resolvedThumbnailUri} />
-        ) : (
-          <video
-            className="message-media-video"
-            onCanPlay={() => setLoaded(true)}
-            onDurationChange={(event) => {
-              const value = event.currentTarget.duration;
-              if (Number.isFinite(value)) setDuration(value);
-            }}
-            onError={() => {
-              if (!retryWithFreshUri) {
-                forgetStableResourceUri(uri);
-                setRetryWithFreshUri(true);
-              }
-            }}
-            onLoadedMetadata={(event) => {
-              const video = event.currentTarget;
-              setLoaded(true);
-              if (video.videoWidth > 0 && video.videoHeight > 0) {
-                const measuredAspectRatio = video.videoWidth / video.videoHeight;
-                const metadataMismatch = metadataAspectRatio !== null
-                  && Math.abs(measuredAspectRatio - metadataAspectRatio) / metadataAspectRatio > 0.05;
-                if (metadataAspectRatio === null || metadataMismatch) {
-                  setAspectRatio(measuredAspectRatio);
-                }
-              }
-              if (Number.isFinite(video.duration)) setDuration(video.duration);
-            }}
-            playsInline
-            poster={resolvedThumbnailUri}
-            preload="metadata"
-            ref={videoRef}
-            src={resolvedUri}
-          />
-        )}
-        <span className="message-video-shade" aria-hidden="true" />
-        <span className="message-video-play" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z" /></svg>
-        </span>
-      </button>
-      <div className="message-video-meta">
-        <span>{formatDuration(metadata?.duration_seconds ?? duration)}</span>
-      </div>
-    </div>
-  );
-});
 
 const MessageImageGallery = memo(function MessageImageGallery({
   from,
@@ -1668,7 +1429,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage failed={message.status === "failed"} groupClassName={groupClassName} localPreviewUri={message.localPreviewUri} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} onRetry={onRetry} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
+    return <MessageMediaImage failed={message.status === "failed"} groupClassName={groupClassName} localPreviewUri={message.localPreviewUri} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} width={message.payload.pixel_width} height={message.payload.pixel_height} onOpenImage={onOpenImage} onRetry={onRetry} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
@@ -1677,9 +1438,11 @@ function renderMessageContent(
         groupClassName={groupClassName}
         messageId={typeof message.id === "number" ? message.id : undefined}
         metadata={message.payload.video_metadata}
+        width={message.payload.pixel_width}
+        height={message.payload.pixel_height}
         onOpenVideo={onOpenVideo}
         thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri}
-        uri={message.localPreviewUri ?? message.payload.uri}
+        uri={message.payload.uri}
       />
     );
   }
@@ -3301,7 +3064,7 @@ function LiveChatsPage({
     isWithinRecallWindow(message) && !pinnedMessages.some((pin) => pin.message.message_id === message.id);
 
   useEffect(() => () => {
-    localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
+    localObjectUrlsRef.current.forEach(releaseLocalMedia);
     localObjectUrlsRef.current.clear();
     clipboardPreviewUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
     clipboardPreviewUrlsRef.current.clear();
@@ -6038,6 +5801,13 @@ function LiveChatsPage({
     triggerMessageEntrance(pendingMessage.clientId);
     updateSendTask(pendingMessage.clientId, 0.03);
 
+    if (kind === "image" || kind === "video") void readLocalMediaSize(objectUrl, kind).then(size => {
+      if (!size || !localObjectUrlsRef.current.has(objectUrl)) return;
+      setMessages(current => ({ ...current, [selectedChat.id]: (current[selectedChat.id] ?? []).map(message => message.clientId === clientId && message.payload ? {
+        ...message, payload: { ...message.payload, pixel_width: message.payload.pixel_width ?? size.width, pixel_height: message.payload.pixel_height ?? size.height },
+      } : message) }));
+    });
+
     try {
       const upload = await uploadMessageMedia(file, kind, (progress) => {
         updateSendTask(pendingMessage.clientId, 0.05 + progress * 0.84);
@@ -7109,7 +6879,7 @@ function LiveChatsPage({
         return next;
       });
       if (removedMessage.localPreviewUri) {
-        URL.revokeObjectURL(removedMessage.localPreviewUri);
+        releaseLocalMedia(removedMessage.localPreviewUri);
         localObjectUrlsRef.current.delete(removedMessage.localPreviewUri);
       }
       setMessageMenu(null);
@@ -7126,7 +6896,7 @@ function LiveChatsPage({
         deletedMessage.payload?.thumbnail_uri,
       ]);
       if (deletedMessage.localPreviewUri) {
-        URL.revokeObjectURL(deletedMessage.localPreviewUri);
+        releaseLocalMedia(deletedMessage.localPreviewUri);
         localObjectUrlsRef.current.delete(deletedMessage.localPreviewUri);
       }
       const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== deletedMessage.clientId);
@@ -7179,7 +6949,7 @@ function LiveChatsPage({
         if (message.status === "pending") cancelledSendIdsRef.current.add(message.clientId);
         purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
         if (message.localPreviewUri) {
-          URL.revokeObjectURL(message.localPreviewUri);
+          releaseLocalMedia(message.localPreviewUri);
           localObjectUrlsRef.current.delete(message.localPreviewUri);
         }
       });
@@ -7227,7 +6997,7 @@ function LiveChatsPage({
       clearingMessages.forEach((message) => {
         purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
         if (message.localPreviewUri) {
-          URL.revokeObjectURL(message.localPreviewUri);
+          releaseLocalMedia(message.localPreviewUri);
           localObjectUrlsRef.current.delete(message.localPreviewUri);
         }
       });

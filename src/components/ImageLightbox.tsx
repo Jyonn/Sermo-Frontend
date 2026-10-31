@@ -6,6 +6,8 @@ import { PhotoArchivePlate } from "./PhotoArchivePlate";
 import { UserAvatar } from "./UserAvatar";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
+import { useMediaSource } from "../lib/useMediaSource";
+import { mediaSourceCandidates } from "../lib/messageMedia";
 import type { ImageMetadataDTO, TinyUserDTO } from "../types";
 
 interface ImageLightboxProps {
@@ -59,8 +61,15 @@ interface MediaLightboxProps {
 }
 
 async function downloadMedia(uri: string, fileNamePrefix: string) {
+  const candidates = mediaSourceCandidates(uri);
   try {
-    const response = await fetch(uri);
+    const response = await fetch(candidates.primary).then(response => {
+      if (!response.ok) throw new Error("download_failed");
+      return response;
+    }).catch(error => {
+      if (candidates.fallback && candidates.fallback !== candidates.primary) return fetch(candidates.fallback);
+      throw error;
+    });
     if (!response.ok) throw new Error("download_failed");
     const blob = await response.blob();
     const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg").replace("quicktime", "mov") || "bin";
@@ -71,7 +80,7 @@ async function downloadMedia(uri: string, fileNamePrefix: string) {
     anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   } catch {
-    if (!window.open(uri, "_blank", "noopener,noreferrer")) throw new Error("download_failed");
+    if (!window.open(candidates.fallback ?? uri, "_blank", "noopener,noreferrer")) throw new Error("download_failed");
   }
 }
 
@@ -103,8 +112,8 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   const [transform, setTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1 });
   const [mode, setMode] = useState<ImageViewMode>("default");
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [phase, setPhase] = useState<MediaWaitPhase>("loading");
-  const [attempt, setAttempt] = useState(0);
+  const source = useMediaSource(src);
+  const phase = source.phase;
 
   const scales = (() => {
     if (!naturalSize.width || !naturalSize.height || !viewportSize.width || !viewportSize.height) {
@@ -192,8 +201,6 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   useLayoutEffect(() => {
     setControlsVisible(false);
     setNaturalSize({ width: 0, height: 0 });
-    setPhase("loading");
-    setAttempt(0);
     transformRef.current = { x: 0, y: 0, scale: 1 };
     setTransform({ x: 0, y: 0, scale: 1 });
     const image = imageRef.current;
@@ -295,19 +302,19 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
       alt={alt}
       className={`immersive-image-canvas${phase === "error" ? " is-failed" : ""}`}
       draggable={false}
-      key={`${src}:${attempt}`}
+      key={source.src}
       referrerPolicy={referrerPolicy}
-      onLoad={(event) => { setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); setPhase("idle"); }}
-      onError={() => setPhase("error")}
+      onLoad={(event) => { setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); source.ready(); }}
+      onError={source.fail}
       ref={imageRef}
-      src={src}
+      src={source.src}
       style={{
         height: naturalSize.height ? `${naturalSize.height}px` : "auto",
         transform: `translate3d(calc(-50% + ${transform.x}px), calc(-50% + ${transform.y}px), 0) scale(${transform.scale})`,
         width: naturalSize.width ? `${naturalSize.width}px` : "auto",
       }}
     />
-    <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} />
+    <MediaWaitFeedback phase={phase} onRetry={source.retry} />
     <div
       className={`immersive-image-actionbar${controlsVisible ? " is-visible" : ""}`}
       onClick={(event) => event.stopPropagation()}
@@ -343,12 +350,12 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
 }
 
 function PreviewImage({ alt, item, active, onSize }: { alt: string; item: MediaLightboxItem; active: boolean; onSize?: (width: number, height: number) => void }) {
-  const [phase, setPhase] = useState<MediaWaitPhase>("loading");
-  const [attempt, setAttempt] = useState(0);
+  const source = useMediaSource(item.uri);
+  const phase = source.phase;
   return <div className="media-preview-image-shell">
     {item.posterUri && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={item.posterUri} /> : null}
-    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onClick={(event) => event.stopPropagation()} onError={() => setPhase("error")} onLoad={(event) => { setPhase("idle"); onSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight); }} referrerPolicy={item.referrerPolicy} src={item.uri} />
-    {active ? <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} /> : null}
+    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={source.src} loading={active ? "eager" : "lazy"} onClick={(event) => event.stopPropagation()} onError={source.fail} onLoad={(event) => { source.ready(); onSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight); }} referrerPolicy={item.referrerPolicy} src={source.src} />
+    {active ? <MediaWaitFeedback phase={phase} onRetry={source.retry} /> : null}
   </div>;
 }
 
@@ -365,9 +372,12 @@ function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: bo
   const [duration, setDuration] = useState(0);
   const [phase, setPhase] = useState<MediaWaitPhase>("idle");
   const [aspectRatio, setAspectRatio] = useState(width && height ? width / height : 16 / 9);
+  const source = useMediaSource(src, undefined, "video");
+  const wantsPlayback = useRef(false);
+  useEffect(() => { setPhase(source.phase); }, [source.phase]);
 
   useEffect(() => {
-    if (!active) videoRef.current?.pause();
+    if (!active) { wantsPlayback.current = false; videoRef.current?.pause(); }
   }, [active]);
 
   useEffect(() => () => videoRef.current?.pause(), []);
@@ -375,8 +385,8 @@ function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: bo
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) { if (phase === "error") video.load(); setPhase("loading"); void video.play().catch(() => setPhase("error")); }
-    else { video.pause(); setPhase("idle"); }
+    if (video.paused) { wantsPlayback.current = true; if (phase === "error") { source.retry(); return; } setPhase("loading"); void video.play().catch(error => { if (error.name !== "AbortError") setPhase("idle"); }); }
+    else { wantsPlayback.current = false; video.pause(); setPhase("idle"); }
   };
   const progress = duration ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
@@ -384,10 +394,11 @@ function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: bo
     <div className="message-video-player" style={{ "--video-aspect": aspectRatio } as CSSProperties} onClick={(event) => event.stopPropagation()}>
       <video
         className="message-video-preview"
-        onLoadedMetadata={(event) => { const video = event.currentTarget; if (video.videoWidth && video.videoHeight) setAspectRatio(video.videoWidth / video.videoHeight); }}
+        onLoadedMetadata={(event) => { const video = event.currentTarget; if (video.videoWidth && video.videoHeight) setAspectRatio(video.videoWidth / video.videoHeight); source.ready(); }}
+        onCanPlay={() => { source.ready(); if (active && wantsPlayback.current && videoRef.current?.paused) void videoRef.current.play().catch(() => { wantsPlayback.current = false; }); }}
         onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
-        onEnded={() => setPlaying(false)}
-        onError={() => setPhase("error")}
+        onEnded={() => { wantsPlayback.current = false; setPlaying(false); }}
+        onError={source.fail}
         onPause={() => { setPlaying(false); setPhase((current) => current === "error" ? current : "idle"); }}
         onPlaying={() => { setPlaying(true); setPhase("idle"); }}
         onStalled={() => setPhase("buffering")}
@@ -397,9 +408,9 @@ function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: bo
         poster={poster || undefined}
         preload={active ? "metadata" : "none"}
         ref={videoRef}
-        src={src}
+        src={source.src}
       />
-      <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { setPhase("loading"); videoRef.current?.load(); void videoRef.current?.play().catch(() => setPhase("error")); }} />
+      <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { wantsPlayback.current = true; source.retry(); }} />
       <div className="message-video-player-controls">
         <button aria-label={phase === "error" ? t("common.retry") : phase === "buffering" ? t("media.buffering") : playing ? t("media.pause") : t("media.play")} onClick={togglePlayback} type="button">
           {phase === "buffering" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}
@@ -446,6 +457,10 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
   const [scale, setScale] = useState(1);
   const [viewMode, setViewMode] = useState<"fit" | "fill" | "actual" | "custom">("fit");
   const [phase, setPhase] = useState<MediaWaitPhase>("loading");
+  const source = useMediaSource(src, undefined, "video");
+  const wantsPlayback = useRef(false);
+  const finalError = useRef(onError); finalError.current = onError;
+  useEffect(() => { setPhase(source.phase); if (source.phase === "error") finalError.current?.(); }, [source.phase]);
   const playbackRates = [0.75, 1, 1.25, 1.5, 2, 3] as const;
 
   const scales = (() => {
@@ -497,8 +512,8 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) { if (phase === "error") video.load(); setPhase("loading"); void video.play().catch(() => setPhase("error")); }
-    else { video.pause(); setPhase("idle"); }
+    if (video.paused) { wantsPlayback.current = true; if (phase === "error") { source.retry(); return; } setPhase("loading"); void video.play().catch(error => { if (error.name !== "AbortError") setPhase("idle"); }); }
+    else { wantsPlayback.current = false; video.pause(); setPhase("idle"); }
   };
 
   const cyclePlaybackRate = () => {
@@ -523,10 +538,10 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
     <video
       className="immersive-video-canvas immersive-image-canvas"
       onDurationChange={(event) => setDuration(event.currentTarget.duration)}
-      onEnded={() => setPlaying(false)}
-      onError={() => { setPhase("error"); onError?.(); }}
-      onCanPlay={() => setPhase("idle")}
-      onLoadedMetadata={(event) => { setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight }); setPhase("idle"); }}
+      onEnded={() => { wantsPlayback.current = false; setPlaying(false); }}
+      onError={source.fail}
+      onCanPlay={() => { source.ready(); if (wantsPlayback.current && videoRef.current?.paused) void videoRef.current.play().catch(() => { wantsPlayback.current = false; }); }}
+      onLoadedMetadata={(event) => { setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight }); source.ready(); }}
       onPause={() => { setPlaying(false); setPhase((current) => current === "error" ? current : "idle"); }}
       onPlaying={() => { setPlaying(true); setPhase("idle"); }}
       onStalled={() => setPhase("buffering")}
@@ -537,14 +552,14 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
       poster={poster || undefined}
       preload="metadata"
       ref={videoRef}
-      src={src}
+      src={source.src}
       style={{
         height: naturalSize.height ? `${naturalSize.height}px` : "100%",
         transform: `translate3d(-50%, -50%, 0) scale(${scale})`,
         width: naturalSize.width ? `${naturalSize.width}px` : "100%",
       }}
     />
-    <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { setPhase("loading"); videoRef.current?.load(); void videoRef.current?.play().catch(() => setPhase("error")); }} />
+    <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { wantsPlayback.current = true; source.retry(); }} />
     <button
       aria-label={phase === "error" ? t("common.retry") : phase === "buffering" ? t("media.buffering") : playing ? t("media.pause") : t("media.play")}
       className={`immersive-video-center-control${controlsVisible ? " is-visible" : ""}`}
