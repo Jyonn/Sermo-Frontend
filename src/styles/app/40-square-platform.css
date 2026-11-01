@@ -454,6 +454,12 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
    prevents the later generic .dialog-backdrop rule from lowering its layer. */
 .dialog-backdrop.message-image-preview-backdrop {
   z-index: 5000;
+  display: block;
+  padding: 0;
+  background: #fbfbf8;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  isolation: isolate;
 }
 
 .square-inline-discussion {

@@ -3891,6 +3891,15 @@ html[data-theme="dark"] .message-link-preview-site {
   z-index: 5100;
 }
 
+/* Opaque fullscreen pages do not need a live capture of the animated chat below. */
+.drawer-backdrop.is-fullscreen-backdrop {
+  background: var(--bg-canvas);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  isolation: isolate;
+  animation: none;
+}
+
 .side-drawer {
   --drawer-width: min(100vw, 440px);
   --drawer-surface: var(--bg-canvas);

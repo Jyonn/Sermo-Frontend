@@ -275,7 +275,7 @@ export function SideDrawer({
       document.body
     ) : null}
     {createPortal(
-    <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
+    <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${fullscreen ? " is-fullscreen-backdrop" : ""}${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
       <aside
         ref={surfaceRef}
         tabIndex={trapFocus ? -1 : undefined}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.01.4",
+  "id": "2026.11.01.5",
   "publishedAt": "2026-11-01",
   "locales": {
     "zh-CN": {
-      "title": "按每日时段管理记录",
+      "title": "全屏面板显示优化",
       "items": [
-        "聊天记录管理支持每天指定时段筛选，可叠加日期、类型与关键词，也支持跨午夜时段"
+        "优化图片、视频预览与全屏聊天记录管理的绘制，移除多余的整屏模糊，减少桌面端闪烁"
       ]
     },
     "en": {
-      "title": "Daily time filters for history",
+      "title": "Smoother fullscreen panels",
       "items": [
-        "Filter chat history by a daily time range alongside dates, types and keywords, including overnight ranges"
+        "Remove unnecessary fullscreen blur from media previews and chat history management to reduce desktop flicker"
       ]
     }
   }
