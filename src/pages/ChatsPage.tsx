@@ -1,4 +1,5 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
+import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {
   createContext,
@@ -2780,6 +2781,8 @@ function LiveChatsPage({
   const hasNewerMessagesRef = useRef(false);
   const latestWindowRequestRef = useRef<Promise<boolean> | null>(null);
   const olderPageRequestRef = useRef(false);
+  const historyPagingIntentRef = useRef(new HistoryPagingIntent());
+  const historyTouchYRef = useRef<number | null>(null);
   const newerPageRequestRef = useRef(false);
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
@@ -4035,6 +4038,8 @@ function LiveChatsPage({
     if (!selectedChatId || !cacheScope) return;
     const controller = new AbortController();
     setOlderState("idle");
+    historyPagingIntentRef.current.reset();
+    historyTouchYRef.current = null;
     setNewerState("idle");
     setHasOlderMessages(false);
     hasNewerMessagesRef.current = false;
@@ -7275,6 +7280,7 @@ function LiveChatsPage({
   const loadOlderMessages = async () => {
     if (
       !selectedChat
+      || !hasOlderMessages
       || !selectedMessages.length
       || olderState === "loading"
       || olderPageRequestRef.current
@@ -7290,6 +7296,7 @@ function LiveChatsPage({
 
     try {
       olderPageRequestRef.current = true;
+      historyPagingIntentRef.current.reset();
       setOlderState("loading");
       const rows = await api.getMessages({
         chat_id: chatId,
@@ -7332,6 +7339,7 @@ function LiveChatsPage({
       setPageError(message);
     } finally {
       olderPageRequestRef.current = false;
+      historyPagingIntentRef.current.reset();
       if (selectedChatIdRef.current === chatId) setOlderState("idle");
     }
   };
@@ -7666,7 +7674,32 @@ function LiveChatsPage({
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
-                onPointerDown={() => {
+                tabIndex={0}
+                onWheelCapture={(event) => {
+                  if (event.deltaY < 0) historyPagingIntentRef.current.arm();
+                  else if (event.deltaY > 0) historyPagingIntentRef.current.reset();
+                  if (event.deltaY < 0 && hasOlderMessages && olderState === "idle" && historyPagingIntentRef.current.consume(event.currentTarget.scrollTop)) void loadOlderMessages();
+                }}
+                onTouchStart={(event) => { historyTouchYRef.current = event.touches[0]?.clientY ?? null; }}
+                onTouchMove={(event) => {
+                  const y = event.touches[0]?.clientY;
+                  const previous = historyTouchYRef.current;
+                  if (y !== undefined && previous !== null) {
+                    if (y > previous) historyPagingIntentRef.current.arm();
+                    else if (y < previous) historyPagingIntentRef.current.reset();
+                    if (y > previous && hasOlderMessages && olderState === "idle" && historyPagingIntentRef.current.consume(event.currentTarget.scrollTop)) void loadOlderMessages();
+                  }
+                  historyTouchYRef.current = y ?? null;
+                }}
+                onKeyDownCapture={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (["ArrowUp", "PageUp", "Home"].includes(event.key)) historyPagingIntentRef.current.arm();
+                  else historyPagingIntentRef.current.reset();
+                }}
+                onPointerDown={(event) => {
+                  const element = event.currentTarget;
+                  const scrollbarWidth = element.offsetWidth - element.clientWidth;
+                  if (scrollbarWidth > 0 && event.clientX >= element.getBoundingClientRect().right - scrollbarWidth) historyPagingIntentRef.current.arm();
                   if (emojiPickerOpen) setEmojiPickerOpen(false);
                   setComposerMoreOpen(false);
                   if (composerActionSheet) setComposerActionSheet(null);
@@ -7682,7 +7715,7 @@ function LiveChatsPage({
                     hasNewerMessagesRef.current,
                     isNearThreadBottom(element),
                   );
-                  if (element && element.scrollTop <= 24 && hasOlderMessages && olderState === "idle") {
+                  if (element && hasOlderMessages && olderState === "idle" && historyPagingIntentRef.current.consume(element.scrollTop)) {
                     void loadOlderMessages();
                   }
                   if (
