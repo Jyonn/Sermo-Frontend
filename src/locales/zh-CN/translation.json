@@ -1,5 +1,12 @@
 {
   "historyManager.title": "聊天记录管理",
+  "historyManager.daily": "每天",
+  "historyManager.timeFrom": "每天开始时间",
+  "historyManager.timeTo": "每天结束时间",
+  "historyManager.allDay": "全天",
+  "historyManager.timeHint": "北京时间 · 含起点、不含终点",
+  "historyManager.overnight": "跨午夜",
+  "historyManager.invalidTimes": "请选择有效时间；起止时间不能相同，全天请清除时段筛选",
   "historyManager.clearedKept": "已清理记录，保留 {{count}} 条固定消息",
   "historyManager.dragMode": "框选",
   "historyManager.privateHint": "仅管理自己的记录 · 固定消息始终保留",

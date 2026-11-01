@@ -11,6 +11,12 @@ explicit request. No media originals are fetched by the manager. Keyword, multip
 types (including system, official and invitation records), date range and private
 protection filters share the server's query policy for browsing, preview and cleanup.
 
+Optional daily clock bounds use UTC+8, independently of the selected calendar dates.
+The start is inclusive and the end exclusive; an end earlier than the start denotes
+an overnight range (for example 22:00–02:00). A single bound limits only that side.
+Equal bounds are rejected; clear the time filter for all day. These bounds apply to
+the list, preview, selected/day cleanup and protection actions through the same query.
+
 Selection supports click, Shift ranges, rectangle intersection, additive Ctrl/Meta
 drag, Ctrl/Meta+A for loaded records and explicit touch drag mode. Selection is
 limited to 500 records. Whole-day/filtered cleanup applies to all matching server

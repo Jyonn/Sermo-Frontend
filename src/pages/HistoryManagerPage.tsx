@@ -4,7 +4,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useI18n, localeForLanguage } from '../lib/language';
 import { showToast } from '../lib/toast';
-import { historyDay, historyDayRange, historyTypeOptions, rangeSelection, selectionInRectangle, type HistoryFilters } from '../lib/historyManagement';
+import { historyDay, historyDayRange, historyTimeMinutes, historyTypeOptions, rangeSelection, selectionInRectangle, type HistoryFilters } from '../lib/historyManagement';
 import type { HistoryManagementPageDTO, ManagedMessageDTO } from '../types';
 import { CompactMessageContent } from '../components/CompactMessageContent';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -20,6 +20,7 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
   const scopeRef = useRef(scope); scopeRef.current = scope;
   const [keyword, setKeyword] = useState(''), [types, setTypes] = useState<string[]>([]);
   const [from, setFrom] = useState(''), [to, setTo] = useState(''), [onlyRetained, setOnlyRetained] = useState(false);
+  const [dailyFrom, setDailyFrom] = useState(''), [dailyTo, setDailyTo] = useState('');
   const [page, setPage] = useState<HistoryManagementPageDTO | null>(null), [rows, setRows] = useState<ManagedMessageDTO[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set()), [loading, setLoading] = useState(true), [moreLoading, setMoreLoading] = useState(false);
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [version, setVersion] = useState(0);
@@ -31,10 +32,11 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
   const [rectangle, setRectangle] = useState<{left:number;top:number;right:number;bottom:number} | null>(null);
   const [dragMode, setDragMode] = useState(false);
   const invalidDates = Boolean(from && to && from > to);
+  const invalidTimes = Boolean((dailyFrom && Number.isNaN(historyTimeMinutes(dailyFrom))) || (dailyTo && Number.isNaN(historyTimeMinutes(dailyTo))) || (dailyFrom && dailyFrom === dailyTo));
   const filters = useMemo<HistoryFilters>(() => ({ chat_id: id, keyword: keyword.trim() || undefined,
     types: types.length ? [...new Set(types.flatMap(type => type.split(',')))].join(',') : undefined,
     start: from ? historyDayRange(from).start : undefined, end: to ? historyDayRange(to).end : undefined,
-    retained: onlyRetained ? 1 : 0 }), [id, keyword, types, from, to, onlyRetained]);
+    retained: onlyRetained ? 1 : 0, time_from: historyTimeMinutes(dailyFrom), time_to: historyTimeMinutes(dailyTo) }), [id, keyword, types, from, to, onlyRetained, dailyFrom, dailyTo]);
   const filterRef = useRef(filters); filterRef.current = filters;
   const currentFilters = () => ({ ...filters, snapshot: page?.snapshot_id });
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
   useEffect(() => {
     const controller = new AbortController();
     setSelected(new Set()); anchor.current = null; setPage(null); setRows([]); setError(''); setLoading(true);
-    if (invalidDates || !Number.isSafeInteger(id) || id <= 0) { setLoading(false); return () => controller.abort(); }
+    if (invalidDates || invalidTimes || !Number.isSafeInteger(id) || id <= 0) { setLoading(false); return () => controller.abort(); }
     const timer = window.setTimeout(() => {
       api.getManagedHistory(filters, controller.signal).then(result => {
         if (!controller.signal.aborted) { setPage(result); setRows(result.items); }
@@ -52,7 +54,7 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
         .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     }, 240);
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [filters, scope, version, invalidDates, id, t]);
+  }, [filters, scope, version, invalidDates, invalidTimes, id, t]);
   const groups = useMemo(() => {
     const days = new Map<string, ManagedMessageDTO[]>();
     rows.forEach(row => { const key = historyDay(row.created_at); const group = days.get(key) || []; group.push(row); days.set(key, group); });
@@ -149,6 +151,7 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
       <div className="history-filter-line"><label className="history-search">{symbol('search')}<input type="search" value={keyword} onChange={event => setKeyword(event.target.value)} placeholder={t('messageSearch.placeholder')} aria-label={t('messageSearch.placeholder')} /></label>
         <div className="history-date-range"><label><span>{t('historyManager.from')}</span><input type="date" value={from} onChange={event => setFrom(event.target.value)} /></label><span aria-hidden="true">—</span><label><span>{t('historyManager.to')}</span><input type="date" value={to} min={from} onChange={event => setTo(event.target.value)} /></label></div>
       </div>
+      <div className="history-daily-range"><span>{t('historyManager.daily')}</span><input type="time" step="60" aria-label={t('historyManager.timeFrom')} value={dailyFrom} onChange={event => setDailyFrom(event.target.value)} /><span aria-hidden="true">—</span><input type="time" step="60" aria-label={t('historyManager.timeTo')} value={dailyTo} onChange={event => setDailyTo(event.target.value)} /><button type="button" aria-pressed={!dailyFrom && !dailyTo} onClick={() => { setDailyFrom(''); setDailyTo(''); }}>{t('historyManager.allDay')}</button><button type="button" aria-pressed={dailyFrom === '10:00' && dailyTo === '18:00'} onClick={() => { setDailyFrom('10:00'); setDailyTo('18:00'); }}>10:00–18:00</button><small>{t('historyManager.timeHint')}{dailyFrom && dailyTo && dailyFrom > dailyTo ? ` · ${t('historyManager.overnight')}` : ''}</small></div>
       <div className="history-types"><button type="button" aria-pressed={!types.length} onClick={() => setTypes([])}>{t('messageSearch.all')}</button>{historyTypeOptions.map(option => <button type="button" key={option.types} aria-pressed={types.includes(option.types)} onClick={() => setTypes(current => current.includes(option.types) ? current.filter(type => type !== option.types) : [...current, option.types])}>{symbol(option.icon)}{t(option.key)}</button>)}<button type="button" className="history-retained-filter" aria-pressed={onlyRetained} onClick={() => setOnlyRetained(value => !value)}>{symbol('keep')}{t('historyManager.retainedOnly')}</button></div>
     </fieldset></section>
     <div className="history-manager-summary"><span aria-live="polite">{loading ? t('common.loading') : t('historyManager.summary', { count: page?.total_count ?? 0, retained: page?.retained_count ?? 0 })}</span><button disabled={busy || loading || !page?.total_count} type="button" onClick={() => void previewDelete([])}>{symbol('delete_sweep')}{t('historyManager.cleanFiltered')}</button></div>
@@ -159,7 +162,7 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
       if (busy || (event.pointerType !== 'mouse' && !dragMode) || event.button !== 0 || (event.target as HTMLElement).closest('[data-no-drag]')) return;
       moved.current = false; drag.current = {x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,pointer:event.pointerId,base:event.ctrlKey || event.metaKey ? new Set(selected) : new Set(),active:false};
     }} onPointerMove={pointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onClickCapture={event => { if (moved.current) { event.preventDefault(); event.stopPropagation(); moved.current = false; } }}>
-      {invalidDates ? <div className="history-empty" role="alert">{t('historyManager.invalidDates')}</div> : error ? <div className="history-empty" role="alert"><p>{error}</p><button type="button" onClick={() => setVersion(value => value + 1)}>{t('historyManager.retry')}</button></div> : loading ? <div className="history-skeleton" aria-label={t('common.loading')}>{Array.from({length:12},(_,index)=><i key={index}/>)}</div> : !rows.length ? <div className="history-empty">{symbol('manage_search')}<h2>{t('historyManager.empty')}</h2><p>{t('historyManager.emptyHint')}</p></div> : groups.map(([day, messages]) => <section className="history-day" key={day}>
+      {invalidDates || invalidTimes ? <div className="history-empty" role="alert">{t(invalidDates ? 'historyManager.invalidDates' : 'historyManager.invalidTimes')}</div> : error ? <div className="history-empty" role="alert"><p>{error}</p><button type="button" onClick={() => setVersion(value => value + 1)}>{t('historyManager.retry')}</button></div> : loading ? <div className="history-skeleton" aria-label={t('common.loading')}>{Array.from({length:12},(_,index)=><i key={index}/>)}</div> : !rows.length ? <div className="history-empty">{symbol('manage_search')}<h2>{t('historyManager.empty')}</h2><p>{t('historyManager.emptyHint')}</p></div> : groups.map(([day, messages]) => <section className="history-day" key={day}>
         <header><h2>{new Intl.DateTimeFormat(localeForLanguage(language), { year:'numeric',month:'short',day:'numeric',weekday:'short',timeZone:'Asia/Shanghai' }).format(new Date(`${day}T12:00:00+08:00`))}</h2><div data-no-drag><button type="button" disabled={busy} onClick={() => { const next = new Set(selected); const all = messages.every(message => next.has(message.message_id)); messages.forEach(message => all ? next.delete(message.message_id) : next.add(message.message_id)); setSelection(next); }}>{t('historyManager.selectDay')}</button><button type="button" disabled={busy} onClick={() => void previewDelete([], day)} aria-label={t('historyManager.cleanDay')}>{symbol('delete_sweep')}</button></div></header>
         <div className="history-message-grid">{messages.map(message => <button type="button" data-record={message.message_id} key={message.message_id} disabled={busy} className={`history-record${selected.has(message.message_id) ? ' is-selected' : ''}${message.retained ? ' is-retained' : ''}`} aria-pressed={selected.has(message.message_id)} onClick={event => toggle(message.message_id, event.shiftKey)} title={`${message.user.name} · ${preview(message)}`}>
           <span className="history-check" aria-hidden="true">{selected.has(message.message_id) ? symbol('check') : message.retained ? symbol('keep') : symbol(historyTypeOptions.find(option => option.types.split(',').includes(String(message.type)))?.icon || 'chat_bubble')}</span><span className="history-record-content"><CompactMessageContent name={message.user.name} preview={preview(message)} /></span><time dateTime={new Date(message.created_at * 1000).toISOString()}>{new Intl.DateTimeFormat(localeForLanguage(language), {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Shanghai'}).format(message.created_at * 1000)}</time>

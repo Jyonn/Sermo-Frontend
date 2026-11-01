@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.01.3",
+  "id": "2026.11.01.4",
   "publishedAt": "2026-11-01",
   "locales": {
     "zh-CN": {
-      "title": "高级聊天记录管理",
+      "title": "按每日时段管理记录",
       "items": [
-        "搜索记录右上角可进入全屏管理，按日期、类型和关键词筛选，支持多列浏览与框选",
-        "固定重要记录后批量清理其余消息，删除仅影响自己，系统消息也可管理"
+        "聊天记录管理支持每天指定时段筛选，可叠加日期、类型与关键词，也支持跨午夜时段"
       ]
     },
     "en": {
-      "title": "Advanced chat history management",
+      "title": "Daily time filters for history",
       "items": [
-        "Open a fullscreen manager from chat search with date, type and keyword filters, multiple columns and drag selection",
-        "Keep important records protected during batch cleanup; deletion affects only you and includes system messages"
+        "Filter chat history by a daily time range alongside dates, types and keywords, including overnight ranges"
       ]
     }
   }

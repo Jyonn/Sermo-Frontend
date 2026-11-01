@@ -1,5 +1,12 @@
 {
   "historyManager.title": "Manage chat history",
+  "historyManager.daily": "Daily",
+  "historyManager.timeFrom": "Daily start time",
+  "historyManager.timeTo": "Daily end time",
+  "historyManager.allDay": "All day",
+  "historyManager.timeHint": "UTC+8 · Start inclusive, end exclusive",
+  "historyManager.overnight": "Overnight",
+  "historyManager.invalidTimes": "Choose valid, different start and end times. Clear the time filter for all day.",
   "historyManager.clearedKept": "History cleaned; {{count}} kept messages preserved",
   "historyManager.dragMode": "Drag select",
   "historyManager.privateHint": "Your records only · Kept messages stay protected",

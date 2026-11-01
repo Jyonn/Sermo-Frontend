@@ -1,4 +1,4 @@
-export interface HistoryFilters { chat_id: number; keyword?: string; types?: string; start?: number; end?: number; snapshot?: number; retained?: number; }
+export interface HistoryFilters { chat_id: number; keyword?: string; types?: string; start?: number; end?: number; snapshot?: number; retained?: number; time_from?: number; time_to?: number; }
 export const historyTypeOptions = [
   { types: '0', key: 'messageSearch.text', icon: 'chat_bubble' },
   { types: '1', key: 'messageSearch.images', icon: 'image' },
@@ -14,6 +14,12 @@ export const historyTypeOptions = [
 ] as const;
 
 export function historyDay(timestamp: number) { return new Date((timestamp + 8 * 3600) * 1000).toISOString().slice(0, 10); }
+export function historyTimeMinutes(value: string) {
+  if (!value) return undefined;
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return NaN;
+  const [hour, minute] = value.split(':').map(Number);
+  return hour * 60 + minute;
+}
 export function historyDayRange(day: string) {
   const start = Date.parse(`${day}T00:00:00+08:00`) / 1000;
   return { start, end: start + 86400 };
