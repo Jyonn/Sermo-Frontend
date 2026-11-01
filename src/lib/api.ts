@@ -1,4 +1,5 @@
 import { createResearchApi } from "./researchApi";
+import { rememberAvatarFrames } from "./avatarFrameCache";
 import { mergeSessionUser } from "./sessionUser";
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
@@ -365,7 +366,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
         body: body === undefined ? undefined : JSON.stringify(body),
         signal,
       });
-      return parseResponse(retryResponse);
+      return parseResponse(retryResponse).then(rememberAvatarFrames);
     } catch (error) {
       const latestSession = authConfig.getSession();
       if (
@@ -379,7 +380,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
     }
   }
 
-  return parseResponse(response);
+  return parseResponse(response).then(rememberAvatarFrames);
 }
 
 function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Promise<T> {
@@ -735,7 +736,7 @@ export const api = {
   },
 
   getChats(signal?: AbortSignal, purpose: "normal" | "submission" = "normal", role?: "author" | "reviewer") {
-    return request<ChatDTO[] | CompactChatList>("/chats/", { auth: true, query: { format: "compact-v1", ...(purpose === "submission" ? { purpose, ...(role ? { role } : {}) } : {}) }, signal }).then(decodeChatList);
+    return request<ChatDTO[] | CompactChatList>("/chats/", { auth: true, query: { format: "compact-v1", ...(purpose === "submission" ? { purpose, ...(role ? { role } : {}) } : {}) }, signal }).then(decodeChatList).then(rememberAvatarFrames);
   },
 
   getSubmissionRecipients(signal?: AbortSignal) {
@@ -898,7 +899,7 @@ export const api = {
       auth: true,
       query: { ...params, format: "compact-v1" },
       signal,
-    }).then((payload) => decodeCompact<ChatMessageDTO[]>(payload, "messages"));
+    }).then((payload) => rememberAvatarFrames(decodeCompact<ChatMessageDTO[]>(payload, "messages")));
   },
 
   getCopySuggestions(chat_id: number, signal?: AbortSignal) {

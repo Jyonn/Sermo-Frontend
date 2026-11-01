@@ -7,7 +7,7 @@ export function ChatConversationIdentity({chat,submissionStatus}:{chat:Chat;subm
   const {t}=useI18n();
   const direct=chat.type==='direct'&&chat.purpose!=='submission';
   return <>
-    <div className="avatar-wrap chat-identity-avatar"><UserAvatar className={`avatar ${direct&&chat.online?'status-online':''}`} groupMembers={chat.type==='group'&&chat.purpose!=='submission'?chat.detail.members.map(member=>({name:member.name,uri:member.avatarUri})):undefined} name={chat.title} uri={chat.avatarUri} cacheKey={chat.avatarCacheKey} frame={chat.avatarFrameStyle}/></div>
+    <div className="avatar-wrap chat-identity-avatar"><UserAvatar userId={direct?chat.detail.members.find(member=>!member.isSelf)?.userId:undefined} className={`avatar ${direct&&chat.online?'status-online':''}`} groupMembers={chat.type==='group'&&chat.purpose!=='submission'?chat.detail.members.map(member=>({name:member.name,uri:member.avatarUri})):undefined} name={chat.title} uri={chat.avatarUri} cacheKey={chat.avatarCacheKey} frame={chat.avatarFrameStyle}/></div>
     <div className="chat-topbar-meta">
       <strong className="chat-topbar-name">
         {direct&&<span className={`chat-inline-presence${chat.online?' is-online':''}`} role="img" aria-label={t(chat.online?'presence.online':'presence.offline')} title={chat.subtitle}/>}

@@ -301,6 +301,7 @@ export function AppBottomNav() {
       {!shortViewport ? <Link aria-label={t("menu.switchAccount")} className="desktop-nav-user" title={t("menu.switchAccount")} to="/app/menu?switch-account=1">
         <UserAvatar
           className="mini-avatar"
+          userId={session.user.user_id}
           cacheKey={session.user.avatar_cache_key}
           frame={session.user.avatar_frame_style}
           name={session.user.name}

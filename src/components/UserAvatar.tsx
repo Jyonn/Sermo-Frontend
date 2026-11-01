@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { avatarResourceKey, loadAvatarSource, peekAvatarSource } from "../lib/avatarCache";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { cachedAvatarFrame, subscribeAvatarFrames } from "../lib/avatarFrameCache";
+import spiderFrame from '../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp';
+import { avatarResourceKey, loadAvatarSource, peekAvatarSource, preloadAvatar } from "../lib/avatarCache";
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AvatarFrameStyle } from "../types";
 import "./ExplorerPersonalization.css";
@@ -11,6 +13,7 @@ interface GroupAvatarMember {
 }
 
 interface UserAvatarProps {
+  userId?: number;
   name: string;
   uri?: string | null;
   cacheKey?: string | null;
@@ -23,6 +26,12 @@ interface UserAvatarProps {
 const supportedAvatarFrames = new Set<AvatarFrameStyle>([
   "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "spider-web", "explorer-conan",
 ]);
+const avatarFrameArt: Partial<Record<AvatarFrameStyle, string>> = {
+  'spider-web': spiderFrame,
+  'explorer-conan': '/activity/explorer-2026/frame-v2.webp',
+};
+// Warm the two bitmap ornaments once, using the same persistent cache as portraits.
+if (typeof window !== 'undefined') Object.values(avatarFrameArt).forEach(uri => preloadAvatar(uri));
 
 function avatarLabel(name: string) {
   return (name?.trim() || "FRIENDEN").slice(0, 2).toUpperCase();
@@ -78,13 +87,28 @@ function AvatarTile({ name, uri, cacheKey }: GroupAvatarMember) {
   return <span className="avatar-group-label">{avatarLabel(name)}</span>;
 }
 
+function useFrameArt(frame: AvatarFrameStyle) {
+  const uri = avatarFrameArt[frame];
+  const [loaded, setLoaded] = useState<{ uri: string; source: string }>();
+  useEffect(() => {
+    if (!uri) return;
+    let active = true;
+    void loadAvatarSource(uri).then(source => {
+      if (active && source) setLoaded({ uri, source });
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [uri]);
+  return uri ? peekAvatarSource(uri) ?? (loaded?.uri === uri ? loaded.source : undefined) : undefined;
+}
+
 function groupLayoutClass(count: number) {
   if (count >= 4) return "avatar-group-stack-four";
   if (count === 3) return "avatar-group-stack-three";
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame = "none", surface = "person" }: UserAvatarProps) {
+export function UserAvatar({ userId, name, uri, cacheKey, className, groupMembers, frame, surface = "person" }: UserAvatarProps) {
+  const cachedFrame = useSyncExternalStore(subscribeAvatarFrames, () => cachedAvatarFrame(userId), () => undefined);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
@@ -93,12 +117,14 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame
   const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
   const canShowImage = Boolean(source) && !failed;
-  const normalizedFrame = supportedAvatarFrames.has(frame) ? frame : "none";
+  const resolvedFrame = frame ?? cachedFrame ?? "none";
+  const normalizedFrame = supportedAvatarFrames.has(resolvedFrame) ? resolvedFrame : "none";
   const hasFrame = normalizedFrame !== "none";
+  const frameArt = useFrameArt(normalizedFrame);
 
   return (
     <div className={`${className} user-avatar avatar-surface-${surface}${canShowImage ? " avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
-      <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${normalizedFrame}` : ""}`}>
+      <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${normalizedFrame}` : ""}`} style={avatarFrameArt[normalizedFrame] ? { '--avatar-frame-art': frameArt ? `url("${frameArt}")` : 'none' } as CSSProperties : undefined}>
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
             {normalizedGroupMembers.map((member, index) => (

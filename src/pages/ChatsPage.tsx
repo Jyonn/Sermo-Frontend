@@ -1991,6 +1991,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   ) : showGroupAvatar ? (
     <UserAvatar
       className="avatar message-avatar"
+      userId={group.messages[0]?.userId}
       frame={group.from === "self" ? selfAvatarFrame : group.avatarFrameStyle}
       name={group.from === "self" ? selfAvatarName ?? "" : group.name}
       uri={group.from === "self" ? selfAvatarUri : group.avatarUri}
@@ -7413,6 +7414,7 @@ function LiveChatsPage({
       <div className="avatar-wrap">
         <UserAvatar
           className={`avatar${!chat.submission && chat.online ? " status-online" : ""}`}
+          userId={chat.type === "direct" && !chat.submission ? chat.detail.members.find(member => !member.isSelf)?.userId : undefined}
           groupMembers={avatarGroupMembers}
           name={chat.submission ? counterparts[0]?.name ?? chat.title : chat.title}
           uri={chat.submission ? counterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}

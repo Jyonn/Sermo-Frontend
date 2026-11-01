@@ -268,7 +268,7 @@
   display: block;
   max-width: none;
   max-height: none;
-  background: url("../../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp") center / contain no-repeat;
+  background: var(--avatar-frame-art, url("../../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp")) center / contain no-repeat;
   content: "";
   filter: drop-shadow(0 2px 3px rgba(5, 18, 31, .2));
   pointer-events: none;

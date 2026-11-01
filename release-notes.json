@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.01.5",
+  "id": "2026.11.01.6",
   "publishedAt": "2026-11-01",
   "locales": {
     "zh-CN": {
-      "title": "全屏面板显示优化",
+      "title": "头像框缓存",
       "items": [
-        "优化图片、视频预览与全屏聊天记录管理的绘制，移除多余的整屏模糊，减少桌面端闪烁"
+        "缓存用户头像框设置和图片，再次打开聊天时更快显示，并随最新设置更新"
       ]
     },
     "en": {
-      "title": "Smoother fullscreen panels",
+      "title": "Cached avatar frames",
       "items": [
-        "Remove unnecessary fullscreen blur from media previews and chat history management to reduce desktop flicker"
+        "Cache avatar frame settings and artwork for faster display when reopening chats, while keeping settings up to date"
       ]
     }
   }
