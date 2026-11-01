@@ -1,9 +1,12 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
+import { CompactMessageContent } from "../components/CompactMessageContent";
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {
   createContext,
   memo,
+  lazy,
+  Suspense,
   Fragment,
   useEffect,
   useLayoutEffect,
@@ -141,6 +144,7 @@ const STICKER_PAGE_SIZE = 30;
 const STICKER_CACHE_MAX_AGE = 5 * 60 * 1000;
 const STICKER_MINE_CACHE_KEY = "stickers:mine";
 const STICKER_EXPLORE_CACHE_KEY = "stickers:explore";
+const HistoryManagerPage = lazy(() => import("./HistoryManagerPage"));
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
@@ -2617,6 +2621,7 @@ function LiveChatsPage({
   const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
+  const [historyManagerOpen, setHistoryManagerOpen] = useState(false);
   const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
   const [messageSearchType, setMessageSearchType] = useState<number | null>(null);
   const [messageSearchResults, setMessageSearchResults] = useState<ChatMessageDTO[]>([]);
@@ -3864,7 +3869,7 @@ function LiveChatsPage({
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [messageSearchKeyword, messageSearchOpen, messageSearchType, selectedChat?.id]);
+  }, [historyReloadVersion, messageSearchKeyword, messageSearchOpen, messageSearchType, selectedChat?.id]);
 
   useEffect(() => {
     const sentinel = messageSearchLoadMoreRef.current;
@@ -6947,10 +6952,12 @@ function LiveChatsPage({
 
     try {
       setMessageDeleteState("deleting");
-      if (remoteIds.length) await api.deleteMessages(remoteIds);
-      if(selectedChat)window.dispatchEvent(new CustomEvent(GROUP_COPY_REMOVED,{detail:{chatId:selectedChat.id,ids:remoteIds}}));
+      const deletedRemoteIds = remoteIds.length ? (await api.deleteMessages(remoteIds)).deleted_message_ids : [];
+      const deletedTargets = targets.filter(message => typeof message.id !== "number" || deletedRemoteIds.includes(message.id));
+      const deletedClientIds = new Set(deletedTargets.map(message => message.clientId));
+      if(selectedChat)window.dispatchEvent(new CustomEvent(GROUP_COPY_REMOVED,{detail:{chatId:selectedChat.id,ids:deletedRemoteIds}}));
 
-      targets.forEach((message) => {
+      deletedTargets.forEach((message) => {
         if (message.status === "pending") cancelledSendIdsRef.current.add(message.clientId);
         purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
         if (message.localPreviewUri) {
@@ -6960,11 +6967,11 @@ function LiveChatsPage({
       });
       setSendTasks((current) => {
         const next = { ...current };
-        targets.forEach((message) => delete next[message.clientId]);
+        deletedTargets.forEach((message) => delete next[message.clientId]);
         return next;
       });
-      const nextThreadMessages = selectedMessages.filter((message) => !selectedIdSet.has(message.clientId));
-      setPinnedMessages((current) => current.filter((pin) => !remoteIds.includes(pin.message.message_id)));
+      const nextThreadMessages = selectedMessages.filter((message) => !deletedClientIds.has(message.clientId));
+      setPinnedMessages((current) => current.filter((pin) => !deletedRemoteIds.includes(pin.message.message_id)));
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: nextThreadMessages,
@@ -6984,7 +6991,7 @@ function LiveChatsPage({
       setMessageSelectionMode(false);
       setSelectedMessageClientIds([]);
       await refreshChats();
-      showToast(t("message.batchDeleted", { count: targets.length }));
+      showToast(t("message.batchDeleted", { count: deletedTargets.length }));
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("message.batchDeleteFailed"), "error");
     } finally {
@@ -6998,7 +7005,7 @@ function LiveChatsPage({
     const clearingMessages = selectedMessages;
     try {
       setClearHistorySaving(true);
-      await api.clearChatMessages(chatId);
+      const cleared = await api.clearChatMessages(chatId);
       clearingMessages.forEach((message) => {
         purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
         if (message.localPreviewUri) {
@@ -7013,8 +7020,9 @@ function LiveChatsPage({
       setClearHistoryConfirmOpen(false);
       setDetailsSheetOpen(false);
       if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
+      setHistoryReloadVersion(value => value + 1);
       await refreshChats();
-      showToast(t("chat.clearHistoryDone"));
+      showToast(cleared.retained_count ? t("historyManager.clearedKept", { count: cleared.retained_count }) : t("chat.clearHistoryDone"));
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("chat.clearHistoryFailed"), "error");
     } finally {
@@ -8685,6 +8693,7 @@ function LiveChatsPage({
         onRouteOpen={() => setMessageSearchOpen(true)}
         open={messageSearchOpen}
         title={t("messageSearch.title")}
+        titleAccessory={selectedChat ? <button type="button" className="history-manager-entry" onClick={() => setHistoryManagerOpen(true)} aria-haspopup="dialog" aria-expanded={historyManagerOpen} aria-label={t("historyManager.title")} title={t("historyManager.title")}><span className="material-symbols-outlined" aria-hidden="true">tune</span></button> : null}
         onClose={() => setMessageSearchOpen(false)}
       >
         <div className="message-search-panel" ref={messageSearchPanelRef}>
@@ -8791,7 +8800,7 @@ function LiveChatsPage({
                     <span className="message-search-result-icon material-symbols-outlined" aria-hidden="true">{typeIcon}</span>
                   ) : null}
                   <span className="message-search-result-main">
-                    {richFile ? <><strong className="message-search-file-author">{displayName}</strong><ResourceFileRow detail={message.payload?.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload?.file_name} href={message.payload?.uri} title={message.payload?.file_name || i18n.t("media.file")} /></> : <button className="message-search-compact-copy" onClick={openResult} type="button"><strong>{displayName}：</strong><span>{compactSearchMessagePreview(message)}</span></button>}
+                    {richFile ? <><strong className="message-search-file-author">{displayName}</strong><ResourceFileRow detail={message.payload?.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload?.file_name} href={message.payload?.uri} title={message.payload?.file_name || i18n.t("media.file")} /></> : <button className="message-search-compact-copy" onClick={openResult} type="button"><CompactMessageContent name={displayName} preview={compactSearchMessagePreview(message)} /></button>}
                   </span>
                   {jumpButton}
                 </article>
@@ -8807,6 +8816,9 @@ function LiveChatsPage({
             visible={messageSearchShowScrollTop}
           />
         </div>
+      </SideDrawer>
+      <SideDrawer open={historyManagerOpen} title={t("historyManager.title")} historyKey="history-manager" onRouteOpen={() => setHistoryManagerOpen(true)} onClose={() => setHistoryManagerOpen(false)} className="history-manager-drawer" fullscreen fullViewport headerless floatingBack={false} trapFocus>
+        {historyManagerOpen && selectedChat ? <Suspense fallback={<div role="status">{t("common.loading")}</div>}><HistoryManagerPage chatId={selectedChat.id} onClose={() => setHistoryManagerOpen(false)} onChanged={() => setHistoryReloadVersion(value => value + 1)} /></Suspense> : null}
       </SideDrawer>
       {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox
         index={messageSearchPreviewIndex}

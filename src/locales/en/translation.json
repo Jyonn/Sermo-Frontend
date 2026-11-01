@@ -1,4 +1,41 @@
 {
+  "historyManager.title": "Manage chat history",
+  "historyManager.clearedKept": "History cleaned; {{count}} kept messages preserved",
+  "historyManager.dragMode": "Drag select",
+  "historyManager.privateHint": "Your records only · Kept messages stay protected",
+  "historyManager.filters": "Filter records",
+  "historyManager.from": "From",
+  "historyManager.to": "To",
+  "historyManager.system": "System",
+  "historyManager.stickers": "Stickers",
+  "historyManager.retainedOnly": "Kept only",
+  "historyManager.summary": "{{count}} records · {{retained}} kept",
+  "historyManager.cleanFiltered": "Clean filtered records",
+  "historyManager.selectDay": "Select loaded on this day",
+  "historyManager.cleanDay": "Clean all matching records on this day",
+  "historyManager.selected": "{{count}} selected",
+  "historyManager.dragHint": "Drag to select · Shift for a range · Kept messages survive cleanup",
+  "historyManager.selectLoaded": "Select loaded",
+  "historyManager.clearSelection": "Clear selection",
+  "historyManager.retain": "Keep",
+  "historyManager.release": "Stop keeping",
+  "historyManager.delete": "Delete for me",
+  "historyManager.confirmTitle": "Delete these chat records?",
+  "historyManager.confirmHint": "Delete {{count}} records from your account only, skipping {{retained}} kept messages. Other members are unaffected. Recovery depends on your remaining recovery allowance.",
+  "historyManager.deleted": "Deleted {{count}} records for you",
+  "historyManager.retained": "Kept and protected from batch cleanup",
+  "historyManager.released": "Protection removed",
+  "historyManager.nothingToDelete": "No deletable records; kept messages stay protected",
+  "historyManager.selectionLimit": "Select up to 500 at once; day and filtered cleanup have no such limit",
+  "historyManager.progress": "{{count}} deleted, continuing…",
+  "historyManager.stop": "Stop after this batch",
+  "historyManager.failed": "Could not finish; refresh and try again",
+  "historyManager.refresh": "Refresh records",
+  "historyManager.retry": "Try again",
+  "historyManager.loadMore": "Load older records",
+  "historyManager.empty": "No matching records",
+  "historyManager.emptyHint": "Adjust the keyword, types or dates to find messages to keep or clean up.",
+  "historyManager.invalidDates": "The end date must not precede the start date",
   "quickActions.entryHint": "Layout, order and visibility",
   "quickActions.direct": "Direct",
   "quickActions.group": "Groups",
@@ -3094,7 +3131,7 @@
   ,"chat.clearHistory": "Clear chat history"
   ,"chat.clearHistoryHint": "Remove only from your account"
   ,"chat.clearHistoryConfirmTitle": "Clear this chat history?"
-  ,"chat.clearHistoryConfirmHint": "All previous messages will be removed only from your account. Other participants can still see them. This cannot be undone."
+  ,"chat.clearHistoryConfirmHint": "Only unkept history will be removed from your account. Kept messages remain, and other participants are unaffected. Recovery depends on your remaining recovery allowance."
   ,"chat.clearHistoryDone": "Chat history cleared"
   ,"chat.clearHistoryFailed": "Could not clear chat history"
   ,"admin.permissionMatrix": "Permission matrix"

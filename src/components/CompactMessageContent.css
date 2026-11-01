@@ -1,0 +1,6 @@
+.history-manager-entry { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-inline-start: 8px; padding:0; border:0; background:transparent; border-radius: 9px; color: var(--text-muted); text-decoration: none; cursor:pointer; }
+.side-drawer.history-manager-drawer { position:fixed; inset:0; width:100vw; max-width:none; height:100dvh; border:0; border-radius:0; }
+.history-manager-drawer>.drawer-body { height:100%; padding:0; overflow:hidden; }
+.history-manager-entry:hover { color: var(--brand-primary); background: color-mix(in srgb, var(--brand-primary) 9%, transparent); }
+.history-manager-entry:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+.history-manager-entry .material-symbols-outlined { font-size: 21px; }

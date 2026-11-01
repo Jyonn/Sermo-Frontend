@@ -28,6 +28,7 @@ interface SideDrawerProps {
   onRouteOpen?: () => void;
   headerless?: boolean;
   fullscreen?: boolean;
+  fullViewport?: boolean;
   floatingBack?: boolean;
   floatingAccessory?: ReactNode;
   style?: CSSProperties;
@@ -71,6 +72,7 @@ export function SideDrawer({
   onRouteOpen,
   headerless = false,
   fullscreen = false,
+  fullViewport = false,
   floatingBack = true,
   floatingAccessory,
   style,
@@ -82,7 +84,7 @@ export function SideDrawer({
   const drawerId = useId();
   const surfaceRef = useRef<HTMLElement | null>(null);
   const panels = useDesktopPanels();
-  const desktopPanel = Boolean(panels?.enabled && panels.host);
+  const desktopPanel = Boolean(panels?.enabled && panels.host && !fullViewport);
   const registerPanel = panels?.register;
   const unregisterPanel = panels?.unregister;
   const routeKey = useMemo(() => normalizeDrawerKey(historyKey), [historyKey]);

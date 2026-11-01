@@ -917,6 +917,14 @@ export const api = {
     });
   },
 
+  getManagedHistory(params: import("./historyManagement").HistoryFilters & { before?: number }, signal?: AbortSignal) {
+    return request<import("../types").HistoryManagementPageDTO>("/messages/history", { auth: true, query: { ...params }, signal });
+  },
+
+  manageHistory(filters: import("./historyManagement").HistoryFilters, action: "preview" | "delete" | "retain" | "release", message_ids: number[] = []) {
+    return request<import("../types").HistoryManagementResultDTO>("/messages/history", { method: "POST", auth: true, body: { ...filters, action, message_ids } });
+  },
+
   getMessageSearchCalendar(chat_id: number, year: number, month: number, signal?: AbortSignal) {
     return request<import("../types").MessageSearchCalendarDTO>("/messages/search/calendar", {
       auth: true,
@@ -1344,7 +1352,7 @@ export const api = {
   },
 
   clearChatMessages(chat_id: number) {
-    return request<{ deleted_count: number }>("/messages/clear", {
+    return request<{ deleted_count: number; retained_count?: number }>("/messages/clear", {
       method: "DELETE",
       auth: true,
       body: { chat_id },

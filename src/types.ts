@@ -1351,6 +1351,15 @@ export interface MessageSearchResponseDTO {
   next_before: number | null;
 }
 
+export interface ManagedMessageDTO extends ChatMessageDTO { retained: boolean; }
+export interface HistoryManagementPageDTO {
+  items: ManagedMessageDTO[]; total_count: number; retained_count: number;
+  has_more: boolean; next_before: number | null; snapshot_id: number;
+}
+export interface HistoryManagementResultDTO {
+  changed_ids?: number[]; remaining?: number; count?: number; deletable_count?: number; retained_count?: number;
+}
+
 export interface MessageSearchCalendarDTO {
   year: number;
   month: number;

@@ -21,6 +21,7 @@ import JoinSpacePage from "./pages/JoinSpacePage";
 import LandingPage from "./pages/LandingPage";
 import OfficialLoginPage from "./pages/OfficialLoginPage";
 import AccountSwitchPage from "./pages/AccountSwitchPage";
+const HistoryManagerPage = lazy(() => import("./pages/HistoryManagerPage"));
 import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
@@ -138,6 +139,7 @@ export default function App() {
           }
         />
         <Route path="/app" element={<AppHomeRedirect />} />
+        <Route path="/app/chats/:chatId/history" element={<RequireAuth><RequireChatFeature><HistoryManagerPage /></RequireChatFeature></RequireAuth>} />
         <Route
           path="/app/chats"
           element={
@@ -264,7 +266,7 @@ export default function App() {
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalMediaLocationMap /> : null}
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalChatLayoutDiagnostics /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
-      {ready && !isPlatformAdmin && !isDesignLab && !location.pathname.startsWith("/app/number-duel/") ? <AppBottomNav /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab && !location.pathname.startsWith("/app/number-duel/") && !/^\/app\/chats\/\d+\/history$/.test(location.pathname) ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
       {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
       {ready && !isPlatformAdmin && !isDesignLab && location.pathname !== "/oauth/authorize" ? <SiteMigrationNotice /> : null}

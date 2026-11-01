@@ -1,4 +1,41 @@
 {
+  "historyManager.title": "聊天记录管理",
+  "historyManager.clearedKept": "已清理记录，保留 {{count}} 条固定消息",
+  "historyManager.dragMode": "框选",
+  "historyManager.privateHint": "仅管理自己的记录 · 固定消息始终保留",
+  "historyManager.filters": "筛选记录",
+  "historyManager.from": "从",
+  "historyManager.to": "至",
+  "historyManager.system": "系统消息",
+  "historyManager.stickers": "表情",
+  "historyManager.retainedOnly": "仅固定",
+  "historyManager.summary": "{{count}} 条记录 · {{retained}} 条已固定",
+  "historyManager.cleanFiltered": "清理筛选结果",
+  "historyManager.selectDay": "选择本页当天",
+  "historyManager.cleanDay": "清理当天全部匹配记录",
+  "historyManager.selected": "已选 {{count}} 条",
+  "historyManager.dragHint": "拖拽框选 · Shift 连选 · 固定后清理时保留",
+  "historyManager.selectLoaded": "选择已加载",
+  "historyManager.clearSelection": "取消选择",
+  "historyManager.retain": "固定保留",
+  "historyManager.release": "取消固定",
+  "historyManager.delete": "仅为我删除",
+  "historyManager.confirmTitle": "删除这些聊天记录？",
+  "historyManager.confirmHint": "将仅从你的账号删除 {{count}} 条记录，跳过 {{retained}} 条固定消息。其他成员不受影响。恢复受账号剩余恢复次数限制。",
+  "historyManager.deleted": "已为你删除 {{count}} 条记录",
+  "historyManager.retained": "已固定，批量清理时会保留",
+  "historyManager.released": "已取消固定",
+  "historyManager.nothingToDelete": "没有可删除的记录，固定消息会被保留",
+  "historyManager.selectionLimit": "一次最多选择 500 条；清理整天或筛选结果不受此限制",
+  "historyManager.progress": "已删除 {{count}} 条，正在继续…",
+  "historyManager.stop": "完成当前批次后停止",
+  "historyManager.failed": "操作未完成，请刷新后重试",
+  "historyManager.refresh": "刷新记录",
+  "historyManager.retry": "重新加载",
+  "historyManager.loadMore": "加载更早记录",
+  "historyManager.empty": "没有匹配的记录",
+  "historyManager.emptyHint": "调整关键词、类型或日期，查看需要保留或清理的消息。",
+  "historyManager.invalidDates": "结束日期不能早于开始日期",
   "quickActions.entryHint": "布局、顺序与显示",
   "quickActions.direct": "私聊",
   "quickActions.group": "群聊",
@@ -3094,7 +3131,7 @@
   ,"chat.clearHistory": "清空聊天记录"
   ,"chat.clearHistoryHint": "仅从你这里清除"
   ,"chat.clearHistoryConfirmTitle": "清空这段聊天记录？"
-  ,"chat.clearHistoryConfirmHint": "所有历史消息将只从你的账号中清除，对方仍可查看。此操作无法撤销。"
+  ,"chat.clearHistoryConfirmHint": "仅从你的账号清除未固定的历史消息，固定消息将保留，对方仍可查看。恢复受账号剩余恢复次数限制。"
   ,"chat.clearHistoryDone": "聊天记录已清空"
   ,"chat.clearHistoryFailed": "暂时无法清空聊天记录"
   ,"admin.permissionMatrix": "权限矩阵"

@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.01.2",
+  "id": "2026.11.01.3",
   "publishedAt": "2026-11-01",
   "locales": {
     "zh-CN": {
-      "title": "头像框叠加效果优化",
+      "title": "高级聊天记录管理",
       "items": [
-        "头像和头像框均保持原有大小，边框直接叠加在头像四周"
+        "搜索记录右上角可进入全屏管理，按日期、类型和关键词筛选，支持多列浏览与框选",
+        "固定重要记录后批量清理其余消息，删除仅影响自己，系统消息也可管理"
       ]
     },
     "en": {
-      "title": "Refined avatar frame overlays",
+      "title": "Advanced chat history management",
       "items": [
-        "Portraits and frames retain their original size, with frames overlaid along the portrait edges"
+        "Open a fullscreen manager from chat search with date, type and keyword filters, multiple columns and drag selection",
+        "Keep important records protected during batch cleanup; deletion affects only you and includes system messages"
       ]
     }
   }
