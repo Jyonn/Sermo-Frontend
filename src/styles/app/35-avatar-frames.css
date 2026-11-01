@@ -1,4 +1,4 @@
-/* The layout footprint belongs to the portrait; frame bands extend outward. */
+/* Portrait and frame share the original footprint; the frame overlays its edges. */
 @keyframes avatar-frame-turn { to { transform: rotate(1turn); } }
 @keyframes avatar-blossom { to { transform: rotate(12deg) scale(1.1); } }
 @keyframes avatar-wing { to { scale: .75 1; opacity: .75; } }
@@ -57,16 +57,16 @@
 
 .user-avatar.has-avatar-frame > .avatar-frame-clip {
   position: absolute;
-  inset: calc(0% - var(--avatar-frame-inset));
-  width: calc(100% + var(--avatar-frame-inset) * 2);
-  height: calc(100% + var(--avatar-frame-inset) * 2);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
-  padding: var(--avatar-frame-inset);
+  padding: 0;
   overflow: hidden;
   border: 0;
   border-radius: inherit;
   outline: 0;
-  background: var(--avatar-frame-paint);
+  background: transparent;
   box-shadow: none;
   transform: none;
   isolation: isolate;
@@ -90,7 +90,29 @@
 
 .user-avatar.has-avatar-frame .avatar-group-stack {
   position: absolute;
-  inset: var(--avatar-frame-inset);
+  inset: 0;
+}
+
+.user-avatar.has-avatar-frame .avatar-label {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--avatar-bg);
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-ornament::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--avatar-frame-inset);
+  border-radius: inherit;
+  background: var(--avatar-frame-paint);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .user-avatar.has-avatar-frame .avatar-frame-ornament {

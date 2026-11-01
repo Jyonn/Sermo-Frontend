@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.01.1",
+  "id": "2026.11.01.2",
   "publishedAt": "2026-11-01",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录按需加载",
+      "title": "头像框叠加效果优化",
       "items": [
-        "修复登录或恢复记录后连续加载历史消息的问题，上滑时才加载更早的消息"
+        "头像和头像框均保持原有大小，边框直接叠加在头像四周"
       ]
     },
     "en": {
-      "title": "Chat history on demand",
+      "title": "Refined avatar frame overlays",
       "items": [
-        "Fixed continuous history loading after login or recovery; older messages load when you scroll up"
+        "Portraits and frames retain their original size, with frames overlaid along the portrait edges"
       ]
     }
   }

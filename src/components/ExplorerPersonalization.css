@@ -1,17 +1,15 @@
 .user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan {
   --avatar-frame-inset: 0%;
   --avatar-frame-paint: transparent;
-  /* Its 72% painted aperture must retain the unframed portrait size. */
-  inset: -19.444444%;
-  width: 138.888889%;
-  height: 138.888889%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
   background: transparent;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: 0; background: url("/activity/explorer-2026/frame-v2.webp") center/100% 100% no-repeat; pointer-events: none; }
-/* The painted aperture is x/y 16–84%. Bleed the portrait under its inner rim;
-   inheriting the app's 28% avatar radius leaves four visible empty corners. */
-.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 14%; width: 72%; height: 72%; border-radius: 12%; object-fit: cover; }
+/* Keep the portrait full size beneath the original-size painted frame. */
+.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
 /* Ai portraits sit beside each bubble, toward the conversation center. */
