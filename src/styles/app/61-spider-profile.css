@@ -32,7 +32,7 @@ html[data-theme="dark"] .user-profile-panel.profile-theme-spider-city {
 .user-profile-panel.profile-theme-spider-city .user-profile-cover,
 .profile-card-entry-swatch.theme-spider-city,
 .profile-card-theme-option.theme-spider-city > span {
-  background:#b53040 url("../../assets/activity/friendly-neighborhood/profile-web-cover.svg") right center/cover no-repeat;
+  background:#b53040 url("https://api.sermo.jyonn.space/resources/assets/85/display/37feb8b6669b64fc926ae6176b8b8546f72a1ca5e190857210f0a7cc42ac9fa1") right center/cover no-repeat;
 }
 .user-profile-panel.profile-theme-spider-city .user-profile-social-card { background:transparent; box-shadow:none; }
 .user-profile-panel.profile-theme-spider-city .user-profile-avatar-wrap {
@@ -71,7 +71,7 @@ html[data-theme="dark"] .user-profile-panel.profile-theme-spider-city {
   position:absolute;
   inset:0 0 0 auto;
   width:42%;
-  background:url("../../assets/activity/friendly-neighborhood/profile-silk.svg") right top/auto 100% no-repeat;
+  background:url("https://api.sermo.jyonn.space/resources/assets/84/display/b35fca1cf45a30afa476bf98406b45ae4156d77e58e1b70ab00b175077fa9745") right top/auto 100% no-repeat;
   pointer-events:none;
   opacity:.75;
 }

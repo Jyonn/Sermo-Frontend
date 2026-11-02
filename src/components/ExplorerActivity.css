@@ -88,7 +88,7 @@
 .explorer-piece-number > span { font-size: 9px; letter-spacing: .14em; }
 .explorer-piece-number strong { font: 22px Georgia, serif; color: #183143; }
 .explorer-piece-number small { font-size: 10px; color: #8b7c61; }
-.explorer-showcase { position: relative; display: grid; place-items: center; height: 280px; overflow: hidden; isolation: isolate; color: #f8eed7; background: #102a41 url("/activity/explorer-2026/banner-v2.webp") center/cover; }
+.explorer-showcase { position: relative; display: grid; place-items: center; height: 280px; overflow: hidden; isolation: isolate; color: #f8eed7; background: #102a41 url("https://api.sermo.jyonn.space/resources/assets/61/display/3bc14b190070ff1eb1dcf00f1940f053548e913865ceb4d1f37cdf88641223f7") center/cover; }
 .explorer-showcase::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #0a1b30ba; }
 .explorer-showcase > div { width: 100%; }
 .explorer-frame-display, .explorer-medal-display { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }

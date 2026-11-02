@@ -1,3 +1,5 @@
+import {activityAsset} from './activityAsset.ts';
+import {explorerExpressionSrc,explorerExpressionDisplaySrc} from './explorerExpressions.ts';
 export function explorerRewardPath(tier: number) {
   if (tier === 1) return "/app/menu?panel=personalization/avatar-frames";
   if (tier === 4) return "/app/menu?panel=personalization/profile-card";
@@ -13,14 +15,14 @@ export function explorerTaskPath(key: string) {
 }
 
 export const EXPLORER_ART = {
-  banner: "/activity/explorer-2026/banner-v2.webp",
-  title: "/activity/explorer-2026/title.webp",
-  frame: "/activity/explorer-2026/frame-v2.webp",
-  bubble: "/activity/explorer-2026/ai-expressions-v7/cool.webp",
-  background: "/activity/explorer-2026/conan-night-v2.webp",
-  backgroundAlternate: "/activity/explorer-2026/shinichi-night-v2.webp",
-  profile: "/activity/explorer-2026/romance-v2.webp",
-  medal: "/activity/explorer-2026/badge-v2.webp",
+  banner: "https://api.sermo.jyonn.space/resources/assets/61/display/3bc14b190070ff1eb1dcf00f1940f053548e913865ceb4d1f37cdf88641223f7",
+  title: "https://api.sermo.jyonn.space/resources/assets/76/display/8cc080b5d91ecf861bdf4dbaedc1846eecfb4f73c7de73874d5b8f776a144260",
+  frame: "https://api.sermo.jyonn.space/resources/assets/66/display/95f72390ed58b1edbf8d7278d4ea0b5c2bd644856d3ada4959a3616b0358005a",
+  bubble: explorerExpressionDisplaySrc('cool'),
+  background: "https://api.sermo.jyonn.space/resources/assets/63/display/39a1c869fb7c1b494fd13cf3638a84998d19b5dcfd21feda18e7afb4e49ac184",
+  backgroundAlternate: "https://api.sermo.jyonn.space/resources/assets/74/display/c198e7c161d1930c8859d600e1af60145f71b6a8eaa1d1efb898647339d7e216",
+  profile: "https://api.sermo.jyonn.space/resources/assets/71/display/e872798c26456da5d450f57d3db1e7f4638f94b86de62a5ce0da271b348266ee",
+  medal: "https://api.sermo.jyonn.space/resources/assets/59/display/78375e5cd9fc9a864cd6aba1ec328bd64f5aea5248b713818f2358b77b5d4f19",
 } as const;
 
 export function explorerRewardArt(tier: number) {
@@ -28,6 +30,6 @@ export function explorerRewardArt(tier: number) {
 }
 
 export function explorerRewardThumbnail(tier: number) {
-  if (tier === 2) return "/activity/explorer-2026/ai-expressions-v7/cool-thumb.webp";
-  return explorerRewardArt(tier).replace(/(-v\d+)\.webp$/, "-thumb$1.webp");
+  if (tier === 2) return explorerExpressionSrc('cool');
+  return activityAsset(['/activity/explorer-2026/frame-thumb-v2.webp','','/activity/explorer-2026/conan-night-thumb-v2.webp','/activity/explorer-2026/romance-thumb-v2.webp','/activity/explorer-2026/badge-thumb-v2.webp'][tier-1]??'/activity/explorer-2026/badge-thumb-v2.webp');
 }

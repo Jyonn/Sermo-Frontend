@@ -31,17 +31,12 @@ test("Explorer bubbles use the shared skin contract for both senders", () => {
   assert.ok(css.includes("prefers-reduced-motion: reduce"));
 });
 
-test("all five collectibles resolve to shipped final art and preserve the matched background pair", () => {
+test("all five collectibles resolve to immutable cloud artwork and preserve the matched background pair", () => {
   assert.equal(new Set([1, 2, 3, 4, 5].map(explorerRewardArt)).size, 5);
   for (const tier of [1, 2, 3, 4, 5]) {
-    const thumbnail = readFileSync(new URL(`../public${explorerRewardThumbnail(tier)}`, import.meta.url));
-    assert.ok(thumbnail.length < 15_000, `tier ${tier} thumbnail exceeds the mobile budget`);
+    assert.match(explorerRewardThumbnail(tier),/^https:\/\/api\.sermo\.jyonn\.space\/resources\/assets\//);
   }
-  for (const asset of Object.values(EXPLORER_ART)) {
-    const bytes = readFileSync(new URL(`../public${asset}`, import.meta.url));
-    assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
-    assert.ok(bytes.length < 500_000, `${asset} exceeds the mobile asset budget`);
-  }
+  for (const asset of Object.values(EXPLORER_ART)) assert.match(asset,/^https:\/\/api\.sermo\.jyonn\.space\/resources\/assets\//);
   const scene = readFileSync(new URL("../src/components/ExplorerTransformationWallpaper.tsx", import.meta.url), "utf8");
   assert.ok(scene.includes("EXPLORER_ART.background"));
   assert.ok(scene.includes("EXPLORER_ART.backgroundAlternate"));
@@ -56,7 +51,7 @@ test("Explorer uses two local portrait layers and profile scenes remain opt-in",
   assert.match(css, /animation-play-state: paused/);
   assert.match(css, /\.explorer-living-wallpaper \{[^}]*background: #0c2138;/);
   assert.ok(!css.includes("@keyframes explorer-duality"));
-  assert.match(css, /inset: 14%; width: 72%; height: 72%; border-radius: 12%/);
+  assert.match(css, /--avatar-frame-inset: 0%/);
   assert.ok(!css.includes('background: url("/activity/explorer-2026/ai-v2.webp")'));
   const card = readFileSync(new URL("../src/components/UserProfileCard.tsx", import.meta.url), "utf8");
   assert.match(card, /profileTheme === "explorer-romance" \? <ExplorerProfileScene/);
@@ -77,7 +72,7 @@ test("portrait bounds contain complete bodies without covering the sky or city",
   assert.match(scene, /root\.dataset\.ready/);
   assert.ok(!scene.includes("getContext"));
   assert.ok(!scene.includes("hardwareConcurrency"));
-  assert.ok(readFileSync(new URL("../public/activity/explorer-2026/roof-night-v4.webp", import.meta.url)).length < 500_000);
+  assert.ok(scene.includes("https://api.sermo.jyonn.space/resources/assets/73/display/034240bbf3675e8dd8ef1da1dcd324ee87e76b7447c1b5e3b87cb48a05d743eb"));
 });
 
 test("Shinichi crop preserves both shoes and keeps the space between his legs clear", () => {

@@ -7,7 +7,7 @@
   overflow: visible;
   background: transparent;
 }
-.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: 0; background: var(--avatar-frame-art, url("/activity/explorer-2026/frame-v2.webp")) center/100% 100% no-repeat; pointer-events: none; }
+.user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: 0; background: var(--avatar-frame-art, url("https://api.sermo.jyonn.space/resources/assets/66/display/95f72390ed58b1edbf8d7278d4ea0b5c2bd644856d3ada4959a3616b0358005a")) center/100% 100% no-repeat; pointer-events: none; }
 /* Keep the portrait full size beneath the original-size painted frame. */
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
@@ -39,7 +39,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
   --bubble-skin-self-color: #fff0de;
 }
 .personalization-option.preview-explorer-ai > i { background: linear-gradient(120deg, #f5e8d5 0 34%, #493448 35%); border: 1px solid #bd8b73; border-radius: 14px 3px 14px 14px; box-shadow: inset 0 0 0 3px #c38d6d30, 0 3px 0 #35273c30; }
-.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 36px; height: 36px; right: -8px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("/activity/explorer-2026/ai-expressions-v7/cool.webp") center bottom/contain no-repeat; }
+.personalization-option.preview-explorer-ai > i::after { content: ""; position: absolute; width: 36px; height: 36px; right: -8px; bottom: 0; border: 0; border-radius: 0; transform: none; background: url("https://api.sermo.jyonn.space/resources/assets/42/display/21fa7f934fa0f8b6ba2991254178df0bb1a8dab67157800e3c88ef4da5850acf") center bottom/contain no-repeat; }
 .explorer-living-wallpaper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #0c2138; pointer-events: none; }
 .explorer-wearables-lab { width: 100%; max-width: 440px; height: 100dvh; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
 .explorer-wearables-lab > nav { display: flex; gap: 4px; padding: 8px; flex-shrink: 0; background: var(--surface); }
@@ -52,11 +52,11 @@ html[data-theme="dark"] :is(.personalization-bubble-stage, .message-group).bubbl
 .explorer-transformation-stage { position: absolute; visibility: hidden; pointer-events: none; }
 .explorer-transformation-actor { position: absolute; opacity: 0; overflow: visible; transform: scale(var(--explorer-figure-scale, 1)); }
 .explorer-transformation-stage[data-portrait="0"] .explorer-transformation-actor[data-index="0"], .explorer-transformation-stage[data-portrait="1"] .explorer-transformation-actor[data-index="1"] { opacity: 1; }
-.explorer-living-wallpaper[data-ready="true"] { background: #0c2138 url("/activity/explorer-2026/roof-night-v4.webp") center 90%/cover no-repeat; }
+.explorer-living-wallpaper[data-ready="true"] { background: #0c2138 url("https://api.sermo.jyonn.space/resources/assets/73/display/034240bbf3675e8dd8ef1da1dcd324ee87e76b7447c1b5e3b87cb48a05d743eb") center 90%/cover no-repeat; }
 .explorer-living-wallpaper[data-ready="true"] .explorer-wallpaper-still { visibility: hidden; }
 .explorer-living-wallpaper[data-ready="true"] .explorer-transformation-stage { visibility: visible; }
-:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 90%/cover no-repeat; }
-:is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("/activity/explorer-2026/conan-night-v2.webp") center 75%/cover no-repeat; }
+:is(.chat-detail-scene, .chat-background-preview).chat-background-explorer-duality::before { background: #0c2138 url("https://api.sermo.jyonn.space/resources/assets/63/display/39a1c869fb7c1b494fd13cf3638a84998d19b5dcfd21feda18e7afb4e49ac184") center 90%/cover no-repeat; }
+:is(.chat-background-choice.theme-explorer-duality > span, .personalization-background-swatch.theme-explorer-duality) { background: #0c2138 url("https://api.sermo.jyonn.space/resources/assets/63/display/39a1c869fb7c1b494fd13cf3638a84998d19b5dcfd21feda18e7afb4e49ac184") center 75%/cover no-repeat; }
 .chat-background-explorer-duality { --chat-chrome-surface: #0e253be8; --chat-chrome-border: #c4d6e42b; --chat-chrome-text: #f3eee2; --chat-input-surface: #162f46; }
 .user-profile-panel.profile-theme-explorer-romance { --profile-page: #f5efdf; --profile-card: #fffbef; --profile-card-soft: #e9e5d9; --profile-ink: #203443; --profile-muted: #6a7680; --profile-line: #28425724; --profile-deep: #203b52; --profile-action: #a75d4f; background: var(--profile-page); color: var(--profile-ink); }
 html[data-theme="dark"] .user-profile-panel.profile-theme-explorer-romance { --profile-page: #12202d; --profile-card: #1a2b39; --profile-card-soft: #223644; --profile-ink: #fff3dd; --profile-muted: #b4c3ce; --profile-line: #bdcbd82a; --profile-deep: #e8d4ae; --profile-action: #e7ae92; }
@@ -64,8 +64,8 @@ html[data-theme="dark"] .user-profile-panel.profile-theme-explorer-romance { --p
 html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance .user-profile-cover { height: 190px; background: radial-gradient(ellipse at 85% 40%, #53616b, #182f43 65%); }
 .profile-theme-explorer-romance .user-profile-cover::before, .profile-theme-explorer-romance .user-profile-cover::after { content: none; }
 .explorer-profile-scene, .explorer-profile-scene > div { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.explorer-profile-city { background: #183347 url("/activity/explorer-2026/romance-city-v3.webp") center 58%/cover; transform: scale(1.06); animation: explorer-city-drift 18s ease-in-out infinite alternate; }
-.explorer-profile-couple { background: url("/activity/explorer-2026/romance-couple-v3.webp") right bottom/auto 110% no-repeat; transform-origin: 78% 100%; animation: explorer-umbrella-sway 6s ease-in-out infinite; }
+.explorer-profile-city { background: #183347 url("https://api.sermo.jyonn.space/resources/assets/68/display/c5d68fbe35438425372a1b6d0541066a2cf9880db7c6c20c709835d9ef00f50a") center 58%/cover; transform: scale(1.06); animation: explorer-city-drift 18s ease-in-out infinite alternate; }
+.explorer-profile-couple { background: url("https://api.sermo.jyonn.space/resources/assets/69/display/a601a9b2112e504321f441654cdf5bfea7c0c3271a8b83afb32630c7e91677d1") right bottom/auto 110% no-repeat; transform-origin: 78% 100%; animation: explorer-umbrella-sway 6s ease-in-out infinite; }
 .explorer-profile-vignette { background: linear-gradient(90deg, #182f4340, transparent 50%), linear-gradient(0deg, #142e4266, transparent 35%); }
 .explorer-profile-rain { background: repeating-linear-gradient(111deg, transparent 0 34px, #dbe4ed40 35px, transparent 36px 67px); transform: translateY(-36px); animation: explorer-rain .9s linear infinite; }
 .explorer-profile-rain.is-back { opacity: .3; background-size: 81px 100%; animation-duration: 1.7s; }
@@ -86,7 +86,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .profile-theme-explorer-romance .user-profile-facts > span { border: 1px solid #ad806442; background: var(--profile-card); color: var(--profile-ink); box-shadow: 0 2px 0 #a2775414; }
 .profile-theme-explorer-romance .user-profile-primary-actions .button { color: var(--profile-card); background: var(--profile-deep); border-color: var(--profile-deep); }
 .profile-theme-explorer-romance .user-profile-reminders { border-color: var(--profile-line); background: var(--profile-card-soft); }
-:is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("/activity/explorer-2026/romance-v2.webp") right center/cover no-repeat; }
+:is(.profile-card-theme-option.theme-explorer-romance > span, .profile-card-entry-swatch.theme-explorer-romance) { background: #22394d url("https://api.sermo.jyonn.space/resources/assets/71/display/e872798c26456da5d450f57d3db1e7f4638f94b86de62a5ce0da271b348266ee") right center/cover no-repeat; }
 .profile-card-theme-option.theme-explorer-romance > span::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 20px, #d8e4ef30 21px 22px, transparent 23px 43px); animation: explorer-rain 3s linear infinite; }
 @keyframes explorer-city-drift { to { transform: scale(1.12) translateX(-6px); } }
 @keyframes explorer-umbrella-sway { 0%, 100% { transform: rotate(-.6deg) translateY(1px); } 50% { transform: rotate(.7deg) translateY(-3px); } }
@@ -105,7 +105,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 .managed-sticker-grid .composer-sticker-item { aspect-ratio:1; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply { row-gap: 6px; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
-.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
+.message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("https://api.sermo.jyonn.space/resources/assets/57/display/05f5e4aab0a23daefc68cad46ff12845db568c4283ad6680ab638d6990f10c72") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }
 .message-group.bubble-style-explorer-ai.self .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { right: auto; left: -12px; transform: translateY(-50%) rotate(60deg); }
 .message-group.bubble-style-explorer-ai .message-bubble:is(.group-start, :has(.explorer-ai-expression))::after { content: none; }
 .explorer-transformation-sweep, .explorer-transformation-ring { opacity: 0; }

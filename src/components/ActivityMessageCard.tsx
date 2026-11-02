@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
+const baxianActivityBanner = "https://api.sermo.jyonn.space/resources/assets/82/display/69ce761f6e5da700e38f520e0d28baf0d6b117dc9a685735dc2723541bd8b847";
 import { getActiveLocale, useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import { ActivityCampaignCard } from "./ActivityCampaignCard";

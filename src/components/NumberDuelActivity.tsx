@@ -152,7 +152,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     {offline ? <p className="duel-notice" role="status">{t("duel.reconnecting")}<button type="button" onClick={() => void refresh()}>{t("duel.retry")}</button></p> : null}
     {error && !sheet ? <p className="duel-error" role="alert">{error}<button aria-label={t("common.close")} type="button" onClick={() => setError("")}>×</button></p> : null}
     {!lobby ? <p className="duel-loading" role="status">{t("common.loading")}</p> : !roomCode ? <>
-      <section className="duel-hero"><div><small>{t("duel.eyebrow")}</small><h2>{t("duel.headline")}</h2><p>{t("duel.subtitle")}</p></div><img src="/activity/number-duel/digits.svg" alt="" /></section>
+      <section className="duel-hero"><div><small>{t("duel.eyebrow")}</small><h2>{t("duel.headline")}</h2><p>{t("duel.subtitle")}</p></div><img src="https://api.sermo.jyonn.space/resources/assets/77/display/17f9eb04e50c3db3663b77088c8bf4911e85959ea910c24cff77d2b5ff440f9e" alt="" /></section>
       <div className="duel-daily"><span>{t("duel.today")} <strong>{lobby.daily.matches}<small> / {lobby.daily.match_limit}</small></strong></span><span>{t("duel.earned")} <strong>{signedGrowthPoints(lobby.daily.points)}</strong></span><span className="duel-first">{t("duel.poolRule")}</span></div>
       <DuelGrowthProgress growth={growth} />
       {!lobby.eligible ? <p className="duel-notice">{t("duel.verify")}</p> : !lobby.active ? <p className="duel-notice">{t("duel.ended")}</p> : lobby.daily.matches >= lobby.daily.match_limit ? <p className="duel-notice">{t("duel.practice")}</p> : null}

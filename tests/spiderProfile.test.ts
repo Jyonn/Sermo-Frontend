@@ -9,7 +9,7 @@ const root = postcss.parse(css);
 test("spider cover artwork is shared by real cards, live previews and both catalog swatches", () => {
   let selectors = "";
   root.walkRules(rule => {
-    if (rule.nodes.some(node => node.type === "decl" && node.value.includes("profile-web-cover.svg"))) selectors = rule.selector;
+    if (rule.nodes.some(node => node.type === "decl" && node.value.includes("https://api.sermo.jyonn.space/resources/assets/85/display/37feb8b6669b64fc926ae6176b8b8546f72a1ca5e190857210f0a7cc42ac9fa1"))) selectors = rule.selector;
   });
   for (const selector of [".user-profile-panel.profile-theme-spider-city .user-profile-cover", ".profile-card-entry-swatch.theme-spider-city", ".profile-card-theme-option.theme-spider-city > span"]) assert.ok(selectors.includes(selector));
   const menu = read("src/pages/MenuPage.tsx");
@@ -23,11 +23,11 @@ test("spider palette covers dark mode without generic text recoloring or changin
   assert.doesNotMatch(css, /!important|:is\(p,small,span\)|min-height:|grid-template/);
   assert.doesNotMatch(read("src/styles/app/00-foundation.css"), /profile-theme-spider-city|spider-city-breathe/);
 });
-test("web artworks are small self-contained decorative SVGs, with no remote requests or text", () => {
+test("decorative artwork URLs remain immutable and centralized", () => {
+  const mapping=JSON.parse(read("src/lib/activityAssetManifest.json"));
   for (const file of ["profile-web-cover.svg", "profile-silk.svg"]) {
-    const svg = read(`src/assets/activity/friendly-neighborhood/${file}`);
-    assert.match(svg, /viewBox=/);
-    assert.doesNotMatch(svg, /<text|<script|<image|href=|filter=/);
-    assert.ok(Buffer.byteLength(svg) < 6000);
+    const uri=mapping[`/assets/activity/friendly-neighborhood/${file}`];
+    assert.match(uri,/^https:\/\/api\.sermo\.jyonn\.space\/resources\/assets\/\d+\/display\/[a-f0-9]{64}$/);
+    assert.ok(css.includes(uri));
   }
 });

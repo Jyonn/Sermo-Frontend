@@ -10,7 +10,7 @@ async function sha256(file: File) {
   return [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, "0")).join("");
 }
 
-export async function addStickerFile(file: File, onProgress?: (progress: number) => void): Promise<StickerDTO> {
+export async function addStickerFile(file: File, onProgress?: (progress: number) => void, seriesId?:number): Promise<StickerDTO> {
   if (!file.type.startsWith("image/")) throw new Error("sticker_image_required");
   if (file.size > STICKER_MAX_SIZE) throw new Error("sticker_too_large");
 
@@ -18,6 +18,7 @@ export async function addStickerFile(file: File, onProgress?: (progress: number)
   const contentHash = await sha256(file);
   onProgress?.(0.08);
   const prepared = await api.prepareSticker({
+    series_id:seriesId,
     content_hash: contentHash,
     file_name: file.name || "sticker.png",
     content_type: file.type,
@@ -35,6 +36,7 @@ export async function addStickerFile(file: File, onProgress?: (progress: number)
   formData.set("file", file);
   await uploadFormData(prepared.upload.upload_url, formData, (value) => onProgress?.(0.08 + value * 0.82));
   const sticker = await api.completeSticker({
+    series_id:seriesId,
     content_hash: contentHash,
     key: prepared.upload.key,
     content_type: file.type,

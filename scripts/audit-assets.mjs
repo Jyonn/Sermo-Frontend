@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
+const migratedActivityAssets=JSON.parse(fs.readFileSync(new URL('../src/lib/activityAssetManifest.json',import.meta.url),'utf8'));
 export const policy = JSON.parse(fs.readFileSync(new URL("retired-assets.json", import.meta.url), "utf8"));
 
 export function walk(root) {
@@ -37,7 +38,7 @@ export function auditAssets(root, built = false) {
       const resource = match[1].split(/[?#]/)[0];
       if (resource.includes("${") || !/\.(?:png|jpe?g|webp|svg|gif|ico|avif|woff2?|ttf|glb|json|mp3|ogg|wav)$/i.test(resource)) continue;
       const candidate = path.join(root, built ? "dist" : "public", resource.slice(1));
-      if (!fs.existsSync(candidate)) failures.push(`Missing literal asset ${resource} in ${path.relative(root, file)}`);
+      if (!fs.existsSync(candidate)&&!/^https:\/\/api\.sermo\.jyonn\.space\/resources\/assets\/\d+\/display\/[a-f0-9]{64}$/.test(migratedActivityAssets[resource]??'')) failures.push(`Missing literal asset ${resource} in ${path.relative(root, file)}`);
     }
   }
   const directory = path.join(root, built ? "dist" : "public");

@@ -56,6 +56,7 @@ import { useGroupCopySuggestions } from "../lib/useGroupCopySuggestions";
 import { GROUP_COPY_REMOVED } from "../lib/groupCopy";
 import { EMOJI_PAGES } from "../lib/composerEmojis";
 import { StickerImage } from "../components/StickerImage";
+import {StickerSeriesManager} from "../components/StickerSeriesManager";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -2745,8 +2746,6 @@ function LiveChatsPage({
   const exploreStickerUsageRefreshRef = useRef(0);
   const [stickerSaving, setStickerSaving] = useState(false);
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
-  const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
-  const [selectedStickerIds, setSelectedStickerIds] = useState<number[]>([]);
 
   useEffect(() => {
     const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
@@ -2754,7 +2753,6 @@ function LiveChatsPage({
     const userId = Number(profileSegment.replace("user-profile-", ""));
     if (Number.isFinite(userId) && userId > 0) setProfileDrawerUserId(userId);
   }, [location.search]);
-  const [stickerDeleteConfirmOpen, setStickerDeleteConfirmOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [locationSending, setLocationSending] = useState(false);
   const [locationMessagePreview, setLocationMessagePreview] = useState<{
@@ -4283,8 +4281,6 @@ function LiveChatsPage({
     setEmojiPickerOpen(false);
     setEmojiPage(STICKER_MY_PAGE);
     setStickerManagerOpen(false);
-    setStickerManagerSelecting(false);
-    setSelectedStickerIds([]);
   }, [selectedChat?.id]);
 
   useEffect(() => {
@@ -4680,48 +4676,12 @@ function LiveChatsPage({
     }
   };
 
-  const toggleStickerSelection = (stickerId: number) => {
-    if (!stickerManagerSelecting || stickerSaving) return;
-    setSelectedStickerIds((current) => current.includes(stickerId)
-      ? current.filter((id) => id !== stickerId)
-      : [...current, stickerId]);
-  };
-
-  const closeStickerManager = () => {
-    if (stickerSaving) return;
-    setStickerManagerOpen(false);
-    setStickerManagerSelecting(false);
-    setSelectedStickerIds([]);
-  };
+  const closeStickerManager = () => { if (!stickerSaving) setStickerManagerOpen(false); };
 
   const openStickerManager = () => {
     if (!requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) return;
     setEmojiPickerOpen(false);
     setStickerManagerOpen(true);
-  };
-
-  const deleteSelectedStickers = async () => {
-    if (stickerSaving || !selectedStickerIds.length) return;
-    const deletingIds = [...selectedStickerIds];
-    setStickerSaving(true);
-    try {
-      await Promise.all(deletingIds.map((stickerId) => api.deleteSticker(stickerId)));
-      const deleting = stickers.filter((sticker) => deletingIds.includes(sticker.sticker_id));
-      setStickers((current) => {
-        const items = current.filter((item) => !deletingIds.includes(item.sticker_id));
-        persistMineStickerCache(items);
-        return items;
-      });
-      purgeCachedMedia(deleting.map((sticker) => sticker.uri));
-      setSelectedStickerIds([]);
-      setStickerManagerSelecting(false);
-      setStickerDeleteConfirmOpen(false);
-      showToast(t("sticker.removedCount", { count: deletingIds.length }));
-    } catch {
-      showToast(t("sticker.removeFailed"), "error");
-    } finally {
-      setStickerSaving(false);
-    }
   };
 
   const collectExploredSticker = async (asset: StickerAssetDTO) => {
@@ -7982,7 +7942,7 @@ function LiveChatsPage({
                 {!voiceComposer.open && (emojiPickerOpen || (mobileComposerLayout && mobileEmojiPanelMounted)) ? (
                   <div className={mobileComposerLayout ? `mobile-composer-reveal mobile-emoji-reveal${emojiPickerOpen ? " is-open" : ""}` : "desktop-emoji-reveal"}>
                     <div className={mobileComposerLayout ? "mobile-composer-reveal-inner" : undefined}>
-                  <ChatEmojiPickerPanel emojiPage={emojiPage} setEmojiPage={setEmojiPage} visibleEmojis={visibleEmojis} stickers={stickers} exploreStickers={exploreStickers} frequentExploreStickerIds={frequentExploreStickerIds} stickerSaving={stickerSaving} mineStickersLoading={mineStickersLoading} exploreStickersLoading={exploreStickersLoading} sendSticker={sendSticker} collectExploredSticker={collectExploredSticker} openStickerManager={openStickerManager} handleStickerGridScroll={handleStickerGridScroll} insertEmoji={insertEmoji}/>
+                  <ChatEmojiPickerPanel emojiPage={emojiPage} setEmojiPage={setEmojiPage} visibleEmojis={visibleEmojis} stickers={stickers} exploreStickers={exploreStickers} frequentExploreStickerIds={frequentExploreStickerIds} stickerSaving={stickerSaving} mineStickersLoading={mineStickersLoading} exploreStickersLoading={exploreStickersLoading} sendSticker={sendSticker} collectExploredSticker={collectExploredSticker} openStickerManager={openStickerManager} onStickerLibraryChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}} handleStickerGridScroll={handleStickerGridScroll} insertEmoji={insertEmoji}/>
                     </div>
                   </div>
                 ) : null}
@@ -8893,58 +8853,8 @@ function LiveChatsPage({
           />
         ) : null}
       </SideDrawer>
-      <SideDrawer
-        open={stickerManagerOpen}
-        title={t("sticker.manageTitle")}
-        actionLabel={stickers.length ? (stickerManagerSelecting ? t("common.cancel") : t("common.manage")) : undefined}
-        onAction={() => {
-          setStickerManagerSelecting((current) => !current);
-          setSelectedStickerIds([]);
-        }}
-        onClose={closeStickerManager}
-        historyKey="stickers"
-      >
-        <div className={`sticker-manager ${stickerManagerSelecting ? "is-selecting" : ""}`}>
-          <div className="sticker-manager-grid">
-            <FeatureDiscoveryTarget className="is-sticker-manager-entry" rewardId="capability.sticker">
-              <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => { if (requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) stickerInputRef.current?.click(); }} type="button" aria-label={t("sticker.add")}>
-                <span className="material-symbols-outlined">add</span>
-              </button>
-            </FeatureDiscoveryTarget>
-            {stickers.map((sticker) => {
-              const selected = selectedStickerIds.includes(sticker.sticker_id);
-              return (
-                <button
-                  aria-pressed={stickerManagerSelecting ? selected : undefined}
-                  className={`sticker-manager-item ${selected ? "is-selected" : ""}`}
-                  disabled={stickerSaving}
-                  key={sticker.sticker_id}
-                  onClick={() => toggleStickerSelection(sticker.sticker_id)}
-                  type="button"
-                >
-                  <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                  {stickerManagerSelecting ? (
-                    <span className="sticker-manager-check material-symbols-outlined">{selected ? "check" : ""}</span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-          {!stickers.length ? (
-            <div className="sticker-manager-empty">
-              <span className="material-symbols-outlined">photo_library</span>
-              <strong>{t("sticker.mineEmpty")}</strong>
-            </div>
-          ) : null}
-          {stickerManagerSelecting ? (
-            <div className="sticker-manager-footer">
-              <button className="danger-button" disabled={!selectedStickerIds.length || stickerSaving} onClick={() => setStickerDeleteConfirmOpen(true)} type="button">
-                <span className="material-symbols-outlined">delete</span>
-                {selectedStickerIds.length ? t("sticker.deleteSelected", { count: selectedStickerIds.length }) : t("sticker.selectToDelete")}
-              </button>
-            </div>
-          ) : null}
-        </div>
+      <SideDrawer open={stickerManagerOpen} title={t("sticker.manageTitle")} onClose={closeStickerManager} historyKey="stickers" fullscreen fullViewport className="sticker-series-drawer">
+        <StickerSeriesManager revision={stickers} onAdd={()=>{if(requireComposerCapability("menu.sticker.create",6,t("sticker.create")))stickerInputRef.current?.click()}} onChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}}/>
       </SideDrawer>
       <InputDialog
         open={newSubmissionTitleOpen}
@@ -9114,18 +9024,6 @@ function LiveChatsPage({
           }
           void executeSelectionAction(messageSelectionActionPrompt.action, messageSelectionActionPrompt.eligibleClientIds);
         }}
-      />
-      <ConfirmDialog
-        open={stickerDeleteConfirmOpen}
-        title={t("sticker.deleteConfirmTitle", { count: selectedStickerIds.length })}
-        description={t("sticker.deleteConfirmHint")}
-        confirmLabel={t("common.delete")}
-        busy={stickerSaving}
-        danger
-        onClose={() => {
-          if (!stickerSaving) setStickerDeleteConfirmOpen(false);
-        }}
-        onConfirm={() => void deleteSelectedStickers()}
       />
       <BottomSheet
         open={chatMemberPickerOpen}

@@ -1,7 +1,7 @@
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
-import cityArt from "../assets/activity/friendly-neighborhood/event-city.webp";
-import spiderAvatarFrame from "../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp";
+const cityArt = "https://api.sermo.jyonn.space/resources/assets/83/display/6bf6d8746a239a5361f2aa67f6fd05b5d323602337d303d8d4baa2b2748884fc";
+const spiderAvatarFrame = "https://api.sermo.jyonn.space/resources/assets/86/display/83de29044d1c4221b1a112452e9b61692a6e74fbc23fbe334ce736be7aaf9c3c";
 
 interface Props {
   activity: ActivityCampaignDTO;

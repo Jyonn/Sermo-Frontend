@@ -56,7 +56,7 @@ export function ComposerEmojiPicker({ mobile, onSelect, onSticker, admin = false
   };
   return <div className={mobile ? "mobile-composer-reveal is-open" : `desktop-emoji-reveal${inset ? " is-inset" : ""}`}>
     <div className={mobile ? "mobile-composer-reveal-inner" : undefined}>
-      <ChatEmojiPickerPanel emojiPage={page} setEmojiPage={(value)=>{if(value===page && value<0) void load();else setPage(value);}}
+      <ChatEmojiPickerPanel onStickerLibraryChanged={()=>void load()} emojiPage={page} setEmojiPage={(value)=>{if(value===page && value<0) void load();else setPage(value);}}
         visibleEmojis={page>=0 ? EMOJI_PAGES[page].emojis : []}
         stickers={(mine?.items ?? []) as StickerDTO[]} exploreStickers={explore?.items ?? []} frequentExploreStickerIds={[]}
         stickerSaving={busy || sending} mineStickersLoading={loading && page===-2} exploreStickersLoading={loading && page===-1}

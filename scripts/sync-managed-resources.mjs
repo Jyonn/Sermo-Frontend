@@ -11,7 +11,7 @@ const response=await fetch(new URL(`/resources/collections/${slug}`,origin),{sig
 const envelope=await response.json();
 const collection=envelope.body;
 if(!response.ok||collection?.slug!==slug||!Array.isArray(collection.assets)||!collection.assets.length)throw new Error('Resource collection unavailable');
-const target=path.join(root,'public/resources',slug);await fs.mkdir(target,{recursive:true});
+
 const manifest={};
 for(const asset of collection.assets){
  if(!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(asset.slug))throw new Error('Invalid asset key');
@@ -25,10 +25,11 @@ for(const asset of collection.assets){
   if(!result.ok)throw new Error(`Download failed for ${asset.slug}`);
   const bytes=Buffer.from(await result.arrayBuffer());
   if(bytes.length>4*1024*1024||bytes.toString('ascii',8,12)!=='WEBP'||createHash('sha256').update(bytes).digest('hex')!==hash)throw new Error(`Invalid resource content for ${asset.slug}`);
-  const file=`${asset.slug}-${variant}.${hash.slice(0,12)}.webp`;
-  await fs.writeFile(path.join(target,file),bytes);record[variant]=`/resources/${slug}/${file}`;
+  if(variant==='thumbnail'&&bytes.length>25000)throw new Error('Thumbnail exceeds mobile budget');
+  record[variant]=url.href;
+  if(variant==='thumbnail')record.thumbnail_bytes=bytes.length;
  }
  manifest[asset.slug]=record;
 }
 await fs.writeFile(path.join(root,'src/assets/haibara-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
-console.log(`Synchronized ${Object.keys(manifest).length} published assets; existing files preserved.`);
+console.log(`Verified ${Object.keys(manifest).length} published assets; wrote URL metadata only.`);

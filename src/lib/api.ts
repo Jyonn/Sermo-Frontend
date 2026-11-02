@@ -1683,10 +1683,21 @@ export const api = {
     });
   },
 
-  getStickers(offset = 0, limit = 30, signal?: AbortSignal) {
+  getStickerSeries() { return request<Array<import('./stickerSeries').StickerSeriesDTO>>('/stickers/series',{auth:true}); },
+  getStickerPacks() { return request<Array<{series_id:number;name:string;count:number}>>('/stickers/packs',{auth:true}); },
+  getStickerPack(id:number) { return request<{name:string;assets:StickerAssetDTO[]}>(`/stickers/packs/${id}`,{auth:true}); },
+  collectStickerPack(id:number) { return request(`/stickers/packs/${id}`,{auth:true,method:'POST'}); },
+  submitStickerSeries(id:number) { return request(`/stickers/series/${id}`,{auth:true,method:'POST',body:{action:'submit'}}); },
+  removeStickerSeriesAsset(id:number,assetId:number) { return request(`/stickers/series/${id}`,{auth:true,method:'POST',body:{remove_asset_id:assetId}}); },
+  getStickerPackReviews() { return request<Array<import('./stickerSeries').StickerSeriesDTO>>('/platform-admin/sticker-packs',{platformAdminAuth:true}); },
+  reviewStickerPack(id:number,approved:boolean,note:string) { return request(`/platform-admin/sticker-packs/${id}`,{platformAdminAuth:true,method:'POST',body:{approved,note}}); },
+  saveStickerSeries(name:string,id?:number) { return request<{series_id:number;name:string;count:number}>(`/stickers/series${id?`/${id}`:''}`,{auth:true,method:'POST',body:{name}}); },
+  deleteStickerSeries(id:number) { return request(`/stickers/series/${id}`,{auth:true,method:'DELETE'}); },
+  assignStickerSeries(sticker_ids:number[],series_id:number|null) { return request('/stickers/series/assign',{auth:true,method:'POST',body:{sticker_ids,series_id}}); },
+  getStickers(offset = 0, limit = 30, signal?: AbortSignal, seriesId?:number) {
     return request<StickerListDTO>("/stickers/", {
       auth: true,
-      query: { offset, limit },
+      query: { offset, limit, ...(seriesId===undefined?{}:{series_id:seriesId}) },
       signal,
     });
   },
@@ -1709,11 +1720,11 @@ export const api = {
     return request<StickerDTO>("/stickers/collect", { method: "POST", auth: true, body: { asset_id } });
   },
 
-  prepareSticker(payload: { content_hash: string; file_name: string; content_type?: string; file_size: number }) {
+  prepareSticker(payload: { content_hash: string; file_name: string; content_type?: string; file_size: number; series_id?:number }) {
     return request<StickerPrepareDTO>("/stickers/prepare", { method: "POST", auth: true, body: payload });
   },
 
-  completeSticker(payload: { content_hash: string; key: string; content_type?: string; file_size: number }) {
+  completeSticker(payload: { content_hash: string; key: string; content_type?: string; file_size: number; series_id?:number }) {
     return request<StickerDTO>("/stickers/complete", { method: "POST", auth: true, body: payload });
   },
 

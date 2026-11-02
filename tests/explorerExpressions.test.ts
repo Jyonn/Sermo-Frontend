@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import manifest from "../src/assets/haibara-manifest.json" with {type:"json"};
 import { EXPLORER_EXPRESSIONS, explorerExpressionForMessage, explorerExpressionSrc } from "../src/lib/explorerExpressions.ts";
 
 test("message choices survive rerenders and appending other messages", () => {
@@ -19,12 +19,10 @@ test("message IDs distribute across all twenty distinct faces", () => {
   for (const count of counts.values()) assert.ok(count > 170 && count < 330);
 });
 
-test("all twenty transparent portraits ship within a small mobile budget", () => {
-  assert.equal(new Set(EXPLORER_EXPRESSIONS.map(explorerExpressionSrc)).size, 20);
-  const files = EXPLORER_EXPRESSIONS.map((face) => readFileSync(new URL(`../public${explorerExpressionSrc(face)}`, import.meta.url)));
-  assert.equal(new Set(files.map((file) => file.toString("base64"))).size, 20);
-  for (const bytes of files) {
-    assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
-    assert.ok(bytes.length < 25_000);
+test("all twenty portraits use immutable cloud thumbnails within the mobile budget", () => {
+  assert.equal(new Set(EXPLORER_EXPRESSIONS.map(explorerExpressionSrc)).size,20);
+  for(const face of EXPLORER_EXPRESSIONS){
+    assert.match(explorerExpressionSrc(face),/^https:\/\/api\.sermo\.jyonn\.space\/resources\/assets\/\d+\/thumbnail\/[a-f0-9]{64}$/);
+    assert.ok(manifest[face].thumbnail_bytes<25000);
   }
 });

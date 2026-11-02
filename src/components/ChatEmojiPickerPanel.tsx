@@ -1,4 +1,6 @@
-import { useState, type UIEvent } from "react";
+import { useEffect,useState, type UIEvent } from "react";
+import {api} from '../lib/api';
+import {CommunityStickerPack} from './CommunityStickerPack';
 import { ManagedStickerCollection } from './ManagedStickerCollection';
 import type { StickerDTO, StickerAssetDTO } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
@@ -7,6 +9,7 @@ import { resolveStableResourceUri } from "../lib/stableResource";
 import { FeatureDiscoveryTarget } from "../lib/featureDiscovery";
 import { StickerImage } from "./StickerImage";
 import { UserAvatar } from "./UserAvatar";
+import './StickerPicker.css';
 
 interface Props {
   emojiPage:number; setEmojiPage:(page:number)=>void; visibleEmojis:readonly string[];
@@ -15,16 +18,25 @@ interface Props {
   sendSticker:(sticker:StickerDTO|StickerAssetDTO)=>void|Promise<void>;
   collectExploredSticker?:(sticker:StickerAssetDTO)=>void|Promise<void>;
   openStickerManager?:()=>void;
+  onStickerLibraryChanged?:()=>void;
   handleStickerGridScroll?:(event:UIEvent<HTMLDivElement>,kind:"mine"|"explore")=>void;
   insertEmoji:(emoji:string)=>void;
 }
 const STICKER_MY_PAGE=-2;
 const STICKER_EXPLORE_PAGE=-1;
-export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stickers,exploreStickers,frequentExploreStickerIds,stickerSaving,mineStickersLoading,exploreStickersLoading,sendSticker,collectExploredSticker,openStickerManager,handleStickerGridScroll,insertEmoji}:Props) {
+export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stickers,exploreStickers,frequentExploreStickerIds,stickerSaving,mineStickersLoading,exploreStickersLoading,sendSticker,collectExploredSticker,openStickerManager,onStickerLibraryChanged,handleStickerGridScroll,insertEmoji}:Props) {
   const { t }=useI18n();
-  const [exploreCollection,setExploreCollection]=useState<'global'|'haibara-v2'>('global');
+  const [exploreReturnPage,setExploreReturnPage]=useState(STICKER_MY_PAGE);
+  const [exploreCollection,setExploreCollection]=useState<string>('global');
+  const [packs,setPacks]=useState<Array<{series_id:number;name:string}>>([]);
+  useEffect(()=>{if(emojiPage!==STICKER_EXPLORE_PAGE)return;let active=true;void api.getStickerPacks().then(rows=>{if(active)setPacks(rows)}).catch(()=>undefined);return()=>{active=false}},[emojiPage]);
   return (                  <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
-                    <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
+                    {emojiPage===STICKER_EXPLORE_PAGE?<div className="composer-emoji-tabs is-explore-navigation" role="tablist" aria-label={t('resources.collections')}>
+                      <button type="button" aria-label={t('common.back')} onClick={()=>setEmojiPage(exploreReturnPage)}><span className="material-symbols-outlined">arrow_back</span></button>
+                      <button type="button" role="tab" aria-selected={exploreCollection==='global'} className={exploreCollection==='global'?'is-active':''} onClick={()=>setExploreCollection('global')}><small>{t('resources.global')}</small></button>
+                      <button type="button" role="tab" aria-selected={exploreCollection==='haibara-v2'} className={exploreCollection==='haibara-v2'?'is-active':''} onClick={()=>setExploreCollection('haibara-v2')}><small>{t('resources.haibara')}</small><span className="material-symbols-outlined picker-official-mark" role="img" aria-label={t('sticker.series.official')}>verified</span></button>
+                      {packs.map(pack=><button type="button" role="tab" key={pack.series_id} aria-selected={exploreCollection===String(pack.series_id)} className={exploreCollection===String(pack.series_id)?'is-active':''} onClick={()=>setExploreCollection(String(pack.series_id))}><small>{pack.name}</small></button>)}
+                    </div>:<div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       <button
                         aria-label={t("sticker.mine")}
                         aria-selected={emojiPage === STICKER_MY_PAGE}
@@ -41,7 +53,7 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                         aria-label={t("sticker.explore")}
                         aria-selected={emojiPage === STICKER_EXPLORE_PAGE}
                         className={emojiPage === STICKER_EXPLORE_PAGE ? "is-active" : ""}
-                        onClick={() => setEmojiPage(STICKER_EXPLORE_PAGE)}
+                        onClick={() => {setExploreReturnPage(emojiPage);setEmojiPage(STICKER_EXPLORE_PAGE)}}
                         role="tab"
                         title={t("sticker.explore")}
                         type="button"
@@ -64,7 +76,7 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                           <small>{t(page.labelKey as TranslationKey)}</small>
                         </button>
                       ))}
-                    </div>
+                    </div>}
                     {emojiPage === STICKER_MY_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         {stickers.length ? (
@@ -101,8 +113,7 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                       </div>
                     ) : emojiPage === STICKER_EXPLORE_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
-                        <div className="composer-sticker-subtabs" role="tablist" aria-label={t('resources.collections')}><button type="button" role="tab" aria-selected={exploreCollection==='global'} onClick={()=>setExploreCollection('global')}>{t('resources.global')}</button><button type="button" role="tab" aria-selected={exploreCollection==='haibara-v2'} onClick={()=>setExploreCollection('haibara-v2')}>{t('resources.haibara')}</button></div>
-                        {exploreCollection==='haibara-v2'?<ManagedStickerCollection slug="haibara-v2" busy={stickerSaving} onSend={sendSticker}/>:exploreStickers.length ? (
+                        {exploreCollection==='haibara-v2'?<ManagedStickerCollection slug="haibara-v2" busy={stickerSaving} onSend={sendSticker}/>:exploreCollection!=='global'?<CommunityStickerPack id={Number(exploreCollection)} busy={stickerSaving} onSend={sendSticker} onCollected={onStickerLibraryChanged}/>:exploreStickers.length ? (
                           <div className="composer-sticker-grid has-frequent-row" onScroll={(event) => handleStickerGridScroll?.(event, "explore")}>
                             {exploreStickers.map((sticker, index) => (
                               <div className={`composer-sticker-explore-item${index < frequentExploreStickerIds.length && frequentExploreStickerIds.includes(sticker.sticker_asset_id) ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>

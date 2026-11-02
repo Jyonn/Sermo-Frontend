@@ -1,4 +1,4 @@
-import starryBanner from "../assets/activity/starry-night/banner.webp";
+const starryBanner = "https://api.sermo.jyonn.space/resources/assets/96/display/197e672103b9d0d35015623505bb5ce2e0cd9a51a657cb121173db61265dbfef";
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";

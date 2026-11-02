@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.02.3",
+  "id": "2026.11.02.4",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "小哀表情上新",
+      "title": "表情集合与轻巧面板",
       "items": [
-        "新增 20 款小哀表情，可在表情探索的“小哀”分组中发送",
-        "小哀气泡的开头表情与文字同大小，不再撑开气泡或影响消息间距"
+        "探索改为单层导航，手机表情面板更轻巧，小哀增加官方标记",
+        "支持全屏制作自己的表情集合，上传与首页分开，发布和更新经过审核",
+        "活动素材统一云端管理，减少前端随包资源"
       ]
     },
     "en": {
-      "title": "New Ai Haibara expressions",
+      "title": "Sticker collections, lighter picker",
       "items": [
-        "Send 20 Ai Haibara expressions from their new collection in sticker Explore",
-        "Ai bubble expressions now match text size without enlarging bubbles or changing message spacing"
+        "Explore uses one navigation row; the mobile picker is shorter and Ai has an official mark",
+        "Create collections in fullscreen; uploads stay separate from My home, with reviewed publishing and updates",
+        "Activity artwork and audio now use a shared cloud resource library"
       ]
     }
   }

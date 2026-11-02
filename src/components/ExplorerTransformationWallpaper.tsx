@@ -92,7 +92,7 @@ export function ExplorerTransformationWallpaper({ compact }: { compact: boolean 
     const prepare = () => {
       if (loading || failed || disposed) return;
       loading = true;
-      void Promise.all([load(EXPLORER_ART.background), load(EXPLORER_ART.backgroundAlternate), load("/activity/explorer-2026/roof-night-v4.webp")]).then(() => {
+      void Promise.all([load(EXPLORER_ART.background), load(EXPLORER_ART.backgroundAlternate), load("https://api.sermo.jyonn.space/resources/assets/73/display/034240bbf3675e8dd8ef1da1dcd324ee87e76b7447c1b5e3b87cb48a05d743eb")]).then(() => {
         if (disposed) return;
         loaded = true;
         resize(); update();

@@ -1,4 +1,9 @@
 .resource-workspace { display:grid; gap:20px; }
+.sticker-pack-reviews article { border-bottom:1px solid var(--line-soft); padding-block:14px; }
+.sticker-pack-reviews header { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.sticker-pack-reviews small { flex:1; color:var(--text-muted); font-size:11px; }
+.sticker-review-images { display:flex; gap:8px; overflow-x:auto; padding-top:12px; }
+.sticker-review-images img { width:56px; height:56px; object-fit:contain; }
 .resource-toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .resource-toolbar>div { flex:1 1 240px; }
 .resource-toolbar h2 { margin:0 0 6px; font-size:22px; }

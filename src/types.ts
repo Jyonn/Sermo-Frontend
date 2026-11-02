@@ -447,6 +447,7 @@ export interface PlatformDashboardDTO {
   spaces: number;
   members: number;
   pending_identity_reviews: number;
+  pending_sticker_reviews?: number;
   mfa_enabled: boolean;
   recent_audit: PlatformAuditDTO[];
 }
@@ -625,7 +626,8 @@ export interface ResourceCollectionDTO {
   title: string;
   title_en: string;
   version: string;
-  category: 'emoji' | 'avatar-frame' | 'background' | 'illustration';
+  category: 'emoji' | 'avatar-frame' | 'background' | 'illustration' | 'activity';
+  directory?: string;
   published: boolean;
   updated_at: number;
   assets: ManagedResourceDTO[];
@@ -723,6 +725,9 @@ export interface StickerAssetDTO {
 }
 
 export interface StickerDTO extends StickerAssetDTO {
+  is_uploaded?: boolean;
+  in_home?: boolean;
+  series_id?: number | null;
   sticker_id: number;
   created_at: number;
 }

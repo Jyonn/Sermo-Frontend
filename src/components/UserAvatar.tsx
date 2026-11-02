@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { cachedAvatarFrame, subscribeAvatarFrames } from "../lib/avatarFrameCache";
-import spiderFrame from '../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp';
+const spiderFrame = "https://api.sermo.jyonn.space/resources/assets/86/display/83de29044d1c4221b1a112452e9b61692a6e74fbc23fbe334ce736be7aaf9c3c";
 import { avatarResourceKey, loadAvatarSource, peekAvatarSource, preloadAvatar } from "../lib/avatarCache";
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AvatarFrameStyle } from "../types";
@@ -28,7 +28,7 @@ const supportedAvatarFrames = new Set<AvatarFrameStyle>([
 ]);
 const avatarFrameArt: Partial<Record<AvatarFrameStyle, string>> = {
   'spider-web': spiderFrame,
-  'explorer-conan': '/activity/explorer-2026/frame-v2.webp',
+  'explorer-conan': 'https://api.sermo.jyonn.space/resources/assets/66/display/95f72390ed58b1edbf8d7278d4ea0b5c2bd644856d3ada4959a3616b0358005a',
 };
 // Warm the two bitmap ornaments once, using the same persistent cache as portraits.
 if (typeof window !== 'undefined') Object.values(avatarFrameArt).forEach(uri => preloadAvatar(uri));
