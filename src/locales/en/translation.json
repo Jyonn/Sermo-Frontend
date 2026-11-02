@@ -646,6 +646,8 @@
   "password.method.email": "Email verification",
   "password.method.sms": "SMS verification",
   "password.directSetup": "Set a password",
+  "password.setupHint": "Create a password to sign in with your nickname next time.",
+  "password.verifyHint": "Confirm your identity before choosing a new password.",
   "password.sendTo": "Send a code to {{target}}",
   "password.sendCode": "Send verification code",
   "password.resendIn": "Resend in {{seconds}}s",

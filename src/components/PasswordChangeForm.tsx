@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../lib/api";
 import { meetsPasswordPolicy } from "../lib/passwordPolicy";
 import type { PasswordChangeOptionsDTO, PasswordChangeResultDTO } from "../types";
-import { SettingSelect } from "./SettingRow";
 import { VerificationCodeInput } from "./VerificationCodeInput";
+import './PasswordChangeForm.css';
 
 type Method = "password" | "email" | "sms";
 
@@ -30,12 +30,16 @@ export function PasswordChangeForm({ onChanged, onBusy }: {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
-  useEffect(() => { stepHeading.current?.focus(); }, [step]);
+  useEffect(() => { stepHeading.current?.focus(); }, [step, Boolean(options)]);
   useEffect(() => {
     alive.current = true;
     const controller = new AbortController();
     setError("");
-    api.getPasswordChangeOptions(controller.signal).then(setOptions).catch((e: unknown) => {
+    api.getPasswordChangeOptions(controller.signal).then(next => {
+      if (controller.signal.aborted) return;
+      setOptions(next);
+      setStep(next.has_password ? 1 : 2);
+    }).catch((e: unknown) => {
       if (!controller.signal.aborted) setError(e instanceof ApiError ? e.message : t("password.optionsFailed"));
     });
     return () => { alive.current = false; controller.abort(); };
@@ -63,7 +67,7 @@ export function PasswordChangeForm({ onChanged, onBusy }: {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!options || busy) return;
-    if (step === 1) {
+    if (options.has_password && step === 1) {
       start();
       try {
         const result = await api.verifyPasswordChange({ method,
@@ -82,25 +86,30 @@ export function PasswordChangeForm({ onChanged, onBusy }: {
     }
     start();
     try {
-      const result = await api.updatePassword({ new_password: password, method,
-        old_password: method === "password" ? oldPassword : undefined,
-        challenge_id: method !== "password" ? challenge : undefined,
-        code: method !== "password" ? code : undefined, reset_token: resetToken });
+      const result = await api.updatePassword({ new_password: password,
+        ...(options.has_password ? { method,
+          old_password: method === "password" ? oldPassword : undefined,
+          challenge_id: method !== "password" ? challenge : undefined,
+          code: method !== "password" ? code : undefined, reset_token: resetToken } : { method: 'password' as const }) });
       if (alive.current) onChanged(result);
     } catch (e) {
       if (alive.current) setError(e instanceof ApiError && /OFFICIAL_PASSWORD_WEAK/.test(e.identifier)
         ? t("password.officialPolicy") : e instanceof ApiError ? e.message : t("password.updateFailed"));
     } finally { finish(); }
   };
-  if (!options) return <div className="simple-form" aria-live="polite">{error ? <><p role="alert">{error}</p><button className="button secondary" onClick={() => setReload((n) => n + 1)} type="button">{t("common.retry")}</button></> : <p>{t("common.loading")}</p>}</div>;
+  if (!options) return <div className="password-form-loading" role="status">{error ? <><p role="alert">{error}</p><button className="button secondary" onClick={() => setReload((n) => n + 1)} type="button">{t("common.retry")}</button></> : <><span className="material-symbols-outlined">progress_activity</span><p>{t("common.loading")}</p></>}</div>;
   const methods = [{ value: "password" as Method, label: t(options.has_password ? "password.current" : "password.directSetup") },
     ...options.channels.map((item) => ({ value: item.type, label: t(`password.method.${item.type}`) }))];
-  return <form className="simple-form menu-security-form" onSubmit={(event) => void submit(event)}>
-    <h4 className="password-step-heading" ref={stepHeading} tabIndex={-1}>{t(step === 1 ? "password.stepVerify" : "password.stepSet")}</h4>
+  return <form className="simple-form password-change-form" onSubmit={(event) => void submit(event)} aria-busy={busy}>
+    <div className={`password-form-intro${!options.has_password ? ' is-first-setup' : ''}`}>
+      {options.has_password ? <div className="password-form-progress" aria-hidden="true"><i className="is-active"/><i className={step === 2 ? 'is-active' : ''}/></div> : null}
+      <h4 className="password-step-heading" ref={stepHeading} tabIndex={-1}>{t(options.has_password ? step === 1 ? "password.stepVerify" : "password.stepSet" : "password.directSetup")}</h4>
+      <p>{t(!options.has_password ? 'password.setupHint' : step === 1 ? 'password.verifyHint' : 'password.sessionNotice')}</p>
+    </div>
     {step === 1 ? <>
-    <SettingSelect label={t("password.verifyWith")} value={method} options={methods} disabled={busy} onChange={(next) => {
-      setMethod(next); setCode(""); setChallenge(undefined); setOldPassword(""); setError("");
-    }} />
+    {methods.length > 1 ? <fieldset className="password-methods"><legend>{t('password.verifyWith')}</legend>{methods.map(item => <button key={item.value} type="button" aria-pressed={method === item.value} disabled={busy} onClick={() => {
+      setMethod(item.value); setCode(""); setChallenge(undefined); setOldPassword(""); setError("");
+    }}>{item.label}</button>)}</fieldset> : null}
     {method === "password" ? options.has_password ? <div className="menu-security-field">
       <label className="field-label" htmlFor={`${id}-old`}>{t("password.current")}</label>
       <input autoComplete="current-password" className="input" disabled={busy} id={`${id}-old`} required type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
@@ -112,7 +121,8 @@ export function PasswordChangeForm({ onChanged, onBusy }: {
     </> : <>
     <div className="menu-security-field">
       <label className="field-label" htmlFor={`${id}-new`}>{t("recovery.newPassword")}</label>
-      <input autoComplete="new-password" className="input" disabled={busy} id={`${id}-new`} required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <input autoComplete="new-password" aria-describedby={`${id}-policy`} className="input" disabled={busy} id={`${id}-new`} required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <small className="password-policy" id={`${id}-policy`}>{t(options.policy.official ? 'password.officialPolicy' : 'password.memberPolicy')}</small>
     </div>
     <div className="menu-security-field">
       <label className="field-label" htmlFor={`${id}-confirm`}>{t("password.confirmNew")}</label>
@@ -121,7 +131,7 @@ export function PasswordChangeForm({ onChanged, onBusy }: {
     </>}
     {error ? <p className="error" role="alert">{error}</p> : null}
     <button className="button" disabled={busy || (step === 2 ? !password || !confirm : method === "password" ? options.has_password && !oldPassword : !challenge || code.length !== 6)} type="submit">{t(busy ? "common.processing" : step === 1 ? "password.next" : options.has_password ? "password.confirmChange" : "password.confirmSetup")}</button>
-    {step === 2 ? <button className="button secondary" disabled={busy} type="button" onClick={() => {
+    {step === 2 && options.has_password ? <button className="password-form-back" disabled={busy} type="button" onClick={() => {
       setStep(1); setResetToken(undefined); setCode(""); setChallenge(undefined); setPassword(""); setConfirm(""); setError("");
     }}>{t("password.back")}</button> : null}
   </form>;

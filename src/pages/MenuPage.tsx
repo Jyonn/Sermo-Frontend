@@ -3415,7 +3415,7 @@ export default function MenuPage() {
       </BottomSheet>
       <BottomSheet
         bodyClassName="menu-security-sheet-body"
-        className="contact-bottom-sheet"
+        className="contact-bottom-sheet password-change-sheet"
         open={passwordSheetOpen}
         title={hasPassword ? t("password.change") : t("password.setup")}
         onClose={() => {

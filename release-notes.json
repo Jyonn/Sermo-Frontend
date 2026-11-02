@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.01.6",
-  "publishedAt": "2026-11-01",
+  "id": "2026.11.02.1",
+  "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "头像框缓存",
+      "title": "更顺畅地设置密码",
       "items": [
-        "缓存用户头像框设置和图片，再次打开聊天时更快显示，并随最新设置更新"
+        "尚未设置密码的账号可直接设置密码，已有密码的账号保留身份验证；同时优化密码表单的布局和提示"
       ]
     },
     "en": {
-      "title": "Cached avatar frames",
+      "title": "Simpler password setup",
       "items": [
-        "Cache avatar frame settings and artwork for faster display when reopening chats, while keeping settings up to date"
+        "Set your first password directly while existing passwords still require verification, with a cleaner form and clearer guidance"
       ]
     }
   }

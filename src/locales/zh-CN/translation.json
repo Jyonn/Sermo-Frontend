@@ -646,6 +646,8 @@
   "password.method.email": "邮件验证",
   "password.method.sms": "短信验证",
   "password.directSetup": "直接设置密码",
+  "password.setupHint": "为账号设置一个密码，之后可用昵称和密码登录。",
+  "password.verifyHint": "先确认是你本人，再设置新密码。",
   "password.sendTo": "验证码将发送至 {{target}}",
   "password.sendCode": "发送验证码",
   "password.resendIn": "{{seconds}} 秒后重新发送",
