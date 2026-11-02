@@ -41,6 +41,13 @@
 .personalization-chat-page-preview > .personalization-option > small {
   display: none;
 }
+.ai-mini-conversation { position:relative; z-index:2; width:100%; height:100%; }
+.ai-mini-conversation>span { position:absolute; display:flex; align-items:center; gap:3px; height:18px; padding:2px 4px; border:1px solid #b98c77; box-shadow:inset 0 0 0 1px #ffffff55; }
+.ai-mini-other { left:7px; top:9px; width:42px; border-radius:4px 9px 9px 9px; background:#faf1e5; }
+.ai-mini-self { right:6px; bottom:9px; width:40px; border-radius:9px 4px 9px 9px; background:#493448; }
+.ai-mini-conversation img { width:13px; height:13px; object-fit:contain; flex-shrink:0; }
+.ai-mini-conversation i { display:block; width:12px; height:3px; border-radius:2px; background:#806975; opacity:.65; }
+.ai-mini-self i { background:#f6eadb; }
 
 .chat-personalization-workspace.is-editing {
   --chat-preview-height: clamp(180px, 29dvh, 280px);

@@ -1,7 +1,9 @@
 import { createPortal } from "react-dom";
+import {useRef} from 'react';
+import {useModalFocus} from '../lib/modalFocus';
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
-import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
+import { CURRENT_RELEASE, type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { UpdateFailureFeedback } from "./UpdateReportButton";
 import { SITE_ORIGINS, updateSiteLabel } from "../lib/siteOrigins";
@@ -19,7 +21,9 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const { t } = useI18n();
   const { phase, install } = usePwaUpdateActivation();
   const installing = phase !== "idle" && phase !== "error";
+  const root=useRef<HTMLElement|null>(null);
   useBodyScrollLock(open);
+  useModalFocus(root,open,()=>{if(!installing)onClose()});
   if (!open || typeof document === "undefined") return null;
 
   const successfulSources = result?.sources.filter((source) => source.status === "ok").length ?? 0;
@@ -27,13 +31,15 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const partiallyFailed = Boolean(result && successfulSources > 0 && successfulSources < result.sources.length);
   const sourceName = (key: UpdateSourceKey) => t(updateSiteLabel(key));
   const destination = updateDestination(result, window.location.origin);
+  const sources=result?.sources ?? SITE_ORIGINS.map(site=>({...site,release:null,releaseId:null,status:'idle' as const}));
+  const current=sources.find(source=>source.origin===window.location.origin);
+  const others=sources.filter(source=>source.origin!==window.location.origin);
 
   return createPortal(
     <div className="dialog-backdrop update-check-backdrop" onClick={() => { if (!installing) onClose(); }} role="presentation">
-      <section aria-labelledby="update-check-title" aria-modal="true" className="update-check-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
+      <section ref={root} aria-labelledby="update-check-title" aria-modal="true" className="update-check-dialog is-compact" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="update-check-header">
-          <div className="update-check-mark" aria-hidden="true"><span className="material-symbols-outlined">system_update</span></div>
-          <div><small>{t("update.versionAndUpdate")}</small><h2 id="update-check-title">{t("update.check")}</h2></div>
+          <div><h2 id="update-check-title">{t("update.check")}</h2><p className="update-installed-version">{t('update.current',{version:result?.currentRelease.id??CURRENT_RELEASE.id})}</p></div>
           <button aria-label={t("common.close")} className="icon-button" disabled={installing} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button>
         </header>
 
@@ -44,18 +50,17 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
             </span>
             <div>
               <strong>{checking ? t("update.checking") : result?.updateAvailable ? t("update.available") : allFailed ? t("update.unavailable") : t("update.latest")}</strong>
-              <p>{checking ? t("update.checkingHint") : allFailed ? t("update.networkHint") : partiallyFailed ? t("update.partialHint") : result?.updateAvailable ? t("update.availableHint") : result ? t("update.latestHint") : t("update.readyHint")}</p>
+              {result?.updateAvailable?<p>{t('update.latestVersion')} · {result.latestVersion}</p>:null}
             </div>
           </div>
 
-          <div className="update-version-strip">
-            <div><small>{t("update.currentVersion")}</small><strong>{result?.currentRelease.id ?? "-"}</strong></div>
-            <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-            <div><small>{t("update.latestVersion")}</small><strong>{result?.latestVersion ?? "-"}</strong></div>
+          <div className="update-current-site">
+            <div><small>{t('update.currentSite')}</small><strong>{window.location.host}</strong></div>
+            <span>{current?.status==='ok'?current.releaseId:current?.status==='error'?t('update.checkFailed'):t('update.waiting')}</span>
           </div>
-
+          <details className="update-other-sites"><summary>{t('update.otherSites')}{partiallyFailed?<span className="update-other-warning" aria-label={t('update.partialHint')}> · {t('update.checkFailed')}</span>:null}</summary>
           <div className="update-source-list">
-            {(result?.sources ?? SITE_ORIGINS.map((site) => ({ ...site, release: null, releaseId: null, status: "idle" as const }))).map((source) => (
+            {others.map((source) => (
               <div className="update-source-row" key={source.key}>
                 <span className="material-symbols-outlined" aria-hidden="true">{source.status === "ok" ? "cloud_done" : source.status === "error" ? "cloud_off" : "cloud_queue"}</span>
                 <div><strong>{sourceName(source.key)}{source.origin === window.location.origin ? ` · ${t("update.currentSite")}` : ""}</strong><a href={`${source.origin}/`} referrerPolicy="no-referrer" rel="noreferrer"><small>{new URL(source.origin).host}</small></a></div>
@@ -63,6 +68,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
               </div>
             ))}
           </div>
+          </details>
 
           {allFailed ? <p className="update-network-advice"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.switchNetworkHint")}</p> : null}
           {phase === "error" ? <UpdateFailureFeedback /> : null}

@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.02.8",
+  "id": "2026.11.02.9",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "柯南动态表情上线",
+      "title": "更清晰的菜单与更新",
       "items": [
-        "探索新增 20 款柯南动态表情，小哀与柯南均附简短描述",
-        "自定义集合支持逐张填写描述，补齐后方可提交审核"
+        "检查更新默认展示当前站，新版本在菜单和更新入口显示红点",
+        "账号入口统一分组，登录其他用户前增加确认",
+        "微调柯南头像框，更新小哀聊天页预览"
       ]
     },
     "en": {
-      "title": "Conan animated stickers",
+      "title": "Clearer menu and updates",
       "items": [
-        "Explore 20 animated Conan stickers, with short labels for both Conan and Ai",
-        "Add a description to every sticker before submitting your collection for review"
+        "Updates focus on this site, with red dots on Menu and Check for updates",
+        "Account actions share a section; another sign-in asks for confirmation",
+        "Refined Conan frame coverage and the Ai chat preview"
       ]
     }
   }

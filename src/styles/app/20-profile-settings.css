@@ -7272,6 +7272,29 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 .update-check-backdrop {
   z-index: 260;
 }
+.update-available-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#ef4b56; flex-shrink:0; }
+.nav-button-icon-wrap>.update-available-dot { position:absolute; top:0; right:-2px; }
+.menu-update-label { display:inline-flex; align-items:center; gap:7px; }
+.update-check-dialog.is-compact { width:min(400px,100%); border-radius:18px; }
+.is-compact .update-check-header { grid-template-columns:minmax(0,1fr) 32px; gap:10px; padding:18px 18px 12px; border:0; }
+.is-compact .update-check-header h2 { margin:0; font-size:17px; }
+.update-installed-version { margin:5px 0 0; font-size:11px; color:var(--text-muted); }
+.is-compact .update-check-body { gap:12px; padding:4px 18px 16px; max-height:calc(100dvh - 200px); }
+.update-check-dialog.is-compact .update-check-summary { grid-template-columns:22px minmax(0,1fr); gap:8px; padding:8px 0; background:transparent; color:var(--text-primary); border-radius:0; }
+.is-compact .update-check-summary>.material-symbols-outlined { width:22px; height:22px; background:transparent; font-size:21px; color:var(--text-muted); }
+.is-compact .update-check-summary.is-available>.material-symbols-outlined { color:var(--brand-primary); }
+.is-compact .update-check-summary strong { font-size:14px; }
+.is-compact .update-check-summary p { margin-top:3px; font-size:11px; }
+.update-current-site { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-block:1px solid var(--line-soft); }
+.update-current-site>div { display:grid; gap:4px; min-width:0; }
+.update-current-site small { font-size:10px; color:var(--text-muted); }
+.update-current-site strong { font-size:12px; overflow-wrap:anywhere; }
+.update-current-site>span { font-size:11px; color:var(--text-secondary); flex-shrink:0; }
+.update-other-sites>summary { cursor:pointer; color:var(--text-muted); font-size:12px; padding:4px 0; }
+.update-other-sites .update-source-list { margin-top:10px; }
+.update-other-warning { font-size:10px; }
+.is-compact .update-check-actions { padding:12px 18px 16px; gap:8px; }
+.is-compact .update-check-actions>button { min-height:38px; font-size:12px; }
 
 .update-check-dialog {
   width: min(100%, 460px);

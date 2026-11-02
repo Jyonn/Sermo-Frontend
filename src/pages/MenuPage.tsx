@@ -19,6 +19,8 @@ import { ChatQuickActionsMark } from "../components/ChatActionIcon";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import {UpdateAvailableDot} from '../components/UpdateAvailableDot';
+import {ChatPageThumbnail} from '../components/ChatPageThumbnail';
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
@@ -497,6 +499,7 @@ export default function MenuPage() {
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [passwordReminderDescription, setPasswordReminderDescription] = useState(() => t("menu.passwordReminder"));
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [otherAccountConfirmOpen,setOtherAccountConfirmOpen]=useState(false);
   const [accountDeleteStep, setAccountDeleteStep] = useState<"intro" | "verify" | "final" | null>(null);
   const [accountDeleteInput, setAccountDeleteInput] = useState("");
   const [accountDeleteSaving, setAccountDeleteSaving] = useState(false);
@@ -2165,24 +2168,11 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {isDesktopViewport ? (
-          <section className="list-section">
-            <div className="simple-list">
-              <button className="simple-row menu-link-row" onClick={() => void openAccountSwitcher()} type="button">
-                <div className="row-main">
-                  <strong>{t("menu.switchAccount")}</strong>
-                </div>
-                <span className="material-symbols-outlined">chevron_right</span>
-              </button>
-            </div>
-          </section>
-        ) : null}
-
         <section className="list-section menu-update-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row menu-update-row" onClick={openUpdateCheck} type="button">
               <div className="row-main">
-                <strong>{t("update.check")}</strong>
+                <strong className="menu-update-label">{t("update.check")}<UpdateAvailableDot/></strong>
                 <span>
                   {updateChecking
                     ? t("update.checking")
@@ -2204,7 +2194,8 @@ export default function MenuPage() {
 
         <section className="list-section">
           <div className="simple-list">
-            <button className="simple-row menu-link-row" onClick={() => window.location.assign(new URL("/pwa?choose=1", window.location.origin).toString())} type="button">
+            {isDesktopViewport?<button className="simple-row menu-link-row" onClick={()=>void openAccountSwitcher()} type="button"><div className="row-main"><strong>{t('menu.switchAccount')}</strong></div><span className="material-symbols-outlined">chevron_right</span></button>:null}
+            <button className="simple-row menu-link-row" onClick={() => setOtherAccountConfirmOpen(true)} type="button">
               <div className="row-main"><strong>{t("pwa.otherAccount")}</strong></div>
               <span className="material-symbols-outlined">person_add</span>
             </button>
@@ -2440,9 +2431,7 @@ export default function MenuPage() {
             })}
             type="button"
           >
-            <span className={`personalization-background-swatch personalization-chat-page-preview theme-${me?.chat_background_theme ?? "default"}`}>
-              <span className={`personalization-option preview-${visibleBubbleStyle(me?.chat_bubble_style)}`}><i aria-hidden="true"><span /></i></span>
-            </span>
+            <ChatPageThumbnail theme={me?.chat_background_theme??'default'} bubbleStyle={visibleBubbleStyle(me?.chat_bubble_style)}/>
             <span><strong>{t("menu.chatPage")}</strong><small>{t("menu.chatPageHint")}</small></span>
             <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span>
           </button>
@@ -3662,6 +3651,7 @@ export default function MenuPage() {
           void leave();
         }}
       />
+      <ConfirmDialog open={otherAccountConfirmOpen} title={t('pwa.otherAccount')} description={t('pwa.otherAccountConfirm')} confirmLabel={t('pwa.otherAccountContinue')} onClose={()=>setOtherAccountConfirmOpen(false)} onConfirm={()=>{setOtherAccountConfirmOpen(false);window.location.assign(new URL('/pwa?choose=1',window.location.origin).toString())}}/>
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );

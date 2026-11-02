@@ -6,6 +6,7 @@ import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
 import { UnreadIndicator } from "./UnreadIndicator";
+import {UpdateAvailableDot} from './UpdateAvailableDot';
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
@@ -290,6 +291,7 @@ export function AppBottomNav() {
                 <UnreadIndicator count={totalUnread} />
               ) : null}
               {route.key === "square" ? <UnreadIndicator count={squareUnread} fresh={squareHasFreshContent} /> : null}
+              {route.key === 'menu' ? <UpdateAvailableDot/> : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
                 <UnreadIndicator count={incomingRequestCount} />
               ) : null}
