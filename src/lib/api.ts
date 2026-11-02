@@ -431,6 +431,25 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  getResourceCollection(slug: string, signal?: AbortSignal) {
+    return request<import('../types').ResourceCollectionDTO>(`/resources/collections/${encodeURIComponent(slug)}`, { signal });
+  },
+  getPlatformResources() {
+    return request<import('../types').ResourceCollectionDTO[]>('/platform-admin/resources', { platformAdminAuth: true });
+  },
+  savePlatformCollection(value: Pick<import('../types').ResourceCollectionDTO, 'slug' | 'title' | 'title_en' | 'version' | 'category' | 'published'>) {
+    return request<import('../types').ResourceCollectionDTO>('/platform-admin/resources', { method:'POST', platformAdminAuth:true, body:value });
+  },
+  savePlatformResource(id: number, value: { title?:string; title_en?:string; enabled?:boolean; position?:number }) {
+    return request<import('../types').ManagedResourceDTO>(`/platform-admin/resources/${id}`, { method:'POST', platformAdminAuth:true, body:value });
+  },
+  async uploadPlatformResource(file: File, collection: string, slug: string, title: string, titleEn: string) {
+    const body = new FormData();
+    body.append('file', file); body.append('collection', collection); body.append('slug', slug); body.append('title', title); body.append('title_en', titleEn);
+    const token = platformAdminAuthConfig.getSession()?.accessToken;
+    const response = await fetch(`${API_BASE_URL}/platform-admin/resources/upload`, { method:'POST', headers:token ? { Authorization:`Bearer ${token}` } : {}, body });
+    return parseEnvelope<import('../types').ManagedResourceDTO>(response);
+  },
   ...createResearchApi(request),
   chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<import('./chronelleProfile').ChronelleProfileDTO>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
   chronelleAccount(action?:string,confirmed?:boolean,callback?:{code?:string;state:string;error?:string}) { return request<{status:string;authorize_url?:string;rebind_required?:boolean;permissions_review_required?:boolean}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed,...callback}}:{})}); },

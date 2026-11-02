@@ -96,16 +96,13 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-explorer-romance
 @keyframes explorer-rain { to { transform: translate(-18px, 36px); } }
 @media (prefers-reduced-motion: reduce) { .explorer-living-wallpaper[data-ready] .explorer-wallpaper-still { visibility: visible; }.explorer-living-wallpaper[data-ready] .explorer-transformation-stage { visibility: hidden; }.explorer-profile-scene *, .profile-card-theme-option.theme-explorer-romance > span::after { animation: none; } }
 
-/* Reserve the portrait's width but only one em of line height. The artwork
-   grows upward, leaving the text's original padding and baseline unchanged. */
-.explorer-ai-expression { display: inline-block; position: relative; width: 3em; height: 1em; margin-inline-start: -8px; margin-inline-end: .25em; vertical-align: -.12em; pointer-events: none; user-select: none; }
-.explorer-ai-expression > img { position: absolute; inset-inline-start: 0; bottom: 0; width: 3em; height: 3em; object-fit: contain; }
-.message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression { width: 1em; margin-inline-start: 0; }
-.message-group.bubble-style-explorer-ai .message-bubble.has-reply .explorer-ai-expression > img { width: 1em; height: 1em; }
-/* Floats start at the line box top; match the original inline baseline without
-   changing the slot's height, text padding, or spacing between bubbles. */
-.message-group.bubble-style-explorer-ai.other .explorer-ai-expression { float: right; margin-inline-start: .25em; margin-inline-end: -8px; transform: translateY(calc((1lh - 1em) / 2 + .035em)); }
-.message-group.bubble-style-explorer-ai.other .message-bubble.has-reply .explorer-ai-expression { margin-inline-start: .25em; margin-inline-end: 0; }
+/* A real inline emoji: one glyph wide/high, with no enlarged overlay or float. */
+.explorer-ai-expression { display: inline-block; width: 1em; height: 1em; margin-inline-end: .15em; vertical-align: -.12em; pointer-events: none; user-select: none; }
+.explorer-ai-expression > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.composer-sticker-subtabs { display:flex; gap:6px; padding:8px 12px; flex-shrink:0; }
+.composer-sticker-subtabs button { padding:6px 12px; border:0; border-radius:8px; color:var(--text-muted); background:transparent; font:inherit; font-size:12px; cursor:pointer; }
+.composer-sticker-subtabs button[aria-selected=true] { color:var(--text-primary); background:var(--bg-elevated); font-weight:650; }
+.managed-sticker-grid .composer-sticker-item { aspect-ratio:1; }
 .message-group.bubble-style-explorer-ai .message-bubble.has-reply { row-gap: 6px; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement)) { overflow: visible; }
 .message-group.bubble-style-explorer-ai .message-bubble:where(:not(.is-sticker, .is-media, .is-link-preview, .is-forward-bundle, .is-submission-invite, .is-activity, .is-travel-map, .is-statement))::after { content: ""; position: absolute; z-index: 3; top: 50%; right: -12px; width: 24px; height: 11px; background: url("/activity/explorer-2026/aptx-capsule.svg") center/contain no-repeat; transform: translateY(-50%) rotate(-60deg); pointer-events: none; }

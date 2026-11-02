@@ -608,6 +608,29 @@ export interface JoinResponseDTO {
   auth: LoginAuthDTO;
 }
 
+export interface ManagedResourceDTO extends StickerAssetDTO {
+  resource_id: number;
+  slug: string;
+  title: string;
+  title_en: string;
+  thumbnail_uri: string;
+  original_uri: string;
+  enabled?: boolean;
+  position: number;
+  storage_key?: string;
+}
+export interface ResourceCollectionDTO {
+  collection_id: number;
+  slug: string;
+  title: string;
+  title_en: string;
+  version: string;
+  category: 'emoji' | 'avatar-frame' | 'background' | 'illustration';
+  published: boolean;
+  updated_at: number;
+  assets: ManagedResourceDTO[];
+}
+
 export interface PasswordChangeOptionsDTO {
   has_password: boolean;
   channels: Array<{ channel: number; type: "email" | "sms"; masked: string }>;

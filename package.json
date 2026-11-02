@@ -4,6 +4,7 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
+    "assets:sync": "node scripts/sync-managed-resources.mjs",
     "deploy:mirror": "node scripts/deploy-mirror.mjs",
     "deploy:frienden-pages": "node scripts/deploy-frienden-pages.mjs",
     "build:frienden": "SERMO_CNAME=frienden.jyonn.space VITE_PUBLIC_ORIGIN=https://frienden.jyonn.space npm run build",

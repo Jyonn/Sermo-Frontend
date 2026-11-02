@@ -1,4 +1,5 @@
-import type { UIEvent } from "react";
+import { useState, type UIEvent } from "react";
+import { ManagedStickerCollection } from './ManagedStickerCollection';
 import type { StickerDTO, StickerAssetDTO } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { EMOJI_PAGES } from "../lib/composerEmojis";
@@ -21,6 +22,7 @@ const STICKER_MY_PAGE=-2;
 const STICKER_EXPLORE_PAGE=-1;
 export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stickers,exploreStickers,frequentExploreStickerIds,stickerSaving,mineStickersLoading,exploreStickersLoading,sendSticker,collectExploredSticker,openStickerManager,handleStickerGridScroll,insertEmoji}:Props) {
   const { t }=useI18n();
+  const [exploreCollection,setExploreCollection]=useState<'global'|'haibara-v2'>('global');
   return (                  <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       <button
@@ -99,7 +101,8 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                       </div>
                     ) : emojiPage === STICKER_EXPLORE_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
-                        {exploreStickers.length ? (
+                        <div className="composer-sticker-subtabs" role="tablist" aria-label={t('resources.collections')}><button type="button" role="tab" aria-selected={exploreCollection==='global'} onClick={()=>setExploreCollection('global')}>{t('resources.global')}</button><button type="button" role="tab" aria-selected={exploreCollection==='haibara-v2'} onClick={()=>setExploreCollection('haibara-v2')}>{t('resources.haibara')}</button></div>
+                        {exploreCollection==='haibara-v2'?<ManagedStickerCollection slug="haibara-v2" busy={stickerSaving} onSend={sendSticker}/>:exploreStickers.length ? (
                           <div className="composer-sticker-grid has-frequent-row" onScroll={(event) => handleStickerGridScroll?.(event, "explore")}>
                             {exploreStickers.map((sticker, index) => (
                               <div className={`composer-sticker-explore-item${index < frequentExploreStickerIds.length && frequentExploreStickerIds.includes(sticker.sticker_asset_id) ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>

@@ -1,0 +1,142 @@
+{
+  "joy": {
+    "title": "开心亮眼",
+    "title_en": "Joy",
+    "content_hash": "778c8283068f193b8aa9be79b7f9e6f82e281d600931090e4db1bb07ec2a7f7a",
+    "display": "/resources/haibara-v2/joy-display.778c8283068f.webp",
+    "thumbnail": "/resources/haibara-v2/joy-thumbnail.90e6a8ab8ae1.webp"
+  },
+  "laugh": {
+    "title": "笑到眯眼",
+    "title_en": "Laughing",
+    "content_hash": "62e4fb07ac92bc762f549a309509bc33d073f62dcc41f288dbcb809d993d04b5",
+    "display": "/resources/haibara-v2/laugh-display.62e4fb07ac92.webp",
+    "thumbnail": "/resources/haibara-v2/laugh-thumbnail.59ce05fc66cb.webp"
+  },
+  "laugh-tears": {
+    "title": "笑到流泪",
+    "title_en": "Tears of joy",
+    "content_hash": "5bf15ec324ff698becc77d5314174825e774ee280863beeaed48d300e939842a",
+    "display": "/resources/haibara-v2/laugh-tears-display.5bf15ec324ff.webp",
+    "thumbnail": "/resources/haibara-v2/laugh-tears-thumbnail.71d4bae49c41.webp"
+  },
+  "smirk": {
+    "title": "得意坏笑",
+    "title_en": "Smirk",
+    "content_hash": "31f6eb0968c2fc172e3bc228b61e9de15eb470683f96def8236b125ae1b23df7",
+    "display": "/resources/haibara-v2/smirk-display.31f6eb0968c2.webp",
+    "thumbnail": "/resources/haibara-v2/smirk-thumbnail.499420a772a9.webp"
+  },
+  "eye-roll": {
+    "title": "无语翻眼",
+    "title_en": "Eye roll",
+    "content_hash": "c9f1ec04a6ae4a801f0e9fe5a43d4507d69643c6b274d475960fe8a861ce578a",
+    "display": "/resources/haibara-v2/eye-roll-display.c9f1ec04a6ae.webp",
+    "thumbnail": "/resources/haibara-v2/eye-roll-thumbnail.e57f6b1de789.webp"
+  },
+  "side-eye": {
+    "title": "嫌弃侧目",
+    "title_en": "Side-eye",
+    "content_hash": "a3db5cdaeee933c10670fd338618162e8d37d70d69d3b73e95a63fe80a610d21",
+    "display": "/resources/haibara-v2/side-eye-display.a3db5cdaeee9.webp",
+    "thumbnail": "/resources/haibara-v2/side-eye-thumbnail.f700564fbeb9.webp"
+  },
+  "grimace": {
+    "title": "尴尬咬牙",
+    "title_en": "Grimace",
+    "content_hash": "636505c2f9c2cfed2fd15d6fe76ced5927c7ea8d4cffea1709de9c621b1829b6",
+    "display": "/resources/haibara-v2/grimace-display.636505c2f9c2.webp",
+    "thumbnail": "/resources/haibara-v2/grimace-thumbnail.54fcb326f3a0.webp"
+  },
+  "sweat-smile": {
+    "title": "汗颜苦笑",
+    "title_en": "Nervous smile",
+    "content_hash": "e4c5d1b923f79922af559ff220d6b7cda027d6329ebc0e39f989b135f93fd52d",
+    "display": "/resources/haibara-v2/sweat-smile-display.e4c5d1b923f7.webp",
+    "thumbnail": "/resources/haibara-v2/sweat-smile-thumbnail.8b8b5e50acd8.webp"
+  },
+  "surprised": {
+    "title": "震惊张嘴",
+    "title_en": "Surprised",
+    "content_hash": "11b8ccb5163a9ccefd8221c35f95dcab2ce6836dab627f0d40017015b534eacd",
+    "display": "/resources/haibara-v2/surprised-display.11b8ccb5163a.webp",
+    "thumbnail": "/resources/haibara-v2/surprised-thumbnail.79ca1faa42ad.webp"
+  },
+  "blank": {
+    "title": "彻底无语",
+    "title_en": "Speechless",
+    "content_hash": "484136ca4e1c0075d9cf0365e087ef73f1448ad6b41b85d3cc53455e9a5ee951",
+    "display": "/resources/haibara-v2/blank-display.484136ca4e1c.webp",
+    "thumbnail": "/resources/haibara-v2/blank-thumbnail.7d575b2a3274.webp"
+  },
+  "pleading": {
+    "title": "委屈巴巴",
+    "title_en": "Pleading",
+    "content_hash": "8aa49e6936c6c935ab749c4b470b1fec2b099d43a3434a2cbe315c83ee5ceef7",
+    "display": "/resources/haibara-v2/pleading-display.8aa49e6936c6.webp",
+    "thumbnail": "/resources/haibara-v2/pleading-thumbnail.b8af628f632d.webp"
+  },
+  "cry": {
+    "title": "放声大哭",
+    "title_en": "Sobbing",
+    "content_hash": "eda3e42109a44c91a38c5fc200d9663b3e8a3c28a20f7649c06d4001b3817d93",
+    "display": "/resources/haibara-v2/cry-display.eda3e42109a4.webp",
+    "thumbnail": "/resources/haibara-v2/cry-thumbnail.de4cca181085.webp"
+  },
+  "angry": {
+    "title": "气到炸毛",
+    "title_en": "Angry",
+    "content_hash": "dd7022583d682648eb29502b8fb2a097f1ac2835762a2450efa852608f012dbd",
+    "display": "/resources/haibara-v2/angry-display.dd7022583d68.webp",
+    "thumbnail": "/resources/haibara-v2/angry-thumbnail.bf9397f28507.webp"
+  },
+  "sleepy": {
+    "title": "困到睡着",
+    "title_en": "Sleepy",
+    "content_hash": "ea8566f7b36f599a15943cbf275c4a4c1c6affe24719ee0e54ba244bf21a6cb7",
+    "display": "/resources/haibara-v2/sleepy-display.ea8566f7b36f.webp",
+    "thumbnail": "/resources/haibara-v2/sleepy-thumbnail.6f6c9e2d0549.webp"
+  },
+  "dizzy": {
+    "title": "头晕眼花",
+    "title_en": "Dizzy",
+    "content_hash": "d28841b6d6adc2e4e4a5c20911d9157be0f077de286bd4387df5d998822b82a3",
+    "display": "/resources/haibara-v2/dizzy-display.d28841b6d6ad.webp",
+    "thumbnail": "/resources/haibara-v2/dizzy-thumbnail.4b67fbb10b9f.webp"
+  },
+  "love": {
+    "title": "心动眼睛",
+    "title_en": "Heart eyes",
+    "content_hash": "6c866325957e8f84196d44b376f93077daffd6ecf9cc84c726938530db70832b",
+    "display": "/resources/haibara-v2/love-display.6c866325957e.webp",
+    "thumbnail": "/resources/haibara-v2/love-thumbnail.02733123a132.webp"
+  },
+  "shush": {
+    "title": "嘘先保密",
+    "title_en": "Shush",
+    "content_hash": "c642ee9885f701f512f8c81e8298dfe84a30eb39c934c4dba4c6dedf41b9a586",
+    "display": "/resources/haibara-v2/shush-display.c642ee9885f7.webp",
+    "thumbnail": "/resources/haibara-v2/shush-thumbnail.38b31ac4331e.webp"
+  },
+  "giggle": {
+    "title": "捂嘴偷笑",
+    "title_en": "Giggle",
+    "content_hash": "b904bd23e5cb5991f4cf78e7965932fcc09449834fe6769f8b45a9fdee60c475",
+    "display": "/resources/haibara-v2/giggle-display.b904bd23e5cb.webp",
+    "thumbnail": "/resources/haibara-v2/giggle-thumbnail.377ae087b09b.webp"
+  },
+  "cool": {
+    "title": "墨镜耍酷",
+    "title_en": "Sunglasses",
+    "content_hash": "1d8abb7c7c7a735c25993018e4b97d49538c99272b1204b56345472fffcb4d21",
+    "display": "/resources/haibara-v2/cool-display.1d8abb7c7c7a.webp",
+    "thumbnail": "/resources/haibara-v2/cool-thumbnail.dc4cf1203bee.webp"
+  },
+  "sigh": {
+    "title": "长舒一口气",
+    "title_en": "Sigh of relief",
+    "content_hash": "4a173f412bb31347dccf3ecba48db82fee82ca8e3c6599f47c9df7991425a498",
+    "display": "/resources/haibara-v2/sigh-display.4a173f412bb3.webp",
+    "thumbnail": "/resources/haibara-v2/sigh-thumbnail.629dd5be2cad.webp"
+  }
+}

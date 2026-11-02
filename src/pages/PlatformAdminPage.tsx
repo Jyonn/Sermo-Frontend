@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import {ResourceWorkspace} from '../components/ResourceWorkspace';
 import { useSearchParams } from "react-router-dom";
 import { OAuthApplicationWorkspace } from "../components/OAuthApplicationWorkspace";
 import { managementSection, platformManagementSections, type PlatformManagementSection } from "../lib/managementNavigation";
@@ -28,6 +29,7 @@ const nav: Array<{ id: Section; icon: string; group: string; groupIcon: string }
   { id: "spaces", icon: "domain", group: "governance", groupIcon: "domain" },
   { id: "reviews", icon: "verified_user", group: "governance", groupIcon: "domain" },
   { id: "oauth", icon: "apps", group: "services", groupIcon: "extension" },
+  { id: "resources", icon: "perm_media", group: "services", groupIcon: "extension" },
   { id: "emails", icon: "mail", group: "services", groupIcon: "extension" },
   { id: "emailReview", icon: "mark_email_read", group: "services", groupIcon: "extension" },
   { id: "audit", icon: "policy", group: "observability", groupIcon: "monitor_heart" },
@@ -322,6 +324,7 @@ function PlatformAdminConsole() {
     {section === "overview" ? <><section className="platform-hero"><div><span>平台状态</span><h2>保持克制，也保持可见。</h2><p>审计只为处理风险，不替用户做决定。</p></div><span className="material-symbols-outlined">radar</span></section><div className="platform-metrics"><Metric label="运行空间" note="全平台累计" value={dashboard?.spaces ?? 0} /><Metric label="有效成员" note="不含官方账号" value={dashboard?.members ?? 0} /><Metric label="待实名审核" note="需要人工判断" value={dashboard?.pending_identity_reviews ?? 0} /></div><section className="platform-panel"><div className="platform-section-title"><div><span>RECENT ACCESS</span><h3>最近敏感操作</h3></div><button onClick={() => setSection("audit")} type="button">查看全部</button></div><AuditList items={dashboard?.recent_audit ?? []} /></section></> : null}
     {section === "spaces" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DIRECTORY</span><h3>空间目录</h3></div><label className="platform-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder="名称、slug 或邮箱" value={query} /></label></div><div className="platform-space-list">{visibleSpaces.map((space) => <SpaceRow key={space.space_id} onClick={() => void selectSpace(space)} space={space} />)}</div></section> : null}
     {section === "permissions" ? <PermissionWorkspace scope="platform" /> : null}
+    {section === "resources" ? <ResourceWorkspace /> : null}
     {section === "oauth" ? <section className="platform-panel"><OAuthApplicationWorkspace platform /></section> : null}
 
     {section === "reviews" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IDENTITY QUEUE</span><h3>实名认证</h3></div><small>{pendingReviews.length} 项待处理</small></div>{pendingReviews.length ? pendingReviews.map((space) => <article className="platform-review-card" key={space.space_id}><div><span>{space.name}</span><strong>@{space.slug}</strong><small>提交于 {new Date((space.identity_submitted_at ?? 0) * 1000).toLocaleString()}</small></div><div><button onClick={() => void api.getPlatformIdentityDocument(space.space_id).then((result) => window.open(result.uri, "_blank", "noopener"))} type="button">查看材料</button><button onClick={() => setReviewTarget({ space, approved: false })} type="button">驳回</button><button className="is-approve" onClick={() => setReviewTarget({ space, approved: true })} type="button">通过</button></div></article>) : <div className="platform-empty is-large"><span className="material-symbols-outlined">task_alt</span><strong>审核队列已清空</strong><p>新的实名认证提交会出现在这里。</p></div>}</section> : null}

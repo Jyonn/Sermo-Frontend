@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.02.2",
+  "id": "2026.11.02.3",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "更简洁的更新提醒",
+      "title": "小哀表情上新",
       "items": [
-        "更新提醒仅提示有新版本，不再展示更新日志"
+        "新增 20 款小哀表情，可在表情探索的“小哀”分组中发送",
+        "小哀气泡的开头表情与文字同大小，不再撑开气泡或影响消息间距"
       ]
     },
     "en": {
-      "title": "Simpler update notices",
+      "title": "New Ai Haibara expressions",
       "items": [
-        "Update notices now simply announce a new version without displaying release notes"
+        "Send 20 Ai Haibara expressions from their new collection in sticker Explore",
+        "Ai bubble expressions now match text size without enlarging bubbles or changing message spacing"
       ]
     }
   }
