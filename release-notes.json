@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.02.6",
+  "id": "2026.11.02.7",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "更轻巧的导航与提醒",
+      "title": "打开即见表情",
       "items": [
-        "手机表情管理只保留一层返回导航",
-        "更新提醒更简洁，可前往菜单查看并检查更新"
+        "手机表情管理直接展示首页，分类切换与内容保持一致",
+        "精简标题与数量排版，集合集中在轻巧面板中选择"
       ]
     },
     "en": {
-      "title": "Lighter navigation and notices",
+      "title": "Your stickers, right away",
       "items": [
-        "Mobile sticker management now has a single back navigation",
-        "A compact update notice links to Check for updates in the menu"
+        "Mobile management opens directly on Home, with tabs matching the visible content",
+        "Compact headings and counts, with collections in a focused selection sheet"
       ]
     }
   }

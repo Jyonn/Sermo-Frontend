@@ -15,7 +15,7 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,o
   const {t}=useI18n();
   const [groups,setGroups]=useState<StickerSeriesDTO[]>([]),[scope,setScope]=useState<Scope>(initialSeriesId);
   const [items,setItems]=useState<StickerDTO[]>([]),[selected,setSelected]=useState<number[]>([]);
-  const [mobileDetail,setMobileDetail]=useState(initialSeriesId!==undefined),[selecting,setSelecting]=useState(false),[choosing,setChoosing]=useState(false);
+  const [collectionsOpen,setCollectionsOpen]=useState(false),[selecting,setSelecting]=useState(false),[choosing,setChoosing]=useState(false);
   const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[more,setMore]=useState(false),[error,setError]=useState('');
   const [editing,setEditing]=useState<number|null|false>(false),[name,setName]=useState(''),[confirm,setConfirm]=useState<'items'|'collection'|null>(null),[organizing,setOrganizing]=useState(false);
   const [query,setQuery]=useState('');
@@ -38,7 +38,7 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,o
     finally{if(id===serial.current){loadingRef.current=false;setLoading(false)}}
   };
   useEffect(()=>{setSelected([]);setSelecting(false);setItems([]);void load();return()=>{serial.current++;loadingRef.current=false}},[scope,choosing,revision]);
-  const go=(value:Scope)=>{setScope(value);setChoosing(false);setMobileDetail(true);setSelected([]);setSelecting(false)};
+  const go=(value:Scope)=>{setScope(value);setChoosing(false);setCollectionsOpen(false);setSelected([]);setSelecting(false)};
   const run=async(action:()=>Promise<unknown>)=>{
     if(busyRef.current)return;busyRef.current=true;setBusy(true);setError('');
     try{await action();setSelected([]);setSelecting(false);await load();onChanged()}
@@ -49,7 +49,15 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,o
   const uploadFiles=(files:File[])=>{if(!files.length)return;void run(async()=>{for(const file of files)await addStickerFile(file,undefined,scope||undefined)})};
   const move=(id:number)=>void run(async()=>{await api.assignStickerSeries(selected,id);setOrganizing(false)});
   const cover=(group:StickerSeriesDTO)=><span className="ss-cover" aria-hidden="true">{group.assets.slice(0,4).map(asset=><StickerImage key={asset.sticker_asset_id} src={asset.uri}/>)}{!group.assets.length?<span className="material-symbols-outlined">collections</span>:null}</span>;
-  return <div className={`sticker-studio${mobileDetail?' is-detail':''}${choosing?' is-choosing':''}`} aria-busy={busy}>
+  return <div className={`sticker-studio${choosing?' is-choosing':''}`} aria-busy={busy}>
+    <div className="ss-mobile-navigation">
+      <header><button className="ss-icon" aria-label={t('common.back')} onClick={()=>{if(choosing)setChoosing(false);else onClose?.()}}><span className="material-symbols-outlined">arrow_back</span></button><h2>{t('sticker.workspace.library')}</h2><button className="ss-icon" disabled={busy} aria-label={t('sticker.series.create')} onClick={()=>{setName('');setEditing(null)}}><span className="material-symbols-outlined">create_new_folder</span></button></header>
+      {!choosing?<nav aria-label={t('sticker.workspace.library')}>
+        <button aria-current={scope===undefined?'page':undefined} disabled={busy} onClick={()=>go(undefined)}>{t('sticker.series.home')}</button>
+        <button aria-current={scope===0?'page':undefined} disabled={busy} onClick={()=>go(0)}>{t('sticker.series.uploads')}</button>
+        <button aria-current={Boolean(scope)?'page':undefined} disabled={busy} onClick={()=>setCollectionsOpen(true)}><span>{t('sticker.workspace.collections')}</span><span className="material-symbols-outlined">expand_more</span></button>
+      </nav>:null}
+    </div>
     <aside className="ss-library">
       <header><div className="ss-library-title">{onClose?<button className="ss-icon ss-mobile-back" aria-label={t('common.back')} onClick={onClose}><span className="material-symbols-outlined">arrow_back</span></button>:null}<div><small>{t('sticker.workspace.libraryEyebrow')}</small><h2>{t('sticker.workspace.library')}</h2></div></div><button className="ss-icon" aria-label={t('sticker.series.create')} title={t('sticker.series.create')} disabled={busy} onClick={()=>{setName('');setEditing(null)}}><span className="material-symbols-outlined">add</span></button></header>
       <nav aria-label={t('sticker.workspace.library')} className="ss-views">
@@ -62,7 +70,7 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,o
     </aside>
     <section className="ss-editor">
       <header className="ss-editor-heading">
-        <div className="ss-heading-copy"><button className="ss-icon ss-mobile-back" aria-label={t('common.back')} onClick={()=>{setMobileDetail(false);setSelected([]);setSelecting(false)}}><span className="material-symbols-outlined">arrow_back</span></button><div><h2>{title}</h2><p>{choosing?t('sticker.workspace.chooseHint'):t('sticker.workspace.itemCount',{count:current?.count??items.length})}</p></div></div>
+        <div className="ss-heading-copy"><div><h2>{title}</h2><p>{choosing?t('sticker.workspace.chooseHint'):loading&&!items.length?t('common.loading'):t('sticker.workspace.itemCount',{count:current?.count??items.length})}</p></div></div>
         <div className="ss-heading-actions">
           {choosing?<button className="ss-text" disabled={busy} onClick={()=>setChoosing(false)}>{t('common.cancel')}</button>:<>
             <button className="ss-text" disabled={busy||!items.length} onClick={()=>{setSelecting(value=>!value);setSelected([])}}>{t(selecting?'common.cancel':'common.manage')}</button>
@@ -87,6 +95,12 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,o
       </div></footer>:null}
     </section>
     <input ref={upload} hidden type="file" accept="image/*" multiple onChange={event=>{const files=Array.from(event.target.files??[]);event.target.value='';uploadFiles(files)}}/>
+    <BottomSheet open={collectionsOpen} title={t('sticker.workspace.collections')} onClose={()=>setCollectionsOpen(false)}><div className="ss-mobile-collections">
+      {groups.length>5?<label className="ss-search"><span className="material-symbols-outlined">search</span><input value={query} onChange={event=>setQuery(event.target.value)} aria-label={t('sticker.workspace.find')} placeholder={t('sticker.workspace.find')}/></label>:null}
+      <nav className="ss-collection-list" aria-label={t('sticker.workspace.collections')}>{shownGroups.map(group=><button key={group.series_id} aria-current={scope===group.series_id?'page':undefined} onClick={()=>go(group.series_id)}>{cover(group)}<span><strong>{group.name}</strong><small>{t('sticker.workspace.itemCount',{count:group.count})} · {t(`sticker.series.status.${group.status}`)}</small></span><span className="material-symbols-outlined ss-chevron">{scope===group.series_id?'check':'chevron_right'}</span></button>)}</nav>
+      {!groups.length?<p className="ss-collections-empty">{t('sticker.workspace.createFirst')}</p>:null}
+      <button className="ss-new-collection" onClick={()=>{setCollectionsOpen(false);setName('');setEditing(null)}}><span className="material-symbols-outlined">create_new_folder</span>{t('sticker.series.create')}</button>
+    </div></BottomSheet>
     <BottomSheet open={menu!==null} title={t(menu==='add'?'sticker.add':'sticker.workspace.collectionOptions')} onClose={()=>setMenu(null)}><div className="ss-menu-options">{menu==='add'?<>
       <button disabled={busy||locked} onClick={()=>{setMenu(null);if(scope)upload.current?.click();else onAdd()}}><span className="material-symbols-outlined">upload</span>{t('sticker.workspace.upload')}</button>
       {current?<button disabled={busy||locked} onClick={()=>{setMenu(null);setChoosing(true);setSelected([])}}><span className="material-symbols-outlined">photo_library</span>{t('sticker.series.chooseUploads')}</button>:null}
