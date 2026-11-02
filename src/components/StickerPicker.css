@@ -2,6 +2,7 @@
 .composer-emoji-tabs.is-explore-navigation { align-items:center; }
 .composer-emoji-tabs.is-explore-navigation > button:first-child { padding-inline:7px; margin-inline-end:3px; }
 .sticker-pack-collect { display:block; margin:0 0 6px auto; padding:4px 10px; border-radius:7px; color:var(--text-primary); background:color-mix(in srgb,var(--brand-primary) 12%,transparent); font-size:11px; }
+.personal-sticker-empty,.personal-sticker-retry { grid-column:1/-1; padding:12px; color:var(--text-muted); font-size:12px; }
 @media(max-width:767px) {
   .composer-emoji-panel { container-type:inline-size; --picker-content-height:min(200px,calc((100cqw - 28px) / 2 + 14px),32dvh); }
   .composer-emoji-panel .composer-sticker-grid,

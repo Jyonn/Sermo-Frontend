@@ -2746,6 +2746,7 @@ function LiveChatsPage({
   const exploreStickerUsageRefreshRef = useRef(0);
   const [stickerSaving, setStickerSaving] = useState(false);
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
+  const [stickerManagerInitialSeries,setStickerManagerInitialSeries]=useState<number|undefined>();
 
   useEffect(() => {
     const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
@@ -4678,9 +4679,10 @@ function LiveChatsPage({
 
   const closeStickerManager = () => { if (!stickerSaving) setStickerManagerOpen(false); };
 
-  const openStickerManager = () => {
+  const openStickerManager = (seriesId?:number) => {
     if (!requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) return;
     setEmojiPickerOpen(false);
+    setStickerManagerInitialSeries(seriesId);
     setStickerManagerOpen(true);
   };
 
@@ -8854,7 +8856,7 @@ function LiveChatsPage({
         ) : null}
       </SideDrawer>
       <SideDrawer open={stickerManagerOpen} title={t("sticker.manageTitle")} onClose={closeStickerManager} historyKey="stickers" fullscreen fullViewport className="sticker-series-drawer">
-        <StickerSeriesManager revision={stickers} onAdd={()=>{if(requireComposerCapability("menu.sticker.create",6,t("sticker.create")))stickerInputRef.current?.click()}} onChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}}/>
+        <StickerSeriesManager initialSeriesId={stickerManagerInitialSeries} revision={stickers} onAdd={()=>{if(requireComposerCapability("menu.sticker.create",6,t("sticker.create")))stickerInputRef.current?.click()}} onChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}}/>
       </SideDrawer>
       <InputDialog
         open={newSubmissionTitleOpen}

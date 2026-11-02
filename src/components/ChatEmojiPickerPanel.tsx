@@ -1,6 +1,8 @@
 import { useEffect,useState, type UIEvent } from "react";
 import {api} from '../lib/api';
 import {CommunityStickerPack} from './CommunityStickerPack';
+import {PersonalStickerCollection} from './PersonalStickerCollection';
+import type {StickerSeriesDTO} from '../lib/stickerSeries';
 import { ManagedStickerCollection } from './ManagedStickerCollection';
 import type { StickerDTO, StickerAssetDTO } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
@@ -17,7 +19,7 @@ interface Props {
   stickerSaving:boolean; mineStickersLoading:boolean; exploreStickersLoading:boolean;
   sendSticker:(sticker:StickerDTO|StickerAssetDTO)=>void|Promise<void>;
   collectExploredSticker?:(sticker:StickerAssetDTO)=>void|Promise<void>;
-  openStickerManager?:()=>void;
+  openStickerManager?:(id?:number)=>void;
   onStickerLibraryChanged?:()=>void;
   handleStickerGridScroll?:(event:UIEvent<HTMLDivElement>,kind:"mine"|"explore")=>void;
   insertEmoji:(emoji:string)=>void;
@@ -29,6 +31,8 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
   const [exploreReturnPage,setExploreReturnPage]=useState(STICKER_MY_PAGE);
   const [exploreCollection,setExploreCollection]=useState<string>('global');
   const [packs,setPacks]=useState<Array<{series_id:number;name:string}>>([]);
+  const [mineExpanded,setMineExpanded]=useState(false),[mineCollection,setMineCollection]=useState<number|null>(null),[mineGroups,setMineGroups]=useState<StickerSeriesDTO[]>([]);
+  useEffect(()=>{if(emojiPage!==STICKER_MY_PAGE||!mineExpanded)return;let active=true;void api.getStickerSeries().then(rows=>{if(active)setMineGroups(rows)}).catch(()=>undefined);return()=>{active=false}},[emojiPage,mineExpanded]);
   useEffect(()=>{if(emojiPage!==STICKER_EXPLORE_PAGE)return;let active=true;void api.getStickerPacks().then(rows=>{if(active)setPacks(rows)}).catch(()=>undefined);return()=>{active=false}},[emojiPage]);
   return (                  <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     {emojiPage===STICKER_EXPLORE_PAGE?<div className="composer-emoji-tabs is-explore-navigation" role="tablist" aria-label={t('resources.collections')}>
@@ -36,12 +40,16 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                       <button type="button" role="tab" aria-selected={exploreCollection==='global'} className={exploreCollection==='global'?'is-active':''} onClick={()=>setExploreCollection('global')}><small>{t('resources.global')}</small></button>
                       <button type="button" role="tab" aria-selected={exploreCollection==='haibara-v2'} className={exploreCollection==='haibara-v2'?'is-active':''} onClick={()=>setExploreCollection('haibara-v2')}><small>{t('resources.haibara')}</small><span className="material-symbols-outlined picker-official-mark" role="img" aria-label={t('sticker.series.official')}>verified</span></button>
                       {packs.map(pack=><button type="button" role="tab" key={pack.series_id} aria-selected={exploreCollection===String(pack.series_id)} className={exploreCollection===String(pack.series_id)?'is-active':''} onClick={()=>setExploreCollection(String(pack.series_id))}><small>{pack.name}</small></button>)}
+                    </div>:emojiPage===STICKER_MY_PAGE&&mineExpanded?<div className="composer-emoji-tabs is-explore-navigation" role="tablist" aria-label={t('sticker.workspace.collections')}>
+                      <button type="button" aria-label={t('common.back')} onClick={()=>{setMineExpanded(false);setMineCollection(null)}}><span className="material-symbols-outlined">arrow_back</span></button>
+                      <button type="button" role="tab" aria-selected={mineCollection===null} className={mineCollection===null?'is-active':''} onClick={()=>setMineCollection(null)}><small>{t('sticker.workspace.homeTab')}</small></button>
+                      {mineGroups.map(group=><button type="button" key={group.series_id} role="tab" aria-selected={mineCollection===group.series_id} className={mineCollection===group.series_id?'is-active':''} onClick={()=>setMineCollection(group.series_id)}><small>{group.name}</small></button>)}
                     </div>:<div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       <button
                         aria-label={t("sticker.mine")}
                         aria-selected={emojiPage === STICKER_MY_PAGE}
                         className={emojiPage === STICKER_MY_PAGE ? "is-active" : ""}
-                        onClick={() => setEmojiPage(STICKER_MY_PAGE)}
+                        onClick={() => {if(emojiPage===STICKER_MY_PAGE)setMineExpanded(true);else{setMineExpanded(false);setMineCollection(null);setEmojiPage(STICKER_MY_PAGE)}}}
                         role="tab"
                         title={t("sticker.mine")}
                         type="button"
@@ -79,10 +87,10 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                     </div>}
                     {emojiPage === STICKER_MY_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
-                        {stickers.length ? (
+                        {mineExpanded&&mineCollection!==null?<PersonalStickerCollection id={mineCollection} busy={stickerSaving} onSend={sendSticker} onManage={openStickerManager}/>:stickers.length ? (
                           <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll?.(event, "mine")}>
                             {openStickerManager ? <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
-                              <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
+                              <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={()=>openStickerManager()} type="button">
                                 <span className="material-symbols-outlined">add</span>
                               </button>
                             </FeatureDiscoveryTarget> : null}
@@ -106,7 +114,7 @@ export function ChatEmojiPickerPanel({emojiPage,setEmojiPage,visibleEmojis,stick
                             <span className="material-symbols-outlined">photo_library</span>
                             <strong>{t("sticker.mineEmpty")}</strong>
                             {openStickerManager ? <FeatureDiscoveryTarget rewardId="capability.sticker">
-                              <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button>
+                              <button onClick={()=>openStickerManager()} type="button">{t("sticker.addFirst")}</button>
                             </FeatureDiscoveryTarget> : null}
                           </div>
                         ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}

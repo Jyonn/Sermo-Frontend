@@ -1,21 +1,21 @@
 {
-  "id": "2026.11.02.4",
+  "id": "2026.11.02.5",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "表情集合与轻巧面板",
+      "title": "更清晰的表情素材库",
       "items": [
-        "探索改为单层导航，手机表情面板更轻巧，小哀增加官方标记",
-        "支持全屏制作自己的表情集合，上传与首页分开，发布和更新经过审核",
-        "活动素材统一云端管理，减少前端随包资源"
+        "再次点击我的，快速切换首页与自己的表情集合",
+        "重新设计表情管理，清晰整理上传、集合与审核状态",
+        "每个上传表情仅归属一个集合，避免重复归类"
       ]
     },
     "en": {
-      "title": "Sticker collections, lighter picker",
+      "title": "A clearer sticker library",
       "items": [
-        "Explore uses one navigation row; the mobile picker is shorter and Ai has an official mark",
-        "Create collections in fullscreen; uploads stay separate from My home, with reviewed publishing and updates",
-        "Activity artwork and audio now use a shared cloud resource library"
+        "Tap My again to switch between Home and your sticker collections",
+        "A redesigned library organizes uploads, collections and review status",
+        "Each uploaded sticker belongs to just one collection"
       ]
     }
   }
