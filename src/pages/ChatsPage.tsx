@@ -8856,7 +8856,7 @@ function LiveChatsPage({
         ) : null}
       </SideDrawer>
       <SideDrawer open={stickerManagerOpen} title={t("sticker.manageTitle")} onClose={closeStickerManager} historyKey="stickers" fullscreen fullViewport className="sticker-series-drawer">
-        <StickerSeriesManager initialSeriesId={stickerManagerInitialSeries} revision={stickers} onAdd={()=>{if(requireComposerCapability("menu.sticker.create",6,t("sticker.create")))stickerInputRef.current?.click()}} onChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}}/>
+        <StickerSeriesManager onClose={closeStickerManager} initialSeriesId={stickerManagerInitialSeries} revision={stickers} onAdd={()=>{if(requireComposerCapability("menu.sticker.create",6,t("sticker.create")))stickerInputRef.current?.click()}} onChanged={()=>{void api.getStickers(0,STICKER_PAGE_SIZE).then(page=>{setStickers(page.items);setMineStickersHasMore(page.has_more);mineStickerOffsetRef.current=page.next_offset;persistMineStickerCache(page.items)}).catch(()=>undefined)}}/>
       </SideDrawer>
       <InputDialog
         open={newSubmissionTitleOpen}

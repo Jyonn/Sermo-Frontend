@@ -34,8 +34,8 @@ test("no new version, failed sources and untrusted destinations never trigger na
   result.sources[1].origin = "https://untrusted.invalid";
   assert.equal(updateDestination(result, here), null);
 });
-test("both update surfaces share destination policy and bilingual button labels", () => {
-  for (const component of ["PwaUpdatePrompt", "UpdateCheckDialog"]) {
+test("the update dialog retains trusted destination policy and bilingual button labels", () => {
+  for (const component of ["UpdateCheckDialog"]) {
     const source = readFileSync(new URL(`../src/components/${component}.tsx`, import.meta.url), "utf8");
     assert.match(source, /updateDestination\(result, window.location.origin\)/);
     assert.match(source, /window.location.assign\(destination\)/);

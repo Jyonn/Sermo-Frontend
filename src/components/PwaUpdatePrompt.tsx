@@ -1,23 +1,19 @@
 import { useState, useSyncExternalStore } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getPwaUpdateCheckSnapshot,
   subscribePwaUpdateCheck,
 } from "../lib/pwaUpdate";
-import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { useI18n } from "../lib/language";
-import { UpdateFailureFeedback } from "./UpdateReportButton";
-import { updateDestination } from "../lib/updateDestination";
 
 const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
 
 export function PwaUpdatePrompt() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const { result } = useSyncExternalStore(subscribePwaUpdateCheck, getPwaUpdateCheckSnapshot);
   const [dismissedReleaseId, setDismissedReleaseId] = useState(() => window.localStorage.getItem(DISMISSED_UPDATE_KEY));
-  const { phase, install } = usePwaUpdateActivation();
-  const updating = phase !== "idle" && phase !== "error";
   const releaseId = result?.latestVersion;
-  const destination = updateDestination(result, window.location.origin);
   if (!result?.updateAvailable || !releaseId || dismissedReleaseId === releaseId) return null;
 
   const dismiss = () => {
@@ -26,23 +22,13 @@ export function PwaUpdatePrompt() {
   };
 
   return (
-    <aside className="pwa-recommendation pwa-update-prompt" role="alert">
-      <div className="pwa-recommendation-icon" aria-hidden="true">
-        <span className="material-symbols-outlined">refresh</span>
-      </div>
-      <div className="pwa-recommendation-copy">
-        <div className="pwa-update-heading">
-          <strong>{t("common.updateAvailable")}</strong>
-        </div>
-      </div>
+    <aside className="pwa-update-prompt" role="status">
+      <span className="pwa-update-dot" aria-hidden="true" />
+      <span className="pwa-update-label">{t("common.updateAvailable")}</span>
       <div className="pwa-update-actions">
-        <button className="pwa-update-dismiss" disabled={updating} onClick={destination ? () => window.location.assign(destination) : dismiss} type="button">{t(destination ? "update.goToNewSite" : "common.gotIt")}</button>
-        <button className="pwa-recommendation-action" disabled={updating} onClick={destination ? dismiss : install} type="button">
-          {updating ? <span aria-hidden="true" className="media-wait-spinner" /> : null}
-          {updating ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t(destination ? "update.wait" : "common.updateNow")}
-        </button>
+        <button onClick={dismiss} type="button">{t("common.gotIt")}</button>
+        <button className="pwa-update-view" onClick={() => { dismiss(); navigate("/app/menu?check-update=1"); }} type="button">{t("update.view")}</button>
       </div>
-      {phase === "error" ? <UpdateFailureFeedback /> : null}
     </aside>
   );
 }

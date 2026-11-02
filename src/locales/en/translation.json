@@ -2714,6 +2714,7 @@
   "update.report.failed": "Upload failed. Check account verification or retry",
   "update.checkingHint": "Connecting to the primary and mirror sites",
   "update.available": "New version available",
+  "update.view": "View update",
   "update.unavailable": "Unable to check for updates",
   "update.latest": "You're up to date",
   "update.latestHint": "You have the latest available version",

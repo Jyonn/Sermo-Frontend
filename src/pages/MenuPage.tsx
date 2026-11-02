@@ -671,6 +671,14 @@ export default function MenuPage() {
     setUpdateCheckOpen(true);
     void runUpdateCheck();
   };
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("check-update") !== "1") return;
+    params.delete("check-update");
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
+    setUpdateCheckOpen(true);
+    void checkForPwaUpdate();
+  }, [location.pathname, location.search, navigate]);
   const boundBindingChannels: BindingChannelKind[] = [
     ...(emailVerified ? ["email" as const] : []),
     ...(phoneVerified ? ["sms" as const] : []),

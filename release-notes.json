@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.02.5",
+  "id": "2026.11.02.6",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的表情素材库",
+      "title": "更轻巧的导航与提醒",
       "items": [
-        "再次点击我的，快速切换首页与自己的表情集合",
-        "重新设计表情管理，清晰整理上传、集合与审核状态",
-        "每个上传表情仅归属一个集合，避免重复归类"
+        "手机表情管理只保留一层返回导航",
+        "更新提醒更简洁，可前往菜单查看并检查更新"
       ]
     },
     "en": {
-      "title": "A clearer sticker library",
+      "title": "Lighter navigation and notices",
       "items": [
-        "Tap My again to switch between Home and your sticker collections",
-        "A redesigned library organizes uploads, collections and review status",
-        "Each uploaded sticker belongs to just one collection"
+        "Mobile sticker management now has a single back navigation",
+        "A compact update notice links to Check for updates in the menu"
       ]
     }
   }

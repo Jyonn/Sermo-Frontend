@@ -11,7 +11,7 @@ import {BottomSheet} from './BottomSheet';
 import './StickerSeriesManager.css';
 
 type Scope=number|undefined;
-export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId}:{revision:unknown;onAdd:()=>void;onChanged:()=>void;initialSeriesId?:number}) {
+export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId,onClose}:{revision:unknown;onAdd:()=>void;onChanged:()=>void;initialSeriesId?:number;onClose?:()=>void}) {
   const {t}=useI18n();
   const [groups,setGroups]=useState<StickerSeriesDTO[]>([]),[scope,setScope]=useState<Scope>(initialSeriesId);
   const [items,setItems]=useState<StickerDTO[]>([]),[selected,setSelected]=useState<number[]>([]);
@@ -51,7 +51,7 @@ export function StickerSeriesManager({revision,onAdd,onChanged,initialSeriesId}:
   const cover=(group:StickerSeriesDTO)=><span className="ss-cover" aria-hidden="true">{group.assets.slice(0,4).map(asset=><StickerImage key={asset.sticker_asset_id} src={asset.uri}/>)}{!group.assets.length?<span className="material-symbols-outlined">collections</span>:null}</span>;
   return <div className={`sticker-studio${mobileDetail?' is-detail':''}${choosing?' is-choosing':''}`} aria-busy={busy}>
     <aside className="ss-library">
-      <header><div><small>{t('sticker.workspace.libraryEyebrow')}</small><h2>{t('sticker.workspace.library')}</h2></div><button className="ss-icon" aria-label={t('sticker.series.create')} title={t('sticker.series.create')} disabled={busy} onClick={()=>{setName('');setEditing(null)}}><span className="material-symbols-outlined">add</span></button></header>
+      <header><div className="ss-library-title">{onClose?<button className="ss-icon ss-mobile-back" aria-label={t('common.back')} onClick={onClose}><span className="material-symbols-outlined">arrow_back</span></button>:null}<div><small>{t('sticker.workspace.libraryEyebrow')}</small><h2>{t('sticker.workspace.library')}</h2></div></div><button className="ss-icon" aria-label={t('sticker.series.create')} title={t('sticker.series.create')} disabled={busy} onClick={()=>{setName('');setEditing(null)}}><span className="material-symbols-outlined">add</span></button></header>
       <nav aria-label={t('sticker.workspace.library')} className="ss-views">
         {[{id:undefined,icon:'grid_view',label:'sticker.series.home'},{id:0,icon:'cloud_upload',label:'sticker.series.uploads'}].map(view=><button key={view.label} className={scope===view.id?'is-current':''} disabled={busy} onClick={()=>go(view.id)}><span className="material-symbols-outlined">{view.icon}</span><span>{t(view.label as TranslationKey)}</span><span className="material-symbols-outlined ss-chevron">chevron_right</span></button>)}
       </nav>

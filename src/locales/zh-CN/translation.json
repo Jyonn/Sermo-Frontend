@@ -2714,6 +2714,7 @@
   "update.report.failed": "上传失败，请确认认证状态或点击重试",
   "update.checkingHint": "正在连接本站和镜像站",
   "update.available": "发现新版本",
+  "update.view": "前往查看",
   "update.unavailable": "无法检查更新",
   "update.latest": "已是最新版本",
   "update.latestHint": "当前已安装可用的最新版本",

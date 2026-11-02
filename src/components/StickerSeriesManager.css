@@ -4,6 +4,7 @@
 .sticker-studio button:disabled { opacity:.4; cursor:default; }
 .ss-library { padding:28px 16px; border-inline-end:1px solid var(--line-soft); background:color-mix(in srgb,var(--bg-canvas) 68%,var(--bg-panel)); }
 .ss-library>header { display:flex; align-items:center; justify-content:space-between; padding:0 10px 24px; }
+.ss-library-title { display:flex; align-items:center; gap:8px; }
 .ss-library h2,.ss-editor h2 { margin:4px 0 0; font-size:22px; font-weight:720; letter-spacing:-.035em; }
 .ss-library header small { font-size:10px; letter-spacing:.13em; color:var(--text-muted); text-transform:uppercase; }
 .ss-icon { display:inline-grid; place-items:center; flex-shrink:0; width:34px; height:34px; border:0; border-radius:9px; color:var(--text-muted); background:transparent; }
@@ -75,6 +76,8 @@
 .ss-destination-list p { font-size:13px; color:var(--text-muted); }
 .ss-mobile-back { display:none; }
 @media(max-width:767px) {
+  .sticker-series-drawer>.drawer-topbar { display:none; }
+  .sticker-series-drawer>.drawer-body { padding-top:env(safe-area-inset-top); }
   .sticker-studio { display:block; }
   .ss-library { min-height:100%; border:0; padding:20px 18px max(28px,env(safe-area-inset-bottom)); }
   .ss-library>header { padding-inline:4px; }
