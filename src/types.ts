@@ -710,6 +710,8 @@ export interface EmojiUsageDTO {
 }
 
 export interface StickerAssetDTO {
+  description?: string;
+  description_en?: string;
   sticker_asset_id: number;
   content_hash: string;
   uri: string;

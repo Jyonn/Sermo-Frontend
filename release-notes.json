@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.02.7",
+  "id": "2026.11.02.8",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "打开即见表情",
+      "title": "柯南动态表情上线",
       "items": [
-        "手机表情管理直接展示首页，分类切换与内容保持一致",
-        "精简标题与数量排版，集合集中在轻巧面板中选择"
+        "探索新增 20 款柯南动态表情，小哀与柯南均附简短描述",
+        "自定义集合支持逐张填写描述，补齐后方可提交审核"
       ]
     },
     "en": {
-      "title": "Your stickers, right away",
+      "title": "Conan animated stickers",
       "items": [
-        "Mobile management opens directly on Home, with tabs matching the visible content",
-        "Compact headings and counts, with collections in a focused selection sheet"
+        "Explore 20 animated Conan stickers, with short labels for both Conan and Ai",
+        "Add a description to every sticker before submitting your collection for review"
       ]
     }
   }

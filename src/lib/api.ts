@@ -1688,6 +1688,7 @@ export const api = {
   getStickerPack(id:number) { return request<{name:string;assets:StickerAssetDTO[]}>(`/stickers/packs/${id}`,{auth:true}); },
   collectStickerPack(id:number) { return request(`/stickers/packs/${id}`,{auth:true,method:'POST'}); },
   submitStickerSeries(id:number) { return request(`/stickers/series/${id}`,{auth:true,method:'POST',body:{action:'submit'}}); },
+  saveStickerDescriptions(id:number,descriptions:Record<string,string>) { return request(`/stickers/series/${id}`,{auth:true,method:'POST',body:{descriptions}}); },
   removeStickerSeriesAsset(id:number,assetId:number) { return request(`/stickers/series/${id}`,{auth:true,method:'POST',body:{remove_asset_id:assetId}}); },
   getStickerPackReviews() { return request<Array<import('./stickerSeries').StickerSeriesDTO>>('/platform-admin/sticker-packs',{platformAdminAuth:true}); },
   reviewStickerPack(id:number,approved:boolean,note:string) { return request(`/platform-admin/sticker-packs/${id}`,{platformAdminAuth:true,method:'POST',body:{approved,note}}); },

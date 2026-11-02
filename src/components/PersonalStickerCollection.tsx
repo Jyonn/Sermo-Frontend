@@ -2,7 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {api} from '../lib/api';
 import {useI18n} from '../lib/language';
 import type {StickerDTO} from '../types';
-import {StickerImage} from './StickerImage';
+import {StickerPickerItem} from './StickerPickerItem';
 
 export function PersonalStickerCollection({id,busy,onSend,onManage}:{id:number;busy:boolean;onSend:(sticker:StickerDTO)=>void|Promise<void>;onManage?:(id?:number)=>void}) {
   const {t}=useI18n();
@@ -18,7 +18,7 @@ export function PersonalStickerCollection({id,busy,onSend,onManage}:{id:number;b
   useEffect(()=>{page.current={offset:0,more:true,busy:false,generation:page.current.generation+1};setItems([]);void load(false);return()=>{page.current.generation++}},[id,retry]);
   return <div className="composer-sticker-grid" onScroll={event=>{const node=event.currentTarget;if(node.scrollHeight-node.scrollTop-node.clientHeight<100)void load(true)}}>
     {onManage?<button className="composer-sticker-add" aria-label={t('sticker.manageTitle')} onClick={()=>onManage(id)}><span className="material-symbols-outlined">tune</span></button>:null}
-    {items.map(row=><button key={row.sticker_id} className="composer-sticker-item" disabled={busy} onClick={()=>void onSend(row)}><StickerImage src={row.uri}/></button>)}
+    {items.map(row=><StickerPickerItem key={row.sticker_id} busy={busy} src={row.uri} description={row.description} onClick={()=>void onSend(row)}/>)}
     {loading?<span className="composer-sticker-page-loading" aria-label={t('common.loading')}/>:failed?<button className="personal-sticker-retry" onClick={()=>setRetry(value=>value+1)}>{t('common.retry')}</button>:!items.length?<p className="personal-sticker-empty">{t('sticker.series.empty')}</p>:null}
   </div>;
 }
