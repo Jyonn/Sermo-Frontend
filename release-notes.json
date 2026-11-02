@@ -1,21 +1,17 @@
 {
-  "id": "2026.11.02.9",
+  "id": "2026.11.02.10",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的菜单与更新",
+      "title": "头像与外框更贴合",
       "items": [
-        "检查更新默认展示当前站，新版本在菜单和更新入口显示红点",
-        "账号入口统一分组，登录其他用户前增加确认",
-        "微调柯南头像框，更新小哀聊天页预览"
+        "修复柯南头像框底部露出照片，头像保持原有缩放并贴合框内开口"
       ]
     },
     "en": {
-      "title": "Clearer menu and updates",
+      "title": "A better avatar fit",
       "items": [
-        "Updates focus on this site, with red dots on Menu and Check for updates",
-        "Account actions share a section; another sign-in asks for confirmation",
-        "Refined Conan frame coverage and the Ai chat preview"
+        "Conan avatars now stay inside the frame opening without changing the portrait scale"
       ]
     }
   }

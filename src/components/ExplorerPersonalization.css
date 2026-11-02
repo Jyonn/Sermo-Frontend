@@ -8,8 +8,9 @@
   background: transparent;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-clip.avatar-frame-explorer-conan::after { content: ""; position: absolute; z-index: 3; inset: -3%; background: var(--avatar-frame-art, url("https://api.sermo.jyonn.space/resources/assets/66/display/95f72390ed58b1edbf8d7278d4ea0b5c2bd644856d3ada4959a3616b0358005a")) center/100% 100% no-repeat; pointer-events: none; }
-/* Keep the portrait full size beneath the original-size painted frame. */
-.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+/* Keep the portrait's scale; clip its edges underneath the painted opening so
+   the source art's transparent outer margin never exposes the photo below it. */
+.user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > :is(.avatar-image, .avatar-label, .avatar-group-stack) { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; clip-path: inset(10% 10% 12% 10% round 14%); }
 .user-avatar.has-avatar-frame > .avatar-frame-explorer-conan > .avatar-label { display: grid; place-items: center; background: var(--avatar-bg); }
 .avatar-frame-explorer-conan > .avatar-frame-ornament { display: none; }
 /* Ai portraits sit beside each bubble, toward the conversation center. */
