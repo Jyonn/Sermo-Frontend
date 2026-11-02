@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.02.1",
+  "id": "2026.11.02.2",
   "publishedAt": "2026-11-02",
   "locales": {
     "zh-CN": {
-      "title": "更顺畅地设置密码",
+      "title": "更简洁的更新提醒",
       "items": [
-        "尚未设置密码的账号可直接设置密码，已有密码的账号保留身份验证；同时优化密码表单的布局和提示"
+        "更新提醒仅提示有新版本，不再展示更新日志"
       ]
     },
     "en": {
-      "title": "Simpler password setup",
+      "title": "Simpler update notices",
       "items": [
-        "Set your first password directly while existing passwords still require verification, with a cleaner form and clearer guidance"
+        "Update notices now simply announce a new version without displaying release notes"
       ]
     }
   }

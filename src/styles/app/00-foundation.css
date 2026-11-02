@@ -205,50 +205,12 @@
 }
 
 .pwa-update-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 12px;
+  display: block;
 }
 
 .pwa-update-heading > strong {
   min-width: 0;
   white-space: normal;
-}
-
-.pwa-update-heading > span {
-  flex: none;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.67rem;
-}
-
-.pwa-update-list {
-  display: grid;
-  gap: 5px;
-  margin: 7px 0 0;
-  padding: 0;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  list-style: none;
-}
-
-.pwa-update-list li {
-  position: relative;
-  min-width: 0;
-  padding-left: 13px;
-  overflow-wrap: anywhere;
-}
-
-.pwa-update-list li::before {
-  position: absolute;
-  top: 0.58em;
-  left: 1px;
-  width: 4px;
-  height: 4px;
-  background: var(--brand-strong);
-  border-radius: 50%;
-  content: "";
 }
 
 .pwa-update-actions{display:flex;align-self:center;align-items:center;gap:8px}.pwa-update-dismiss{min-height:40px;padding:0 12px;border:0;border-radius:12px;color:var(--text-secondary);font:inherit;font-size:.78rem;font-weight:700;background:transparent}.pwa-update-dismiss:hover{color:var(--text-primary);background:var(--bg-canvas)}

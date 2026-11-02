@@ -16,7 +16,7 @@ interface UpdateCheckDialogProps {
 }
 
 export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: UpdateCheckDialogProps) {
-  const { language, t } = useI18n();
+  const { t } = useI18n();
   const { phase, install } = usePwaUpdateActivation();
   const installing = phase !== "idle" && phase !== "error";
   useBodyScrollLock(open);
@@ -25,8 +25,6 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const successfulSources = result?.sources.filter((source) => source.status === "ok").length ?? 0;
   const allFailed = Boolean(result && successfulSources === 0);
   const partiallyFailed = Boolean(result && successfulSources > 0 && successfulSources < result.sources.length);
-  const release = result?.latestRelease?.id === result?.latestVersion ? result?.latestRelease : null;
-  const localizedRelease = release?.locales[language] ?? release?.locales.en;
   const sourceName = (key: UpdateSourceKey) => t(updateSiteLabel(key));
   const destination = updateDestination(result, window.location.origin);
 
@@ -66,7 +64,6 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
             ))}
           </div>
 
-          {result?.updateAvailable && localizedRelease ? <div className="update-release-copy"><strong>{localizedRelease.title}</strong><ul>{localizedRelease.items.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
           {allFailed ? <p className="update-network-advice"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.switchNetworkHint")}</p> : null}
           {phase === "error" ? <UpdateFailureFeedback /> : null}
         </div>

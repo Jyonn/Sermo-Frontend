@@ -7295,7 +7295,6 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 .update-check-header h2,
 .update-check-header small,
 .update-check-summary p,
-.update-release-copy ul,
 .update-network-advice {
   margin: 0;
 }
@@ -7452,27 +7451,6 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .update-source-row em.is-error {
   color: var(--danger);
-}
-
-.update-release-copy {
-  display: grid;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: var(--surface-soft);
-}
-
-.update-release-copy strong {
-  font-size: 0.8rem;
-}
-
-.update-release-copy ul {
-  display: grid;
-  gap: 5px;
-  padding-left: 18px;
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  line-height: 1.5;
 }
 
 .update-network-advice {
