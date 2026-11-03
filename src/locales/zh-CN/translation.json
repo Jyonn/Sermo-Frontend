@@ -1,4 +1,13 @@
 {
+  "webPush.checkFailed": "暂时无法检查通知状态，请重试。",
+  "webPush.repairHint": "此设备的通知连接已丢失或失效，请重新连接。",
+  "webPush.reconnect": "重新连接",
+  "webPush.disable": "关闭",
+  "webPush.subscriptionExpired": "通知连接已失效，请重新连接后再试。",
+  "webPush.serviceAccepted": "发送服务已接收",
+  "webPush.deliveryReceived": "客户端已接收",
+  "webPush.deliverySubmitted": "已提交系统通知",
+  "webPush.deliveryFailed": "客户端通知提交失败",
   "square.photoInfo": "照片信息",
   "common.remove": "移除",
   "square.creationTitle": "想分享什么？",

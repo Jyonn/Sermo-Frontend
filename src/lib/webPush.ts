@@ -2,7 +2,7 @@ import { api } from './api';
 import { i18n } from './language';
 import { authStorage } from './storage';
 
-export type WebPushState = 'checking'|'unsupported'|'needs-install'|'denied'|'off'|'on';
+export type WebPushState = 'checking'|'unsupported'|'needs-install'|'needs-repair'|'error'|'denied'|'off'|'on';
 const DEVICE_ENDPOINT_KEY='sermo.web-push.endpoint';
 const reconciliations=new Map<string,Promise<void>>();
 
@@ -27,6 +27,7 @@ async function register(scope:string,subscription:PushSubscription,restoreOnly:b
   assertAccount(scope);
   const saved=await api.registerWebPush({endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,origin:window.location.origin,restore_only:restoreOnly,previous_endpoint:previousEndpoint||''});
   assertAccount(scope);
+  if(!restoreOnly&&(!saved?.enabled||saved.invalidated_at||saved.opted_in===false))throw new Error(i18n.t('webPush.subscriptionExpired'));
   if(saved?.opted_in!==false&&saved?.enabled)rememberEndpoint(scope,data.endpoint);
 }
 
@@ -35,14 +36,18 @@ export async function getWebPushState(expectedScope?:string):Promise<WebPushStat
   if(isIos()&&!isStandalone())return 'needs-install';
   if(Notification.permission==='denied')return 'denied';
   const scope=expectedScope||accountScope();if(!scope)return 'off';assertAccount(scope);
-  await reconcileWebPushSubscription();
+  const pending=reconciliations.get(scope);if(pending)await pending;
   assertAccount(scope);
   const info=await api.getWebPushInfo();
   assertAccount(scope);
   const registration=await navigator.serviceWorker.getRegistration();
   const subscription=await registration?.pushManager.getSubscription();
   assertAccount(scope);
-  return subscription&&info.subscriptions.some(item=>item.endpoint===subscription.endpoint&&item.enabled&&item.opted_in!==false)?'on':'off';
+  const bindings=info.bindings||info.subscriptions;
+  const binding=bindings.find(item=>item.endpoint===subscription?.endpoint)||bindings.find(item=>item.endpoint===storedEndpoint(scope));
+  if(binding?.opted_in===false)return 'off';
+  if(Notification.permission==='granted'&&subscription&&info.subscriptions.some(item=>item.endpoint===subscription.endpoint&&item.enabled&&item.opted_in!==false&&!item.invalidated_at))return 'on';
+  return binding?.opted_in===true?'needs-repair':'off';
 }
 
 export async function enableWebPush(expectedScope?:string) {
@@ -55,7 +60,10 @@ export async function enableWebPush(expectedScope?:string) {
   if(!info.public_key)throw new Error(i18n.t('webPush.notConfigured'));
   await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
   const registration=await navigator.serviceWorker.ready;
-  const existing=await registration.pushManager.getSubscription();assertAccount(scope);
+  let existing=await registration.pushManager.getSubscription();assertAccount(scope);
+  if(existing&&(info.bindings||info.subscriptions).some(item=>item.endpoint===existing?.endpoint&&item.invalidated_at)){
+    await existing.unsubscribe();assertAccount(scope);existing=null;
+  }
   const subscription=existing??await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeApplicationServerKey(info.public_key)});
   await register(scope!,subscription,false,storedEndpoint(scope!)||undefined);
 }
@@ -90,12 +98,8 @@ async function reconcile(scope:string) {
   const prior=bindings.find(item=>item.endpoint===previous);
   // Browser permission and another account's endpoint are not consent for this account.
   const binding=current||prior;
-  if(!binding||binding.opted_in===false)return;
-  if(!registration)registration=await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
-  assertAccount(scope);
-  if(!subscription){
-    if(!info.public_key)return;
-    subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeApplicationServerKey(info.public_key)});
-  }
+  // A lost or terminally invalid subscription requires an explicit user action.
+  // Foreground refresh and status checks must not silently create subscriptions.
+  if(!binding||binding.opted_in===false||binding.invalidated_at||!subscription)return;
   await register(scope,subscription,true,binding.endpoint);
 }

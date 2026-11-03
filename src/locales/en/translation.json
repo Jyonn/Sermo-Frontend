@@ -1,4 +1,13 @@
 {
+  "webPush.checkFailed": "Unable to check notification status. Please retry.",
+  "webPush.repairHint": "This device's notification connection is missing or expired. Reconnect to restore it.",
+  "webPush.reconnect": "Reconnect",
+  "webPush.disable": "Turn off",
+  "webPush.subscriptionExpired": "The notification connection has expired. Please reconnect.",
+  "webPush.serviceAccepted": "Accepted by sending service",
+  "webPush.deliveryReceived": "Received by client",
+  "webPush.deliverySubmitted": "System notification submitted",
+  "webPush.deliveryFailed": "Client notification submission failed",
   "square.photoInfo": "Photo information",
   "common.remove": "Remove",
   "square.creationTitle": "What would you like to share?",

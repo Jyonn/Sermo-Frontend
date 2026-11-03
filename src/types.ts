@@ -502,6 +502,9 @@ export interface CapabilitySimulationDTO {
 }
 
 export interface PlatformMessageDeliveryDTO {
+  client_received_at?: number|null;
+  notification_submitted_at?: number|null;
+  client_error?: string;
   delivery_id: number;
   channel: "web" | "email" | "sms" | "bark" | "unknown";
   status: "pending" | "sent" | "failed" | "skipped" | "unknown";
@@ -751,6 +754,7 @@ export interface StickerPrepareDTO {
 }
 
 export interface WebPushSubscriptionDTO {
+  invalidated_at?: number|null;
   opted_in?: boolean;
   endpoint: string;
   origin: string;

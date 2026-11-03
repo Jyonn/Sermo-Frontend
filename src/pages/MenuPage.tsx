@@ -74,6 +74,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
+import '../components/WebPushSettings.css';
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, QQIdentityDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
@@ -1007,6 +1008,7 @@ export default function MenuPage() {
   };
 
   const openWebReminderDrawer = () => {
+    setWebPushState('checking');
     setWebReminderDrawerOpen(true);
   };
 
@@ -1019,19 +1021,19 @@ export default function MenuPage() {
         if (active) setWebPushState(state);
       })
       .catch(() => {
-        if (active) setWebPushState("off");
+        if (active) setWebPushState("error");
       });
     return () => {
       active = false;
     };
   }, [webReminderDrawerOpen, session?.user.space_id, currentUserId]);
 
-  const toggleWebPush = async () => {
+  const toggleWebPush = async (enabled?:boolean) => {
     if (webPushSaving || webPushState === "checking") return;
     const account = webPushAccountRef.current;
     setWebPushSaving(true);
     try {
-      if (webPushState === "on") {
+      if (enabled===false || webPushState === "on") {
         await disableWebPush(account);
       } else {
         await enableWebPush(account);
@@ -1041,7 +1043,7 @@ export default function MenuPage() {
       if (account === webPushAccountRef.current) setWebPushState(next);
     } catch (pushError) {
       if (account !== webPushAccountRef.current) return;
-      const next = await getWebPushState(account).catch((): WebPushState => "off");
+      const next = await getWebPushState(account).catch((): WebPushState => "error");
       if (account !== webPushAccountRef.current) return;
       setWebPushState(next);
       setError(pushError instanceof Error ? pushError.message : t("webPush.settingFailed"));
@@ -1052,6 +1054,8 @@ export default function MenuPage() {
 
   const webPushDescription: string | null = {
     checking: t("common.checking"),
+    error: t('webPush.checkFailed'),
+    'needs-repair': t('webPush.repairHint'),
     unsupported: t("webPush.browserUnsupported"),
     "needs-install": t("webPush.addToHomeFirst"),
     denied: t("webPush.allowInSettings"),
@@ -3007,7 +3011,7 @@ export default function MenuPage() {
 
       <SideDrawer
         historyKey="web-notifications"
-        onRouteOpen={() => setWebReminderDrawerOpen(true)}
+        onRouteOpen={() => {setWebPushState('checking');setWebReminderDrawerOpen(true)}}
         open={webReminderDrawerOpen}
         onClose={() => setWebReminderDrawerOpen(false)}
         title={standalonePwa ? t("webReminder.systemTitle") : t("webReminder.title")}
@@ -3020,13 +3024,15 @@ export default function MenuPage() {
                   <strong>{t("webReminder.systemNotifications")}</strong>
                   {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
                 </div>
-                <button
+                {webPushState==='checking'||webPushSaving?<span className="web-push-checking" role="status"><span className="media-wait-spinner"/>{t(webPushSaving?'common.saving':'common.checking')}</span>:webPushState==='error'?<button className="web-push-repair" type="button" onClick={()=>{const account=webPushAccountRef.current;setWebPushState('checking');void getWebPushState(account).then(state=>{if(account===webPushAccountRef.current)setWebPushState(state)}).catch(()=>{if(account===webPushAccountRef.current)setWebPushState('error')})}}>{t('common.retry')}</button>:webPushState==='needs-repair'?<div className="web-push-actions"><button className="web-push-disable" type="button" onClick={()=>void toggleWebPush(false)}>{t('webPush.disable')}</button><button className="web-push-repair" type="button" onClick={()=>void toggleWebPush()}>{t('webPush.reconnect')}</button></div>:<button
                   aria-label={t("webReminder.toggleSystem")}
+                  role="switch"
+                  aria-checked={webPushState==='on'}
                   className={`switch ${webPushState === "on" ? "active" : ""}`}
-                  disabled={webPushSaving || webPushState === "checking" || webPushState === "unsupported" || webPushState === "denied"}
+                  disabled={webPushState === "unsupported" || webPushState === "denied"}
                   onClick={() => void toggleWebPush()}
                   type="button"
-                />
+                />}
               </div>
             ) : null}
             <div className="menu-pref-row">

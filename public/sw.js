@@ -265,6 +265,16 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+function reportPushReceipt(token, phase, error = '') {
+  if (typeof token !== 'string' || !token) return Promise.resolve();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3500);
+  return fetch('https://api.sermo.jyonn.space/users/web-push/receipt', {
+    method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, phase, error }), signal: controller.signal,
+  }).catch(() => undefined).finally(() => clearTimeout(timeout));
+}
+
 self.addEventListener("push", (event) => {
   let payload = {};
   try {
@@ -272,21 +282,30 @@ self.addEventListener("push", (event) => {
   } catch {
     payload = { body: event.data ? event.data.text() : "你收到了一条新消息" };
   }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) payload = {};
   const spacePrefix = payload.space_slug ? `/${encodeURIComponent(payload.space_slug)}` : "";
   const url = payload.project_id ? `${spacePrefix}/app/research?project=${encodeURIComponent(payload.project_id)}${payload.task_id ? `&task=${encodeURIComponent(payload.task_id)}` : ''}` : payload.chat_id ? `${spacePrefix}/app/chats/${payload.chat_id}` : payload.statement_id ? `${spacePrefix}/app/square/statements/${payload.statement_id}` : `${spacePrefix}/app/chats`;
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-      const hasVisibleClient = clients.some((client) => client.visibilityState === "visible");
-      if (hasVisibleClient) return undefined;
-      return self.registration.showNotification(payload.title || "FRIENDEN 友间", {
-        body: payload.body || "你收到了一条新消息",
+  const title = typeof payload.title === 'string' && payload.title ? payload.title : 'FRIENDEN 友间';
+  const options = {
+        body: typeof payload.body === 'string' && payload.body ? payload.body : "你收到了一条新消息",
         icon: payload.icon || "/icons/frienden-512.png?v=2",
         badge: "/icons/frienden-192.png?v=2",
         tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
         data: { url },
-      });
-    })
-  );
+  };
+  // Web Push promises user-visible notifications, including with a visible tab.
+  // Never wait for telemetry or a client lookup before submitting the notification.
+  const received = reportPushReceipt(payload.receipt_token, 'received');
+  const submitted = (async () => {
+    try {
+      try { await self.registration.showNotification(title, options); }
+      catch { await self.registration.showNotification(title, { body: options.body, tag: options.tag, data: options.data }); }
+      await reportPushReceipt(payload.receipt_token, 'submitted');
+    } catch (error) {
+      await reportPushReceipt(payload.receipt_token, 'failed', error?.name || 'UnknownError');
+    }
+  })();
+  event.waitUntil(Promise.all([received, submitted]));
 });
 
 self.addEventListener("notificationclick", (event) => {

@@ -34,7 +34,7 @@ function harness() {
     navigator:{userAgent:'Test',platform:'Test',maxTouchPoints:0,serviceWorker:{getRegistration:async()=>registration,register:async()=>registration,ready:Promise.resolve(registration)}},
     Notification:notification,window:{PushManager:class{},Notification:notification,location:{origin:'https://frienden.jyonn.space'},matchMedia:()=>({matches:true}),atob:(value:string)=>Buffer.from(value,'base64').toString('binary'),localStorage:{getItem:(key:string)=>storage.get(key)||null,setItem:(key:string,value:string)=>storage.set(key,value)}},
   });
-  return {push:exports,records,storage,switch:(space:number)=>{user={space_id:space,user_id:1};},rotate:()=>{current=subscription('https://push.test/rotated');},forgetBrowserSubscription:()=>{current=null;},deferPermission:(fn:()=>Promise<string>)=>{permission=fn;},unsubscribed:()=>unsubscribed,registrations:()=>registrations};
+  return {push:exports,records,storage,switch:(space:number)=>{user={space_id:space,user_id:1};},rotate:()=>{current=subscription('https://push.test/rotated');},forgetBrowserSubscription:()=>{current=null;},setBrowserPermission:(value:string)=>{notification.permission=value},deferPermission:(fn:()=>Promise<string>)=>{permission=fn;},unsubscribed:()=>unsubscribed,registrations:()=>registrations};
 }
 
 test('one shared WebAPP can enable one space account and disable another',async()=>{
@@ -59,10 +59,36 @@ test('rotation restores enabled accounts without reviving opted-out accounts',as
   h.switch(2);assert.equal(await h.push.getWebPushState(),'off');
   assert.equal(h.records.get('2:1')?.get('https://push.test/shared').opted_in,false);
 });
-test('OS subscription loss recovers only the account with prior consent',async()=>{
+test('OS subscription loss is reported without silently creating another subscription',async()=>{
   const h=harness();await h.push.enableWebPush();h.forgetBrowserSubscription();
+  const registrations=h.registrations();
+  assert.equal(await h.push.getWebPushState(),'needs-repair');
+  await h.push.reconcileWebPushSubscription();
+  assert.equal(h.registrations(),registrations);
+  await h.push.enableWebPush();
   assert.equal(await h.push.getWebPushState(),'on');
   h.switch(2);assert.equal(await h.push.getWebPushState(),'off');
+});
+test('terminally invalid endpoints require an explicit reconnect and cannot be revived by checking',async()=>{
+  const h=harness();await h.push.enableWebPush();
+  const binding=h.records.get('1:1')!.get('https://push.test/shared');binding.enabled=false;binding.invalidated_at=123;
+  const registrations=h.registrations();
+  assert.equal(await h.push.getWebPushState(),'needs-repair');
+  await h.push.reconcileWebPushSubscription();assert.equal(h.registrations(),registrations);
+  await h.push.enableWebPush();assert.equal(h.unsubscribed(),1);assert.equal(await h.push.getWebPushState(),'on');
+});
+test('a user can turn off a lost connection without reconnecting it first',async()=>{
+  const h=harness();await h.push.enableWebPush();h.forgetBrowserSubscription();
+  await h.push.disableWebPush();assert.equal(await h.push.getWebPushState(),'off');
+});
+test('status reads do not register or refresh existing subscriptions',async()=>{
+  const h=harness();await h.push.enableWebPush();const registrations=h.registrations();
+  assert.equal(await h.push.getWebPushState(),'on');assert.equal(await h.push.getWebPushState(),'on');assert.equal(h.registrations(),registrations);
+});
+test('a stored subscription does not report on when browser permission has been reset',async()=>{
+  const h=harness();await h.push.enableWebPush();h.setBrowserPermission('default');
+  assert.equal(await h.push.getWebPushState(),'needs-repair');
+  h.setBrowserPermission('denied');assert.equal(await h.push.getWebPushState(),'denied');
 });
 test('switching accounts during the permission prompt never registers the new account',async()=>{
   const h=harness();let resolve!:(permission:string)=>void;

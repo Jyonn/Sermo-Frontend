@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.04.1",
+  "id": "2026.11.04.2",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "滑动切换广场频道",
+      "title": "修复系统通知连接与状态显示",
       "items": [
-        "广场内容区支持左右滑动切换活动、探索、好友、我的及成员频道，顶部标签同步定位",
-        "保留上下浏览、图片轮播、媒体控件与系统边缘返回手势"
+        "修复前台页面导致系统通知被跳过的问题，增强 iOS WebAPP 推送可靠性",
+        "通知设置明确展示检查中、检查失败和待重新连接，避免开关先关后开的误导",
+        "失效订阅不再静默重建，可主动重新连接或关闭；推送链路区分服务接收与客户端处理"
       ]
     },
     "en": {
-      "title": "Swipe between Square channels",
+      "title": "More reliable system notifications",
       "items": [
-        "Swipe across the Square feed to switch between Activities, Explore, Friends, My and member channels, keeping the top tabs in sync",
-        "Vertical scrolling, image carousels, media controls and system edge gestures retain their own behavior"
+        "System notifications are no longer skipped because a page is visible, improving iOS WebAPP reliability",
+        "Notification settings clearly distinguish checking, check failures and connections needing repair",
+        "Lost subscriptions require an explicit reconnect and can be turned off; delivery traces distinguish service acceptance from client handling"
       ]
     }
   }

@@ -1,0 +1,6 @@
+.web-push-checking{display:flex;align-items:center;gap:7px;flex:none;color:var(--text-muted);font-size:12px}
+.web-push-checking .media-wait-spinner{width:14px;height:14px}
+.web-push-actions{display:flex;align-items:center;gap:8px;flex:none}
+.web-push-repair,.web-push-disable{min-height:34px;padding:6px 10px;border:0;border-radius:9px;font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}
+.web-push-repair{color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 12%,var(--bg-elevated))}
+.web-push-disable{color:var(--text-muted);background:none}
