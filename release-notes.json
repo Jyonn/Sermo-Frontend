@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.02.10",
-  "publishedAt": "2026-11-02",
+  "id": "2026.11.03.1",
+  "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "头像与外框更贴合",
+      "title": "柯南头像框调整",
       "items": [
-        "修复柯南头像框底部露出照片，头像保持原有缩放并贴合框内开口"
+        "放大柯南头像框覆盖头像边缘，撤掉额外裁切，保持头像原有尺寸"
       ]
     },
     "en": {
-      "title": "A better avatar fit",
+      "title": "Conan avatar frame adjustment",
       "items": [
-        "Conan avatars now stay inside the frame opening without changing the portrait scale"
+        "Enlarged the Conan frame to cover portrait edges, with no extra crop or change to avatar size"
       ]
     }
   }
