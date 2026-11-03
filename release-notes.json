@@ -1,23 +1,17 @@
 {
-  "id": "2026.11.03.12",
+  "id": "2026.11.03.13",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "更顺手的广场与发布体验",
+      "title": "更紧凑的广场频道栏",
       "items": [
-        "频道栏支持横向滑动，成员发言也可在同一行切换",
-        "默认打开好友圈，可分别设置探索、好友圈和个人发言的展示形式",
-        "先选择文字、照片、语音、视频或外部分享，再进入简洁编辑页，统一选择可见范围",
-        "我的频道集中展示发言额度与广场消息，新消息可从轻量提醒直接查看"
+        "频道标签恢复紧凑布局与文字居中，中央区域约占六成宽度，超出时可横向滑动"
       ]
     },
     "en": {
-      "title": "A smoother Square and publishing flow",
+      "title": "More compact Square navigation",
       "items": [
-        "Swipe through channels, including member feeds, in one sticky navigation row",
-        "Square opens in Friends, with separate layout preferences for Explore, Friends and personal feeds",
-        "Choose text, photos, voice, video or an external share before entering a clean editor with unified audience options",
-        "My brings together posting allowance and notifications, with a lightweight shortcut for unread messages"
+        "Compact, centered channel labels use about 60% of the header width and scroll horizontally when needed"
       ]
     }
   }
