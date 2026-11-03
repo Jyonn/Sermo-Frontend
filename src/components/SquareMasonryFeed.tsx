@@ -1,4 +1,4 @@
-import {useLayoutEffect,useRef,useState,type ReactNode,type RefObject} from 'react';
+import {useLayoutEffect,useMemo,useRef,useState,type ReactNode,type RefObject} from 'react';
 import {useI18n} from '../lib/language';
 import {arrangeSquareColumns,squareCover,textCoverStyle} from '../lib/squareFeedLayout';
 import type {SquareStatementDTO} from '../types';
@@ -12,7 +12,7 @@ import './SquareMasonryFeed.css';
 export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>}){
   const {t}=useI18n();const root=useRef<HTMLDivElement>(null),[width,setWidth]=useState(0);
   useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>setWidth(entry.contentRect.width));observer.observe(node);return()=>observer.disconnect()},[]);
-  const columns=arrangeSquareColumns(items,width);
+  const columns=useMemo(()=>arrangeSquareColumns(items,width),[items,width]);
   const renderItem=(item:SquareStatementDTO)=>{
     const cover=squareCover(item),textStyle=textCoverStyle(item.statement_id,item.text);
     const author=item.is_anonymous?t('square.anonymousUser'):item.user.name;

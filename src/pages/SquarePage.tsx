@@ -2150,9 +2150,9 @@ export default function SquarePage() {
         day: "numeric",
         timeZone: "Asia/Shanghai",
       }).format(new Date(`${selectedFeedDate}T00:00:00+08:00`));
-  const visibleStatements = statements.filter((statement) => !(
+  const visibleStatements = useMemo(() => statements.filter((statement) => !(
     !hasFeedFilters && feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id
-  ));
+  )), [statements, hasFeedFilters, feedMode, pinnedStatement?.statement_id]);
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
     if (statement.chat_record) return 380;
