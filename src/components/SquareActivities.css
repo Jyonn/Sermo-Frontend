@@ -1,0 +1,4 @@
+.square-activity-hub{width:100%;max-width:1440px;margin:0 auto;padding:16px 18px 36px}
+.square-activity-hub .square-activity-rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;overflow:visible;scroll-snap-type:none;padding:0}
+.square-activity-hub .square-activity-rail>.square-activity-banner{width:100%;min-width:0;max-width:none;flex:none;height:clamp(145px,18vw,205px);max-height:205px;scroll-snap-align:none}
+@media(max-width:719px){.square-activity-hub{padding:14px 12px 28px}.square-activity-hub .square-activity-rail{gap:12px}.square-activity-hub .square-activity-rail>.square-activity-banner{height:165px}}

@@ -562,6 +562,8 @@ export interface FriendOperatorDTO {
 }
 
 export interface AdminActivityDTO {
+  eligible?: boolean;
+  missing_requirements?: string[];
   key: string;
   title: string;
   title_en: string;

@@ -11,7 +11,7 @@ import './SquareMasonryFeed.css';
 
 export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>}){
   const {t}=useI18n();const root=useRef<HTMLDivElement>(null),[width,setWidth]=useState(0);
-  useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>setWidth(entry.contentRect.width));observer.observe(node);return()=>observer.disconnect()},[]);
+  useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>{if(entry.contentRect.width>0)setWidth(entry.contentRect.width)});observer.observe(node);return()=>observer.disconnect()},[]);
   const columns=useMemo(()=>arrangeSquareColumns(items,width),[items,width]);
   const renderItem=(item:SquareStatementDTO)=>{
     const cover=squareCover(item),textStyle=textCoverStyle(item.statement_id,item.text);

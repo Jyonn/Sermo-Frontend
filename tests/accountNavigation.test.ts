@@ -3,13 +3,6 @@ import test from "node:test";
 import { groupSwitchAccounts } from "../src/lib/accountGroups.ts";
 import { pwaLaunchAccount } from "../src/lib/pwaLaunch.ts";
 import type { SwitchAccountDTO } from "../src/types";
-import { activityBannerStops } from "../src/lib/activityBannerStops.ts";
-
-test("banner navigation skips unreachable duplicate stops when multiple cards fit", () => {
-  assert.deepEqual(activityBannerStops(300, 1236, [0, 312, 624, 936]), [0, 312, 624, 936]);
-  assert.deepEqual(activityBannerStops(900, 1204, [0, 304, 608, 912]), [0, 304]);
-  assert.deepEqual(activityBannerStops(1200, 1200, [0, 404, 808]), [0]);
-});
 
 test("switcher groups all identities by space without merging admin and regular accounts", () => {
   const account = (space: number, user: number, official = false) => ({ space: { space_id: space }, user: { user_id: user, official } }) as SwitchAccountDTO;

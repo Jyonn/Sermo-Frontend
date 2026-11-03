@@ -6,7 +6,7 @@ import type {SquareStatementDTO} from '../src/types';
 const item=(id:number)=>({statement_id:id,text:'文字封面 '+id,media:[]}) as unknown as SquareStatementDTO;
 test('responsive masonry never drops or duplicates items and appending preserves existing columns',()=>{
  const items=Array.from({length:50},(_,index)=>item(index+1));
- for(const [width,count] of [[390,2],[900,3],[1400,4]]){
+ for(const [width,count] of [[390,2],[719,2],[720,3],[900,3],[1400,4]]){
   const first=arrangeSquareColumns(items.slice(0,20),width),all=arrangeSquareColumns(items,width);
   assert.equal(all.length,count);assert.deepEqual(all.flat().map(row=>row.statement_id).sort((a,b)=>a-b),items.map(row=>row.statement_id));
   first.forEach((column,index)=>assert.deepEqual(all[index].slice(0,column.length),column));

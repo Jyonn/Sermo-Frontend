@@ -414,7 +414,7 @@ export default function SpaceAdminDashboardPage() {
   };
 
   const claimActivity = async (activity: AdminActivityDTO) => {
-    if (activity.claimed || activityClaimingKey) return;
+    if (activity.claimed || activity.eligible === false || activityClaimingKey) return;
     setActivityClaimingKey(activity.key);
     try {
       setActivities(await api.claimAdminActivity(activity.key));
@@ -886,11 +886,15 @@ export default function SpaceAdminDashboardPage() {
             const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
             const localizedTitle = getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title;
             const localizedSummary = getActiveLocale().startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
+            const missingRequirements = (activity.missing_requirements ?? [])
+              .map(key => t((['square','free_post','chat','submission','publish'].includes(key) ? `admin.activityRequirement.${key}` : 'admin.activityRequirement.other') as TranslationKey))
+              .join(t('admin.activityRequirementSeparator'));
             return <article className={`admin-activity-card is-${activity.status}`} key={activity.key}>
               <header><span><small>{activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
               <p>{localizedSummary}</p>
               <dl><div><dt>{t("admin.activityDuration")}</dt><dd>{durationDays === null ? t("admin.activityNoTimeLimit") : t("admin.activityDays", { count: durationDays })}</dd></div>{activity.ends_at ? <div><dt>{t("admin.activityEndsAt")}</dt><dd>{new Date(activity.ends_at * 1000).toLocaleString(getActiveLocale())}</dd></div> : null}</dl>
-              {!activity.claimed && !activity.mandatory ? <button disabled={Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
+              {!activity.claimed && activity.eligible===false ? <p className="admin-activity-requirements">{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
+              {!activity.claimed && !activity.mandatory ? <button disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
               {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
             </article>;
           })}

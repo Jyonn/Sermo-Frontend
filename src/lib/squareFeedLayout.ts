@@ -26,7 +26,7 @@ export function textCoverStyle(id:number,text:string){
   return {theme:Math.abs(id)%4,ratio:text.length>100?.75:text.length>35?.85:1,font:text.length>100?'small':text.length>35?'medium':'large'};
 }
 export function arrangeSquareColumns(items:SquareStatementDTO[],width:number){
-  const count=width>=1100?4:width>=660?3:2;
+  const count=width>=1100?4:width>=720?3:2;
   const columns:SquareStatementDTO[][]=Array.from({length:count},()=>[]),heights=Array(count).fill(0);
   const cardWidth=(Math.max(280,width)-(count-1)*14)/count;
   for(const item of items){

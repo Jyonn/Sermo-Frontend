@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.03.9",
+  "id": "2026.11.03.10",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "广场浏览更连贯",
+      "title": "活动有了独立入口",
       "items": [
-        "打开和关闭发言详情时保留广场列表，避免瀑布流闪烁重排",
-        "个人资料请求采用无损压缩，减少加载流量，资料与功能保持完整"
+        "广场活动移至探索左侧的独立 Tab，手机瀑布流增加两侧留白",
+        "活动认领前检查空间功能，缺少必要功能时说明原因并阻止认领"
       ]
     },
     "en": {
-      "title": "Smoother Square browsing",
+      "title": "A dedicated home for activities",
       "items": [
-        "Keep the Square feed mounted when opening and closing post details to avoid masonry flicker",
-        "Lossless profile compression reduces loading traffic while preserving all data and features"
+        "Find activities in their own tab before Explore; phone masonry feeds now have side margins",
+        "Activity claims check space features and explain which required features need enabling"
       ]
     }
   }
