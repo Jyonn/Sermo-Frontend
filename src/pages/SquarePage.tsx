@@ -31,6 +31,10 @@ import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import {SquareFeedHeader} from "../components/SquareFeedHeader";
 import {SquareActivityTile} from "../components/SquareActivityTile";
+import {SquareCreationSheet,type SquareCreationKind} from '../components/SquareCreationSheet';
+import {SquareComposerEditor} from '../components/SquareComposerEditor';
+import {SquareVoiceRecorder} from '../components/SquareVoiceRecorder';
+import {ActionSheet} from '../components/ActionSheet';
 import { SquareHeaderTools } from "../components/SquareHeaderTools";
 import { SquareSearchDialog } from "../components/SquareSearchDialog";
 import { availableSquareQuota } from "../lib/squareQuota";
@@ -512,7 +516,6 @@ export default function SquarePage() {
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
-  const [squareFeedLayout]=useSquareFeedLayout(cacheScope);
   const [activityTab,setActivityTab]=useState(false);
   const activityFeedScroll=useRef(0);
   const selectSquareChannel=(activity:boolean)=>{
@@ -524,6 +527,7 @@ export default function SquarePage() {
   };
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
+  const previousProfileFeedUserId=useRef<number|null>(null);
   const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
   const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
   const selectedFeedFrom = normalizeFeedDate(searchParams.get("date_from"));
@@ -532,13 +536,13 @@ export default function SquarePage() {
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedFrom || selectedFeedTo || selectedFeedKeyword);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(() => {
     if (profileFeedUserId) return "user";
-    const saved = readTabCache<string>(cacheScope, "square:mode")?.data;
-    return saved === "friends" || saved === "mine" ? saved : "all";
+    return "friends";
   });
   useEffect(() => { if (feedMode !== "user") writeTabCache(cacheScope, "square:mode", feedMode); }, [cacheScope, feedMode]);
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
-    ? features.squareExploreEnabled ? "all" : "friends"
+    ? "friends"
     : feedMode;
+  const [squareFeedLayout]=useSquareFeedLayout(cacheScope,effectiveFeedMode==='all'?'explore':effectiveFeedMode==='friends'?'friends':'user');
   const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedKeyword, selectedFeedFrom, selectedFeedTo);
   const initialFeedSnapshotRef = useRef<NormalizedSquareFeedSnapshot<SquareStatementDTO> | null>();
   if (initialFeedSnapshotRef.current === undefined) {
@@ -568,6 +572,9 @@ export default function SquarePage() {
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [recording, setRecording] = useState(false);
+  const [recordingStarting,setRecordingStarting]=useState(false);
+  const [voiceError,setVoiceError]=useState('');
+  const recordingRequestRef=useRef(0);
   const [contentSheetOpen, setContentSheetOpen] = useState(false);
   const [externalMediaDialogOpen, setExternalMediaDialogOpen] = useState(false);
   const [externalMediaInput, setExternalMediaInput] = useState("");
@@ -741,8 +748,8 @@ export default function SquarePage() {
     [chatRecordDraft, currentUser?.official],
   );
   const canPublish = Boolean(currentUser?.verified);
-  const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
-  const canSendVideo = Boolean(currentUser?.official) || growthLevel >= 8;
+  const canSendVoice = quota?.media.audio ?? (Boolean(currentUser?.official) || growthLevel >= 6);
+  const canSendVideo = quota?.media.video ?? (Boolean(currentUser?.official) || growthLevel >= 10);
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
   const canCommentAnonymously = Boolean(activeCommentStatement?.is_anonymous && activeCommentStatement.is_mine);
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
@@ -1292,15 +1299,19 @@ export default function SquarePage() {
   }, [activeFeedCacheKey, cacheScope, hasMore, loading, statements, statementsFeedKey]);
 
   useEffect(() => {
+    if(previousProfileFeedUserId.current===profileFeedUserId)return;
+    previousProfileFeedUserId.current=profileFeedUserId;
     if (profileFeedUserId) {
       setFeedMode("user");
+      selectSquareChannel(false);
       setProfileDrawerUserId(null);
-    } else if (feedMode === "user") {
-      setFeedMode(features.squareExploreEnabled ? "all" : "friends");
+    } else {
+      setFeedMode(current=>current==='user'?'friends':current);
     }
-  }, [features.squareExploreEnabled, feedMode, profileFeedUserId]);
+  }, [profileFeedUserId]);
 
   useEffect(() => () => {
+    recordingRequestRef.current++;
     audioCaptureRef.current?.cleanup();
     audioCaptureRef.current = null;
     if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
@@ -1748,6 +1759,7 @@ export default function SquarePage() {
       setExternalMedia(preview);
       setExternalMediaDialogOpen(false);
       setExternalMediaInput("");
+      setComposerOpen(true);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("square.externalMediaUnsupported"), "error");
     } finally {
@@ -1756,14 +1768,16 @@ export default function SquarePage() {
   };
 
   const choosePhotos = (files: FileList | null) => {
-    if (!files) return;
+    if (!files?.length) return;
     const available = MAX_PHOTOS - photos.length;
     const next = Array.from(files).filter((file) => file.type.startsWith("image/")).slice(0, available).map((file) => ({
       id: `${file.name}:${file.size}:${file.lastModified}:${crypto.randomUUID()}`,
       file,
       preview: URL.createObjectURL(file),
     }));
+    if(!next.length){if(available>0)showToast(t('square.mediaReadFailed'),'error');return}
     setPhotos((current) => [...current, ...next]);
+    setComposerOpen(true);
     setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
     setVoiceFile(null);
     setVoiceDuration(0);
@@ -1777,19 +1791,24 @@ export default function SquarePage() {
     const preview = URL.createObjectURL(file);
     const probe = document.createElement("video");
     probe.preload = "metadata";
-    probe.src = preview;
+    const releaseProbe=()=>{probe.onloadedmetadata=null;probe.onerror=null;probe.removeAttribute('src');probe.load()};
     probe.onloadedmetadata = () => {
       const duration = Math.ceil(probe.duration || 0);
-      if (duration > MAX_VIDEO_SECONDS) {
+      if (!Number.isFinite(duration)||duration<=0||duration > MAX_VIDEO_SECONDS) {
         URL.revokeObjectURL(preview);
-        setError(t("square.videoTooLong"));
+        showToast(t(duration>MAX_VIDEO_SECONDS?'square.videoTooLong':'square.mediaReadFailed'),'error');
+        releaseProbe();
         return;
       }
       setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
       setVoiceFile(null);
       setExternalMedia(null);
       setVideo({ id: crypto.randomUUID(), file, preview, duration });
+      setComposerOpen(true);
+      releaseProbe();
     };
+    probe.onerror=()=>{releaseProbe();URL.revokeObjectURL(preview);showToast(t('square.mediaReadFailed'),'error')};
+    probe.src=preview;
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
@@ -1808,10 +1827,14 @@ export default function SquarePage() {
       stopRecording();
       return;
     }
+    if(recordingStarting)return;
+    const request=++recordingRequestRef.current;
+    setRecordingStarting(true);setVoiceError('');
     let capture: NoiseReducedAudioCapture | null = null;
     try {
       audioCaptureRef.current?.cleanup();
       capture = await createNoiseReducedAudioCapture();
+      if(request!==recordingRequestRef.current){capture.cleanup();return}
       const mimeType = preferredAudioMimeType();
       const recorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
       audioCaptureRef.current = capture;
@@ -1844,7 +1867,9 @@ export default function SquarePage() {
     } catch {
       capture?.cleanup();
       if (audioCaptureRef.current === capture) audioCaptureRef.current = null;
-      setError(t("square.recordingFailed"));
+      setVoiceError(t("square.recordingFailed"));
+    } finally {
+      if(request===recordingRequestRef.current)setRecordingStarting(false);
     }
   };
 
@@ -1946,6 +1971,20 @@ export default function SquarePage() {
       return;
     }
     setComposerOpen(true);
+  };
+  const quotaHint=quotaLoading?t('common.loading'):quota?quota.unlimited?t('square.quotaUnlimited'):t('square.quotaHero',{count:availableSquareQuota(quota.statements.daily_used,quota.statements.daily_limit,quota.statements.weekly_used,quota.statements.weekly_limit)??0}):undefined;
+  const openCreationMenu=()=>{
+    if(!canPublish){setPublishVerificationOpen(true);return}
+    setContentSheetOpen(true);setQuotaLoading(true);
+    void api.getSquareQuota().then(setQuota).catch(()=>setQuota(null)).finally(()=>setQuotaLoading(false));
+  };
+  const chooseCreationKind=(kind:SquareCreationKind)=>{
+    setContentSheetOpen(false);
+    if(kind==='text'){openComposer();return}
+    if(kind==='photo'){photoInputRef.current?.click();return}
+    if(kind==='video'&&canSendVideo){videoInputRef.current?.click();return}
+    if(kind==='voice'&&canSendVoice){setVoiceError('');setVoiceSheetOpen(true);return}
+    if(kind==='external')setExternalMediaDialogOpen(true);
   };
 
   const continueToVerification = () => {
@@ -2183,13 +2222,14 @@ export default function SquarePage() {
         }}
         ref={squareFeedScrollRef}
       >
-        <SquareFeedHeader syncing={syncing} search={<SquareHeaderTools variant="search" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openComposer:undefined}>
+        <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="search" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
           <div className="square-workspace-tabs is-square" role="tablist">
             <div className="square-workspace-tab-group is-square-channels">
               <button aria-selected={activityTab} className={activityTab?"is-active":""} onClick={()=>selectSquareChannel(true)} role="tab" type="button">{t("square.activitiesTab")}{claimableActivityKeys.length?<span className="square-fresh-dot" aria-label={t("activity.pendingClaim")}/>:null}</button>
               {features.squareExploreEnabled ? <button aria-selected={!activityTab && feedMode === "all"} className={!activityTab && feedMode === "all" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("all"); }} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && (activityTab || feedMode !== "all") ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button> : null}
               <button aria-selected={!activityTab && feedMode === "friends"} className={!activityTab && feedMode === "friends" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("friends"); }} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && (activityTab || feedMode !== "friends") ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button>
               <button aria-selected={!activityTab && feedMode === "mine"} className={!activityTab && feedMode === "mine" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("mine"); }} role="tab" type="button">{t("square.feedMine")}</button>
+              {profileFeedUserId ? <span className={`square-feed-user-tab${!activityTab && feedMode === "user" ? " is-active" : ""}`}><button aria-selected={!activityTab && feedMode === "user"} onClick={() => { selectSquareChannel(false); setFeedMode("user"); }} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode(current=>current==='user'?'friends':current); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
           </div>
         </SquareFeedHeader>
@@ -2249,8 +2289,7 @@ export default function SquarePage() {
           </section></div> : null}
           {activityTab && !activityBannerCount ? <FeedbackState tone={activitiesLoading?"loading":activitiesError?"error":"empty"} title={t(activitiesLoading?"common.loading":activitiesError?"square.activitiesLoadFailed":"square.activitiesEmpty")} action={activitiesError?<button className="secondary-button" onClick={()=>void loadActivities()} type="button">{t("common.retry")}</button>:undefined}/> : null}
         <div className="square-feed-column" style={activityTab?{display:"none"}:undefined}>
-          {!activityTab && feedMode==="mine"?<div className="square-my-tools"><SquareHeaderTools variant="utilities" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={()=>setFeedSearchOpen(true)} onQuota={openQuota} onNotifications={openNotificationDrawer}/></div>:null}
-          {profileFeedUserId?<div className="square-feed-context-tabs">{profileFeedUserId ? <span className={`square-feed-user-tab${!activityTab && feedMode === "user" ? " is-active" : ""}`}><button aria-selected={!activityTab && feedMode === "user"} onClick={() => { selectSquareChannel(false); setFeedMode("user"); }} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode("mine"); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}</div>:null}
+          {!activityTab&&feedMode==="mine"?<div className="square-my-service-row"><button onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{t('square.notifications')}<small>{notificationUnread||t('square.noUnread')}</small></button><button onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span>{t('square.quotaTitle')}<small>{quotaHint||t('square.viewQuota')}</small></button></div>:null}
           {hasFeedFilters ? <div className="square-date-context">
             <span className="material-symbols-outlined" aria-hidden="true">filter_alt</span>
             <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedFrom || selectedFeedTo ? `${selectedFeedFrom || t("square.anyDate")} → ${selectedFeedTo || t("square.anyDate")}` : selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
@@ -2363,26 +2402,14 @@ export default function SquarePage() {
           {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
-      <SideDrawer
-        className="square-compose-side-drawer"
-        historyKey="square-compose"
-        onRouteOpen={openComposer}
-        onClose={() => { setComposerOpen(false); setChatRecordDraft(null); }}
-        open={composerOpen}
-        title={t("square.composeTitle")}
-      >
-        <div className="square-compose-drawer">
-          <div className="square-compose-canvas">
-            {error ? <div className="square-inline-error">{error}</div> : null}
-            <div className="square-compose-editor">
-              <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />
-              <strong>{currentUser?.name}</strong>
-            </div>
-            <div className="square-compose-writing-zone">
-              <textarea autoFocus aria-label={t("square.saySomething")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setText(event.target.value)} placeholder={t("square.saySomething")} value={text} />
-              <span className={`square-compose-count${text.length >= MAX_TEXT_LENGTH - 20 ? " is-near-limit" : ""}`}>{text.length}<i>/{MAX_TEXT_LENGTH}</i></span>
-            </div>
-            {chatRecordDraft ? <section className="square-compose-chat-record">
+      {notificationUnread>0&&(activityTab||feedMode!=="mine")&&!notificationDrawerOpen&&!composerOpen?<button className="square-inbox-float" onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{t('square.inboxUnread',{count:notificationUnread})}</button>:null}
+      <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless fullscreen fullViewport floatingBack={false}>
+        <SquareComposerEditor text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video} voice={voiceFile&&voicePreview?{uri:voicePreview,duration:voiceDuration}:null} external={externalMedia}
+          onRemovePhoto={removePhoto} onRemoveVideo={()=>{if(video)URL.revokeObjectURL(video.preview);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
+          onAdd={openCreationMenu} onBack={()=>setComposerOpen(false)} onPublish={()=>void publish()} audienceLabel={anonymousStatement?t("square.publishAnonymously"):visibility==="friends"?t("square.friendsOnly"):t("square.audiencePublic")} onAudience={()=>setVisibilitySheetOpen(true)}
+          locationLabel={statementLocation?.address||t("square.location")} onLocation={locateStatement} onRemoveLocation={statementLocation?()=>setStatementLocation(null):undefined}
+          publishing={publishing} publishable={publishable} progress={uploadProgress} error={error||undefined} quotaLabel={quotaHint}
+          chatPreview={chatRecordDraft ? <section className="square-compose-chat-record">
               <header>
                 <span><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft.messageIds.length })}</small></span>
                 <button aria-label={t("common.close")} onClick={() => setChatRecordDraft(null)} type="button"><span className="material-symbols-outlined">close</span></button>
@@ -2401,37 +2428,14 @@ export default function SquarePage() {
                 />
               </div> : null}
             </section> : null}
-            {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
-            {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
-            {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><div><strong>{t("square.voiceReady")}</strong>{voicePreview ? <audio controls preload="metadata" src={voicePreview} /> : null}</div><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
-            {externalMedia ? <div className="square-composer-external-media"><ExternalMediaPreview preview={externalMedia} /><button aria-label={t("common.close")} className="square-external-media-remove" onClick={() => setExternalMedia(null)} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
-            {statementLocation ? <button className="square-compose-location-pill is-active" onClick={() => setStatementLocation(null)} type="button"><span className="material-symbols-outlined">location_on</span><span>{statementLocation.address || t("square.locationAddedShort")}</span><span className="material-symbols-outlined">close</span></button> : null}
-            {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
-            <div className="square-compose-content-actions">
-              {!chatRecordDraft ? <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : externalMedia ? t("square.externalMediaReady") : t("square.addMedia")}</span></button> : null}
-              {!statementLocation ? <button onClick={locateStatement} type="button"><span className="material-symbols-outlined">location_on</span><span>{t("square.location")}</span></button> : null}
-            </div>
-          </div>
-          <footer className="square-compose-publish-footer">
-            <div className="square-compose-settings">
-              <button disabled={anonymousStatement} onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{anonymousStatement ? t("square.exploreOnly") : visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
-              {features.squareExploreEnabled && !chatRecordDraft ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
-              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
-              {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
-            </div>
-            <button disabled={!publishable || publishing} onClick={() => void publish()} type="button"><span className="square-compose-publish-copy"><small>{t("square.publishToSquare")}</small><strong>{publishing ? t("square.publishing") : t("square.publishStatement")}</strong></span><span className="material-symbols-outlined">arrow_upward</span></button>
-          </footer>
-          <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
-          <input accept="video/*" hidden onChange={(event) => chooseVideo(event.target.files)} ref={videoInputRef} type="file" />
-        </div>
+          extraSettings={currentUser?.official||chatRecordDraft?<details className="square-editor-extras"><summary>{t('square.moreOptions')}</summary>{chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
+              {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}</details>:null}
+        />
       </SideDrawer>
+      <input accept="image/*" hidden multiple onChange={event=>choosePhotos(event.target.files)} ref={photoInputRef} type="file"/>
+      <input accept="video/*" hidden onChange={event=>chooseVideo(event.target.files)} ref={videoInputRef} type="file"/>
       <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={setStatementLocation} />
-      <BottomSheet bodyClassName="square-content-sheet" onClose={() => setContentSheetOpen(false)} open={contentSheetOpen} title={t("square.addToStatement")}>
-        <button disabled={publishing || photos.length >= MAX_PHOTOS} onClick={() => { setContentSheetOpen(false); photoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">image</span><span><strong>{t("square.photo")}</strong><small>{t("square.photoMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-        <button disabled={publishing || !canSendVoice} onClick={() => { setContentSheetOpen(false); setVoiceSheetOpen(true); }} type="button"><span className="material-symbols-outlined">mic</span><span><strong>{t("square.voice")}</strong><small>{canSendVoice ? t("square.voiceMediaHint") : t("square.voiceUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-        <button disabled={publishing || !canSendVideo} onClick={() => { setContentSheetOpen(false); videoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">videocam</span><span><strong>{t("square.video")}</strong><small>{canSendVideo ? t("square.videoMediaHint") : t("square.videoUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-        <button disabled={publishing} onClick={() => { setContentSheetOpen(false); setExternalMediaDialogOpen(true); }} type="button"><span className="material-symbols-outlined">link</span><span><strong>{t("square.externalMedia")}</strong><small>{t("square.externalMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-      </BottomSheet>
+      <SquareCreationSheet open={contentSheetOpen} onClose={()=>setContentSheetOpen(false)} onChoose={chooseCreationKind} voiceAllowed={canSendVoice} videoAllowed={canSendVideo} description={quotaHint}/>
       <InputDialog
         busy={externalMediaResolving}
         confirmLabel={t("square.insertExternalMedia")}
@@ -2445,9 +2449,11 @@ export default function SquarePage() {
         title={t("square.externalMedia")}
         value={externalMediaInput}
       />
-      <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
-        {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
-      </BottomSheet>
+      <ActionSheet open={visibilitySheetOpen} onClose={()=>setVisibilitySheetOpen(false)} title={t('square.visibility')} compactHeader actions={[
+        {key:'anonymous',label:t('square.publishAnonymously'),description:t('square.publishAnonymouslyHint'),disabled:!features.squareExploreEnabled||Boolean(chatRecordDraft)||quota?.statements.anonymous_available===false,icon:<span className="material-symbols-outlined">person_off</span>,onSelect:()=>{setAnonymousStatement(true);setVisibility('public')}},
+        {key:'public',label:t('square.audiencePublic'),description:t('square.publicHint'),icon:<span className="material-symbols-outlined">public</span>,onSelect:()=>{setAnonymousStatement(false);setVisibility('public')}},
+        {key:'friends',label:t('square.friendsOnly'),description:t('square.friendsHint'),icon:<span className="material-symbols-outlined">group</span>,onSelect:()=>{setAnonymousStatement(false);setVisibility('friends')}}
+      ]}/>
       <TravelMapDrawer
         focusLocation={chatRecordLocation?.location}
         focusOwner={chatRecordLocation?.owner}
@@ -2466,13 +2472,9 @@ export default function SquarePage() {
         targets={shareTargets}
         title={t("square.shareToChat")}
       />
-      <BottomSheet bodyClassName="square-voice-sheet" onClose={() => { if (recording) stopRecording(); setVoiceSheetOpen(false); }} open={voiceSheetOpen} title={t("square.voice")}>
-        <div className={`square-voice-stage${recording ? " is-recording" : ""}`}><div className="square-voice-bars">{Array.from({ length: 25 }, (_, index) => <i key={index} />)}</div><strong>{Math.min(voiceDuration, MAX_AUDIO_SECONDS)}<small> / {MAX_AUDIO_SECONDS}s</small></strong></div>
-        <button className="square-record-button" onClick={() => void startRecording()} type="button"><span className="material-symbols-outlined">{recording ? "stop" : "mic"}</span></button>
-        <p>{recording ? t("square.tapToStop") : voiceFile ? t("square.voiceReady") : t("square.tapToRecord")}</p>
-        {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
-        {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
-      </BottomSheet>
+      <SquareVoiceRecorder open={voiceSheetOpen} recording={recording} starting={recordingStarting} duration={voiceDuration} maximum={MAX_AUDIO_SECONDS} preview={voicePreview} error={voiceError}
+        onRecord={()=>void startRecording()} onClose={()=>{recordingRequestRef.current++;setRecordingStarting(false);if(recording)stopRecording();setVoiceSheetOpen(false)}}
+        onClear={()=>{setVoiceFile(null);setVoiceDuration(0)}} onDone={()=>{setVoiceSheetOpen(false);setComposerOpen(true)}}/>
       <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
@@ -2607,6 +2609,7 @@ export default function SquarePage() {
               navigate(`/app/chats/${chatId}`);
             }}
             onSyncingChange={setProfileSyncing}
+            onOpenStatements={user=>{setProfileDrawerUserId(null);selectSquareChannel(false);if(user.user_id===currentUser?.user_id){setFeedMode('mine');navigate('/app/square');return}setFeedMode('user');const params=new URLSearchParams({user_id:String(user.user_id),user_name:user.name});navigate(`/app/square?${params.toString()}`)}}
             userId={profileDrawerUserId}
           />
         ) : null}

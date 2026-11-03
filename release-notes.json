@@ -1,21 +1,23 @@
 {
-  "id": "2026.11.03.11",
+  "id": "2026.11.03.12",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "更清爽的广场",
+      "title": "更顺手的广场与发布体验",
       "items": [
-        "居中频道与左右操作组成单行导航，广场使用纯色底色和更小的卡片圆角",
-        "图片卡片移除数量角标，活动卡片增加本空间参与者头像和人数",
-        "暂无参与者时展示加入邀请，互动额度和广场消息移至我的频道"
+        "频道栏支持横向滑动，成员发言也可在同一行切换",
+        "默认打开好友圈，可分别设置探索、好友圈和个人发言的展示形式",
+        "先选择文字、照片、语音、视频或外部分享，再进入简洁编辑页，统一选择可见范围",
+        "我的频道集中展示发言额度与广场消息，新消息可从轻量提醒直接查看"
       ]
     },
     "en": {
-      "title": "A cleaner Square",
+      "title": "A smoother Square and publishing flow",
       "items": [
-        "Centered channels, search and publishing share one row above solid backgrounds and smaller card corners",
-        "Image counts are removed; activity cards show participant avatars and counts from your space",
-        "Empty activities invite you to join; quotas and Square notifications are available in My"
+        "Swipe through channels, including member feeds, in one sticky navigation row",
+        "Square opens in Friends, with separate layout preferences for Explore, Friends and personal feeds",
+        "Choose text, photos, voice, video or an external share before entering a clean editor with unified audience options",
+        "My brings together posting allowance and notifications, with a lightweight shortcut for unread messages"
       ]
     }
   }

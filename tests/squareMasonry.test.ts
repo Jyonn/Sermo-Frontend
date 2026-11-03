@@ -48,6 +48,15 @@ test('device storage restores a known preference and rejects unknown values',()=
  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value)}});
  try{
   assert.equal(getSquareFeedLayout('stored:1'),'masonry');assert.equal(getSquareFeedLayout('stored:2'),'masonry');assert.equal(getSquareFeedLayout('stored:3'),'list');
-  setSquareFeedLayout('stored:2','masonry');assert.equal(values.get('frienden:square-layout:v1:stored:2'),'masonry');
+  setSquareFeedLayout('stored:2','masonry');assert.equal(values.get('frienden:square-layout:v2:stored:2:explore'),'masonry');
  }finally{if(previous)Object.defineProperty(globalThis,'localStorage',previous);else Reflect.deleteProperty(globalThis,'localStorage')}
+});
+test('Explore, Friends and personal feeds have independent defaults and preferences',()=>{
+ assert.equal(getSquareFeedLayout('channels:1','explore'),'masonry');
+ assert.equal(getSquareFeedLayout('channels:1','friends'),'list');
+ assert.equal(getSquareFeedLayout('channels:1','user'),'list');
+ setSquareFeedLayout('channels:1','masonry','friends');
+ assert.equal(getSquareFeedLayout('channels:1','friends'),'masonry');
+ assert.equal(getSquareFeedLayout('channels:1','user'),'list');
+ assert.equal(getSquareFeedLayout('channels:2','friends'),'list');
 });

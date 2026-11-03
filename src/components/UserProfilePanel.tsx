@@ -46,6 +46,7 @@ interface UserProfilePanelProps {
   initialIsFriend?: boolean;
   onSyncingChange?: (syncing: boolean) => void;
   onOpenChat?: (chatId: number) => void;
+  onOpenStatements?: (user: Pick<UserDTO,'user_id'|'name'>) => void;
   friendRequestSource?: "direct" | "square";
 }
 
@@ -66,7 +67,7 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
-export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct", previewAudience }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, onOpenStatements, friendRequestSource = "direct", previewAudience }: UserProfilePanelProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -234,6 +235,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   const openStatements = () => {
     if (!user || !squareEnabled) return;
+    if(onOpenStatements){onOpenStatements(user);return}
     const params = new URLSearchParams({ user_id: String(user.user_id), user_name: user.name });
     navigate(`/app/square?${params.toString()}`);
   };
