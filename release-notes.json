@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.03.3",
+  "id": "2026.11.03.4",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "外观素材云端同步",
+      "title": "头像框更贴合",
       "items": [
-        "个性化外观素材统一从云端加载，各站保持一致"
+        "修正柯南头像框的透明留白与对齐，保持头像原有尺寸"
       ]
     },
     "en": {
-      "title": "Appearance assets in sync",
+      "title": "A closer-fitting avatar frame",
       "items": [
-        "Personalization artwork now loads from the cloud consistently across sites"
+        "Corrected the Conan frame's transparent margins and alignment while preserving avatar size"
       ]
     }
   }

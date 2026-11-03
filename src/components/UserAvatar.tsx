@@ -148,6 +148,7 @@ export function UserAvatar({ userId, name, uri, cacheKey, className, groupMember
         ) : (
           <span className="avatar-label">{avatarLabel(resolvedName)}</span>
         )}
+        {normalizedFrame === 'explorer-conan' && frameArt ? <svg aria-hidden="true" className="avatar-frame-conan-art" viewBox="17 23 607 577" preserveAspectRatio="none" focusable="false"><image href={frameArt} width="640" height="640" /></svg> : null}
         {hasFrame ? <span aria-hidden="true" className="avatar-frame-ornament"><i /><i /><i /><i /></span> : null}
       </span>
     </div>
