@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import type { MusicProviderDataDTO } from "../types";
 import { musicBrand, sameMusic } from "./musicBrand";
+import {claimMediaPlayback} from './mediaPlaybackFocus';
 import { useI18n } from "./language";
 import { SideDrawer } from "../components/SideDrawer";
 import { usePlaybackWait } from "../components/MediaWaitFeedback";
@@ -11,6 +12,7 @@ type Player = {
   time: number;
   duration: number;
   unavailable: boolean;
+  loading: boolean;
   play: (music: MusicProviderDataDTO) => void;
   toggle: () => void;
   seek: (time: number) => void;
@@ -161,10 +163,10 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
   const brand = music ? musicBrand(music.provider) : null;
 
-  return <Context.Provider value={{ music, playing, time, duration, unavailable, play, toggle, seek, close }}>
+  return <Context.Provider value={{ music, playing, time, duration, unavailable, loading:playbackWait.visible&&playbackWait.phase!=='error', play, toggle, seek, close }}>
     {children}
     <audio ref={audio} src={music?.audio_url || undefined} preload="none"
-      onPlay={() => setUnavailable(false)} onPlaying={() => { setPlaying(true); playbackWait.ready(); }}
+      onPlay={event => {claimMediaPlayback(event.currentTarget);setUnavailable(false)}} onPlaying={() => { setPlaying(true); playbackWait.ready(); }}
       onPause={() => { setPlaying(false); playbackWait.stop(); }} onWaiting={playbackWait.waiting} onStalled={playbackWait.waiting}
       onEnded={() => { setPlaying(false); playbackWait.ready(); }} onError={() => { playbackWait.fail(); setUnavailable(true); setPlaying(false); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}

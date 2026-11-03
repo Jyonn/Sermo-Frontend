@@ -1,21 +1,21 @@
 {
-  "id": "2026.11.03.6",
+  "id": "2026.11.03.7",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "广场，换个方式逛",
+      "title": "在广场，直接听见",
       "items": [
-        "个性化中可切换广场瀑布流，手机双列、桌面三到四列",
-        "纯文字发言自动排成文字封面，点击可阅读全文",
-        "适配多图首图、视频、音频、音乐专辑和 StillFolio 照片集封面"
+        "音乐以虚化封面和 CD 造型展示，音乐与音频可在瀑布流中直接播放",
+        "发言卡片更紧凑，照片集增加 StillFolio 标识，媒体比例限定为 2:3–3:2",
+        "默认使用瀑布流，手机信息流两侧贴边，仍可自行切换列表"
       ]
     },
     "en": {
-      "title": "A new way to browse Square",
+      "title": "Listen right in Square",
       "items": [
-        "Choose a masonry Square feed in Personalization: two columns on phones, three or four on desktop",
-        "Text-only posts get typographic covers; open a post to read the full text",
-        "Covers support photo galleries, video, audio, music albums and StillFolio collections"
+        "Music uses a blurred album backdrop and CD cover; play music and audio directly in the feed",
+        "More cohesive cards, StillFolio collection branding and media ratios between 2:3 and 3:2",
+        "Masonry is now the default with edge-to-edge phone layouts; List remains available"
       ]
     }
   }

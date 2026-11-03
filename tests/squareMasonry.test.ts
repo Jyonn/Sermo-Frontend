@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {arrangeSquareColumns,squareCover,textCoverStyle} from '../src/lib/squareFeedLayout.ts';
+import {arrangeSquareColumns,squareCover,textCoverStyle,squareMediaRatio} from '../src/lib/squareFeedLayout.ts';
 import {getSquareFeedLayout,setSquareFeedLayout} from '../src/lib/useSquareFeedLayout.ts';
 import type {SquareStatementDTO} from '../src/types';
 const item=(id:number)=>({statement_id:id,text:'文字封面 '+id,media:[]}) as unknown as SquareStatementDTO;
@@ -14,13 +14,14 @@ test('responsive masonry never drops or duplicates items and appending preserves
 });
 test('covers reserve image geometry and long text remains deterministic',()=>{
  const row={...item(3),media:[{kind:'image',uri:'full',thumbnail_uri:'thumb',metadata:{pixel_width:100,pixel_height:900}}]} as SquareStatementDTO;
- assert.equal(squareCover(row).uri,'thumb');assert.equal(squareCover(row).fallbackUri,'full');assert.equal(squareCover(row).ratio,.65);
+ assert.equal(squareCover(row).uri,'thumb');assert.equal(squareCover(row).fallbackUri,'full');assert.equal(squareCover(row).ratio,2/3);
+ assert.equal(squareMediaRatio(9000,100),3/2);assert.equal(squareMediaRatio(0,100),.8);
  assert.deepEqual(textCoverStyle(3,'长'.repeat(200)),textCoverStyle(3,'长'.repeat(200)));
  assert.equal(textCoverStyle(3,'长'.repeat(200)).font,'small');
 });
 test('layout preferences are scoped to each account and survive unavailable storage',()=>{
- assert.equal(getSquareFeedLayout('fixture:1'),'list');setSquareFeedLayout('fixture:1','masonry');
- assert.equal(getSquareFeedLayout('fixture:1'),'masonry');assert.equal(getSquareFeedLayout('fixture:2'),'list');
+ assert.equal(getSquareFeedLayout('fixture:1'),'masonry');setSquareFeedLayout('fixture:1','list');
+ assert.equal(getSquareFeedLayout('fixture:1'),'list');assert.equal(getSquareFeedLayout('fixture:2'),'masonry');
  setSquareFeedLayout('fixture:1','list');assert.equal(getSquareFeedLayout('fixture:1'),'list');
 });
 test('mixed posts use the first image, video poster, audio card, album art and Stillfolio cover',()=>{
@@ -43,10 +44,10 @@ test('mixed posts use the first image, video poster, audio card, album art and S
 });
 test('device storage restores a known preference and rejects unknown values',()=>{
  const previous=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
- const values=new Map([['frienden:square-layout:v1:stored:1','masonry'],['frienden:square-layout:v1:stored:2','unknown']]);
+ const values=new Map([['frienden:square-layout:v1:stored:1','masonry'],['frienden:square-layout:v1:stored:2','unknown'],['frienden:square-layout:v1:stored:3','list']]);
  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value)}});
  try{
-  assert.equal(getSquareFeedLayout('stored:1'),'masonry');assert.equal(getSquareFeedLayout('stored:2'),'list');
+  assert.equal(getSquareFeedLayout('stored:1'),'masonry');assert.equal(getSquareFeedLayout('stored:2'),'masonry');assert.equal(getSquareFeedLayout('stored:3'),'list');
   setSquareFeedLayout('stored:2','masonry');assert.equal(values.get('frienden:square-layout:v1:stored:2'),'masonry');
  }finally{if(previous)Object.defineProperty(globalThis,'localStorage',previous);else Reflect.deleteProperty(globalThis,'localStorage')}
 });
