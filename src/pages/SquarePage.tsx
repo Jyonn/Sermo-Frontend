@@ -46,6 +46,8 @@ import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
 import {SquareNoteDetail} from '../components/SquareNoteDetail';
 import {squareDetailView,squareStatementSearch} from '../lib/squareNoteMedia';
+import {useSquareChannelSwipe} from '../lib/useSquareChannelSwipe';
+import type {SquareChannel} from '../lib/squareSwipe';
 import '../components/SquareActivities.css';
 import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
 import { ApiError, api } from "../lib/api";
@@ -2216,6 +2218,9 @@ export default function SquarePage() {
       </div>
     </Fragment>;
   };
+
+  const squareChannels:SquareChannel[]=['activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
+  useSquareChannelSwipe(squareFeedScrollRef,squareChannels,activityTab?'activities':effectiveFeedMode,channel=>{selectSquareChannel(channel==='activities');if(channel!=='activities')setFeedMode(channel)},routedStatementId===null&&!routeActivityKey&&!inlineStatementExpanded);
 
   return (
     <AppChrome workspaceSelected={inlineRouteActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">

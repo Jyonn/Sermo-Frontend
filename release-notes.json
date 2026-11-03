@@ -1,23 +1,19 @@
 {
-  "id": "2026.11.03.15",
-  "publishedAt": "2026-11-03",
+  "id": "2026.11.04.1",
+  "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "更流畅的广场阅读体验",
+      "title": "滑动切换广场频道",
       "items": [
-        "广场消息移至搜索旁，发布菜单可查询互动额度，频道两端连续淡出",
-        "好友圈更名为好友，成员频道的关闭入口更醒目",
-        "瀑布流发言采用滑动图文详情，支持照片信息与直接沉浸看图，列表保留原有详情",
-        "聊天中的发言分享统一为瀑布流卡片，适配个性化气泡；StillFolio 照片支持拍摄信息"
+        "广场内容区支持左右滑动切换活动、探索、好友、我的及成员频道，顶部标签同步定位",
+        "保留上下浏览、图片轮播、媒体控件与系统边缘返回手势"
       ]
     },
     "en": {
-      "title": "A smoother Square reading experience",
+      "title": "Swipe between Square channels",
       "items": [
-        "Notifications sit beside search; publishing offers an allowance shortcut, with softly fading channel edges",
-        "Member channels have a clearer close control",
-        "Masonry posts open swipeable photo details with photo information and direct immersive viewing; lists retain classic details",
-        "Shared posts in chats reuse readable masonry cards across bubble themes, with photography information for StillFolio images"
+        "Swipe across the Square feed to switch between Activities, Explore, Friends, My and member channels, keeping the top tabs in sync",
+        "Vertical scrolling, image carousels, media controls and system edge gestures retain their own behavior"
       ]
     }
   }
