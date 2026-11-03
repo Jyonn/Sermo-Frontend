@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { deploymentPlan, ENTRY_FILES, entryFileArguments } from "./mirror-deploy-plan.mjs";
+import {publishFrontendRelease} from './frontend-release-publisher.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 process.chdir(root);
@@ -51,6 +52,7 @@ try {
     const response = await fetch(url, { headers: { "Cache-Control": "no-cache" }, signal: AbortSignal.timeout(20000) });
     if (!response.ok || (await response.json()).id !== expected) throw new Error("Mirror release verification failed; do not report deployment success");
     console.log(`Mirror verified: ${expected}`);
+    await publishFrontendRelease(origin.origin,JSON.parse(fs.readFileSync('release-notes.json','utf8')),env);
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

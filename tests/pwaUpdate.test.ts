@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { activatePwaUpdate, checkForPwaUpdate, CURRENT_RELEASE } from "../src/lib/pwaUpdate.ts";
+import {SITE_ORIGINS} from '../src/lib/siteOrigins.ts';
 
 const target = "2099.10.17.1";
 test("bootstrap HTML stays compatible with older same-origin update validators", () => {
@@ -29,7 +30,7 @@ function setup(context: { after: (fn: () => void) => void }, options: { oldEntry
     fetch: async (input: unknown) => {
       if (String(input).includes("googleapis")) throw Error("external styles must not be fetched");
       if (options.badAsset && String(input).includes("next.css")) assert.fail("a failed probe must stop subsequent resource requests");
-      return String(input).includes("release.json") ? new Response(JSON.stringify({ ...CURRENT_RELEASE, id: options.oldSite ? CURRENT_RELEASE.id : target })) : new Response("resource", { headers: { "Content-Type": options.badAsset ? "text/html" : "text/javascript" } });
+      return String(input).includes('/frontend/releases') ? new Response(JSON.stringify({body:{kind:'frontend',sources:SITE_ORIGINS.map(site=>({...site,status:'ok',releaseId:options.oldSite?CURRENT_RELEASE.id:target,release:{...CURRENT_RELEASE,id:options.oldSite?CURRENT_RELEASE.id:target}}))}})) : new Response("resource", { headers: { "Content-Type": options.badAsset ? "text/html" : "text/javascript" } });
     },
     sessionStorage: { getItem: () => null, setItem() {} },
   };
@@ -53,12 +54,16 @@ for (const options of [{ oldEntry: true }, { workerFailure: true }, { oldSite: t
     assert.equal(restarts(), 0);
   });
 }
-test("unavailable new sites remain visible as failed checks alongside working legacy sites", async (context) => {
+test("the API reports unavailable new sites alongside working legacy sites", async (context) => {
   setup(context);
   const previousFetch = globalThis.fetch;
   globalThis.fetch = async (input, init) => {
-    if (String(input).includes("frienden.")) throw Error("not live yet");
-    return previousFetch(input, init);
+    const response=await previousFetch(input,init);
+    if(String(input).includes('/frontend/releases')){
+      const value=await response.json();value.body.sources=value.body.sources.map((source:any)=>source.origin.includes('frienden.')?{...source,status:'error',release:null,releaseId:null}:source);
+      return new Response(JSON.stringify(value));
+    }
+    return response;
   };
   const result = await checkForPwaUpdate();
   assert.equal(result.sources.length, 4);

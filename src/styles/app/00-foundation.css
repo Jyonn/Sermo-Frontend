@@ -187,29 +187,6 @@
   border-radius: 12px;
 }
 
-.pwa-update-prompt {
-  position:fixed;
-  right:14px;
-  bottom:calc(18px + env(safe-area-inset-bottom));
-  display:flex;
-  align-items:center;
-  gap:10px;
-  z-index: 80;
-  max-width:calc(100vw - 28px);
-  padding:8px 10px 8px 14px;
-  border:1px solid var(--line-soft);
-  border-radius:12px;
-  background:var(--bg-panel);
-  color:var(--text-primary);
-  box-shadow:0 4px 20px #00000014;
-}
-.pwa-update-dot { width:6px; height:6px; border-radius:50%; background:var(--brand-primary); flex-shrink:0; }
-.pwa-update-label { font-size:13px; line-height:1.5; }
-.pwa-update-actions { display:flex; flex-shrink:0; gap:2px; margin-inline-start:auto; }
-.pwa-update-actions button { min-height:36px; padding:7px 9px; border:0; border-radius:7px; background:transparent; color:var(--text-secondary); font:inherit; font-size:12px; white-space:nowrap; cursor:pointer; }
-.pwa-update-actions button:hover { background:var(--bg-canvas); }
-.pwa-update-actions .pwa-update-view { color:var(--text-primary); font-weight:650; }
-
 .update-failure-feedback {
   display: grid;
   min-width: 0;
@@ -384,15 +361,6 @@
 
   .pwa-recommendation {
     bottom: calc(76px + env(safe-area-inset-bottom));
-  }
-
-  .pwa-update-prompt { bottom:calc(76px + env(safe-area-inset-bottom)); }
-}
-
-@media (max-width: 480px) {
-  .pwa-update-prompt {
-    gap:8px;
-    padding:6px 8px 6px 12px;
   }
 
 }

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import {publishFrontendRelease,releaseDeploymentEnv} from './frontend-release-publisher.mjs';
 
 // Reuse the operator's existing gh/git authorization. No deployment token is created.
 const repository = "Jyonn/Frienden-Frontend";
@@ -45,6 +46,10 @@ try {
       run("git", ["push", "origin", "HEAD:main"], temporary);
     }
     console.log(`Frienden ${release} pushed; verify the Pages run and public HTTPS release ID`);
+    const notes=JSON.parse(fs.readFileSync('release-notes.json','utf8'));
+    const env=releaseDeploymentEnv(root);
+    await publishFrontendRelease('https://sermo.jyonn.space',notes,env);
+    await publishFrontendRelease('https://frienden.jyonn.space',notes,env);
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
   }

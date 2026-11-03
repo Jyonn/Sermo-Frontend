@@ -1,6 +1,8 @@
 import currentRelease from "../../release-notes.json" with { type: "json" };
 import { beginUpdate, recordUpdate, failUpdate, markUpdateReload, reconcileUpdate, compareVersions } from "./updateDiagnostics.ts";
 import { SITE_ORIGINS } from "./siteOrigins.ts";
+import {API_BASE_URL} from './siteConfig.ts';
+import {parseFrontendReleaseCatalog} from './frontendReleaseCatalog.ts';
 
 export interface ReleaseNotes {
   id: string;
@@ -29,6 +31,7 @@ export interface ExplicitUpdateCheckResult {
   latestVersion: string | null;
   updateAvailable: boolean;
   sources: UpdateSourceResult[];
+  catalogUnavailable?: boolean;
 }
 
 interface UpdateCheckSnapshot {
@@ -67,30 +70,18 @@ function compareReleaseIds(left: string, right: string) {
   return 0;
 }
 
-function isReleaseNotes(value: unknown): value is ReleaseNotes {
-  if (!value || typeof value !== "object") return false;
-  const release = value as Partial<ReleaseNotes>;
-  return typeof release.id === "string"
-    && /^\d{4}\.\d{2}\.\d{2}\.\d+$/.test(release.id)
-    && typeof release.publishedAt === "string"
-    && Boolean(release.locales && typeof release.locales === "object");
-}
-
-async function fetchReleaseFromSource(source: { key: UpdateSourceKey; origin: string }): Promise<UpdateSourceResult> {
+async function fetchFrontendReleases(): Promise<UpdateSourceResult[]> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8000);
   try {
-    const response = await fetch(`${source.origin}/release.json?t=${Date.now()}`, {
+    const response = await fetch(`${API_BASE_URL}/frontend/releases`, {
       cache: "no-store",
       credentials: "omit",
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const release: unknown = await response.json();
-    if (!isReleaseNotes(release)) throw new Error("Invalid release metadata");
-    return { ...source, release, releaseId: release.id, status: "ok" };
-  } catch {
-    return { ...source, release: null, releaseId: null, status: "error" };
+    const envelope=await response.json();
+    return parseFrontendReleaseCatalog(envelope.body);
   } finally {
     window.clearTimeout(timeout);
   }
@@ -100,21 +91,25 @@ export function checkForPwaUpdate(): Promise<ExplicitUpdateCheckResult> {
   if (updateCheckPromise) return updateCheckPromise;
   publishUpdateCheck({ ...updateCheckSnapshot, checking: true });
   updateCheckPromise = (async () => {
-    const sources = await Promise.all(UPDATE_SOURCES.map(fetchReleaseFromSource));
+    let sources:UpdateSourceResult[];
+    let catalogUnavailable=false;
+    try { sources=await fetchFrontendReleases(); }
+    catch { catalogUnavailable=true;sources=UPDATE_SOURCES.map(site=>({...site,status:'error',release:null,releaseId:null})); }
     const latestVersion = sources.reduce<string | null>((latest, source) => {
       if (!source.releaseId) return latest;
       return !latest || compareReleaseIds(source.releaseId, latest) > 0 ? source.releaseId : latest;
-    }, null);
+    }, catalogUnavailable?updateCheckSnapshot.result?.latestVersion??null:null);
     const latestRelease = sources.reduce<ReleaseNotes | null>((latest, source) => {
       if (!source.release) return latest;
       return !latest || compareReleaseIds(source.release.id, latest.id) > 0 ? source.release : latest;
-    }, null);
+    }, catalogUnavailable?updateCheckSnapshot.result?.latestRelease??null:null);
     const result = {
       currentRelease: CURRENT_RELEASE,
       latestRelease,
       latestVersion,
       updateAvailable: Boolean(latestVersion && compareReleaseIds(latestVersion, CURRENT_RELEASE.id) > 0),
       sources,
+      catalogUnavailable,
     };
     publishUpdateCheck({ checking: false, result });
     return result;
@@ -155,12 +150,12 @@ export function activatePwaUpdate(onPhase?: (phase: UpdateActivationPhase) => vo
 
 async function runUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
   onPhase?.("preparing");
-  const source = { key: "primary" as const, origin: window.location.origin };
-  const local = await fetchReleaseFromSource(source);
-  beginUpdate(local.releaseId ?? CURRENT_RELEASE.id);
+  const checked=await checkForPwaUpdate();
+  const local=checked.sources.find(source=>source.origin===window.location.origin);
+  beginUpdate(local?.releaseId ?? CURRENT_RELEASE.id);
   recordUpdate(2, { runningVersion: CURRENT_RELEASE.id, site: UPDATE_SOURCES.findIndex((site) => site.origin === window.location.origin) + 1, online: navigator.onLine });
   try {
-    if (!local.releaseId || compareVersions(local.releaseId, CURRENT_RELEASE.id) <= 0) throw new Error("site-not-ready");
+    if (!local?.releaseId || compareVersions(local.releaseId, CURRENT_RELEASE.id) <= 0) throw new Error("site-not-ready");
     await prepareUpdate(local.releaseId, onPhase);
   } catch (error) {
     const reasons = ["site-not-ready", "resource-unavailable", "entry-version-mismatch", "missing-entry-script", "unexpected-resource-origin", "invalid-resource", "worker-update-timeout", "worker-not-ready", "worker-version-mismatch", "worker-activation-timeout", "worker-message-failed"];
@@ -182,16 +177,6 @@ async function freshResponse(path: string) {
     const body = await response.arrayBuffer();
     return new Response(body, { status: response.status, headers: response.headers });
   } finally { window.clearTimeout(timeout); }
-}
-
-async function workerRelease(worker: ServiceWorker) {
-  return new Promise<string | null>((resolve) => {
-    const channel = new MessageChannel();
-    const finish = (version: string | null) => { clearTimeout(timeout); channel.port1.close(); resolve(version); };
-    const timeout = setTimeout(() => finish(null), 1500);
-    channel.port1.onmessage = (event) => finish(typeof event.data?.release === "string" ? event.data.release : null);
-    try { worker.postMessage({ type: "GET_RELEASE" }, [channel.port2]); } catch { finish(null); }
-  });
 }
 
 async function prepareUpdate(target: string, onPhase?: (phase: UpdateActivationPhase) => void) {
@@ -244,11 +229,6 @@ async function prepareUpdate(target: string, onPhase?: (phase: UpdateActivationP
   const worker = registration ? await waitForWaitingWorker(registration) : null;
   recordUpdate(5, { hasWorker: Boolean(worker), hasController: Boolean(navigator.serviceWorker?.controller) });
   if (!worker) {
-    if (registration) {
-      const activeVersion = registration.active ? await workerRelease(registration.active) : null;
-      recordUpdate(6, { workerVersion: activeVersion });
-      if (activeVersion !== target) throw new Error("worker-not-ready");
-    }
     onPhase?.("restarting");
     markUpdateReload();
     window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
@@ -257,9 +237,6 @@ async function prepareUpdate(target: string, onPhase?: (phase: UpdateActivationP
     window.location.replace(url.href);
     return;
   }
-  const version = await workerRelease(worker);
-  recordUpdate(6, { workerVersion: version });
-  if (version !== target) throw new Error("worker-version-mismatch");
   await new Promise<void>((resolve, reject) => {
     let reloading = false;
     const reload = () => {

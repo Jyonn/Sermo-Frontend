@@ -2716,6 +2716,7 @@
   "update.available": "发现新版本",
   "update.view": "前往查看",
   "update.otherSites": "其他站点",
+  "update.toastAvailable": "发现新版本，可前往菜单检查更新",
   "pwa.otherAccountConfirm": "将离开当前页面，前往登录入口选择其他空间或用户。是否继续？",
   "pwa.otherAccountContinue": "前往登录",
   "resources.conan": "柯南",

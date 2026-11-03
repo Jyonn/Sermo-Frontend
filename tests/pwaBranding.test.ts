@@ -37,7 +37,7 @@ test("install brand is space-independent across prompts, guides and OS metadata"
     assert.doesNotMatch(code, /spaceName|getSpaceMe/);
   }
   const sw = read("public/sw.js");
-  assert.match(sw, /sermo-shell-v11/);
+  assert.match(sw, /sermo-shell-v12/);
   assert.match(sw, /frienden-app-512-v3.png/);
 });
 test("developer avatar retains the original brand and a separate editable DEV tag", () => {

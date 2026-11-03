@@ -49,7 +49,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
               {checking ? "progress_activity" : result?.updateAvailable ? "new_releases" : allFailed ? "cloud_off" : "check_circle"}
             </span>
             <div>
-              <strong>{checking ? t("update.checking") : result?.updateAvailable ? t("update.available") : allFailed ? t("update.unavailable") : t("update.latest")}</strong>
+              <strong>{checking ? t("update.checking") : allFailed ? t("update.unavailable") : result?.updateAvailable ? t("update.available") : t("update.latest")}</strong>
               {result?.updateAvailable?<p>{t('update.latestVersion')} · {result.latestVersion}</p>:null}
             </div>
           </div>

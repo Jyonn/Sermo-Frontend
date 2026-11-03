@@ -2716,6 +2716,7 @@
   "update.available": "New version available",
   "update.view": "View update",
   "update.otherSites": "Other sites",
+  "update.toastAvailable": "An update is available. Open Menu to check for updates.",
   "pwa.otherAccountConfirm": "Leave this page and open sign-in to choose another space or user?",
   "pwa.otherAccountContinue": "Go to sign-in",
   "resources.conan": "Conan",

@@ -8,7 +8,6 @@ import "./styles/cloud-resources.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";
-import { checkForPwaUpdate } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
 import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
@@ -17,7 +16,6 @@ import { chronelleReturnDestination } from './lib/chronelleReturn';
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { initializeScheduledSiteTheme } from "./lib/siteTheme";
-import { isPageActive } from "./lib/pageActivity";
 import { MusicPlayerProvider } from "./lib/musicPlayer";
 
 const PAGE_RELOAD_REASON_KEY = "sermo:diagnostics:reload-reason";
@@ -119,20 +117,11 @@ void renderApp();
 if (import.meta.env.PROD) {
   window.addEventListener("load", () => {
     if ("serviceWorker" in navigator) {
-      void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch((error: unknown) => {
+      // Install offline/push support once. Existing workers are updated only by
+      // an explicit user update or the browser's own stable-script lifecycle.
+      void navigator.serviceWorker.getRegistration('/').then(registration=>registration??navigator.serviceWorker.register("/sw.js", { scope: "/" })).catch((error: unknown) => {
         console.warn("[sermo:pwa-update] registration-failed", error);
       });
     }
-    const checkForUpdate = () => {
-      if (!isPageActive()) return;
-      void checkForPwaUpdate();
-    };
-    checkForUpdate();
-    const timer = window.setInterval(checkForUpdate, 3 * 60 * 1000);
-    document.addEventListener("visibilitychange", checkForUpdate);
-    window.addEventListener("beforeunload", () => {
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", checkForUpdate);
-    }, { once: true });
   });
 }

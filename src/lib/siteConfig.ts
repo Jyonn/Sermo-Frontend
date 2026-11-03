@@ -1,5 +1,5 @@
-const configuredPublicOrigin = String(import.meta.env.VITE_PUBLIC_ORIGIN || "").trim().replace(/\/$/, "");
-const configuredApiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/$/, "");
+const configuredPublicOrigin = String(import.meta.env?.VITE_PUBLIC_ORIGIN || "").trim().replace(/\/$/, "");
+const configuredApiBaseUrl = String(import.meta.env?.VITE_API_BASE_URL || "").trim().replace(/\/$/, "");
 
 export const PUBLIC_ORIGIN = configuredPublicOrigin
   || (typeof window !== "undefined" ? window.location.origin : "https://sermo.jyonn.space");
@@ -12,7 +12,7 @@ export const PUBLIC_HOST = (() => {
   }
 })();
 
-export const API_BASE_URL = configuredApiBaseUrl || (import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space");
+export const API_BASE_URL = configuredApiBaseUrl || (import.meta.env?.DEV ? "/api" : "https://api.sermo.jyonn.space");
 
 export function buildPublicUrl(pathname: string) {
   return `${PUBLIC_ORIGIN}/${pathname.replace(/^\/+/, "")}`;

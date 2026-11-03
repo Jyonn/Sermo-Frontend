@@ -1,6 +1,5 @@
-importScripts("/sw-release.js");
-
-const CACHE_NAME = "sermo-shell-v11";
+// Worker code is stable across frontend releases. Versions live in the API.
+const CACHE_NAME = "sermo-shell-v12";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";
 const MEDIA_DB_STORE = "entries";
@@ -193,7 +192,8 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "GET_RELEASE") event.ports[0]?.postMessage({ release: self.SERMO_RELEASE_ID });
+  // Compatibility for old clients during their explicitly requested upgrade.
+  if (event.data?.type === "GET_RELEASE") event.waitUntil(fetch('https://api.sermo.jyonn.space/frontend/releases',{cache:'no-store'}).then(response=>response.json()).then(value=>event.ports[0]?.postMessage({release:value.body?.sources?.find(source=>source.origin===self.location.origin)?.releaseId??null})).catch(()=>event.ports[0]?.postMessage({release:null})));
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "PURGE_MEDIA" && Array.isArray(event.data.slugs)) {
     event.data.slugs.forEach((slug) => blockedMediaSlugs.add(slug));
@@ -219,7 +219,7 @@ self.addEventListener("message", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME && key !== MEDIA_CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('sermo-shell-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });

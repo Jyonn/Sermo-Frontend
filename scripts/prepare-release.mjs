@@ -43,7 +43,7 @@ fs.mkdirSync(publicDirectory, { recursive: true });
 fs.writeFileSync(releasePath, `${JSON.stringify(release, null, 2)}\n`);
 fs.writeFileSync(
   workerReleasePath,
-  `self.SERMO_RELEASE_ID = ${JSON.stringify(release.id)};\n`,
+  '// Legacy worker bootstrap only. Frontend versions are served by the release API.\nself.SERMO_RELEASE_ID = null;\n',
 );
 
 console.log(`Prepared release ${release.id}`);

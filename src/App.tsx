@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
+import {FrontendUpdatePoller} from './components/FrontendUpdatePoller';
 import { ChronelleBindingGate, ChronelleReturnFailure } from './components/ChronelleBindingGate';
 import { isChronelleReturn } from './lib/chronelleReturn';
 import { DocumentTitle } from "./components/DocumentTitle";
@@ -10,7 +11,6 @@ import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
 import { GlobalChatLayoutDiagnostics } from "./components/GlobalChatLayoutDiagnostics";
 import { PwaRecommendation } from "./components/PwaRecommendation";
-import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { SiteMigrationNotice } from "./components/SiteMigrationNotice";
 import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
 import { RouteResourceState } from "./components/RouteResourceState";
@@ -268,9 +268,9 @@ export default function App() {
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
       {ready && !isPlatformAdmin && !isDesignLab && !location.pathname.startsWith("/app/number-duel/") && !/^\/app\/chats\/\d+\/history$/.test(location.pathname) ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
-      {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
       {ready && !isPlatformAdmin && !isDesignLab && location.pathname !== "/oauth/authorize" ? <SiteMigrationNotice /> : null}
       <AppToast />
+      {!isPlatformAdmin && !isDesignLab ? <FrontendUpdatePoller/> : null}
     </>
   );
 }

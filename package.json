@@ -10,6 +10,7 @@
     "build:frienden": "SERMO_CNAME=frienden.jyonn.space VITE_PUBLIC_ORIGIN=https://frienden.jyonn.space npm run build",
     "build:frienden-mirror": "VITE_PUBLIC_ORIGIN=https://frienden.6-79.cn npm run build:mirror",
     "release:prepare": "node scripts/prepare-release.mjs",
+    "release:publish": "node scripts/publish-frontend-release.mjs",
     "assets:check": "node scripts/audit-assets.mjs",
     "assets:check-built": "node scripts/audit-assets.mjs --built",
     "dev": "npm run release:prepare && vite",
