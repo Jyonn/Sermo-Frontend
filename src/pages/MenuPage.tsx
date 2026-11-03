@@ -68,6 +68,8 @@ import chronelleIcon from "../assets/chronelle-icon.png";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
+import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
+import type {SquareFeedLayout} from '../lib/squareFeedLayout';
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
@@ -548,6 +550,7 @@ export default function MenuPage() {
   const pwaGrowthClaimedRef = useRef(false);
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
+  const [squareFeedLayout,setSquareFeedLayout]=useSquareFeedLayout(cacheScope);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   useEffect(() => {
     if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
@@ -2422,6 +2425,7 @@ export default function MenuPage() {
               />}
             />
           </SettingGroup>
+          <SettingGroup><SettingSelect<SquareFeedLayout> label={t('square.layout')} value={squareFeedLayout} onChange={setSquareFeedLayout} options={[{value:'list',label:t('square.layoutList')},{value:'masonry',label:t('square.layoutMasonry')}]}/></SettingGroup>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
             className="personalization-background-entry personalization-feature-entry personalization-chat-page-entry"

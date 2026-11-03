@@ -1,17 +1,21 @@
 {
-  "id": "2026.11.03.5",
+  "id": "2026.11.03.6",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "查看最新更新内容",
+      "title": "广场，换个方式逛",
       "items": [
-        "检查更新中展示服务器提供的最新版本号和更新点，轻提示保持简洁"
+        "个性化中可切换广场瀑布流，手机双列、桌面三到四列",
+        "纯文字发言自动排成文字封面，点击可阅读全文",
+        "适配多图首图、视频、音频、音乐专辑和 StillFolio 照片集封面"
       ]
     },
     "en": {
-      "title": "See what's new",
+      "title": "A new way to browse Square",
       "items": [
-        "Check for updates shows the latest version and release notes from the server; toasts stay brief"
+        "Choose a masonry Square feed in Personalization: two columns on phones, three or four on desktop",
+        "Text-only posts get typographic covers; open a post to read the full text",
+        "Covers support photo galleries, video, audio, music albums and StillFolio collections"
       ]
     }
   }

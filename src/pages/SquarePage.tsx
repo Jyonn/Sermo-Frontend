@@ -39,6 +39,8 @@ import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VirtualDynamicList } from "../components/VirtualDynamicList";
+import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
+import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
 import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
@@ -509,6 +511,7 @@ export default function SquarePage() {
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
+  const [squareFeedLayout]=useSquareFeedLayout(cacheScope);
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
   const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
@@ -2178,7 +2181,7 @@ export default function SquarePage() {
 
   return (
     <AppChrome workspaceSelected={inlineRouteActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
-      <div className={`square-desktop-workspace is-square${inlineRouteActive ? " has-selection" : ""}`}>
+      <div className={`square-desktop-workspace is-square${squareFeedLayout==='masonry'?' is-masonry':''}${inlineRouteActive ? " has-selection" : ""}`}>
       <main
         className="list-screen square-feed-screen is-square-workspace"
         onScroll={(event) => {
@@ -2307,7 +2310,7 @@ export default function SquarePage() {
             />
           ) : null}
           {
-            <VirtualDynamicList
+            squareFeedLayout==='masonry'?<SquareMasonryFeed items={visibleStatements} scrollRef={squareFeedScrollRef} renderText={statement=><InlineRichText text={statement.text} emoticons={statement.inline_emoticons}/>} canInteract={canPublish} onOpen={statement=>openStatementDrawer(statement.statement_id)} onLike={statement=>void toggleStatementLike(statement)} onProfile={statement=>openUserProfile(statement.user)}/>:<VirtualDynamicList
               className="square-statement-feed square-virtual-feed"
               estimateSize={estimateStatementHeight}
               itemKey={(statement) => `statement-${statement.statement_id}`}
