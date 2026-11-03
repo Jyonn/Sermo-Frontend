@@ -1,5 +1,5 @@
 .message-bubble.is-statement:has(.message-statement-card.is-note){width:min(68vw,260px)}
 .message-statement-card.is-note{display:block;grid-template-rows:none;width:100%;height:auto;min-width:0;border-radius:6px;color:var(--text-primary)}
-.message-statement-card.is-note>.square-note{width:100%;margin:0;border:0;border-radius:inherit}
+.message-statement-card.is-note>.square-note{width:100%;margin:0;border:0;border-radius:inherit;color:var(--text-primary)}
 .message-statement-card.is-note .square-note .square-note-title{font-size:13px}
 .message-statement-card.is-note .square-note-cover{max-height:340px}

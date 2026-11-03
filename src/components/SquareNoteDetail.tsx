@@ -34,7 +34,7 @@ export function SquareNoteDetail(p:Props){
   const currentIndex=useRef(index);currentIndex.current=index;
   useEffect(()=>{setCollection(initial);if(!initial||!s.external_media?.preview_id)return;let live=true;void revalidateCollection(s.external_media.preview_id).then(next=>{if(live&&next?.canonical_url===initial.canonical_url)setCollection(next)}).catch(()=>undefined);return()=>{live=false}},[initial,s.external_media?.preview_id]);
   const photos=useMemo(()=>squareNotePhotos(s,collection),[s,collection]);
-  useEffect(()=>setIndex(current=>Math.max(0,Math.min(current,photos.length-1))),[photos.length]);
+  useEffect(()=>{setIndex(current=>Math.max(0,Math.min(current,photos.length-1)));setLightbox(current=>current===null?null:photos.length?Math.max(0,Math.min(current,photos.length-1)):null)},[photos.length]);
   useLayoutEffect(()=>{const el=track.current;if(!el)return;const align=()=>{el.scrollLeft=el.clientWidth*currentIndex.current};align();const observer=new ResizeObserver(align);observer.observe(el);return()=>observer.disconnect()},[photos.length]);
   const audio=s.media.find(item=>item.kind==='audio'),video=s.media.find(item=>item.kind==='video'),active=photos[index];
   const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;

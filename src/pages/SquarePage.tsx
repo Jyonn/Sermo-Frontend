@@ -610,6 +610,7 @@ export default function SquarePage() {
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const noteDetailActive=routedStatementId!==null&&squareDetailView(location.search)==='note';
   const [noteMoreOpen,setNoteMoreOpen]=useState(false);
+  useEffect(()=>setNoteMoreOpen(false),[routedStatementId,noteDetailActive]);
   const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; previewMessages?: ChatMessageDTO[]; firstPersonUserId?: number | null; text?: string } } | null;
   const inlineRouteActive = routedStatementId !== null && !noteDetailActive && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
