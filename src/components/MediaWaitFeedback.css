@@ -73,4 +73,6 @@
 .music-mini-compact { position: relative; }
 .music-mini-wait { position: absolute; top: calc(50% - 8px); left: calc(50% - 8px); }
 .statement-video-thumbnail.is-cover-loading { background: var(--surface-soft); }
+.statement-video-thumbnail.is-fit-media{height:auto}
+.statement-video-thumbnail.is-fit-media>img,.statement-video-thumbnail.is-fit-media>.statement-video-thumbnail-placeholder{position:absolute;inset:0;object-fit:contain}
 .statement-video-thumbnail.is-cover-loading > img { opacity: 0; }

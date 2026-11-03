@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {squareDetailView,squareStatementSearch,squareNotePhotos} from '../src/lib/squareNoteMedia.ts';
+import {squareDetailView,squareStatementSearch,squareNotePhotos,naturalMediaRatio} from '../src/lib/squareNoteMedia.ts';
+test('detail media preserves actual wide, portrait and long-image ratios',()=>{
+  assert.equal(naturalMediaRatio(1920,1080),16/9);
+  assert.equal(naturalMediaRatio(600,900),2/3);
+  assert.equal(naturalMediaRatio(300,3000),0.1);
+  for(const dimensions of [[0,100],[-1,100],[NaN,100],[100,Infinity],[undefined,100]]){
+    assert.equal(naturalMediaRatio(...dimensions as [number|undefined,number]),null);
+  }
+});
 import type {SquareStatementDTO,StillfolioCollectionDTO} from '../src/types.ts';
 test('detail navigation preserves feed filters and explicitly selects its presentation',()=>{
   const note=squareStatementSearch('?user_id=7&keyword=hello&panel=profile','note');

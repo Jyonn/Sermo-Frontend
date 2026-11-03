@@ -12,10 +12,10 @@
 .square-reader-layout{width:100%;max-width:1100px;margin:auto}
 .square-reader-reading{min-width:0;padding:0 20px}
 .square-reader-gallery{position:relative;min-width:0;background:var(--bg-elevated)}
-.square-reader-track{display:flex;width:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
+.square-reader-track{display:flex;align-items:stretch;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
 .square-reader-track::-webkit-scrollbar{display:none}
-.square-reader-photo{position:relative;flex:0 0 100%;width:100%;height:min(125vw,65dvh);scroll-snap-align:start;scroll-snap-stop:always}
-.square-reader-photo>button{display:block;width:100%;height:100%;padding:0;border:0;background:none}
+.square-reader-photo{position:relative;flex:0 0 100%;width:100%;min-width:0;min-height:0;scroll-snap-align:start;scroll-snap-stop:always}
+.square-reader-photo>button{position:absolute;inset:0;display:block;width:100%;height:100%;padding:0;border:0;background:none}
 .square-reader-photo img{display:block;width:100%;height:100%;object-fit:contain}
 .square-reader-provider{position:absolute;left:14px;top:14px;display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:#faf8f0dd}
 .square-reader-provider img{width:24px;height:24px}
@@ -38,7 +38,7 @@
 .square-reader-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 20px;border-bottom:1px solid var(--line-soft);color:var(--text-muted);font-size:11px}
 .square-reader-external{padding-top:16px}
 .square-reader-audio{width:100%;margin-top:18px}
-.square-reader-video{width:100%;aspect-ratio:4/3;margin-top:16px}
+.square-reader-video{width:100%;height:auto;margin-top:16px}
 .square-reader-chat-record{margin-top:16px}
 .square-reader .square-discussion-section{padding:20px 0;border:0;border-radius:0;background:none;box-shadow:none}
 .square-reader-footer{display:flex;align-items:center;gap:10px;flex:none;padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));border-top:1px solid var(--line-soft);background:var(--bg-canvas)}
@@ -53,5 +53,6 @@
 .square-reader-footer .is-liked>span{font-variation-settings:'FILL' 1}
 .square-reader-info>small{display:block;margin-bottom:12px;color:var(--text-muted);font-size:11px}
 .square-reader-info>a{display:block;margin-top:16px;color:var(--brand-primary);font-size:12px}
-@media(min-width:900px){.square-reader-header,.square-reader-footer{padding-inline:max(24px,calc((100vw - 1100px)/2))}.square-reader.has-gallery .square-reader-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}.square-reader-gallery{position:sticky;top:0}.square-reader-photo{height:min(720px,calc(100dvh - 175px))}.square-reader-reading{padding-inline:28px}.square-reader:not(.has-gallery) .square-reader-reading{max-width:720px;margin:auto}.square-reader-composer{max-width:750px}.square-reader-footer{justify-content:center}}
+.square-reader.is-panel .square-reader-header{min-height:65px;padding:8px 12px}
+.square-reader.is-panel .square-reader-footer{padding-inline:12px}
 @media(prefers-reduced-motion:reduce){.square-reader-scroll{scroll-behavior:auto}}

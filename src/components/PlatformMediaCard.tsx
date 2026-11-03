@@ -1,9 +1,12 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect,useRef,useState, type ReactNode } from "react";
+import {naturalMediaRatio} from '../lib/squareNoteMedia';
 import { useI18n } from "../lib/language";
 import "./MediaWaitFeedback.css";
 import "./PlatformMediaCard.css";
 
 interface PlatformMediaCardProps {
+  fitMedia?:boolean;
+  aspectRatio?:number|null;
   author?: string;
   cover?: string;
   kindLabel: string;
@@ -15,12 +18,15 @@ interface PlatformMediaCardProps {
   title: string;
 }
 
-export function PlatformMediaCard({ author, cover, kindLabel, logo, onClick, opening = false, playIcon, source, title }: PlatformMediaCardProps) {
+export function PlatformMediaCard({ author, cover, kindLabel, logo, onClick, opening = false, playIcon, source, title,fitMedia=false,aspectRatio }: PlatformMediaCardProps) {
   const { t } = useI18n();
   const [coverResult, setCoverResult] = useState<{ uri?: string; status: "ready" | "error" } | null>(null);
+  const [coverRatio,setCoverRatio]=useState<{uri:string;ratio:number}|null>(null),imageRef=useRef<HTMLImageElement>(null);
+  const rememberSize=(image:HTMLImageElement)=>{const ratio=naturalMediaRatio(image.naturalWidth,image.naturalHeight);if(fitMedia&&cover&&ratio)setCoverRatio({uri:cover,ratio})};
+  useLayoutEffect(()=>{if(imageRef.current?.complete&&imageRef.current.naturalWidth){rememberSize(imageRef.current);setCoverResult({uri:cover,status:'ready'})}},[cover,fitMedia]);
   const coverState = coverResult && coverResult.uri === cover ? coverResult.status : cover ? "loading" : "error";
-  return <button aria-busy={opening} className={`platform-media-card${coverState === "loading" ? " is-cover-loading" : ""}`} disabled={opening} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
-    {cover && coverState !== "error" ? <img alt="" className="platform-media-cover" loading="lazy" onError={() => setCoverResult({ uri: cover, status: "error" })} onLoad={() => setCoverResult({ uri: cover, status: "ready" })} referrerPolicy="no-referrer" src={cover} /> : <span className="platform-media-cover is-unavailable"><span aria-hidden="true" className="material-symbols-outlined">image_not_supported</span></span>}
+  return <button aria-busy={opening} style={fitMedia?{aspectRatio:naturalMediaRatio(aspectRatio,1)??(coverRatio && coverRatio.uri===cover?coverRatio.ratio:null)??4/3}:undefined} className={`platform-media-card${fitMedia?' is-fit-media':''}${coverState === "loading" ? " is-cover-loading" : ""}`} disabled={opening} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
+    {cover && coverState !== "error" ? <img alt="" ref={imageRef} className="platform-media-cover" loading="lazy" onError={() => setCoverResult({ uri: cover, status: "error" })} onLoad={event=>{setCoverResult({ uri: cover, status: "ready" });rememberSize(event.currentTarget)}} referrerPolicy="no-referrer" src={cover} /> : <span className="platform-media-cover is-unavailable"><span aria-hidden="true" className="material-symbols-outlined">image_not_supported</span></span>}
     <span className="platform-media-card-top">
       <span className="platform-media-card-brand"><img alt="" src={logo} />{source}</span>
       <span className="platform-media-card-kind">{kindLabel}</span>

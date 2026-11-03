@@ -2,7 +2,7 @@ import {useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from '
 import type {SquareStatementDTO} from '../types';
 import {useI18n} from '../lib/language';
 import {formatRelativeTime} from '../lib/presentation';
-import {squareNotePhotos} from '../lib/squareNoteMedia';
+import {squareNotePhotos,naturalMediaRatio} from '../lib/squareNoteMedia';
 import {useMediaSource} from '../lib/useMediaSource';
 import {claimMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {UserAvatar} from './UserAvatar';
@@ -17,12 +17,13 @@ import {BottomSheet} from './BottomSheet';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareNoteDetail.css';
 
-function NoteImage({uri,poster,selected,near,external,onOpen}:{uri:string;poster?:string|null;selected:boolean;near:boolean;external:boolean;onOpen:()=>void}){
+function NoteImage({uri,poster,selected,near,external,onOpen,onSize}:{uri:string;poster?:string|null;selected:boolean;near:boolean;external:boolean;onOpen:()=>void;onSize:(width:number,height:number)=>void}){
   const {t}=useI18n(),source=useMediaSource(selected?uri:poster||uri);
-  return <div className="square-reader-photo"><button onClick={onOpen} type="button" aria-label={t('common.fullscreen')}><img src={near?source.src:undefined} alt="" loading={selected?'eager':'lazy'} decoding="async" referrerPolicy={external?'no-referrer':undefined} onLoad={source.ready} onError={source.fail}/></button>{selected?<MediaWaitFeedback phase={source.phase} onRetry={source.retry}/>:null}</div>;
+  return <div className="square-reader-photo"><button onClick={onOpen} type="button" aria-label={t('common.fullscreen')}><img src={near?source.src:undefined} alt="" loading={selected?'eager':'lazy'} decoding="async" referrerPolicy={external?'no-referrer':undefined} onLoad={event=>{source.ready();onSize(event.currentTarget.naturalWidth,event.currentTarget.naturalHeight)}} onError={source.fail}/></button>{selected?<MediaWaitFeedback phase={source.phase} onRetry={source.retry}/>:null}</div>;
 }
 
 interface Props{
+  panel?:boolean;
   statement:SquareStatementDTO;discussion:ReactNode;composer:ReactNode;text:ReactNode;canInteract:boolean;
   onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onVideo:()=>void;onLocation:()=>void;
 }
@@ -30,6 +31,7 @@ export function SquareNoteDetail(p:Props){
   const {t}=useI18n(),s=p.statement;
   const initial=s.external_media?.status==='ready'&&isStillfolioCollection(s.external_media.provider_data)?s.external_media.provider_data:null;
   const [collection,setCollection]=useState(initial),[index,setIndex]=useState(0),[lightbox,setLightbox]=useState<number|null>(null),[info,setInfo]=useState(false);
+  const [imageRatios,setImageRatios]=useState<Record<string,number>>({});
   const track=useRef<HTMLDivElement>(null),comments=useRef<HTMLDivElement>(null);
   const currentIndex=useRef(index);currentIndex.current=index;
   useEffect(()=>{setCollection(initial);if(!initial||!s.external_media?.preview_id)return;let live=true;void revalidateCollection(s.external_media.preview_id).then(next=>{if(live&&next?.canonical_url===initial.canonical_url)setCollection(next)}).catch(()=>undefined);return()=>{live=false}},[initial,s.external_media?.preview_id]);
@@ -37,21 +39,22 @@ export function SquareNoteDetail(p:Props){
   useEffect(()=>{setIndex(current=>Math.max(0,Math.min(current,photos.length-1)));setLightbox(current=>current===null?null:photos.length?Math.max(0,Math.min(current,photos.length-1)):null)},[photos.length]);
   useLayoutEffect(()=>{const el=track.current;if(!el)return;const align=()=>{el.scrollLeft=el.clientWidth*currentIndex.current};align();const observer=new ResizeObserver(align);observer.observe(el);return()=>observer.disconnect()},[photos.length]);
   const audio=s.media.find(item=>item.kind==='audio'),video=s.media.find(item=>item.kind==='video'),active=photos[index];
+  const activeRatio=active?(imageRatios[active.uri]??naturalMediaRatio(active.metadata?.pixel_width,active.metadata?.pixel_height)??4/3):4/3;
   const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const page=(next:number)=>{const el=track.current;if(el)el.scrollTo({left:next*el.clientWidth,behavior:reduce()?'auto':'smooth'})};
   const photoStage=photos.length?<section className="square-reader-gallery" aria-label={t('square.photo')}>
-    <div className="square-reader-track" ref={track} onScroll={event=>{const el=event.currentTarget;if(el.clientWidth)setIndex(Math.max(0,Math.min(photos.length-1,Math.round(el.scrollLeft/el.clientWidth))))}}>
-      {photos.map((photo,i)=><NoteImage key={photo.uri} uri={photo.uri} poster={photo.poster} external={photo.external} selected={i===index} near={Math.abs(i-index)<=1} onOpen={()=>setLightbox(i)}/>)}
+    <div className="square-reader-track" style={{aspectRatio:activeRatio}} ref={track} onScroll={event=>{const el=event.currentTarget;if(el.clientWidth)setIndex(Math.max(0,Math.min(photos.length-1,Math.round(el.scrollLeft/el.clientWidth))))}}>
+      {photos.map((photo,i)=><NoteImage key={photo.uri} uri={photo.uri} poster={photo.poster} external={photo.external} selected={i===index} near={Math.abs(i-index)<=1} onOpen={()=>setLightbox(i)} onSize={(width,height)=>{const ratio=naturalMediaRatio(width,height);if(ratio)setImageRatios(current=>current[photo.uri]===ratio?current:{...current,[photo.uri]:ratio})}}/>)}
     </div>
     {collection?<span className="square-reader-provider"><img src={stillfolioMark} alt="StillFolio"/></span>:null}
     <button className="square-reader-photo-info" onClick={()=>setInfo(true)} type="button"><span className="material-symbols-outlined">info</span>{t('square.photoInfo')}</button>
     {photos.length>1?<div className="square-reader-pagination"><button disabled={index===0} aria-label={t('media.previousImage')} onClick={()=>page(index-1)} type="button"><span className="material-symbols-outlined">chevron_left</span></button><div className="square-reader-dots" role="group" aria-label={t('square.photo')} >{photos.map((photo,i)=><button key={photo.uri} aria-label={`${i+1} / ${photos.length}`} aria-current={i===index?'true':undefined} onClick={()=>page(i)} type="button"><i/></button>)}</div><span>{index+1} / {photos.length}</span><button disabled={index===photos.length-1} aria-label={t('media.nextImage')} onClick={()=>page(index+1)} type="button"><span className="material-symbols-outlined">chevron_right</span></button></div>:null}
   </section>:null;
-  return <article className={`square-reader${photos.length?' has-gallery':''}`}>
-    <header className="square-reader-header"><button aria-label={t('common.back')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">arrow_back</span></button><button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button><button aria-label={t('square.share')} onClick={p.onShare} type="button"><span className="material-symbols-outlined">ios_share</span></button>{s.can_delete||s.can_pin||s.can_mute?<button aria-label={t('common.more')} onClick={p.onMore} type="button"><span className="material-symbols-outlined">more_horiz</span></button>:null}</header>
+  return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
+    <header className="square-reader-header"><button className={p.panel?'native-panel-back':undefined} aria-label={t('common.back')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">arrow_back</span></button><button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button><button aria-label={t('square.share')} onClick={p.onShare} type="button"><span className="material-symbols-outlined">ios_share</span></button>{s.can_delete||s.can_pin||s.can_mute?<button aria-label={t('common.more')} onClick={p.onMore} type="button"><span className="material-symbols-outlined">more_horiz</span></button>:null}{p.panel?<button className="native-panel-close" aria-label={t('common.close')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">close</span></button>:null}</header>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
-      {!photos.length&&s.external_media?.status==='ready'?<div className="square-reader-external"><ExternalMediaPreview preview={s.external_media}/></div>:null}
-      {video?<StatementVideoThumbnail className="square-reader-video" eager thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={p.onVideo}/>:null}
+      {!photos.length&&s.external_media?.status==='ready'?<div className="square-reader-external"><ExternalMediaPreview preview={s.external_media} fitMedia/></div>:null}
+      {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={p.onVideo}/>:null}
       {audio?<audio className="square-reader-audio" src={audio.uri} controls preload="metadata" onPlay={event=>claimMediaPlayback(event.currentTarget)}/>:null}
       {s.chat_record?<button className="square-reader-chat-record" onClick={()=>window.dispatchEvent(new CustomEvent('sermo:forward-bundle',{detail:s.chat_record}))} type="button"><span className="material-symbols-outlined">forum</span>{t('message.forwardBundleSnapshot')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
       {s.text?<div className="square-reader-text">{p.text}</div>:null}

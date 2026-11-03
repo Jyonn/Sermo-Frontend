@@ -4,6 +4,7 @@ import type { DouyinVideoDataDTO } from "../types";
 import { ImmersiveVideo } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { api } from "../lib/api";
+import {naturalMediaRatio} from '../lib/squareNoteMedia';
 import { PlatformMediaCard, PlatformVideoError, PlatformVideoSource } from "./PlatformMediaCard";
 
 export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
@@ -42,7 +43,7 @@ function DouyinDrawerPlayer({ imageUrl, onClose, onPlaybackError, playbackKey, v
   </div>;
 }
 
-export function DouyinVideoPreview({ previewId, video, imageUrl }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string }) {
+export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string;fitMedia?:boolean }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(video);
@@ -91,7 +92,7 @@ export function DouyinVideoPreview({ previewId, video, imageUrl }: { previewId?:
   };
 
   return <>
-    <PlatformMediaCard author={currentVideo.author} cover={currentImageUrl} kindLabel={t("social.video")} logo="/icons/douyin-logo.svg" onClick={() => void openPlayer()} opening={opening} playIcon={playable ? "play_arrow" : "open_in_new"} source={t("social.douyin")} title={currentVideo.title || t("douyin.video")} />
+    <PlatformMediaCard fitMedia={fitMedia} aspectRatio={naturalMediaRatio(currentVideo.width,currentVideo.height)} author={currentVideo.author} cover={currentImageUrl} kindLabel={t("social.video")} logo="/icons/douyin-logo.svg" onClick={() => void openPlayer()} opening={opening} playIcon={playable ? "play_arrow" : "open_in_new"} source={t("social.douyin")} title={currentVideo.title || t("douyin.video")} />
     <SideDrawer floatingBack={false} fullscreen headerless historyKey={`douyin-video-${currentVideo.video_id}`} open={open} onClose={() => setOpen(false)} title={currentVideo.title || t("douyin.video")}>
       {open && currentVideo.video_url ? <DouyinDrawerPlayer imageUrl={currentImageUrl} onClose={() => setOpen(false)} onPlaybackError={() => void handlePlaybackError()} playbackKey={playbackKey} video={currentVideo} /> : null}
       {playbackFailed ? <PlatformVideoError href={currentVideo.canonical_url} label={t("douyin.openOriginal")}>{t("douyin.playbackUnavailable")}</PlatformVideoError> : null}

@@ -25,7 +25,7 @@ export function isSocialMediaData(value: unknown): value is SocialMediaDataDTO {
   return Array.isArray(media.images) && media.images.length > 0 && media.images.every((url) => typeof url === "string" && trusted(url, domains));
 }
 
-export function SocialMediaPreview({ media, imageUrl }: { media: SocialMediaDataDTO; imageUrl?: string }) {
+export function SocialMediaPreview({ media, imageUrl,fitMedia=false }: { media: SocialMediaDataDTO; imageUrl?: string;fitMedia?:boolean }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
@@ -47,7 +47,7 @@ export function SocialMediaPreview({ media, imageUrl }: { media: SocialMediaData
     </div>
   </div>;
   return <>
-    <PlatformMediaCard author={media.author} cover={cover} kindLabel={isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`} logo={logo} onClick={() => { setIndex(0); setFailed(false); setOpen(true); }} playIcon={isVideo ? "play_arrow" : undefined} source={source} title={title} />
+    <PlatformMediaCard fitMedia={fitMedia} author={media.author} cover={cover} kindLabel={isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`} logo={logo} onClick={() => { setIndex(0); setFailed(false); setOpen(true); }} playIcon={isVideo ? "play_arrow" : undefined} source={source} title={title} />
     {open && !isVideo ? <ImageLightbox altPrefix={title} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={galleryDetails} uris={images} /> : null}
     <SideDrawer floatingBack={false} fullscreen headerless historyKey={`social-${media.canonical_url}`} open={open && isVideo} onClose={() => setOpen(false)} title={title}>
       {open && isVideo ? <div className="platform-video-shell">

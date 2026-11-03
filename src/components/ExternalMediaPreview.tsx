@@ -12,13 +12,13 @@ export function isSupportedExternalMedia(preview?: LinkPreviewDTO | null) {
     && (isMusicData(preview?.provider_data) || isDouyinVideoData(preview?.provider_data) || isSocialMediaData(preview?.provider_data) || isStillfolioCollection(preview?.provider_data));
 }
 
-export function ExternalMediaPreview({ preview }: { preview: LinkPreviewDTO }) {
+export function ExternalMediaPreview({ preview,fitMedia=false }: { preview: LinkPreviewDTO;fitMedia?:boolean }) {
   if (!isSupportedExternalMedia(preview)) return <UnsupportedContentNotice minVersion={preview.min_client_version} title={preview.title || preview.site_name} url={preview.url} />;
   if (isMusicData(preview.provider_data)) return <MusicPreview music={preview.provider_data} />;
   if (isDouyinVideoData(preview.provider_data)) {
-    return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} />;
+    return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} fitMedia={fitMedia} />;
   }
-  if (isSocialMediaData(preview.provider_data)) return <SocialMediaPreview media={preview.provider_data} imageUrl={preview.image_url} />;
+  if (isSocialMediaData(preview.provider_data)) return <SocialMediaPreview media={preview.provider_data} imageUrl={preview.image_url} fitMedia={fitMedia} />;
   if (isStillfolioCollection(preview.provider_data)) return <StillfolioPreview collection={preview.provider_data} previewId={preview.preview_id} />;
   return <UnsupportedContentNotice minVersion={preview.min_client_version} title={preview.title || preview.site_name} url={preview.url} />;
 }

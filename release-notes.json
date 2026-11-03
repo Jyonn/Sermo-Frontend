@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.04.2",
+  "id": "2026.11.04.3",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "修复系统通知连接与状态显示",
+      "title": "更自然的广场媒体详情",
       "items": [
-        "修复前台页面导致系统通知被跳过的问题，增强 iOS WebAPP 推送可靠性",
-        "通知设置明确展示检查中、检查失败和待重新连接，避免开关先关后开的误导",
-        "失效订阅不再静默重建，可主动重新连接或关闭；推送链路区分服务接收与客户端处理"
+        "照片与视频展示区按媒体实际比例调整，减少多余留白",
+        "桌面端从瀑布流打开详情时，在右侧面板阅读并保留发言流"
       ]
     },
     "en": {
-      "title": "More reliable system notifications",
+      "title": "Natural media layouts in Square",
       "items": [
-        "System notifications are no longer skipped because a page is visible, improving iOS WebAPP reliability",
-        "Notification settings clearly distinguish checking, check failures and connections needing repair",
-        "Lost subscriptions require an explicit reconnect and can be turned off; delivery traces distinguish service acceptance from client handling"
+        "Photo and video detail areas follow the media’s natural proportions, removing unnecessary space",
+        "Masonry posts open in a right-hand detail panel on desktop, keeping the feed available"
       ]
     }
   }
