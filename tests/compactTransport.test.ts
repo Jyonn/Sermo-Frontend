@@ -47,3 +47,12 @@ test("message paging, growth and founder acknowledgement negotiate compact trans
   assert.equal((growth.match(/decodeCompact<UserGrowthDTO>/g) ?? []).length, 3);
   assert.match(growth, /acknowledgeFounderMedal/);
 });
+
+test("current profile negotiates lossless transport with a legacy fallback", () => {
+  const source = readFileSync(new URL("../src/lib/api.ts", import.meta.url), "utf8");
+  const me = source.slice(source.indexOf("  getUserMe("), source.indexOf("  getWechatMiniProgramBinding("));
+  assert.match(me, /format: "compact-v1"/);
+  assert.match(me, /decodeCompact<UserMeDTO>\(payload, "user-me"\)/);
+  const legacy = { user_id: 1, resource_inventory: [], growth: { levels: [], pending_level: null } };
+  assert.equal(decodeCompact(legacy, "user-me"), legacy);
+});

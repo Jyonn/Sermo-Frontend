@@ -76,6 +76,7 @@ function RequireSubmissionFeature({ children }: { children: ReactNode }) {
 }
 
 function SquareEntry() {
+  // Every Square route uses this entry so opening an overlay preserves the feed instance.
   const location = useLocation();
   const destination = legacySubmissionDestination(location.pathname, location.search);
   return destination ? <Navigate replace to={destination} /> : <SquarePage />;
@@ -192,7 +193,7 @@ export default function App() {
           path="/app/square/statements/:statementId"
           element={
             <RequireAuth>
-              <SquarePage />
+              <SquareEntry />
             </RequireAuth>
           }
         />
@@ -204,7 +205,7 @@ export default function App() {
           path="/app/square/activities/:activityKey"
           element={
             <RequireAuth>
-              <SquarePage />
+              <SquareEntry />
             </RequireAuth>
           }
         />

@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.03.7",
+  "id": "2026.11.03.8",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "在广场，直接听见",
+      "title": "广场浏览更连贯",
       "items": [
-        "音乐以虚化封面和 CD 造型展示，音乐与音频可在瀑布流中直接播放",
-        "发言卡片更紧凑，照片集增加 StillFolio 标识，媒体比例限定为 2:3–3:2",
-        "默认使用瀑布流，手机信息流两侧贴边，仍可自行切换列表"
+        "打开和关闭发言详情时保留广场列表，避免瀑布流闪烁重排",
+        "个人资料请求采用无损压缩，减少加载流量，资料与功能保持完整"
       ]
     },
     "en": {
-      "title": "Listen right in Square",
+      "title": "Smoother Square browsing",
       "items": [
-        "Music uses a blurred album backdrop and CD cover; play music and audio directly in the feed",
-        "More cohesive cards, StillFolio collection branding and media ratios between 2:3 and 3:2",
-        "Masonry is now the default with edge-to-edge phone layouts; List remains available"
+        "Keep the Square feed mounted when opening and closing post details to avoid masonry flicker",
+        "Lossless profile compression reduces loading traffic while preserving all data and features"
       ]
     }
   }

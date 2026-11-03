@@ -1606,10 +1606,11 @@ export const api = {
   },
 
   getUserMe(signal?: AbortSignal) {
-    return request<UserMeDTO>("/users/me", {
+    return request<UserMeDTO | CompactPayload>("/users/me", {
       auth: true,
+      query: { format: "compact-v1" },
       signal,
-    });
+    }).then(payload => decodeCompact<UserMeDTO>(payload, "user-me"));
   },
 
   getWechatMiniProgramBinding(signal?: AbortSignal) {
