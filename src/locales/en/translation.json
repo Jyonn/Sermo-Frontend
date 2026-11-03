@@ -62,7 +62,7 @@
   "sticker.series.apply": "Add",
   "sticker.series.delete": "Delete stickers",
   "sticker.series.failed": "Could not complete the action. Please retry.",
-  "resources.category.activity": "Activity assets",
+  "resources.category.activity": "Activities",
   "explorer.expression.joy": "Joy",
   "explorer.expression.laugh": "Laughing",
   "explorer.expression.laugh-tears": "Tears of joy",
@@ -93,7 +93,7 @@
   "resources.englishName": "English name",
   "resources.version": "Version",
   "resources.category": "Category",
-  "resources.category.emoji": "Expressions",
+  "resources.category.emoji": "Emoji",
   "resources.category.avatar-frame": "Avatar frames",
   "resources.category.background": "Backgrounds",
   "resources.category.illustration": "Illustrations",
@@ -103,7 +103,7 @@
   "resources.unpublish": "Unpublish collection",
   "resources.publish": "Publish collection",
   "resources.upload": "Upload assets",
-  "resources.search": "Search names or asset keys",
+  "resources.search": "Search assets",
   "resources.order": "Order",
   "resources.rename": "Rename",
   "resources.disable": "Unpublish",
@@ -265,7 +265,7 @@
   "menu.profileCardTheme.explorer-romance": "Shinichi & Ran · Always",
   "research.changedRetry": "The project changed. The latest version is loaded; review it and try again.",
   "resources.add": "Add resource",
-  "resources.library": "Shared library",
+  "resources.library": "OFFICIAL LIBRARY",
   "resources.inventory": "{{files}} files · {{links}} links",
   "resources.archived": "Read-only",
   "resources.search": "Search files, folders or links",
@@ -3941,4 +3941,10 @@
   ,"bgm.manageKeychain": "Manage tracks, keys and entrance sounds"
   ,"resources.dropToUpload": "Drop files to upload"
   ,"resources.dropHint": "Add files to the current folder"
+,"resources.category.profile-card": "Profile cards"
+,"resources.category.bubble": "Bubbles"
+,"resources.collectionCount": "{{count}} collections"
+,"resources.assetCount": "{{count}} assets"
+,"resources.reviewHint": "Sticker packs awaiting review appear here."
+,"resources.noResults": "No matching assets"
 }

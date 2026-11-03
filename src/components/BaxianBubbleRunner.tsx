@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import heXianguAnimation from "../../design/Baxian/HeXiangu/direct-imagegen-v4/animation.json";
 import lvDongbinAnimation from "../../design/Baxian/LvDongbin/direct-imagegen-v4/animation.json";
 import zhongliQuanAnimation from "../../design/Baxian/ZhongliQuan/direct-imagegen-v4/animation.json";
-import heXianguTransitionSheet from "../assets/baxian/he-xiangu-edge-sheet.webp";
-import lvDongbinTransitionSheet from "../assets/baxian/lv-dongbin-edge-sheet.webp";
-import zhongliQuanTransitionSheet from "../assets/baxian/zhongli-quan-edge-sheet.webp";
+const heXianguTransitionSheet = "https://api.sermo.jyonn.space/resources/assets/132/display/bc3b92821a129652dd9548f5cf2efea6b9942c2da1ab134a708d553d9ceeb157";
+const lvDongbinTransitionSheet = "https://api.sermo.jyonn.space/resources/assets/133/display/3f1b56d3c98c3a9ab8dde1c65ce37c41fac86ba0bd5e727a778f3b8b3ee6af3e";
+const zhongliQuanTransitionSheet = "https://api.sermo.jyonn.space/resources/assets/134/display/6c38f40ec84a374b7e75eba54c7b74951e89187fba78e46c9790e559aa37926e";
 
 type BaxianCharacter = "lv" | "zhongli" | "he";
 

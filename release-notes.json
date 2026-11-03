@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.03.2",
+  "id": "2026.11.03.3",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "更新由你决定",
+      "title": "外观素材云端同步",
       "items": [
-        "定时通过 API 检测前端新版本，发现更新时用轻提示和红点提醒",
-        "请在菜单中检查更新，确认后才更新并刷新页面"
+        "个性化外观素材统一从云端加载，各站保持一致"
       ]
     },
     "en": {
-      "title": "Updates on your terms",
+      "title": "Appearance assets in sync",
       "items": [
-        "Periodic API checks detect frontend releases and show a toast and red dots",
-        "Check for updates in Menu; updating and reloading require your confirmation"
+        "Personalization artwork now loads from the cloud consistently across sites"
       ]
     }
   }

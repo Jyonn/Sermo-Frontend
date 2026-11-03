@@ -27,6 +27,7 @@
 
 ## Product Quality
 
+- Personalization bitmap assets live in the managed cloud resource library, grouped as avatar-frame, background, profile-card, bubble, or emoji. Use stable `/resources/assets/<id>/<variant>/<hash>` API URLs and keep only URL metadata in `src/lib/appearanceAssetManifest.json`; do not restore retired bitmap copies. Resolve computed layer paths through `appearanceAsset`. Keep preset-avatar compatibility files until backend and native clients have migrated their saved URLs. CSS/vector-only ornamentation stays in code.
 - Reuse one shared component for the same experience across chat and Square; do not maintain visually divergent copies.
 - Maintain Chinese and English through translation keys rather than hard-coded bilingual branches.
 - Design mobile-first while verifying desktop layouts, dark mode, safe areas, PWA behavior, loading states, and empty states.

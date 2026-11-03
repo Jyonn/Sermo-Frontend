@@ -122,7 +122,7 @@ import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
 import type { AppViewState, AudioTranscriptDTO, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatMuteDuration, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
-import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
+const chatPreviewMediaImage = "https://api.sermo.jyonn.space/resources/assets/228/display/f2513b63e644810ec6854d2d13bb072d31e34346e70feb4909d08b5fb6d86d43";
 import { PUBLIC_ORIGIN } from "../lib/siteConfig";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;

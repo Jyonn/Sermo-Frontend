@@ -1,5 +1,14 @@
 {
   "retired": [
+    "public/assets/city-bubbles",
+    "public/assets/baxian",
+    "public/assets/niko",
+    "public/assets/fufu",
+    "public/assets/profile-card-themes",
+    "public/assets/frienden-wallpapers",
+    "public/assets/qixi-2026",
+    "src/assets/baxian",
+    "src/assets/square/plaza-waterfront.jpg",
     "public/icons/frienden-32.png",
     "public/icons/frienden-180.png",
     "public/icons/frienden-maskable-192.png",

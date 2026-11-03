@@ -1,3 +1,4 @@
+import {appearanceAsset} from '../lib/appearanceAsset';
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import type { ChatBackgroundTheme } from "../types";
@@ -24,13 +25,13 @@ interface LivingScene {
 }
 
 const asset = (theme: "night" | "garden", group: "actors" | "plants", name: string) =>
-  `/assets/frienden-wallpapers/layers/${theme}/${group}/${name}.png`;
+  appearanceAsset(`/assets/frienden-wallpapers/layers/${theme}/${group}/${name}.png`);
 const item = (href: string, x: number, y: number, w: number, h: number, motion: string, delay: number, layer: LayerKind = "actor", effect?: SceneItem["effect"]): SceneItem =>
   ({ delay, effect, h, href, layer, motion, w, x, y });
 
 const SCENES: Record<LivingTheme, LivingScene> = {
   "frienden-night": {
-    environment: "/assets/frienden-wallpapers/layers/night-environment.webp",
+    environment: "https://api.sermo.jyonn.space/resources/assets/179/display/1755bf30a656168a76d6b3410f91c02653ca475f805fdcb7b4d385fef8eb1a7b",
     items: [
       item(asset("night", "plants", "ivy-strand"), 565, -16, 160, 300, "vine-breathe", -2.1, "back"),
       item(asset("night", "plants", "white-flower-vine"), 730, 145, 145, 260, "vine-breathe", -5.4, "back"),
@@ -52,7 +53,7 @@ const SCENES: Record<LivingTheme, LivingScene> = {
     ],
   },
   "frienden-garden": {
-    environment: "/assets/frienden-wallpapers/layers/garden-environment.webp",
+    environment: "https://api.sermo.jyonn.space/resources/assets/161/display/0cb5dae20ba221acb3b624a8127597987708a24e6ffd7e262166df19487141a4",
     items: [
       item(asset("garden", "plants", "flowering-ivy"), 18, 92, 150, 430, "vine-breathe", -2.2, "back"),
       item(asset("garden", "plants", "flower-arch"), 286, 125, 390, 255, "arch-breathe", -5.1, "back"),
@@ -111,13 +112,13 @@ export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: 
 
   if (theme === "starry-night") return <svg aria-hidden="true" className={`frienden-starry-wallpaper is-active is-visible${compact ? " is-compact" : ""}`} preserveAspectRatio="xMidYMid slice" viewBox="0 0 941 1672">
     <defs><clipPath id="starry-sky-boundary"><rect height={compact ? 820 : 1037} width="941" x="0" y="0" /></clipPath></defs>
-    <image height="1672" href="/assets/frienden-wallpapers/layers/starry-night/environment.webp" width="941" />
+    <image height="1672" href="https://api.sermo.jyonn.space/resources/assets/181/display/dbb2657abbbb2f3543cfbd4fae26baf2d66f40043250629a21e2508ce73819f1" width="941" />
     <g className="starry-sky-clip" clipPath="url(#starry-sky-boundary)">
-      <image className="starry-cloud-current" height="430" href="/assets/frienden-wallpapers/layers/starry-night/cloud-current.webp" width="1450" x="-260" y="120" />
-      <image className="starry-vortex is-main" height={compact ? 480 : 743} href="/assets/frienden-wallpapers/layers/starry-night/vortex-main.webp" width={compact ? 480 : 743} x={compact ? -80 : -216} y={compact ? 190 : 238} />
-      <image className="starry-vortex is-moon" height={compact ? 340 : 536} href="/assets/frienden-wallpapers/layers/starry-night/vortex-moon.webp" width={compact ? 340 : 536} x={compact ? 630 : 565} y={compact ? 20 : -93} />
-      <image className="starry-vortex is-star" height={compact ? 170 : 292} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 170 : 292} x={compact ? 560 : 489} y={compact ? 390 : 404} />
-      <image className="starry-vortex is-small" height={compact ? 90 : 169} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 90 : 169} x={compact ? 825 : 819} y={compact ? 560 : 570} />
+      <image className="starry-cloud-current" height="430" href="https://api.sermo.jyonn.space/resources/assets/180/display/9c9cb130c7ef77964a404af2a4e6280eafa25ac6d462240d9ed59f04a3cc911b" width="1450" x="-260" y="120" />
+      <image className="starry-vortex is-main" height={compact ? 480 : 743} href="https://api.sermo.jyonn.space/resources/assets/182/display/1a1344ea0db61454bf47aea37f4bc503d9c46fd5f4c93389709f8cf1927d2ca2" width={compact ? 480 : 743} x={compact ? -80 : -216} y={compact ? 190 : 238} />
+      <image className="starry-vortex is-moon" height={compact ? 340 : 536} href="https://api.sermo.jyonn.space/resources/assets/183/display/4f3d911142be5511a211c6414c599681cad206580c33b949fcd8209d4bc2df42" width={compact ? 340 : 536} x={compact ? 630 : 565} y={compact ? 20 : -93} />
+      <image className="starry-vortex is-star" height={compact ? 170 : 292} href="https://api.sermo.jyonn.space/resources/assets/184/display/be92f9ff3e51d99415c5965907a2d1bafe1632898e7490bca06c16584bc1aaee" width={compact ? 170 : 292} x={compact ? 560 : 489} y={compact ? 390 : 404} />
+      <image className="starry-vortex is-small" height={compact ? 90 : 169} href="https://api.sermo.jyonn.space/resources/assets/184/display/be92f9ff3e51d99415c5965907a2d1bafe1632898e7490bca06c16584bc1aaee" width={compact ? 90 : 169} x={compact ? 825 : 819} y={compact ? 560 : 570} />
     </g>
   </svg>;
   if (theme !== "frienden-night" && theme !== "frienden-garden") return null;

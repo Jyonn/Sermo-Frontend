@@ -77,9 +77,9 @@ const heXiangu = "https://api.sermo.jyonn.space/resources/assets/89/display/4f37
 const lanCaihe = "https://api.sermo.jyonn.space/resources/assets/90/display/cdac99ad29c003d358052b56f4dfedb4c33a26213ed07c1dca87c55c6f5a849b";
 const hanXiangzi = "https://api.sermo.jyonn.space/resources/assets/88/display/f1e04a067b88c2e1c2c208430b0e08adadc0a689d0b17604abf079bb6d8c3ee5";
 const caoGuojiu = "https://api.sermo.jyonn.space/resources/assets/87/display/addffd5b42eceaaccab7b3b41235530970283d684794734dbd02ac0ee142c6ce";
-import heXianguSealSheet from "../assets/baxian/he-xiangu-edge-sheet.webp";
-import lvDongbinSealSheet from "../assets/baxian/lv-dongbin-edge-sheet.webp";
-import zhongliQuanSealSheet from "../assets/baxian/zhongli-quan-edge-sheet.webp";
+const heXianguSealSheet = "https://api.sermo.jyonn.space/resources/assets/132/display/bc3b92821a129652dd9548f5cf2efea6b9942c2da1ab134a708d553d9ceeb157";
+const lvDongbinSealSheet = "https://api.sermo.jyonn.space/resources/assets/133/display/3f1b56d3c98c3a9ab8dde1c65ce37c41fac86ba0bd5e727a778f3b8b3ee6af3e";
+const zhongliQuanSealSheet = "https://api.sermo.jyonn.space/resources/assets/134/display/6c38f40ec84a374b7e75eba54c7b74951e89187fba78e46c9790e559aa37926e";
 
 type SelectedPhoto = {
   id: string;

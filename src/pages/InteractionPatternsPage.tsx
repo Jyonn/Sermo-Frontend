@@ -9,7 +9,7 @@ import { Snackbar } from "../components/Snackbar";
 import { Tour } from "../components/Tour";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { DEFAULT_SHEET_STOPS } from "../lib/interactionPatterns";
-import photo from "../assets/square/plaza-waterfront.jpg";
+const photo = "https://api.sermo.jyonn.space/resources/assets/228/display/f2513b63e644810ec6854d2d13bb072d31e34346e70feb4909d08b5fb6d86d43";
 import "./InteractionPatternsPage.css";
 
 const patterns = ["sheet", "actions", "snackbar", "alert", "tour", "lightbox", "inline"] as const;

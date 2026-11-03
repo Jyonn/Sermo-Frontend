@@ -626,7 +626,7 @@ export interface ResourceCollectionDTO {
   title: string;
   title_en: string;
   version: string;
-  category: 'emoji' | 'avatar-frame' | 'background' | 'illustration' | 'activity';
+  category: 'emoji' | 'avatar-frame' | 'background' | 'profile-card' | 'bubble' | 'illustration' | 'activity';
   directory?: string;
   published: boolean;
   updated_at: number;

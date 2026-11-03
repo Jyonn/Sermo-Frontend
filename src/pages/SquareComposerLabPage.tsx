@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import samplePhoto from "../assets/square/plaza-waterfront.jpg";
+const samplePhoto = "https://api.sermo.jyonn.space/resources/assets/228/display/f2513b63e644810ec6854d2d13bb072d31e34346e70feb4909d08b5fb6d86d43";
 import { PlainAvatar } from "../components/UserAvatar";
 
 type MediaMode = "none" | "images" | "audio" | "video";

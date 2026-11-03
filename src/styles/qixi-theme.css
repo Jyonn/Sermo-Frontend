@@ -6,11 +6,11 @@ html[data-site-theme="qixi-2026"] {
   --qixi-gold: #c9a45e;
   --qixi-cinnabar: #a84558;
   --qixi-plum: #6d405c;
-  --qixi-bg-image: url("/assets/qixi-2026/qixi-background-light.webp");
-  --qixi-header-image: url("/assets/qixi-2026/qixi-header-ribbon.webp");
-  --qixi-tab-image: url("/assets/qixi-2026/qixi-tab-underline.webp");
-  --qixi-corner-image: url("/assets/qixi-2026/qixi-corner-magpies.webp");
-  --qixi-medallion-image: url("/assets/qixi-2026/qixi-moon-medallion.webp");
+  --qixi-bg-image: url("https://api.sermo.jyonn.space/resources/assets/186/display/74ede718316db325f2a4d5338cb065e8c7d84e114bc4bb50aafb0e02692f5ec5");
+  --qixi-header-image: url("https://api.sermo.jyonn.space/resources/assets/188/display/bd824a348fb8c491bf75908cfc58b8e5f89b5509504c674603dcfd1b0fe2ea25");
+  --qixi-tab-image: url("https://api.sermo.jyonn.space/resources/assets/190/display/7d73a25cc88bca5e7e045e106663009afde02fa1097a717eb8c14b77f437f1f4");
+  --qixi-corner-image: url("https://api.sermo.jyonn.space/resources/assets/187/display/abe7e00d29e974c804342768b96e79808c891c1e222c6a6f1e99c7c5389721f7");
+  --qixi-medallion-image: url("https://api.sermo.jyonn.space/resources/assets/189/display/7f0cfd4c6e777e7bbc807fc914e81b948f9f33d491c438fb0e6e0ed6f5b4b7a4");
   --bg-canvas: #f2eee7;
   --bg-surface: #f7f3ec;
   --bg-elevated: #fbf7f0;
@@ -26,7 +26,7 @@ html[data-site-theme="qixi-2026"] {
 }
 
 html[data-site-theme="qixi-2026"][data-theme="dark"] {
-  --qixi-bg-image: url("/assets/qixi-2026/qixi-background-dark.webp");
+  --qixi-bg-image: url("https://api.sermo.jyonn.space/resources/assets/185/display/7a5348a2fa2f528e64837fa3288c2ea9bfc82192e39bbaafec7f6c90b0c3c135");
   --bg-canvas: #171a31;
   --bg-surface: #202541;
   --bg-elevated: #272c49;

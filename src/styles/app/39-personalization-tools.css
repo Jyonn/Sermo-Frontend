@@ -1036,7 +1036,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   bottom:0;
   left:50%;
   display:block;
-  background-image:url("/assets/niko/niko-avatar-greeting-spritesheet.png");
+  background-image:url("https://api.sermo.jyonn.space/resources/assets/135/display/d81ef064d64345439bbc91ba2fc86c0652df04de487469054837c1a469e9f9e2");
   animation:niko-frame-greeting 10s steps(1,end) infinite;
   transform:translateX(-50%);
 }
@@ -1049,7 +1049,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   left:50%;
   width:34px;
   height:28px;
-  background:url("/assets/niko/niko-run-right.webp") center calc(100% + 4px)/38px 38px no-repeat;
+  background:url("https://api.sermo.jyonn.space/resources/assets/136/display/f46a94de649608e5ae3cca80afea2e11292a3ec0b61635315d471887b19611ac") center calc(100% + 4px)/38px 38px no-repeat;
   display:none;
   filter:drop-shadow(0 2px 2px rgba(82,53,35,.2));
   transform:translateX(-50%);
@@ -1247,9 +1247,9 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   background-repeat:no-repeat;
 }
 
-.baxian-character-runner.is-lv .baxian-character-frame { background-image:url("/assets/baxian/lv-dongbin-latest-sheet.webp"); }
-.baxian-character-runner.is-zhongli .baxian-character-frame { background-image:url("/assets/baxian/zhongli-quan-latest-sheet.webp"); }
-.baxian-character-runner.is-he .baxian-character-frame { background-image:url("/assets/baxian/he-xiangu-latest-sheet.webp"); }
+.baxian-character-runner.is-lv .baxian-character-frame { background-image:url("https://api.sermo.jyonn.space/resources/assets/129/display/585f11cfdb5f347a53bd240e97309fd25bbbcd24108619cd92b1902727bd715b"); }
+.baxian-character-runner.is-zhongli .baxian-character-frame { background-image:url("https://api.sermo.jyonn.space/resources/assets/131/display/54e283ef95d70ff14a10d903c024c05ab5ee74ee2f8c739da0342ab162faa459"); }
+.baxian-character-runner.is-he .baxian-character-frame { background-image:url("https://api.sermo.jyonn.space/resources/assets/127/display/02c1164573226c9e0e7f6be45ba399f9bd3289a9e8bf9ff26a019ecb5c18e037"); }
 
 .baxian-bubble-transition {
   --baxian-element-size:23px;
@@ -1324,9 +1324,9 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   content:"";
   pointer-events:none;
 }
-.field-chat_bubble_style .preview-baxian-lv > i::after { background-image:url("/assets/baxian/lv-dongbin-edge-frame.png"); }
-.field-chat_bubble_style .preview-baxian-zhongli > i::after { background-image:url("/assets/baxian/zhongli-quan-edge-frame.png"); }
-.field-chat_bubble_style .preview-baxian-he > i::after { background-image:url("/assets/baxian/he-xiangu-edge-frame.png"); }
+.field-chat_bubble_style .preview-baxian-lv > i::after { background-image:url("https://api.sermo.jyonn.space/resources/assets/128/display/f4c4b3e4a501ce8a8839db50274bf55319c97894534079296ce7d70e59024343"); }
+.field-chat_bubble_style .preview-baxian-zhongli > i::after { background-image:url("https://api.sermo.jyonn.space/resources/assets/130/display/f8784d344b4f08530717b8a03dac8a629655a4ee166e5c1442567c0c8b15fe58"); }
+.field-chat_bubble_style .preview-baxian-he > i::after { background-image:url("https://api.sermo.jyonn.space/resources/assets/126/display/0e091bb26fb84f84d4032c35b61034b943405263cbfc6496d7dfa32d15880373"); }
 
 @media (min-width:900px) {
   .baxian-character-runner { --baxian-character-size:26.4px; }
@@ -1487,7 +1487,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble
   left:50%;
   width:40px;
   height:40px;
-  background:url("/assets/niko/niko-run-right.webp") center/contain no-repeat;
+  background:url("https://api.sermo.jyonn.space/resources/assets/136/display/f46a94de649608e5ae3cca80afea2e11292a3ec0b61635315d471887b19611ac") center/contain no-repeat;
   content:"";
   filter:drop-shadow(0 2px 2px rgba(83,57,39,.14));
   pointer-events:none;
@@ -1554,7 +1554,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble
   left:calc(50% - 21px);
   width:42px;
   height:32px;
-  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
+  background:url("https://api.sermo.jyonn.space/resources/assets/138/display/48be5402b7f2e2f3144ec049e5f5b6bea6176ee6086577c77751df2953715463") center/contain no-repeat;
   content:"";
   filter:drop-shadow(0 2px 2px rgba(48,40,29,.16));
   pointer-events:none;
@@ -1612,7 +1612,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   bottom:0;
   left:50%;
   display:block;
-  background-image:url("/assets/fufu/fufu-avatar-greeting-spritesheet.png");
+  background-image:url("https://api.sermo.jyonn.space/resources/assets/137/display/38f581e711be9016e05f2b92cf442dc3ed129aced5685cea769ccfa6d26a9721");
   animation:fufu-frame-greeting 10s steps(1,end) infinite;
   transform:translateX(-50%);
 }
@@ -1624,7 +1624,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   left:0;
   width:36px;
   height:28px;
-  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
+  background:url("https://api.sermo.jyonn.space/resources/assets/138/display/48be5402b7f2e2f3144ec049e5f5b6bea6176ee6086577c77751df2953715463") center/contain no-repeat;
   display:none;
   filter:drop-shadow(0 2px 2px rgba(39,31,22,.24));
   animation:fufu-bubble-dash var(--fufu-run-duration,2.4s) linear infinite;

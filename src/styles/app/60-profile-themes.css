@@ -436,7 +436,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-level-12 .user-p
   border-bottom: 1px solid rgba(152, 230, 225, 0.4);
   background-image:
     linear-gradient(90deg, rgba(2, 28, 45, 0.2), transparent 58%),
-    url("/assets/profile-card-themes/tidal-blue.webp");
+    url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9");
   background-position: center 46%;
   background-size: cover;
 }
@@ -571,7 +571,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
   border-bottom: 1px solid rgba(241, 205, 130, 0.5);
   background-image:
     linear-gradient(90deg, rgba(18, 12, 7, 0.16), transparent 60%),
-    url("/assets/profile-card-themes/gilded-hour.webp");
+    url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511");
   background-position: center 47%;
   background-size: cover;
 }
@@ -733,7 +733,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
     repeating-radial-gradient(ellipse at 10% 122%, transparent 0 22px, rgba(216, 255, 249, 0.23) 23px 24px, transparent 25px 40px),
     linear-gradient(180deg, #092d45 0 45%, #4aa4ad 46% 49%, #91dcd4 50%);
   border-bottom: 1px solid rgba(152, 230, 225, 0.42);
-  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.16), transparent 58%), url("/assets/profile-card-themes/tidal-blue.webp");
+  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.16), transparent 58%), url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9");
   background-position: center 46%;
   background-size: cover;
 }
@@ -776,7 +776,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
     repeating-conic-gradient(from 248deg at 88% 78%, rgba(255, 225, 151, 0.14) 0deg 1deg, transparent 1deg 9deg),
     linear-gradient(104deg, #251a0f 0 38%, #5b3b17 70%, #b77b28);
   border-bottom: 1px solid rgba(241, 205, 130, 0.5);
-  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.13), transparent 60%), url("/assets/profile-card-themes/gilded-hour.webp");
+  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.13), transparent 60%), url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511");
   background-position: center 47%;
   background-size: cover;
 }
@@ -822,7 +822,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
   background:
     repeating-radial-gradient(ellipse at 4% 118%, transparent 0 8px, rgba(220, 255, 250, 0.28) 9px 10px, transparent 11px 18px),
     linear-gradient(180deg, #0a3650 0 46%, #4ca8b0 47% 51%, #8dd9d1 52%);
-  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.12), transparent 58%), url("/assets/profile-card-themes/tidal-blue.webp");
+  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.12), transparent 58%), url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9");
   background-position: center;
   background-size: cover;
 }
@@ -832,7 +832,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
   background:
     repeating-conic-gradient(from 245deg at 82% 80%, rgba(255, 229, 161, 0.18) 0deg 2deg, transparent 2deg 13deg),
     linear-gradient(110deg, #25190d 0 42%, #704717 72%, #c48a31);
-  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.12), transparent 60%), url("/assets/profile-card-themes/gilded-hour.webp");
+  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.12), transparent 60%), url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511");
   background-position: center;
   background-size: cover;
 }
@@ -1218,7 +1218,7 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
   background:
     linear-gradient(rgba(225, 248, 246, 0.68), rgba(214, 239, 238, 0.62)),
-    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9") center top / cover;
   backdrop-filter: blur(22px) saturate(1.28);
   -webkit-backdrop-filter: blur(22px) saturate(1.28);
 }
@@ -1226,7 +1226,7 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
   background:
     linear-gradient(rgba(255, 246, 222, 0.7), rgba(235, 213, 171, 0.64)),
-    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511") center top / cover;
   backdrop-filter: blur(22px) saturate(1.22);
   -webkit-backdrop-filter: blur(22px) saturate(1.22);
 }
@@ -1234,13 +1234,13 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
   background:
     linear-gradient(rgba(6, 24, 32, 0.72), rgba(9, 36, 45, 0.68)),
-    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9") center top / cover;
 }
 
 html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
   background:
     linear-gradient(rgba(23, 17, 10, 0.72), rgba(33, 24, 14, 0.68)),
-    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511") center top / cover;
 }
 
 /* A personal card keeps the standard action rhythm without relationship chrome. */
@@ -1257,7 +1257,7 @@ html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) 
 .shell-friend-profile:has(.user-profile-panel.profile-theme-level-12) .friend-profile-header {
   background:
     linear-gradient(rgba(225, 248, 246, 0.68), rgba(214, 239, 238, 0.62)),
-    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9") center top / cover;
   backdrop-filter: blur(22px) saturate(1.28);
   -webkit-backdrop-filter: blur(22px) saturate(1.28);
 }
@@ -1265,7 +1265,7 @@ html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) 
 .shell-friend-profile:has(.user-profile-panel.profile-theme-vip) .friend-profile-header {
   background:
     linear-gradient(rgba(255, 246, 222, 0.7), rgba(235, 213, 171, 0.64)),
-    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511") center top / cover;
   backdrop-filter: blur(22px) saturate(1.22);
   -webkit-backdrop-filter: blur(22px) saturate(1.22);
 }
@@ -1273,13 +1273,13 @@ html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) 
 html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-theme-level-12) .friend-profile-header {
   background:
     linear-gradient(rgba(6, 24, 32, 0.72), rgba(9, 36, 45, 0.68)),
-    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/140/display/361db8ed606963c449961471cd34b2312beb1a25091405015692da1f41229ac9") center top / cover;
 }
 
 html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-theme-vip) .friend-profile-header {
   background:
     linear-gradient(rgba(23, 17, 10, 0.72), rgba(33, 24, 14, 0.68)),
-    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+    url("https://api.sermo.jyonn.space/resources/assets/139/display/88eb72d2e4db1c90bd146b53f9485c463331447b4ca80a712093443779aa7511") center top / cover;
 }
 
 /* Character bubbles keep the outside corner fully rounded at the end of a run. */

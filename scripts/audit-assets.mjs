@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
-const migratedActivityAssets=JSON.parse(fs.readFileSync(new URL('../src/lib/activityAssetManifest.json',import.meta.url),'utf8'));
+const migratedActivityAssets={...JSON.parse(fs.readFileSync(new URL('../src/lib/activityAssetManifest.json',import.meta.url),'utf8')),...JSON.parse(fs.readFileSync(new URL('../src/lib/appearanceAssetManifest.json',import.meta.url),'utf8'))};
 export const policy = JSON.parse(fs.readFileSync(new URL("retired-assets.json", import.meta.url), "utf8"));
 
 export function walk(root) {

@@ -420,7 +420,7 @@
 .message-group.other.bubble-style-city-nyc {
   --bubble-skin-other-bg:
     linear-gradient(rgba(250, 248, 238, .9), rgba(250, 248, 238, .9)),
-    url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
+    url("https://api.sermo.jyonn.space/resources/assets/124/display/da085235414789949b09f3272fe369fa2bbedb6a5d18a3e69bf7482ebf5e862b") center / 440px auto repeat;
   --bubble-skin-other-color: #173b36;
   --bubble-theme-muted-other: rgba(23, 59, 54, .68);
 }
