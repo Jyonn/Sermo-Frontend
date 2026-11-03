@@ -34,7 +34,10 @@ export function MediaMetadataPanel({ kind, metadata, owner }: { kind: "image" | 
   const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? t("location.resolving") : coordinate);
   const canOpenMap = Number.isFinite(metadata.latitude) && Number.isFinite(metadata.longitude);
   const videoMetadata = kind === "video" ? metadata as VideoMetadataDTO : null;
+  const photo = kind === 'image' ? metadata as ImageMetadataDTO : null;
+  const exposure = [photo?.focal_length_mm ? `${Number(photo.focal_length_mm.toFixed(1))} mm` : '', photo?.aperture ? `f/${Number(photo.aperture.toFixed(1))}` : '', photo?.exposure_seconds ? photo.exposure_seconds < 1 ? `1/${Math.round(1/photo.exposure_seconds)} s` : `${photo.exposure_seconds} s` : '', photo?.iso ? `ISO ${photo.iso}` : ''].filter(Boolean).join(' · ');
   const rows = [
+    [t('media.exposureLabel'), exposure],
     [t("media.takenAt"), takenAt],
     [t("media.device"), device],
     [t("media.lens"), metadata.lens_model],

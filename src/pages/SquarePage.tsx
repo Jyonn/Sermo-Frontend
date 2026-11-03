@@ -44,6 +44,8 @@ import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
+import {SquareNoteDetail} from '../components/SquareNoteDetail';
+import {squareDetailView,squareStatementSearch} from '../lib/squareNoteMedia';
 import '../components/SquareActivities.css';
 import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
 import { ApiError, api } from "../lib/api";
@@ -606,8 +608,10 @@ export default function SquarePage() {
 
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
+  const noteDetailActive=routedStatementId!==null&&squareDetailView(location.search)==='note';
+  const [noteMoreOpen,setNoteMoreOpen]=useState(false);
   const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; previewMessages?: ChatMessageDTO[]; firstPersonUserId?: number | null; text?: string } } | null;
-  const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
+  const inlineRouteActive = routedStatementId !== null && !noteDetailActive && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -664,6 +668,8 @@ export default function SquarePage() {
   const inlineExpandTimerRef = useRef<number | null>(null);
   const commentStatementId = routedStatementId ?? inlineStatementId;
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
+  const [commentLoadError,setCommentLoadError]=useState('');
+  const [commentReload,setCommentReload]=useState(0);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsHasMore, setCommentsHasMore] = useState(false);
   const [expandedCommentId, setExpandedCommentId] = useState<number | null>(null);
@@ -1405,6 +1411,7 @@ export default function SquarePage() {
     if (commentStatementId === null) return;
     const controller = new AbortController();
     setCommentsLoading(true);
+    setCommentLoadError('');
     void Promise.all([
       api.getSquareStatement(commentStatementId, controller.signal),
       api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30, sort: commentSort }, controller.signal),
@@ -1415,10 +1422,10 @@ export default function SquarePage() {
       setComments(rows);
       setCommentsHasMore(rows.length === 30);
     }).catch((cause) => {
-      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.commentsLoadFailed"));
-    }).finally(() => setCommentsLoading(false));
+      if (!controller.signal.aborted) setCommentLoadError(cause instanceof Error ? cause.message : t("square.commentsLoadFailed"));
+    }).finally(() => {if(!controller.signal.aborted)setCommentsLoading(false)});
     return () => controller.abort();
-  }, [commentSort, commentStatementId, t]);
+  }, [commentSort, commentStatementId, commentReload, t]);
 
   useEffect(() => {
     if (commentStatementId === null) return;
@@ -1570,8 +1577,8 @@ export default function SquarePage() {
     navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
   };
 
-  const openStatementDrawer = (statementId: number) => {
-    navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareStatementDrawer: true } });
+  const openStatementDrawer = (statementId: number,view:'note'|'classic'='classic') => {
+    navigate({ pathname: `/app/square/statements/${statementId}`, search: squareStatementSearch(location.search,view) }, { state: { squareStatementDrawer: true } });
   };
 
   useEffect(() => () => {
@@ -2112,7 +2119,8 @@ export default function SquarePage() {
         {comments.length ? <div className="square-comments-sort" role="group" aria-label={t("square.commentSortLabel")}><button className={commentSort === "hot" ? "is-active" : ""} onClick={() => setCommentSort("hot")} type="button">{t("square.commentsHot")}</button><button className={commentSort === "latest" ? "is-active" : ""} onClick={() => setCommentSort("latest")} type="button">{t("square.commentsLatest")}</button></div> : null}
       </div>
       {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
-      {!commentsLoading && !comments.length ? <QuietState icon="forum" title={t("square.noComments")} description={canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}/> : null}
+      {commentLoadError?<FeedbackState tone="error" title={commentLoadError} action={<button className="secondary-button" onClick={()=>setCommentReload(value=>value+1)} type="button">{t('common.retry')}</button>}/>:null}
+      {!commentsLoading && !comments.length && !commentLoadError ? <QuietState icon="forum" title={t("square.noComments")} description={canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}/> : null}
       <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread renderContent={(comment, onReply) => <CommentContent comment={comment} onOpenProfile={openUserProfile} onReply={onReply}/>} canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
       {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
         if (commentStatementId === null) return;
@@ -2222,7 +2230,7 @@ export default function SquarePage() {
         }}
         ref={squareFeedScrollRef}
       >
-        <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="search" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
+        <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="navigation" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
           <div className="square-workspace-tabs is-square" role="tablist">
             <div className="square-workspace-tab-group is-square-channels">
               <button aria-selected={activityTab} className={activityTab?"is-active":""} onClick={()=>selectSquareChannel(true)} role="tab" type="button">{t("square.activitiesTab")}{claimableActivityKeys.length?<span className="square-fresh-dot" aria-label={t("activity.pendingClaim")}/>:null}</button>
@@ -2289,7 +2297,6 @@ export default function SquarePage() {
           </section></div> : null}
           {activityTab && !activityBannerCount ? <FeedbackState tone={activitiesLoading?"loading":activitiesError?"error":"empty"} title={t(activitiesLoading?"common.loading":activitiesError?"square.activitiesLoadFailed":"square.activitiesEmpty")} action={activitiesError?<button className="secondary-button" onClick={()=>void loadActivities()} type="button">{t("common.retry")}</button>:undefined}/> : null}
         <div className="square-feed-column" style={activityTab?{display:"none"}:undefined}>
-          {!activityTab&&feedMode==="mine"?<div className="square-my-service-row"><button onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{t('square.notifications')}<small>{notificationUnread||t('square.noUnread')}</small></button><button onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span>{t('square.quotaTitle')}<small>{quotaHint||t('square.viewQuota')}</small></button></div>:null}
           {hasFeedFilters ? <div className="square-date-context">
             <span className="material-symbols-outlined" aria-hidden="true">filter_alt</span>
             <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedFrom || selectedFeedTo ? `${selectedFeedFrom || t("square.anyDate")} → ${selectedFeedTo || t("square.anyDate")}` : selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
@@ -2297,7 +2304,7 @@ export default function SquarePage() {
           </div> : null}
 
           {!hasFeedFilters && feedMode === "all" && pinnedStatement ? (
-            <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
+            <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id,squareFeedLayout==='masonry'?'note':'classic')} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
               <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} />
               <span className="square-pinned-copy"><small>{t("square.pinnedStatement")}</small><strong>{pinnedStatement.text || t("square.mediaStatement")}</strong></span>
@@ -2314,7 +2321,7 @@ export default function SquarePage() {
             />
           ) : null}
           {
-            squareFeedLayout==='masonry'?<SquareMasonryFeed items={visibleStatements} scrollRef={squareFeedScrollRef} renderText={statement=><InlineRichText text={statement.text} emoticons={statement.inline_emoticons}/>} canInteract={canPublish} onOpen={statement=>openStatementDrawer(statement.statement_id)} onLike={statement=>void toggleStatementLike(statement)} onProfile={statement=>openUserProfile(statement.user)}/>:<VirtualDynamicList
+            squareFeedLayout==='masonry'?<SquareMasonryFeed items={visibleStatements} scrollRef={squareFeedScrollRef} renderText={statement=><InlineRichText text={statement.text} emoticons={statement.inline_emoticons}/>} canInteract={canPublish} onOpen={statement=>openStatementDrawer(statement.statement_id,'note')} onLike={statement=>void toggleStatementLike(statement)} onProfile={statement=>openUserProfile(statement.user)}/>:<VirtualDynamicList
               className="square-statement-feed square-virtual-feed"
               estimateSize={estimateStatementHeight}
               itemKey={(statement) => `statement-${statement.statement_id}`}
@@ -2402,7 +2409,6 @@ export default function SquarePage() {
           {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
-      {notificationUnread>0&&(activityTab||feedMode!=="mine")&&!notificationDrawerOpen&&!composerOpen?<button className="square-inbox-float" onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{t('square.inboxUnread',{count:notificationUnread})}</button>:null}
       <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless fullscreen fullViewport floatingBack={false}>
         <SquareComposerEditor text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video} voice={voiceFile&&voicePreview?{uri:voicePreview,duration:voiceDuration}:null} external={externalMedia}
           onRemovePhoto={removePhoto} onRemoveVideo={()=>{if(video)URL.revokeObjectURL(video.preview);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
@@ -2435,7 +2441,7 @@ export default function SquarePage() {
       <input accept="image/*" hidden multiple onChange={event=>choosePhotos(event.target.files)} ref={photoInputRef} type="file"/>
       <input accept="video/*" hidden onChange={event=>chooseVideo(event.target.files)} ref={videoInputRef} type="file"/>
       <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={setStatementLocation} />
-      <SquareCreationSheet open={contentSheetOpen} onClose={()=>setContentSheetOpen(false)} onChoose={chooseCreationKind} voiceAllowed={canSendVoice} videoAllowed={canSendVideo} description={quotaHint}/>
+      <SquareCreationSheet open={contentSheetOpen} onClose={()=>setContentSheetOpen(false)} onChoose={chooseCreationKind} voiceAllowed={canSendVoice} videoAllowed={canSendVideo} description={quotaHint} onQuota={()=>{setContentSheetOpen(false);openQuota()}}/>
       <InputDialog
         busy={externalMediaResolving}
         confirmLabel={t("square.insertExternalMedia")}
@@ -2475,7 +2481,16 @@ export default function SquarePage() {
       <SquareVoiceRecorder open={voiceSheetOpen} recording={recording} starting={recordingStarting} duration={voiceDuration} maximum={MAX_AUDIO_SECONDS} preview={voicePreview} error={voiceError}
         onRecord={()=>void startRecording()} onClose={()=>{recordingRequestRef.current++;setRecordingStarting(false);if(recording)stopRecording();setVoiceSheetOpen(false)}}
         onClear={()=>{setVoiceFile(null);setVoiceDuration(0)}} onDone={()=>{setVoiceSheetOpen(false);setComposerOpen(true)}}/>
-      <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive} title={t("square.statementDetail")}>
+      <SideDrawer className="square-note-detail-drawer" historyMode="route" onClose={()=>{setReplyTarget(null);if(window.history.length>1)navigate(-1);else navigate('/app/square',{replace:true})}} open={noteDetailActive} title={t('square.statementDetail')} headerless fullscreen fullViewport floatingBack={false}>
+        {activeCommentStatement?<SquareNoteDetail key={activeCommentStatement.statement_id} statement={activeCommentStatement} text={<InlineRichText text={activeCommentStatement.text} emoticons={activeCommentStatement.inline_emoticons}/>} discussion={discussionContent} composer={commentComposer} canInteract={canPublish}
+          onBack={()=>{setReplyTarget(null);if(window.history.length>1)navigate(-1);else navigate('/app/square',{replace:true})}} onProfile={()=>openUserProfile(activeCommentStatement.user)} onShare={()=>openStatementShare(activeCommentStatement)} onMore={()=>setNoteMoreOpen(true)} onLike={()=>void toggleStatementLike(activeCommentStatement)} onVideo={()=>openStatementVideo(activeCommentStatement.statement_id)} onLocation={()=>activeCommentStatement.location&&setChatRecordLocation({location:activeCommentStatement.location,owner:activeCommentStatement.user})}/>:<div className="square-reader"><header className="square-reader-header"><button aria-label={t('common.back')} onClick={()=>{if(window.history.length>1)navigate(-1);else navigate('/app/square',{replace:true})}} type="button"><span className="material-symbols-outlined">arrow_back</span></button></header><FeedbackState tone={commentLoadError?'error':'loading'} title={commentLoadError||t('common.loading')} action={commentLoadError?<button className="secondary-button" onClick={()=>setCommentReload(value=>value+1)} type="button">{t('common.retry')}</button>:undefined}/></div>}
+      </SideDrawer>
+      <ActionSheet open={noteMoreOpen&&noteDetailActive&&Boolean(activeCommentStatement)} onClose={()=>setNoteMoreOpen(false)} title={t('common.more')} compactHeader actions={activeCommentStatement?[
+        ...(activeCommentStatement.can_pin?[{key:'pin',label:t(activeCommentStatement.is_pinned?'square.unpinStatement':'square.pinStatement'),icon:<span className="material-symbols-outlined">keep</span>,onSelect:()=>{void toggleStatementPinned(activeCommentStatement)}}]:[]),
+        ...(activeCommentStatement.can_mute?[{key:'mute',label:t('square.muteAuthor'),icon:<span className="material-symbols-outlined">voice_over_off</span>,onSelect:()=>setMuteStatement(activeCommentStatement)}]:[]),
+        ...(activeCommentStatement.can_delete?[{key:'delete',label:t('common.delete'),danger:true,icon:<span className="material-symbols-outlined">delete</span>,onSelect:()=>setDeleteStatementId(activeCommentStatement.statement_id)}]:[])
+      ]:[]}/>
+      <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive && !noteDetailActive} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">

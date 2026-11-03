@@ -48,3 +48,6 @@
 .square-editor-extras button[aria-checked="true"]::after{content:"✓";background:var(--brand-primary);color:white}
 @media(min-width:901px){.square-inbox-float{bottom:24px}.square-editor-body{padding-inline:32px}.square-editor-footer{padding-inline:32px}}
 @media(prefers-reduced-motion:reduce){.square-voice-bars i{animation:none!important}}
+.action-sheet .square-creation-quota{display:flex;align-items:center;gap:6px;width:100%;margin-top:9px;padding:0;border:0;background:none;color:var(--text-muted);font:inherit;font-size:11px;text-align:start;cursor:pointer}
+.square-creation-quota>span:first-child{flex:1}
+.square-creation-quota>span:last-child{font-size:16px}

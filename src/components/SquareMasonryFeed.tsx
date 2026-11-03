@@ -9,11 +9,8 @@ import {isMusicData} from './NeteaseMusicPreview';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareMasonryFeed.css';
 
-export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>}){
-  const {t}=useI18n();const root=useRef<HTMLDivElement>(null),[width,setWidth]=useState(0);
-  useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>{if(entry.contentRect.width>0)setWidth(entry.contentRect.width)});observer.observe(node);return()=>observer.disconnect()},[]);
-  const columns=useMemo(()=>arrangeSquareColumns(items,width),[items,width]);
-  const renderItem=(item:SquareStatementDTO)=>{
+export function SquareNoteCard({item,canInteract,onOpen,onLike,onProfile,renderText}:{item:SquareStatementDTO;canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode}){
+    const {t}=useI18n();
     const cover=squareCover(item),textStyle=textCoverStyle(item.statement_id,item.text);
     const author=item.is_anonymous?t('square.anonymousUser'):item.user.name;
     const fallback=cover.title||(cover.kind==='music'?t('square.typeMusic'):cover.video?t('square.video'):cover.kind==='audio'?t('square.typeAudio'):item.chat_record?t('messageSearch.chatRecord'):t('square.statementDetail'));
@@ -34,7 +31,13 @@ export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,ren
       <footer><button className="square-note-author" type="button" disabled={item.is_anonymous} onClick={()=>onProfile(item)}>{item.is_anonymous?<span className="square-note-anonymous material-symbols-outlined" aria-hidden="true">person</span>:<PlainAvatar className="square-note-avatar" name={author} uri={item.user.avatar_uri}/>}<span>{author}</span></button><button className={`square-note-like${item.liked?' is-liked':''}`} disabled={!canInteract} onClick={()=>onLike(item)} type="button" aria-label={`${t('square.like')} ${item.like_count}`} aria-pressed={item.liked}><span className="material-symbols-outlined" aria-hidden="true">favorite</span><span>{item.like_count||t('square.like')}</span></button></footer>
       </div>
     </article>;
-  };
+}
+
+export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>}){
+  const root=useRef<HTMLDivElement>(null),[width,setWidth]=useState(0);
+  useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>{if(entry.contentRect.width>0)setWidth(entry.contentRect.width)});observer.observe(node);return()=>observer.disconnect()},[]);
+  const columns=useMemo(()=>arrangeSquareColumns(items,width),[items,width]);
+  const renderItem=(item:SquareStatementDTO)=><SquareNoteCard item={item} canInteract={canInteract} onOpen={onOpen} onLike={onLike} onProfile={onProfile} renderText={renderText}/>;
   const cardWidth=(Math.max(280,width)-(columns.length-1)*14)/columns.length;
   return <div className="square-masonry-feed" ref={root} style={{gridTemplateColumns:`repeat(${columns.length},minmax(0,1fr))`}}>{columns.map((column,index)=><VirtualDynamicList key={index} className="square-masonry-column" items={column} scrollRef={scrollRef} itemKey={item=>String(item.statement_id)} estimateSize={item=>{const cover=squareCover(item);return cardWidth/(cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio)+90}} rowGap={16} overscan={500} renderItem={renderItem}/>)}</div>;
 }

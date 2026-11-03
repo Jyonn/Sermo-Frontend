@@ -21,7 +21,7 @@ export function isStillfolioCollection(value: unknown): value is StillfolioColle
 
 const collectionChecks = new Map<number, { expiresAt: number; request: Promise<StillfolioCollectionDTO | null> }>();
 
-function revalidateCollection(previewId: number) {
+export function revalidateCollection(previewId: number) {
   const cached = collectionChecks.get(previewId);
   if (cached && cached.expiresAt > Date.now()) return cached.request;
   const request = api.refreshExternalMedia(previewId).then((preview) =>

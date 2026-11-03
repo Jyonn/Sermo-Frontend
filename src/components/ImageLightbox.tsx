@@ -42,6 +42,7 @@ export interface MediaLightboxItem {
 }
 
 interface MediaLightboxProps {
+  initialImmersive?: boolean;
   index: number;
   items: MediaLightboxItem[];
   altPrefix?: string;
@@ -620,6 +621,7 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
 }
 
 export function MediaLightbox({
+  initialImmersive = false,
   index,
   items,
   altPrefix,
@@ -647,7 +649,7 @@ export function MediaLightbox({
   const gestureRef = useRef<{ moved: boolean; x: number; y: number } | null>(null);
   const approachingEndRef = useRef(onApproachingEnd);
   const approachingStartRef = useRef(onApproachingStart);
-  const [immersive, setImmersive] = useState(false);
+  const [immersive, setImmersive] = useState(initialImmersive);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
   const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({});

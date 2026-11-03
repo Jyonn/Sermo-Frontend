@@ -1084,6 +1084,7 @@ export interface StillfolioCollectionDTO {
   description: string;
   cover_url: string;
   images: string[];
+  image_metadata?: Array<ImageMetadataDTO | null>;
   photo_count: number;
 }
 

@@ -1,4 +1,5 @@
 {
+  "square.photoInfo": "照片信息",
   "common.remove": "移除",
   "square.creationTitle": "想分享什么？",
   "square.writeText": "写文字",
@@ -11,7 +12,7 @@
   "square.recordAgain": "重新录制",
   "square.useRecording": "使用录音",
   "square.layoutExplore": "探索页布局",
-  "square.layoutFriends": "好友圈布局",
+  "square.layoutFriends": "好友布局",
   "square.layoutUser": "个人发言布局",
   "square.noUnread": "暂无未读",
   "square.viewQuota": "查看剩余额度",
@@ -1389,7 +1390,7 @@
   "square.pinFailed": "置顶操作失败",
   "square.deleteFailed": "删除发言失败",
   "square.feedAll": "探索",
-  "square.feedFriends": "好友圈",
+  "square.feedFriends": "好友",
   "square.feedMine": "我的",
   "square.backToTop": "回到顶部",
   "square.byDate": "按日期浏览",

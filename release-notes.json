@@ -1,17 +1,23 @@
 {
-  "id": "2026.11.03.13",
+  "id": "2026.11.03.14",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "更紧凑的广场频道栏",
+      "title": "更流畅的广场阅读体验",
       "items": [
-        "频道标签恢复紧凑布局与文字居中，中央区域约占六成宽度，超出时可横向滑动"
+        "广场消息移至搜索旁，发布菜单可查询互动额度，频道两端连续淡出",
+        "好友圈更名为好友，成员频道的关闭入口更醒目",
+        "瀑布流发言采用滑动图文详情，支持照片信息与直接沉浸看图，列表保留原有详情",
+        "聊天中的发言分享统一为瀑布流卡片，StillFolio 照片支持拍摄信息"
       ]
     },
     "en": {
-      "title": "More compact Square navigation",
+      "title": "A smoother Square reading experience",
       "items": [
-        "Compact, centered channel labels use about 60% of the header width and scroll horizontally when needed"
+        "Notifications sit beside search; publishing offers an allowance shortcut, with softly fading channel edges",
+        "Member channels have a clearer close control",
+        "Masonry posts open swipeable photo details with photo information and direct immersive viewing; lists retain classic details",
+        "Shared posts in chats reuse masonry cards, with photography information for StillFolio images"
       ]
     }
   }
