@@ -8,7 +8,8 @@
         "删除发言后同步清理各列表缓存，避免切换频道后再次出现",
         "自动校验已加载发言的可见状态、点赞、评论数与置顶，离线时保留缓存",
         "发言时间按今天、昨天、一周内的星期和具体日期清晰展示",
-        "修复小高度窗口中最后一张活动卡片的参与成员被裁切的问题"
+        "修复小高度窗口中最后一张活动卡片的参与成员被裁切的问题",
+        "重新设计语音录制与试听，发言编辑器使用统一的紧凑语音卡片，移除重复播放条"
       ]
     },
     "en": {
@@ -17,7 +18,8 @@
         "Deleted posts are removed across cached feeds so they do not return when switching channels",
         "Loaded posts stay in sync with visibility, likes, comment counts and pins while offline caches remain available",
         "Post times distinguish today, yesterday, recent weekdays and older dates",
-        "Activity participant rows remain fully scrollable in short windows"
+        "Activity participant rows remain fully scrollable in short windows",
+        "Redesigned recording and preview with one compact voice card, removing duplicate playback bars"
       ]
     }
   }

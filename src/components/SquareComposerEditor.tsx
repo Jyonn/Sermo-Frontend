@@ -1,5 +1,6 @@
 import {useLayoutEffect,useRef,type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
+import {SquareVoicePreview} from './SquareVoicePreview';
 import './SquareComposerEditor.css';
 interface Props{
   text:string;onText:(text:string)=>void;limit:number;photos:Array<{id:string;preview:string}>;video:{preview:string;duration:number}|null;voice:{uri:string;duration:number}|null;external:{title?:string;image_url?:string|null}|null;
@@ -17,11 +18,10 @@ export function SquareComposerEditor(p:Props){
       <div className="square-editor-media">
         {p.photos.map(photo=><div className="square-editor-thumb" key={photo.id}><img src={photo.preview} alt={t('square.photo')}/>{remove(()=>p.onRemovePhoto(photo.id))}</div>)}
         {p.video?<div className="square-editor-thumb"><video src={p.video.preview} muted playsInline preload="metadata"/><span className="square-editor-duration">{p.video.duration}s</span>{remove(p.onRemoveVideo)}</div>:null}
-        {p.voice?<div className="square-editor-thumb is-audio"><span className="material-symbols-outlined">graphic_eq</span><small>{p.voice.duration}s</small>{remove(p.onRemoveVoice)}</div>:null}
+        {p.voice?<SquareVoicePreview key={p.voice.uri} uri={p.voice.uri} duration={p.voice.duration} onRemove={p.onRemoveVoice} disabled={p.publishing}/>:null}
         {p.external?<div className="square-editor-thumb is-link">{p.external.image_url?<img src={p.external.image_url} alt=""/>:<span className="material-symbols-outlined">link</span>}<small>{p.external.title||t('square.externalMedia')}</small>{remove(p.onRemoveExternal)}</div>:null}
         {!p.chatPreview&&p.photos.length<9?<button className="square-editor-add" disabled={p.publishing} aria-label={t('square.addMedia')} onClick={p.onAdd} type="button"><span className="material-symbols-outlined">add</span></button>:null}
       </div>
-      {p.voice?<audio className="square-editor-audio" src={p.voice.uri} controls preload="metadata"/>:null}
       <textarea ref={writing} autoFocus={!p.photos.length&&!p.video&&!p.voice&&!p.external} aria-label={t('square.saySomething')} placeholder={t('square.saySomething')} value={p.text} maxLength={p.limit} onChange={event=>p.onText(event.target.value)} disabled={p.publishing}/>
       {p.chatPreview}
       <div className="square-editor-settings">
