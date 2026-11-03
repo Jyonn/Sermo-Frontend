@@ -2247,7 +2247,7 @@ export default function SquarePage() {
     <AppChrome workspaceSelected={workspaceDetailActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <div className={`square-desktop-workspace is-square${squareFeedLayout==='masonry'?' is-masonry':''}${workspaceDetailActive ? " has-selection" : ""}`}>
       <main
-        className="list-screen square-feed-screen is-square-workspace"
+        className={`list-screen square-feed-screen is-square-workspace${activityTab?' is-activity-feed':''}`}
         onScroll={(event) => {
           if (inlineStatementId !== null || workspaceDetailActive || inlineStatementExpanded) return;
           const top = event.currentTarget.scrollTop;
