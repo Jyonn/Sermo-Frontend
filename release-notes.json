@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.03.10",
+  "id": "2026.11.03.11",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "活动有了独立入口",
+      "title": "更清爽的广场",
       "items": [
-        "广场活动移至探索左侧的独立 Tab，手机瀑布流增加两侧留白",
-        "活动认领前检查空间功能，缺少必要功能时说明原因并阻止认领"
+        "居中频道与左右操作组成单行导航，广场使用纯色底色和更小的卡片圆角",
+        "图片卡片移除数量角标，活动卡片增加本空间参与者头像和人数",
+        "暂无参与者时展示加入邀请，互动额度和广场消息移至我的频道"
       ]
     },
     "en": {
-      "title": "A dedicated home for activities",
+      "title": "A cleaner Square",
       "items": [
-        "Find activities in their own tab before Explore; phone masonry feeds now have side margins",
-        "Activity claims check space features and explain which required features need enabling"
+        "Centered channels, search and publishing share one row above solid backgrounds and smaller card corners",
+        "Image counts are removed; activity cards show participant avatars and counts from your space",
+        "Empty activities invite you to join; quotas and Square notifications are available in My"
       ]
     }
   }

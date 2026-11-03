@@ -1,4 +1,7 @@
 {
+  "square.activityParticipants": "{{count}} 位空间成员参与",
+  "square.activityFirst": "来做第一个参与者",
+  "square.activityJoin": "加入这场活动",
   "square.activitiesTab": "活动",
   "square.activitiesEmpty": "暂无进行中的活动",
   "square.activitiesLoadFailed": "活动加载失败",

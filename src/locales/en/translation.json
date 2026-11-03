@@ -1,4 +1,9 @@
 {
+  "square.activityParticipants": "{{count}} space members participating",
+  "square.activityParticipants_one": "{{count}} space member participating",
+  "square.activityParticipants_other": "{{count}} space members participating",
+  "square.activityFirst": "Be the first to join",
+  "square.activityJoin": "Join this activity",
   "square.activitiesTab": "Activities",
   "square.activitiesEmpty": "No active activities",
   "square.activitiesLoadFailed": "Could not load activities",

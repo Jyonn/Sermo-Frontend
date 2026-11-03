@@ -1,7 +1,7 @@
 .square-masonry-feed{display:grid;gap:14px;align-items:start;padding:14px 0 24px;min-width:0;width:100%}
 .square-masonry-column{display:block;min-width:0}
 .square-masonry-column>.virtual-dynamic-list-row{display:block}
-.square-note{min-width:0;display:grid;gap:0;align-content:start;overflow:hidden;border:1px solid color-mix(in srgb,var(--line-soft) 65%,transparent);border-radius:14px;background:var(--bg-elevated)}
+.square-note{min-width:0;display:grid;gap:0;align-content:start;overflow:hidden;border:1px solid color-mix(in srgb,var(--line-soft) 65%,transparent);border-radius:6px;background:var(--bg-elevated)}
 .square-note-details{display:grid;gap:6px;min-width:0;padding:9px 10px 10px}
 .square-note button{font:inherit;cursor:pointer;color:inherit;border:0;padding:0;background:transparent;text-align:start}
 .square-note button:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px}
@@ -54,4 +54,4 @@
 @keyframes square-note-disc-turn{to{transform:rotate(1turn)}}
 @media(prefers-reduced-motion:reduce){.square-note-music.is-playing .square-note-disc{animation:none}}
 @media(min-width:900px){.desktop-panel-workspace.shell>.square-desktop-workspace.is-square.is-masonry:not(.has-selection){width:min(100%,1440px)}}
-@media(max-width:719px){.square-desktop-workspace.is-masonry>.square-feed-screen{padding-inline:0}.square-desktop-workspace.is-masonry .square-feed-column{width:100%;padding-inline:12px;margin-inline:0}.square-masonry-feed{gap:10px;margin-inline:0;padding-inline:0}.square-note{border-radius:12px}.square-note .square-note-title{font-size:13px}.square-note .square-note-cover.is-text{padding:20px 14px}.square-note-lettering{font-size:16px}.square-note-author>span:last-child{max-width:78px}.square-note-details{padding-inline:8px}}
+@media(max-width:719px){.square-desktop-workspace.is-masonry>.square-feed-screen{padding-inline:0}.square-desktop-workspace.is-masonry .square-feed-column{width:100%;padding-inline:12px;margin-inline:0}.square-masonry-feed{gap:10px;margin-inline:0;padding-inline:0}.square-note{border-radius:6px}.square-note .square-note-title{font-size:13px}.square-note .square-note-cover.is-text{padding:20px 14px}.square-note-lettering{font-size:16px}.square-note-author>span:last-child{max-width:78px}.square-note-details{padding-inline:8px}}

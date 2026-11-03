@@ -1,0 +1,23 @@
+.square-community-shell{--square-canvas:#f7f7f4}
+.square-community-shell.desktop-tab-shell>.square-desktop-workspace{--desktop-square-header-height:60px}
+[data-theme="dark"] .square-community-shell{--square-canvas:#19191c}
+.square-community-shell,.square-community-shell .square-desktop-workspace.is-square,.square-community-shell .square-feed-screen,.square-community-shell .square-workspace-surface{background:var(--square-canvas)!important;background-image:none!important}
+.square-feed-header{position:sticky;top:0;z-index:25;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;min-height:60px;padding:6px 12px;border-bottom:1px solid color-mix(in srgb,var(--line-soft) 55%,transparent);background:var(--square-canvas);isolation:isolate}
+.square-feed-header-side{display:flex;align-items:center;justify-content:center;width:44px;min-width:0}
+.square-feed-header-channels{min-width:0;display:flex;justify-content:center}
+.square-feed-header .square-workspace-tabs{width:auto;min-width:0;padding:0;border:0;background:none;overflow-x:auto;scrollbar-width:none}
+.square-feed-header .square-workspace-tab-group{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:clamp(2px,1.4vw,18px);padding:0;border:0;background:none;box-shadow:none}
+.square-feed-header .square-workspace-tab-group>button{position:relative;flex-shrink:0;padding:13px 5px 15px;border:0;border-radius:0;color:var(--text-muted);background:none;box-shadow:none;font-size:clamp(12px,3.6vw,16px);font-weight:600;line-height:20px;white-space:nowrap;transition:color .16s ease}
+.square-feed-header .square-workspace-tab-group>button.is-active{color:var(--text-primary);background:none;box-shadow:none;font-weight:750}
+.square-feed-header .square-workspace-tab-group>button::after{content:"";position:absolute;bottom:5px;left:calc(50% - 11px);width:22px;height:3px;border-radius:3px;background:var(--brand-primary);transform:scaleX(0);transition:transform .18s ease}
+.square-feed-header .square-workspace-tab-group>button.is-active::after{transform:scaleX(1)}
+.square-feed-header .square-header-tool{width:40px;height:40px;border:0;background:none;box-shadow:none}
+.square-feed-publish{display:grid;place-items:center;width:34px;height:34px;padding:6px;border:0;border-radius:9px;color:var(--text-on-brand,#fff);background:var(--brand-primary);cursor:pointer}
+.square-feed-publish svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.square-feed-header button:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px}
+.square-my-tools{display:flex;justify-content:flex-end;padding:8px 0 4px}
+.square-feed-context-tabs{display:flex;align-items:center;gap:8px;padding:10px 0}
+@media(max-width:359px){.square-feed-header{grid-template-columns:36px minmax(0,1fr) 36px;gap:2px;padding-inline:8px}.square-feed-header-side{width:36px}.square-feed-header .square-workspace-tab-group{gap:1px}.square-feed-header .square-workspace-tab-group>button{padding-inline:3px}}
+@media(max-width:900px){.square-feed-header{min-height:calc(60px + env(safe-area-inset-top));padding-top:calc(6px + env(safe-area-inset-top));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}}
+@media(max-width:359px){.square-feed-header{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}}
+@media(prefers-reduced-motion:reduce){.square-feed-header .square-workspace-tab-group>button,.square-feed-header .square-workspace-tab-group>button::after{transition:none}}

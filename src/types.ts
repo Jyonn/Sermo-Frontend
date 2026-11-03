@@ -287,6 +287,7 @@ export interface PersonalizationDTO {
 }
 
 export interface PermanentVipCampaignDTO {
+  participation?:ActivityCampaignDTO['participation'];
   limit: number;
   claimed: number;
   remaining: number;
@@ -983,6 +984,7 @@ export interface ActivityMilestoneDTO {
 }
 
 export interface ActivityCampaignDTO {
+  participation?:{count:number;users:Array<{user_id:number;name:string;avatar_uri?:string}>}|null;
   explorer?: {
     year: number;
     completed_count: number;
