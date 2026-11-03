@@ -60,6 +60,7 @@ import { isChineseLanguage, localeForLanguage } from "../lib/i18n";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { usePlaybackWait } from "../components/MediaWaitFeedback";
 import { formatRelativeTime } from "../lib/presentation";
+import {formatSquareTime} from '../lib/squareTime';
 import {
   mergeSquareFeedRefresh,
   normalizeSquareFeedSnapshot,
@@ -353,7 +354,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   onPin: () => void;
   onShare: () => void;
 }) {
-  const { t } = useI18n();
+  const { t,language } = useI18n();
   const [playing, setPlaying] = useState(false);
   const audioWait = usePlaybackWait();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
@@ -400,7 +401,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
             {!statement.is_anonymous && statement.user.official ? <OfficialBadge /> : null}
             {!statement.is_anonymous && statement.user.operator ? <OperatorBadge /> : null}
           </div>
-          <span>{formatRelativeTime(statement.created_at)}</span>
+          <span>{formatSquareTime(statement.created_at,language,t('time.yesterday'))}</span>
         </div>
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>

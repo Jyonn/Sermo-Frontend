@@ -1,7 +1,7 @@
 import {useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import type {SquareStatementDTO} from '../types';
 import {useI18n} from '../lib/language';
-import {formatRelativeTime} from '../lib/presentation';
+import {formatSquareTime} from '../lib/squareTime';
 import {squareNotePhotos,naturalMediaRatio} from '../lib/squareNoteMedia';
 import {useMediaSource} from '../lib/useMediaSource';
 import {claimMediaPlayback} from '../lib/mediaPlaybackFocus';
@@ -28,7 +28,7 @@ interface Props{
   onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onVideo:()=>void;onLocation:()=>void;
 }
 export function SquareNoteDetail(p:Props){
-  const {t}=useI18n(),s=p.statement;
+  const {t,language}=useI18n(),s=p.statement;
   const initial=s.external_media?.status==='ready'&&isStillfolioCollection(s.external_media.provider_data)?s.external_media.provider_data:null;
   const [collection,setCollection]=useState(initial),[index,setIndex]=useState(0),[lightbox,setLightbox]=useState<number|null>(null),[info,setInfo]=useState(false);
   const [imageRatios,setImageRatios]=useState<Record<string,number>>({});
@@ -60,7 +60,7 @@ export function SquareNoteDetail(p:Props){
       {s.text?<div className="square-reader-text">{p.text}</div>:null}
       {collection?.title?<a className="square-reader-source" href={collection.canonical_url} target="_blank" rel="noreferrer">{collection.title}<span className="material-symbols-outlined">arrow_outward</span></a>:null}
       {s.location?<button className="square-reader-location" onClick={p.onLocation} type="button"><span className="material-symbols-outlined">location_on</span>{s.location.address||t('square.location')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
-      <div className="square-reader-meta"><time dateTime={new Date(s.created_at*1000).toISOString()}>{formatRelativeTime(s.created_at)}</time><span>{s.is_anonymous?t('square.publishAnonymously'):s.visibility==='friends'?t('square.friendsOnly'):t('square.audiencePublic')}</span></div>
+      <div className="square-reader-meta"><time dateTime={new Date(s.created_at*1000).toISOString()}>{formatSquareTime(s.created_at,language,t('time.yesterday'))}</time><span>{s.is_anonymous?t('square.publishAnonymously'):s.visibility==='friends'?t('square.friendsOnly'):t('square.audiencePublic')}</span></div>
       <div ref={comments}>{p.discussion}</div>
     </div></div></div>
     <footer className="square-reader-footer"><div className="square-reader-composer">{p.composer||<span>{t('square.readOnlyHint')}</span>}</div><button className={s.liked?'is-liked':''} disabled={!p.canInteract} aria-label={`${t('square.like')} ${s.like_count}`} aria-pressed={s.liked} onClick={p.onLike} type="button"><span className="material-symbols-outlined">favorite</span><small>{s.like_count||t('square.like')}</small></button><button aria-label={t('square.comments')} onClick={()=>comments.current?.scrollIntoView({behavior:reduce()?'auto':'smooth',block:'start'})} type="button"><span className="material-symbols-outlined">chat_bubble_outline</span><small>{s.comment_count}</small></button></footer>
