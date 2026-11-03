@@ -7,6 +7,10 @@ import {
 } from "../src/lib/squareFeedCache.ts";
 
 const statements = (...ids: number[]) => ids.map((statement_id) => ({ statement_id }));
+test('refresh removes cached holes within the returned range while retaining older pages',()=>{
+  assert.deepEqual(mergeSquareFeedRefresh(statements(9,8,7,6,5),statements(10,9,7)).items,statements(10,9,7,6,5));
+  assert.deepEqual(mergeSquareFeedRefresh([{statement_id:90,created_at:100},{statement_id:3,created_at:300},{statement_id:2,created_at:200}], [{statement_id:4,created_at:400},{statement_id:2,created_at:200}]).items.map(item=>item.statement_id),[4,2,90]);
+});
 
 test("builds an isolated cache key for every feed", () => {
   assert.equal(squareFeedCacheKey("all", null), "square:all");

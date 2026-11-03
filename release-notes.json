@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.04.3",
+  "id": "2026.11.04.4",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "更自然的广场媒体详情",
+      "title": "更及时的广场缓存同步",
       "items": [
-        "照片与视频展示区按媒体实际比例调整，减少多余留白",
-        "桌面端从瀑布流打开详情时，在右侧面板阅读并保留发言流"
+        "删除发言后同步清理各列表缓存，避免切换频道后再次出现",
+        "自动校验已加载发言的可见状态、点赞、评论数与置顶，离线时保留缓存"
       ]
     },
     "en": {
-      "title": "Natural media layouts in Square",
+      "title": "Timelier Square cache updates",
       "items": [
-        "Photo and video detail areas follow the media’s natural proportions, removing unnecessary space",
-        "Masonry posts open in a right-hand detail panel on desktop, keeping the feed available"
+        "Deleted posts are removed across cached feeds so they do not return when switching channels",
+        "Loaded posts stay in sync with visibility, likes, comment counts and pins while offline caches remain available"
       ]
     }
   }

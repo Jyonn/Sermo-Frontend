@@ -1363,6 +1363,7 @@
   "square.videoTooLong": "视频最长 60 秒",
   "square.deleteStatement": "删除发言",
   "square.deleteStatementHint": "删除后，其他人将无法继续查看这条发言。",
+  "square.statementUnavailable": "这条发言已删除或已不可见",
   "square.muteAuthor": "广场禁言",
   "square.muteAuthorTitle": "限制该用户参与广场？",
   "square.muteAuthorHint": "禁言期间仍可浏览和点赞，但不能发布发言或评论。",

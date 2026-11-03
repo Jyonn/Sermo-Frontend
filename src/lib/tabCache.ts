@@ -1,5 +1,20 @@
 const TAB_CACHE_PREFIX = "sermo:tab-cache:v1";
 
+export function updateTabCaches(scope: string, update: (tab: string, data: unknown) => unknown) {
+  if (typeof window === 'undefined') return;
+  const prefix=`${TAB_CACHE_PREFIX}:${scope}:`;
+  try {
+    for (const key of Object.keys(window.localStorage)) {
+      if (!key.startsWith(prefix)) continue;
+      const tab=key.slice(prefix.length);
+      const record=readTabCache<unknown>(scope,tab);
+      if (!record) continue;
+      const next=update(tab,record.data);
+      if (next!==record.data) writeTabCache(scope,tab,next);
+    }
+  } catch { /* Storage is best-effort. */ }
+}
+
 interface TabCacheRecord<T> {
   data: T;
   updatedAt: number;

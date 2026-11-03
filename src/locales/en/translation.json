@@ -1365,6 +1365,7 @@
   "square.videoTooLong": "Videos can be up to 60 seconds",
   "square.deleteStatement": "Delete statement",
   "square.deleteStatementHint": "Other people will no longer be able to view this statement.",
+  "square.statementUnavailable": "This post was deleted or is no longer visible",
   "square.muteAuthor": "Mute on Square",
   "square.muteAuthorTitle": "Restrict this member on Square?",
   "square.muteAuthorHint": "They can still browse and like, but cannot post or comment while muted.",

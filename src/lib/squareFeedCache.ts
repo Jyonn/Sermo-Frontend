@@ -53,7 +53,13 @@ export function mergeSquareFeedRefresh<T extends SquareFeedItem>(cached: T[], la
   const connected = cached.some((item) => latestIds.has(item.statement_id));
   if (!connected) return { items: latest, connected: false };
 
-  const merged = new Map(cached.map((item) => [item.statement_id, item]));
+  // The refreshed page is authoritative within its covered publication range.
+  // Older pages remain cached, but holes in the refreshed range are removals.
+  const oldest=latest[latest.length-1];
+  const olderThanPage=(item:T)=>typeof item.created_at==='number'&&typeof oldest.created_at==='number'
+    ? item.created_at<oldest.created_at||(item.created_at===oldest.created_at&&item.statement_id<oldest.statement_id)
+    : item.statement_id<oldest.statement_id;
+  const merged = new Map(cached.filter(item=>latestIds.has(item.statement_id)||olderThanPage(item)).map((item) => [item.statement_id, item]));
   latest.forEach((item) => merged.set(item.statement_id, item));
   return {
     items: [...merged.values()].sort((left, right) => {

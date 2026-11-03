@@ -1,4 +1,6 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
+import {useSquareSync} from '../lib/useSquareSync';
+import {filterSquareRemoved,reconcileSquareItems} from '../lib/squareSync';
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -719,6 +721,18 @@ export default function SquarePage() {
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
+  useSquareSync(cacheScope,activeFeedCacheKey,statements,pinnedStatement,commentStatementId,change=>{
+    setStatements(current=>reconcileSquareItems(current,change));
+    if(commentStatementId!==null&&change.removed_ids.includes(commentStatementId)){
+      showToast(t('square.statementUnavailable'),'info');
+      navigate('/app/square',{replace:true});
+    }
+    setPinnedStatement(current=>{
+      const candidate=change.items.find(item=>item.is_pinned);
+      const known=candidate&&statements.find(item=>item.statement_id===candidate.statement_id);
+      return known?{...known,...candidate}:current?(reconcileSquareItems([current],change).filter(item=>item.is_pinned)[0]??null):null;
+    });
+  });
   const [activities, setActivities] = useState<ActivityCampaignDTO[]>(() => (
     readTabCache<ActivityCampaignDTO[]>(cacheScope, "square:activities")?.data ?? []
   ));
@@ -1269,7 +1283,7 @@ export default function SquarePage() {
     const controller = new AbortController();
     void api.getSquareStatements({ date: selectedFeedDate ?? undefined, date_from: selectedFeedFrom ?? undefined, date_to: selectedFeedTo ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
       if (activeFeedCacheKeyRef.current !== cacheKey) return;
-      const refreshed = mergeSquareFeedRefresh(cached?.items ?? [], rows);
+      const refreshed = mergeSquareFeedRefresh(filterSquareRemoved(cacheScope,cached?.items ?? []), rows);
       const nextHasMore = refreshed.connected && cached
         ? cached.hasMore || rows.length === SQUARE_FEED_PAGE_SIZE
         : rows.length === SQUARE_FEED_PAGE_SIZE;
@@ -1421,6 +1435,7 @@ export default function SquarePage() {
       api.getSquareStatement(commentStatementId, controller.signal),
       api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30, sort: commentSort }, controller.signal),
     ]).then(([statement, rows]) => {
+      if(controller.signal.aborted||!filterSquareRemoved(cacheScope,[statement]).length)return;
       setStatements((current) => current.some((item) => item.statement_id === statement.statement_id)
         ? current.map((item) => item.statement_id === statement.statement_id ? statement : item)
         : [statement, ...current]);

@@ -1,6 +1,8 @@
 import { createResearchApi } from "./researchApi";
 import { rememberAvatarFrames } from "./avatarFrameCache";
 import { mergeSessionUser } from "./sessionUser";
+import {applySquareSync,rememberSquareResponse,squareSyncRevision,type SquareSyncResult} from './squareSync';
+import {buildTabCacheScope} from './tabCache';
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
@@ -313,6 +315,15 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
   const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
   const session = auth ? authConfig.getSession() : null;
+  const squareScope=buildTabCacheScope(session?.user.space_id,session?.user.user_id);
+  const squareRevision=squareScope?squareSyncRevision(squareScope):0;
+  const rememberSquare=(value:T)=>rememberSquareResponse(squareScope,path,method,value,squareRevision);
+  const rememberSquareError=(cause:unknown):never=>{
+    if(squareScope&&method==='GET'&&/^\/square\/statements\/\d+$/.test(path)&&cause instanceof ApiError&&(cause.status===404||cause.identifier==='SQUARE@NOT_EXISTS')){
+      applySquareSync(squareScope,{items:[],removed_ids:[Number(path.split('/').pop())]});
+    }
+    throw cause;
+  };
   const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
   const platformAdminSession = platformAdminAuth ? platformAdminAuthConfig.getSession() : null;
   const headers = new Headers();
@@ -366,7 +377,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
         body: body === undefined ? undefined : JSON.stringify(body),
         signal,
       });
-      return parseResponse(retryResponse).then(rememberAvatarFrames);
+      return parseResponse(retryResponse).then(rememberAvatarFrames).then(rememberSquare).catch(rememberSquareError);
     } catch (error) {
       const latestSession = authConfig.getSession();
       if (
@@ -380,7 +391,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
     }
   }
 
-  return parseResponse(response).then(rememberAvatarFrames);
+  return parseResponse(response).then(rememberAvatarFrames).then(rememberSquare).catch(rememberSquareError);
 }
 
 function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Promise<T> {
@@ -407,7 +418,7 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", auth = false, adminAuth = false, platformAdminAuth = false, query, signal } = options;
   if (method !== "GET") {
     return requestCore<T>(path, options).then((result) => {
-      if (auth && path !== "/users/me/growth") {
+      if (auth && path !== "/users/me/growth" && path !== '/square/statements/sync') {
         window.dispatchEvent(new CustomEvent("sermo:growth-refresh"));
       }
       return result;
@@ -1041,6 +1052,10 @@ export const api = {
       query: params,
       signal,
     });
+  },
+
+  syncSquareStatements(statement_ids:number[],signal?:AbortSignal){
+    return request<SquareSyncResult>('/square/statements/sync',{auth:true,method:'POST',body:{statement_ids},signal});
   },
 
   getSquareCalendar(params: { month: number; scope?: "all" | "friends" | "mine"; user_id?: number; year: number }, signal?: AbortSignal) {
