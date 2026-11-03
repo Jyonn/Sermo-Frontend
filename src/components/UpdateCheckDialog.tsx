@@ -8,6 +8,8 @@ import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { UpdateFailureFeedback } from "./UpdateReportButton";
 import { SITE_ORIGINS, updateSiteLabel } from "../lib/siteOrigins";
 import { updateDestination } from "../lib/updateDestination";
+import {localizedReleaseNotes} from '../lib/releaseNotes';
+import './UpdateCheckDialog.css';
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -18,7 +20,7 @@ interface UpdateCheckDialogProps {
 }
 
 export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: UpdateCheckDialogProps) {
-  const { t } = useI18n();
+  const { t,language } = useI18n();
   const { phase, install } = usePwaUpdateActivation();
   const installing = phase !== "idle" && phase !== "error";
   const root=useRef<HTMLElement|null>(null);
@@ -34,6 +36,8 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const sources=result?.sources ?? SITE_ORIGINS.map(site=>({...site,release:null,releaseId:null,status:'idle' as const}));
   const current=sources.find(source=>source.origin===window.location.origin);
   const others=sources.filter(source=>source.origin!==window.location.origin);
+  const latest=!checking&&!allFailed?result?.latestRelease:null;
+  const notes=localizedReleaseNotes(latest,language);
 
   return createPortal(
     <div className="dialog-backdrop update-check-backdrop" onClick={() => { if (!installing) onClose(); }} role="presentation">
@@ -50,9 +54,10 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
             </span>
             <div>
               <strong>{checking ? t("update.checking") : allFailed ? t("update.unavailable") : result?.updateAvailable ? t("update.available") : t("update.latest")}</strong>
-              {result?.updateAvailable?<p>{t('update.latestVersion')} · {result.latestVersion}</p>:null}
             </div>
           </div>
+
+          {latest?<section className="update-release-notes" aria-labelledby="update-release-heading"><div className="update-release-version"><span>{t('update.latestVersion')}</span><strong>{latest.id}</strong></div>{notes?<><h3 id="update-release-heading">{notes.title}</h3><ul>{notes.items.map((item,index)=><li key={`${index}:${item}`}>{item}</li>)}</ul></>:<h3 id="update-release-heading">{t('update.changes')}</h3>}</section>:null}
 
           <div className="update-current-site">
             <div><small>{t('update.currentSite')}</small><strong>{window.location.host}</strong></div>

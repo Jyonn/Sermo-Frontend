@@ -2735,6 +2735,7 @@
   "update.switchNetworkHint": "请尝试切换 Wi-Fi 或蜂窝网络后重新检查。",
   "update.currentVersion": "当前版本",
   "update.latestVersion": "最新版本",
+  "update.changes": "更新内容",
   "update.primarySite": "主站",
   "update.friendenPrimary": "Frienden 友间 · 新主站",
   "update.friendenMirror": "Frienden 友间 · 新镜像",

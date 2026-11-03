@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.03.4",
+  "id": "2026.11.03.5",
   "publishedAt": "2026-11-03",
   "locales": {
     "zh-CN": {
-      "title": "头像框更贴合",
+      "title": "查看最新更新内容",
       "items": [
-        "修正柯南头像框的透明留白与对齐，保持头像原有尺寸"
+        "检查更新中展示服务器提供的最新版本号和更新点，轻提示保持简洁"
       ]
     },
     "en": {
-      "title": "A closer-fitting avatar frame",
+      "title": "See what's new",
       "items": [
-        "Corrected the Conan frame's transparent margins and alignment while preserving avatar size"
+        "Check for updates shows the latest version and release notes from the server; toasts stay brief"
       ]
     }
   }

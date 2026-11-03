@@ -2735,6 +2735,7 @@
   "update.switchNetworkHint": "Try switching between Wi-Fi and mobile data, then check again.",
   "update.currentVersion": "Current version",
   "update.latestVersion": "Latest version",
+  "update.changes": "What's new",
   "update.primarySite": "Primary site",
   "update.friendenPrimary": "Frienden 友间 · primary",
   "update.friendenMirror": "Frienden 友间 · mirror",
