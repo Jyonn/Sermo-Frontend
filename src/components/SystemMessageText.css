@@ -1,4 +1,6 @@
-.message-system-self{display:inline-block;margin-inline:2px;padding:0 4px;border:1px solid color-mix(in srgb,var(--brand-primary) 25%,transparent);border-radius:4px;color:var(--text-secondary);background:color-mix(in srgb,var(--brand-primary) 9%,var(--bg-canvas));font-weight:650;line-height:1.4}
+.message-system-self{margin-inline:2px;color:var(--brand-accent,var(--brand-primary));font-weight:650}
 .message-system-user{font-weight:550}
-.system-message-copy .message-system-view{display:inline;margin-inline-start:7px;padding:2px 0;border:0;background:none;color:var(--brand-primary);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.system-message-copy .message-system-view{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:28px;height:28px;margin:-4px -5px -4px 3px;padding:0;border:0;border-radius:50%;background:none;color:var(--brand-accent,var(--brand-primary));font:inherit;cursor:pointer;pointer-events:auto}
+.message-system-view>.material-symbols-outlined{font-size:17px}
+.message-system-view:hover{background:color-mix(in srgb,var(--brand-primary) 8%,transparent)}
 .message-system-view:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px}

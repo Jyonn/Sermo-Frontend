@@ -1,21 +1,21 @@
 {
-  "id": "2026.11.04.7",
+  "id": "2026.11.04.8",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "足迹筛选、打卡历史与系统消息优化",
+      "title": "更顺畅的足迹查看与共享",
       "items": [
-        "系统消息按用户身份展示“我”，足迹分享消息可点击查看；聊天外观预览移除足迹场景",
-        "科研、活动与足迹使用统一圆形成员头像，足迹支持筛选成员并保留自己的足迹",
-        "足迹面板按年月展示最近 20 条首次打卡记录，同一地区重复打卡不增加历史"
+        "修复系统消息的足迹入口与成员头像排列，“我”改用文字颜色突出",
+        "打卡历史展示成员与国家，点击地图地区可查看打卡成员",
+        "聊天中直接进入已共享足迹，首次共享需确认，停止共享收进面板设置"
       ]
     },
     "en": {
-      "title": "Footprint filters, history and clearer system messages",
+      "title": "Smoother footprint viewing and sharing",
       "items": [
-        "System messages resolve identities and highlight Me, with a footprint shortcut; appearance previews no longer include footprint cards",
-        "Research, activities and footprints share circular member avatars; footprint filters always retain your own map",
-        "Footprints show up to 20 first check-ins by month; repeat visits to a region do not add history"
+        "Fixed footprint shortcuts and avatar alignment; Me now uses a text accent",
+        "Check-in history includes members and countries; tap a region to see who visited",
+        "Shared maps open directly from chats, with consent before sharing and sharing controls inside the panel"
       ]
     }
   }

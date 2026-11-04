@@ -11,6 +11,8 @@ import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 import { SideDrawer } from "./SideDrawer";
 import { BottomSheet } from "./BottomSheet";
+import {ConfirmDialog} from './ConfirmDialog';
+import {SettingGroup,SettingRow,SettingSwitch} from './SettingRow';
 import { UserAvatar } from "./UserAvatar";
 import {MemberAvatarStack} from './MemberAvatarStack';
 import type {TravelMapHistoryDTO} from '../types';
@@ -30,6 +32,8 @@ countries.registerLocale(koCountries);
 countries.registerLocale(zhCountries);
 
 interface TravelMapDrawerProps {
+  onStopSharing?:()=>Promise<void>;
+  sharingBusy?:boolean;
   open: boolean;
   onClose: () => void;
   backdropClassName?: string;
@@ -64,6 +68,7 @@ interface MapTransform {
 }
 
 interface MapGesture {
+  tapRegionCode?:string|null;
   pointers: Map<number, { x: number; y: number; startX: number; startY: number }>;
   center: { x: number; y: number } | null;
   distance: number | null;
@@ -307,12 +312,15 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
   ).values()];
 }
 
-export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
+export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner,onStopSharing,sharingBusy=false }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [maps, setMaps] = useState<MapOwner[]>([]);
   const [selectedOwnerIds,setSelectedOwnerIds]=useState<number[]|null>(null);
   const [memberPickerOpen,setMemberPickerOpen]=useState(false);
+  const [sharingSettingsOpen,setSharingSettingsOpen]=useState(false),[stopSharingConfirm,setStopSharingConfirm]=useState(false);
+  const [regionInfo,setRegionInfo]=useState<{code:string;x:number;y:number}|null>(null);
+  const canvasRef=useRef<HTMLDivElement>(null);
   const [history,setHistory]=useState<TravelMapHistoryDTO[]>([]),[historyLoading,setHistoryLoading]=useState(false),[historyError,setHistoryError]=useState(false),[historyReload,setHistoryReload]=useState(0);
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -345,7 +353,8 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
   const activeCountry = focusLocation ? null : selectedCountry;
 
-  useEffect(()=>{setSelectedOwnerIds(null);setMemberPickerOpen(false);setHistory([])},[open,chatId,otherUser?.user_id,currentUserId]);
+  useEffect(()=>{setSelectedOwnerIds(null);setMemberPickerOpen(false);setSharingSettingsOpen(false);setStopSharingConfirm(false);setHistory([])},[open,chatId,otherUser?.user_id,currentUserId]);
+  useEffect(()=>{setRegionInfo(null)},[open,activeCountry,selectedHistoryIds]);
   useEffect(()=>{
     if(!open||focusLocation||loading||!selectedHistoryIds)return;
     const controller=new AbortController();setHistoryLoading(true);setHistoryError(false);setHistory([]);
@@ -646,8 +655,9 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       return zoomTransformAroundPoint(current, nextScale, anchor, !activeCountry);
     });
   };
-  const zoom = (delta: number) => zoomAroundClientPoint((currentScale) => currentScale + delta);
+  const zoom = (delta: number) => {setRegionInfo(null);zoomAroundClientPoint((currentScale) => currentScale + delta)};
   const resetView = () => {
+    setRegionInfo(null);
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
   };
@@ -657,6 +667,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     resetView();
   };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
+    setRegionInfo(null);
     event.preventDefault();
     const factor = Math.exp(-event.deltaY * 0.0015);
     zoomAroundClientPoint((currentScale) => currentScale * factor, { x: event.clientX, y: event.clientY });
@@ -690,9 +701,11 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       gesture.tapCountryCode = event.target instanceof Element
         ? event.target.closest<SVGPathElement>("[data-country-code]")?.dataset.countryCode ?? null
         : null;
+      gesture.tapRegionCode=event.target instanceof Element?event.target.closest<SVGPathElement>('[data-region-code]')?.dataset.regionCode??null:null;
     } else {
       gesture.moved = true;
       gesture.tapCountryCode = null;
+      gesture.tapRegionCode=null;setRegionInfo(null);
     }
   };
   const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
@@ -714,6 +727,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     if (pointer && Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY) > 6) {
       gesture.moved = true;
       gesture.tapCountryCode = null;
+      gesture.tapRegionCode=null;setRegionInfo(null);
     }
 
     if (metrics.distance && previousDistance) {
@@ -737,6 +751,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   };
   const handlePointerEnd = (event: ReactPointerEvent<SVGSVGElement>, cancelled = false) => {
     const gesture = gestureRef.current;
+    const regionCode=!cancelled&&gesture.pointers.size===1&&!gesture.moved&&!focusLocation&&activeCountry?gesture.tapRegionCode:null;
     const shouldOpenCountry = !cancelled
       && gesture.pointers.size === 1
       && !gesture.moved
@@ -749,6 +764,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     gesture.distance = metrics.distance;
     if (!gesture.pointers.size) {
       gesture.tapCountryCode = null;
+      gesture.tapRegionCode=null;
       gesture.moved = false;
     }
     if (shouldOpenCountry) {
@@ -758,7 +774,16 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
         setTransform({ x: 0, y: 0, scale: 1 });
       }
     }
+    if(regionCode)openRegionInfo(regionCode,event.clientX,event.clientY);
+    else if(!gesture.moved&&!shouldOpenCountry)setRegionInfo(null);
   };
+
+  const openRegionInfo=(code:string,clientX:number,clientY:number)=>{
+    const bounds=canvasRef.current?.getBoundingClientRect();if(!bounds)return;
+    setRegionInfo({code,x:Math.max(12,Math.min(bounds.width-256,clientX-bounds.left-120)),y:Math.max(12,Math.min(bounds.height-190,clientY-bounds.top+14))});
+  };
+  const inspectedRegion=regionInfo&&activeCountry?geometry?.features.find(region=>regionCode(activeCountry,region)===regionInfo.code):null;
+  const regionVisitors=inspectedRegion&&activeCountry?selectedMaps.filter(item=>hasRegion(item.regions,activeCountry,inspectedRegion)):[];
 
   const title = focusLocation
     ? t("location.drawerTitle")
@@ -781,7 +806,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       open={open}
       onClose={onClose}
       title={title}
-      headerAction={!focusLocation && !chatId && !otherUser ? (
+      headerAction={!focusLocation&&chatId&&onStopSharing?<button className="travel-map-access-header-button" aria-label={t('travelMap.sharingSettings')} title={t('travelMap.sharingSettings')} disabled={sharingBusy} onClick={()=>setSharingSettingsOpen(true)} type="button"><span className="material-symbols-outlined" aria-hidden="true">more_horiz</span></button>:!focusLocation && !chatId && !otherUser ? (
         <button
           aria-label={t("travelMap.accessManagement")}
           className="travel-map-access-header-button"
@@ -810,7 +835,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           ) : null}
         </div>
 
-        <div className="travel-map-canvas">
+        <div className="travel-map-canvas" ref={canvasRef}>
           <div className="travel-map-paper-heading">
             <span>{focusLocation ? t("location.focusing") : t("travelMap.worldAtlas")}</span>
             <strong>{focusLocation ? locationFocusCandidate?.regionName || locationFocusCandidate?.countryCode || t("travelMap.worldCode") : activeCountry ? countryName(activeCountry, language) : t("travelMap.worldCode")}</strong>
@@ -847,7 +872,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
                     const otherActive = others.some((item) => hasRegion(item.regions, activeCountry, region));
                     const path = detailPath(region);
                     return path ? (
-                      <path className={`travel-map-region is-${mineActive && otherActive ? "overlap" : mineActive ? "mine" : otherActive ? "theirs" : "empty"}`} d={path} key={`${code}:${index}`}>
+                      <path className={`travel-map-region is-${mineActive && otherActive ? "overlap" : mineActive ? "mine" : otherActive ? "theirs" : "empty"}${regionInfo?.code===code?' is-inspecting':''}`} d={path} data-region-code={code} key={`${code}:${index}`} tabIndex={0} role="button" aria-label={t('travelMap.inspectRegion',{region:region.properties?.name||code})} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();const bounds=event.currentTarget.getBoundingClientRect();openRegionInfo(code,bounds.left+bounds.width/2,bounds.top+bounds.height/2)}}}>
                         <title>{region.properties?.name || code}</title>
                       </path>
                     ) : null;
@@ -891,6 +916,10 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
               </g>
             </svg>
           ) : null}
+          {regionInfo&&inspectedRegion?<section className="travel-map-region-popover" style={{left:regionInfo.x,top:regionInfo.y}} aria-label={t('travelMap.regionVisitors')}>
+            <header><span><strong>{inspectedRegion.properties?.name||regionInfo.code}</strong><small>{t('travelMap.regionVisitors')}</small></span><button aria-label={t('common.close')} type="button" onClick={()=>setRegionInfo(null)}><span className="material-symbols-outlined">close</span></button></header>
+            {regionVisitors.length?<ul>{regionVisitors.map(item=><li key={item.owner.user_id}><MemberAvatarStack members={[{id:item.owner.user_id,name:item.owner.name,uri:item.owner.avatar_uri}]} size={28} label={item.owner.user_id===currentUserId?t('common.me'):item.owner.name}/></li>)}</ul>:<p>{t('travelMap.noRegionVisitors')}</p>}
+          </section>:null}
           {loading ? <div className="travel-map-loading"><span /></div> : null}
           {locationFlashVisible ? <div className="travel-map-focus-flash" aria-hidden="true" /> : null}
           <div className="travel-map-zoom">
@@ -940,9 +969,13 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
         ) : null}
 
         {!focusLocation?<section className="travel-map-history"><h3>{t('travelMap.history')}</h3>
-          {historyLoading?<p className="travel-map-history-state" role="status">{t('common.loading')}</p>:historyError?<button className="travel-map-history-state" type="button" onClick={()=>setHistoryReload(value=>value+1)}>{t('common.retry')}</button>:!history.length?<p className="travel-map-history-state">{t('travelMap.noHistory')}</p>:<ol>{history.slice(0,20).map(item=><li key={item.check_in_id}><span><strong>{item.region_name}</strong>{selectedMaps.length>1?<small>{item.user_id===currentUserId?t('common.me'):maps.find(map=>map.owner.user_id===item.user_id)?.owner.name}</small>:null}</span><time>{new Intl.DateTimeFormat(language,{year:'numeric',month:'short'}).format(new Date(item.checked_at*1000))}</time></li>)}</ol>}
+          {historyLoading?<p className="travel-map-history-state" role="status">{t('common.loading')}</p>:historyError?<button className="travel-map-history-state" type="button" onClick={()=>setHistoryReload(value=>value+1)}>{t('common.retry')}</button>:!history.length?<p className="travel-map-history-state">{t('travelMap.noHistory')}</p>:<ol>{history.slice(0,20).map(item=>{const owner=maps.find(map=>map.owner.user_id===item.user_id)?.owner;return <li key={item.check_in_id}><MemberAvatarStack members={[{id:item.user_id,name:owner?.name??'',uri:owner?.avatar_uri}]} size={34} label={<span className="travel-map-history-meta"><strong>{owner?.name||t('common.me')}</strong><time>{new Intl.DateTimeFormat(language,{year:'numeric',month:'short'}).format(new Date(item.checked_at*1000))}</time></span>} subtitle={t('travelMap.checkedInPlace',{region:item.region_name,country:countryName(item.country_code,language)||item.country_name})}/></li>})}</ol>}
         </section>:null}
       </div>
+      <BottomSheet open={sharingSettingsOpen} onClose={()=>setSharingSettingsOpen(false)} title={t('travelMap.sharingSettings')} description={t('travelMap.sharingCurrentChat')}>
+        <SettingGroup><SettingRow title={t('travelMap.shareWithChat')} description={t('travelMap.sharingDescription')} trailing={<SettingSwitch checked disabled={sharingBusy} label={t('travelMap.shareWithChat')} onChange={()=>{setSharingSettingsOpen(false);setStopSharingConfirm(true)}}/>}/></SettingGroup>
+      </BottomSheet>
+      <ConfirmDialog open={stopSharingConfirm} title={t('travelMap.stopChatSharingTitle')} description={t('travelMap.stopChatSharingHint')} confirmLabel={t('composer.stopFootprintSharing')} busy={sharingBusy} danger onClose={()=>{if(!sharingBusy)setStopSharingConfirm(false)}} onConfirm={()=>{void onStopSharing?.()}}/>
       <BottomSheet open={memberPickerOpen} onClose={()=>setMemberPickerOpen(false)} title={t('travelMap.selectMembers')}>
         <div className="travel-map-member-picker">{maps.map(item=>{const self=item.owner.user_id===currentUserId,checked=self||selectedOwnerIds===null||selectedOwnerIds.includes(item.owner.user_id);return <button key={item.owner.user_id} type="button" role="checkbox" aria-checked={checked} disabled={self} onClick={()=>setSelectedOwnerIds(current=>toggleMapOwner(current,item.owner.user_id,currentUserId,maps.map(map=>map.owner.user_id)))}>
           <MemberAvatarStack members={[{id:item.owner.user_id,name:item.owner.name,uri:item.owner.avatar_uri}]} size={36} label={self?t('common.me'):item.owner.name}/><span className="material-symbols-outlined" aria-hidden="true">{checked?'check_circle':'radio_button_unchecked'}</span>

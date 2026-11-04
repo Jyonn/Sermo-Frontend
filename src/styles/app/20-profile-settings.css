@@ -6800,7 +6800,7 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   background: var(--bg-panel);
 }
 
-.travel-map-owner > span {
+.travel-map-owner > .member-avatar-stack-copy {
   display: grid;
   min-width: 0;
   gap: 2px;

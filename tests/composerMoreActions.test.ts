@@ -56,11 +56,12 @@ test("layout switching is a peer action and footprints expose the current permis
   assert.match(expanded, /composer.collapseLayout/);
   assert.match(render({ compact: true, onToggleLayout() {} }), /composer.expandLayout/);
   const chat = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
-  assert.match(chat, /authorized_by_me \? "composer.stopFootprintSharing" : "composer.publishFootprint"/);
   assert.doesNotMatch(chat, /chatTravelMapMenuOpen|composer-layout-toggle/);
   const load = chat.slice(chat.indexOf("const openComposerFootprintActions"), chat.indexOf("const grantChatTravelMap"));
   assert.match(load, /await api.getChatTravelMapAccess/);
-  assert.match(load, /setComposerActionSheet\("footprint"\)/);
+  assert.match(load, /if\(access.authorized_by_me\)setChatTravelMapOpen\(true\)/);
+  assert.match(load, /else setChatTravelMapGrantConfirmOpen\(true\)/);
+  assert.doesNotMatch(load, /setComposerActionSheet\("footprint"\)/);
 });
 
 test("tablet back does not wait for a mobile-only animation and group counts stay on one line", () => {

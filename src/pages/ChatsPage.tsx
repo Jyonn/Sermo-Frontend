@@ -2724,7 +2724,7 @@ function LiveChatsPage({
   const composerMoreAnchor = useRef<HTMLButtonElement>(null);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
-  const [composerActionSheet, setComposerActionSheet] = useState<"file" | "footprint" | null>(null);
+  const [composerActionSheet, setComposerActionSheet] = useState<"file" | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
@@ -6008,10 +6008,14 @@ function LiveChatsPage({
     if (!selectedChat || composerBusy || travelMapSaving) return;
     setComposerMoreOpen(false);
     setTravelMapSaving(true);
+    const chatId=selectedChat.id;
     try {
-      const access = await api.getChatTravelMapAccess(selectedChat.id);
+      const access = await api.getChatTravelMapAccess(chatId);
+      if(selectedChatIdRef.current!==chatId)return;
       setChatTravelMapAccess(access);
-      setComposerActionSheet("footprint");
+      setDesktopComposerTool(null);
+      if(access.authorized_by_me)setChatTravelMapOpen(true);
+      else setChatTravelMapGrantConfirmOpen(true);
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
     } finally {
@@ -6021,10 +6025,13 @@ function LiveChatsPage({
 
   const grantChatTravelMap = async () => {
     if (!selectedChat || travelMapSaving) return;
+    const chatId=selectedChat.id;
     if (!await moveToLatestMessageWindow()) return;
+    if(selectedChatIdRef.current!==chatId)return;
     setTravelMapSaving(true);
     try {
-      const access = await api.grantChatTravelMapAccess(selectedChat.id);
+      const access = await api.grantChatTravelMapAccess(chatId);
+      if(selectedChatIdRef.current!==chatId)return;
       setChatTravelMapAccess(access);
       if (access.invitation_message) {
         const delivered = mapChatMessage(access.invitation_message, currentUserId);
@@ -6052,8 +6059,10 @@ function LiveChatsPage({
     setTravelMapSaving(true);
     try {
       const access = await api.revokeChatTravelMapAccess(selectedChat.id);
+      if(selectedChatIdRef.current!==selectedChat.id)return;
       setChatTravelMapAccess(access);
       setComposerActionSheet(null);
+      setChatTravelMapOpen(false);
       showToast(t("travelMap.accessRemoved"));
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
@@ -6105,20 +6114,7 @@ function LiveChatsPage({
       }>).detail;
       if(travelMapSaving)return;
       if (detail.chatGrant) {
-        const openFromStatus = (status: ChatTravelMapAccessDTO) => {
-          setChatTravelMapAccess(status);
-          if (status.authorized_by_me) setChatTravelMapOpen(true);
-          else setChatTravelMapGrantConfirmOpen(true);
-        };
-        if (detail.chatAccess) {
-          openFromStatus(detail.chatAccess);
-        } else if (selectedChat) {
-          setTravelMapSaving(true);
-          void api.getChatTravelMapAccess(selectedChat.id)
-            .then(openFromStatus)
-            .catch((error) => showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error"))
-            .finally(() => setTravelMapSaving(false));
-        }
+        void openComposerFootprintActions();
         return;
       }
       const peer = detail.from === "self" ? selectedDirectPeer : (detail.owner ?? selectedDirectPeer);
@@ -6139,7 +6135,7 @@ function LiveChatsPage({
     };
     window.addEventListener("sermo:travel-map-message", handleMapMessage);
     return () => window.removeEventListener("sermo:travel-map-message", handleMapMessage);
-  }, [selectedChat?.id, selectedDirectPeer?.user_id, travelMapSaving]);
+  }, [selectedChat?.id, selectedDirectPeer?.user_id, travelMapSaving, composerBusy]);
 
   const openSharedTravelMap = () => {
     if (!travelMapMenu?.access.can_view_theirs) return;
@@ -7583,12 +7579,9 @@ function LiveChatsPage({
       {!mobileComposerLayout ? <ComposerActionsPopover open={composerMoreOpen} anchor={composerMoreAnchor} onClose={() => setComposerMoreOpen(false)} label={t("composer.moreActions")}>
         {composerMoreActions}
       </ComposerActionsPopover> : null}
-      <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t(composerActionSheet === "file" ? "cloudResources.fileSourceTitle" : "travelMap.actionShort")} actions={composerActionSheet === "file" ? [
+      <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t("cloudResources.fileSourceTitle")} actions={[
         { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
-      ] : [
-        { key: "map", label: t("travelMap.openMap"), description: t("composer.openFootprintHint"), icon: <ComposerSvgIcon kind="map" />, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); setChatTravelMapOpen(true); } },
-        { key: "sharing", label: t(chatTravelMapAccess?.authorized_by_me ? "composer.stopFootprintSharing" : "composer.publishFootprint"), description: t("composer.shareFootprintHint"), icon: <span className="material-symbols-outlined">{chatTravelMapAccess?.authorized_by_me ? "visibility_off" : "group_add"}</span>, disabled: composerBusy || travelMapSaving, onSelect: () => { setComposerMoreOpen(false); if (chatTravelMapAccess?.authorized_by_me) void revokeChatTravelMap(); else setChatTravelMapGrantConfirmOpen(true); } },
       ]} />
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
@@ -9237,6 +9230,8 @@ function LiveChatsPage({
         chatTitle={selectedChat?.title}
         chatType={selectedChat?.type}
         historyKey="chat-travel-map"
+        onStopSharing={revokeChatTravelMap}
+        sharingBusy={travelMapSaving}
         onRouteOpen={() => setChatTravelMapOpen(true)}
         open={chatTravelMapOpen}
         onClose={() => setChatTravelMapOpen(false)}

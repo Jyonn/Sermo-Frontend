@@ -3,7 +3,10 @@
 .travel-map-history h3{margin:0 0 14px;font-size:14px;font-weight:650;color:var(--text-primary)}
 .travel-map-history ol{margin:0;padding:0;list-style:none}
 .travel-map-history li{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:53px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
-.travel-map-history li>span{display:grid;min-width:0;gap:3px}
+.travel-map-history li>.member-avatar-stack{width:100%;min-width:0}
+.travel-map-history-meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.travel-map-history .member-avatar-stack-copy{flex:1}
+.travel-map-history .member-avatar-stack-copy>small{white-space:normal;line-height:1.5}
 .travel-map-history strong{font-size:13px;font-weight:550}
 .travel-map-history small,.travel-map-history time{color:var(--text-muted);font-size:11px}
 .travel-map-history time{flex:none;font-variant-numeric:tabular-nums}
@@ -13,3 +16,16 @@
 .travel-map-member-picker>button:disabled{cursor:default}
 .travel-map-member-picker>button>.material-symbols-outlined{color:var(--text-muted);font-size:22px}
 .travel-map-member-picker>button[aria-checked=true]>.material-symbols-outlined{color:var(--brand-primary)}
+.travel-map-region-popover{position:absolute;z-index:4;width:244px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:14px;border:1px solid var(--line-soft);border-radius:18px;background:var(--surface-card,var(--surface));box-shadow:0 12px 36px #0002;color:var(--text-primary)}
+.travel-map-region-popover header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.travel-map-region-popover header>span{display:grid;gap:4px}
+.travel-map-region-popover header strong{font-size:14px}
+.travel-map-region-popover small,.travel-map-region-popover p{font-size:12px;color:var(--text-muted)}
+.travel-map-region-popover header button{display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--text-muted);cursor:pointer}
+.travel-map-region-popover header button:hover{background:var(--line-soft)}
+.travel-map-region-popover header button>span{font-size:18px}
+.travel-map-region-popover ul{display:grid;gap:12px;margin:16px 0 0;padding:0;list-style:none}
+.travel-map-region-popover p{margin:14px 0 0;line-height:1.6}
+.travel-map-region-popover .member-avatar-stack-copy{font-size:13px}
+.travel-map-canvas path[role=button]{cursor:pointer}
+.travel-map-canvas path.is-inspecting,.travel-map-canvas path[role=button]:focus-visible{stroke:var(--brand-primary);stroke-width:2;outline:none}
