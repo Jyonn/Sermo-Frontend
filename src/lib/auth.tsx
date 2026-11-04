@@ -219,6 +219,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const [gestureUnlocked, setGestureUnlocked] = useState(() => isGestureUnlocked(gestureScope));
   const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(initialGestureCache.preference);
   const [gesturePreferenceReady, setGesturePreferenceReady] = useState(initialGestureCache.found || gestureUnlocked);
+  const gesturePreferenceSnapshot = useRef({ scope: gestureScope, ...initialGestureCache });
 
   useEffect(() => {
     setGestureUnlocked(isGestureUnlocked(gestureScope));
@@ -232,21 +233,27 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     }
 
     let cancelled = false;
-    const cached = readCachedGestureLockPreference(gestureScope);
+    // A rotated token is still the same identity. Keep its resolved security
+    // policy while revalidating, rather than unmounting the authenticated page.
+    const cached = gesturePreferenceSnapshot.current.scope === gestureScope && gesturePreferenceSnapshot.current.found
+      ? gesturePreferenceSnapshot.current
+      : readCachedGestureLockPreference(gestureScope);
+    gesturePreferenceSnapshot.current = { scope: gestureScope, ...cached };
     setGesturePreference(cached.preference);
     setGesturePreferenceReady(cached.found || isGestureUnlocked(gestureScope));
     const loadPreference = (nextPreference?: GestureLockPreferenceDTO) => {
       if (nextPreference) {
+        gesturePreferenceSnapshot.current = { scope: gestureScope, found: true, preference: nextPreference };
         cacheGestureLockPreference(gestureScope, nextPreference);
         setGesturePreference(nextPreference);
         setGesturePreferenceReady(true);
         return;
       }
-      setGesturePreferenceReady(false);
       api
         .getGestureLockPrefs()
         .then((preference) => {
           if (cancelled) return;
+          gesturePreferenceSnapshot.current = { scope: gestureScope, found: true, preference };
           cacheGestureLockPreference(gestureScope, preference);
           setGesturePreference(preference);
         })
@@ -256,6 +263,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
         })
         .finally(() => {
           if (cancelled) return;
+          gesturePreferenceSnapshot.current = { ...gesturePreferenceSnapshot.current, found: true };
           setGesturePreferenceReady(true);
         });
     };
