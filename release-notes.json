@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.04.9",
+  "id": "2026.11.04.10",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "登录续期不再打断当前页面",
+      "title": "更轻量的图片与视频",
       "items": [
-        "修复自动登录续期或安全设置复查时页面闪回加载、聊天状态丢失的问题",
-        "保留首次登录、切换账号和手势锁的安全检查"
+        "图片默认展示和下载最长边 1920px 的压缩版本，保留照片信息",
+        "修复视频漏转码并检查每分钟 20 MB 的体积限制，默认下载转码版本",
+        "压缩版与原文件使用独立缓存，避免旧缓存继续加载大文件"
       ]
     },
     "en": {
-      "title": "Session renewal keeps your page intact",
+      "title": "Lighter photos and videos",
       "items": [
-        "Fixed loading flashes and lost chat state during session renewal or security preference checks",
-        "Initial sign-in, account switching and gesture-lock checks remain enforced"
+        "Photos display and download a compressed version up to 1920px while retaining photo information",
+        "Fixed skipped video processing and added a 20 MB per minute output check; downloads use the processed video",
+        "Processed media has separate cache entries so old originals do not override lighter versions"
       ]
     }
   }

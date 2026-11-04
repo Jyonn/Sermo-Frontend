@@ -10,7 +10,7 @@ import { BottomSheet } from "./BottomSheet";
 import { ChatTargetPicker } from "./ChatTargetPicker";
 import { ContentLoader, QuietState } from "./BoundaryState";
 import { CloudFileList } from "./CloudFileList";
-import { MediaLightbox } from "./ImageLightbox";
+import { MediaLightbox, downloadMedia } from "./ImageLightbox";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "./MediaResourceGrid";
 import { SideDrawer } from "./SideDrawer";
@@ -290,7 +290,7 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
         {actionAsset ? (
           <div className="cloud-resource-action-list">
             <button disabled={busyId === actionAsset.resource_id} onClick={() => void requestSend(actionAsset)} type="button"><span className="material-symbols-outlined">send</span><span>{t("cloudResources.send")}</span></button>
-            <a download href={actionAsset.uri} onClick={() => setActionAsset(null)}><span className="material-symbols-outlined">download</span><span>{t("cloudResources.download")}</span></a>
+            {actionAsset.kind==='image'||actionAsset.kind==='video'?<button disabled={busyId===actionAsset.resource_id} type="button" onClick={()=>{const asset=actionAsset;setBusyId(asset.resource_id);void downloadMedia(asset.uri,'frienden').then(()=>setActionAsset(null)).catch(error=>showToast(t(error instanceof Error&&error.message==='media_processing'?'media.downloadProcessing':'media.downloadFailed'),'error')).finally(()=>setBusyId(null))}}><span className="material-symbols-outlined">download</span><span>{t("cloudResources.download")}</span></button>:<a download href={actionAsset.uri} onClick={() => setActionAsset(null)}><span className="material-symbols-outlined">download</span><span>{t("cloudResources.download")}</span></a>}
             {actionAsset.kind !== "image" ? <button className="is-danger" disabled={busyId === actionAsset.resource_id} onClick={() => void deleteAsset(actionAsset)} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
           </div>
         ) : null}

@@ -8,6 +8,23 @@ import * as stable from "../src/lib/stableResource.ts";
 import { preserveStableMediaUri } from "../src/lib/chatMessageReconciliation.ts";
 import type { ChatMessage } from "../src/types.ts";
 
+test('processed photo cache entries cannot collide with originals or thumbnails',()=>{
+  const context=vm.createContext({self:{location:{origin:'https://app.test'},addEventListener(){}},Request,Response,Headers,URL,Blob,Set,console});
+  vm.runInContext(fs.readFileSync(new URL('../public/sw.js',import.meta.url),'utf8'),context);
+  const identify=vm.runInContext('mediaIdentity',context);
+  assert.equal(identify('https://api.test/messages/blob/a/display').variant,'display-v1');
+  assert.equal(identify('https://api.test/messages/blob/a').variant,'original');
+  assert.equal(identify('https://api.test/square/media/a/thumbnail').variant,'thumbnail');
+  assert.equal(identify('https://api.test/messages/blob/a/download'),null);
+});
+
+test('downloads choose the server representation even when the upload blob is cached',()=>{
+  media.retainLocalMedia('https://api.test/messages/blob/download-test/display','blob:download-test');
+  assert.equal(media.mediaDownloadUri('blob:download-test'),'https://api.test/messages/blob/download-test/download');
+  assert.equal(media.mediaDownloadUri('/square/media/id?variant=playback'),'/square/media/id/download?variant=playback');
+  assert.equal(media.mediaDownloadUri('https://external.test/photo.jpg'),'https://external.test/photo.jpg');
+});
+
 test("upload acknowledgement retains local geometry and a reversible source fallback", () => {
   const pending = { clientId: "local", kind: "image", localPreviewUri: "blob:upload", payload: { kind: "image", uri: "blob:upload", pixel_width: 1200, pixel_height: 1800 } } as ChatMessage;
   const remote = "https://media.test/messages/blob/lifecycle";

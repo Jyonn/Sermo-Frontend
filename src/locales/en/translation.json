@@ -1922,6 +1922,7 @@
   "media.loadFailed": "Media could not be loaded",
   "media.downloading": "Downloading",
   "media.downloadFailed": "Download failed. Try again.",
+  "media.downloadProcessing": "This video is being compressed. Download it shortly.",
   "media.viewMode": "Image view mode",
   "media.fitPage": "Fit",
   "media.fillScreen": "Fill",

@@ -1920,6 +1920,7 @@
   "media.loadFailed": "媒体暂时无法加载",
   "media.downloading": "正在下载",
   "media.downloadFailed": "下载失败，请重试",
+  "media.downloadProcessing": "视频正在压缩，请稍后下载",
   "media.viewMode": "图片查看方式",
   "media.fitPage": "完整显示",
   "media.fillScreen": "铺满屏幕",

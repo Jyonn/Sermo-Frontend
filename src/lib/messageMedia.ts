@@ -25,6 +25,15 @@ export function mediaSourceCandidates(uri: string) {
   const playback = /[?&]variant=playback(?:&|$)/.test(remote);
   return { primary: playback ? remote : local ?? remote, fallback: playback ? local : local ? remote : undefined };
 }
+
+export function mediaDownloadUri(uri: string) {
+  const remote = remoteMedia.get(uri) ?? uri;
+  if (/^(blob:|data:)/.test(remote)) return remote;
+  const url = new URL(remote, 'https://media.invalid');
+  if (!/\/(?:messages\/blob|square\/media)\/[a-z0-9-]+(?:\/(?:display|thumbnail|download))?\/?$/i.test(url.pathname)) return remote;
+  url.pathname = url.pathname.replace(/\/(?:display|thumbnail|download)\/?$/, '').replace(/\/$/, '') + '/download';
+  return /^https?:/.test(remote) ? url.href : `${url.pathname}${url.search}`;
+}
 export function freshMediaUri(uri: string, attempt: number, nonce: string) {
   if (!attempt || !/\/(?:messages\/blob|square\/media)\//.test(uri) || /^(blob:|data:)/.test(uri)) return uri;
   const separator = uri.includes("?") ? "&" : "?";

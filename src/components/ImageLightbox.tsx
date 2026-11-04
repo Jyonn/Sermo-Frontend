@@ -7,7 +7,7 @@ import { UserAvatar } from "./UserAvatar";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
 import { useMediaSource } from "../lib/useMediaSource";
-import { mediaSourceCandidates } from "../lib/messageMedia";
+import { mediaSourceCandidates, mediaDownloadUri } from "../lib/messageMedia";
 import type { ImageMetadataDTO, TinyUserDTO } from "../types";
 
 interface ImageLightboxProps {
@@ -61,17 +61,20 @@ interface MediaLightboxProps {
   navigationLabel?: string;
 }
 
-async function downloadMedia(uri: string, fileNamePrefix: string) {
-  const candidates = mediaSourceCandidates(uri);
+export async function downloadMedia(uri: string, fileNamePrefix: string) {
+  const downloadUri = mediaDownloadUri(uri);
+  const managed = /\/(?:messages\/blob|square\/media)\/[^/?]+\/download(?:\?|$)/.test(downloadUri);
+  const candidates = managed ? {primary:downloadUri,fallback:undefined} : mediaSourceCandidates(downloadUri);
   try {
     const response = await fetch(candidates.primary).then(response => {
+      if (managed && response.status === 409) throw new Error('media_processing');
       if (!response.ok) throw new Error("download_failed");
       return response;
     }).catch(error => {
       if (candidates.fallback && candidates.fallback !== candidates.primary) return fetch(candidates.fallback);
       throw error;
     });
-    if (!response.ok) throw new Error("download_failed");
+    if (!response.ok || managed && /text\/html|application\/json/.test(response.headers.get('Content-Type')??'')) throw new Error("download_failed");
     const blob = await response.blob();
     const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg").replace("quicktime", "mov") || "bin";
     const objectUrl = URL.createObjectURL(blob);
@@ -80,7 +83,8 @@ async function downloadMedia(uri: string, fileNamePrefix: string) {
     anchor.download = `${fileNamePrefix}-${Date.now()}.${extension}`;
     anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-  } catch {
+  } catch (error) {
+    if (managed) throw error;
     if (!window.open(candidates.fallback ?? uri, "_blank", "noopener,noreferrer")) throw new Error("download_failed");
   }
 }
@@ -651,11 +655,11 @@ export function MediaLightbox({
   const approachingStartRef = useRef(onApproachingStart);
   const [immersive, setImmersive] = useState(initialImmersive);
   const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState(false);
+  const [downloadError, setDownloadError] = useState<'processing'|'failed'|null>(null);
   const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({});
   const activeUri = items[index]?.uri ?? items[0]?.uri;
 
-  useEffect(() => { setDownloadError(false); }, [activeUri]);
+  useEffect(() => { setDownloadError(null); }, [activeUri]);
 
   useEffect(() => { approachingEndRef.current = onApproachingEnd; }, [onApproachingEnd]);
   useEffect(() => { approachingStartRef.current = onApproachingStart; }, [onApproachingStart]);
@@ -679,15 +683,15 @@ export function MediaLightbox({
   const sentAt = activeItem.createdAt ? new Date(activeItem.createdAt * 1000) : null;
   const sentTime = sentAt && Number.isFinite(sentAt.getTime()) ? new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(sentAt) : "";
   const close = () => onClose();
-  const downloadLabel = activeItem.kind === "video" ? `${t("common.download")}${activeItem.downloadLabel ? ` · ${activeItem.downloadLabel}` : ""}` : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage");
+  const downloadLabel = activeItem.kind === "video" ? `${t("common.download")}${activeItem.downloadLabel ? ` · ${activeItem.downloadLabel}` : ""}` : t("media.downloadImage");
   const move = (direction: -1 | 1) => {
     const next = index + direction;
     if (next >= 0 && next < items.length) onIndexChange(next);
     else onBoundary?.(direction === -1 ? "older" : "newer");
   };
   const actions = <div className="photo-archive-actions" onClick={(event) => event.stopPropagation()}>
-    {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
-    <button aria-label={downloading ? t("media.downloading") : downloadLabel} title={downloadLabel} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
+    {downloadError ? <span className="media-download-error" role="alert">{t(downloadError==='processing'?'media.downloadProcessing':"media.downloadFailed")}</span> : null}
+    <button aria-label={downloading ? t("media.downloading") : downloadLabel} title={downloadLabel} disabled={downloading} onClick={() => { setDownloadError(null); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(error => setDownloadError(error instanceof Error&&error.message==='media_processing'?'processing':'failed')).finally(() => setDownloading(false)); }} type="button">
       {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
     </button>
     <button aria-label={t("common.fullscreen")} title={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg></button>

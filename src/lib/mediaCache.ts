@@ -1,5 +1,5 @@
-const MEDIA_BLOB_PATTERN = /\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(?:\/thumbnail)?\/?$/i;
-const SQUARE_MEDIA_PATTERN = /\/(?:api\/)?square\/media\/([a-z0-9-]+)(?:\/thumbnail)?\/?$/i;
+const MEDIA_BLOB_PATTERN = /\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(?:\/(?:thumbnail|display))?\/?$/i;
+const SQUARE_MEDIA_PATTERN = /\/(?:api\/)?square\/media\/([a-z0-9-]+)(?:\/(?:thumbnail|display))?\/?$/i;
 const STICKER_ASSET_PATTERN = /\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i;
 
 export function mediaBlobSlug(value?: string | null) {

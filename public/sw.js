@@ -11,18 +11,18 @@ const blockedMediaSlugs = new Set();
 function mediaIdentity(value) {
   const url = new URL(value, self.location.origin);
   const revision = url.searchParams.get("variant") === "playback" ? "-playback" : "";
-  const messageMatch = url.pathname.match(/\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
+  const messageMatch = url.pathname.match(/\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(\/(?:thumbnail|display))?\/?$/i);
   if (messageMatch) {
     return {
       slug: messageMatch[1].toLowerCase(),
-      variant: `${messageMatch[2] ? "thumbnail" : "original"}${revision}`,
+      variant: `${messageMatch[2] === '/display' ? 'display-v1' : messageMatch[2] ? "thumbnail" : "original"}${revision}`,
     };
   }
-  const squareMatch = url.pathname.match(/\/(?:api\/)?square\/media\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
+  const squareMatch = url.pathname.match(/\/(?:api\/)?square\/media\/([a-z0-9-]+)(\/(?:thumbnail|display))?\/?$/i);
   if (squareMatch) {
     return {
       slug: squareMatch[1].toLowerCase(),
-      variant: `${squareMatch[2] ? "thumbnail" : "original"}${revision}`,
+      variant: `${squareMatch[2] === '/display' ? 'display-v1' : squareMatch[2] ? "thumbnail" : "original"}${revision}`,
     };
   }
   const stickerMatch = url.pathname.match(/\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i);
