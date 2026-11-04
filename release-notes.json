@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.04.5",
+  "id": "2026.11.04.6",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "广场频道支持跟手滑动",
+      "title": "修复手机端广场宽度",
       "items": [
-        "左右滑动时实时展示相邻频道，松手后平滑切换",
-        "各频道独立保留页面与滚动位置，相邻频道预加载首页，历史内容仍按需加载"
+        "修正手机端广场容器宽度，消除右侧露出的背景色空隙"
       ]
     },
     "en": {
-      "title": "Swipe between Square channels",
+      "title": "Correct mobile Square width",
       "items": [
-        "Neighboring channels follow your swipe and settle smoothly when released",
-        "Each channel keeps its own page and scroll position; nearby feeds preload their first page while history loads on demand"
+        "Fixed mobile Square container sizing to eliminate the background strip along the right edge"
       ]
     }
   }
