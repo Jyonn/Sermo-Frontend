@@ -48,7 +48,8 @@ import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
 import {SquareNoteDetail} from '../components/SquareNoteDetail';
 import {squareDetailView,squareStatementSearch} from '../lib/squareNoteMedia';
-import {useSquareChannelSwipe} from '../lib/useSquareChannelSwipe';
+import {SquareChannelPager} from '../components/SquareChannelPager';
+import {SquareChannelPage} from '../components/SquareChannelPage';
 import type {SquareChannel} from '../lib/squareSwipe';
 import '../components/SquareActivities.css';
 import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
@@ -524,13 +525,8 @@ export default function SquarePage() {
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const [activityTab,setActivityTab]=useState(false);
-  const activityFeedScroll=useRef(0);
   const selectSquareChannel=(activity:boolean)=>{
-    if(activity===activityTab)return;
-    const scroller=squareFeedScrollRef.current;
-    if(activity&&!activityTab)activityFeedScroll.current=scroller?.scrollTop??0;
     setActivityTab(activity);
-    requestAnimationFrame(()=>{if(scroller)scroller.scrollTop=activity?0:activityFeedScroll.current});
   };
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
@@ -675,6 +671,7 @@ export default function SquarePage() {
   const [feedScrollTopRight, setFeedScrollTopRight] = useState(18);
   const inlineExpandTimerRef = useRef<number | null>(null);
   const commentStatementId = routedStatementId ?? inlineStatementId;
+  const [loadedDetailStatement,setLoadedDetailStatement]=useState<SquareStatementDTO|null>(null);
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
   const [commentLoadError,setCommentLoadError]=useState('');
   const [commentReload,setCommentReload]=useState(0);
@@ -724,6 +721,7 @@ export default function SquarePage() {
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
   useSquareSync(cacheScope,activeFeedCacheKey,statements,pinnedStatement,commentStatementId,change=>{
     setStatements(current=>reconcileSquareItems(current,change));
+    setLoadedDetailStatement(current=>current?reconcileSquareItems([current],change)[0]??null:null);
     if(commentStatementId!==null&&change.removed_ids.includes(commentStatementId)){
       showToast(t('square.statementUnavailable'),'info');
       navigate('/app/square',{replace:true});
@@ -776,11 +774,11 @@ export default function SquarePage() {
   const canPublish = Boolean(currentUser?.verified);
   const canSendVoice = quota?.media.audio ?? (Boolean(currentUser?.official) || growthLevel >= 6);
   const canSendVideo = quota?.media.video ?? (Boolean(currentUser?.official) || growthLevel >= 10);
-  const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
+  const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? (loadedDetailStatement?.statement_id===commentStatementId?loadedDetailStatement:null);
   const canCommentAnonymously = Boolean(activeCommentStatement?.is_anonymous && activeCommentStatement.is_mine);
-  const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
+  const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? (loadedDetailStatement?.statement_id===gallery?.statementId?loadedDetailStatement:null);
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
-  const galleryVideoStatement = statements.find((item) => item.statement_id === videoGalleryStatementId) ?? null;
+  const galleryVideoStatement = statements.find((item) => item.statement_id === videoGalleryStatementId) ?? (loadedDetailStatement?.statement_id===videoGalleryStatementId?loadedDetailStatement:null);
   const galleryVideo = galleryVideoStatement?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
 
@@ -1058,6 +1056,7 @@ export default function SquarePage() {
   const refreshStatementMedia = (statementId: number) => {
     void api.getSquareStatement(statementId).then((fresh) => {
       setStatements((current) => current.map((statement) => statement.statement_id === statementId ? fresh : statement));
+      setLoadedDetailStatement(current=>current?.statement_id===statementId?fresh:current);
       setPinnedStatement((current) => current?.statement_id === statementId ? fresh : current);
     }).catch(() => undefined);
   };
@@ -1264,7 +1263,7 @@ export default function SquarePage() {
   useEffect(() => {
     const sentinel = squareLoadMoreRef.current;
     const root = squareFeedScrollRef.current;
-    if (!sentinel || !root || !hasMore || loading || loadingMore || !statements.length) return;
+    if (activityTab || !sentinel || !root || !hasMore || loading || loadingMore || !statements.length) return;
     const observer = new IntersectionObserver((entries) => {
       if (!entries[0]?.isIntersecting) return;
       setLoadingMore(true);
@@ -1272,7 +1271,7 @@ export default function SquarePage() {
     }, { root, rootMargin: "600px 0px" });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
+  }, [activityTab, activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
 
   useEffect(() => {
     const cacheKey = activeFeedCacheKey;
@@ -1437,9 +1436,8 @@ export default function SquarePage() {
       api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30, sort: commentSort }, controller.signal),
     ]).then(([statement, rows]) => {
       if(controller.signal.aborted||!filterSquareRemoved(cacheScope,[statement]).length)return;
-      setStatements((current) => current.some((item) => item.statement_id === statement.statement_id)
-        ? current.map((item) => item.statement_id === statement.statement_id ? statement : item)
-        : [statement, ...current]);
+      setLoadedDetailStatement(statement);
+      setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? statement : item));
       setComments(rows);
       setCommentsHasMore(rows.length === 30);
     }).catch((cause) => {
@@ -1489,7 +1487,7 @@ export default function SquarePage() {
   }, [commentStatementId]);
 
   const alignStatementBelowHeader = (element: HTMLElement, behavior: ScrollBehavior) => {
-    const screen = element.closest<HTMLElement>(".square-feed-screen");
+    const screen = element.closest<HTMLElement>(".square-channel-page") ?? element.closest<HTMLElement>(".square-feed-screen");
     const header = screen?.querySelector<HTMLElement>(".tab-sticky-header");
     const headerHeight = header?.getBoundingClientRect().height ?? 0;
     const screenStyle = screen ? window.getComputedStyle(screen) : null;
@@ -2208,9 +2206,6 @@ export default function SquarePage() {
         day: "numeric",
         timeZone: "Asia/Shanghai",
       }).format(new Date(`${selectedFeedDate}T00:00:00+08:00`));
-  const visibleStatements = useMemo(() => statements.filter((statement) => !(
-    !hasFeedFilters && feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id
-  )), [statements, hasFeedFilters, feedMode, pinnedStatement?.statement_id]);
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
     if (statement.chat_record) return 380;
@@ -2222,8 +2217,8 @@ export default function SquarePage() {
     if (media.length === 1) return 390;
     return statement.text.length > 80 ? 250 : 190;
   };
-  const renderFeedStatement = (statement: SquareStatementDTO, inDetail = false) => {
-    const focused = inlineStatementId === statement.statement_id && (desktopWorkspace || inDetail);
+  const renderFeedStatement = (statement: SquareStatementDTO, inDetail = false, panelActive = true) => {
+    const focused = panelActive && inlineStatementId === statement.statement_id && (desktopWorkspace || inDetail);
     return <Fragment>
       <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`}>
         {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
@@ -2231,7 +2226,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : panelActive ? (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); } : undefined} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2241,21 +2236,20 @@ export default function SquarePage() {
   const noteDetailContent=activeCommentStatement?<SquareNoteDetail key={activeCommentStatement.statement_id} panel={noteDesktopPanel} statement={activeCommentStatement} text={<InlineRichText text={activeCommentStatement.text} emoticons={activeCommentStatement.inline_emoticons}/>} discussion={discussionContent} composer={commentComposer} canInteract={canPublish}
     onBack={closeNoteDetail} onProfile={()=>openUserProfile(activeCommentStatement.user)} onShare={()=>openStatementShare(activeCommentStatement)} onMore={()=>setNoteMoreOpen(true)} onLike={()=>void toggleStatementLike(activeCommentStatement)} onVideo={()=>openStatementVideo(activeCommentStatement.statement_id)} onLocation={()=>activeCommentStatement.location&&setChatRecordLocation({location:activeCommentStatement.location,owner:activeCommentStatement.user})}/>:<div className="square-reader"><header className="square-reader-header"><button aria-label={t('common.back')} onClick={closeNoteDetail} type="button"><span className="material-symbols-outlined">arrow_back</span></button></header><FeedbackState tone={commentLoadError?'error':'loading'} title={commentLoadError||t('common.loading')} action={commentLoadError?<button className="secondary-button" onClick={()=>setCommentReload(value=>value+1)} type="button">{t('common.retry')}</button>:undefined}/></div>;
   const squareChannels:SquareChannel[]=['activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
-  useSquareChannelSwipe(squareFeedScrollRef,squareChannels,activityTab?'activities':effectiveFeedMode,channel=>{selectSquareChannel(channel==='activities');if(channel!=='activities')setFeedMode(channel)},routedStatementId===null&&!routeActivityKey&&!inlineStatementExpanded);
+  const currentChannel:SquareChannel=activityTab?'activities':effectiveFeedMode;
+  const handleChannelScroll=(event:ReactUIEvent<HTMLElement>)=>{
+    if (inlineStatementId !== null || workspaceDetailActive || inlineStatementExpanded) return;
+    const top=event.currentTarget.scrollTop;
+    setFeedScrollTopVisible(top>320);
+    if(activityTab||pendingFeedScrollRestoreRef.current?.key===activeFeedCacheKey)return;
+    feedScrollPositionsRef.current.set(activeFeedCacheKey,top);
+  };
 
   return (
     <AppChrome workspaceSelected={workspaceDetailActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <div className={`square-desktop-workspace is-square${squareFeedLayout==='masonry'?' is-masonry':''}${workspaceDetailActive ? " has-selection" : ""}`}>
       <main
-        className={`list-screen square-feed-screen is-square-workspace${activityTab?' is-activity-feed':''}`}
-        onScroll={(event) => {
-          if (inlineStatementId !== null || workspaceDetailActive || inlineStatementExpanded) return;
-          const top = event.currentTarget.scrollTop;
-          setFeedScrollTopVisible(top > 320);
-          if (pendingFeedScrollRestoreRef.current?.key === activeFeedCacheKey) return;
-          feedScrollPositionsRef.current.set(activeFeedCacheKey, top);
-        }}
-        ref={squareFeedScrollRef}
+        className="list-screen square-feed-screen is-square-workspace is-channel-pager"
       >
         <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="navigation" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
           <div className="square-workspace-tabs is-square" role="tablist">
@@ -2268,8 +2262,18 @@ export default function SquarePage() {
             </div>
           </div>
         </SquareFeedHeader>
-        <div className="square-workspace-surface is-square">
-          {activityTab && activityBannerCount ? <div className="square-activity-carousel square-activity-hub"><section className="square-activity-rail" aria-label={t("activity.active")}>
+        <SquareChannelPager channels={squareChannels} current={currentChannel} onSelect={channel=>{selectSquareChannel(channel==='activities');if(channel!=='activities')setFeedMode(channel)}} enabled={routedStatementId===null&&!routeActivityKey&&!inlineStatementExpanded}>
+        {squareChannels.map((channel,index)=>{
+          const pageCacheKey=channel==='activities'?'square:activities-feed':squareFeedCacheKey(channel,profileFeedUserId,selectedFeedDate,selectedFeedKeyword,selectedFeedFrom,selectedFeedTo);
+          const active=channel===currentChannel;
+          return <SquareChannelPage key={`${cacheScope}:${channel}:${channel==='user'?profileFeedUserId:''}`} mode={channel} label={channel==='user'?profileFeedUserName:t(channel==='activities'?'square.activitiesTab':channel==='all'?'square.feedAll':channel==='friends'?'square.feedFriends':'square.feedMine')} cacheKey={pageCacheKey} scope={cacheScope} active={active} preload={Math.abs(index-squareChannels.indexOf(currentChannel))<=1} activeRoot={squareFeedScrollRef}
+            activeState={active&&channel!=='activities'&&statementsFeedKey===pageCacheKey?{items:statements,loading,loadingMore,hasMore,error}:null} settled={!syncing&&!loading} rememberScroll={inlineStatementId===null&&!workspaceDetailActive&&!inlineStatementExpanded}
+            params={{date:selectedFeedDate??undefined,date_from:selectedFeedFrom??undefined,date_to:selectedFeedTo??undefined,keyword:selectedFeedKeyword||undefined,scope:channel==='user'||channel==='activities'?'all':channel,user_id:channel==='user'?profileFeedUserId??undefined:undefined}} onScroll={handleChannelScroll}>
+            {view=>{
+              const {items:statements,loading,loadingMore,hasMore,error,layout:squareFeedLayout,mode:feedMode,scrollRef}=view;
+              const visibleStatements=statements.filter(statement=>hasFeedFilters||feedMode!=='all'||statement.statement_id!==pinnedStatement?.statement_id);
+              return <div className="square-workspace-surface is-square">
+          {view.mode==='activities' && activityBannerCount ? <div className="square-activity-carousel square-activity-hub"><section className="square-activity-rail" aria-label={t("activity.active")}>
             {bgmActivity ? <SquareActivityTile activity={bgmActivity}><BgmBanner activity={bgmActivity} onClick={() => navigate(`/app/square/activities/${bgmActivity.key}`)} /></SquareActivityTile> : null}
             {explorerActivity ? <SquareActivityTile activity={explorerActivity}><ExplorerBanner activity={explorerActivity} onClick={() => navigate(`/app/square/activities/${explorerActivity.key}`)} /></SquareActivityTile> : null}
             {regularActivities.map((activity) => {
@@ -2322,8 +2326,8 @@ export default function SquarePage() {
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button></SquareActivityTile> : null}
           </section></div> : null}
-          {activityTab && !activityBannerCount ? <FeedbackState tone={activitiesLoading?"loading":activitiesError?"error":"empty"} title={t(activitiesLoading?"common.loading":activitiesError?"square.activitiesLoadFailed":"square.activitiesEmpty")} action={activitiesError?<button className="secondary-button" onClick={()=>void loadActivities()} type="button">{t("common.retry")}</button>:undefined}/> : null}
-        <div className="square-feed-column" style={activityTab?{display:"none"}:undefined}>
+          {view.mode==='activities' && !activityBannerCount ? <FeedbackState tone={activitiesLoading?"loading":activitiesError?"error":"empty"} title={t(activitiesLoading?"common.loading":activitiesError?"square.activitiesLoadFailed":"square.activitiesEmpty")} action={activitiesError?<button className="secondary-button" onClick={()=>void loadActivities()} type="button">{t("common.retry")}</button>:undefined}/> : null}
+        {view.mode!=='activities'?<div className="square-feed-column">
           {hasFeedFilters ? <div className="square-date-context">
             <span className="material-symbols-outlined" aria-hidden="true">filter_alt</span>
             <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedFrom || selectedFeedTo ? `${selectedFeedFrom || t("square.anyDate")} → ${selectedFeedTo || t("square.anyDate")}` : selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
@@ -2348,33 +2352,39 @@ export default function SquarePage() {
             />
           ) : null}
           {
-            squareFeedLayout==='masonry'?<SquareMasonryFeed items={visibleStatements} scrollRef={squareFeedScrollRef} renderText={statement=><InlineRichText text={statement.text} emoticons={statement.inline_emoticons}/>} canInteract={canPublish} onOpen={statement=>openStatementDrawer(statement.statement_id,'note')} onLike={statement=>void toggleStatementLike(statement)} onProfile={statement=>openUserProfile(statement.user)}/>:<VirtualDynamicList
+            squareFeedLayout==='masonry'?<SquareMasonryFeed items={visibleStatements} scrollRef={scrollRef} overscan={view.active?500:120} renderText={statement=><InlineRichText text={statement.text} emoticons={statement.inline_emoticons}/>} canInteract={canPublish} onOpen={statement=>openStatementDrawer(statement.statement_id,'note')} onLike={statement=>void toggleStatementLike(statement)} onProfile={statement=>openUserProfile(statement.user)}/>:<VirtualDynamicList
               className="square-statement-feed square-virtual-feed"
               estimateSize={estimateStatementHeight}
               itemKey={(statement) => `statement-${statement.statement_id}`}
               items={visibleStatements}
-              key={activeFeedCacheKey}
-              overscan={900}
-              scrollRef={squareFeedScrollRef}
-              renderItem={(statement) => renderFeedStatement(statement)}
+              key={pageCacheKey}
+              overscan={view.active?900:200}
+              scrollRef={scrollRef}
+              renderItem={(statement) => renderFeedStatement(statement,false,view.active)}
             />
           }
-          {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
-        </div>
+          {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={view.active?squareLoadMoreRef:undefined}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
+        </div>:null}
+        </div>;
+            }}
+          </SquareChannelPage>;
+        })}
+        </SquareChannelPager>
         <ScrollToTopButton
           ariaLabel={t("square.backToTop")}
           className="square-feed-scroll-top"
           onClick={() => {
-            pendingFeedScrollRestoreRef.current = null;
-            feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
-            writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
+            if(!activityTab){
+              pendingFeedScrollRestoreRef.current = null;
+              feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
+              writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
+            }
             squareFeedScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
           }}
           portal
           style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
           visible={feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace)}
         />
-        </div>
       </main>
       <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {noteDesktopPanel?noteDetailContent:inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">

@@ -11,7 +11,10 @@ test('vertical scrolling, small movements and long presses do not switch channel
   assert.equal(squareSwipeDirection(50,150,300,390),null);
   assert.equal(squareSwipeDirection(30,3,200,390),null);
   assert.equal(squareSwipeDirection(80,60,300,390),null);
-  assert.equal(squareSwipeDirection(100,2,1100,390),null);
+  assert.equal(squareSwipeDirection(30,2,1100,390),null);
+});
+test('a deliberate slow page drag still settles onto the neighboring channel',()=>{
+  assert.equal(squareSwipeDirection(-160,8,1600,390),1);
 });
 test('hidden Explore is skipped and first and last channels do not wrap',()=>{
   assert.equal(adjacentSquareChannel(['activities','friends','mine'],'friends',-1),'activities');

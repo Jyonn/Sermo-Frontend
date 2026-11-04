@@ -1,25 +1,19 @@
 {
-  "id": "2026.11.04.4",
+  "id": "2026.11.04.5",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "广场同步与时间展示优化",
+      "title": "广场频道支持跟手滑动",
       "items": [
-        "删除发言后同步清理各列表缓存，避免切换频道后再次出现",
-        "自动校验已加载发言的可见状态、点赞、评论数与置顶，离线时保留缓存",
-        "发言时间按今天、昨天、一周内的星期和具体日期清晰展示",
-        "修复小高度窗口中最后一张活动卡片的参与成员被裁切的问题",
-        "重新设计语音录制与试听，发言编辑器使用统一的紧凑语音卡片，移除重复播放条"
+        "左右滑动时实时展示相邻频道，松手后平滑切换",
+        "各频道独立保留页面与滚动位置，相邻频道预加载首页，历史内容仍按需加载"
       ]
     },
     "en": {
-      "title": "Square sync and clearer post dates",
+      "title": "Swipe between Square channels",
       "items": [
-        "Deleted posts are removed across cached feeds so they do not return when switching channels",
-        "Loaded posts stay in sync with visibility, likes, comment counts and pins while offline caches remain available",
-        "Post times distinguish today, yesterday, recent weekdays and older dates",
-        "Activity participant rows remain fully scrollable in short windows",
-        "Redesigned recording and preview with one compact voice card, removing duplicate playback bars"
+        "Neighboring channels follow your swipe and settle smoothly when released",
+        "Each channel keeps its own page and scroll position; nearby feeds preload their first page while history loads on demand"
       ]
     }
   }

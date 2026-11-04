@@ -33,11 +33,11 @@ export function SquareNoteCard({item,canInteract,onOpen,onLike,onProfile,renderT
     </article>;
 }
 
-export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>}){
+export function SquareMasonryFeed({items,canInteract,onOpen,onLike,onProfile,renderText,scrollRef,overscan=500}:{items:SquareStatementDTO[];canInteract:boolean;onOpen:(item:SquareStatementDTO)=>void;onLike:(item:SquareStatementDTO)=>void;onProfile:(item:SquareStatementDTO)=>void;renderText?:(item:SquareStatementDTO)=>ReactNode;scrollRef:RefObject<HTMLElement|null>;overscan?:number}){
   const root=useRef<HTMLDivElement>(null),[width,setWidth]=useState(0);
   useLayoutEffect(()=>{const node=root.current;if(!node)return;const observer=new ResizeObserver(([entry])=>{if(entry.contentRect.width>0)setWidth(entry.contentRect.width)});observer.observe(node);return()=>observer.disconnect()},[]);
   const columns=useMemo(()=>arrangeSquareColumns(items,width),[items,width]);
   const renderItem=(item:SquareStatementDTO)=><SquareNoteCard item={item} canInteract={canInteract} onOpen={onOpen} onLike={onLike} onProfile={onProfile} renderText={renderText}/>;
   const cardWidth=(Math.max(280,width)-(columns.length-1)*14)/columns.length;
-  return <div className="square-masonry-feed" ref={root} style={{gridTemplateColumns:`repeat(${columns.length},minmax(0,1fr))`}}>{columns.map((column,index)=><VirtualDynamicList key={index} className="square-masonry-column" items={column} scrollRef={scrollRef} itemKey={item=>String(item.statement_id)} estimateSize={item=>{const cover=squareCover(item);return cardWidth/(cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio)+90}} rowGap={16} overscan={500} renderItem={renderItem}/>)}</div>;
+  return <div className="square-masonry-feed" ref={root} style={{gridTemplateColumns:`repeat(${columns.length},minmax(0,1fr))`}}>{columns.map((column,index)=><VirtualDynamicList key={index} className="square-masonry-column" items={column} scrollRef={scrollRef} itemKey={item=>String(item.statement_id)} estimateSize={item=>{const cover=squareCover(item);return cardWidth/(cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio)+90}} rowGap={16} overscan={overscan} renderItem={renderItem}/>)}</div>;
 }
