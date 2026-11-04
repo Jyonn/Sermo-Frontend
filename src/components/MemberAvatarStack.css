@@ -1,0 +1,11 @@
+.member-avatar-stack{display:flex;align-items:center;gap:10px;min-width:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:start}
+button.member-avatar-stack{cursor:pointer}
+.member-avatar-stack:focus-visible{outline:2px solid var(--brand-primary);outline-offset:5px;border-radius:8px}
+.member-avatar-stack-faces{display:flex;align-items:center;flex-shrink:0}
+.member-avatar-stack .member-avatar-stack-face{flex:0 0 var(--member-stack-size);width:var(--member-stack-size);height:var(--member-stack-size);border:2px solid var(--bg-elevated);border-radius:50%;box-sizing:border-box;font-size:calc(var(--member-stack-size)*.35)}
+.member-avatar-stack-face+.member-avatar-stack-face{margin-inline-start:calc(var(--member-stack-size)*-.25)}
+.member-avatar-stack-face :is(.avatar-image,.avatar-frame-clip){border-radius:inherit}
+.member-avatar-stack-copy{display:grid;min-width:0;gap:3px}
+.member-avatar-stack-copy>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.member-avatar-stack-copy>small{color:var(--text-muted);font-size:12px}
+.member-avatar-stack-chevron{flex:none;font-size:18px;color:var(--text-muted)}

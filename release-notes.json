@@ -1,17 +1,21 @@
 {
-  "id": "2026.11.04.6",
+  "id": "2026.11.04.7",
   "publishedAt": "2026-11-04",
   "locales": {
     "zh-CN": {
-      "title": "修复手机端广场宽度",
+      "title": "足迹筛选、打卡历史与系统消息优化",
       "items": [
-        "修正手机端广场容器宽度，消除右侧露出的背景色空隙"
+        "系统消息按用户身份展示“我”，足迹分享消息可点击查看；聊天外观预览移除足迹场景",
+        "科研、活动与足迹使用统一圆形成员头像，足迹支持筛选成员并保留自己的足迹",
+        "足迹面板按年月展示最近 20 条首次打卡记录，同一地区重复打卡不增加历史"
       ]
     },
     "en": {
-      "title": "Correct mobile Square width",
+      "title": "Footprint filters, history and clearer system messages",
       "items": [
-        "Fixed mobile Square container sizing to eliminate the background strip along the right edge"
+        "System messages resolve identities and highlight Me, with a footprint shortcut; appearance previews no longer include footprint cards",
+        "Research, activities and footprints share circular member avatars; footprint filters always retain your own map",
+        "Footprints show up to 20 first check-ins by month; repeat visits to a region do not add history"
       ]
     }
   }

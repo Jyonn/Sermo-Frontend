@@ -12,6 +12,10 @@ import type { Feature, FeatureCollection, Geometry } from "geojson";
 import { SideDrawer } from "./SideDrawer";
 import { BottomSheet } from "./BottomSheet";
 import { UserAvatar } from "./UserAvatar";
+import {MemberAvatarStack} from './MemberAvatarStack';
+import type {TravelMapHistoryDTO} from '../types';
+import './TravelMapHistory.css';
+import {selectedMapOwners,toggleMapOwner} from '../lib/travelMapSelection';
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
@@ -307,6 +311,9 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [maps, setMaps] = useState<MapOwner[]>([]);
+  const [selectedOwnerIds,setSelectedOwnerIds]=useState<number[]|null>(null);
+  const [memberPickerOpen,setMemberPickerOpen]=useState(false);
+  const [history,setHistory]=useState<TravelMapHistoryDTO[]>([]),[historyLoading,setHistoryLoading]=useState(false),[historyError,setHistoryError]=useState(false),[historyReload,setHistoryReload]=useState(0);
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -331,10 +338,23 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
 
   const currentUserId = session?.user.user_id;
   const mine = maps.find((item) => item.owner.user_id === currentUserId);
-  const others = maps.filter((item) => item.owner.user_id !== currentUserId);
+  const selectedMaps=selectedMapOwners(maps,selectedOwnerIds,currentUserId);
+  const others = selectedMaps.filter((item) => item.owner.user_id !== currentUserId);
+  const selectedHistoryIds=selectedMaps.map(item=>item.owner.user_id).sort((a,b)=>a-b).join(',');
   const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
   const activeCountry = focusLocation ? null : selectedCountry;
+
+  useEffect(()=>{setSelectedOwnerIds(null);setMemberPickerOpen(false);setHistory([])},[open,chatId,otherUser?.user_id,currentUserId]);
+  useEffect(()=>{
+    if(!open||focusLocation||loading||!selectedHistoryIds)return;
+    const controller=new AbortController();setHistoryLoading(true);setHistoryError(false);setHistory([]);
+    void api.getTravelMapHistory({chat_id:chatId??undefined,user_id:chatId?undefined:otherUser?.user_id,selected_ids:selectedHistoryIds},controller.signal)
+      .then(payload=>{if(!controller.signal.aborted)setHistory(payload.items)})
+      .catch(()=>{if(!controller.signal.aborted)setHistoryError(true)})
+      .finally(()=>{if(!controller.signal.aborted)setHistoryLoading(false)});
+    return()=>controller.abort();
+  },[open,focusLocation,loading,chatId,otherUser?.user_id,selectedHistoryIds,historyReload,currentUserId]);
 
   useEffect(() => {
     if (!open) return;
@@ -359,6 +379,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     if (!open) return;
     const controller = new AbortController();
     setLoading(true);
+    setMaps([]);
     const request = focusLocation && focusOwner
       ? Promise.resolve(setMaps([{ owner: focusOwner, regions: [] }]))
       : chatId
@@ -544,6 +565,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           : [...current, { owner: payload.owner, regions: payload.regions }];
       });
       setCheckInCandidates([]);
+      setHistoryReload(value=>value+1);
       setCheckInPosition(null);
       showToast(t("travelMap.checkedIn", { region: payload.checked_region.region_name }));
     } catch (error) {
@@ -747,10 +769,8 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     : otherUser
     ? t("travelMap.sharedTitle", { name: otherUser.name })
     : t("travelMap.myTitle");
-  const totalRegions = maps.reduce((sum, item) => sum + item.regions.length, 0);
-  const otherLegendLabel = chatType === "direct"
-    ? (others[0]?.owner.name || chatTitle || t("travelMap.others"))
-    : otherUser?.name || t("travelMap.others");
+  const totalRegions = selectedMaps.reduce((sum, item) => sum + item.regions.length, 0);
+  const otherLegendLabel = others.length===1?others[0].owner.name:t('travelMap.others');
 
   return (
     <SideDrawer
@@ -781,17 +801,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           </div>
         ) : null}
         <div className="travel-map-owner-row">
-          <div className="travel-map-owner">
-            <div className="travel-map-owner-avatars">
-              {maps.slice(0, 4).map((item) => (
-                <UserAvatar className="mini-avatar" key={item.owner.user_id} name={item.owner.name} uri={item.owner.avatar_uri} />
-              ))}
-            </div>
-            <span>
-              <strong>{focusLocation ? focusOwner?.name : chatId ? t("travelMap.sharedFootprints") : t("travelMap.myFootprints")}</strong>
-              <small>{focusLocation ? t("location.focusing") : t("travelMap.regionCount", { count: totalRegions })}</small>
-            </span>
-          </div>
+          <MemberAvatarStack className="travel-map-owner" members={selectedMaps.map(item=>({id:item.owner.user_id,name:item.owner.name,uri:item.owner.avatar_uri,cacheKey:item.owner.avatar_cache_key}))} size={34} label={<strong>{focusLocation?focusOwner?.name:chatId||otherUser?t('travelMap.sharedFootprints'):t('travelMap.myFootprints')}</strong>} subtitle={focusLocation?t('location.focusing'):t('travelMap.regionCount',{count:totalRegions})} onClick={!focusLocation&&maps.length>1?()=>setMemberPickerOpen(true):undefined} ariaLabel={t('travelMap.selectMembers')}/>
           {!focusLocation ? (
             <div className="travel-map-view-tabs" aria-label={t("travelMap.world")}>
               <button className={activeCountry === "CHN" ? "is-active" : ""} onClick={() => showMapView("CHN")} type="button">{countryName("CHN", language)}</button>
@@ -929,7 +939,15 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           </button>
         ) : null}
 
+        {!focusLocation?<section className="travel-map-history"><h3>{t('travelMap.history')}</h3>
+          {historyLoading?<p className="travel-map-history-state" role="status">{t('common.loading')}</p>:historyError?<button className="travel-map-history-state" type="button" onClick={()=>setHistoryReload(value=>value+1)}>{t('common.retry')}</button>:!history.length?<p className="travel-map-history-state">{t('travelMap.noHistory')}</p>:<ol>{history.slice(0,20).map(item=><li key={item.check_in_id}><span><strong>{item.region_name}</strong>{selectedMaps.length>1?<small>{item.user_id===currentUserId?t('common.me'):maps.find(map=>map.owner.user_id===item.user_id)?.owner.name}</small>:null}</span><time>{new Intl.DateTimeFormat(language,{year:'numeric',month:'short'}).format(new Date(item.checked_at*1000))}</time></li>)}</ol>}
+        </section>:null}
       </div>
+      <BottomSheet open={memberPickerOpen} onClose={()=>setMemberPickerOpen(false)} title={t('travelMap.selectMembers')}>
+        <div className="travel-map-member-picker">{maps.map(item=>{const self=item.owner.user_id===currentUserId,checked=self||selectedOwnerIds===null||selectedOwnerIds.includes(item.owner.user_id);return <button key={item.owner.user_id} type="button" role="checkbox" aria-checked={checked} disabled={self} onClick={()=>setSelectedOwnerIds(current=>toggleMapOwner(current,item.owner.user_id,currentUserId,maps.map(map=>map.owner.user_id)))}>
+          <MemberAvatarStack members={[{id:item.owner.user_id,name:item.owner.name,uri:item.owner.avatar_uri}]} size={36} label={self?t('common.me'):item.owner.name}/><span className="material-symbols-outlined" aria-hidden="true">{checked?'check_circle':'radio_button_unchecked'}</span>
+        </button>})}</div>
+      </BottomSheet>
       <BottomSheet
         open={checkInCandidates.length > 1}
         title={t("travelMap.chooseCurrentRegion")}

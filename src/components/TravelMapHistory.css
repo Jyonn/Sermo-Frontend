@@ -1,0 +1,15 @@
+.travel-map-owner.member-avatar-stack{flex:1;min-width:0}
+.travel-map-history{margin-top:22px;border-top:1px solid var(--line-soft);padding-top:18px}
+.travel-map-history h3{margin:0 0 14px;font-size:14px;font-weight:650;color:var(--text-primary)}
+.travel-map-history ol{margin:0;padding:0;list-style:none}
+.travel-map-history li{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:53px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.travel-map-history li>span{display:grid;min-width:0;gap:3px}
+.travel-map-history strong{font-size:13px;font-weight:550}
+.travel-map-history small,.travel-map-history time{color:var(--text-muted);font-size:11px}
+.travel-map-history time{flex:none;font-variant-numeric:tabular-nums}
+.travel-map-history-state{margin:0;padding:12px 0;border:0;background:none;color:var(--text-muted);font:inherit;font-size:12px}
+.travel-map-member-picker{display:grid}
+.travel-map-member-picker>button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:60px;padding:12px 0;border:0;border-bottom:1px solid var(--line-soft);background:none;color:var(--text-primary);font:inherit;cursor:pointer}
+.travel-map-member-picker>button:disabled{cursor:default}
+.travel-map-member-picker>button>.material-symbols-outlined{color:var(--text-muted);font-size:22px}
+.travel-map-member-picker>button[aria-checked=true]>.material-symbols-outlined{color:var(--brand-primary)}

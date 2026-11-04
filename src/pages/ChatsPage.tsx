@@ -86,6 +86,8 @@ import { PageTabs } from "../components/PageTabs";
 import "../styles/submission-workspace.css";
 import { ChatInvitationSheet, ResearchChatProjectLink, ResearchInvitationCard, researchInvitationPreview } from "../components/ResearchChat";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
+import {SystemMessageText} from '../components/SystemMessageText';
+import type {SystemMessageContext} from '../lib/systemMessage';
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
@@ -1904,6 +1906,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selfAvatarUri,
   selfIsPermanentVip,
   renderMessageFooter,
+  systemContext,
 }: MessageGroupBlockProps) {
   const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
   if (systemMessage) {
@@ -1911,7 +1914,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
         <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
-          {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message"><span className="bgm-entrance-copy">{i18n.t("bgm.entranceMessage", { actor: systemMessage.payload.actor_name || systemMessage.name })}</span>{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
+          {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message"><SystemMessageText message={systemMessage} context={systemContext}/>{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <SystemMessageText message={systemMessage} context={systemContext}/>}
         </div>
       </div>
     );
@@ -2230,6 +2233,7 @@ interface MessageBubbleRowProps {
 }
 
 interface MessageGroupBlockProps {
+  systemContext?:SystemMessageContext;
   enteringMessageIds: string[];
   group: MessageGroup;
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
@@ -6099,6 +6103,7 @@ function LiveChatsPage({
         chatAccess?: ChatTravelMapAccessDTO;
         from: "self" | "other";
       }>).detail;
+      if(travelMapSaving)return;
       if (detail.chatGrant) {
         const openFromStatus = (status: ChatTravelMapAccessDTO) => {
           setChatTravelMapAccess(status);
@@ -7728,6 +7733,7 @@ function LiveChatsPage({
                   scrollRef={messageScrollRef}
                   renderItem={(group) => (
                     <MessageGroupBlock
+                      systemContext={{viewerId:currentUserId,peer:selectedDirectPeer,groupTitle:selectedChat?.type==='group'?selectedChat.title||t('chat.group'):undefined}}
                       enteringMessageIds={enteringMessageIds}
                       group={group}
                       onOpenImage={(uris, index, metadata = [], messageIds = []) => {
@@ -9511,7 +9517,7 @@ export interface ChatsPagePreviewConfig {
   selfOnly?: boolean;
 }
 
-export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "map_access" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link";
+export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link";
 
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
 
@@ -9540,7 +9546,6 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
   }
   if (kind === "file") return { ...base, type: MESSAGE_TYPE_FILE, payload: { kind, uri: "data:text/plain,preview", file_name: i18n.t("menu.bubblePreviewFile"), file_size: 2516582 } };
   if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };
-  if (kind === "map_access") return { ...base, type: MESSAGE_TYPE_MAP_ACCESS, payload: { kind, text: i18n.t("travelMap.messageJoin"), owner: { user_id: 2, name: config.avatarName }, access: { can_view_theirs: true, they_can_view_mine: true } } };
   if (kind === "statement") return { ...base, type: MESSAGE_TYPE_STATEMENT, payload: { kind, statement_id: 1, statement: { statement_id: 1, user: { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri }, text: i18n.t("menu.bubblePreviewStatement"), visibility: "public", media: [{ media_id: 1, kind: "image", uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE }], comment_count: 8, like_count: 26, liked: false, can_delete: false, created_at: now } } };
   if (kind === "forward_bundle") return {
     ...base,
@@ -9737,7 +9742,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       </section>
     );
   }
-  const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "map_access", "statement", "text"];
+  const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "statement", "text"];
   const groups = kinds.flatMap((kind, kindIndex) => (["other", "self"] as const).map((from, sideIndex): MessageGroup => {
     const index = kindIndex * 2 + sideIndex;
     return {

@@ -1282,6 +1282,9 @@ export const api = {
   getMyTravelMap(signal?: AbortSignal) {
     return request<MyTravelMapDTO>("/maps/me", { auth: true, signal });
   },
+  getTravelMapHistory(params:{chat_id?:number;user_id?:number;selected_ids?:string},signal?:AbortSignal){
+    return request<{items:import('../types').TravelMapHistoryDTO[]}>('/maps/history',{auth:true,query:params,signal});
+  },
 
   checkInTravelMap(payload: {
     latitude: number;

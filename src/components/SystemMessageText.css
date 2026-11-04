@@ -1,0 +1,4 @@
+.message-system-self{display:inline-block;margin-inline:2px;padding:0 4px;border:1px solid color-mix(in srgb,var(--brand-primary) 25%,transparent);border-radius:4px;color:var(--text-secondary);background:color-mix(in srgb,var(--brand-primary) 9%,var(--bg-canvas));font-weight:650;line-height:1.4}
+.message-system-user{font-weight:550}
+.system-message-copy .message-system-view{display:inline;margin-inline-start:7px;padding:2px 0;border:0;background:none;color:var(--brand-primary);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.message-system-view:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px}

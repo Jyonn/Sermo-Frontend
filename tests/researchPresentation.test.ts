@@ -64,8 +64,8 @@ test('research uses framed avatars and one member picker rather than initial pla
   assert.match(people, /name="member" value=\{id\}/);
   const overview=source('components/ResearchWorkspace.tsx');
   assert.match(overview, /research-member-stack/);
-  assert.match(overview, /<UserAvatar/);
-  assert.match(overview, /frame=\{member.avatar_frame_style\}/);
+  assert.match(overview, /<MemberAvatarStack/);
+  assert.match(source('components/MemberAvatarStack.tsx'), /<PlainAvatar/);
 });
 
 test('project creation is progressive and description remains editable Markdown', () => {

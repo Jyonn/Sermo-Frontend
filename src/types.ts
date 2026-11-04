@@ -1147,6 +1147,8 @@ export interface ChatMessagePayloadDTO {
   event?: string;
   actor_user_id?: number;
   actor_name?: string;
+  reference_text?: string;
+  reference_users?: Array<{user_id:number;name:string}>;
   invitation?: SubmissionInviteDTO | null;
   old_title?: string;
   new_title?: string;
@@ -1215,6 +1217,7 @@ export interface TravelMapRegionDTO {
   country_name: string;
   checked_at: number;
 }
+export interface TravelMapHistoryDTO extends TravelMapRegionDTO {check_in_id:number;user_id:number}
 
 export interface TravelMapAccessDTO {
   can_view_theirs: boolean;

@@ -1,6 +1,6 @@
 import { useI18n } from '../lib/language';
 import type { ResearchProject, ResearchSummary } from '../lib/research';
-import { UserAvatar } from './UserAvatar';
+import {MemberAvatarStack} from './MemberAvatarStack';
 import { Markdown } from './ResearchMarkdown';
 import { ResearchTaskItem } from './ResearchTaskItem';
 import { QuietState } from './BoundaryState';
@@ -27,10 +27,7 @@ export function ResearchOverview({ project, tasks, chat, calendar, members, addT
   const active = project.tasks.filter(item => item.status !== 'archived');
   return <div className="research-overview">
     <section className="research-project-intro">
-      <div className="research-team-bar"><button type="button" className="research-member-stack" onClick={members} aria-label={`${t('research.team')} · ${project.members.length}`}>
-        <span className="research-member-stack-avatars">{project.members.slice(0,6).map(member=><UserAvatar key={member.id} className="research-overview-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style}/>)}</span>
-        <span className="research-member-stack-count">{project.members.length}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
-      </button><button className="research-team-chat" onClick={chat} aria-label={t('research.group')}><span className="material-symbols-outlined" aria-hidden="true">forum</span><span>{t('research.groupShort')}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div>
+      <div className="research-team-bar"><MemberAvatarStack className="research-member-stack" members={project.members.map(member=>({id:member.id,name:member.name,uri:member.avatar_uri,cacheKey:member.avatar_cache_key}))} size={38} label={project.members.length} onClick={members} ariaLabel={`${t('research.team')} · ${project.members.length}`}/><button className="research-team-chat" onClick={chat} aria-label={t('research.group')}><span className="material-symbols-outlined" aria-hidden="true">forum</span><span>{t('research.groupShort')}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div>
       <div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
     </section>
     <div className="research-overview-columns"><section className="research-overview-tasks"><header className="research-section-heading"><h2>{t('research.tasks')}</h2><span className="research-muted">{done} / {project.tasks.length}</span><button className="ghost-button" onClick={() => tasks()}>{t('research.viewAll')}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></header>
