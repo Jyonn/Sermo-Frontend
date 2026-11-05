@@ -1,0 +1,20 @@
+export type StudioState='planned'|'active'|'blocked'|'review'|'done';
+export type StudioTask={id:string;title:string;phase:number;owner:string;due:string;state:StudioState;priority:'normal'|'high';question:string;next:string;blocker:string;dependencies:string[];criteria:Array<{text:string;done:boolean}>;updates:Array<{body:string;at:string;author:string}>;artifacts:Array<{title:string;url:string}>};
+export type StudioExperiment={id:string;title:string;owner:string;task:string;hypothesis:string;config:string;metric:string;baseline:string;result:string;conclusion:string;at:string};
+export type ResearchStudio={tasks:StudioTask[];experiments:StudioExperiment[];reports:Array<{id:string;owner:string;body:string;at:string}>};
+export const studioPeople=[{id:'mentor',name:'林老师',role:'mentor',color:'#48715e'},{id:'lin',name:'林予安',role:'student',color:'#6679a0'},{id:'chen',name:'陈知远',role:'student',color:'#ae7955'},{id:'zhou',name:'周明溪',role:'student',color:'#91799c'}];
+export const studioPhases=['问题与文献','方法与实现','实验与验证','写作与投稿'];
+const task=(id:string,title:string,phase:number,owner:string,due:string,state:StudioState,question:string,next:string,criteria:string[],dependencies:string[]=[],blocker=''):StudioTask=>({id,title,phase,owner,due,state,priority:state==='blocked'?'high':'normal',question,next,blocker,dependencies,criteria:criteria.map((text,index)=>({text,done:state==='done'||state==='review'||state==='active'&&index===0})),updates:[{body:next,author:owner,at:'2026-11-04T09:20:00+08:00'}],artifacts:[]});
+export function initialResearchStudio():ResearchStudio{return {tasks:[
+  task('R01','界定长尾场景与核心研究问题',0,'lin','2026-10-28','done','现有生成式推荐在低频物品上的性能瓶颈是什么？','已确定低频物品覆盖与生成稳定性两个评估维度。',['整理 12 篇相关工作','给出可检验的研究假设']),
+  task('R02','完成文献对比与研究空白分析',0,'chen','2026-11-06','review','哪些改进来自表示学习，哪些来自生成策略？','对比表已整理，待确认是否加入扩散模型路线。',['比较问题设定、数据、指标与局限','形成一页研究空白总结'],['R01']),
+  task('R03','复现 TIGER 基线并固定环境',1,'lin','2026-11-09','active','能否在统一数据划分下复现论文结果？','今晚完成第二个随机种子，核对 Recall@20 偏差。',['固定数据划分与依赖版本','运行 3 个随机种子','记录复现偏差与原因'],['R01']),
+  task('R04','构建无泄漏的时间切分数据集',1,'zhou','2026-11-07','blocked','用户历史与目标物品是否存在时间泄漏？','拿到时间戳字段后重建验证集。',['提供数据清洗脚本','验证无时间泄漏','记录长尾物品占比'],['R01'],'公开数据缺少精确时间戳，需要导师确认替代数据源。'),
+  task('R05','验证语义码重分配对长尾召回的影响',2,'chen','2026-11-13','planned','重分配是否提升长尾召回且不损害总体效果？','等待基线和时间切分就绪，再运行最小验证实验。',['固定其他变量并开展消融','报告总体与长尾指标','至少 3 个随机种子'],['R03','R04']),
+  task('R06','消融实验与误差案例分析',2,'zhou','2026-11-18','planned','收益是否来自重分配本身，失败案例有什么共性？','先列出待控制变量和案例采样原则。',['完成消融表格','分析 20 个失败案例'],['R05']),
+  task('R07','方法章节初稿与结果叙事',3,'lin','2026-11-23','planned','如何把问题、方法和实验连成可审查的论证？','在方法稳定后整理符号表和章节提纲。',['完成方法与实验初稿','每项主张对应实验依据'],['R05']),
+],experiments:[{id:'E01',title:'TIGER 复现 · 种子 42',owner:'lin',task:'R03',hypothesis:'统一划分后，基线 Recall@20 与论文结果差距不超过 5%。',config:'Amazon Beauty · temporal split v2 · seed 42 · commit 7a91c2f',metric:'Recall@20 ↑',baseline:'0.0487',result:'0.0469',conclusion:'与论文相差约 3.7%，需补齐其他种子并排查过滤条件。',at:'2026-11-04T15:40:00+08:00'},{id:'E02',title:'长尾物品过滤敏感性',owner:'zhou',task:'R04',hypothesis:'5-core 过滤会显著改变长尾分布。',config:'Amazon Beauty · min interactions 3 / 5 · split audit',metric:'长尾占比',baseline:'61.2%',result:'43.8%',conclusion:'不同过滤方式不可直接横向比较，先固定预处理再跑模型。',at:'2026-11-03T11:20:00+08:00'}],reports:[]}}
+export function taskReadiness(task:StudioTask,tasks:StudioTask[]){return task.dependencies.map(id=>tasks.find(item=>item.id===id)).filter((item):item is StudioTask=>Boolean(item&&item.state!=='done'))}
+export function taskEvidence(task:StudioTask){return {done:task.criteria.filter(item=>item.done).length,total:task.criteria.length}}
+export function studioHealth(tasks:StudioTask[],today:string){return {done:tasks.filter(t=>t.state==='done').length,blocked:tasks.filter(t=>t.state==='blocked'),review:tasks.filter(t=>t.state==='review'),overdue:tasks.filter(t=>t.state!=='done'&&t.due<today)}}
+export function safeResearchLink(value:string){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.href:null}catch{return null}}

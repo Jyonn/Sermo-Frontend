@@ -42,6 +42,7 @@ const PlatformAdminPage = lazy(() => import("./pages/PlatformAdminPage"));
 const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPage"));
 const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
+const ResearchStudioPage = import.meta.env.DEV ? lazy(() => import('./pages/ResearchStudioPage')) : () => null;
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 const MentionMobileLabPage = lazy(() => import("./pages/MentionMobileLabPage"));
 const InteractionPatternsPage = lazy(() => import("./pages/InteractionPatternsPage"));
@@ -118,6 +119,7 @@ export default function App() {
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/design/interactions" element={<InteractionPatternsPage />} />
         <Route path="/design/explorer" element={<ExplorerActivityLabPage />} />
+        {import.meta.env.DEV?<Route path="/design/research-studio" element={<ResearchStudioPage/>}/>:null}
         <Route
           path="/design/square-composer"
           element={<Suspense fallback={<FeedbackState title="Loading design study" tone="loading" />}><SquareComposerLabPage /></Suspense>}
