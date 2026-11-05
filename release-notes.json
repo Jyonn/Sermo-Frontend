@@ -8,7 +8,7 @@
         "课题采用紧凑单行导航，任务表单分区更清晰，日报、周报、月报改为单选",
         "日期统一使用连续月历，支持 1900–2099 年与年月跳转；下拉选择统一采用友间组件",
         "科研操作按钮更紧凑，讨论支持成员与日期组合筛选；提交报告提示实际获得的奖励",
-        "学生请求导师答复的问题，由导师处理，学生无法自行标记完成"
+        "报销支持日期区间、多项目凭证、币种与手动汇率，金额统一保留两位小数"
       ]
     },
     "en": {
@@ -17,7 +17,7 @@
         "Compact project navigation and clearer task forms, with one reporting frequency per task",
         "A shared scrolling calendar covers 1900–2099 with month jumps; selections consistently use Frienden pickers",
         "Compact research actions, combined member/date discussion filters and earned-reward report toasts",
-        "Students cannot resolve their own requests for mentor responses"
+        "Reimbursements support date ranges, itemized evidence, currencies and manual FX quotes with two-decimal amounts"
       ]
     }
   }
