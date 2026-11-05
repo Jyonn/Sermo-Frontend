@@ -1,4 +1,9 @@
 {
+  "researchFlow.memberFilter": "Filter by member",
+  "researchFlow.replyContext": "Original comment context",
+  "researchFlow.rewardToast": "Report submitted. Earned {{rewards}}",
+  "researchFlow.waivedToast": "Report submitted. Reward waived.",
+  "researchFlow.reportSavedToast": "Report submitted",
   "researchFlow.hourShort": "hours",
   "researchFlow.minuteShort": "minutes",
   "researchFlow.halfHourHint": "30-minute increments",

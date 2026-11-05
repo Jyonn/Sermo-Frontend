@@ -1,4 +1,9 @@
 {
+  "researchFlow.memberFilter": "筛选成员",
+  "researchFlow.replyContext": "原评论上下文",
+  "researchFlow.rewardToast": "报告已提交，获得 {{rewards}}",
+  "researchFlow.waivedToast": "报告已提交，本次已放弃奖励",
+  "researchFlow.reportSavedToast": "报告已提交",
   "researchFlow.hourShort": "小时",
   "researchFlow.minuteShort": "分钟",
   "researchFlow.halfHourHint": "以半小时为单位",

@@ -105,7 +105,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     {memberPicker&&<MemberPickerSheet title={tr('members')} initial={selected} members={project.members.map(member=>({...member,description:member.id===userId?tr('self'):undefined}))} limit={20} onClose={()=>setMemberPicker(false)} onApply={setSelected}/>}
     <ChronellePermissionsDrawer open={settingsOpen} onClose={()=>setSettingsOpen(false)} onRebind={()=>{setSettingsOpen(false);setConsent(true);}}/>
     <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId} onChange={()=>setTick(n=>n+1)}/>
-    <SideDrawer historyKey="research-meeting-create" open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
+    <SideDrawer className="research-workflow-drawer" historyKey="research-meeting-create" open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
     </SideDrawer>
   </section>;

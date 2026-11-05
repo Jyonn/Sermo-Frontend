@@ -13,3 +13,4 @@
 .markdown-editor-dialog-error{flex:0 0 auto;max-height:72px;overflow-y:auto;margin:0;padding:8px 16px;color:var(--danger);font-size:12px}
 @media(max-height:500px){.dialog-backdrop.markdown-editor-backdrop{padding:8px}.markdown-editor-dialog{height:calc(100dvh - 16px);border-radius:18px}.markdown-editor-dialog>header{padding-block:8px}.markdown-editor-dialog>footer{padding-block:8px}}
 .dialog-backdrop.markdown-editor-backdrop{padding:16px;touch-action:auto}
+.markdown-editor-dialog>header>button{min-height:32px;width:32px;height:32px;padding:4px;border-radius:8px;box-shadow:none}.markdown-editor-dialog>header>button>.material-symbols-outlined{font-size:19px}.markdown-editor-dialog>footer>.button,.markdown-editor-dialog>footer>.ghost-button{min-height:36px;padding:8px 14px;border-radius:8px;font-size:13px;box-shadow:none}
