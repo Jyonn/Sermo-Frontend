@@ -4,7 +4,8 @@
 .preview[data-theme=botanical]{--corner-art:url('./assets/botanical-corner-v1.webp');--emblem-art:url('./assets/botanical-ornament-v1.webp');--frame-stroke:color-mix(in srgb,var(--brand) 45%,transparent)}
 .preview[data-theme=pop]{--corner-art:url('./assets/pop-corner-v1.webp');--emblem-art:url('./assets/pop-ornament-v1.webp');--frame-stroke:color-mix(in srgb,var(--brand) 68%,transparent)}
 .theme-emblem{object-fit:contain;pointer-events:none;user-select:none;flex-shrink:0;aspect-ratio:1312/1199}
-.ornate-frame{position:relative;isolation:isolate}
+/* Decoration must not override the host's positioning (welcome is an absolute overlay). */
+.ornate-frame{isolation:isolate}
 .ornate-frame:before{content:'';position:absolute;inset:10px;z-index:2;border:1px solid var(--frame-stroke);border-radius:inherit;pointer-events:none}
 .preview[data-theme=gilded] .ornate-frame:before{outline:1px solid color-mix(in srgb,var(--accent) 25%,transparent);outline-offset:4px}
 .preview[data-theme=orbital] .ornate-frame:before{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 6%,transparent)}
