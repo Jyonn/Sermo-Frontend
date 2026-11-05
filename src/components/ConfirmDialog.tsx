@@ -6,6 +6,7 @@ import { useModalFocus } from "../lib/modalFocus";
 
 interface ConfirmDialogProps {
   open: boolean;
+  className?: string;
   title: string;
   description: string;
   confirmLabel?: string;
@@ -24,6 +25,7 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({
   open,
+  className = "",
   title,
   description,
   confirmLabel,
@@ -50,7 +52,7 @@ export function ConfirmDialog({
 
   return createPortal(
     <div className="dialog-backdrop confirm-dialog-backdrop" onClick={() => { if (dismissible && !busy) onClose(); }} role="presentation">
-      <section ref={root} tabIndex={-1} aria-labelledby={titleId} aria-describedby={descriptionId} aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role={kind === "alert" ? "alertdialog" : "dialog"}>
+      <section ref={root} tabIndex={-1} aria-labelledby={titleId} aria-describedby={descriptionId} aria-modal="true" className={`confirm-dialog ${className}`.trim()} onClick={(event) => event.stopPropagation()} role={kind === "alert" ? "alertdialog" : "dialog"}>
         <div className="confirm-dialog-copy">
           <h2 id={titleId}>{title}</h2>
           <p id={descriptionId}>{description}</p>

@@ -28,13 +28,14 @@ test('resource metadata formats files and links safely',()=>{
   assert.equal(resourceHost('invalid'),'');
   assert.equal(resourceFileLabel('Report.pdf'),'PDF');
 });
-test('project and task reuse library summaries, and group details use an independent settings section',()=>{
+test('project library remains available without task resource entries',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
   const overview=readFileSync(new URL('../src/components/ResearchWorkspace.tsx',import.meta.url),'utf8');
   const chat=readFileSync(new URL('../src/components/ResearchChat.tsx',import.meta.url),'utf8');
-  assert.match(page,/ResearchResourceSummary/);
+  assert.match(page,/<ResearchResources key=\{project.id\} projectId=\{project.id\}/);
+  assert.doesNotMatch(page,/ResearchResourceSummary|taskId=\{resourceScope\}/);
   assert.match(overview,/research-team-bar/);
-  assert.match(overview,/ResearchResourceSummary/);
+  assert.doesNotMatch(overview,/ResearchResourceSummary/);
   assert.match(chat,/research-chat-project-section/);
   assert.match(chat,/if \(onProjectDetails\) onProjectDetails\(\)/);
   assert.match(page,/busy=\{busy\} onClose=\{\(\)=>\{setConfirm\(null\)/);

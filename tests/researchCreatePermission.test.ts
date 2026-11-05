@@ -19,7 +19,7 @@ test('the server capability result and required level remain authoritative',()=>
 });
 test('all creation entry points use the shared preflight and submit failures toast too',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
-  assert.equal((page.match(/startCreate\(\)}/g)||[]).length,4);
+  assert.equal((page.match(/startCreate\(\)}/g)||[]).length,5);
   assert.equal((page.match(/setPanel\('create'\)/g)||[]).length,1);
   assert.match(page,/setError\(message\);showToast\(message,'error',4000\)/);
 });

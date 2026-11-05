@@ -1,10 +1,11 @@
-import {useState, type FormEvent} from 'react';
+import {useRef,useState, type FormEvent} from 'react';
 import type {ReportKind, ResearchMilestone, ResearchAward, ResearchReward, ResearchProject, ResearchTask, ResearchTodo} from '../lib/research';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {DurationPickerField} from './DurationPickerField';
 import {FormSelectField} from './FormSelectField';
 import {ResearchAwardForm} from './ResearchAwardForm';
 import {ResearchRewardEditor} from './ResearchRewardEditor';
+import {ConfirmDialog} from './ConfirmDialog';
 import {SideDrawer} from './SideDrawer';
 import {SettingGroup, SettingRow, SettingSwitch, SelectControl} from './SettingRow';
 import {QuietState} from './BoundaryState';
@@ -26,6 +27,7 @@ export function ResearchTimeline({project,editable,mutate}:{project:ResearchProj
   const {t}=useI18n();
   const [selected,setSelected]=useState<ResearchMilestone|null>(null),[editing,setEditing]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const [flagDate,setFlagDate]=useState(project.start);
+  const milestoneForm=useRef<HTMLFormElement>(null);
   const flags=project.workflow?.milestones||[];
   const start=Date.parse(project.start),end=Date.parse(project.end||flags[flags.length-1]?.date||project.start),span=Math.max(86400000,end-start);
   const today=new Intl.DateTimeFormat('sv-SE').format(new Date());
@@ -35,9 +37,9 @@ export function ResearchTimeline({project,editable,mutate}:{project:ResearchProj
   return <section className="research-flow-section"><header><h2>{t('researchFlow.milestone')}</h2>{editable&&<button className="ghost-button" onClick={()=>{setSelected(null);setFlagDate(project.start);setEditing(true);}}><span className="material-symbols-outlined" aria-hidden="true">add</span>{t('common.add')}</button>}</header>
     <div className="research-roadmap-scroll"><div className="research-roadmap" style={{minWidth:Math.max(460,flags.length*110)}}><div className="research-roadmap-bounds"><time><small>{t('research.start')}</small>{project.start}</time><time><small>{t('research.end')}</small>{project.end||t('calendarDate.unset')}</time></div><div className="research-roadmap-axis"><span className="research-roadmap-baseline"/>{Array.from({length:9},(_,i)=><i key={i} style={{left:`${i*12.5}%`}}/>)}{today>=project.start&&(!project.end||today<=project.end)&&<div className="research-roadmap-today" style={{left:todayPosition+'%'}}><small>{t('calendarDate.today')}</small></div>}{flags.map((flag,index)=><button type="button" className={`research-roadmap-pin${flag.id===upcoming?' is-next':''}`} key={flag.id} style={{left:Math.min(100,Math.max(0,(Date.parse(flag.date)-start)/span*100))+'%'}} onClick={()=>setSelected(flag)} aria-label={flag.date+' '+flag.title}><span className="research-roadmap-diamond"/><small>{String(index+1).padStart(2,'0')}</small></button>)}</div></div></div>
     {flags.length?<div className="research-roadmap-list">{flags.map((flag,index)=><button type="button" key={flag.id} className={flag.id===upcoming?'is-next':''} onClick={()=>setSelected(flag)}><span className="research-roadmap-number">{String(index+1).padStart(2,'0')}</span><span className="research-roadmap-copy"><span><time>{flag.date}</time>{flag.id===upcoming&&<small>{t('researchFlow.nextMilestone')}</small>}</span><strong>{flag.title}</strong>{flag.body&&<span className="research-roadmap-description">{flag.body.replace(/[#*_`]/g,'')}</span>}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_outward</span></button>)}</div>:<p className="research-flow-hint">{t('researchFlow.milestoneEmpty')}</p>}
-    <SideDrawer className="research-workflow-drawer" open={editing||!!selected} historyKey="research-milestone" title={t('researchFlow.milestone')} onClose={()=>{if(!busy){setEditing(false);setSelected(null);}}}>
-      {editing?<form className="research-form" onSubmit={save}><label>{t('research.name')}<input name="title" defaultValue={selected?.title} required maxLength={160}/></label><DatePickerField label={t('researchFlow.date')} name="date" value={flagDate} onChange={setFlagDate} min={project.start} max={project.end||undefined} required/><MarkdownInput initialValue={selected?.body}/>{error&&<p role="alert">{error}</p>}<button className="button" disabled={busy}>{t(busy?'common.loading':'research.save')}</button></form>:selected&&<div className="research-form"><time>{selected.date}</time><h2>{selected.title}</h2><Markdown body={selected.body}/>{editable&&<><button className="button" onClick={()=>{setFlagDate(selected.date);setEditing(true);}}>{t('researchFlow.edit')}</button><button className="ghost-button" disabled={busy} onClick={async()=>{setBusy(true);if(await mutate({action:'milestone',id:selected.id,delete:true}))setSelected(null);else setError(t('research.failed'));setBusy(false);}}>{t('common.delete')}</button>{error&&<p role="alert">{error}</p>}</>}</div>}
-    </SideDrawer>
+    <ConfirmDialog open={editing||!!selected} className="research-milestone-dialog" title={editing?t('researchFlow.milestone'):selected?.title||t('researchFlow.milestone')} description={editing?'':selected?.date||''} confirmLabel={t(editing?'research.save':'common.close')} showCancelButton={editing} busy={busy} onClose={()=>{if(!busy){setEditing(false);setSelected(null);}}} onConfirm={()=>{if(editing)milestoneForm.current?.requestSubmit();else setSelected(null);}}>
+      {editing?<form ref={milestoneForm} className="research-form" onSubmit={save}><label>{t('research.name')}<input name="title" defaultValue={selected?.title} required maxLength={160}/></label><DatePickerField label={t('researchFlow.date')} name="date" value={flagDate} onChange={setFlagDate} min={project.start} max={project.end||undefined} required/><MarkdownInput initialValue={selected?.body}/>{error&&<p role="alert">{error}</p>}</form>:selected&&<div className="research-form research-milestone-content"><Markdown body={selected.body}/>{editable&&<><button className="button" onClick={()=>{setFlagDate(selected.date);setEditing(true);}}>{t('researchFlow.edit')}</button><button className="ghost-button" disabled={busy} onClick={async()=>{setBusy(true);if(await mutate({action:'milestone',id:selected.id,delete:true}))setSelected(null);else setError(t('research.failed'));setBusy(false);}}>{t('common.delete')}</button>{error&&<p role="alert">{error}</p>}</>}</div>}
+    </ConfirmDialog>
   </section>;
 }
 
@@ -60,9 +62,9 @@ export function ResearchTaskEditor({project,task,busy,onSave}:{project:ResearchP
   </form>;
 }
 
-export function ResearchTodos({project,onOpen,onReimburse,mutate,busy}:{project:ResearchProject;onOpen:(todo:ResearchTodo)=>void;onReimburse:()=>void;mutate:ResearchMutation;busy:boolean}){
+export function ResearchTodos({project,onOpen,onReimburse}:{project:ResearchProject;onOpen:(todo:ResearchTodo)=>void;onReimburse:()=>void}){
   const {t}=useI18n();const todos=project.workflow?.todos||[];
-  return <div className="research-flow-scroll"><header className="research-flow-intro"><h2>{t('researchFlow.todo')}</h2><p>{t('researchFlow.todoHint')}</p></header>{todos.length?<div className="research-todo-list">{todos.map(todo=><div key={todo.id}><button className="research-todo-open" onClick={()=>todo.kind==='reimbursement'?onReimburse():onOpen(todo)}><span className="material-symbols-outlined" aria-hidden="true">{todo.kind==='response'?'reply':todo.kind==='reimbursement'?'receipt_long':'edit_calendar'}</span><span><small>{t(`researchFlow.${todo.kind}` as TranslationKey)}{todo.period_start&&` · ${todo.period_start}`}</small><strong>{todo.title}</strong>{todo.body&&<p>{todo.body}</p>}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>{todo.kind==='response'&&<button className="ghost-button" disabled={busy} onClick={()=>void mutate({action:'resolve_request',id:todo.id})}>{t('researchFlow.resolve')}</button>}</div>)}</div>:<QuietState icon="task_alt" title={t('researchFlow.noTodo')} description={t('researchFlow.noTodoHint')}/>}</div>;
+  return <div className="research-flow-scroll"><header className="research-flow-intro"><h2>{t('researchFlow.todo')}</h2><p>{t('researchFlow.todoHint')}</p></header>{todos.length?<div className="research-todo-list">{todos.map(todo=><div key={todo.id}><button className="research-todo-open" onClick={()=>todo.kind==='reimbursement'?onReimburse():onOpen(todo)}><span className="material-symbols-outlined" aria-hidden="true">{todo.kind==='response'?'reply':todo.kind==='reimbursement'?'receipt_long':'edit_calendar'}</span><span><small>{t(`researchFlow.${todo.kind}` as TranslationKey)}{todo.period_start&&` · ${todo.period_start}`}</small><strong>{todo.title}</strong>{todo.body&&<p>{todo.body}</p>}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div>)}</div>:<QuietState icon="task_alt" title={t('researchFlow.noTodo')} description={t('researchFlow.noTodoHint')}/>}</div>;
 }
 
 export function ResearchReportForm({project,task,kind,busy,onSave}:{project:ResearchProject;task:ResearchTask;kind:ReportKind;busy:boolean;onSave:ResearchMutation}){

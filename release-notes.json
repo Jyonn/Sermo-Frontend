@@ -5,19 +5,21 @@
     "zh-CN": {
       "title": "科研任务与汇报协作",
       "items": [
-        "课题采用紧凑单行导航，任务表单分区更清晰，日报、周报、月报改为单选",
-        "日期统一使用连续月历，支持 1900–2099 年与年月跳转；下拉选择统一采用友间组件",
-        "科研操作按钮更紧凑，讨论支持成员与日期组合筛选；提交报告提示实际获得的奖励",
-        "报销支持日期区间、多项目凭证、币种与手动汇率，金额统一保留两位小数"
+        "科研概览聚焦成员、里程碑与介绍，任务支持单一汇报周期和自动待办",
+        "汇报与讨论支持二级回复、成员和日期组合筛选，答复请求在实际回复后自动完成",
+        "科研奖励支持报告自动发放、评论 BONUS 编辑与来源跳转，日报可记录 AI 与思考工时",
+        "报销支持日期区间、多项目凭证和外币中行折算价，金额统一保留两位小数",
+        "日期统一使用连续月历，优化科研按钮与手机弹层层级，移除任务资源入口"
       ]
     },
     "en": {
       "title": "Research tasks and reporting",
       "items": [
-        "Compact project navigation and clearer task forms, with one reporting frequency per task",
-        "A shared scrolling calendar covers 1900–2099 with month jumps; selections consistently use Frienden pickers",
-        "Compact research actions, combined member/date discussion filters and earned-reward report toasts",
-        "Reimbursements support date ranges, itemized evidence, currencies and manual FX quotes with two-decimal amounts"
+        "Focused research overviews, one reporting frequency per task and automatic to-dos",
+        "Threaded discussions with member/date filters and requests completed by actual replies",
+        "Automatic report rewards, editable comment bonuses and source links, plus AI/thinking work durations",
+        "Itemized reimbursements with date ranges, evidence and foreign-currency BOC quotes, rounded to two decimals",
+        "Shared scrolling calendars, compact research controls and corrected mobile overlay ordering; task resource entries removed"
       ]
     }
   }

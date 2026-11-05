@@ -20,8 +20,9 @@ test('current project resolves remembered selection, active fallback and empty m
 test('research renders the selected project directly and keeps management in a floating Drawer',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
   assert.doesNotMatch(page,/historyKey="research-project"|workspaceSelected=/);
-  assert.match(page,/secondary=\{id&&list.length/);
-  assert.match(page,/triggerLabel=\{/);
+  assert.match(page,/<ResearchProjectHeader/);
+  assert.match(page,/onBack=\{\(\)=>setBrowsing\(true\)\}/);
+  assert.doesNotMatch(page,/secondary=\{id&&list.length/);
   assert.match(page,/historyKey="research-manage"/);
   assert.match(page,/localStorage.setItem\(memoryKey/);
   assert.doesNotMatch(page,/<p className="research-muted">\{t\('research.shared'\)\}/);
