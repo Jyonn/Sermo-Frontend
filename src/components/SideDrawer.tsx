@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { useDesktopPanels } from "./DesktopPanelWorkspace";
-import {useOverlayLayer} from '../lib/overlayLayer';
+import {useOverlayLayer,OverlayScope} from '../lib/overlayLayer';
 import { useModalFocus } from "../lib/modalFocus";
 
 const activeDrawerIds = new Set<string>();
@@ -269,7 +269,7 @@ export function SideDrawer({
   const desktopClose = desktopPanel && !panels?.single && dismissAction !== "back";
   const dismissLabel = t(desktopClose ? "common.close" : "common.back");
   const dismissIcon = desktopClose ? "close" : "arrow_back";
-  return <>
+  return <OverlayScope root={surfaceRef}>
     {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
       <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} style={overlayLevel?{zIndex:overlayLevel-1}:undefined} onClick={requestClose} aria-hidden="true" />,
       document.body
@@ -322,5 +322,5 @@ export function SideDrawer({
       </aside>
     </div>,
     desktopPanel && panels?.host ? panels.host : document.body
-  )}</>;
+  )}</OverlayScope>;
 }

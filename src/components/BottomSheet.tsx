@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
+import {OverlayScope} from "../lib/overlayLayer";
 import { useModalFocus } from "../lib/modalFocus";
 import { sheetRelease, sheetStops } from "../lib/interactionPatterns";
 import "./InteractionPatterns.css";
@@ -101,7 +102,7 @@ export function BottomSheet({
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="sheet-backdrop" onClick={onClose} role="presentation">
+    <OverlayScope root={root}><div className="sheet-backdrop" onClick={onClose} role="presentation">
       <section
         ref={root}
         tabIndex={-1}
@@ -147,7 +148,7 @@ export function BottomSheet({
         )}
         <div className={`sheet-body ${bodyClassName ?? ""}`.trim()}>{children}</div>
       </section>
-    </div>,
+    </div></OverlayScope>,
     document.body
   );
 }

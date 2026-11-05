@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {nextOverlayLevel} from '../src/lib/overlayOrder.ts';
+import {nextOverlayLevel,orderOverlayEntries} from '../src/lib/overlayOrder.ts';
 test('sheets open above floating drawers rather than retaining the old CSS rank',()=>{
   const drawer=nextOverlayLevel(31,[]);
   const sheet=nextOverlayLevel(30,[drawer]);
@@ -28,11 +28,22 @@ test('all focus-managed dialogs and both floating drawer paths use the same allo
   assert.match(read('lib/modalFocus.ts'),/useOverlayLayer\(root,open/);
   assert.match(read('components/SideDrawer.tsx'),/panels\?\.floating&&panels.topId===drawerId/);
   assert.match(read('components/SideDrawer.tsx'),/zIndex:overlayLevel-1/);
-  assert.match(read('lib/overlayLayer.ts'),/node.dataset.overlayOwner!==owner/);
-  assert.match(read('lib/overlayLayer.ts'),/\.desktop-panel-slot/);
+  assert.match(read('lib/overlayLayer.tsx'),/node.dataset.overlayOwner!==owner/);
+  assert.match(read('lib/overlayLayer.tsx'),/\.desktop-panel-slot/);
 });
 test('chat message actions open above research chat drawers',()=>{
   const source=readFileSync(new URL('../src/pages/ChatsPage.tsx',import.meta.url),'utf8');
   assert.match(source,/useOverlayLayer\(messageMenuRef, Boolean\(messageMenu && !messageMenu.confirmDelete\)\)/);
   assert.ok(nextOverlayLevel(70,[nextOverlayLevel(31,[])])>100);
+});
+test('cold-mounted portal children stay above parents regardless of effect order',()=>{
+  const parent={},child={},picker={};
+  const rows=[{root:picker,parents:[parent,child],order:1},{root:child,parents:[parent],order:2},{root:parent,parents:[],order:3}];
+  assert.deepEqual(orderOverlayEntries(rows).map(row=>row.root),[parent,child,picker]);
+});
+test('independent openings retain their order while nested parents precede descendants',()=>{
+  const first={},second={},child={};
+  const rows=[{root:first,parents:[],order:1},{root:second,parents:[],order:2},{root:child,parents:[first],order:3}];
+  assert.deepEqual(orderOverlayEntries(rows).map(row=>row.root),[first,second,child]);
+  assert.deepEqual(orderOverlayEntries(rows.filter(row=>row.root!==child)).map(row=>row.root),[first,second]);
 });

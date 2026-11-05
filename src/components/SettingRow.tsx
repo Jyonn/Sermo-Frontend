@@ -1,3 +1,4 @@
+import {OverlayScope} from '../lib/overlayLayer';
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from 'react-dom';
 import { useI18n } from '../lib/language';
@@ -91,7 +92,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
     catch { setError(true); }
     finally { running.current = false; setBusy(false); }
   }
-  return <>
+  return <OverlayScope root={root}>
     <button className={`setting-select setting-select-trigger${compact ? ' is-compact' : ' is-row'}${disabled ? ' is-disabled' : ''}`} aria-label={`${label}: ${selected?.label || t('select.choose')}`} aria-haspopup="dialog" aria-expanded={open} disabled={disabled || !options.length} type="button" onClick={show} onKeyDown={event => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(); }
     }}>
@@ -117,7 +118,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
         {busy && <p className="option-picker-status" role="status">{t('common.processing')}</p>}
       </section>
     </div>, document.body)}
-  </>;
+  </OverlayScope>;
 }
 
 export function SettingSelect<T extends string>(props: Parameters<typeof SelectControl<T>>[0]) {
