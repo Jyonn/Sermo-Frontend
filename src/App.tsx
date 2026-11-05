@@ -26,6 +26,9 @@ import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { refreshSpaceFeatures, useSpaceFeatures } from "./lib/spaceFeatures";
 import { applySiteTheme } from './lib/siteTheme';
+import {useBirthday} from './lib/birthday';
+import {BirthdayExperience} from './components/BirthdayExperience';
+import {birthdayAssets} from './lib/birthdayAssets';
 import { legacySubmissionDestination } from "./lib/submissionRouting";
 import { routeResources } from "./lib/routeResources";
 import { readOAuthRequest, isOAuthLoginPending } from "./lib/oauthPending";
@@ -87,11 +90,14 @@ export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
   const features = useSpaceFeatures();
+  const birthday=useBirthday();
+  const birthdayActive=Boolean(birthday.status?.active&&location.pathname.startsWith('/app/'));
   const spaceId = session?.user.space_id;
   useEffect(() => {
-    applySiteTheme(spaceId ? features.siteTheme : 'default');
-    return () => applySiteTheme('default');
-  }, [spaceId, features.siteTheme]);
+    for(const [key,value] of Object.entries(birthdayAssets))document.documentElement.style.setProperty(`--birthday-${key}`,`url("${value}")`);
+    applySiteTheme(spaceId ? birthdayActive?'birthday-botanical':features.siteTheme : 'default');
+    return () => {applySiteTheme('default');for(const key of Object.keys(birthdayAssets))document.documentElement.style.removeProperty(`--birthday-${key}`);};
+  }, [spaceId, features.siteTheme,birthdayActive]);
   useEffect(() => {
     if (!spaceId) return;
     const refresh = () => {
@@ -123,6 +129,7 @@ export default function App() {
   return (
     <>
       {ready&&session&&<ChronelleBindingGate key={session.user.user_id} userId={session.user.user_id}/>}
+      {ready&&session&&birthdayActive&&<BirthdayExperience/>}
       <RouteResourceBoundary>
         <Suspense fallback={<RouteResourceState status="loading" />}>
           <Routes location={routeLocation}>

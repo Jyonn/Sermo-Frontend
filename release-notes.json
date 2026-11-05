@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.05.3",
-  "publishedAt": "2026-11-05",
+  "id": "2026.11.06.1",
+  "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "空间皮肤",
+      "title": "花间来日 · 生日祝福",
       "items": [
-        "空间管理员可切换默认与已获授权的七夕皮肤，成员界面跟随空间设置",
-        "七夕皮肤不再按日期自动启用，撤销授权后恢复默认"
+        "聊天等页面可设置生日，个人信息中也可管理；只保存月日，每 365 天可设置一次",
+        "生日当天享有个人专属的花间来日主题与全屏庆祝，不可转赠或分享",
+        "平台和空间管理员可分别致信，生日当天由本人拆阅"
       ]
     },
     "en": {
-      "title": "Space themes",
+      "title": "A garden of tomorrows · Birthday wishes",
       "items": [
-        "Space administrators can switch between Default and authorized Qixi themes for all members",
-        "Qixi no longer activates by date; revoked access restores the default theme"
+        "Set your birthday from chat reminders or personal information; only month and day are stored, changeable every 365 days",
+        "Enjoy your personal garden birthday theme and full-screen celebration on the day, without sharing or transfers",
+        "Platform and space administrators can each leave a private letter to unseal on your birthday"
       ]
     }
   }

@@ -6,6 +6,7 @@ import { managementSettingsForSection } from '../src/lib/managementNavigation.ts
 test('only explicit supported space themes can activate', () => {
   for (const value of [undefined, null, '', 'default', 'unknown', true]) assert.equal(resolveSiteTheme(value), 'default');
   assert.equal(resolveSiteTheme('qixi-2026'), 'qixi-2026');
+  assert.equal(resolveSiteTheme('birthday-botanical'), 'birthday-botanical');
 });
 
 test('switching space or signing out clears the previous skin', () => {

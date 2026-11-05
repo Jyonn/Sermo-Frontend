@@ -7,6 +7,7 @@ import { FeedbackState } from "./FeedbackState";
 import { UserAvatar } from "./UserAvatar";
 import { GrowthLevelBadge } from "./GrowthLevelBadge";
 import "./FounderMedals.css";
+import {BirthdayLetterComposer} from './BirthdayLetterComposer';
 
 export function PlatformMemberPanel({ member, onChat }: { member: PlatformAdminMemberDTO; onChat: (chat: ChatDTO) => void }) {
   const { t } = useI18n();
@@ -44,6 +45,7 @@ export function PlatformMemberPanel({ member, onChat }: { member: PlatformAdminM
       <UserAvatar className="platform-member-portrait" frame={member.avatar_frame_style} name={member.name} uri={member.avatar_uri} />
       <div><h2>{member.name}</h2><p>#{member.user_id}<GrowthLevelBadge level={member.growth_level ?? 1} name={member.growth_level_name} /><span>{t(member.verified ? "admin.verified" : "management.unverified")}</span></p></div>
     </header>
+    <BirthdayLetterComposer userId={member.user_id} platform/>
     <section className="founder-medal-management"><h3>{t("management.founderMedal")}</h3>
       {years.map(value => <span key={value}>{t("profile.founderMedal", { year: value })}</span>)}
       <div><label>{t("management.awardYear")} <input type="number" min={2026} max={new Date().getFullYear()} value={year} onChange={event => setYear(Number(event.target.value))} /></label><button type="button" className="ghost-button" disabled={awarding || !Number.isInteger(year) || year < 2026 || year > new Date().getFullYear()} onClick={() => void updateMedal()}>{t(years.includes(year) ? "management.revokeMedal" : "management.grantMedal")}</button></div>

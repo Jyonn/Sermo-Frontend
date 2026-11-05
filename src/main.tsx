@@ -16,6 +16,8 @@ import { chronelleReturnDestination } from './lib/chronelleReturn';
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { MusicPlayerProvider } from "./lib/musicPlayer";
+import {BirthdayProvider} from './lib/birthday';
+import './styles/birthday-theme.css';
 
 const PAGE_RELOAD_REASON_KEY = "sermo:diagnostics:reload-reason";
 const navigationEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
@@ -100,7 +102,7 @@ async function renderApp() {
         <PlatformAdminAuthProvider><AuthProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <FeatureDiscoveryProvider><MusicPlayerProvider><App /></MusicPlayerProvider></FeatureDiscoveryProvider>
+              <FeatureDiscoveryProvider><MusicPlayerProvider><BirthdayProvider><App /></BirthdayProvider></MusicPlayerProvider></FeatureDiscoveryProvider>
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider></PlatformAdminAuthProvider>

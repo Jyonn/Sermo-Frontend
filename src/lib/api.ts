@@ -442,6 +442,27 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  getBirthday(signal?: AbortSignal) {
+    return request<import('./birthdayTypes').BirthdayStatus>('/users/me/birthday', {auth:true, signal});
+  },
+  setBirthday(month:number, day:number) {
+    return request<import('./birthdayTypes').BirthdayStatus>('/users/me/birthday', {auth:true, method:'POST', body:{month,day}});
+  },
+  acknowledgeBirthday() {
+    return request<import('./birthdayTypes').BirthdayStatus>('/users/me/birthday/seen', {auth:true,method:'POST',body:{}});
+  },
+  getBirthdayLetters(signal?:AbortSignal) {
+    return request<import('./birthdayTypes').BirthdayEnvelope[]>('/users/me/birthday/letters',{auth:true,signal});
+  },
+  openBirthdayLetter(id:number, signal?:AbortSignal) {
+    return request<import('./birthdayTypes').BirthdayEnvelope & {body:string}>(`/users/me/birthday/letters/${id}/open`,{auth:true,method:'POST',body:{},signal});
+  },
+  getBirthdayLetterDraft(userId:number, platform:boolean, signal?:AbortSignal) {
+    return request<import('./birthdayTypes').BirthdayLetterDraft>(platform?`/platform-admin/members/${userId}/birthday-letter`:`/spaces/admin/users/${userId}/birthday-letter`,{platformAdminAuth:platform,adminAuth:!platform,signal});
+  },
+  saveBirthdayLetterDraft(userId:number, platform:boolean, body:{birthday_year:number;title:string;body:string}) {
+    return request<import('./birthdayTypes').BirthdayLetterDraft>(platform?`/platform-admin/members/${userId}/birthday-letter`:`/spaces/admin/users/${userId}/birthday-letter`,{platformAdminAuth:platform,adminAuth:!platform,method:'POST',body});
+  },
   getMonifaOtp(url:string,signal?:AbortSignal){return request<import('./monifa').MonifaOtp>('/messages/monifa-otp',{method:'POST',body:{text:url},auth:true,signal})},
   getResourceCollection(slug: string, signal?: AbortSignal) {
     return request<import('../types').ResourceCollectionDTO>(`/resources/collections/${encodeURIComponent(slug)}`, { signal });

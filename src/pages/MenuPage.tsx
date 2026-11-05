@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
+import {BirthdayProfileRow} from '../components/BirthdayControls';
 import { DrawerTabs } from "../components/DrawerTabs";
 import { notificationCategoriesForSpace, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
 import { SignatureSettings } from '../components/SignatureSettings';
@@ -2337,6 +2338,7 @@ export default function MenuPage() {
       <SideDrawer historyKey="basic-info" onRouteOpen={() => setBasicDrawerOpen(true)} open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
+            <BirthdayProfileRow/>
             <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.avatar", () => setAvatarDialogOpen(true))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.avatar")}</strong>

@@ -31,6 +31,7 @@ import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/lang
 import type { AdminActivityDTO, AdminMemberDTO, AppViewState, ChatMuteDuration, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
 import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
+import {BirthdayLetterComposer} from '../components/BirthdayLetterComposer';
 
 type MemberFilter = "all" | "online";
 type AdminTab = SpaceManagementSection;
@@ -1006,6 +1007,7 @@ export default function SpaceAdminDashboardPage() {
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
         {selectedMember ? <div className="admin-member-drawer">
+          <BirthdayLetterComposer key={selectedMember.user_id} userId={selectedMember.user_id}/>
           <section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section>
           <section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section>
           <section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section>

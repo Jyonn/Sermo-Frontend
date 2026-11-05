@@ -1,0 +1,71 @@
+/* Personal, date-bound skin. Borders remain CSS geometry; images are independent ornaments. */
+html[data-site-theme="birthday-botanical"] {
+  --bg-canvas: #f2efe3;
+  --bg-surface: #fcf9ef;
+  --bg-elevated: #fffaf0;
+  --bg-panel: rgb(252 249 239 / 88%);
+  --bg-panel-strong: #fcf9ef;
+  --text-primary: #34473b;
+  --text-secondary: #697760;
+  --text-muted: #868b76;
+  --line-soft: rgb(88 119 92 / 16%);
+  --line-strong: rgb(88 119 92 / 30%);
+  --brand-primary: #58775c;
+  --brand-primary-press: #456449;
+  --birthday-frame: rgb(88 119 92 / 35%);
+}
+html[data-site-theme="birthday-botanical"][data-theme="dark"] {
+  --bg-canvas: #17201b;
+  --bg-surface: #202b23;
+  --bg-elevated: #28352b;
+  --bg-panel: rgb(32 43 35 / 90%);
+  --bg-panel-strong: #202b23;
+  --text-primary: #f0ecdc;
+  --text-secondary: #b9c4ae;
+  --text-muted: #97a48d;
+  --line-soft: rgb(199 208 184 / 15%);
+  --line-strong: rgb(199 208 184 / 28%);
+  --brand-primary: #bad0a5;
+  --brand-primary-press: #d0e1bc;
+  --birthday-frame: rgb(199 208 184 / 30%);
+}
+html[data-site-theme="birthday-botanical"] body { background-color: var(--bg-canvas); }
+html[data-site-theme="birthday-botanical"] .festival-theme-mark {
+  display: inline-block;
+  width: 31px;
+  height: 28px;
+  background: var(--birthday-corner) center / contain no-repeat;
+  pointer-events: none;
+}
+html[data-site-theme="birthday-botanical"] :is(.topbar, .tab-sticky-header, .square-feed-header, .drawer-topbar) {
+  background-color: var(--bg-panel-strong);
+  border-bottom-color: var(--birthday-frame);
+}
+html[data-site-theme="birthday-botanical"] :is(.confirm-dialog, .side-drawer, .bottom-sheet) {
+  border-color: var(--birthday-frame);
+  outline: 1px solid var(--line-soft);
+  outline-offset: -7px;
+}
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) {
+  background-image: var(--birthday-corner);
+  background-position: right 10px top 6px;
+  background-size: 56px 56px;
+  background-repeat: no-repeat;
+}
+html[data-site-theme="birthday-botanical"] :is(.drawer-title-row, .sheet-title-row)::after {
+  content: "";
+  display: inline-block;
+  width: 29px;
+  height: 25px;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  background: var(--birthday-corner) center / contain no-repeat;
+  pointer-events: none;
+}
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) .confirm-dialog-copy { padding-inline-end: 32px; }
+html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon {
+  background: var(--birthday-emblem) center / contain no-repeat;
+  border-radius: 0;
+}
+html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon .material-symbols-outlined { opacity: 0; }
