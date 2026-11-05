@@ -7,7 +7,7 @@
       "items": [
         "课题采用紧凑单行导航，重绘里程碑时间线，科研奖励支持新增与逐项编辑",
         "日期统一使用连续月历，支持 1900–2099 年与年月跳转；下拉选择统一采用友间组件",
-        "修复手机端下级菜单和日期弹层被上级页面遮挡的问题"
+        "修复手机端弹层遮挡，讨论支持二级回复、可编辑 BONUS 奖励及原评论跳转"
       ]
     },
     "en": {
@@ -15,7 +15,7 @@
       "items": [
         "Compact project navigation, redesigned milestone timelines and individually editable research rewards",
         "A shared scrolling calendar covers 1900–2099 with month jumps; selections consistently use Frienden pickers",
-        "Nested menus and date pickers stay above their parent panels on mobile"
+        "Fixed mobile overlay ordering; discussions support threaded replies, editable bonuses and source-comment links"
       ]
     }
   }

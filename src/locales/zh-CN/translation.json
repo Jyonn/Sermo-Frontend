@@ -1,4 +1,6 @@
 {
+  "researchFlow.editBonus": "编辑奖励",
+  "researchFlow.viewSource": "查看原评论",
   "researchFlow.nextMilestone": "下个节点",
   "researchFlow.chooseEvidence": "选择图片或 PDF",
   "calendarDate.browse": "连续滚动月历",
@@ -623,7 +625,7 @@
   "research.active": "进行中",
   "research.archived": "已存档",
   "research.completed": "已完结",
-  "research.progress": "进度记录",
+  "research.progress": "汇报与讨论",
   "research.mine": "只看自己",
   "research.all": "全部成员",
   "research.shared": "所有进度与回复均对课题成员可见。",
