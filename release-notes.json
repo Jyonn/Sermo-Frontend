@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.04.10",
-  "publishedAt": "2026-11-04",
+  "id": "2026.11.05.1",
+  "publishedAt": "2026-11-05",
   "locales": {
     "zh-CN": {
-      "title": "更轻量的图片与视频",
+      "title": "Monifa 验证码分享卡片",
       "items": [
-        "图片默认展示和下载最长边 1920px 的压缩版本，保留照片信息",
-        "修复视频漏转码并检查每分钟 20 MB 的体积限制，默认下载转码版本",
-        "压缩版与原文件使用独立缓存，避免旧缓存继续加载大文件"
+        "Monifa 分享链接支持验证码卡片，可复制、查看有效时间并手动刷新",
+        "过期验证码自动隐藏，分享撤销或网络异常时展示明确状态"
       ]
     },
     "en": {
-      "title": "Lighter photos and videos",
+      "title": "Monifa shared code cards",
       "items": [
-        "Photos display and download a compressed version up to 1920px while retaining photo information",
-        "Fixed skipped video processing and added a 20 MB per minute output check; downloads use the processed video",
-        "Processed media has separate cache entries so old originals do not override lighter versions"
+        "Monifa share links display codes with copy, expiry and manual refresh controls",
+        "Expired codes are hidden, with clear states for revoked shares and network errors"
       ]
     }
   }

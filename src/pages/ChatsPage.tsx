@@ -1,4 +1,6 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
+import {MonifaOtpCard} from '../components/MonifaOtpCard';
+import {monifaShareUrl} from '../lib/monifa';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
@@ -1253,6 +1255,9 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
       if (timer !== null) window.clearTimeout(timer);
     };
   }, [isPollable, messageId, pageActive]);
+
+  const monifaUrl=monifaShareUrl(url)||monifaShareUrl(previewUrl);
+  if(monifaUrl)return <MonifaOtpCard url={monifaUrl}/>;
 
   if (currentPreview?.status === "pending") {
     const pendingHostname = hostnameFromUrl(previewUrl);

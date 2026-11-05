@@ -1,4 +1,6 @@
 import type { LinkPreviewDTO } from "../types";
+import {monifaShareUrl} from '../lib/monifa';
+import {MonifaOtpCard} from './MonifaOtpCard';
 import { DouyinVideoPreview, isDouyinVideoData } from "./DouyinVideoPreview";
 import { isMusicData, MusicPreview } from "./NeteaseMusicPreview";
 import { isSocialMediaData, SocialMediaPreview } from "./SocialMediaPreview";
@@ -9,11 +11,13 @@ import { needsContentUpgrade } from "../lib/contentCompatibility";
 
 export function isSupportedExternalMedia(preview?: LinkPreviewDTO | null) {
   return !needsContentUpgrade(preview?.min_client_version, CURRENT_RELEASE.id)
-    && (isMusicData(preview?.provider_data) || isDouyinVideoData(preview?.provider_data) || isSocialMediaData(preview?.provider_data) || isStillfolioCollection(preview?.provider_data));
+    && (Boolean(monifaShareUrl(preview?.url)) || isMusicData(preview?.provider_data) || isDouyinVideoData(preview?.provider_data) || isSocialMediaData(preview?.provider_data) || isStillfolioCollection(preview?.provider_data));
 }
 
 export function ExternalMediaPreview({ preview,fitMedia=false }: { preview: LinkPreviewDTO;fitMedia?:boolean }) {
   if (!isSupportedExternalMedia(preview)) return <UnsupportedContentNotice minVersion={preview.min_client_version} title={preview.title || preview.site_name} url={preview.url} />;
+  const monifaUrl=monifaShareUrl(preview.url);
+  if(monifaUrl)return <MonifaOtpCard url={monifaUrl}/>;
   if (isMusicData(preview.provider_data)) return <MusicPreview music={preview.provider_data} />;
   if (isDouyinVideoData(preview.provider_data)) {
     return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} fitMedia={fitMedia} />;

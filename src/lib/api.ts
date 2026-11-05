@@ -442,6 +442,7 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  getMonifaOtp(url:string,signal?:AbortSignal){return request<import('./monifa').MonifaOtp>('/messages/monifa-otp',{method:'POST',body:{text:url},auth:true,signal})},
   getResourceCollection(slug: string, signal?: AbortSignal) {
     return request<import('../types').ResourceCollectionDTO>(`/resources/collections/${encodeURIComponent(slug)}`, { signal });
   },
