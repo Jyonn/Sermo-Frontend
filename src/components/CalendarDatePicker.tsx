@@ -1,6 +1,7 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {useI18n} from '../lib/language';
 import {calendarDate,FIRST_YEAR,LAST_YEAR,MONTH_COUNT,monthIndex,monthDays,defaultDateRange} from '../lib/calendarDate';
+import {SelectControl} from './SettingRow';
 import './CalendarDatePicker.css';
 
 const MONTH_HEIGHT=326;
@@ -18,7 +19,7 @@ export function CalendarDatePicker({value,onChange,min,max}:{value:string;onChan
   useEffect(()=>{const index=monthIndex(selected);const element=viewport.current;if(element&&(index*MONTH_HEIGHT<element.scrollTop||index*MONTH_HEIGHT>element.scrollTop+element.clientHeight))jump(index);},[selected]);
   const monthLabel=(year:number,month:number)=>new Intl.DateTimeFormat(language,{year:'numeric',month:'long'}).format(new Date(year,month-1,1));
   return <div className="calendar-date-picker">
-    <div className="calendar-date-jump"><label>{t('datePicker.year')}<select value={current.year} onChange={event=>jump((Number(event.target.value)-FIRST_YEAR)*12+current.month-1)}>{Array.from({length:LAST_YEAR-FIRST_YEAR+1},(_,i)=><option key={i} value={FIRST_YEAR+i}>{FIRST_YEAR+i}</option>)}</select></label><label>{t('datePicker.month')}<select value={current.month} onChange={event=>jump((current.year-FIRST_YEAR)*12+Number(event.target.value)-1)}>{Array.from({length:12},(_,i)=><option key={i} value={i+1}>{new Intl.DateTimeFormat(language,{month:'long'}).format(new Date(2026,i,1))}</option>)}</select></label></div>
+    <div className="calendar-date-jump"><SelectControl label={t('datePicker.year')} value={String(current.year)} onChange={value=>jump((Number(value)-FIRST_YEAR)*12+current.month-1)} options={Array.from({length:LAST_YEAR-FIRST_YEAR+1},(_,i)=>({value:String(FIRST_YEAR+i),label:String(FIRST_YEAR+i)}))}/><SelectControl label={t('datePicker.month')} value={String(current.month)} onChange={value=>jump((current.year-FIRST_YEAR)*12+Number(value)-1)} options={Array.from({length:12},(_,i)=>({value:String(i+1),label:new Intl.DateTimeFormat(language,{month:'long'}).format(new Date(2026,i,1))}))}/></div>
     <div className="calendar-date-weekdays" aria-hidden="true">{Array.from({length:7},(_,i)=><span key={i}>{new Intl.DateTimeFormat(language,{weekday:'narrow'}).format(new Date(2026,10,2+i))}</span>)}</div>
     <div className="calendar-date-months" ref={viewport} tabIndex={0} aria-label={t('calendarDate.browse')} onScroll={event=>setTop(event.currentTarget.scrollTop)}>
       <div style={{height:first*MONTH_HEIGHT}} aria-hidden="true"/>

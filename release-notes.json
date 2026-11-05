@@ -6,14 +6,14 @@
       "title": "科研任务与汇报协作",
       "items": [
         "课题采用紧凑单行导航，重绘里程碑时间线，科研奖励支持新增与逐项编辑",
-        "日期统一使用连续月历，支持 1900–2099 年与年月跳转，新建课题及任务默认一个月"
+        "日期统一使用连续月历，支持 1900–2099 年与年月跳转；下拉选择统一采用友间组件"
       ]
     },
     "en": {
       "title": "Research tasks and reporting",
       "items": [
         "Compact project navigation, redesigned milestone timelines and individually editable research rewards",
-        "A shared scrolling calendar covers 1900–2099 with month jumps and one-month defaults for new projects and tasks"
+        "A shared scrolling calendar covers 1900–2099 with month jumps; selections consistently use Frienden pickers"
       ]
     }
   }
