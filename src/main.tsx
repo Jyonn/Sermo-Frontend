@@ -15,7 +15,6 @@ import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { chronelleReturnDestination } from './lib/chronelleReturn';
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
-import { initializeScheduledSiteTheme } from "./lib/siteTheme";
 import { MusicPlayerProvider } from "./lib/musicPlayer";
 
 const PAGE_RELOAD_REASON_KEY = "sermo:diagnostics:reload-reason";
@@ -58,7 +57,6 @@ try {
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
 initializeTheme();
-initializeScheduledSiteTheme();
 const routerBasename = getSpaceRouterBasename();
 
 function initializeMaterialSymbols(attempt = 0) {

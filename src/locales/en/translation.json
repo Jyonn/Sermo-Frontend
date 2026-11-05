@@ -1,4 +1,9 @@
 {
+  "admin.spaceTheme": "Space theme",
+  "admin.spaceThemeHint": "Applies to the web interface for everyone in this space",
+  "admin.spaceThemeLocked": "Default is always available. Qixi requires a platform administrator's grant",
+  "admin.defaultTheme": "Default",
+  "admin.qixiTheme": "Qixi",
   "researchFlow.expenseItems": "Expense items",
   "researchFlow.addItem": "Add item",
   "researchFlow.expenseItem": "Expense details",

@@ -17,7 +17,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
-import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
+import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
 import { SpaceAvatar, UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -96,6 +96,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsSquareFreePostEnabled, setSettingsSquareFreePostEnabled] = useState(true);
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsResearchEnabled, setSettingsResearchEnabled] = useState(false);
+  const [settingsQixiTheme, setSettingsQixiTheme] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
@@ -310,6 +311,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsSquareFreePostEnabled(dashboard.space.square_free_post_enabled !== false);
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsResearchEnabled(dashboard.space.research_enabled === true);
+    setSettingsQixiTheme(dashboard.space.site_theme === 'qixi-2026');
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
     setSettingsOauthDeveloperEnabled(dashboard.space.oauth_developer_enabled === true);
@@ -455,6 +457,7 @@ export default function SpaceAdminDashboardPage() {
         square_free_post_enabled: currentSpace.square_free_post_enabled !== false ? 1 : 0,
         submission_enabled: currentSpace.submission_enabled ? 1 : 0,
         research_enabled: currentSpace.research_enabled ? 1 : 0,
+        qixi_theme_enabled: currentSpace.site_theme === 'qixi-2026' ? 1 : 0,
         square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
         qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
@@ -469,6 +472,7 @@ export default function SpaceAdminDashboardPage() {
         square_free_post_enabled: settingsSquareFreePostEnabled ? 1 : 0,
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         research_enabled: settingsResearchEnabled ? 1 : 0,
+        qixi_theme_enabled: settingsQixiTheme ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
@@ -477,6 +481,7 @@ export default function SpaceAdminDashboardPage() {
         level_names: settingsLevelNames.map((name) => name.trim()),
       }));
       setCachedSpaceFeatures(payload.space_id, {
+        siteTheme: payload.site_theme ?? 'default',
         chatEnabled: payload.chat_enabled !== false,
         submissionEnabled: payload.submission_enabled === true,
         researchEnabled: payload.research_enabled === true,
@@ -962,6 +967,9 @@ export default function SpaceAdminDashboardPage() {
               <span><strong>{currentSpace?.name}</strong><a href={entryHref}>{PUBLIC_HOST}/{currentSpace?.slug}</a></span>
               <button aria-label={t("admin.copyMemberEntry")} title={t("admin.copyMemberEntry")} onClick={() => void copyEntryLink()} type="button"><span aria-hidden="true" className="material-symbols-outlined">content_copy</span></button>
             </div>
+            <SettingGroup>
+              <SettingRow title={t('admin.spaceTheme')} description={t(currentSpace?.qixi_theme_granted ? 'admin.spaceThemeHint' : 'admin.spaceThemeLocked')} trailing={<SelectControl label={t('admin.spaceTheme')} value={settingsQixiTheme ? 'qixi-2026' : 'default'} disabled={settingsSaving || !currentSpace?.qixi_theme_granted} options={[{value: 'default', label: t('admin.defaultTheme')}, ...(currentSpace?.qixi_theme_granted ? [{value: 'qixi-2026', label: t('admin.qixiTheme')}] : [])]} onChange={(value) => setSettingsQixiTheme(value === 'qixi-2026')} />} />
+            </SettingGroup>
             <div className="management-setting-fields">
               <div className="management-field"><label htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div>
               <div className="management-field"><div><label htmlFor="admin-space-capacity">{t("admin.memberLimit")}</label><small id="admin-space-capacity-hint">{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div><input id="admin-space-capacity" aria-describedby="admin-space-capacity-hint" className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /></div>

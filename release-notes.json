@@ -1,25 +1,19 @@
 {
-  "id": "2026.11.05.2",
+  "id": "2026.11.05.3",
   "publishedAt": "2026-11-05",
   "locales": {
     "zh-CN": {
-      "title": "科研任务与汇报协作",
+      "title": "空间皮肤",
       "items": [
-        "科研概览聚焦成员、里程碑与介绍，任务支持单一汇报周期和自动待办",
-        "汇报与讨论支持二级回复、成员和日期组合筛选，答复请求在实际回复后自动完成",
-        "科研奖励支持报告自动发放、评论 BONUS 编辑与来源跳转，日报可记录 AI 与思考工时",
-        "报销支持日期区间、多项目凭证和外币中行折算价，金额统一保留两位小数",
-        "日期统一使用连续月历，优化科研按钮与手机弹层层级，移除任务资源入口"
+        "空间管理员可切换默认与已获授权的七夕皮肤，成员界面跟随空间设置",
+        "七夕皮肤不再按日期自动启用，撤销授权后恢复默认"
       ]
     },
     "en": {
-      "title": "Research tasks and reporting",
+      "title": "Space themes",
       "items": [
-        "Focused research overviews, one reporting frequency per task and automatic to-dos",
-        "Threaded discussions with member/date filters and requests completed by actual replies",
-        "Automatic report rewards, editable comment bonuses and source links, plus AI/thinking work durations",
-        "Itemized reimbursements with date ranges, evidence and foreign-currency BOC quotes, rounded to two decimals",
-        "Shared scrolling calendars, compact research controls and corrected mobile overlay ordering; task resource entries removed"
+        "Space administrators can switch between Default and authorized Qixi themes for all members",
+        "Qixi no longer activates by date; revoked access restores the default theme"
       ]
     }
   }

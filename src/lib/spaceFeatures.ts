@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuth } from "./auth";
+import { resolveSiteTheme, type SiteTheme } from './siteTheme';
 
 type SpaceFeatures = {
+  siteTheme?: SiteTheme;
   researchEnabled?: boolean;
   chatEnabled: boolean;
   submissionEnabled: boolean;
@@ -55,7 +57,9 @@ function loadSpaceFeatures(spaceId: number) {
   const existing = featureRequests.get(spaceId);
   if (existing) return existing;
   const request = api.getSpaceMe().then((space) => {
+    if (space.space_id !== spaceId) throw new Error('Space changed during request');
     const features = {
+      siteTheme: resolveSiteTheme(space.site_theme),
       researchEnabled: space.research_enabled === true,
       chatEnabled: space.chat_enabled !== false,
       submissionEnabled: space.submission_enabled === true,
@@ -92,6 +96,10 @@ export function setCachedSpaceFeatures(spaceId: number, features: SpaceFeatures)
 
 export function useGroupSquareEnabled() {
   return useSpaceFeatures().squareEnabled;
+}
+
+export function refreshSpaceFeatures(spaceId: number) {
+  return loadSpaceFeatures(spaceId);
 }
 
 export function useSpaceFeatures() {

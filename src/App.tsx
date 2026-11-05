@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
@@ -24,7 +24,8 @@ import AccountSwitchPage from "./pages/AccountSwitchPage";
 const HistoryManagerPage = lazy(() => import("./pages/HistoryManagerPage"));
 import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
-import { useSpaceFeatures } from "./lib/spaceFeatures";
+import { refreshSpaceFeatures, useSpaceFeatures } from "./lib/spaceFeatures";
+import { applySiteTheme } from './lib/siteTheme';
 import { legacySubmissionDestination } from "./lib/submissionRouting";
 import { routeResources } from "./lib/routeResources";
 import { readOAuthRequest, isOAuthLoginPending } from "./lib/oauthPending";
@@ -86,6 +87,23 @@ export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
   const features = useSpaceFeatures();
+  const spaceId = session?.user.space_id;
+  useEffect(() => {
+    applySiteTheme(spaceId ? features.siteTheme : 'default');
+    return () => applySiteTheme('default');
+  }, [spaceId, features.siteTheme]);
+  useEffect(() => {
+    if (!spaceId) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') void refreshSpaceFeatures(spaceId).catch(() => {});
+    };
+    document.addEventListener('visibilitychange', refresh);
+    const timer = window.setInterval(refresh, 180_000);
+    return () => {
+      document.removeEventListener('visibilitychange', refresh);
+      window.clearInterval(timer);
+    };
+  }, [spaceId]);
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const [rootChronelleReturn] = useState(() => window.location.pathname === '/app/research' && isChronelleReturn(new URL(window.location.href)));
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");

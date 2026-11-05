@@ -1,4 +1,9 @@
 {
+  "admin.spaceTheme": "空间皮肤",
+  "admin.spaceThemeHint": "应用于此空间所有成员的网页界面",
+  "admin.spaceThemeLocked": "默认皮肤始终可用，七夕皮肤需超级管理员授权",
+  "admin.defaultTheme": "默认",
+  "admin.qixiTheme": "七夕",
   "researchFlow.expenseItems": "报销项目",
   "researchFlow.addItem": "添加项目",
   "researchFlow.expenseItem": "项目明细",
