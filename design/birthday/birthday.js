@@ -1,3 +1,5 @@
+import { componentLabel, componentGallery, decorateBirthdayPreview, installBirthdayComponents, resetBirthdayLayers, themeEmblem } from './birthday-components.js';
+
 const themes = {
   gilded: {number:'01', en:'GILDED OCCASION', name:['鎏光礼序','Gilded occasion'], palette:['#853947','#c3a16a','#f4ead9'], description:['香槟金的仪式感，酒红色的温度。把一场郑重的生日礼遇，藏进每一次日常相遇。','Champagne, burgundy and quiet ceremony. An occasion worthy of you, woven into everyday conversations.'], heading:['今天的主角，\n是你。','Today belongs\nto you.'], line:['A day, all yours.','A day, all yours.'], wish:['愿新的一岁，所遇皆温柔。\n每一个平凡日子，都有值得举杯的瞬间。','May this new chapter meet you with kindness.\nMay ordinary days give you reasons to celebrate.'], gesture:['点亮今天的心愿','Make a birthday wish'], mark:'✧', motion:['一束礼花，落下即停','A single, gentle shower of golden confetti']},
   orbital: {number:'02', en:'A LETTER FROM THE STARS', name:['星河来信','A letter from the stars'], palette:['#101f32','#cdb587','#e9e0cc'], description:['深蓝的天文馆，环绕着你的星轨。让生日成为一次安静而盛大的宇宙来信。','An intimate observatory, an orbit of your own. A quiet, magnificent birthday letter from the universe.'], heading:['新的一岁，\n自有星光。','Another year.\nYour own light.'], line:['Another orbit, another you.','Another orbit, another you.'], wish:['你已完成又一次绕太阳的旅行。\n下一程，愿好奇不止，心中始终有光。','Another beautiful journey around the sun.\nStay curious. Carry your own light into the next.'], gesture:['向星河许个愿','Send a wish to the stars'], mark:'✦', motion:['星点短暂汇聚，缓缓熄落','A brief gathering of starlight, then stillness']},
@@ -10,7 +12,7 @@ const dictionary = {
 };
 const params = new URLSearchParams(location.search);
 let theme = Object.hasOwn(themes, params.get('theme')) ? params.get('theme') : 'gilded';
-let scene = ['skin','welcome','compare'].includes(params.get('scene')) ? params.get('scene') : 'skin';
+let scene = ['skin','welcome','components','compare'].includes(params.get('scene')) ? params.get('scene') : 'skin';
 let lang = params.get('lang') === 'en' ? 'en' : 'zh';
 let device = params.get('device') === 'phone' || matchMedia('(max-width:540px)').matches ? 'phone' : 'desktop';
 let dark = params.get('dark') === 'true';
@@ -63,11 +65,17 @@ function compare() {
   return `<div class="compare-grid">${Object.entries(themes).map(([key,item])=>`<article class="compare-card"><div class="compare-art"><img src="${art(key)}" alt="${l(item.name)}" loading="lazy"/><span>0${Number(item.number)} / FRIENDEN</span><button data-try="${key}">${t('see')} ↗</button></div><div class="compare-copy"><span class="overline">${item.en}</span><h2>${l(item.name)}</h2><div class="compare-palette">${item.palette.map(color=>`<i style="--swatch:${color}"></i>`).join('')}</div><p>${l(item.description)}</p><span class="overline" style="font-size:8px;letter-spacing:.6px">${l(item.motion)}</span></div></article>`).join('')}</div>`;
 }
 function render() {
+  resetBirthdayLayers();
   timers.forEach(clearTimeout);timers=[];
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
   const item=themes[theme];
   root.innerHTML=`<header class="lab-top"><div class="lab-brand"><span class="monogram">f</span>Frienden <small>BIRTHDAY ATELIER</small></div><nav class="scene-switch" aria-label="${t('overview')}">${[['skin','skins'],['welcome','welcome'],['compare','compare']].map(([value,key])=>`<button data-scene="${value}" aria-pressed="${scene===value}">${t(key)}</button>`).join('')}</nav><div class="lab-tools">${button('dark','dark_mode',t('dark'),'tool',`aria-pressed="${dark}"`)}${button('reduce','motion_photos_off',t('reduce'),'tool',`aria-pressed="${reduced}"`)}<button class="tool" data-action="language" aria-label="${t('language')}" title="${t('language')}">${lang==='zh'?'EN':'中'}</button></div></header><div class="lab-layout"><aside class="design-nav"><span class="overline">${t('edition')}</span><h1>${t('lab')}</h1><p>${t('intro').replace('\n','<br/>')}</p>${Object.entries(themes).map(([key,value])=>themeNav(key,value)).join('')}<div class="nav-note">${icon('auto_awesome')}${t('note').replace('\n','<br/>')}</div></aside><main class="lab-stage"><header class="stage-caption"><div><strong>${scene==='compare'?t('overview'):item.number+' / '+l(item.name)}</strong><small>${scene==='compare'?t('edition'):l(item.description)}</small></div><div class="viewport-controls">${button('desktop','desktop_windows',t('desktop'),'',`aria-pressed="${device==='desktop'}"`)}${button('phone','smartphone',t('phone'),'',`aria-pressed="${device==='phone'}"`)}${scene!=='compare'?button('expand','open_in_full',t('expand'),''):''}</div></header><div class="preview-wrap">${scene==='compare'?compare():`<div class="preview ${device==='phone'?'phone-preview':''} ${reduced?'reduced':''}" data-theme="${theme}" data-dark="${dark}"><div class="app-shell">${rail()}${page==='chat'?chat():page==='square'?square():page==='contacts'?contacts():menu()}</div>${scene==='welcome'?welcome():''}</div>`}</div><footer class="stage-foot"><span>${t('local')}</span><span>${scene==='skin'?t('controls'):t('performance')}</span></footer></main></div>`;
-  const next=new URLSearchParams({theme,scene,device,lang,...(dark?{dark:'true'}:{})});
+  const preview=root.querySelector('.preview');
+  if(scene==='components')preview.innerHTML=componentGallery(theme,lang);
+  const componentTab=document.createElement('button');componentTab.dataset.scene='components';componentTab.textContent=componentLabel(lang);componentTab.setAttribute('aria-pressed',String(scene==='components'));
+  root.querySelector('[data-scene="compare"]').before(componentTab);
+  decorateBirthdayPreview(preview,theme,lang);
+  const next=new URLSearchParams({theme,scene,device,lang,...(recipient!=='阿言'?{name:recipient}:{}),...(dark?{dark:'true'}:{})});
   history.replaceState(null,'',`${location.pathname}?${next}`);
   if(scene==='welcome') {
     const welcomeEl = root.querySelector('.welcome');
@@ -109,7 +117,7 @@ root.addEventListener('click',async event=>{
     const welcomeEl=root.querySelector('.welcome');welcomeEl.classList.add('wishing');
     const feedback=document.createElement('section');feedback.className='wish-feedback';feedback.setAttribute('role','status');
     feedback.innerHTML=`<span class="wish-glyph" aria-hidden="true">${themes[theme].mark}</span><h3>${t('wishTitle')}</h3><p>${t('wishText')}</p><button data-action="wish-done">${t('wishDone')} ↗</button>`;
-    welcomeEl.append(feedback);feedback.querySelector('button').focus();
+    welcomeEl.append(feedback);feedback.querySelector('.wish-glyph').outerHTML=themeEmblem(theme);feedback.querySelector('button').focus();
   }else if(action==='wish-done'){wished=true;scene='skin';page='chat';render();toast(t('wishTitle'));}
 });
 root.addEventListener('submit',event=>{
@@ -130,4 +138,5 @@ document.addEventListener('keydown',event=>{
   }
 });
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')root.querySelector('.flecks')?.remove();});
+installBirthdayComponents(root,()=>({theme,lang}));
 render();
