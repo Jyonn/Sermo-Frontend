@@ -1,0 +1,30 @@
+{
+  "tool": "built-in imagegen",
+  "purpose": "Local birthday theme and welcome design review",
+  "assets": [
+    {
+      "key": "gilded",
+      "prompt": "Use case: stylized-concept. Asset type: premium birthday celebration artwork for a fullscreen welcome and matching social-app skin. Create a tall portrait art-directed still life: a spectacular sculptural ivory birthday cake with fine fluted cream, small molten-gold ribbon accents and slender lit candles, on a warm limestone pedestal, flowing deep oxblood silk ribbon curling gracefully through the foreground. Sophisticated champagne and burgundy birthday atmosphere, tactile fine-art luxury editorial photography with softly lit pearlescent surfaces, believable exquisite materials, restrained gallery-grade composition. Cake occupies lower middle 55 percent; generous warm ivory negative space in upper quarter, full object visible with breathing room. Subtle shadow architecture, warm candle glow, no giant balloons, no confetti noise, no people. No text, no lettering, no watermark, no interface. Portrait composition, exceptional production quality.",
+      "source": "/Users/jyonn/.codex/generated_images/01a18a29-f00c-7473-b30d-7bc48ec3b610/exec-49785860-c66b-49bc-9e81-62d76095e7b3.png",
+      "asset": "assets/gilded.webp"
+    },
+    {
+      "key": "orbital",
+      "prompt": "Use case: stylized-concept. Asset type: premium birthday fullscreen welcome art and matching social-app skin. A poetic celestial birthday still life in a deep midnight-blue observatory: a luminous small frosted moon-like birthday cake with several delicate glowing candles rests on a dark circular plinth; elegant thin champagne-metal orbital rings, a few exquisite translucent glass celestial spheres, a finely sparkling distant star field. Dreamlike yet physically crafted editorial set design, cinematic pool of light, precise rich midnight navy with muted silver and pale champagne highlights. Main installation in lower-middle 60 percent of tall portrait canvas, upper quarter calm dark negative space for actual UI lettering. Fine material detail, theatrical spaciousness, quiet wonder, no purple neon, no clutter, no humans, no text, no lettering, no UI, no watermark. All cake and candles fully visible.",
+      "source": "/Users/jyonn/.codex/generated_images/01a18a29-f00c-7473-b30d-7bc48ec3b610/exec-65449a64-6e61-4907-a9dc-171d03cd5b4a.png",
+      "asset": "assets/orbital.webp"
+    },
+    {
+      "key": "botanical",
+      "prompt": "Use case: stylized-concept. Asset type: premium birthday fullscreen welcome artwork and matching app skin. A finely hand-painted garden birthday still life, sophisticated contemporary botanical gouache with subtle oil-painted and handmade paper texture. A beautifully sculpted pale buttercream birthday cake, a few tiny lit candles, wild roses, delicate cosmos, small green leaves and pale apricot blossoms naturally frame the lower and side edges. Airy warm ecru paper backdrop, muted sage green, pale petal pink and rich botanical burgundy accents. Authored fine-art composition, joyful mature taste, not stock floral wedding invitation. Central cake lower middle 55 percent, calm upper quarter and open central breathing room for UI typography. Exceptionally beautiful brushwork and irregular organic shapes, no humans, no text or lettering, no interface, no watermarks. Tall portrait, entire cake visible.",
+      "source": "/Users/jyonn/.codex/generated_images/01a18a29-f00c-7473-b30d-7bc48ec3b610/exec-99e13b84-1fe2-4d50-af64-df2683626f05.png",
+      "asset": "assets/botanical.webp"
+    },
+    {
+      "key": "pop",
+      "prompt": "Use case: stylized-concept. Asset type: premium playful birthday fullscreen welcome artwork and coordinated social-app skin. An expertly art-directed contemporary 3D birthday still life with tactile matte clay and polished enamel: a boldly sculptural butter-yellow birthday cake on a coral plinth, expressive cobalt-blue curled ribbons, small rounded coral-red and apricot celebration shapes, several delicate lit candles. Warm creamy studio backdrop and one large cobalt sculptural arc framing the scene, playful graphic proportions, sophisticated collectible design-object aesthetic, crisp soft shadows, luscious materials and intentional negative space. The sculptural cake scene occupies lower-middle 60 percent of tall portrait canvas, top quarter mostly calm creamy negative space. Tasteful bold contrast, no rainbow gradient, no childish character, no humans, no text, no lettering, no UI, no watermark. Entire cake and candles visible, exquisite production detail.",
+      "source": "/Users/jyonn/.codex/generated_images/01a18a29-f00c-7473-b30d-7bc48ec3b610/exec-dbe04eb1-2cd1-45ce-a2be-76f19cc1e67b.png",
+      "asset": "assets/pop.webp"
+    }
+  ]
+}
