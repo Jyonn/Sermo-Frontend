@@ -47,7 +47,7 @@ export function TabPageHeader({ title, syncing = false, status, actions, seconda
   }, []);
 
   return (
-    <><BirthdayReminder/>
+    <>
     <div ref={headerRef} className={`tab-sticky-header${secondary ? " has-secondary" : ""}`}>
       <div className="page-toolbar">
         <div className="page-toolbar-title-status">
@@ -60,6 +60,7 @@ export function TabPageHeader({ title, syncing = false, status, actions, seconda
       </div>
       {secondary ? <div className="tab-sticky-header-secondary">{secondary}</div> : null}
     </div>
+    <BirthdayReminder/>
     </>
   );
 }

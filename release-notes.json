@@ -1,21 +1,17 @@
 {
-  "id": "2026.11.06.1",
+  "id": "2026.11.06.2",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "花间来日 · 生日祝福",
+      "title": "生日提醒位置优化",
       "items": [
-        "聊天等页面可设置生日，个人信息中也可管理；只保存月日，每 365 天可设置一次",
-        "生日当天享有个人专属的花间来日主题与全屏庆祝，不可转赠或分享",
-        "平台和空间管理员可分别致信，生日当天由本人拆阅"
+        "生日提醒移至页面标题下方，保持顶部导航清晰"
       ]
     },
     "en": {
-      "title": "A garden of tomorrows · Birthday wishes",
+      "title": "Better birthday reminder placement",
       "items": [
-        "Set your birthday from chat reminders or personal information; only month and day are stored, changeable every 365 days",
-        "Enjoy your personal garden birthday theme and full-screen celebration on the day, without sharing or transfers",
-        "Platform and space administrators can each leave a private letter to unseal on your birthday"
+        "Birthday reminders now appear below page headers to keep navigation clear"
       ]
     }
   }
