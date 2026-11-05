@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.05.1",
+  "id": "2026.11.05.2",
   "publishedAt": "2026-11-05",
   "locales": {
     "zh-CN": {
-      "title": "Monifa 验证码分享卡片",
+      "title": "科研任务与汇报协作",
       "items": [
-        "Monifa 分享链接支持验证码卡片，可复制、查看有效时间并手动刷新",
-        "过期验证码自动隐藏，分享撤销或网络异常时展示明确状态"
+        "科研概览聚焦成员、里程碑与介绍，任务与课题信息支持编辑",
+        "按日、周、月汇报并自动生成待办，支持答复标记、科研奖励与报销凭证"
       ]
     },
     "en": {
-      "title": "Monifa shared code cards",
+      "title": "Research tasks and reporting",
       "items": [
-        "Monifa share links display codes with copy, expiry and manual refresh controls",
-        "Expired codes are hidden, with clear states for revoked shares and network errors"
+        "Research overviews focus on members, milestones and introductions, with editable projects and tasks",
+        "Daily, weekly and monthly reports connect to to-dos, answer requests, research rewards and reimbursements"
       ]
     }
   }

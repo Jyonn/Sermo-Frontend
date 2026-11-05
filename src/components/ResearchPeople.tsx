@@ -16,9 +16,9 @@ export function ResearchMemberGrid({ members, onMember, onAdd, onRemove }: { mem
   </div>;
 }
 
-export function ResearchAssigneesField({ members }: { members: ResearchMember[] }) {
+export function ResearchAssigneesField({ members, initial=[] }: { members: ResearchMember[]; initial?:number[] }) {
   const { t } = useI18n();
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<number[]>(initial);
   const [open, setOpen] = useState(false);
   return <div className="research-assignees-field">
     <button className="research-assignees-trigger" type="button" onClick={() => setOpen(true)}><span><strong>{t('research.assignees')}</strong><small>{selected.length ? members.filter(member => selected.includes(member.id)).map(member => member.name).join(' · ') : t('research.selectMembers')}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>

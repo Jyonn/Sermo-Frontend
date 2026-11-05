@@ -2,10 +2,8 @@ import { useI18n } from '../lib/language';
 import type { ResearchProject, ResearchSummary } from '../lib/research';
 import {MemberAvatarStack} from './MemberAvatarStack';
 import { Markdown } from './ResearchMarkdown';
-import { ResearchTaskItem } from './ResearchTaskItem';
+import {ResearchTimeline,type ResearchMutation} from './ResearchWorkflow';
 import { QuietState } from './BoundaryState';
-import { SettingGroup, SettingRow } from './SettingRow';
-import { ResearchResourceSummary } from './ResearchResourceSummary';
 
 export function ResearchHome({ projects, selected, open, create }: { projects: ResearchSummary[]; selected?: number|null; open: (id: number) => void; create: () => void }) {
   const { t } = useI18n();
@@ -21,20 +19,11 @@ export function ResearchHome({ projects, selected, open, create }: { projects: R
   </>;
 }
 
-export function ResearchOverview({ project, tasks, chat, calendar, members, addTask, canEdit, resources, resourceRefresh=0 }: { project: ResearchProject; tasks: (id?: string) => void; chat:()=>void; calendar: () => void; members: () => void; addTask: () => void; canEdit: boolean; resources:()=>void; resourceRefresh?:number }) {
-  const { t } = useI18n();
-  const done = project.tasks.filter(item => item.status === 'archived').length;
-  const active = project.tasks.filter(item => item.status !== 'archived');
+export function ResearchOverview({project,chat,members,canEdit,mutate}:{project:ResearchProject;chat:()=>void;members:()=>void;canEdit:boolean;mutate:ResearchMutation}){
+  const {t}=useI18n();
   return <div className="research-overview">
-    <section className="research-project-intro">
-      <div className="research-team-bar"><MemberAvatarStack className="research-member-stack" members={project.members.map(member=>({id:member.id,name:member.name,uri:member.avatar_uri,cacheKey:member.avatar_cache_key}))} size={38} label={project.members.length} onClick={members} ariaLabel={`${t('research.team')} · ${project.members.length}`}/><button className="research-team-chat" onClick={chat} aria-label={t('research.group')}><span className="material-symbols-outlined" aria-hidden="true">forum</span><span>{t('research.groupShort')}</span><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div>
-      <div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState icon="edit_note" title={t('research.noDescription')} description={t('research.descriptionHint')}/>}</div>
-    </section>
-    <div className="research-overview-columns"><section className="research-overview-tasks"><header className="research-section-heading"><h2>{t('research.tasks')}</h2><span className="research-muted">{done} / {project.tasks.length}</span><button className="ghost-button" onClick={() => tasks()}>{t('research.viewAll')}<span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></header>
-      <progress className="research-completion" value={done} max={project.tasks.length || 1} aria-label={t('research.tasks')}/>
-      {active.slice(0, 4).map(item => <ResearchTaskItem key={item.id} task={item} members={project.members} onClick={()=>tasks(item.id)}/>)}
-      {!active.length && <QuietState icon="assignment_turned_in" title={t(project.tasks.length ? 'research.allTasksDone' : 'research.noTasks')} description={t('research.taskEmptyHint')}/>}
-      {canEdit && <button className="ghost-button research-add-task" onClick={addTask}><span className="material-symbols-outlined" aria-hidden="true">add</span>{t('research.addTask')}</button>}
-    </section><aside className="research-overview-aside"><ResearchResourceSummary projectId={project.id} refresh={resourceRefresh} onOpen={resources}/><SettingGroup><SettingRow title={t('research.calendar')} description={t('research.calendarShortcut')} icon={<span className="material-symbols-outlined">calendar_month</span>} onClick={calendar}/></SettingGroup></aside></div>
+    <section className="research-team-bar"><MemberAvatarStack className="research-member-stack" members={project.members.map(member=>({id:member.id,name:member.name,uri:member.avatar_uri,cacheKey:member.avatar_cache_key}))} size={38} label={project.members.length} onClick={members} ariaLabel={t('research.team')}/><button className="research-team-chat" onClick={chat}><span className="material-symbols-outlined" aria-hidden="true">forum</span>{t('research.groupShort')}</button></section>
+    <ResearchTimeline project={project} editable={canEdit} mutate={mutate}/>
+    <section className="research-flow-section"><header><h2>{t('research.description')}</h2>{canEdit&&<button className="ghost-button" onClick={members}>{t('researchFlow.edit')}</button>}</header><div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState title={t('research.noDescription')}/>}</div></section>
   </div>;
 }

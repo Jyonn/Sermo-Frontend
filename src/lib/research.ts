@@ -1,6 +1,13 @@
-export type ResearchTask = {id:string;title:string;body:string;start:string;end:string|null;assignees:number[];status:'active'|'archived';progress:Array<{id:string;user_id:number;body:string;created_at:string;reply_to?:string}>};
+export type ReportKind='daily'|'weekly'|'monthly';
+export type ReportRule={reward_type?:string;amount:number};
+export type ResearchProgress={id:string;user_id:number;body:string;created_at:string;reply_to?:string;report_kind?:ReportKind;period_start?:string;ai_slots?:number;thinking_slots?:number;waive_reward?:boolean;response_to?:number;resolved_at?:string};
+export type ResearchTask = {id:string;title:string;body:string;start:string;end:string|null;assignees:number[];status:'active'|'archived';reporting?:Partial<Record<ReportKind,ReportRule>>;progress:ResearchProgress[]};
+export type ResearchMilestone={id:string;date:string;title:string;body:string};
+export type ResearchReward={id:string;name:string;description:string};
+export type ResearchTodo={id:string;title:string;kind:ReportKind|'response'|'reimbursement';task_id?:string;body?:string;progress_id?:string;period_start?:string};
+export type ResearchWorkflow={report_periods:Record<ReportKind,string>;reportable_task_ids:string[];milestones:ResearchMilestone[];reward_types:ResearchReward[];todos:ResearchTodo[];ledger:Array<{id:string;user_id:number;reward_type:string;amount:number;reason:string;created_at:string}>;reimbursements:Array<{id:string;user_id:number;title:string;amount:string;notes:string;evidence:number[];status:string;reviewer_note?:string;created_at:string}>};
 export type ResearchSummary={id:number;chat_id?:number;title:string;status:'active'|'archived';start:string;end:string|null};
 export type ResearchMember={id:number;name:string;owner:boolean;avatar_uri?:string;avatar_cache_key?:string;avatar_frame_style?:import('../types').AvatarFrameStyle};
-export type ResearchProject=ResearchSummary&{chat_id:number;description:string;revision:number;members:ResearchMember[];tasks:ResearchTask[];pending_invitee_ids?:number[]};
+export type ResearchProject=ResearchSummary&{chat_id:number;description:string;revision:number;members:ResearchMember[];tasks:ResearchTask[];pending_invitee_ids?:number[];workflow?:ResearchWorkflow};
 export type ResearchResource={id:number;parent_id:number|null;kind:'folder'|'file'|'link';name:string;url?:string|null;size:number|null;creator_id:number;created_at:string;can_delete:boolean};
 export type ResearchResourceSpace={items:ResearchResource[];writable:boolean};
