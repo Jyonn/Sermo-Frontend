@@ -1,3 +1,4 @@
+import {defaultDateRange} from '../lib/calendarDate';
 import { useState } from 'react';
 import { InputDialog } from './InputDialog';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -13,7 +14,7 @@ export function ResearchCreateFlow({busy,error,onClose,onCreate}:{
   const {t}=useI18n();
   const [step,setStep]=useState<'name'|'dates'|'description'>('name');
   const [title,setTitle]=useState(''),[description,setDescription]=useState('');
-  const [range,setRange]=useState<ResearchDateRange>({from:new Intl.DateTimeFormat('sv-SE').format(new Date()),to:''});
+  const [range,setRange]=useState<ResearchDateRange>(defaultDateRange);
   async function create(description=''){
     if(busy||!title.trim())return;
     await onCreate({title:title.trim(),start:range.from,end:range.to||null,description});
@@ -23,6 +24,6 @@ export function ResearchCreateFlow({busy,error,onClose,onCreate}:{
     <ConfirmDialog open={step==='dates'} title={t('research.createDates')} description={title} cancelLabel={t('common.back')} confirmLabel={t('common.next')} onClose={()=>setStep('name')} onConfirm={()=>setStep('description')}>
       <div className="research-create-dates"><DateRangeField value={range} onChange={setRange}/></div>
     </ConfirmDialog>
-    {step==='description'&&<MarkdownEditorDialog title={t('research.description')} initialValue={description} onChange={setDescription} summary={`${title} · ${range.from} — ${range.to||t('square.distantFuture')}`} busy={busy} error={error} confirmLabel={t('research.create')} skipLabel={t('research.skipDescription')} onClose={()=>setStep('dates')} onSave={value=>void create(value)} onSkip={()=>void create()}/>}
+    {step==='description'&&<MarkdownEditorDialog title={t('research.description')} initialValue={description} onChange={setDescription} summary={`${title} · ${range.from} — ${range.to||t('calendarDate.unset')}`} busy={busy} error={error} confirmLabel={t('research.create')} skipLabel={t('research.skipDescription')} onClose={()=>setStep('dates')} onSave={value=>void create(value)} onSkip={()=>void create()}/>}
   </>;
 }

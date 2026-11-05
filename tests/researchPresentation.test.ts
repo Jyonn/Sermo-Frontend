@@ -20,9 +20,9 @@ test('research project panels preserve a real embedded conversation and onboardi
 
 test('calendar consent is global and explicit, and empty views reuse the same component', () => {
   const calendar=source('components/ResearchCalendar.tsx');
-  assert.match(calendar,/default_busy:defaultBusy/);
-  assert.match(calendar,/value.status==='active'&&!value.policy_configured/);
-  assert.match(calendar,/research.finePermissions/);
+  assert.match(calendar,/<ChronellePermissionsDrawer/);
+  assert.match(calendar,/<ChronellePluginDialog/);
+  assert.match(source('components/ChronellePermissionsDrawer.tsx'),/api.saveChronellePermissions\(policy\)/);
   assert.match(source('pages/SquarePage.tsx'),/<QuietState icon="forum" title=\{t\("square.noComments"\)\}/);
   assert.match(source('components/SquareExperience.css'),/grid-template-columns:minmax\(0,1fr\) 24px minmax\(0,1fr\)/);
 });
@@ -39,15 +39,15 @@ test('project details reuse chat sections and shared settings groups', () => {
   assert.match(source('pages/ResearchPage.tsx'), /limit=\{1\} allowEmpty=\{false\}/);
 });
 
-test('research and Square share date summaries and date wheels', () => {
+test('research and Square share date summaries and continuous calendars', () => {
   assert.match(source('components/SquareSearchDialog.tsx'), /<DateRangeSummary/);
   const range = source('components/DateRangeField.tsx');
-  assert.match(range, /<DateWheelPicker/);
+  assert.match(range, /<CalendarDatePicker/);
   assert.match(range, /name="start" value=\{range.from\}/);
   assert.match(range, /name="end" value=\{range.to\}/);
   assert.match(range, /next.to < next.from/);
   const page = source('pages/ResearchPage.tsx');
-  assert.match(page, /<DateRangeField\/>/);
+  assert.match(source('components/ResearchWorkflow.tsx'), /<DateRangeField value=/);
   assert.doesNotMatch(page, /type="date"/);
 });
 
@@ -104,7 +104,7 @@ test('Markdown tools are single-line, uniform and use a floating heading menu', 
   assert.match(css, /flex:0 0 36px/);
   assert.match(source('components/ResearchPeople.tsx'), /chat-detail-member-avatar-add chat-detail-member-avatar-remove/);
   assert.match(source('pages/ResearchPage.tsx'), /<HeaderIconButton/);
-  assert.match(source('components/ResearchWorkspace.tsx'), /<ResearchTaskItem/);
+  assert.match(source('pages/ResearchPage.tsx'), /<ResearchTaskItem/);
 });
 
 test('research preserves its root panel while nested drawers float, and shares Square comments', () => {

@@ -5,15 +5,15 @@
     "zh-CN": {
       "title": "科研任务与汇报协作",
       "items": [
-        "科研概览聚焦成员、里程碑与介绍，任务与课题信息支持编辑",
-        "按日、周、月汇报并自动生成待办，支持答复标记、科研奖励与报销凭证"
+        "科研概览与任务操作更简洁，奖励和报销使用独立下级页面",
+        "日期统一使用连续月历，支持 1900–2099 年与年月跳转，新建课题及任务默认一个月"
       ]
     },
     "en": {
       "title": "Research tasks and reporting",
       "items": [
-        "Research overviews focus on members, milestones and introductions, with editable projects and tasks",
-        "Daily, weekly and monthly reports connect to to-dos, answer requests, research rewards and reimbursements"
+        "Cleaner research overviews and task controls, with dedicated reward and reimbursement screens",
+        "A shared scrolling calendar covers 1900–2099 with month jumps and one-month defaults for new projects and tasks"
       ]
     }
   }

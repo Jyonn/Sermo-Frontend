@@ -4,7 +4,7 @@ import { useI18n } from "../lib/language";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
 import "./SquareExperience.css";
-import { DateWheelPicker } from "./DateWheelPicker";
+import { CalendarDatePicker } from "./CalendarDatePicker";
 import { DateRangeSummary } from "./DateRangeField";
 
 export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, onClear }: {
@@ -18,7 +18,7 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
   const [editing, setEditing] = useState<"from" | "to" | null>(null);
   const [date, setDate] = useState("");
   useEffect(() => {
-    if (editing) root.current?.querySelector<HTMLElement>('[role="listbox"]')?.focus();
+    if (editing) root.current?.querySelector<HTMLElement>('.calendar-date-months')?.focus();
   }, [editing]);
   useEffect(() => { if (open) { setDraft({ keyword, from, to }); setError(false); setEditing(null); } }, [open, keyword, from, to]);
   useBodyScrollLock(open);
@@ -35,9 +35,9 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
       <header><h2>{t(editing ? editing === "from" ? "square.dateFrom" : "square.dateTo" : "square.search")}</h2><button type="button" className="square-search-close" aria-label={t(editing ? "common.back" : "common.close")} onClick={() => editing ? setEditing(null) : onClose()}><span className="material-symbols-outlined" aria-hidden="true">{editing ? "arrow_back" : "close"}</span></button></header>
       {editing ? <div className="square-date-step">
         <p className="square-date-selected">{format(date, true)}</p>
-        <DateWheelPicker value={date} onChange={(value) => { setDate(value); setError(false); }} />
+        <CalendarDatePicker value={date} onChange={(value) => { setDate(value); setError(false); }} />
         {error ? <p role="alert">{t("square.dateRangeInvalid")}</p> : null}
-        <footer><button type="button" className="ghost-button" onClick={() => { setDraft({ ...draft, [editing]: "" }); setEditing(null); setError(false); }}>{t(editing === "from" ? "square.distantPast" : "square.distantFuture")}</button><button type="button" className="button" onClick={() => {
+        <footer><button type="button" className="ghost-button" onClick={() => { setDraft({ ...draft, [editing]: "" }); setEditing(null); setError(false); }}>{t('common.clear')}</button><button type="button" className="button" onClick={() => {
           const next = { ...draft, [editing]: date };
           if (next.from && next.to && next.from > next.to) { setError(true); return; }
           setDraft(next); setEditing(null); setError(false);

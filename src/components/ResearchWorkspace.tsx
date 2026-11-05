@@ -24,6 +24,6 @@ export function ResearchOverview({project,chat,members,canEdit,mutate}:{project:
   return <div className="research-overview">
     <section className="research-team-bar"><MemberAvatarStack className="research-member-stack" members={project.members.map(member=>({id:member.id,name:member.name,uri:member.avatar_uri,cacheKey:member.avatar_cache_key}))} size={38} label={project.members.length} onClick={members} ariaLabel={t('research.team')}/><button className="research-team-chat" onClick={chat}><span className="material-symbols-outlined" aria-hidden="true">forum</span>{t('research.groupShort')}</button></section>
     <ResearchTimeline project={project} editable={canEdit} mutate={mutate}/>
-    <section className="research-flow-section"><header><h2>{t('research.description')}</h2>{canEdit&&<button className="ghost-button" onClick={members}>{t('researchFlow.edit')}</button>}</header><div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState title={t('research.noDescription')}/>}</div></section>
+    <section className="research-flow-section"><div className="research-description">{project.description?<Markdown body={project.description}/>:<QuietState title={t('research.noDescription')}/>}</div></section>
   </div>;
 }

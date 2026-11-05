@@ -1,7 +1,8 @@
+import {defaultDateRange} from '../lib/calendarDate';
 import { useState } from 'react';
 import { useI18n } from '../lib/language';
 import { BottomSheet } from './BottomSheet';
-import { DateWheelPicker } from './DateWheelPicker';
+import { CalendarDatePicker } from './CalendarDatePicker';
 import './SquareExperience.css';
 import './SelectionSheet.css';
 
@@ -18,8 +19,8 @@ export function DateRangeSummary({ from, to, onEdit, legend, startLabel, endLabe
       const value = side === 'from' ? from : to;
       return <button type="button" className="square-date-result" key={side} onClick={() => onEdit(side)}>
         <span>{side === 'from' ? startLabel || t('square.dateFrom') : endLabel || t('square.dateTo')}</span>
-        <strong>{value ? format(value) : t(side === 'from' ? 'square.distantPast' : 'square.distantFuture')}</strong>
-        <small>{value ? format(value, true) : t('square.unboundedDate')}</small>
+        <strong>{value ? format(value) : t('calendarDate.unset')}</strong>
+        <small>{value ? format(value, true) : t('calendarDate.select')}</small>
       </button>;
     })}
     <span className="square-date-arrow material-symbols-outlined" aria-hidden="true">chevron_right</span>
@@ -30,7 +31,7 @@ export type ResearchDateRange = { from:string; to:string };
 
 export function DateRangeField({value,onChange}:{value?:ResearchDateRange;onChange?:(value:ResearchDateRange)=>void} = {}) {
   const { t } = useI18n();
-  const [local, setLocal] = useState({ from: new Intl.DateTimeFormat('sv-SE').format(new Date()), to: '' });
+  const [local, setLocal] = useState(defaultDateRange);
   const range=value??local;
   const setRange=(next:ResearchDateRange|((current:ResearchDateRange)=>ResearchDateRange))=>{
     const result=typeof next==='function'?next(range):next;
@@ -45,9 +46,9 @@ export function DateRangeField({value,onChange}:{value?:ResearchDateRange;onChan
     }}/>
     <input type="hidden" name="start" value={range.from}/><input type="hidden" name="end" value={range.to}/>
     <BottomSheet open={side !== null} className="selection-sheet" title={t(side === 'from' ? 'research.start' : 'research.end')} onClose={() => setSide(null)}>
-      <div className="research-date-editor"><DateWheelPicker value={draft} onChange={value => { setDraft(value); setError(false); }}/>
+      <div className="research-date-editor"><CalendarDatePicker value={draft} onChange={value => { setDraft(value); setError(false); }}/>
         {error && <p className="research-error" role="alert">{t('square.dateRangeInvalid')}</p>}
-        <footer>{side === 'to' && <button type="button" className="ghost-button" onClick={() => { setRange(current => ({ ...current, to: '' })); setSide(null); }}>{t('square.distantFuture')}</button>}
+        <footer>
           <button type="button" className="button" onClick={() => {
             if (!side) return;
             const next = { ...range, [side]: draft };
