@@ -1,11 +1,12 @@
 import {useState, type FormEvent} from 'react';
 import type {ReportKind, ResearchMilestone, ResearchAward, ResearchReward, ResearchProject, ResearchTask, ResearchTodo} from '../lib/research';
 import {useI18n, type TranslationKey} from '../lib/language';
+import {DurationPickerField} from './DurationPickerField';
 import {FormSelectField} from './FormSelectField';
 import {ResearchAwardForm} from './ResearchAwardForm';
 import {ResearchRewardEditor} from './ResearchRewardEditor';
 import {SideDrawer} from './SideDrawer';
-import {SettingGroup, SettingRow, SelectControl} from './SettingRow';
+import {SettingGroup, SettingRow, SettingSwitch, SelectControl} from './SettingRow';
 import {QuietState} from './BoundaryState';
 import {MarkdownInput} from './ResearchMarkdownInput';
 import {Markdown} from './ResearchMarkdown';
@@ -68,9 +69,8 @@ export function ResearchReportForm({project,task,kind,busy,onSave}:{project:Rese
   const {t}=useI18n();const [body,setBody]=useState(''),[waive,setWaive]=useState(false),[ai,setAi]=useState('0'),[thinking,setThinking]=useState('0'),[response,setResponse]=useState(false);
   const owner=project.members.find(m=>m.owner),rule=task.reporting?.[kind];
   const rewards=project.workflow?.reward_types||defaultResearchRewards;
-  const timeOptions=Array.from({length:49},(_,n)=>({value:String(n),label:`${n/2} ${t('researchFlow.hours')}`}));
-  return <form className="research-form" onSubmit={event=>{event.preventDefault();void onSave({action:'progress',task_id:task.id,body,report_kind:kind,ai_slots:Number(ai),thinking_slots:Number(thinking),waive_reward:waive,...(response&&owner?{response_to:owner.id}:{})});}}><p className="research-flow-hint">{task.title}</p><MarkdownInput value={body} onChange={setBody} required/>{kind==='daily'&&<div className="research-report-times"><SelectControl label={t('researchFlow.aiTime')} value={ai} options={timeOptions} onChange={setAi}/><SelectControl label={t('researchFlow.thinkingTime')} value={thinking} options={timeOptions} onChange={setThinking}/></div>}{Number(ai)+Number(thinking)>48&&<p role="alert">{t('researchFlow.timeLimit')}</p>}
-    {!!rule?.amount&&<div className="research-report-reward"><span>{t('researchFlow.earned',{amount:rule.amount,name:rewards.find(r=>r.id===rule.reward_type)?.name||t(`researchFlow.${rule.reward_type||'silver'}` as TranslationKey)})}</span><label><input type="checkbox" checked={waive} onChange={event=>setWaive(event.target.checked)}/>{t('researchFlow.waive')}</label></div>}<label className="research-flow-check"><input type="checkbox" checked={response} onChange={event=>setResponse(event.target.checked)}/>{t('researchFlow.askMentor')}</label><button className="button" disabled={busy||!body.trim()||Number(ai)+Number(thinking)>48}>{t(busy?'common.loading':'researchFlow.submitReport')}</button>
+  return <form className="research-form research-report-form" onSubmit={event=>{event.preventDefault();void onSave({action:'progress',task_id:task.id,body,report_kind:kind,ai_slots:Number(ai),thinking_slots:Number(thinking),waive_reward:waive,...(response&&owner?{response_to:owner.id}:{})});}}><p className="research-flow-hint">{task.title}</p><MarkdownInput value={body} onChange={setBody} required/>{kind==='daily'&&<div className="research-report-times"><DurationPickerField label={t('researchFlow.aiTime')} value={Number(ai)} onChange={value=>setAi(String(value))} disabled={busy}/><DurationPickerField label={t('researchFlow.thinkingTime')} value={Number(thinking)} onChange={value=>setThinking(String(value))} disabled={busy}/></div>}{Number(ai)+Number(thinking)>48&&<p role="alert">{t('researchFlow.timeLimit')}</p>}
+    {!!rule?.amount&&<div className="research-report-reward"><span>{t('researchFlow.earned',{amount:rule.amount,name:rewards.find(r=>r.id===rule.reward_type)?.name||t(`researchFlow.${rule.reward_type||'silver'}` as TranslationKey)})}</span><SettingRow title={t('researchFlow.waive')} trailing={<SettingSwitch label={t('researchFlow.waive')} checked={waive} onChange={setWaive} disabled={busy}/>}/></div>}<SettingRow title={t('researchFlow.askMentor')} trailing={<SettingSwitch label={t('researchFlow.askMentor')} checked={response} onChange={setResponse} disabled={busy}/>}/><button className="button" disabled={busy||!body.trim()||Number(ai)+Number(thinking)>48}>{t(busy?'common.loading':'researchFlow.submitReport')}</button>
   </form>;
 }
 

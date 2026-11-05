@@ -1,4 +1,8 @@
 {
+  "researchFlow.hourShort": "小时",
+  "researchFlow.minuteShort": "分钟",
+  "researchFlow.halfHourHint": "以半小时为单位",
+  "researchFlow.discussionDate": "按日期查看汇报与讨论",
   "researchFlow.frequency.none": "不要求",
   "researchFlow.frequency.daily": "日报",
   "researchFlow.frequency.weekly": "周报",

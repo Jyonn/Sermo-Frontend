@@ -1,4 +1,8 @@
 {
+  "researchFlow.hourShort": "hours",
+  "researchFlow.minuteShort": "minutes",
+  "researchFlow.halfHourHint": "30-minute increments",
+  "researchFlow.discussionDate": "Filter reports and discussions by date",
   "researchFlow.frequency.none": "None",
   "researchFlow.frequency.daily": "Daily",
   "researchFlow.frequency.weekly": "Weekly",
