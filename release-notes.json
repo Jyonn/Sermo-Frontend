@@ -1,25 +1,17 @@
 {
-  "id": "2026.11.06.7",
+  "id": "2026.11.06.8",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "花间来日 · 纸间花笺",
+      "title": "小哀语音气泡样式修复",
       "items": [
-        "保留生日欢迎，将油画花园、奶油纸面与缎带统一用于普通弹窗、面板、抽屉和按钮",
-        "重新整理聊天、通讯与菜单的生日外观，适配手机、桌面与深色模式",
-        "生日概览、设置与生日信分层展示，手机标题栏恢复滚动后的通栏背景",
-        "修复花卉贴图边缘断线，常用组件补充蜡烛与礼物细节",
-        "认证用户生日当天展示冬日生日头像装饰与会话生日标识，聊天底色沿用原有外观"
+        "小哀语音气泡的播放按钮、波形与转文字结果统一使用气泡主题配色，适配深浅模式"
       ]
     },
     "en": {
-      "title": "A garden of tomorrows · Painted stationery",
+      "title": "Ai voice bubble styling fix",
       "items": [
-        "Preserved the welcome and brought its painted garden, cream paper and ribbons to ordinary dialogs, sheets, drawers and buttons",
-        "Refined birthday styling across Chats, Contacts and Menu for mobile, desktop and dark mode",
-        "Separated birthday overview, date settings and letters, with full-width mobile headers appearing on scroll",
-        "Removed hard artwork edges and added candle and gift details to common surfaces",
-        "Verified members receive winter birthday avatar accents and conversation markers, while chat surfaces retain their original appearance"
+        "Ai voice playback, waveforms and transcripts now match the bubble palette in light and dark modes"
       ]
     }
   }
