@@ -1,5 +1,12 @@
 {
   "birthday.title": "Birthday",
+  "birthday.componentPreview": "Birthday components",
+  "birthday.toggleTheme": "Toggle light / dark",
+  "birthday.preview.sheet": "Bottom sheet",
+  "birthday.preview.drawer": "Drawer",
+  "birthday.preview.modal": "Modal",
+  "birthday.preview.direct": "View private chat",
+  "birthday.preview.group": "View group chat",
   "birthday.openWishes": "Happy birthday! Open your wishes",
   "birthday.set": "Set birthday",
   "birthday.savedLetters": "Your birthday letters",

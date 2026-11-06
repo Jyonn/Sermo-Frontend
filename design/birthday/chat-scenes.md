@@ -9,6 +9,7 @@ Use the isolated preview backend and frontend at `http://localhost:5190`:
 - `/api/__birthday__/direct`: enter the birthday recipient's private conversation.
 - `/api/__birthday__/group`: enter the four-person group.
 - `/api/__birthday__/celebrate`: replay the welcome and two administrator letters.
+- `/design/birthday/components.html`: shared Tab, Sheet, Drawer and Modal with a light/dark switch and real button styles.
 
 All participants and messages are fictional, in the SQLite preview database. The entry helpers log into these local test accounts only. They are outside production routing. Both chats contain 24 messages and an inline reply, allowing long-scroll, avatar, multiline, composer and detail-panel checks. Sending stays within the isolated local database.
 

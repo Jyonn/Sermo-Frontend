@@ -1,5 +1,12 @@
 {
   "birthday.title": "生日",
+  "birthday.componentPreview": "生日组件预览",
+  "birthday.toggleTheme": "切换明暗",
+  "birthday.preview.sheet": "底部面板",
+  "birthday.preview.drawer": "侧边抽屉",
+  "birthday.preview.modal": "模态框",
+  "birthday.preview.direct": "查看私聊场景",
+  "birthday.preview.group": "查看群聊场景",
   "birthday.openWishes": "生日快乐，点此查看生日祝福",
   "birthday.set": "设置生日",
   "birthday.savedLetters": "收好的生日信",
