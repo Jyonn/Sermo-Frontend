@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.06.4",
+  "id": "2026.11.06.5",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "更简洁的生日设置",
+      "title": "更完整的生日庆祝",
       "items": [
-        "精简生日设置弹窗，修复生日提醒与会话列表重叠"
+        "生日欢迎补回飘落彩带，许愿后可继续进入友间，并精简说明"
       ]
     },
     "en": {
-      "title": "Simpler birthday settings",
+      "title": "A fuller birthday celebration",
       "items": [
-        "Simplified the birthday dialog and fixed reminders overlapping conversations"
+        "Restored birthday ribbons, completed the wish-to-enter flow and removed extra explanatory copy"
       ]
     }
   }
