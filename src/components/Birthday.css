@@ -1,7 +1,13 @@
 .birthday-editor,.birthday-letter-editor { display: grid; gap: 20px; padding: 8px 0 24px; }
 .birthday-banner-sentence { display: block; }
 .birthday-banner-sentence strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.birthday-date-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; }
+.birthday-date-dialog { width: min(390px, calc(100vw - 56px)); overflow: visible; }
+.birthday-panel-body { max-height: min(52dvh, 380px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding: 4px 0; gap: 12px; }
+.birthday-summary-date { font: 500 32px/1.4 'Songti SC',serif; color: var(--text-primary); padding: 8px 0 16px; }
+.birthday-overview-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border: 0; border-top: 1px solid var(--line-soft); color: var(--text-primary); background: transparent; font: inherit; font-size: 13px; text-align: start; }
+.birthday-overview-row>span { flex: 1; }
+.birthday-overview-row svg { width: 17px; height: 17px; color: var(--text-muted); }
+.birthday-overview-row small { color: var(--text-muted); }
 .birthday-date-wheels { margin: 0; border: 0; min-width: 0; padding: 8px 0; }
 .birthday-date-wheels .duration-wheel-scroll { height: 220px; padding-block: 88px; }
 .birthday-date-wheels .duration-wheel::after { top: 116px; }
@@ -56,8 +62,8 @@
 .birthday-private-note { font-size: 10px; line-height: 1.9; color: #9a9f8c; margin-top: 20px; }
 .birthday-welcome-close { position: fixed; z-index: 4; top: max(24px,env(safe-area-inset-top)); right: max(24px,env(safe-area-inset-right)); display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #85916f3b; border-radius: 50%; background: #fcf9eddd; color: #34473b; }
 .birthday-welcome-close .material-symbols-outlined { font-size: 20px; }
-.birthday-open-letter { background: var(--bg-surface); max-height: min(80dvh,800px); overflow: auto; }
-.birthday-letter-paper { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2.1; color: var(--text-primary); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 22px 0; margin: 12px 0 20px; font-size: 14px; }
+.birthday-open-letter { background: var(--bg-surface); overflow: visible; }
+.birthday-letter-paper { max-height: min(52dvh, 480px); overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2.1; color: var(--text-primary); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 22px 0; margin: 12px 0 20px; font-size: 14px; }
 @keyframes birthday-art-in { from { opacity: .5; transform: scale(1.025); } to { opacity: 1; transform: scale(1); } }
 @media (max-width: 720px) {
   .birthday-welcome { grid-template-columns: 1fr; grid-template-rows: minmax(230px,40svh) auto; }

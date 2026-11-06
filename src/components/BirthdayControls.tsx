@@ -17,6 +17,8 @@ export function BirthdayEditor({open,onClose}:{open:boolean;onClose:()=>void}){
   const {t}=useI18n();const birthday=useBirthday();
   const [month,setMonth]=useState('1');const [day,setDay]=useState('1');
   const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+  const [page,setPage]=useState<'overview'|'edit'|'letters'>('overview');
+  useEffect(()=>{if(open)setPage('overview');},[open]);
   const [letters,setLetters]=useState<BirthdayEnvelope[]>([]);const [letterId,setLetterId]=useState<number|null>(null);
   useEffect(()=>{if(!open)return;setError('');setMonth(String(birthday.status?.month??new Date().getMonth()+1));setDay(String(birthday.status?.day??new Date().getDate()));},[open,birthday.status?.month,birthday.status?.day]);
   useEffect(()=>{if(open)void birthday.refresh();},[open]);
@@ -30,22 +32,25 @@ export function BirthdayEditor({open,onClose}:{open:boolean;onClose:()=>void}){
   const editable=birthday.status?.can_change===true;
   const save=async()=>{
     if(!editable||busy)return;setBusy(true);setError('');
-    try{const value=await api.setBirthday(Number(month),normalizedDay);birthday.update(value);showToast(t('birthday.saved'));onClose();}
+    try{const value=await api.setBirthday(Number(month),normalizedDay);birthday.update(value);showToast(t('birthday.saved'));setPage('overview');}
     catch(cause){setError(t(cause instanceof ApiError&&cause.status===403?'birthday.locked':'birthday.saveFailed'));void birthday.refresh();}
     finally{setBusy(false);}
   };
-  return <ConfirmDialog open={open} onClose={onClose} title={t('birthday.set')} className="birthday-date-dialog" busy={busy} confirmDisabled={!editable||!birthday.status} confirmLabel={t('common.confirm')} onConfirm={()=>void save()}>
-    <div className="birthday-editor">
+  const back=()=>page==='overview'?onClose():setPage('overview');
+  return <><ConfirmDialog open={open&&letterId===null} onClose={back} title={t(page==='edit'?'birthday.set':page==='letters'?'birthday.savedLetters':'birthday.title')} className="birthday-date-dialog" busy={busy} confirmDisabled={page==='edit'&&(!editable||!birthday.status)} showCancelButton={page==='edit'} cancelLabel={t('common.back')} confirmLabel={t(page==='edit'?'common.confirm':'common.done')} onConfirm={()=>page==='edit'?void save():back()}>
+    <div className="birthday-editor birthday-panel-body">
       {!birthday.status?<FeedbackState tone={birthday.loading?'loading':'error'} title={t(birthday.loading?'common.loading':'birthday.loadFailed')} action={!birthday.loading?<button className="ghost-button" onClick={()=>void birthday.refresh()}>{t('common.retry')}</button>:undefined}/>:<>
-      <fieldset className="birthday-date-wheels duration-picker-wheels" disabled={!editable||busy}><DurationWheel label={t('birthday.month')} values={Array.from({length:12},(_,i)=>i+1)} value={Number(month)} onChange={value=>{setMonth(String(value));setDay(String(Math.min(Number(day),new Date(2000,value,0).getDate())));}}/><DurationWheel label={t('birthday.day')} values={Array.from({length:count},(_,i)=>i+1)} value={normalizedDay} onChange={value=>setDay(String(value))}/></fieldset>
-      {!editable&&birthday.status.available_at?<p className="birthday-lock-note">{t('birthday.nextChange',{date:new Date(birthday.status.available_at*1000).toLocaleString(getActiveLocale(),{timeZone:'Asia/Shanghai',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})})}</p>:null}
-      {error?<p className="error-text" role="alert">{error}</p>:null}
-      {birthday.status.active?<button className="ghost-button birthday-save" onClick={()=>{onClose();birthday.openWelcome();}}>{t('birthday.reopen')}</button>:null}
+      {page==='edit'?<><fieldset className="birthday-date-wheels duration-picker-wheels" disabled={!editable||busy}><DurationWheel label={t('birthday.month')} values={Array.from({length:12},(_,i)=>i+1)} value={Number(month)} onChange={value=>{if(!editable||busy)return;setMonth(String(value));setDay(String(Math.min(Number(day),new Date(2000,value,0).getDate())));}}/><DurationWheel label={t('birthday.day')} values={Array.from({length:count},(_,i)=>i+1)} value={normalizedDay} onChange={value=>{if(editable&&!busy)setDay(String(value));}}/></fieldset>{error?<p className="error-text" role="alert">{error}</p>:null}</>:null}
+      {page==='overview'?<>
+        <div className="birthday-summary-date">{birthday.status.month&&birthday.status.day?birthdayLabel(birthday.status.month,birthday.status.day):t('birthday.unset')}</div>
+        {editable?<button type="button" className="birthday-overview-row" onClick={()=>{setError('');setPage('edit');}}><span>{t('birthday.set')}</span><ForwardArrowIcon/></button>:birthday.status.available_at?<p className="birthday-lock-note">{t('birthday.nextChange',{date:new Date(birthday.status.available_at*1000).toLocaleDateString(getActiveLocale(),{timeZone:'Asia/Shanghai',year:'numeric',month:'long',day:'numeric'})})}</p>:null}
+        {birthday.status.active?<button type="button" className="birthday-overview-row" onClick={()=>{onClose();birthday.openWelcome();}}><span>{t('birthday.reopen')}</span><ForwardArrowIcon/></button>:null}
+        {letters.length?<button type="button" className="birthday-overview-row" onClick={()=>setPage('letters')}><span>{t('birthday.savedLetters')}</span><small>{letters.length}</small><ForwardArrowIcon/></button>:null}
+      </>:null}
       </>}
-      {letters.length?<section className="birthday-history"><h3>{t('birthday.savedLetters')}</h3>{letters.map(item=><button type="button" key={item.letter_id} onClick={()=>setLetterId(item.letter_id)}><span className="material-symbols-outlined" aria-hidden="true">{item.opened_at?'drafts':'mail'}</span><span><strong>{item.title}</strong><small>{item.sender_name} · {item.occasion}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</section>:null}
-      <BirthdayLetterReader letterId={letterId} onClose={()=>setLetterId(null)} onOpened={value=>setLetters(current=>current.map(item=>item.letter_id===value.letter_id?value:item))}/>
+      {page==='letters'?<section className="birthday-history">{letters.map(item=><button type="button" key={item.letter_id} onClick={()=>setLetterId(item.letter_id)}><span className="material-symbols-outlined" aria-hidden="true">{item.opened_at?'drafts':'mail'}</span><span><strong>{item.title}</strong><small>{item.sender_name} · {item.occasion}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</section>:null}
     </div>
-  </ConfirmDialog>;
+  </ConfirmDialog><BirthdayLetterReader letterId={letterId} onClose={()=>setLetterId(null)} onOpened={value=>setLetters(current=>current.map(item=>item.letter_id===value.letter_id?value:item))}/></>;
 }
 
 export function BirthdayProfileRow(){
