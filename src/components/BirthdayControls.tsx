@@ -4,8 +4,9 @@ import {useAuth} from '../lib/auth';
 import {api,ApiError} from '../lib/api';
 import {getActiveLocale,useI18n} from '../lib/language';
 import {showToast} from '../lib/toast';
-import {SideDrawer} from './SideDrawer';
-import {SelectControl,SettingGroup,SettingRow} from './SettingRow';
+import {ConfirmDialog} from './ConfirmDialog';
+import {DurationWheel} from './DurationPickerField';
+import {ForwardArrowIcon} from './ForwardArrowIcon';
 import {FeedbackState} from './FeedbackState';
 import {BirthdayLetterReader} from './BirthdayLetterReader';
 import type {BirthdayEnvelope} from '../lib/birthdayTypes';
@@ -33,20 +34,19 @@ export function BirthdayEditor({open,onClose}:{open:boolean;onClose:()=>void}){
     catch(cause){setError(t(cause instanceof ApiError&&cause.status===403?'birthday.locked':'birthday.saveFailed'));void birthday.refresh();}
     finally{setBusy(false);}
   };
-  return <SideDrawer open={open} onClose={()=>{if(!busy)onClose();}} title={t('birthday.title')} historyKey="birthday-settings">
-    <div className="birthday-editor"><p className="detail-text">{t('birthday.policy')}</p>
+  return <ConfirmDialog open={open} onClose={onClose} title={t('birthday.title')} description={t('birthday.policy')} className="birthday-date-dialog" busy={busy} confirmDisabled={!editable||!birthday.status} confirmLabel={t('birthday.confirmDate',{date:birthdayLabel(Number(month),normalizedDay)})} onConfirm={()=>void save()}>
+    <div className="birthday-editor">
       {!birthday.status?<FeedbackState tone={birthday.loading?'loading':'error'} title={t(birthday.loading?'common.loading':'birthday.loadFailed')} action={!birthday.loading?<button className="ghost-button" onClick={()=>void birthday.refresh()}>{t('common.retry')}</button>:undefined}/>:<>
-      <div className="birthday-date-fields"><label><span>{t('birthday.month')}</span><SelectControl label={t('birthday.month')} value={month} disabled={!editable||busy} options={Array.from({length:12},(_,i)=>({value:String(i+1),label:new Intl.DateTimeFormat(getActiveLocale(),{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2000,i,1)))}))} onChange={setMonth}/></label><label><span>{t('birthday.day')}</span><SelectControl label={t('birthday.day')} value={String(normalizedDay)} disabled={!editable||busy} options={Array.from({length:count},(_,i)=>({value:String(i+1),label:String(i+1)}))} onChange={setDay}/></label></div>
+      <fieldset className="birthday-date-wheels duration-picker-wheels" disabled={!editable||busy}><DurationWheel label={t('birthday.month')} values={Array.from({length:12},(_,i)=>i+1)} value={Number(month)} onChange={value=>{setMonth(String(value));setDay(String(Math.min(Number(day),new Date(2000,value,0).getDate())));}}/><DurationWheel label={t('birthday.day')} values={Array.from({length:count},(_,i)=>i+1)} value={normalizedDay} onChange={value=>setDay(String(value))}/></fieldset>
       <p className="detail-text birthday-policy-note">{t('birthday.leapPolicy')}</p>
       {!editable&&birthday.status.available_at?<p className="birthday-lock-note">{t('birthday.nextChange',{date:new Date(birthday.status.available_at*1000).toLocaleString(getActiveLocale(),{timeZone:'Asia/Shanghai',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})})}</p>:null}
       {error?<p className="error-text" role="alert">{error}</p>:null}
-      {editable?<button className="button birthday-save" disabled={busy} onClick={()=>void save()}>{busy?t('common.processing'):t('birthday.confirmDate',{date:birthdayLabel(Number(month),normalizedDay)})}</button>:null}
       {birthday.status.active?<button className="ghost-button birthday-save" onClick={()=>{onClose();birthday.openWelcome();}}>{t('birthday.reopen')}</button>:null}
       </>}
       {letters.length?<section className="birthday-history"><h3>{t('birthday.savedLetters')}</h3>{letters.map(item=><button type="button" key={item.letter_id} onClick={()=>setLetterId(item.letter_id)}><span className="material-symbols-outlined" aria-hidden="true">{item.opened_at?'drafts':'mail'}</span><span><strong>{item.title}</strong><small>{item.sender_name} · {item.occasion}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</section>:null}
       <BirthdayLetterReader letterId={letterId} onClose={()=>setLetterId(null)} onOpened={value=>setLetters(current=>current.map(item=>item.letter_id===value.letter_id?value:item))}/>
     </div>
-  </SideDrawer>;
+  </ConfirmDialog>;
 }
 
 export function BirthdayProfileRow(){
@@ -60,5 +60,5 @@ export function BirthdayReminder(){
   if(!userId||!birthday.status||birthday.status.month&&!birthday.status.active||birthday.reminderDismissed)return null;
   const active=birthday.status.active;
   const unread=birthday.status.letters.filter(letter=>!letter.opened_at).length;
-  return <><aside className="birthday-reminder"><span className="material-symbols-outlined" aria-hidden="true">cake</span><button type="button" onClick={()=>active?birthday.openWelcome():setOpen(true)}><strong>{t(active?'birthday.happyToday':'birthday.reminder')}</strong><small>{active?(unread?t('birthday.unreadLetters',{count:unread}):t('birthday.reopen')):t('birthday.reminderHint')}</small></button><button className="birthday-reminder-close" aria-label={t('common.close')} onClick={birthday.dismissReminder}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></aside><BirthdayEditor key={userId} open={open} onClose={()=>setOpen(false)}/></>;
+  return <><button className="verification-banner" type="button" onClick={()=>active?birthday.openWelcome():setOpen(true)}><div className="verification-banner-copy"><strong>{t(active?'birthday.happyToday':'birthday.title')}</strong><span>{active?(unread?t('birthday.unreadLetters',{count:unread}):t('birthday.reopen')):t('birthday.reminderHint')}</span></div><ForwardArrowIcon className="verification-banner-action"/></button><BirthdayEditor key={userId} open={open} onClose={()=>setOpen(false)}/></>;
 }

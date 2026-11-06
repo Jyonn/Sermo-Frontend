@@ -3,7 +3,7 @@ import {BottomSheet} from './BottomSheet';
 import {useI18n} from '../lib/language';
 import './DurationPickerField.css';
 
-function DurationWheel({label,values,value,onChange}:{label:string;values:number[];value:number;onChange:(value:number)=>void}){
+export function DurationWheel({label,values,value,onChange}:{label:string;values:number[];value:number;onChange:(value:number)=>void}){
   const root=useRef<HTMLDivElement>(null),timer=useRef<ReturnType<typeof setTimeout>>();const scrolling=useRef(false);const id=useId();const change=useRef(onChange);change.current=onChange;
   useEffect(()=>{if(scrolling.current)return;root.current?.scrollTo({top:Math.max(0,values.indexOf(value))*44,behavior:'instant'});},[value,values.length]);
   useEffect(()=>()=>clearTimeout(timer.current),[]);

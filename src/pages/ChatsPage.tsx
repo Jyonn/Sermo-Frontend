@@ -99,6 +99,7 @@ import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { VerificationBanner } from "../components/VerificationBanner";
+import { BirthdayReminder } from "../components/BirthdayControls";
 import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components/VirtualDynamicList";
 import { ApiError, api } from "../lib/api";
 import { createNoiseReducedAudioCapture, preferredAudioMimeType, readMicrophonePermission, requestMicrophoneAccess, type NoiseReducedAudioCapture } from "../lib/audioCapture";
@@ -7428,6 +7429,7 @@ function LiveChatsPage({
       /> : null}
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
+      {!submissionMode ? <BirthdayReminder /> : null}
 
       <div className="chat-list-screen-body">
         <div className="chat-list">

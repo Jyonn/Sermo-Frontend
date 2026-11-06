@@ -1,7 +1,9 @@
 .birthday-editor,.birthday-letter-editor { display: grid; gap: 20px; padding: 8px 0 24px; }
-.birthday-date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.birthday-date-fields>label { display: grid; gap: 9px; min-width: 0; }
-.birthday-date-fields>label>span { color: var(--text-secondary); font-size: 13px; }
+.birthday-date-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; }
+.birthday-date-wheels { margin: 0; border: 0; min-width: 0; padding: 8px 0; }
+.birthday-date-wheels .duration-wheel-scroll { height: 220px; padding-block: 88px; }
+.birthday-date-wheels .duration-wheel::after { top: 116px; }
+.birthday-date-wheels:disabled { opacity: .6; pointer-events: none; }
 .birthday-policy-note,.birthday-lock-note { font-size: 12px; line-height: 1.9; margin: 0; color: var(--text-muted); }
 .birthday-lock-note { padding: 12px 15px; background: var(--bg-elevated); border: 1px solid var(--line-soft); border-radius: 10px; }
 .birthday-save { justify-self: start; min-height: 39px; padding: 9px 18px; font-size: 13px; }
@@ -16,13 +18,6 @@
 .birthday-history .material-symbols-outlined { font-size: 19px; color: var(--brand-primary); }
 .birthday-admin-entry { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; font-size: 13px; margin-block: 12px; }
 .birthday-admin-entry .material-symbols-outlined { font-size: 18px; }
-.birthday-reminder { display: flex; align-items: center; gap: 10px; padding: 11px 15px; margin: 8px 14px 10px; border: 1px solid var(--line-soft); border-radius: 11px; background: var(--bg-surface); }
-.birthday-reminder>button:first-of-type { flex: 1; text-align: start; padding: 0; min-width: 0; border: 0; color: var(--text-primary); background: none; }
-.birthday-reminder strong { display: block; font-size: 12px; font-weight: 550; }
-.birthday-reminder small { display: block; color: var(--text-muted); font-size: 11px; line-height: 1.7; margin-top: 3px; }
-.birthday-reminder>.material-symbols-outlined { font-size: 22px; color: var(--brand-primary); }
-.birthday-reminder-close { background: none; border: 0; color: var(--text-muted); width: 28px; height: 28px; display: grid; place-items: center; }
-.birthday-reminder-close .material-symbols-outlined { font-size: 17px; }
 .birthday-welcome-backdrop { position: fixed; inset: 0; z-index: 180; background: #f8f3e7; }
 .birthday-welcome { position: absolute; inset: 0; display: grid; grid-template-columns: 49% 51%; color: #34473b; background: #fcf9ed; overflow: auto; outline: none; }
 .birthday-welcome::before { content: ""; position: absolute; inset: 13px; border: 1px solid #8d9b704f; border-radius: 16px 5px 16px 5px; pointer-events: none; z-index: 3; }
