@@ -3554,6 +3554,9 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   border: 1px solid var(--line-soft);
 }
 
+.chat-list-notices { display: grid; gap: 14px; min-width: 0; }
+.chat-list-notices:empty { display: none; }
+
 .chat-list-screen-body {
   display: grid;
   gap: 14px;

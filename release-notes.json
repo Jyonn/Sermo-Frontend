@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.06.3",
+  "id": "2026.11.06.4",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
       "title": "更简洁的生日设置",
       "items": [
-        "生日提醒仅在聊天页显示，与邮箱认证横幅统一样式；生日改用五行滚轮弹窗选择"
+        "精简生日设置弹窗，修复生日提醒与会话列表重叠"
       ]
     },
     "en": {
       "title": "Simpler birthday settings",
       "items": [
-        "Birthday reminders now appear only in Chats, matching email verification banners; choose your birthday in a five-row wheel dialog"
+        "Simplified the birthday dialog and fixed reminders overlapping conversations"
       ]
     }
   }

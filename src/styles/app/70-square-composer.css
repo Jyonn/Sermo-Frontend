@@ -2422,7 +2422,7 @@ html[data-theme="dark"] .verification-banner-action {
 }
 
 @media (min-width: 720px) {
-  .mobile-chat-list-screen.has-verification-banner {
+  .mobile-chat-list-screen:has(> .chat-list-notices:not(:empty)) {
     grid-template-rows: auto auto minmax(0, 1fr);
   }
 

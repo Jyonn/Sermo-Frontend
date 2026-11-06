@@ -1,5 +1,6 @@
 {
   "birthday.title": "生日",
+  "birthday.set": "设置生日",
   "birthday.savedLetters": "收好的生日信",
   "birthday.happyToday": "生日快乐，今天为你准备了一份特别的祝福",
   "birthday.unreadLetters": "有 {{count}} 封生日信等你拆阅",

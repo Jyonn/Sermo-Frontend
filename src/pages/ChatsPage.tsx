@@ -7428,8 +7428,7 @@ function LiveChatsPage({
         ) : undefined}
       /> : null}
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
-      {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
-      {!submissionMode ? <BirthdayReminder /> : null}
+      {!submissionMode ? <div className="chat-list-notices"><VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /><BirthdayReminder /></div> : null}
 
       <div className="chat-list-screen-body">
         <div className="chat-list">

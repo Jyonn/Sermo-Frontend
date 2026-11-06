@@ -34,11 +34,10 @@ export function BirthdayEditor({open,onClose}:{open:boolean;onClose:()=>void}){
     catch(cause){setError(t(cause instanceof ApiError&&cause.status===403?'birthday.locked':'birthday.saveFailed'));void birthday.refresh();}
     finally{setBusy(false);}
   };
-  return <ConfirmDialog open={open} onClose={onClose} title={t('birthday.title')} description={t('birthday.policy')} className="birthday-date-dialog" busy={busy} confirmDisabled={!editable||!birthday.status} confirmLabel={t('birthday.confirmDate',{date:birthdayLabel(Number(month),normalizedDay)})} onConfirm={()=>void save()}>
+  return <ConfirmDialog open={open} onClose={onClose} title={t('birthday.set')} className="birthday-date-dialog" busy={busy} confirmDisabled={!editable||!birthday.status} confirmLabel={t('common.confirm')} onConfirm={()=>void save()}>
     <div className="birthday-editor">
       {!birthday.status?<FeedbackState tone={birthday.loading?'loading':'error'} title={t(birthday.loading?'common.loading':'birthday.loadFailed')} action={!birthday.loading?<button className="ghost-button" onClick={()=>void birthday.refresh()}>{t('common.retry')}</button>:undefined}/>:<>
       <fieldset className="birthday-date-wheels duration-picker-wheels" disabled={!editable||busy}><DurationWheel label={t('birthday.month')} values={Array.from({length:12},(_,i)=>i+1)} value={Number(month)} onChange={value=>{setMonth(String(value));setDay(String(Math.min(Number(day),new Date(2000,value,0).getDate())));}}/><DurationWheel label={t('birthday.day')} values={Array.from({length:count},(_,i)=>i+1)} value={normalizedDay} onChange={value=>setDay(String(value))}/></fieldset>
-      <p className="detail-text birthday-policy-note">{t('birthday.leapPolicy')}</p>
       {!editable&&birthday.status.available_at?<p className="birthday-lock-note">{t('birthday.nextChange',{date:new Date(birthday.status.available_at*1000).toLocaleString(getActiveLocale(),{timeZone:'Asia/Shanghai',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})})}</p>:null}
       {error?<p className="error-text" role="alert">{error}</p>:null}
       {birthday.status.active?<button className="ghost-button birthday-save" onClick={()=>{onClose();birthday.openWelcome();}}>{t('birthday.reopen')}</button>:null}
