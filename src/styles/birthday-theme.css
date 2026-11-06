@@ -65,7 +65,7 @@ html[data-site-theme="birthday-botanical"] :is(.button,.ghost-button):focus-visi
   outline-offset: 3px;
 }
 
-/* Tab: a leaf seam below the toolbar, separate from its title and hit targets. */
+/* Tab: a ribbon seam below the toolbar, separate from its title and hit targets. */
 html[data-site-theme="birthday-botanical"] .tab-sticky-header::after {
   content: "";
   position: absolute;
@@ -74,37 +74,38 @@ html[data-site-theme="birthday-botanical"] .tab-sticky-header::after {
   pointer-events: none;
   background: var(--brand-primary);
   opacity: .35;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 7' preserveAspectRatio='none'%3E%3Cpath d='M0 6H1000' stroke='black' stroke-width='.6'/%3E%3Cpath d='M55 6Q47 -4 42 1Q45 7 55 6M57 6Q62 -3 68 1Q65 7 57 6' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 7' preserveAspectRatio='none'%3E%3Cpath d='M0 5H1000M55 5C35 -6 36 9 55 5C74 -6 74 9 55 5M55 5L49 7M55 5L61 7' stroke='black' stroke-width='.8' fill='none'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 
-/* Sheet: the drag handle becomes a small stem, keeping the entire drag zone intact. */
+/* Sheet: a ribbon bow keeps the entire drag zone intact. */
 html[data-site-theme="birthday-botanical"] .bottom-sheet { background: var(--bg-surface); box-shadow: inset 0 3px 0 color-mix(in srgb,var(--brand-primary) 13%,transparent), var(--shadow-lg); }
 html[data-site-theme="birthday-botanical"] .sheet-handle { position: relative; width: 42px; height: 3px; background: var(--brand-primary); opacity: .65; }
 html[data-site-theme="birthday-botanical"] .sheet-handle::before,
 html[data-site-theme="birthday-botanical"] .sheet-handle::after { content: ""; position: absolute; width: 10px; height: 5px; border-radius: 100% 0 100% 0; background: var(--brand-primary); pointer-events: none; }
-html[data-site-theme="birthday-botanical"] .sheet-handle::before { left: 10px; top: -4px; transform: rotate(20deg); }
-html[data-site-theme="birthday-botanical"] .sheet-handle::after { right: 9px; bottom: -4px; transform: rotate(20deg); }
+html[data-site-theme="birthday-botanical"] .sheet-handle::before { left: 9px; top: -5px; width: 12px; height: 8px; border: 1px solid var(--brand-primary); background: transparent; border-radius: 8px 8px 0 8px; transform: rotate(18deg); }
+html[data-site-theme="birthday-botanical"] .sheet-handle::after { right: 9px; top: -5px; width: 12px; height: 8px; border: 1px solid var(--brand-primary); background: transparent; border-radius: 8px 8px 8px 0; transform: rotate(-18deg); }
 html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header { border-bottom: 1px solid var(--line-soft); padding-bottom: 14px; }
 
-/* Drawer: a vertical pressed sprig stays on the outer margin, not beside the title. */
+/* Drawer: the gift closes the panel, with reserved space below its content. */
 html[data-site-theme="birthday-botanical"] .side-drawer { border-inline-start: 2px solid var(--birthday-frame); }
 html[data-site-theme="birthday-botanical"] .side-drawer::after {
   content: "";
   position: absolute;
   right: 7px;
   bottom: max(22px,env(safe-area-inset-bottom));
-  width: 16px;
-  height: 120px;
-  background: var(--brand-primary);
-  opacity: .22;
+  width: 72px;
+  height: 72px;
+  background: var(--birthday-emblem) center / contain no-repeat;
+  opacity: .9;
   pointer-events: none;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 120'%3E%3Cpath d='M8 116Q3 68 10 8' fill='none' stroke='black'/%3E%3Cpath d='M8 94Q-4 88 1 79Q10 82 8 94M8 76Q21 68 14 60Q6 66 8 76M8 54Q-4 46 2 38Q11 44 8 54M9 33Q20 25 13 17Q6 24 9 33M10 15Q3 6 12 1Q16 8 10 15' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
 }
+html[data-site-theme="birthday-botanical"] .side-drawer .drawer-body { padding-bottom: max(100px, calc(78px + env(safe-area-inset-bottom))); }
 
 /* Modal: a flexible stationery frame; no fixed-size bitmap or title decoration. */
 html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) { position: relative; background: var(--bg-surface); }
 html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::before { content: ""; position: absolute; inset: 7px; border: 1px solid var(--line-soft); border-radius: 18px; pointer-events: none; }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::after { content: ""; position: absolute; bottom: 4px; left: calc(50% - 9px); width: 18px; height: 7px; border-radius: 100% 0 100% 0; background: var(--brand-primary); opacity: .55; pointer-events: none; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::after { content: ""; position: absolute; top: -24px; right: 18px; width: 64px; height: 64px; background: var(--birthday-emblem) center / contain no-repeat; pointer-events: none; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) .confirm-dialog-copy { padding-inline-end: 62px; }
 
 /* The garden belongs to the conversation canvas, never to navigation or controls. */
 html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default {

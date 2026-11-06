@@ -15,6 +15,8 @@ All participants and messages are fictional, in the SQLite preview database. The
 
 ## Art direction
 
+Gift revision: `assets/botanical-frame-v1.webp` is the previously generated gift/cake/floral frame. The component study clips its four corners at a fixed proportional scale, joins them with responsive CSS lines, and never stretches the complete bitmap. This reference frame remains local to the design gallery. Actual birthday components reuse the cloud-managed gift emblem: the sheet handle is a bow, drawers end with a gift, and modal stationery carries a gift on its rim.
+
 Keep the existing Frienden navigation, message geometry and personalization preferences. The birthday theme is a paper-warm garden: sage for actions and own messages, ecru for received messages, a quiet botanical illustration on the edge of the conversation. No decorative flower is appended to navigation titles, settings rows or dialog headings. Existing non-default chat backgrounds and bubble styles take priority.
 
 The garden illustration is a single static layer, uses the existing cloud-managed asset, consumes no additional message space and cannot receive pointer events. Dark mode reduces its opacity. The welcome keeps its larger illustration and finite ribbons; no ambient animation runs while chatting.
