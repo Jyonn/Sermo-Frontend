@@ -1,5 +1,19 @@
 # 花间来日 · 聊天场景本地修订
 
+## Current direction: painted stationery
+
+The welcome illustration and welcome layout remain unchanged. The latest revision replaces the earlier gift stickers, sprite corner frame and repeated group bows. Those earlier studies below are historical, not the active design.
+
+`BirthdaySurfaceArt` is attached to the actual shared `ConfirmDialog`, `BottomSheet` and `SideDrawer` shells. It is hidden outside the birthday skin and absent from destructive dialogs, fullscreen drawers and headerless media surfaces. Ordinary component content is unchanged. One static crop of the approved oil painting and native SVG silk curves establish the visual language; no new bitmap, timer or animation loop is added.
+
+- Dialog: asymmetric paper corners, fine inset rule, a painted upper edge and silk thread below its rim.
+- Sheet: folded paper surface, stitched rose handle and a painted corner outside the heading's text flow.
+- Drawer: a full-height folio, with the painting and thread at the bottom; the scrolling body stays transparent to this separate art layer.
+- Menu and Contacts: paper sections and sage controls, without a bow on every row. Profile artwork uses the same welcome painting.
+- Chats: readable cream/sage bubbles and a quiet garden at the page edge. Existing selected backgrounds and bubble styles keep priority.
+
+Chrome visual checks completed for desktop ordinary confirmation and notification sheet, mobile notification sheet, mobile dark drawer, and the real mobile group conversation. The dark drawer's opaque content-layer issue was corrected after inspection. Final follow-up inspection was limited by repeated Chrome accessibility timeouts; do not claim every surface has a final screenshot. Browser screenshots are actual UI captures, not generated mockups.
+
 Branch: `design/birthday-chat-scenes`. This branch is for local review; do not deploy it without a separate request.
 
 ## Review
@@ -39,4 +53,4 @@ python manage.py shell --settings=frienden_birthday_preview_settings -c "exec(op
 
 The seed refuses any database except `/private/tmp/frienden-birthday-final-preview.sqlite3`. It adds only named test conversations and reuses them on subsequent runs. It does not invoke message delivery or create production data.
 
-Browser visual verification is unavailable while local browser use is disabled. HTTP checks and build validation do not substitute for screenshot review.
+HTTP checks and build validation do not substitute for the visual checks recorded above. Keep this branch local until the user requests deployment.

@@ -3,21 +3,19 @@
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "更清爽的页面标题",
+      "title": "花间来日 · 纸间花笺",
       "items": [
-        "恢复手机端滚动后通栏标题背景，生日花园装饰移至聊天画布",
-        "生日主题按钮改为纯色，页签、底部面板、抽屉与模态框使用礼物和缎带装饰",
-        "生日概览与设置分层，生日信单独查看，四角饰件完整展现",
-        "通讯与菜单分组增加可伸缩的丝带和蝴蝶结装饰"
+        "保留生日欢迎，将油画花园、奶油纸面与缎带统一用于普通弹窗、面板、抽屉和按钮",
+        "重新整理聊天、通讯与菜单的生日外观，适配手机、桌面与深色模式",
+        "生日概览、设置与生日信分层展示，手机标题栏恢复滚动后的通栏背景"
       ]
     },
     "en": {
-      "title": "Cleaner page headers",
+      "title": "A garden of tomorrows · Painted stationery",
       "items": [
-        "Restored full-width mobile headers on scroll and moved birthday garden decoration to the conversation canvas",
-        "Birthday buttons use solid colors, with gift and ribbon details for tabs, sheets, drawers and dialogs",
-        "Birthday overview, date settings and letters have separate views, with unclipped corner decorations",
-        "Communication and menu groups gain scalable ribbons and bows"
+        "Preserved the welcome and brought its painted garden, cream paper and ribbons to ordinary dialogs, sheets, drawers and buttons",
+        "Refined birthday styling across Chats, Contacts and Menu for mobile, desktop and dark mode",
+        "Separated birthday overview, date settings and letters, with full-width mobile headers appearing on scroll"
       ]
     }
   }

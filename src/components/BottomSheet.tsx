@@ -6,6 +6,7 @@ import {OverlayScope} from "../lib/overlayLayer";
 import { useModalFocus } from "../lib/modalFocus";
 import { sheetRelease, sheetStops } from "../lib/interactionPatterns";
 import "./InteractionPatterns.css";
+import {BirthdaySurfaceArt} from './BirthdaySurfaceArt';
 
 interface BottomSheetProps {
   open: boolean;
@@ -116,6 +117,7 @@ export function BottomSheet({
         aria-modal="true"
         role="dialog"
       >
+        <BirthdaySurfaceArt kind="sheet"/>
         {showCloseButton ? (
           <button className="sheet-close" onClick={onClose} type="button" aria-label={t("common.closePanel")}>
             <span className="material-symbols-outlined">close</span>

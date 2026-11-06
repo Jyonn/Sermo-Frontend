@@ -1,191 +1,102 @@
-/* Personal, date-bound skin. Borders remain CSS geometry; images are independent ornaments. */
+/* 花间来日 — the welcome's oil-painted garden, translated into paper and stationery. */
+.birthday-surface-art { display: none; }
 html[data-site-theme="birthday-botanical"] {
-  --bg-canvas: #f2efe3;
-  --bg-surface: #fcf9ef;
-  --bg-elevated: #fffaf0;
-  --bg-panel: rgb(252 249 239 / 88%);
-  --bg-panel-strong: #fcf9ef;
-  --text-primary: #34473b;
-  --text-secondary: #697760;
-  --text-muted: #868b76;
-  --line-soft: rgb(88 119 92 / 16%);
-  --line-strong: rgb(88 119 92 / 30%);
-  --brand-primary: #58775c;
-  --brand-primary-press: #456449;
-  --birthday-frame: rgb(88 119 92 / 35%);
-  --birthday-button-ink: #fcf9ef;
-  --birthday-ribbon: #ac797a;
-  --birthday-ribbon-edge: #d9b9ac;
-  --birthday-bow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 36'%3E%3Cg stroke='black' stroke-width='1.5' stroke-linejoin='round'%3E%3Cpath d='M23 15C1 -9 -8 25 23 17C56 27 56 -9 25 15Z' fill='none'/%3E%3Cpath d='M23 17L12 32L20 29L23 35L25 18L28 35L32 28L39 31L26 17' fill='none'/%3E%3Cpath d='M21 13Q24 11 27 13L27 19Q24 21 21 19Z' fill='black'/%3E%3C/g%3E%3C/svg%3E");
+  --bg-canvas: #f5f2e7; --bg-surface: #fbf9ed; --bg-elevated: #fffdf4;
+  --bg-panel: #f8f6eb; --bg-panel-strong: #fbf9ed;
+  --text-primary: #34483b; --text-secondary: #6b775f; --text-muted: #8c9179;
+  --line-soft: #dce0cb; --line-strong: #bcc5a7;
+  --brand-primary: #58785e; --brand-primary-press: #45644c;
+  --birthday-button-ink: #fffdf2; --birthday-rose: #b8847c; --birthday-thread: #bbaa7d;
+  --birthday-shadow: 0 28px 90px #35433024, 0 4px 16px #3543300a;
 }
 html[data-site-theme="birthday-botanical"][data-theme="dark"] {
-  --bg-canvas: #17201b;
-  --bg-surface: #202b23;
-  --bg-elevated: #28352b;
-  --bg-panel: rgb(32 43 35 / 90%);
-  --bg-panel-strong: #202b23;
-  --text-primary: #f0ecdc;
-  --text-secondary: #b9c4ae;
-  --text-muted: #97a48d;
-  --line-soft: rgb(199 208 184 / 15%);
-  --line-strong: rgb(199 208 184 / 28%);
-  --brand-primary: #bad0a5;
-  --brand-primary-press: #d0e1bc;
-  --birthday-frame: rgb(199 208 184 / 30%);
-  --birthday-button-ink: #202b23;
-  --birthday-ribbon: #d3a5a1;
-  --birthday-ribbon-edge: #795c59;
+  --bg-canvas: #1b251e; --bg-surface: #263229; --bg-elevated: #303e32;
+  --bg-panel: #222e25; --bg-panel-strong: #263229;
+  --text-primary: #f0eedc; --text-secondary: #bdc5aa; --text-muted: #9da68c;
+  --line-soft: #3d4b3d; --line-strong: #66775b;
+  --brand-primary: #b8cca3; --brand-primary-press: #cbdcb9;
+  --birthday-button-ink: #243025; --birthday-rose: #cea29a; --birthday-thread: #a69873;
+  --birthday-shadow: 0 28px 90px #0005;
 }
-html[data-site-theme="birthday-botanical"] body { background-color: var(--bg-canvas); }
+html[data-site-theme="birthday-botanical"] body { background: var(--bg-canvas); }
 html[data-site-theme="birthday-botanical"] .festival-theme-mark { display: none; }
-html[data-site-theme="birthday-botanical"] :is(.topbar, .tab-sticky-header, .square-feed-header, .drawer-topbar) {
-  background-color: var(--bg-panel-strong);
-  border-bottom-color: var(--birthday-frame);
-}
-html[data-site-theme="birthday-botanical"] :is(.confirm-dialog, .side-drawer, .bottom-sheet) {
-  border-color: var(--birthday-frame);
-}
-html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon {
-  background: var(--birthday-emblem) center / contain no-repeat;
-  border-radius: 0;
-}
-html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon .material-symbols-outlined { opacity: 0; }
 
-/* Controls use ink on paper; never inherit the default emerald gradient. */
-html[data-site-theme="birthday-botanical"] .button {
-  background: var(--brand-primary);
-  color: var(--birthday-button-ink);
-  border: 1px solid transparent;
-  box-shadow: none;
-}
+/* Solid ink and the asymmetric stationery corner from the welcome. */
+html[data-site-theme="birthday-botanical"] .button { background: var(--brand-primary); color: var(--birthday-button-ink); border: 1px solid transparent; border-radius: 18px 18px 18px 4px; box-shadow: none; }
 html[data-site-theme="birthday-botanical"] .button:hover { background: var(--brand-primary-press); }
-html[data-site-theme="birthday-botanical"] .ghost-button {
-  background: var(--bg-surface);
-  color: var(--text-secondary);
-  border-color: var(--line-strong);
-  box-shadow: none;
-}
-html[data-site-theme="birthday-botanical"] :is(.button,.ghost-button):focus-visible {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 3px;
-}
+html[data-site-theme="birthday-botanical"] .ghost-button { background: transparent; color: var(--text-secondary); border-color: var(--line-soft); box-shadow: none; }
+html[data-site-theme="birthday-botanical"] :is(.button,.ghost-button):focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 
-/* Tab: a ribbon seam below the toolbar, separate from its title and hit targets. */
-html[data-site-theme="birthday-botanical"] .tab-sticky-header::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 7px;
-  pointer-events: none;
-  background: var(--brand-primary);
-  opacity: .35;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 7' preserveAspectRatio='none'%3E%3Cpath d='M0 5H1000M55 5C35 -6 36 9 55 5C74 -6 74 9 55 5M55 5L49 7M55 5L61 7' stroke='black' stroke-width='.8' fill='none'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-}
+/* One painted edge and one continuous silk thread, rather than repeated stickers. */
+html[data-site-theme="birthday-botanical"] .birthday-surface-art { display: block; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit; }
+html[data-site-theme="birthday-botanical"] .birthday-surface-painting { position: absolute; background: var(--birthday-hero) 65% 65% / cover no-repeat; }
+html[data-site-theme="birthday-botanical"] .birthday-surface-thread { position: absolute; stroke: var(--birthday-thread); stroke-width: 1; opacity: .65; }
+html[data-site-theme="birthday-botanical"] .birthday-surface-thread path+path { opacity: .35; }
+html[data-site-theme="birthday-botanical"] .birthday-surface-knot { position: absolute; stroke: var(--birthday-rose); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; width: 42px; height: 32px; }
 
-/* Sheet: a ribbon bow keeps the entire drag zone intact. */
-html[data-site-theme="birthday-botanical"] .bottom-sheet { background: var(--bg-surface); box-shadow: inset 0 3px 0 color-mix(in srgb,var(--brand-primary) 13%,transparent), var(--shadow-lg); }
-html[data-site-theme="birthday-botanical"] .sheet-handle { position: relative; width: 42px; height: 3px; background: var(--brand-primary); opacity: .65; }
-html[data-site-theme="birthday-botanical"] .sheet-handle::before,
-html[data-site-theme="birthday-botanical"] .sheet-handle::after { content: ""; position: absolute; width: 10px; height: 5px; border-radius: 100% 0 100% 0; background: var(--brand-primary); pointer-events: none; }
-html[data-site-theme="birthday-botanical"] .sheet-handle::before { left: 9px; top: -5px; width: 12px; height: 8px; border: 1px solid var(--brand-primary); background: transparent; border-radius: 8px 8px 0 8px; transform: rotate(18deg); }
-html[data-site-theme="birthday-botanical"] .sheet-handle::after { right: 9px; top: -5px; width: 12px; height: 8px; border: 1px solid var(--brand-primary); background: transparent; border-radius: 8px 8px 8px 0; transform: rotate(-18deg); }
-html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header { border-bottom: 1px solid var(--line-soft); padding-bottom: 14px; }
+/* Modal: a letter laid on a pressed-flower page. */
+html[data-site-theme="birthday-botanical"] .confirm-dialog-backdrop { padding: max(32px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left)); background: #35443240; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) { position: relative; isolation: isolate; overflow: visible; background: var(--bg-surface); border: 1px solid var(--line-strong); border-radius: 24px 24px 8px 24px; box-shadow: var(--birthday-shadow); padding: 28px; gap: 22px; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::before { content: ''; position: absolute; inset: 8px; border: 1px solid var(--line-soft); border-radius: 17px 17px 3px 17px; pointer-events: none; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog-copy h2 { font-family: 'Songti SC','Noto Serif SC',serif; font-size: 24px; font-weight: 600; letter-spacing: .035em; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog-copy p { color: var(--text-secondary); font-size: 13px; line-height: 1.85; }
+html[data-site-theme="birthday-botanical"] .confirm-dialog-actions { gap: 10px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+html[data-site-theme="birthday-botanical"] .confirm-dialog-actions>button { min-height: 42px; padding-inline: 19px; font-size: 13px; }
+html[data-site-theme="birthday-botanical"] .is-dialog .birthday-surface-painting { width: 125px; height: 180px; right: -24px; top: -42px; opacity: .6; background-position: 3% 20%; mask-image: radial-gradient(ellipse at 55% 50%,#000 15%,transparent 69%); }
+html[data-site-theme="birthday-botanical"] .is-dialog .birthday-surface-thread { width: calc(100% + 28px); height: 65px; bottom: -18px; left: -14px; }
+html[data-site-theme="birthday-botanical"] .is-dialog .birthday-surface-knot { bottom: -18px; left: 22px; transform: rotate(-12deg); }
 
-/* Drawer: the gift closes the panel, with reserved space below its content. */
-html[data-site-theme="birthday-botanical"] .side-drawer { border-inline-start: 2px solid var(--birthday-frame); }
-html[data-site-theme="birthday-botanical"] .side-drawer::after {
-  content: "";
-  position: absolute;
-  right: 7px;
-  bottom: max(22px,env(safe-area-inset-bottom));
-  width: 72px;
-  height: 72px;
-  background: var(--birthday-emblem) center / contain no-repeat;
-  opacity: .9;
-  pointer-events: none;
-}
-html[data-site-theme="birthday-botanical"] .side-drawer .drawer-body { padding-bottom: max(100px, calc(78px + env(safe-area-inset-bottom))); }
+/* Sheet: a folded invitation. Its artwork occupies a corner, not the heading. */
+html[data-site-theme="birthday-botanical"] .bottom-sheet { isolation: isolate; background: var(--bg-surface); border-color: var(--line-strong); border-radius: 28px 28px 0 0; box-shadow: var(--birthday-shadow); }
+html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header { padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); }
+html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header h3 { font: 600 24px/1.4 'Songti SC','Noto Serif SC',serif; }
+html[data-site-theme="birthday-botanical"] .sheet-handle { width: 36px; height: 3px; background: var(--birthday-rose); opacity: .65; }
+html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-painting { right: 0; top: 0; width: 185px; height: 210px; border-top-right-radius: 26px; opacity: .34; mask-image: linear-gradient(225deg,#000,transparent 70%); }
+html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-thread { top: 8px; left: -8px; width: calc(100% + 16px); height: 72px; opacity: .25; }
+html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-knot { left: 24px; top: -12px; width: 34px; transform: rotate(9deg); }
 
-/* Modal: a flexible stationery frame; no fixed-size bitmap or title decoration. */
-html[data-site-theme="birthday-botanical"] .confirm-dialog-backdrop { padding: max(30px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(30px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left)); }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) { position: relative; background: var(--bg-surface); overflow: visible; }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::before { content: ""; position: absolute; inset: 7px; border: 1px solid var(--line-soft); border-radius: 18px; pointer-events: none; }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger)::after { content: ""; position: absolute; inset: -24px; background: var(--birthday-emblem) left top / 68px 68px no-repeat, var(--birthday-corner) right top / 44px 44px no-repeat, var(--birthday-corner) left bottom / 44px 44px no-repeat, var(--birthday-emblem) right bottom / 50px 50px no-repeat; pointer-events: none; }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) .confirm-dialog-copy { padding-inline-start: 35px; min-height: 30px; }
+/* Drawer: a full-height folio with the painting gathered at its foot. */
+html[data-site-theme="birthday-botanical"] body .side-drawer:not(.is-fullscreen) { --drawer-surface: var(--bg-surface); isolation: isolate; border-inline-start: 1px solid var(--line-strong); background: var(--bg-surface); box-shadow: var(--birthday-shadow); }
+html[data-site-theme="birthday-botanical"] body .side-drawer:not(.is-fullscreen)>.drawer-body { background: transparent; }
+html[data-site-theme="birthday-botanical"] .drawer-topbar { background: transparent; border-bottom-color: var(--line-soft); }
+html[data-site-theme="birthday-botanical"] .drawer-title { font-family: 'Songti SC','Noto Serif SC',serif; font-size: 23px; font-weight: 600; }
+html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-painting { bottom: 0; right: 0; width: min(75%,300px); height: 300px; opacity: .22; mask-image: linear-gradient(315deg,#000,transparent 75%); }
+html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-thread { bottom: 18px; left: 10px; width: calc(100% - 20px); height: 90px; opacity: .3; }
+html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-knot { bottom: 28px; right: 26px; width: 32px; opacity: .65; }
 
-/* Gift-wrap seams decorate groups as a whole, without changing individual row hit areas. */
-html[data-site-theme="birthday-botanical"] :is(.simple-list:has(> .menu-link-row), .simple-list:has(> .communication-entry-row), .setting-group) {
-  position: relative;
-  overflow: visible;
-  border-color: var(--line-strong);
-}
-html[data-site-theme="birthday-botanical"] :is(.simple-list:has(> .menu-link-row), .simple-list:has(> .communication-entry-row), .setting-group)::before {
-  content: "";
-  position: absolute;
-  inset: 8px auto 8px -3px;
-  width: 5px;
-  border-inline: 1px solid var(--birthday-ribbon-edge);
-  border-radius: 2px;
-  background: var(--birthday-ribbon);
-  opacity: .65;
-  pointer-events: none;
-}
-html[data-site-theme="birthday-botanical"] :is(.simple-list:has(> .menu-link-row), .simple-list:has(> .communication-entry-row), .setting-group)::after {
-  content: "";
-  position: absolute;
-  left: -15px;
-  top: 11px;
-  width: 28px;
-  height: 24px;
-  background: var(--birthday-ribbon);
-  mask: var(--birthday-bow) center / contain no-repeat;
-  pointer-events: none;
-}
-html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-handle { background: var(--birthday-ribbon); }
-html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-handle::before,
-html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-handle::after { border-color: var(--birthday-ribbon); }
-html[data-site-theme="birthday-botanical"] .side-drawer { border-inline-start-color: var(--birthday-ribbon-edge); }
-html[data-site-theme="birthday-botanical"] .side-drawer .drawer-topbar { box-shadow: inset 0 -2px 0 color-mix(in srgb,var(--birthday-ribbon) 35%,transparent); }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) .confirm-dialog-actions {
-  padding-top: 13px;
-  border-top: 1px solid var(--birthday-ribbon-edge);
-}
+/* Menu and communication groups become clean paper sections. */
+html[data-site-theme="birthday-botanical"] :is(.simple-list:has(>.menu-link-row),.simple-list:has(>.communication-entry-row),.setting-group) { position: relative; overflow: visible; background: var(--bg-surface); border: 1px solid var(--line-soft); border-radius: 18px 18px 6px 18px; box-shadow: 0 3px 0 color-mix(in srgb,var(--line-soft) 30%,transparent); }
+html[data-site-theme="birthday-botanical"] :is(.simple-list,.setting-group)>:is(.simple-row,.setting-row):first-child { border-top-left-radius: 17px; border-top-right-radius: 17px; }
+html[data-site-theme="birthday-botanical"] :is(.simple-list,.setting-group)>:is(.simple-row,.setting-row):last-child { border-bottom-left-radius: 17px; border-bottom-right-radius: 5px; }
+html[data-site-theme="birthday-botanical"] .menu-profile-card { position: relative; isolation: isolate; border: 1px solid var(--line-soft); background: var(--bg-surface); border-radius: 22px 22px 6px 22px; padding: 22px; }
+html[data-site-theme="birthday-botanical"] .menu-profile-card::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--birthday-hero) right 55% / 200px auto no-repeat; opacity: .13; mask-image: linear-gradient(to left,#000,transparent 65%); pointer-events: none; }
+html[data-site-theme="birthday-botanical"] :is(.menu-growth-entry,.communication-entry-row .row-icon) { background: color-mix(in srgb,var(--brand-primary) 8%,var(--bg-surface)); color: var(--brand-primary); }
 
-/* The garden belongs to the conversation canvas, never to navigation or controls. */
-html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default {
-  isolation: isolate;
-  background: radial-gradient(ellipse at 100% 100%, color-mix(in srgb, var(--brand-primary) 7%, transparent), transparent 65%), var(--bg-canvas);
-}
-html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: auto 0 0 auto;
-  width: clamp(180px, 38%, 420px);
-  height: min(55%, 470px);
-  background: var(--birthday-hero) center bottom / cover no-repeat;
-  mask-image: linear-gradient(to top, #000, transparent 95%);
-  opacity: .14;
-  pointer-events: none;
-}
+/* Navigation stays clear; a full-width background fades in only with scrolling. */
+html[data-site-theme="birthday-botanical"] .tab-sticky-header .panel-title { font-family: 'Songti SC','Noto Serif SC',serif; font-weight: 600; letter-spacing: .05em; }
+html[data-site-theme="birthday-botanical"] .verification-banner { border-color: var(--line-soft); background: #f5eedb; border-radius: 15px 15px 4px 15px; }
+html[data-site-theme="birthday-botanical"] .verification-banner-action { color: var(--brand-primary); }
+
+/* Existing user-selected backgrounds and bubbles take priority over this default page. */
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default { isolation: isolate; background: var(--bg-canvas); }
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { inset: 0; background: var(--birthday-hero) right bottom / min(52%,440px) auto no-repeat; opacity: .1; mask-image: linear-gradient(315deg,#000,transparent 70%); }
 html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .message-scroll { background: transparent; }
-html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .composer {
-  background-color: color-mix(in srgb, var(--bg-surface) 94%, transparent);
-  border-top-color: var(--line-soft);
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .composer { background-color: color-mix(in srgb,var(--bg-surface) 97%,transparent); border-top-color: var(--line-soft); }
+html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.self .message-bubble:not(.is-media,.is-sticker,.is-activity,.is-statement,.is-forward-bundle,.is-link-preview) { background: #dce4cd; color: #34483b; }
+html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.other .message-bubble:not(.is-media,.is-sticker,.is-activity,.is-statement,.is-forward-bundle,.is-link-preview) { background: var(--bg-surface); color: var(--text-primary); }
+html[data-site-theme="birthday-botanical"] .chat-list .chat-item.active { background: color-mix(in srgb,var(--brand-primary) 9%,transparent); }
+html[data-site-theme="birthday-botanical"] .desktop-conversation-header { background: var(--bg-surface); border-bottom-color: var(--line-soft); }
+html[data-site-theme="birthday-botanical"] .chat-main-pane { border-color: var(--line-soft); }
+@media (min-width:901px) {
+  html[data-site-theme="birthday-botanical"] .bottom-sheet { border-radius: 24px 24px 8px 24px; }
 }
-html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.self .message-bubble:not(.is-media, .is-sticker, .is-activity, .is-statement, .is-forward-bundle, .is-link-preview) {
-  background-color: color-mix(in srgb, var(--brand-primary) 15%, var(--bg-surface));
-  color: var(--text-primary);
-}
-html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.other .message-bubble:not(.is-media, .is-sticker, .is-activity, .is-statement, .is-forward-bundle, .is-link-preview) {
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
-}
-html[data-site-theme="birthday-botanical"][data-theme="dark"] .chat-detail-scene.chat-background-default::before { opacity: .07; }
-@media (max-width: 900px) {
+@media (max-width:900px) {
   html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header { background: transparent; }
-  html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header::before {
-    background: color-mix(in srgb, var(--bg-canvas) 92%, transparent);
-    border-bottom-color: var(--line-soft);
-  }
+  html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header::before { background: color-mix(in srgb,var(--bg-canvas) 94%,transparent); border-bottom-color: var(--line-soft); }
+  html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) { padding: 24px; }
+  html[data-site-theme="birthday-botanical"] .drawer-title { font-size: 21px; }
+  html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { background-size: 72% auto; opacity: .08; }
 }
+html[data-site-theme="birthday-botanical"][data-theme="dark"] .birthday-surface-painting { opacity: .16; }
+html[data-site-theme="birthday-botanical"][data-theme="dark"] .verification-banner { background: #303a2c; }
+html[data-site-theme="birthday-botanical"][data-theme="dark"] .message-group.bubble-style-default.self .message-bubble:not(.is-media,.is-sticker,.is-activity,.is-statement,.is-forward-bundle,.is-link-preview) { background: #43523b; color: var(--text-primary); }

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { useModalFocus } from "../lib/modalFocus";
+import {BirthdaySurfaceArt} from './BirthdaySurfaceArt';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -53,6 +54,7 @@ export function ConfirmDialog({
   return createPortal(
     <div className="dialog-backdrop confirm-dialog-backdrop" onClick={() => { if (dismissible && !busy) onClose(); }} role="presentation">
       <section ref={root} tabIndex={-1} aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} aria-modal="true" className={`confirm-dialog${danger ? ' is-danger' : ''} ${className}`.trim()} onClick={(event) => event.stopPropagation()} role={kind === "alert" ? "alertdialog" : "dialog"}>
+        {!danger?<BirthdaySurfaceArt kind="dialog"/>:null}
         <div className="confirm-dialog-copy">
           <h2 id={titleId}>{title}</h2>
           {description ? <p id={descriptionId}>{description}</p> : null}

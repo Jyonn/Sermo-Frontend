@@ -6,6 +6,7 @@ import { useI18n } from "../lib/language";
 import { useDesktopPanels } from "./DesktopPanelWorkspace";
 import {useOverlayLayer,OverlayScope} from '../lib/overlayLayer';
 import { useModalFocus } from "../lib/modalFocus";
+import {BirthdaySurfaceArt} from './BirthdaySurfaceArt';
 
 const activeDrawerIds = new Set<string>();
 
@@ -286,6 +287,7 @@ export function SideDrawer({
         role={desktopPanel ? "region" : "dialog"}
         style={{ ...style, ...(fullscreen && !desktopPanel ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
       >
+        {!headerless&&!fullscreen?<BirthdaySurfaceArt kind="drawer"/>:null}
         {headerless ? (
           floatingBack || desktopPanel ? <button className={`drawer-floating-back${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
             <span className="material-symbols-outlined">{dismissIcon}</span>
