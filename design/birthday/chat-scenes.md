@@ -18,6 +18,8 @@ Branch: `design/birthday-chat-scenes`. This branch is for local review; do not d
 
 ## Review
 
+Candle/gift refinement: static SVG candle clusters sit along the conversation header's lower seam and on the outer rim of ordinary shared panels. A 26px gift sits on the composer seam, extending 16px upward without changing layout or receiving input. These decorations remain available with every selected background/bubble combination. No candle flicker, new timer, media or animation loop is introduced.
+
 ### Personalization matrix
 
 Each entry uses a separate fictional birthday recipient with saved personalization, rather than changing the default account. Both direct and group chats contain 18 messages, including a reply. Accounts have the initial growth ceremony acknowledged so that it does not interrupt review.
