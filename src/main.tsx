@@ -18,7 +18,6 @@ import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { MusicPlayerProvider } from "./lib/musicPlayer";
 import {BirthdayProvider} from './lib/birthday';
 import './styles/birthday-theme.css';
-import './styles/mobile-tab-headers.css';
 
 const PAGE_RELOAD_REASON_KEY = "sermo:diagnostics:reload-reason";
 const navigationEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;

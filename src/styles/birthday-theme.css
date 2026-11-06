@@ -30,42 +30,55 @@ html[data-site-theme="birthday-botanical"][data-theme="dark"] {
   --birthday-frame: rgb(199 208 184 / 30%);
 }
 html[data-site-theme="birthday-botanical"] body { background-color: var(--bg-canvas); }
-html[data-site-theme="birthday-botanical"] .festival-theme-mark {
-  display: inline-block;
-  width: 31px;
-  height: 28px;
-  background: var(--birthday-corner) center / contain no-repeat;
-  pointer-events: none;
-}
+html[data-site-theme="birthday-botanical"] .festival-theme-mark { display: none; }
 html[data-site-theme="birthday-botanical"] :is(.topbar, .tab-sticky-header, .square-feed-header, .drawer-topbar) {
   background-color: var(--bg-panel-strong);
   border-bottom-color: var(--birthday-frame);
 }
 html[data-site-theme="birthday-botanical"] :is(.confirm-dialog, .side-drawer, .bottom-sheet) {
   border-color: var(--birthday-frame);
-  outline: 1px solid var(--line-soft);
-  outline-offset: -7px;
 }
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) {
-  background-image: var(--birthday-corner);
-  background-position: right 10px top 6px;
-  background-size: 56px 56px;
-  background-repeat: no-repeat;
-}
-html[data-site-theme="birthday-botanical"] :is(.drawer-title-row, .sheet-title-row)::after {
-  content: "";
-  display: inline-block;
-  width: 29px;
-  height: 25px;
-  margin-inline-start: 8px;
-  vertical-align: middle;
-  flex-shrink: 0;
-  background: var(--birthday-corner) center / contain no-repeat;
-  pointer-events: none;
-}
-html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) .confirm-dialog-copy { padding-inline-end: 32px; }
 html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon {
   background: var(--birthday-emblem) center / contain no-repeat;
   border-radius: 0;
 }
 html[data-site-theme="birthday-botanical"] .feedback-state.empty .feedback-icon .material-symbols-outlined { opacity: 0; }
+
+/* The garden belongs to the conversation canvas, never to navigation or controls. */
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default {
+  isolation: isolate;
+  background: radial-gradient(ellipse at 100% 100%, color-mix(in srgb, var(--brand-primary) 7%, transparent), transparent 65%), var(--bg-canvas);
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 0 auto;
+  width: clamp(180px, 38%, 420px);
+  height: min(55%, 470px);
+  background: var(--birthday-hero) center bottom / cover no-repeat;
+  mask-image: linear-gradient(to top, #000, transparent 95%);
+  opacity: .14;
+  pointer-events: none;
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .message-scroll { background: transparent; }
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .composer {
+  background-color: color-mix(in srgb, var(--bg-surface) 94%, transparent);
+  border-top-color: var(--line-soft);
+}
+html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.self .message-bubble:not(.is-media, .is-sticker, .is-activity, .is-statement, .is-forward-bundle, .is-link-preview) {
+  background-color: color-mix(in srgb, var(--brand-primary) 15%, var(--bg-surface));
+  color: var(--text-primary);
+}
+html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.other .message-bubble:not(.is-media, .is-sticker, .is-activity, .is-statement, .is-forward-bundle, .is-link-preview) {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+html[data-site-theme="birthday-botanical"][data-theme="dark"] .chat-detail-scene.chat-background-default::before { opacity: .07; }
+@media (max-width: 900px) {
+  html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header { background: transparent; }
+  html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header::before {
+    background: color-mix(in srgb, var(--bg-canvas) 92%, transparent);
+    border-bottom-color: var(--line-soft);
+  }
+}

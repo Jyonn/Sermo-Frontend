@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.06.6",
+  "id": "2026.11.06.7",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
       "title": "更清爽的页面标题",
       "items": [
-        "生日祝福横幅精简为一行，手机端各页签标题移除背景及节庆装饰"
+        "恢复手机端滚动后通栏标题背景，生日花园装饰移至聊天画布，简化弹窗和抽屉标题"
       ]
     },
     "en": {
       "title": "Cleaner page headers",
       "items": [
-        "Birthday wishes now fit one line; mobile tab headers no longer show backgrounds or festive title ornaments"
+        "Restored full-width mobile headers on scroll and moved birthday garden decoration to the conversation canvas"
       ]
     }
   }
