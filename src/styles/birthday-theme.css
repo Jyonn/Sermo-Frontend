@@ -51,7 +51,7 @@ html[data-site-theme="birthday-botanical"] .bottom-sheet { isolation: isolate; b
 html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header { padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); }
 html[data-site-theme="birthday-botanical"] .bottom-sheet .sheet-header h3 { font: 600 24px/1.4 'Songti SC','Noto Serif SC',serif; }
 html[data-site-theme="birthday-botanical"] .sheet-handle { width: 36px; height: 3px; background: var(--birthday-rose); opacity: .65; }
-html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-painting { right: 0; top: 0; width: 185px; height: 210px; border-top-right-radius: 26px; opacity: .34; mask-image: linear-gradient(225deg,#000,transparent 70%); }
+html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-painting { right: 0; top: 0; width: 185px; height: 210px; border-top-right-radius: 26px; opacity: .34; mask-image: linear-gradient(to right,transparent,#000 45%),linear-gradient(to top,transparent,#000 50%); mask-composite: intersect; }
 html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-thread { top: 8px; left: -8px; width: calc(100% + 16px); height: 72px; opacity: .25; }
 html[data-site-theme="birthday-botanical"] .is-sheet .birthday-surface-knot { left: 24px; top: -12px; width: 34px; transform: rotate(9deg); }
 
@@ -60,7 +60,7 @@ html[data-site-theme="birthday-botanical"] body .side-drawer:not(.is-fullscreen)
 html[data-site-theme="birthday-botanical"] body .side-drawer:not(.is-fullscreen)>.drawer-body { background: transparent; }
 html[data-site-theme="birthday-botanical"] .drawer-topbar { background: transparent; border-bottom-color: var(--line-soft); }
 html[data-site-theme="birthday-botanical"] .drawer-title { font-family: 'Songti SC','Noto Serif SC',serif; font-size: 23px; font-weight: 600; }
-html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-painting { bottom: 0; right: 0; width: min(75%,300px); height: 300px; opacity: .22; mask-image: linear-gradient(315deg,#000,transparent 75%); }
+html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-painting { bottom: 0; right: 0; width: min(75%,300px); height: 300px; opacity: .22; mask-image: linear-gradient(to right,transparent,#000 45%),linear-gradient(to bottom,transparent,#000 50%); mask-composite: intersect; }
 html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-thread { bottom: 18px; left: 10px; width: calc(100% - 20px); height: 90px; opacity: .3; }
 html[data-site-theme="birthday-botanical"] .is-drawer .birthday-surface-knot { bottom: 28px; right: 26px; width: 32px; opacity: .65; }
 
@@ -69,7 +69,7 @@ html[data-site-theme="birthday-botanical"] :is(.simple-list:has(>.menu-link-row)
 html[data-site-theme="birthday-botanical"] :is(.simple-list,.setting-group)>:is(.simple-row,.setting-row):first-child { border-top-left-radius: 17px; border-top-right-radius: 17px; }
 html[data-site-theme="birthday-botanical"] :is(.simple-list,.setting-group)>:is(.simple-row,.setting-row):last-child { border-bottom-left-radius: 17px; border-bottom-right-radius: 5px; }
 html[data-site-theme="birthday-botanical"] .menu-profile-card { position: relative; isolation: isolate; border: 1px solid var(--line-soft); background: var(--bg-surface); border-radius: 22px 22px 6px 22px; padding: 22px; }
-html[data-site-theme="birthday-botanical"] .menu-profile-card::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--birthday-hero) right 55% / 200px auto no-repeat; opacity: .13; mask-image: linear-gradient(to left,#000,transparent 65%); pointer-events: none; }
+html[data-site-theme="birthday-botanical"] .menu-profile-card::before { content: ''; position: absolute; inset: 0 0 0 auto; width: min(65%,240px); z-index: -1; border-top-right-radius: inherit; border-bottom-right-radius: inherit; background: var(--birthday-hero) right 55% / cover no-repeat; opacity: .13; mask-image: linear-gradient(to right,transparent,#000 60%); pointer-events: none; }
 html[data-site-theme="birthday-botanical"] :is(.menu-growth-entry,.communication-entry-row .row-icon) { background: color-mix(in srgb,var(--brand-primary) 8%,var(--bg-surface)); color: var(--brand-primary); }
 
 /* Navigation stays clear; a full-width background fades in only with scrolling. */
@@ -79,7 +79,7 @@ html[data-site-theme="birthday-botanical"] .verification-banner-action { color: 
 
 /* Existing user-selected backgrounds and bubbles take priority over this default page. */
 html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default { isolation: isolate; background: var(--bg-canvas); }
-html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { inset: 0; background: var(--birthday-hero) right bottom / min(52%,440px) auto no-repeat; opacity: .1; mask-image: linear-gradient(315deg,#000,transparent 70%); }
+html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { inset: auto 0 0 auto; width: min(52%,440px); height: auto; aspect-ratio: 2 / 3; background: var(--birthday-hero) right bottom / cover no-repeat; opacity: .1; mask-image: linear-gradient(to right,transparent,#000 45%),linear-gradient(to bottom,transparent,#000 50%); mask-composite: intersect; }
 html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .message-scroll { background: transparent; }
 html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default .composer { background-color: color-mix(in srgb,var(--bg-surface) 97%,transparent); border-top-color: var(--line-soft); }
 html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.self .message-bubble:not(.is-media,.is-sticker,.is-activity,.is-statement,.is-forward-bundle,.is-link-preview) { background: #dce4cd; color: #34483b; }
@@ -87,6 +87,13 @@ html[data-site-theme="birthday-botanical"] .message-group.bubble-style-default.o
 html[data-site-theme="birthday-botanical"] .chat-list .chat-item.active { background: color-mix(in srgb,var(--brand-primary) 9%,transparent); }
 html[data-site-theme="birthday-botanical"] .desktop-conversation-header { background: var(--bg-surface); border-bottom-color: var(--line-soft); }
 html[data-site-theme="birthday-botanical"] .chat-main-pane { border-color: var(--line-soft); }
+/* Birthday chrome remains visible even when the conversation owns its own artwork. */
+html[data-site-theme="birthday-botanical"] .chat-mobile-layout { --chat-chrome-surface: var(--bg-surface); --chat-chrome-border: var(--line-soft); --chat-input-surface: var(--bg-elevated); }
+html[data-site-theme="birthday-botanical"] .topbar.conversation-topbar { background: var(--bg-surface); border-color: var(--line-soft); color: var(--text-primary); }
+html[data-site-theme="birthday-botanical"] .topbar.conversation-topbar :is(.chat-topbar-name,.chat-back-button,.message-actions .icon-button) { color: var(--text-primary); }
+html[data-site-theme="birthday-botanical"] .chat-detail-scene>.composer { border-top: 1px solid var(--birthday-rose); }
+html[data-site-theme="birthday-botanical"] .chat-detail-scene>.composer::after { content: ''; position: absolute; left: 17px; top: -9px; width: 32px; height: 22px; background: var(--birthday-rose); pointer-events: none; opacity: .8; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 48'%3E%3Cpath d='M30 21C11-3-8 8 12 23C17 27 26 23 31 22M33 21C51-3 72 8 51 23C46 27 38 23 33 22M31 24L21 43L28 39L31 45L33 25L36 45L40 38L47 42L34 24' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat; }
+html[data-site-theme="birthday-botanical"] :is(.desktop-conversation-header,.topbar.conversation-topbar)::after { content: ''; position: absolute; bottom: -1px; right: 18px; width: 110px; height: 8px; pointer-events: none; background: var(--birthday-thread); opacity: .65; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 8'%3E%3Cpath d='M0 6C25 6 32 0 52 4S86 8 110 1M0 8C25 8 32 2 52 6S86 10 110 3' stroke='black' stroke-width='.7' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
 @media (min-width:901px) {
   html[data-site-theme="birthday-botanical"] .bottom-sheet { border-radius: 24px 24px 8px 24px; }
 }
@@ -95,7 +102,7 @@ html[data-site-theme="birthday-botanical"] .chat-main-pane { border-color: var(-
   html[data-site-theme="birthday-botanical"] .shell-no-topbar .tab-sticky-header::before { background: color-mix(in srgb,var(--bg-canvas) 94%,transparent); border-bottom-color: var(--line-soft); }
   html[data-site-theme="birthday-botanical"] .confirm-dialog:not(.is-danger) { padding: 24px; }
   html[data-site-theme="birthday-botanical"] .drawer-title { font-size: 21px; }
-  html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { background-size: 72% auto; opacity: .08; }
+  html[data-site-theme="birthday-botanical"] .chat-detail-scene.chat-background-default::before { width: 72%; opacity: .08; }
 }
 html[data-site-theme="birthday-botanical"][data-theme="dark"] .birthday-surface-painting { opacity: .16; }
 html[data-site-theme="birthday-botanical"][data-theme="dark"] .verification-banner { background: #303a2c; }

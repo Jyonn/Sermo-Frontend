@@ -54,3 +54,29 @@ for title, kind, people, lines in scenes:
             Message.objects.filter(pk=message.pk).update(created_at=timezone.now()-timedelta(minutes=(len(lines)*4-index)*3))
             previous = message
     print(f'{title}: /birthday-preview/app/chats/{chat.pk}')
+
+# Separate accounts preserve each combination while reviewing without rewriting another case.
+from User.birthday import ZONE
+today = timezone.now().astimezone(ZONE).date()
+for key, label, background, bubble in [
+    ('night-ai', '夜景＋小哀', 'frienden-night', 'explorer-ai'),
+    ('garden-comic', '花园＋漫画', 'frienden-garden', 'comic'),
+    ('paper-vip', '纸张＋VIP', 'paper', 'vip'),
+]:
+    owner = User.objects.filter(space=space, name=f'阿言·{label}').first() or User.create(space, f'阿言·{label}', verified=True)
+    User.objects.filter(pk=owner.pk).update(chat_background_theme=background, chat_bubble_style=bubble, language='zh-CN', language_preference='zh-CN', growth_acknowledged_level=1, birthday_month=today.month, birthday_day=today.day, birthday_welcomed_year=today.year)
+    owner.refresh_from_db()
+    low, high = sorted([owner.pk, members[1].pk])
+    Friendship.objects.update_or_create(space=space, user_low_id=low, user_high_id=high, defaults={'status': FriendshipStatusChoice.ACCEPTED,'requested_by':owner})
+    for suffix, kind, people in [('direct',ChatTypeChoice.DIRECT,[owner,members[1]]),('group',ChatTypeChoice.GROUP,[owner,*members[1:]])]:
+        chat, _ = Chat.objects.get_or_create(space=space,title=f'{label}·{suffix}',chat_type=kind,defaults={'created_by':owner})
+        for index, person in enumerate(people):
+            ChatMember.objects.update_or_create(chat=chat,user=person,defaults={'status':ChatMemberStatusChoice.ACTIVE,'role':ChatMemberRoleChoice.OWNER if index==0 else ChatMemberRoleChoice.MEMBER,'joined_at':timezone.now()-timedelta(days=2)})
+        if not Message.objects.filter(chat=chat).exists():
+            previous = None
+            lines = scenes[0 if suffix=='direct' else 1][3]
+            for index, (author,text) in enumerate(lines*3):
+                message = Message.objects.create(chat=chat,user=people[author],type=MessageTypeChoice.TEXT,content=text,appearance={'chat_bubble_style':bubble,'avatar_frame_style':'none'},reply_to=previous if index==4 else None)
+                Message.objects.filter(pk=message.pk).update(created_at=timezone.now()-timedelta(minutes=(len(lines)*3-index)*3))
+                previous = message
+        print(f'{key}-{suffix}: user {owner.pk}, chat {chat.pk}, {background} / {bubble}')

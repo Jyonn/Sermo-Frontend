@@ -18,6 +18,20 @@ Branch: `design/birthday-chat-scenes`. This branch is for local review; do not d
 
 ## Review
 
+### Personalization matrix
+
+Each entry uses a separate fictional birthday recipient with saved personalization, rather than changing the default account. Both direct and group chats contain 18 messages, including a reply. Accounts have the initial growth ceremony acknowledged so that it does not interrupt review.
+
+| Entry prefix | Background | Saved message bubble |
+| --- | --- | --- |
+| `/api/__birthday__/night-ai-` | `frienden-night` | `explorer-ai` |
+| `/api/__birthday__/garden-comic-` | `frienden-garden` | `comic` |
+| `/api/__birthday__/paper-vip-` | `paper` | `vip` |
+
+Append `direct` or `group` to an entry prefix. The component preview links all six entries. Browser checks confirmed the actual background and bubble DOM classes for all three combinations at 393×852, and saved actual screenshots. Birthday chrome is independent of the default wallpaper: paper navigation, silk header seam and the rose input ribbon remain, without changing custom bubbles or painting over selected wallpapers. The conversation body naturally remains dominated by the selected look.
+
+The previous hard edges came from masking the entire profile card while only painting a small background tile, and from a diagonal mask leaving one side of the drawer artwork opaque. The profile art now has its own bounded layer. Drawer, sheet and default-chat art intersect horizontal and vertical alpha ramps at the actual artwork bounds. Desktop Menu and Basic Information drawer were visually verified with no vertical seam after this fix.
+
 Use the isolated preview backend and frontend at `http://localhost:5190`:
 
 - `/api/__birthday__/direct`: enter the birthday recipient's private conversation.
