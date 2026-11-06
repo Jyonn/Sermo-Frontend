@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.06.5",
+  "id": "2026.11.06.6",
   "publishedAt": "2026-11-06",
   "locales": {
     "zh-CN": {
-      "title": "更完整的生日庆祝",
+      "title": "更清爽的页面标题",
       "items": [
-        "生日欢迎补回飘落彩带，许愿后可继续进入友间，并精简说明"
+        "生日祝福横幅精简为一行，手机端各页签标题移除背景及节庆装饰"
       ]
     },
     "en": {
-      "title": "A fuller birthday celebration",
+      "title": "Cleaner page headers",
       "items": [
-        "Restored birthday ribbons, completed the wish-to-enter flow and removed extra explanatory copy"
+        "Birthday wishes now fit one line; mobile tab headers no longer show backgrounds or festive title ornaments"
       ]
     }
   }

@@ -1,4 +1,6 @@
 .birthday-editor,.birthday-letter-editor { display: grid; gap: 20px; padding: 8px 0 24px; }
+.birthday-banner-sentence { display: block; }
+.birthday-banner-sentence strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .birthday-date-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; }
 .birthday-date-wheels { margin: 0; border: 0; min-width: 0; padding: 8px 0; }
 .birthday-date-wheels .duration-wheel-scroll { height: 220px; padding-block: 88px; }

@@ -58,6 +58,5 @@ export function BirthdayReminder(){
   const userId=session?.user.user_id;
   if(!userId||!birthday.status||birthday.status.month&&!birthday.status.active||birthday.reminderDismissed)return null;
   const active=birthday.status.active;
-  const unread=birthday.status.letters.filter(letter=>!letter.opened_at).length;
-  return <><button className="verification-banner" type="button" onClick={()=>active?birthday.openWelcome():setOpen(true)}><div className="verification-banner-copy"><strong>{t(active?'birthday.happyToday':'birthday.title')}</strong><span>{active?(unread?t('birthday.unreadLetters',{count:unread}):t('birthday.reopen')):t('birthday.reminderHint')}</span></div><ForwardArrowIcon className="verification-banner-action"/></button><BirthdayEditor key={userId} open={open} onClose={()=>setOpen(false)}/></>;
+  return <><button className="verification-banner" type="button" onClick={()=>active?birthday.openWelcome():setOpen(true)}><div className={`verification-banner-copy${active?' birthday-banner-sentence':''}`}><strong>{t(active?'birthday.openWishes':'birthday.title')}</strong>{!active?<span>{t('birthday.reminderHint')}</span>:null}</div><ForwardArrowIcon className="verification-banner-action"/></button><BirthdayEditor key={userId} open={open} onClose={()=>setOpen(false)}/></>;
 }

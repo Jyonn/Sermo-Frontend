@@ -51,7 +51,6 @@ export function TabPageHeader({ title, syncing = false, status, actions, seconda
       <div className="page-toolbar">
         <div className="page-toolbar-title-status">
           <h2 className="panel-title">{title}</h2>
-          <span className="festival-theme-mark" aria-hidden="true" />
           <HeaderSyncIndicator syncing={syncing} />
           {status}
         </div>
