@@ -93,7 +93,7 @@ import type {SystemMessageContext} from '../lib/systemMessage';
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
-import { PlainAvatar, UserAvatar } from "../components/UserAvatar";
+import { BirthdayNameMark, PlainAvatar, UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
 import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -7393,7 +7393,7 @@ function LiveChatsPage({
         {chat.unread ? <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name"><span>{chat.title}</span>{!chat.submission && chat.official ? <OfficialBadge /> : null}{!chat.submission && chat.operator ? <OperatorBadge /> : null}</p>
+        <p className="chat-name"><span><BirthdayNameMark userId={chat.type === 'direct' && !chat.submission ? chat.detail.members.find(member => !member.isSelf)?.userId : undefined}/>{chat.title}</span>{!chat.submission && chat.official ? <OfficialBadge /> : null}{!chat.submission && chat.operator ? <OperatorBadge /> : null}</p>
         <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.submission && counterpartNames ? `${counterpartNames} · ` : ""}{chat.preview}</span></div>
       </div>
       <div className="chat-meta">

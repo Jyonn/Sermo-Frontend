@@ -1,0 +1,3 @@
+.user-avatar:has(>.birthday-avatar-crown) { position: relative; overflow: visible; }
+.birthday-avatar-crown { position: absolute; width: 76%; height: 48%; top: -25%; left: 12%; z-index: 3; pointer-events: none; overflow: visible; }
+.birthday-name-mark { display: inline-block; margin-inline-end: .3em; font-size: .95em; vertical-align: baseline; }

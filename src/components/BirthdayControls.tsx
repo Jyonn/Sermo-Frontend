@@ -55,13 +55,14 @@ export function BirthdayEditor({open,onClose}:{open:boolean;onClose:()=>void}){
 
 export function BirthdayProfileRow(){
   const {t}=useI18n();const {session}=useAuth();const birthday=useBirthday();const [open,setOpen]=useState(false);
+  if (!session?.user.verified) return null;
   return <><button className="simple-row menu-link-row" type="button" onClick={()=>setOpen(true)}><div className="row-main menu-key-cell"><strong>{t('birthday.title')}</strong></div><div className="menu-detail-value menu-detail-text">{birthday.status?.month&&birthday.status.day?birthdayLabel(birthday.status.month,birthday.status.day):t('birthday.unset')}</div><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button><BirthdayEditor key={session?.user.user_id??0} open={open} onClose={()=>setOpen(false)}/></>;
 }
 
 export function BirthdayReminder(){
   const {t}=useI18n();const {session}=useAuth();const birthday=useBirthday();const [open,setOpen]=useState(false);
   const userId=session?.user.user_id;
-  if(!userId||!birthday.status||birthday.status.month&&!birthday.status.active||birthday.reminderDismissed)return null;
+  if(!userId||!session?.user.verified||!birthday.status||birthday.status.month&&!birthday.status.active||birthday.reminderDismissed)return null;
   const active=birthday.status.active;
   return <><button className="verification-banner" type="button" onClick={()=>active?birthday.openWelcome():setOpen(true)}><div className={`verification-banner-copy${active?' birthday-banner-sentence':''}`}><strong>{t(active?'birthday.openWishes':'birthday.title')}</strong>{!active?<span>{t('birthday.reminderHint')}</span>:null}</div><ForwardArrowIcon className="verification-banner-action"/></button><BirthdayEditor key={userId} open={open} onClose={()=>setOpen(false)}/></>;
 }

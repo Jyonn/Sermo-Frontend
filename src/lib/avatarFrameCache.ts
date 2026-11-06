@@ -1,4 +1,5 @@
 import type { AvatarFrameStyle } from '../types';
+import {rememberPublicBirthday} from './publicBirthday';
 
 const KEY = 'sermo:user-avatar-frames:v1';
 const MAX_ENTRIES = 1200;
@@ -43,6 +44,7 @@ export function rememberAvatarFrames<T>(payload: T): T {
     if (!value || typeof value !== 'object') return;
     if (Array.isArray(value)) { value.forEach(visit); return; }
     const row = value as Record<string, unknown>;
+    rememberPublicBirthday(row);
     const id = row.user_id;
     const frame = row.avatar_frame_style as AvatarFrameStyle;
     if (typeof id === 'number' && Number.isSafeInteger(id) && id > 0 && styles.has(frame)) {

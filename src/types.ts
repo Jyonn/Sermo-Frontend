@@ -21,6 +21,7 @@ export interface ApiEnvelope<T> {
 }
 
 export interface TinyUserDTO {
+  birthday_until?: number | null;
   signature?: string;
   growth_honor?: GrowthHonorDTO | null;
   growth_level_name?: string;

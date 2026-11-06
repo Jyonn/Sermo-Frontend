@@ -5,6 +5,8 @@ import { avatarResourceKey, loadAvatarSource, peekAvatarSource, preloadAvatar } 
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AvatarFrameStyle } from "../types";
 import "./ExplorerPersonalization.css";
+import {usePublicBirthday} from '../lib/publicBirthday';
+import './BirthdayAvatar.css';
 
 interface GroupAvatarMember {
   name: string;
@@ -108,6 +110,7 @@ function groupLayoutClass(count: number) {
 }
 
 export function UserAvatar({ userId, name, uri, cacheKey, className, groupMembers, frame, surface = "person" }: UserAvatarProps) {
+  const birthday = usePublicBirthday(userId);
   const cachedFrame = useSyncExternalStore(subscribeAvatarFrames, () => cachedAvatarFrame(userId), () => undefined);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
@@ -151,8 +154,13 @@ export function UserAvatar({ userId, name, uri, cacheKey, className, groupMember
         {normalizedFrame === 'explorer-conan' && frameArt ? <svg aria-hidden="true" className="avatar-frame-conan-art" viewBox="17 23 607 577" preserveAspectRatio="none" focusable="false"><image href={frameArt} width="640" height="640" /></svg> : null}
         {hasFrame ? <span aria-hidden="true" className="avatar-frame-ornament"><i /><i /><i /><i /></span> : null}
       </span>
+      {birthday && !canShowGroup && surface === 'person' ? <svg className="birthday-avatar-crown" aria-hidden="true" viewBox="0 0 64 32" fill="none"><path d="m15 25 12-22 20 24" fill="#eee3cc" stroke="#ae9570"/><path d="m22 12 12 7m-16 1 24 5" stroke="#b8847c" strokeWidth="4"/><circle cx="27" cy="4" r="4" fill="#e9c281"/><path d="m49 8 0 12m-6-9 12 6m-12 0 12-6" stroke="#b4cbd1" strokeWidth="1.5"/><path d="M12 27q19-5 38 2" stroke="#faf2e1" strokeWidth="5" strokeLinecap="round"/></svg> : null}
     </div>
   );
+}
+
+export function BirthdayNameMark({userId}:{userId?:number}) {
+  return usePublicBirthday(userId) ? <span className="birthday-name-mark" aria-hidden="true">🎂</span> : null;
 }
 
 export function PlainAvatar(props: Omit<UserAvatarProps, "frame" | "surface">) {
