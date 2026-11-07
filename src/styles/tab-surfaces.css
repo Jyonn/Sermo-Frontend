@@ -13,6 +13,7 @@ body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.squar
   box-shadow: 0 8px 20px color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 @media (min-width:720px) {
+  .shell-authenticated { --tab-header-paint: var(--tab-panel-paint); }
   body .shell-authenticated.desktop-tab-shell > .page-stack,
   body .desktop-panel-workspace.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
   body .desktop-panel-workspace.shell-authenticated > .square-desktop-workspace > .square-feed-screen {

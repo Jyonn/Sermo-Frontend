@@ -6012,7 +6012,6 @@ html[data-theme="dark"] body :is(
   .bottom-sheet,
   .mobile-nav,
   .app-mobile-nav,
-  .mobile-chat-list-screen,
   .chat-mobile-layout > .panel.desktop-pane,
   .chat-mobile-layout .message-pane.chat-main-pane
 ) {
