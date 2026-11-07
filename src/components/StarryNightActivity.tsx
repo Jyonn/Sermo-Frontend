@@ -1,6 +1,7 @@
 const starryBanner = "https://api.sermo.jyonn.space/resources/assets/96/display/197e672103b9d0d35015623505bb5ce2e0cd9a51a657cb121173db61265dbfef";
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
+import {ActivityTitle} from './ActivityCampaignCard';
 import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";
 
 const formatDate = (timestamp: number) => new Intl.DateTimeFormat(undefined, {
@@ -23,7 +24,7 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
     <section className="starry-night-hero">
       <img alt="" src={starryBanner} />
       <div className="starry-night-orbit is-one" /><div className="starry-night-orbit is-two" />
-      <div className="starry-night-hero-copy"><small>FIVE NIGHTS · LIVING CANVAS</small><h2>{t("activity.starry.title")}</h2><p>{t("activity.starry.subtitle")}</p><span>{t("growth.rarity.legendary")} · COLLECTION</span></div>
+      <div className="starry-night-hero-copy"><small>FIVE NIGHTS · LIVING CANVAS</small><h2><ActivityTitle activity={activity} title={t("activity.starry.title")}/></h2><p>{t("activity.starry.subtitle")}</p><span>{t("growth.rarity.legendary")} · COLLECTION</span></div>
       <div className="starry-night-hero-progress"><strong>{data.streak_days}<small>/ {data.target_days}</small></strong><span>{data.reward_owned ? t("activity.starry.unlocked") : t("activity.starry.nightsLeft", { count: remaining })}</span></div>
     </section>
 

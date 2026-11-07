@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { activityPresentation } from "../lib/activityPresentation";
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
@@ -8,6 +8,7 @@ export function ActivityTitle({ activity, title }: { activity?: Pick<ActivityCam
   const { language } = useI18n();
   const [failed, setFailed] = useState(false);
   const image = activityPresentation(activity).title_art_url;
+  useEffect(() => setFailed(false), [image]);
   return image && language.startsWith("zh") && !failed
     ? <img className="campaign-title-art" src={image} alt={title} onError={() => setFailed(true)} />
     : <strong className="campaign-title-text">{title}</strong>;

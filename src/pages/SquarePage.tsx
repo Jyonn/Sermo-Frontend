@@ -2540,7 +2540,6 @@ export default function SquarePage() {
       {qqProfileUser ? <QqUserDialog onClose={() => setQqProfileUser(null)} user={qqProfileUser} /> : null}
       <SideDrawer
         className={`activity-drawer activity-transparent-header${activeActivity?.theme === "bgm" || activeActivity?.presentation || routeActivityKey === "main-character-bgm-2026" ? " is-custom-activity" : ""}${activeActivity?.theme === "bgm" || routeActivityKey === "main-character-bgm-2026" ? " is-bgm-activity" : ""}${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}${activeActivity?.theme === "starry-night" ? " is-starry-night" : ""}`}
-        dismissAction="back"
         headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null}
         historyMode="route"
         onClose={() => navigate("/app/square")}

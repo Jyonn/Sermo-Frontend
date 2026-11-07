@@ -1,0 +1,23 @@
+/* Shared transparent controls; the drawer body owns the entire canvas. */
+.side-drawer.has-floating-toolbar { grid-template-rows: minmax(0,1fr); --drawer-toolbar-space: calc(76px + env(safe-area-inset-top)); }
+.drawer-floating-toolbar { position: absolute; z-index: 30; top: max(14px,env(safe-area-inset-top)); left: max(16px,env(safe-area-inset-left)); right: max(16px,env(safe-area-inset-right)); display: flex; align-items: center; gap: 12px; min-height: 42px; background: transparent; pointer-events: none; }
+.drawer-floating-toolbar > * { pointer-events: auto; }
+.drawer-floating-identity { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+.drawer-floating-actions { display: flex; align-items: center; gap: 8px; }
+.drawer-surface-dismiss,
+.drawer-floating-actions > :is(.icon-button,.activity-drawer-share,.header-icon-button,.travel-map-access-header-button) { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; padding: 0; border: 1px solid color-mix(in srgb,var(--text-primary) 15%,transparent); border-radius: 50%; color: var(--text-primary); background: color-mix(in srgb,var(--bg-surface) 80%,transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 3px 12px #0000000a; cursor: pointer; }
+.drawer-surface-dismiss:hover { background: var(--bg-elevated); }
+.drawer-surface-dismiss:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
+.drawer-control-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.drawer-floating-toolbar .drawer-dismiss-desktop { display: none; }
+.drawer-floating-actions .drawer-topbar-action { min-height: 38px; padding: 7px 14px; border-radius: 999px; }
+.activity-drawer .drawer-floating-identity :is(.campaign-title-art,.activity-drawer-title-art) { width: auto; height: 34px; max-width: min(180px,calc(100vw - 152px)); object-fit: contain; object-position: left center; }
+.activity-drawer .drawer-floating-identity .campaign-title-text { font-size: 16px; }
+.activity-drawer .drawer-floating-identity { overflow: hidden; }
+.friendly-neighbor-hero-copy .campaign-title-art,
+.starry-night-hero-copy .campaign-title-art { display: block; max-width: 100%; width: 260px; height: auto; }
+@media(min-width:720px) {
+  .drawer-surface-dismiss { order: 3; }
+  .drawer-floating-toolbar .drawer-dismiss-mobile { display: none; }
+  .drawer-floating-toolbar .drawer-dismiss-desktop { display: block; }
+}

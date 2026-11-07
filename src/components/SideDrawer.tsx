@@ -7,6 +7,7 @@ import { useDesktopPanels } from "./DesktopPanelWorkspace";
 import {useOverlayLayer,OverlayScope} from '../lib/overlayLayer';
 import { useModalFocus } from "../lib/modalFocus";
 import {BirthdaySurfaceArt} from './BirthdaySurfaceArt';
+import './SideDrawer.css';
 
 const activeDrawerIds = new Set<string>();
 
@@ -282,7 +283,7 @@ export function SideDrawer({
         tabIndex={trapFocus ? -1 : undefined}
         aria-label={title}
         aria-modal={desktopPanel ? undefined : true}
-        className={`side-drawer${panels?.surfaceClassName ? ` ${panels.surfaceClassName}` : ""}${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
+        className={`side-drawer${panels?.surfaceClassName ? ` ${panels.surfaceClassName}` : ""}${headerless ? " is-headerless" : " has-floating-toolbar"}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
         onClick={(event) => event.stopPropagation()}
         role={desktopPanel ? "region" : "dialog"}
         style={{ ...style, ...(fullscreen && !desktopPanel ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
@@ -292,20 +293,19 @@ export function SideDrawer({
           floatingBack || desktopPanel ? <button className={`drawer-floating-back${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
             <span className="material-symbols-outlined">{dismissIcon}</span>
           </button> : null
-        ) : <header className="drawer-topbar">
-          <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
-            <button className={`chat-back-button drawer-back-button${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
-              <span className="material-symbols-outlined">{dismissIcon}</span>
+        ) : <header className="drawer-floating-toolbar">
+            <button className="drawer-surface-dismiss" onClick={requestClose} type="button">
+              <span className="drawer-dismiss-mobile material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              <span className="drawer-dismiss-mobile drawer-control-label">{t('common.back')}</span>
+              <span className="drawer-dismiss-desktop material-symbols-outlined" aria-hidden="true">close</span>
+              <span className="drawer-dismiss-desktop drawer-control-label">{t('common.close')}</span>
             </button>
-            {titleLeading ? <div className="drawer-title-leading">{titleLeading}</div> : null}
-            <div className="drawer-topbar-copy">
-              <div className="drawer-topbar-meta">
-                <div className="drawer-title-row">
-                  <h3 className="drawer-title">{title}</h3>
-                  {titleAccessory}
-                </div>
-              </div>
+            <div className="drawer-floating-identity">
+              {titleLeading}
+              <h3 className="drawer-control-label">{title}</h3>
+              {titleAccessory}
             </div>
+            <div className="drawer-floating-actions">
             {headerAction}
             {actionLabel && onAction ? (
               <button
@@ -317,10 +317,10 @@ export function SideDrawer({
                 {actionBusy ? t("common.processing") : actionLabel}
               </button>
             ) : null}
-          </div>
+            </div>
         </header>}
         {headerless && floatingAccessory ? <div className="drawer-floating-accessory">{floatingAccessory}</div> : null}
-        <div className="drawer-body">{children}</div>
+        <div className="drawer-body" style={headerless ? undefined : {paddingTop:'var(--drawer-toolbar-space)'}}>{children}</div>
       </aside>
     </div>,
     desktopPanel && panels?.host ? panels.host : document.body
