@@ -2,7 +2,7 @@
 .setting-select.setting-select-trigger{min-width:0}
 .guest-language-tool>.setting-select-trigger,.management-language-control>.setting-select-trigger{min-height:32px;padding:4px 6px;border:0;background:transparent}
 body .guest-language-tool:has(>.setting-select-trigger),.management-header-actions>.management-language-control:has(>.setting-select-trigger){display:flex;align-items:center;justify-content:center;gap:4px;width:auto;flex-basis:auto;padding-inline:8px}
-.landing-facade-topbar .guest-language-tool:has(>.setting-select-trigger){width:auto;flex-basis:auto}
+.landing-facade-topbar .guest-language-tool:has(>.setting-select-trigger){width:auto;flex-basis:auto;border-radius:999px}
 .guest-language-tool .setting-select-trigger>.setting-select-value,.management-language-control .setting-select-trigger>.setting-select-value{max-width:9ch}
 .setting-select-label{flex:1;min-width:0;font-size:14px;font-weight:700;line-height:1.6;overflow-wrap:anywhere}
 .setting-select-value{min-width:0;max-width:50%;color:var(--text-muted);font-size:13px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
