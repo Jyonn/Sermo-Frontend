@@ -143,10 +143,9 @@ export function ChronelleCalendar({ ownerId, previewAudience }: { ownerId: numbe
     </div>
     <div className="chronelle-agenda" aria-busy={displayState === "loading"}>
       {displayState === "ready" && known ? <div className="chronelle-availability">
-        <CalendarAvailabilityBar events={items} day={selectedDay} />
+        <CalendarAvailabilityBar events={events} day={selectedDay} upcoming />
       </div> : null}
       {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
     </div>
-    <small className="row-subtle">{t("chronelle.permissionFiltered")}</small>
   </section>;
 }

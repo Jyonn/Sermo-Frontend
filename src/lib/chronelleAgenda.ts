@@ -8,6 +8,19 @@ export interface AgendaEvent {
   location: string;
 }
 
+export function agendaRelevantEvent(events: AgendaEvent[], now: Date) {
+  const instant = now.getTime();
+  const rows = agendaEventsOn(events, agendaDay(now)).filter(event => agendaDate(event.end).getTime() > instant)
+    .sort((a,b) => agendaDate(a.start).getTime() - agendaDate(b.start).getTime());
+  return rows.find(event => agendaDate(event.start).getTime() <= instant) ?? rows[0];
+}
+
+export function agendaWindowRanges(events: AgendaEvent[], start: number, end: number) {
+  return events.map(event => ({start: Math.max(start, agendaDate(event.start).getTime()), end: Math.min(end, agendaDate(event.end).getTime())}))
+    .filter(range => range.end > range.start)
+    .map(range => ({start:(range.start-start)/(end-start)*100,end:(range.end-start)/(end-start)*100}));
+}
+
 export function agendaDayProgress(day: Date, now: Date) {
   const start = agendaDay(day).getTime();
   const end = agendaDay(day, 1).getTime();

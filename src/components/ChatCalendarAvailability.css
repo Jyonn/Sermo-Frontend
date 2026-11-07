@@ -55,3 +55,7 @@ html[data-theme="dark"] .chat-calendar-status-dot.is-busy { background: #d8a18c;
 .chat-calendar-popover .chronelle-calendar { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
 @keyframes chat-calendar-appear { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .chat-calendar-popover { animation: none; } }
+.chat-calendar-popover .chronelle-calendar { gap: 10px; }
+.chat-calendar-popover .chronelle-calendar-navigation { grid-template-columns: 32px minmax(0,1fr) 32px; }
+.chat-calendar-popover .chronelle-calendar-navigation button { width: 32px; min-height: 32px; }
+.chat-calendar-popover .chronelle-calendar-navigation .chronelle-selected-date { width: auto; }

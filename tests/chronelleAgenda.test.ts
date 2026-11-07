@@ -1,5 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {agendaRelevantEvent, agendaWindowRanges} from '../src/lib/chronelleAgenda.ts';
+test('chat summary prefers active events and never borrows tomorrow', () => {
+  const now = new Date('2026-11-07T13:00:00');
+  const rows = normalizeAgenda([
+    {id:'past',start:'2026-11-07T09:00:00',end:'2026-11-07T10:00:00'},
+    {id:'active',start:'2026-11-07T12:30:00',end:'2026-11-07T15:00:00'},
+    {id:'next',start:'2026-11-07T16:00:00',end:'2026-11-07T17:00:00'},
+    {id:'tomorrow',start:'2026-11-08T09:00:00',end:'2026-11-08T10:00:00'},
+  ]);
+  assert.equal(agendaRelevantEvent(rows,now)?.id,'active');
+  assert.equal(agendaRelevantEvent(rows,new Date('2026-11-07T15:30:00'))?.id,'next');
+  assert.equal(agendaRelevantEvent(rows,new Date('2026-11-07T20:00:00')),undefined);
+});
+test('six-hour availability clips ongoing and cross-midnight events', () => {
+  const start = new Date('2026-11-07T22:00:00').getTime();
+  const rows = normalizeAgenda([{id:'overnight',start:'2026-11-07T21:00:00',end:'2026-11-08T01:00:00'}, {id:'late',start:'2026-11-08T03:00:00',end:'2026-11-08T06:00:00'}]);
+  assert.deepEqual(agendaWindowRanges(rows,start,start+6*3600000),[{start:0,end:50},{start:5/6*100,end:100}]);
+});
 import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
 test("rolling dates stay bounded in DOM while browsing arbitrary historical and future dates", () => {
   for (const year of [1900, 2026, 2100]) {

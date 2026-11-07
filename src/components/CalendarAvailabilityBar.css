@@ -24,3 +24,6 @@ html[data-theme="dark"] .calendar-availability { --calendar-busy: #82a998; }
 }
 .calendar-availability-now { position: absolute; z-index: 2; inset-block: 0; width: 1px; background: var(--calendar-ink); }
 .calendar-availability-labels { display: flex; justify-content: space-between; color: var(--profile-muted, var(--text-muted)); font-size: .6rem; font-variant-numeric: tabular-nums; }
+.calendar-availability.is-upcoming { gap: 8px; }
+.calendar-availability.is-upcoming .calendar-availability-track { height: 12px; border-radius: 6px; background-image: repeating-linear-gradient(to right,transparent 0,transparent calc(16.666% - 1px),var(--calendar-paper) calc(16.666% - 1px),var(--calendar-paper) 16.666%); }
+.calendar-availability.is-upcoming .calendar-availability-busy { border-radius: 4px; inset-block: 2px; }

@@ -348,8 +348,10 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Backspace") debugMention("keydown", { keyCode: event.nativeEvent.keyCode, composing: event.nativeEvent.isComposing });
     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === "Enter") {
       event.preventDefault();
+      const mac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+      if (mac ? event.metaKey : event.ctrlKey) { insertLineBreak(); return; }
       if (!onSelectFirstMention()) onSubmit();
       return;
     }

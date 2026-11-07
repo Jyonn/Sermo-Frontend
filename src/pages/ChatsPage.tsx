@@ -7887,7 +7887,7 @@ function LiveChatsPage({
                   />
                 ) : (
                   <DesktopChatComposerDesk
-                    shortcutLabel={t("composer.desktopShortcut")}
+                    shortcutLabel={t("composer.desktopShortcut", {modifier: /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? 'Command' : 'Ctrl'})}
                     reply={replyingTo ? (
                       <div className="composer-reply-preview">
                         <div>

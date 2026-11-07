@@ -4,7 +4,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
-import { agendaAvailability, agendaDay, agendaDayDistance, type AgendaEvent } from "../lib/chronelleAgenda";
+import { agendaAvailability, agendaDay, agendaDayDistance, agendaRelevantEvent, type AgendaEvent } from "../lib/chronelleAgenda";
 import { profileAgenda } from "../lib/chronelleProfile";
 import { CalendarAvailabilityBar, useCalendarClock } from "./CalendarAvailabilityBar";
 import { ChronelleCalendar } from "./ChronelleCalendar";
@@ -123,13 +123,12 @@ export function ChatCalendarAvailability({ data, quick = false }: { data: ChatCa
       }
     } else if (summary.restOfDayFree) {
       forecast = t("chronelle.restDayFree");
-      if (summary.nextBusy !== null) forecast += ` · ${t("chronelle.nextBusyAt", { time: formatTime(summary.nextBusy) })}`;
     } else {
       forecast = t("chronelle.busyAfter", { time: formatTime(summary.nextBusy!), minutes: summary.changeMinutes });
       if (summary.nextBusyUntil !== null) forecast += ` · ${t("chronelle.busyUntil", { time: formatTime(summary.nextBusyUntil) })}`;
     }
   }
-  const nextEvent = data.events?.filter(event => new Date(event.start).getTime() > data.now.getTime()).sort((a, b) => a.start.localeCompare(b.start))[0];
+  const nextEvent = data.events ? agendaRelevantEvent(data.events, data.now) : undefined;
   const nextEventLabel = nextEvent ? `${formatTime(new Date(nextEvent.start).getTime())} · ${nextEvent.locked ? t("chronelle.busy") : nextEvent.title || t("chronelle.untitled")}` : summary ? t("chronelle.restDayFree") : status;
   const quickStatus = summary ? summary.restOfDayFree ? t("chronelle.restDayFree") : `${status} · ${t("chronelle.durationMinutes", { minutes: summary.changeMinutes })}` : status;
   return <>
@@ -152,8 +151,8 @@ export function ChatCalendarAvailability({ data, quick = false }: { data: ChatCa
             <div><small>{toneLabel}</small><strong>{status}</strong>{summary ? <span>{summary.busy ? t("chronelle.busyUntil", { time: formatTime(summary.busyUntil!) }) : t("chronelle.readyToChat")}</span> : null}</div>
           </div>
           {summary && data.events ? <>
-            <div className="chat-calendar-day-overview"><span>{t("chronelle.todayOverview")}</span><small>{t("chronelle.busyPercent", { percent: Math.round(summary.busyRatio * 100) })}</small></div>
-            <CalendarAvailabilityBar events={data.events} day={agendaDay(data.now)} now={data.now} />
+            <div className="chat-calendar-day-overview"><span>{t("chronelle.nextSixHours")}</span></div>
+            <CalendarAvailabilityBar events={data.events} day={agendaDay(data.now)} now={data.now} upcoming />
             <div className="chat-calendar-forecast"><span className="material-symbols-outlined" aria-hidden="true">{summary.busy ? "east" : "hourglass_empty"}</span><p>{forecast}</p></div>
           </> : <p className="chat-calendar-unavailable" role="status">{status}</p>}
           <button className="chat-calendar-open-details" type="button" onClick={() => setExpanded(true)}><span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>{t("chronelle.viewSchedule")}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>

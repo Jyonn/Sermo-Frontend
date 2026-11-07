@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.06.8",
-  "publishedAt": "2026-11-06",
+  "id": "2026.11.07.1",
+  "publishedAt": "2026-11-07",
   "locales": {
     "zh-CN": {
-      "title": "小哀语音气泡样式修复",
+      "title": "聊天输入与日程优化",
       "items": [
-        "小哀语音气泡的播放按钮、波形与转文字结果统一使用气泡主题配色，适配深浅模式"
+        "小哀语音气泡统一主题配色；Mac 使用 Command＋Enter 换行，Windows 使用 Ctrl＋Enter",
+        "日程优先显示当前任务，无今日后续安排时显示今日空闲，浮动日历更紧凑并展示六小时忙闲"
       ]
     },
     "en": {
-      "title": "Ai voice bubble styling fix",
+      "title": "Chat input and calendar refinements",
       "items": [
-        "Ai voice playback, waveforms and transcripts now match the bubble palette in light and dark modes"
+        "Ai voice bubbles match their theme; use Command+Enter on Mac or Ctrl+Enter on Windows for a new line",
+        "Calendar summaries prioritize ongoing events and today's availability, with a compact six-hour timeline"
       ]
     }
   }

@@ -24,5 +24,5 @@ export function ChatComposerLayout({ input, tools, toolCount, mobile, mobileInpu
   const { t } = useI18n();
   return mobile
     ? <MobileChatComposer input={mobileInput ?? <div className="mobile-quiet-input-wrap">{input}</div>} tools={tools} toolCount={toolCount}/>
-    : <DesktopChatComposerDesk input={input} tools={tools} shortcutLabel={t("composer.desktopShortcut")}/>;
+    : <DesktopChatComposerDesk input={input} tools={tools} shortcutLabel={t("composer.desktopShortcut", {modifier: /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? 'Command' : 'Ctrl'})}/>;
 }
