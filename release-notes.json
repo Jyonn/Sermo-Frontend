@@ -8,7 +8,7 @@
         "语音转写改为下方独立引用框，匹配各款气泡材质并保持底色清晰；语音长度随时长变化，长文本保持舒适阅读宽度",
         "修正首页语言选择按钮的异常椭圆外形",
         "七个主 Tab 的深色内容区统一使用原聊天列表底色，Header 保留独立层次，手机滚动后浮现背景",
-        "活动统一悬浮操作与精简排版，规则奖池收进下一级，更新星旋与 VIP 字标、八仙无字封面，VIP 改为抽屉",
+        "活动精简排版，规则奖池收进下一级并适配深浅色；友好邻居增加奖励进度，八仙移除联名标识，更新星旋与 VIP 字标",
         "活动无法领取时明确展示未满足的空间功能条件"
       ]
     },
@@ -18,7 +18,7 @@
         "Transcripts appear as separate readable quotes matching each bubble skin, with duration-based playback widths and comfortable text widths",
         "Corrected the stretched oval shape of the homepage language selector",
         "All seven main tabs share the original dark chat-list background, with distinct header surfaces and mobile scroll elevation",
-        "Activities gain focused layouts and secondary rules/reward panels, refreshed Starry Night and VIP lettering, a text-free Baxian cover, and a VIP drawer",
+        "Activities gain focused layouts and theme-aware rule/reward panels; Friendly Neighborhood adds reward milestones, Baxian drops co-branding, and Starry Night and VIP gain new lettering",
         "Unavailable activity claims clearly explain unmet space feature requirements"
       ]
     }

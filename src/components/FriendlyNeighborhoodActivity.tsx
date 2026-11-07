@@ -27,9 +27,17 @@ export function FriendlyNeighborhoodActivity({ activity, claiming, onClaim }: Pr
       <header><div><small>{t("activity.friendly.today")}</small><strong>{data.today_points} / {data.daily_limit}</strong></div><span>{data.next_reply_points ? t("activity.friendly.next", { count: data.next_reply_points }) : t("activity.friendly.dailyComplete")}</span></header>
       <div><i style={{ width: `${data.today_points / data.daily_limit * 100}%` }} /></div>
     </section>
+    <section className="friendly-reward-journey" aria-label={t('activity.friendly.rewards')}>
+      <header><h3>{t('activity.friendly.rewards')}</h3><span>{data.web_points}<small> / 100</small></span></header>
+      <div className="friendly-reward-meter"><progress aria-label={t('activity.friendly.webPoints')} value={progress} max={100}/>{data.rewards.map(reward=><span key={reward.key} className={data.web_points>=reward.threshold?'is-reached':''} style={{left:`${reward.threshold}%`}}><i/>{reward.threshold}</span>)}</div>
+      <div className="friendly-reward-stops">{data.rewards.map(reward=><article key={reward.key} className={reward.claimed?'is-owned':reward.claimable?'is-ready':''}>
+        <div className="friendly-reward-miniature">{reward.resource_type==='frame'?<img src={spiderAvatarFrame} alt=""/>:<img src={cityArt} alt=""/>}</div>
+        <div><strong>{t(reward.resource_type==='frame'?'activity.friendly.frame':'activity.friendly.profile')}</strong><small>{reward.threshold} {t('activity.friendly.points')}</small></div>
+        {reward.claimable&&!reward.claimed?<button type="button" disabled={claiming!==null} onClick={()=>onClaim(reward.key)}>{t(claiming===reward.key?'common.processing':'activity.friendly.unlock')}</button>:<span>{t(reward.claimed?'activity.friendly.owned':'activity.friendly.locked',{count:Math.max(0,reward.threshold-data.web_points)})}</span>}
+      </article>)}</div>
+    </section>
     <ActivityDetails rules={<section className="friendly-neighbor-rules"><ol><li>{t("activity.friendly.rule1")}</li><li>{t("activity.friendly.rule2")}</li><li>{t("activity.friendly.rule3")}</li></ol></section>} rewards={<section className="friendly-neighbor-rewards">
       <header><small>YOUR CITY. YOUR LEGACY.</small><h3>{t("activity.friendly.rewards")}</h3></header>
-      <div className="friendly-neighbor-track"><i style={{ width: `${progress}%` }} />{data.rewards.map((reward) => <article className={`${reward.claimed ? "is-claimed" : reward.claimable ? "is-ready" : ""}`} key={reward.key} style={{ left: `${reward.threshold}%` }}><span>{reward.threshold}</span></article>)}</div>
       {data.rewards.map((reward) => <article className={`friendly-neighbor-reward ${reward.key}`} key={reward.key}>
         <div className={`friendly-neighbor-reward-art${reward.resource_type === "frame" ? " is-avatar-frame" : ""}`}>
           {reward.resource_type === "frame"

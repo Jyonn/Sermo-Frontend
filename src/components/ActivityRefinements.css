@@ -10,6 +10,36 @@
 .activity-primary-action { min-height: 46px; padding: 12px 20px; border: 1px solid #e7ca7d55; border-radius: 14px; background: #e7ca7d; color: #14263b; font-weight: 750; cursor: pointer; }
 .activity-details-sheet { padding-bottom: max(24px,env(safe-area-inset-bottom)); }
 .activity-details-sheet > section { margin: 0; }
+.activity-details-sheet .friendly-neighbor-rules,
+.activity-details-sheet .friendly-neighbor-rewards { padding: 0; background: transparent; color: var(--text-primary); }
+.activity-details-sheet .friendly-neighbor-rules ol { margin: 0; color: var(--text-secondary); }
+.activity-details-sheet .friendly-neighbor-rewards header small,
+.activity-details-sheet .friendly-neighbor-reward small { color: var(--brand-primary); }
+.activity-details-sheet .friendly-neighbor-reward { background: var(--bg-elevated); border-color: var(--line-soft); color: var(--text-primary); }
+.activity-details-sheet .friendly-neighbor-reward p { color: var(--text-secondary); }
+.activity-details-sheet .friendly-neighbor-reward button:disabled { background: var(--bg-surface); color: var(--text-muted); }
+.friendly-reward-journey { margin: 22px 18px 0; padding: 20px 18px 8px; border: 1px solid #87b9d52b; border-radius: 20px; background: linear-gradient(140deg,#17374b99,#0b203699); }
+.friendly-reward-journey header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.friendly-reward-journey h3 { margin: 0; font-size: 15px; color: #e1eef5; }
+.friendly-reward-journey header > span { color: #80d8f3; font-size: 23px; font-weight: 750; }
+.friendly-reward-journey header small { color: #8baabd; font-size: 12px; font-weight: 500; }
+.friendly-reward-meter { position: relative; margin: 24px 12px 36px 0; height: 6px; }
+.friendly-reward-meter progress { display: block; appearance: none; width: 100%; height: 6px; overflow: hidden; border: 0; border-radius: 99px; background: #9dbed329; }
+.friendly-reward-meter progress::-webkit-progress-bar { background: #9dbed329; }
+.friendly-reward-meter progress::-webkit-progress-value { background: linear-gradient(90deg,#4b9dca,#89e2e5); }
+.friendly-reward-meter progress::-moz-progress-bar { background: #89e2e5; }
+.friendly-reward-meter > span { position: absolute; top: -4px; display: grid; justify-items: center; gap: 7px; transform: translateX(-50%); color: #8baabd; font-size: 10px; }
+.friendly-reward-meter i { width: 14px; height: 14px; border: 3px solid #28465a; border-radius: 50%; background: #698ba1; }
+.friendly-reward-meter .is-reached i { background: #9ce8eb; border-color: #46798c; box-shadow: 0 0 12px #89e2e544; }
+.friendly-reward-stops article { display: flex; gap: 12px; align-items: center; padding: 14px 0; border-top: 1px solid #87b9d51c; }
+.friendly-reward-miniature { display: grid; place-items: center; flex: 0 0 48px; height: 48px; overflow: hidden; border-radius: 12px; background: #16364b; }
+.friendly-reward-miniature img { width: 100%; height: 100%; object-fit: cover; }
+.friendly-reward-stops article > div:nth-child(2) { display: grid; gap: 4px; flex: 1; min-width: 0; }
+.friendly-reward-stops strong { color: #e1eef5; font-size: 13px; }
+.friendly-reward-stops small,.friendly-reward-stops article > span { color: #94afbf; font-size: 11px; }
+.friendly-reward-stops article > span { max-width: 7em; text-align: right; }
+.friendly-reward-stops button { padding: 8px 12px; border: 1px solid #85dce766; border-radius: 10px; background: #163e54; color: #a8edf3; font-size: 12px; cursor: pointer; }
+.friendly-reward-stops .is-owned > span { color: #8bdac0; }
 .activity-drawer .friendly-neighbor-activity,.activity-drawer .starry-night-activity { padding-top: 0; }
 .activity-drawer .starry-night-hero { aspect-ratio: auto; min-height: 440px; margin-top: 0; }
 .activity-drawer .starry-night-hero > img { height: 100%; }
@@ -25,9 +55,9 @@
 .activity-drawer .friendly-neighbor-hero-copy,.activity-drawer .friendly-neighbor-score { z-index: 2; }
 .activity-drawer .friendly-neighbor-activity > .activity-secondary-actions { padding-inline: 20px; }
 .activity-drawer .friendly-neighbor-hero-copy { bottom: 110px; }
-.activity-drawer .activity-detail > .activity-body-wordmark { margin: 0; padding: calc(86px + env(safe-area-inset-top)) 20px 8px; }
+.activity-drawer .activity-detail > .activity-body-wordmark { margin: 0; padding: calc(68px + env(safe-area-inset-top)) 20px 8px; }
 .activity-drawer .activity-detail > .activity-body-wordmark img { width: min(230px,76%); }
-.activity-drawer .activity-detail-masthead { position: relative; inset: auto; padding-inline: 20px; gap: 12px; }
+.activity-drawer .activity-detail-masthead { position: relative; inset: auto; padding-inline: 20px; gap: 12px; justify-content: flex-end; }
 .activity-drawer .activity-detail-visual { height: 48cqw; min-height: 180px; max-height: 330px; margin-top: -30px; }
 .square-spider-man-title { writing-mode: horizontal-tb !important; width: 58% !important; height: auto !important; top: 24% !important; left: 5% !important; }
 .square-spider-man-title img,.square-vip-banner-title img,.square-starry-night-title img { display: block; width: 100%; height: auto; object-fit: contain; }
