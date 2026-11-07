@@ -29,6 +29,7 @@ interface SideDrawerProps {
   historyMode?: "stack" | "route";
   onRouteOpen?: () => void;
   headerless?: boolean;
+  contentUnderToolbar?: boolean;
   fullscreen?: boolean;
   fullViewport?: boolean;
   floatingBack?: boolean;
@@ -73,6 +74,7 @@ export function SideDrawer({
   historyMode = "stack",
   onRouteOpen,
   headerless = false,
+  contentUnderToolbar = false,
   fullscreen = false,
   fullViewport = false,
   floatingBack = true,
@@ -320,7 +322,7 @@ export function SideDrawer({
             </div>
         </header>}
         {headerless && floatingAccessory ? <div className="drawer-floating-accessory">{floatingAccessory}</div> : null}
-        <div className="drawer-body" style={headerless ? undefined : {paddingTop:'var(--drawer-toolbar-space)'}}>{children}</div>
+        <div className="drawer-body" style={headerless ? undefined : {paddingTop:contentUnderToolbar ? 0 : 'var(--drawer-toolbar-space)'}}>{children}</div>
       </aside>
     </div>,
     desktopPanel && panels?.host ? panels.host : document.body

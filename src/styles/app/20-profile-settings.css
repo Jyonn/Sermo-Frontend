@@ -7525,3 +7525,5 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
     padding-left: 16px;
   }
 }
+.admin-activity-card .admin-activity-requirements { display: flex; align-items: flex-start; gap: 7px; padding: 10px 12px; border-radius: 10px; color: var(--text-primary); background: color-mix(in srgb,var(--brand-primary) 8%,var(--bg-surface)); font-size: 13px; line-height: 1.6; }
+.admin-activity-requirements .material-symbols-outlined { flex: none; font-size: 18px; margin-top: 1px; }

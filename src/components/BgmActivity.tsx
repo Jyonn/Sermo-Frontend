@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { localBgmUri } from "../lib/bgmMedia";
 import type { ActivityCampaignDTO } from "../types";
-import { ActivityCampaignCard } from "./ActivityCampaignCard";
+import { ActivityCampaignCard, ActivityTitle } from "./ActivityCampaignCard";
 import { BgmIcon } from "./BgmIcon";
 import { BgmKeychain } from "./BgmKeychain";
 import { BottomSheet } from "./BottomSheet";
@@ -70,6 +70,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
     catch { reset(); if (alive.current && request.current === current) setError(t("bgm.playFailed")); }
   }
   return <div className="bgm-activity">
+    <div className="activity-body-wordmark"><ActivityTitle activity={activity} title={activity.title}/></div>
     <header className="bgm-masthead"><span>{t("bgm.limited")}</span><time>{date(activity.starts_at)} — {activity.ends_at ? date(activity.ends_at) : "—"}</time></header>
     <section className="bgm-intro"><small>YOUR MOMENT, YOUR SOUND</small><h2>{t(data.joined ? "bgm.homeTitle" : "bgm.chooseTitle")}</h2><p>{t(data.joined ? "bgm.homeHint" : "bgm.chooseHint")}</p></section>
     {!data.ready ? <p className="bgm-feedback" role="status">{t("bgm.preparing")}</p> : !data.joined ? <>

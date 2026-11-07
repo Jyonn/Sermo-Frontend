@@ -7,6 +7,16 @@
 .drawer-surface-dismiss,
 .drawer-floating-actions > :is(.icon-button,.activity-drawer-share,.header-icon-button,.travel-map-access-header-button) { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; padding: 0; border: 1px solid color-mix(in srgb,var(--text-primary) 15%,transparent); border-radius: 50%; color: var(--text-primary); background: color-mix(in srgb,var(--bg-surface) 80%,transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 3px 12px #0000000a; cursor: pointer; }
 .drawer-surface-dismiss:hover { background: var(--bg-elevated); }
+.side-drawer.activity-drawer .drawer-floating-toolbar :is(.drawer-surface-dismiss,.activity-drawer-share) {
+  display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; padding: 0;
+  color: #f4f7f3; background: rgba(16,26,23,.68); border: 1px solid rgba(244,247,243,.24);
+  border-radius: 50%; box-shadow: 0 3px 12px #00000014; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.side-drawer.activity-drawer .drawer-floating-toolbar :is(.drawer-surface-dismiss,.activity-drawer-share):hover { background: rgba(16,26,23,.88); }
+.side-drawer.activity-drawer .drawer-floating-toolbar .material-symbols-outlined { font-size: 24px; }
+.activity-drawer :is(.bgm-activity,.friendly-neighbor-activity,.starry-night-activity,.number-duel,.activity-detail) { padding-top: calc(76px + env(safe-area-inset-top)); }
+.activity-body-wordmark { margin: 0 0 20px; }
+.activity-body-wordmark .campaign-title-art { width: min(260px,72%); height: auto; display: block; }
 .drawer-surface-dismiss:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 .drawer-control-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .drawer-floating-toolbar .drawer-dismiss-desktop { display: none; }

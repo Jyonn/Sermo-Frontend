@@ -899,8 +899,8 @@ export default function SpaceAdminDashboardPage() {
               <header><span><small>{activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
               <p>{localizedSummary}</p>
               <dl><div><dt>{t("admin.activityDuration")}</dt><dd>{durationDays === null ? t("admin.activityNoTimeLimit") : t("admin.activityDays", { count: durationDays })}</dd></div>{activity.ends_at ? <div><dt>{t("admin.activityEndsAt")}</dt><dd>{new Date(activity.ends_at * 1000).toLocaleString(getActiveLocale())}</dd></div> : null}</dl>
-              {!activity.claimed && activity.eligible===false ? <p className="admin-activity-requirements">{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
-              {!activity.claimed && !activity.mandatory ? <button disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
+              {!activity.claimed && activity.eligible===false ? <p role="note" id={`activity-blocked-${activity.key}`} className="admin-activity-requirements"><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
+              {!activity.claimed && !activity.mandatory ? <button aria-describedby={activity.eligible===false ? `activity-blocked-${activity.key}` : undefined} disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activity.eligible===false ? t('admin.activityUnavailable') : activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
               {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
             </article>;
           })}

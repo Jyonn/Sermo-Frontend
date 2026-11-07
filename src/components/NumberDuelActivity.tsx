@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {ActivityTitle} from './ActivityCampaignCard';
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
@@ -148,6 +149,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     setSheet(null); navigate(value ? `/app/number-duel/${value}` : `/app/square/activities/${activity.key}`);
   }
   return <div className="number-duel">
+    <div className="activity-body-wordmark"><ActivityTitle activity={activity} title={activity.title}/></div>
     <div className="duel-topline"><nav aria-label={t("duel.sections")}><button type="button" onClick={() => setSheet("rules")}>{t("duel.rulesShort")}</button><button type="button" onClick={() => setSheet("history")}>{t("duel.historyShort")}</button><button type="button" onClick={() => setSheet("leaders")}>{t("duel.leadersShort")}</button></nav><time>{lobby?.ends_at ? `${date(activity.starts_at)} — ${date(lobby.ends_at)}` : t("duel.week")}</time></div>
     {offline ? <p className="duel-notice" role="status">{t("duel.reconnecting")}<button type="button" onClick={() => void refresh()}>{t("duel.retry")}</button></p> : null}
     {error && !sheet ? <p className="duel-error" role="alert">{error}<button aria-label={t("common.close")} type="button" onClick={() => setError("")}>×</button></p> : null}
