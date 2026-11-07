@@ -706,6 +706,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
       className={`message-audio-unit ${from} ${className ?? ""}`.trim()}
       role="group"
     >
+      <div className="message-audio-playback-row" style={{width: `${170 + Math.min(60, Math.max(0, totalDuration)) * 2}px`}}>
       <div
         className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}
       >
@@ -762,6 +763,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           <span>{transcriptButtonLabel}</span>
         </button>
       ) : null}
+      </div>
       {transcript?.status === "ready" || transcript?.status === "failed" ? (
         <div
           aria-hidden={!transcriptVisible}

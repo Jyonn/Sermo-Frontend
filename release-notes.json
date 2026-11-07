@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.07.1",
+  "id": "2026.11.07.2",
   "publishedAt": "2026-11-07",
   "locales": {
     "zh-CN": {
-      "title": "聊天输入与日程优化",
+      "title": "语音转写展示优化",
       "items": [
-        "小哀语音气泡统一主题配色；Mac 使用 Command＋Enter 换行，Windows 使用 Ctrl＋Enter",
-        "日程优先显示当前任务，无今日后续安排时显示今日空闲，浮动日历更紧凑并展示六小时忙闲"
+        "语音转写改为气泡下方独立引用框，语音长度随时长变化，长文本保持舒适阅读宽度"
       ]
     },
     "en": {
-      "title": "Chat input and calendar refinements",
+      "title": "Voice transcript layout",
       "items": [
-        "Ai voice bubbles match their theme; use Command+Enter on Mac or Ctrl+Enter on Windows for a new line",
-        "Calendar summaries prioritize ongoing events and today's availability, with a compact six-hour timeline"
+        "Transcripts now appear as separate quotes below voice bubbles, with duration-based playback widths and readable text widths"
       ]
     }
   }
