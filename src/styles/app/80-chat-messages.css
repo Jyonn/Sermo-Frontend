@@ -544,18 +544,35 @@
   max-width: min(320px, 100%);
   clip-path: none;
 }
-.message-audio-unit > .message-audio-transcript-reveal > div { overflow: hidden; }
+.message-audio-unit > .message-audio-transcript-reveal > div { overflow: hidden; border-radius: var(--voice-quote-radius, 9px); background: var(--bg-surface); }
 .message-audio-unit > .message-audio-transcript-reveal.is-open { margin-top: 8px; }
+.message-group.other .message-audio-unit {
+  --voice-quote-bg: var(--bubble-skin-other-bg, var(--message-other-surface));
+  --voice-quote-ink: var(--bubble-skin-other-color, var(--text-primary));
+  --voice-quote-border: var(--bubble-skin-other-border, var(--line-soft));
+  --voice-quote-radius: var(--bubble-skin-other-radius, 9px);
+}
+.message-group.self .message-audio-unit {
+  --voice-quote-bg: var(--bubble-skin-self-bg, var(--message-self-surface));
+  --voice-quote-ink: var(--bubble-skin-self-color, #eef4fa);
+  --voice-quote-border: var(--bubble-skin-self-border, var(--line-soft));
+  --voice-quote-radius: var(--bubble-skin-self-radius, 9px);
+}
 .message-group:is(.self,.other) .message-audio-unit:is(.self,.other) .message-audio-transcript {
   margin: 0;
   padding: 9px 12px;
-  border: 1px solid color-mix(in srgb, var(--bubble-theme-color, var(--text-primary)) 12%, transparent);
-  border-inline-start: 3px solid color-mix(in srgb, var(--bubble-theme-accent, var(--brand-primary)) 60%, var(--text-muted));
-  border-radius: 9px;
-  color: var(--bubble-theme-color, var(--text-primary));
-  background: color-mix(in srgb, var(--bubble-theme-surface, var(--bg-panel)) 85%, var(--bg-canvas));
+  border: 1px solid var(--voice-quote-border);
+  border-inline-start: 3px solid var(--voice-quote-border);
+  border-radius: var(--voice-quote-radius);
+  color: var(--voice-quote-ink);
+  /* Bubble skins may be layered gradients, not colors. Keep their full paint
+     and put an opaque surface beneath translucent layers for any wallpaper. */
+  background: var(--voice-quote-bg);
   box-shadow: none;
   animation: none;
 }
+.message-group:is(.bubble-style-typewriter,.bubble-style-terminal,.bubble-style-receipt) .message-audio-transcript p { font-family: "JetBrains Mono", monospace; }
+.message-group.bubble-style-comic .message-audio-unit:is(.self,.other) .message-audio-transcript { border-width: 2px 2px 2px 4px; }
+.message-group.bubble-style-receipt .message-audio-unit:is(.self,.other) .message-audio-transcript { border-block-style: dashed; }
 .message-group .message-audio-unit .message-audio-transcript p { font-size: .82rem; font-weight: 400; line-height: 1.65; }
 .message-group.bubble-style-receipt .message-bubble.is-audio:has(.message-audio-unit)::before { content: none; }

@@ -5,13 +5,13 @@
     "zh-CN": {
       "title": "语音转写展示优化",
       "items": [
-        "语音转写改为气泡下方独立引用框，语音长度随时长变化，长文本保持舒适阅读宽度"
+        "语音转写改为下方独立引用框，匹配各款气泡材质并保持底色清晰；语音长度随时长变化，长文本保持舒适阅读宽度"
       ]
     },
     "en": {
       "title": "Voice transcript layout",
       "items": [
-        "Transcripts now appear as separate quotes below voice bubbles, with duration-based playback widths and readable text widths"
+        "Transcripts appear as separate readable quotes matching each bubble skin, with duration-based playback widths and comfortable text widths"
       ]
     }
   }
