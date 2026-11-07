@@ -1,7 +1,6 @@
-.square-community-shell{--square-canvas:#f7f7f4}
+.square-community-shell{--square-canvas:transparent}
 .square-community-shell.desktop-tab-shell>.square-desktop-workspace{--desktop-square-header-height:60px}
-[data-theme="dark"] .square-community-shell{--square-canvas:#19191c}
-.square-community-shell,.square-community-shell .square-desktop-workspace.is-square,.square-community-shell .square-feed-screen,.square-community-shell .square-workspace-surface{background:var(--square-canvas)!important;background-image:none!important}
+.square-community-shell,.square-community-shell .square-workspace-surface{background:transparent}
 .square-feed-header{position:sticky;top:0;z-index:25;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,60%) minmax(0,1fr);align-items:center;min-height:60px;padding:6px 12px;border-bottom:1px solid color-mix(in srgb,var(--line-soft) 55%,transparent);background:var(--square-canvas);isolation:isolate}
 .square-feed-header-side{display:flex;align-items:center;justify-content:center;min-width:0}
 .square-feed-header-channels{min-width:0;display:flex;justify-content:center}

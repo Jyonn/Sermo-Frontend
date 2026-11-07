@@ -1,0 +1,51 @@
+/* One material system for Chats, Square, Submissions, Research, Contacts,
+   Developer and Menu. Content cards and conversation wallpapers stay local. */
+.shell-authenticated {
+  --tab-header-paint: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+  --tab-panel-paint: var(--bg-elevated);
+}
+body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
+  isolation: isolate;
+  background: var(--tab-header-paint);
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+@media (min-width:720px) {
+  body .shell-authenticated.desktop-tab-shell > .page-stack,
+  body .desktop-panel-workspace.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
+  body .desktop-panel-workspace.shell-authenticated > .square-desktop-workspace > .square-feed-screen {
+    background: var(--tab-panel-paint);
+    border: 1px solid var(--line-soft);
+    border-radius: 20px;
+  }
+}
+@media (max-width:719px) {
+  body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header)::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: calc((100vw - 100%) / -2);
+    right: calc((100vw - 100%) / -2);
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--tab-sticky-elevation,0);
+    background: var(--tab-header-paint);
+    border-bottom: 1px solid var(--line-soft);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--text-primary) 4%, transparent);
+  }
+}
+body .shell.shell-authenticated .square-workspace-surface { background: transparent; }
+@media (max-width:719px) {
+  body .shell.shell-authenticated .square-feed-screen { background: transparent; }
+}
