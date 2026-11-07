@@ -14,7 +14,7 @@ export { BgmKeychain } from "./BgmKeychain";
 export function BgmBanner({ onClick, activity }: { onClick: () => void; activity?: ActivityCampaignDTO }) {
   const { t, language } = useI18n();
   const title = activity ? (language.startsWith("zh") ? activity.title : activity.title_en || activity.title) : t("bgm.bannerTitle");
-  return <ActivityCampaignCard activity={activity ?? { key: "main-character-bgm-2026", theme: "bgm" }} title={title} eyebrow={t("bgm.limited")} hint={t("bgm.bannerHint")} className="square-activity-banner" onClick={onClick} />;
+  return <ActivityCampaignCard activity={activity ?? { key: "main-character-bgm-2026", theme: "bgm" }} progress={activity?.bgm ? {value:activity.bgm.tracks.filter(track=>track.owned).length,max:activity.bgm.tracks.length}:undefined} title={title} eyebrow={t("bgm.limited")} hint={t("bgm.bannerHint")} className="square-activity-banner" onClick={onClick} />;
 }
 
 export function BgmActivity({ activity, onUpdate, onTask }: { activity: ActivityCampaignDTO; onUpdate: (activity: ActivityCampaignDTO) => void; onTask: (kind: string) => void }) {
@@ -82,7 +82,8 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
       {next ? <aside className="bgm-next"><BgmIcon name="music_note" /><div><strong>{t("bgm.nextTrack", { title: next.title })}</strong><span>{t("bgm.remaining", { days: Math.max(0, next.days - data.active_days), points: Math.max(0, next.points - data.points) })}</span></div></aside> : <p className="bgm-complete">{t("bgm.complete")}</p>}
     </>}
     <nav className="bgm-secondary-menu" aria-label={t("bgm.sections")}>
-      {data.joined ? <><button onClick={() => setPanel("tracks")} type="button"><BgmIcon name="music_note" />{t("bgm.tracks")}</button><button onClick={() => setPanel("tasks")} type="button"><BgmIcon name="edit_square" />{t("bgm.tasks")}</button></> : null}
+      <button onClick={() => setPanel("tracks")} type="button"><BgmIcon name="music_note" />{t("bgm.tracks")}</button>
+      {data.joined ? <button onClick={() => setPanel("tasks")} type="button"><BgmIcon name="edit_square" />{t("bgm.tasks")}</button> : null}
       <button onClick={() => setPanel("rules")} type="button"><BgmIcon name="chat_bubble" />{t("bgm.rulesShort")}</button>
     </nav>
     {data.joined ? <button className="bgm-settings-link" onClick={() => navigate("/app/menu?panel=personalization")} type="button">{t("bgm.settingsLocation")}<BgmIcon name="arrow_forward" /></button> : null}

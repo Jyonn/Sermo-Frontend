@@ -1,6 +1,7 @@
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import {ActivityTitle} from './ActivityCampaignCard';
+import {ActivityDetails} from './ActivityDetails';
 const cityArt = "https://api.sermo.jyonn.space/resources/assets/83/display/6bf6d8746a239a5361f2aa67f6fd05b5d323602337d303d8d4baa2b2748884fc";
 const spiderAvatarFrame = "https://api.sermo.jyonn.space/resources/assets/86/display/83de29044d1c4221b1a112452e9b61692a6e74fbc23fbe334ce736be7aaf9c3c";
 
@@ -26,7 +27,7 @@ export function FriendlyNeighborhoodActivity({ activity, claiming, onClaim }: Pr
       <header><div><small>{t("activity.friendly.today")}</small><strong>{data.today_points} / {data.daily_limit}</strong></div><span>{data.next_reply_points ? t("activity.friendly.next", { count: data.next_reply_points }) : t("activity.friendly.dailyComplete")}</span></header>
       <div><i style={{ width: `${data.today_points / data.daily_limit * 100}%` }} /></div>
     </section>
-    <section className="friendly-neighbor-rewards">
+    <ActivityDetails rules={<section className="friendly-neighbor-rules"><ol><li>{t("activity.friendly.rule1")}</li><li>{t("activity.friendly.rule2")}</li><li>{t("activity.friendly.rule3")}</li></ol></section>} rewards={<section className="friendly-neighbor-rewards">
       <header><small>YOUR CITY. YOUR LEGACY.</small><h3>{t("activity.friendly.rewards")}</h3></header>
       <div className="friendly-neighbor-track"><i style={{ width: `${progress}%` }} />{data.rewards.map((reward) => <article className={`${reward.claimed ? "is-claimed" : reward.claimable ? "is-ready" : ""}`} key={reward.key} style={{ left: `${reward.threshold}%` }}><span>{reward.threshold}</span></article>)}</div>
       {data.rewards.map((reward) => <article className={`friendly-neighbor-reward ${reward.key}`} key={reward.key}>
@@ -38,7 +39,6 @@ export function FriendlyNeighborhoodActivity({ activity, claiming, onClaim }: Pr
         <div><small>{reward.threshold} {t("activity.friendly.points")}</small><strong>{t(reward.resource_type === "frame" ? "activity.friendly.frame" : "activity.friendly.profile")}</strong><p>{t(reward.resource_type === "frame" ? "activity.friendly.frameHint" : "activity.friendly.profileHint")}</p></div>
         <button disabled={!reward.claimable || claiming !== null} onClick={() => onClaim(reward.key)} type="button">{reward.claimed ? t("activity.friendly.owned") : reward.claimable ? (claiming === reward.key ? t("common.processing") : t("activity.friendly.unlock")) : t("activity.friendly.locked", { count: Math.max(0, reward.threshold - data.web_points) })}</button>
       </article>)}
-    </section>
-    <section className="friendly-neighbor-rules"><h3>{t("activity.friendly.rules")}</h3><ol><li>{t("activity.friendly.rule1")}</li><li>{t("activity.friendly.rule2")}</li><li>{t("activity.friendly.rule3")}</li></ol></section>
+    </section>}/>
   </div>;
 }

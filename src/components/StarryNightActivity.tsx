@@ -2,12 +2,8 @@ const starryBanner = "https://api.sermo.jyonn.space/resources/assets/96/display/
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import {ActivityTitle} from './ActivityCampaignCard';
+import {ActivityDetails} from './ActivityDetails';
 import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";
-
-const formatDate = (timestamp: number) => new Intl.DateTimeFormat(undefined, {
-  month: "2-digit",
-  day: "2-digit",
-}).format(new Date(timestamp * 1000));
 
 export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }: { activity: ActivityCampaignDTO; claiming: boolean; onClaim: () => void; onConfigure: () => void }) {
   const { t } = useI18n();
@@ -17,10 +13,6 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
   const progress = Math.min(100, data.streak_days / Math.max(1, data.target_days) * 100);
 
   return <div className="starry-night-activity">
-    <section className="starry-night-masthead">
-      <div className="starry-night-brand"><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=2" /></span><i /><b>星夜观测局</b></div>{/* i18n-ignore: campaign identity */}
-      <div className="starry-night-index"><span>{t("activity.starry.rules")}</span><time>{formatDate(activity.starts_at)} — {activity.ends_at ? formatDate(activity.ends_at) : "∞"}</time></div>
-    </section>
     <section className="starry-night-hero">
       <img alt="" src={starryBanner} />
       <div className="starry-night-orbit is-one" /><div className="starry-night-orbit is-two" />
@@ -41,7 +33,7 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
       <p>{data.reward_owned ? t("activity.starry.completeHint") : data.reward_claimable ? t("activity.starry.rewardReady") : t("activity.starry.continueHint", { count: remaining })}</p>
     </section>
 
-    <section className="starry-night-reward-stage">
+    <ActivityDetails primary={data.reward_claimable?<button className="activity-primary-action" disabled={claiming} onClick={onClaim} type="button">{t(claiming?'common.processing':'activity.starry.claimReward')}</button>:data.reward_owned?<button className="activity-primary-action" onClick={onConfigure} type="button">{t('activity.configureReward')}</button>:undefined} rules={<section className="starry-night-rules"><ol><li><p>{t('activity.starry.rule1')}</p></li><li><p>{t('activity.starry.rule2')}</p></li></ol></section>} rewards={<section className="starry-night-reward-stage">
       <header><small>COLLECTOR REWARD</small><h3>{t("menu.themeStarryNight")}</h3><p>{t("activity.starry.rewardHint")}</p></header>
       <div className="starry-night-chat-preview">
         <FriendenLivingWallpaper compact theme="starry-night" />
@@ -51,8 +43,6 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
         <b>{t("growth.rarity.legendary")}</b>
       </div>
       <footer><div><span>{data.reward_owned ? t("activity.starry.unlocked") : data.reward_claimable ? t("activity.starry.rewardReady") : t("activity.starry.reward")}</span><small>{t("activity.starry.permanent")}</small></div>{data.reward_owned ? <button onClick={onConfigure} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button> : data.reward_claimable ? <button disabled={claiming} onClick={onClaim} type="button">{claiming ? t("common.processing") : t("activity.starry.claimReward")}<span className="material-symbols-outlined">redeem</span></button> : <span className="starry-night-locked"><span className="material-symbols-outlined">lock</span>{remaining}</span>}</footer>
-    </section>
-
-    <section className="starry-night-rules"><header><span>HOW TO OBSERVE</span><strong>{t("activity.starry.rules")}</strong></header><ol><li><b>01</b><p>{t("activity.starry.rule1")}</p></li><li><b>02</b><p>{t("activity.starry.rule2")}</p></li></ol></section>
+    </section>}/>
   </div>;
 }

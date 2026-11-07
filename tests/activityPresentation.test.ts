@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 test('all built-in activity themes resolve dedicated navigation lettering', () => {
-  for (const theme of ['explorer','number_duel','bgm','baxian','spider-man-4','starry-night']) {
+  for (const theme of ['explorer','number_duel','bgm','baxian','spider-man-4','starry-night','permanent-vip']) {
     assert.ok(activityPresentation({theme}).title_art_url, theme);
   }
   assert.notEqual(activityPresentation({theme:'spider-man-4'}).title_art_url,activityPresentation({theme:'starry-night'}).title_art_url);

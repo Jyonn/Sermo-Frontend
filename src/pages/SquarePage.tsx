@@ -20,6 +20,7 @@ import { ExplorerActivity, ExplorerBanner } from "../components/ExplorerActivity
 import { BgmActivity, BgmBanner } from "../components/BgmActivity";
 import { NumberDuelActivity } from "../components/NumberDuelActivity";
 import { ActivityCampaignCard, ActivityTitle } from "../components/ActivityCampaignCard";
+import {ActivityDetails} from '../components/ActivityDetails';
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -81,7 +82,7 @@ import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO,
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 const baxianActivityLogo = "https://api.sermo.jyonn.space/resources/assets/81/display/e59634bb5f5993dc23ecb4472a4c2eb8250b36498493ec467a0a4b5bfc50054b";
 const baxianActivityTitle = "https://api.sermo.jyonn.space/resources/assets/97/display/ae7c175937ef04783fd8b797d59ae536a837464051885c7b1d4be815869c5cab";
-const baxianActivityBanner = "https://api.sermo.jyonn.space/resources/assets/82/display/69ce761f6e5da700e38f520e0d28baf0d6b117dc9a685735dc2723541bd8b847";
+const baxianActivityBanner = "/assets/activity/baxian-banner-clean.webp";
 const spiderMan4PreviewBanner = "https://api.sermo.jyonn.space/resources/assets/95/display/04cb9a19de2826fb02e226e25db209748b37da57da5aa389b9c99a5027c5f7dd";
 const starryNightBanner = "https://api.sermo.jyonn.space/resources/assets/96/display/197e672103b9d0d35015623505bb5ce2e0cd9a51a657cb121173db61265dbfef";
 const tieguaiLi = "https://api.sermo.jyonn.space/resources/assets/92/display/7a3700a814de2c54cf8e004cccb5228c0de74646799a4a43a9ec9e9667ea06ee";
@@ -2296,7 +2297,7 @@ export default function SquarePage() {
             {showVipCampaign && vipCampaign ? <SquareActivityTile activity={{participation:vipCampaign.participation}}><button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
               {claimableActivityKeys.includes("vip:founding-100") ? <span className="square-activity-attention-tag">{t("activity.pendingClaim")}</span> : null}
               <span className="square-vip-banner-index">FRIENDEN · FOUNDING 100</span>
-              <strong className="square-vip-banner-title">{t("vip.bannerTitle")}</strong>
+              <strong className="square-vip-banner-title"><ActivityTitle activity={{key:'permanent-vip-founding-100',theme:'permanent-vip'}} title={t('vip.campaignTitle')}/></strong>
               <span className="square-vip-banner-number">{String(vipCampaign.slot ?? Math.max(1, 100 - vipCampaign.remaining)).padStart(3, "0")}</span>
               <span className="square-vip-banner-seal"><b>{vipCampaign.claimed_by_user ? vipCampaign.slot : vipCampaign.remaining}</b><small>{vipCampaign.claimed_by_user ? "VIP" : t("vip.remaining", { count: vipCampaign.remaining })}</small></span>
               <span className="square-vip-banner-reward"><i /><span><small>{t("vip.bannerOwnership")}</small><strong>{t("vip.bannerRewards")}</strong></span></span>
@@ -2306,7 +2307,7 @@ export default function SquarePage() {
               {spiderManActivity.newly_claimed || claimableActivityKeys.includes(spiderManActivity.key) ? <span className="square-activity-attention-tag">{spiderManActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
               <img alt="" aria-hidden="true" className="square-spider-man-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-live"><i />{t("admin.activityStatus.active")}</span>
-              <strong className="square-spider-man-title">{t("activity.friendly.bannerTitle")}</strong>
+              <strong className="square-spider-man-title"><ActivityTitle activity={spiderManActivity} title={t('activity.friendly.title')}/></strong>
               <span className="square-spider-man-web" aria-hidden="true" />
               <span className="square-spider-man-score"><b>{spiderManActivity.friendly_neighbor?.web_points ?? 0}</b><span>{t("activity.friendly.webPoints")}<small>{t("activity.friendly.bannerNext")}</small></span></span>
               <span className="square-spider-man-rewards">{(spiderManActivity.friendly_neighbor?.rewards?.length ? spiderManActivity.friendly_neighbor.rewards : [
@@ -2321,7 +2322,7 @@ export default function SquarePage() {
               <span className="square-starry-night-rarity">{t("growth.rarity.legendary")} · COLLECTION</span>
               <span className="square-starry-night-orbit" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i className={index < (starryNightActivity.starry_night?.streak_days ?? 0) ? "is-lit" : ""} key={index}>★</i>)}</span>
               <span className="square-starry-night-count"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b><small> / {starryNightActivity.starry_night?.target_days ?? 5} {t("activity.starry.bannerNights")}</small></span>
-              <span className="square-starry-night-title"><small>{starryNightActivity.starry_night?.window_start ?? "20:00"}—{starryNightActivity.starry_night?.window_end ?? "24:00"}</small><strong>{t("activity.starry.title")}</strong></span>
+              <span className="square-starry-night-title"><small>{starryNightActivity.starry_night?.window_start ?? "20:00"}—{starryNightActivity.starry_night?.window_end ?? "24:00"}</small><strong><ActivityTitle activity={starryNightActivity} title={t('activity.starry.title')}/></strong></span>
               <span className="square-starry-night-reward"><small>{t("activity.starry.bannerRewardAction")}</small><b>{t("activity.starry.bannerRewardName")}</b></span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button></SquareActivityTile> : null}
@@ -2544,7 +2545,7 @@ export default function SquarePage() {
         headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null}
         historyMode="route"
         onClose={() => navigate("/app/square")}
-        open={Boolean(routeActivityKey)}
+        open={Boolean(routeActivityKey) && routeActivityKey !== 'permanent-vip-founding-100'}
         title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")}
       >
         {activeActivity?.theme === "explorer" ? <ExplorerActivity activity={activeActivity} onUpdate={patchActivity} onPublish={() => { if (features.squareFreePostEnabled) { selectSquareChannel(false); navigate("/app/square"); openComposer(); } else if (features.submissionEnabled) navigate("/app/submissions/new"); else showToast(t("explorer.featureUnavailable"), "error"); }} /> : activeActivity?.theme === "number_duel" ? <NumberDuelActivity activity={activeActivity} /> : activeActivity?.theme === "bgm" ? <BgmActivity activity={activeActivity} onUpdate={patchActivity} onTask={(kind) => { selectSquareChannel(false); navigate("/app/square"); if (kind === "publish") openComposer(); }} /> : activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
@@ -2615,15 +2616,14 @@ export default function SquarePage() {
           }} type="button" />)}
         </div>
       </BottomSheet>
-      <BottomSheet bodyClassName="vip-campaign-sheet" onClose={() => setVipCampaignOpen(false)} open={vipCampaignOpen} title={t("vip.campaignTitle")}>
+      <SideDrawer className="activity-drawer vip-activity-drawer" contentUnderToolbar headerAction={<button aria-label={t('square.share')} className="activity-drawer-share" onClick={() => { void api.getActivity('permanent-vip-founding-100').then(openActivityShare).catch(cause=>showToast(cause instanceof Error?cause.message:t('square.shareLoadFailed'),'error')); }} type="button"><span className="material-symbols-outlined">share</span></button>} onClose={() => {setVipCampaignOpen(false); if(routeActivityKey==='permanent-vip-founding-100') navigate('/app/square');}} open={vipCampaignOpen || routeActivityKey==='permanent-vip-founding-100'} title={t("vip.campaignTitle")}>
         {vipCampaign ? <div className={`vip-campaign-panel${vipCampaign.claimed_by_user ? " is-claimed" : ""}`}>
           <section className="vip-campaign-hero">
             <span>FOUNDING 100</span>
-            <strong>{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
-            <p>{t("vip.rewards")}</p>
+            <ActivityTitle activity={{key:'permanent-vip-founding-100',theme:'permanent-vip'}} title={t('vip.campaignTitle')}/>
             <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "---" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
           </section>
-          <section className="vip-campaign-benefits">
+          <ActivityDetails rules={<p>{t('vip.levelTiers')}</p>} rewards={<section className="vip-campaign-benefits">
             <header><span>{t("vip.privilegesEyebrow")}</span><strong>{t("vip.privilegesTitle")}</strong></header>
             <div className="vip-campaign-benefit-grid">
               <article className="is-featured"><b>7D</b><span><strong>{t("vip.recallTitle")}</strong><small>{t("vip.recallDescription")}</small></span></article>
@@ -2633,7 +2633,7 @@ export default function SquarePage() {
               <article><b>GOLD</b><span><strong>{t("vip.squareTitle")}</strong><small>{t("vip.squareDescription")}</small></span></article>
               <article className="is-wide"><b>{vipCampaign.claimed_by_user && vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "001"}</b><span><strong>{t("vip.badgeTitle")}</strong><small>{t("vip.badgeDescription")}</small></span></article>
             </div>
-          </section>
+          </section>}/>
           {!vipCampaign.claimed_by_user ? <div className="vip-campaign-requirements">{[
             ["email", t("contact.verifyEmail"), vipCampaign.requirements.email],
             ["phone", t("contact.bindPhone"), vipCampaign.requirements.phone],
@@ -2641,7 +2641,7 @@ export default function SquarePage() {
           ].map(([key, label, complete]) => <button className={complete ? "is-complete" : ""} disabled={Boolean(complete)} key={String(key)} onClick={() => { setVipCampaignOpen(false); navigate("/app/menu"); }} type="button"><i>{complete ? "✓" : ""}</i><strong>{label}</strong><span>{complete ? t("common.completed") : t("vip.goComplete")}</span></button>)}</div> : <div className="vip-campaign-owned"><b>VIP</b><span>{t("vip.permanentOwned")}</span></div>}
           {!vipCampaign.claimed_by_user ? <button className="vip-campaign-claim" disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">{vipClaiming ? t("vip.reserving") : vipCampaign.eligible ? t("vip.claim") : t("vip.completeRequirements")}</button> : null}
         </div> : null}
-      </BottomSheet>
+      </SideDrawer>
       <SideDrawer
         headerless
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}

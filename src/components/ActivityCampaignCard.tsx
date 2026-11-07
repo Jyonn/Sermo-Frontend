@@ -14,9 +14,9 @@ export function ActivityTitle({ activity, title }: { activity?: Pick<ActivityCam
     : <strong className="campaign-title-text">{title}</strong>;
 }
 
-export function ActivityCampaignCard({ activity, title, eyebrow, hint, className = "", disabled, onClick }: {
+export function ActivityCampaignCard({ activity, title, eyebrow, hint, progress, className = "", disabled, onClick }: {
   activity?: Pick<ActivityCampaignDTO, "key" | "theme" | "presentation"> | null;
-  title: string; eyebrow: string; hint: string; className?: string; disabled?: boolean; onClick: () => void;
+  title: string; eyebrow: string; hint: string; progress?: {value:number;max:number}; className?: string; disabled?: boolean; onClick: () => void;
 }) {
   const visual = activityPresentation(activity);
   const explorer = activity?.key === "explorer-2026" || activity?.theme === "explorer";
@@ -24,5 +24,6 @@ export function ActivityCampaignCard({ activity, title, eyebrow, hint, className
     <span className="campaign-card-copy"><small>{eyebrow}</small><ActivityTitle activity={activity} title={title} /><span>{hint}</span></span>
     {visual.artwork_url ? <span className={`campaign-card-object is-${visual.artwork_layout}`} style={{ backgroundImage: `url(${JSON.stringify(visual.artwork_url)})` }} aria-hidden="true" /> : <span className="campaign-card-symbol" aria-hidden="true">✦</span>}
     <span className="campaign-card-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+    {progress ? <span className="campaign-card-progress"><b>{progress.value}<small> / {progress.max}</small></b><progress value={progress.value} max={Math.max(1,progress.max)} aria-label={title}/></span>:null}
   </button>;
 }
