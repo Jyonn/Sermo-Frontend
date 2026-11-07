@@ -21,6 +21,7 @@ import { BgmActivity, BgmBanner } from "../components/BgmActivity";
 import { NumberDuelActivity } from "../components/NumberDuelActivity";
 import { ActivityCampaignCard, ActivityTitle } from "../components/ActivityCampaignCard";
 import {ActivityDetails} from '../components/ActivityDetails';
+import {ActivityRewardRail} from '../components/ActivityRewardRail';
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -2563,6 +2564,7 @@ export default function SquarePage() {
             </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />
+            <ActivityRewardRail label={t('activity.spaceReward')} onOpen={()=>setActivityPoolOpen(true)} items={activeActivity.milestones.map(item=>({key:item.reward_id,title:item.reward_label,step:String(item.threshold),reached:item.unlocked}))}/>
             {activeActivity.space_reward_claimable ? <section className="activity-space-reward-ready"><div><small>{t("activity.spaceReward")}</small><strong>{t("activity.spaceRewardReady", { force: activeActivity.space_reward_claimable.threshold })}</strong></div><button disabled={spaceRewardClaiming} onClick={() => void claimSpaceActivityReward()} type="button">{spaceRewardClaiming ? t("common.processing") : t("activity.claimSpaceReward")}</button></section> : null}
             <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{isChineseLanguage(language) ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
             <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.claimable_points ? t("activity.claimHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
@@ -2621,7 +2623,7 @@ export default function SquarePage() {
             <ActivityTitle activity={{key:'permanent-vip-founding-100',theme:'permanent-vip'}} title={t('vip.campaignTitle')}/>
             <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "---" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
           </section>
-          <ActivityDetails rules={<p>{t('vip.levelTiers')}</p>} rewards={<section className="vip-campaign-benefits">
+          <ActivityDetails overview={open=><ActivityRewardRail label={t('vip.privilegesTitle')} onOpen={open} items={[{key:'recall',title:t('vip.recallTitle'),step:'7D',reached:vipCampaign.claimed_by_user},{key:'growth',title:t('vip.growthTitle'),step:'+500',reached:vipCampaign.claimed_by_user},{key:'badge',title:t('vip.badgeTitle'),step:vipCampaign.slot?String(vipCampaign.slot).padStart(3,'0'):'VIP',reached:vipCampaign.claimed_by_user}]}/>} rules={<p>{t('vip.levelTiers')}</p>} rewards={<section className="vip-campaign-benefits">
             <header><span>{t("vip.privilegesEyebrow")}</span><strong>{t("vip.privilegesTitle")}</strong></header>
             <div className="vip-campaign-benefit-grid">
               <article className="is-featured"><b>7D</b><span><strong>{t("vip.recallTitle")}</strong><small>{t("vip.recallDescription")}</small></span></article>

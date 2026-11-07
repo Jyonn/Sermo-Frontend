@@ -8,6 +8,7 @@ import { ActivityCampaignCard, ActivityTitle } from "./ActivityCampaignCard";
 import { BgmIcon } from "./BgmIcon";
 import { BgmKeychain } from "./BgmKeychain";
 import { BottomSheet } from "./BottomSheet";
+import {ActivityRewardRail} from './ActivityRewardRail';
 import "./BgmActivity.css";
 export { BgmKeychain } from "./BgmKeychain";
 
@@ -43,6 +44,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
   }, [activity.key]);
   if (!data) return null;
   const owned = data.tracks.filter((item) => item.owned);
+  const upcoming = data.tracks.filter(item=>!item.owned);
   const next = data.tracks.find((item) => !item.owned);
   const deviceStyle = data.joined && data.style ? data.style : style;
   const date = (seconds: number) => new Intl.DateTimeFormat(language, { month: "short", day: "numeric" }).format(new Date(seconds * 1000));
@@ -81,6 +83,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
       <section className="bgm-device-stage"><BgmKeychain onPress={(key) => void play(key)} playingKey={playing} slots={data.slots} style={deviceStyle} tracks={data.tracks} /><div className="bgm-key-legend"><span className="is-inactive">{t("bgm.keyInactive")}</span><span className="is-ready">{t("bgm.keyReady")}</span><span className="is-playing">{t("bgm.keyPlaying")}</span></div><div className="bgm-owned"><strong>{t("bgm.collected", { count: owned.length })}</strong><span>{t("bgm.journey", { days: data.active_days, points: data.points })}</span></div><progress aria-label={t("bgm.collectionProgress")} max={12} value={owned.length} /></section>
       {next ? <aside className="bgm-next"><BgmIcon name="music_note" /><div><strong>{t("bgm.nextTrack", { title: next.title })}</strong><span>{t("bgm.remaining", { days: Math.max(0, next.days - data.active_days), points: Math.max(0, next.points - data.points) })}</span></div></aside> : <p className="bgm-complete">{t("bgm.complete")}</p>}
     </>}
+    <ActivityRewardRail label={t('bgm.tracks')} onOpen={()=>setPanel('tracks')} items={(data.joined&&upcoming.length?upcoming:data.tracks).slice(0,3).map(track=>({key:track.key,title:track.title,step:t('bgm.gate',{days:track.days,points:track.points}),reached:track.owned}))}/>
     <nav className="bgm-secondary-menu" aria-label={t("bgm.sections")}>
       <button onClick={() => setPanel("tracks")} type="button"><BgmIcon name="music_note" />{t("bgm.tracks")}</button>
       {data.joined ? <button onClick={() => setPanel("tasks")} type="button"><BgmIcon name="edit_square" />{t("bgm.tasks")}</button> : null}

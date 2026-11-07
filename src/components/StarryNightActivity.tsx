@@ -33,6 +33,7 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
       <p>{data.reward_owned ? t("activity.starry.completeHint") : data.reward_claimable ? t("activity.starry.rewardReady") : t("activity.starry.continueHint", { count: remaining })}</p>
     </section>
 
+    <aside className="starry-reward-teaser"><img src={starryBanner} alt=""/><div><small>{t('activity.starry.reward')}</small><strong>{t('menu.themeStarryNight')}</strong><span>{t('activity.starry.permanent')}</span></div><b>{data.reward_owned?'✓':`${data.streak_days}/${data.target_days}`}</b></aside>
     <ActivityDetails primary={data.reward_claimable?<button className="activity-primary-action" disabled={claiming} onClick={onClaim} type="button">{t(claiming?'common.processing':'activity.starry.claimReward')}</button>:data.reward_owned?<button className="activity-primary-action" onClick={onConfigure} type="button">{t('activity.configureReward')}</button>:undefined} rules={<section className="starry-night-rules"><ol><li><p>{t('activity.starry.rule1')}</p></li><li><p>{t('activity.starry.rule2')}</p></li></ol></section>} rewards={<section className="starry-night-reward-stage">
       <header><small>COLLECTOR REWARD</small><h3>{t("menu.themeStarryNight")}</h3><p>{t("activity.starry.rewardHint")}</p></header>
       <div className="starry-night-chat-preview">

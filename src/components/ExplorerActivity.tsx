@@ -8,6 +8,7 @@ import { showToast } from "../lib/toast";
 import type { ActivityCampaignDTO } from "../types";
 import { ActivityTitle } from "./ActivityCampaignCard";
 import { BottomSheet } from "./BottomSheet";
+import {ActivityRewardRail} from './ActivityRewardRail';
 import { ChronellePluginDialog } from "./ChronellePluginDialog";
 import { ExplorerRewardGallery } from "./ExplorerRewardGallery";
 import "./ExplorerActivity.css";
@@ -70,6 +71,7 @@ export function ExplorerActivity({ activity, onUpdate, onPublish, preview = fals
       <div className="explorer-stamps">{data.themes.map((theme, index) => <button aria-label={`${tr(`theme.${theme.key}`)}: ${theme.completed ? tr("done") : tr("pending")}`} className={theme.completed ? "is-complete" : ""} key={theme.key} onClick={() => { setPanel("tasks"); void refresh(); }} type="button"><span className="material-symbols-outlined">{theme.completed ? "check" : themeIcons[theme.key]}</span><b>{tr(`theme.${theme.key}`)}</b><small>0{index + 1}</small></button>)}</div>
       <button className="explorer-text-action" onClick={() => { setPanel("tasks"); void refresh(); }} type="button">{tr("viewTasks")}<span className="material-symbols-outlined">arrow_forward</span></button>
     </section>
+    <ActivityRewardRail label={tr('viewRewards')} onOpen={()=>setPanel('rewards')} items={data.rewards.map(reward=>({key:String(reward.tier),title:tr(`reward.${reward.tier}`),step:String(reward.tier),reached:reward.unlocked||reward.claimed,image:explorerRewardThumbnail(reward.tier)}))}/>
     <section className="explorer-next-reward">
       <div className="explorer-next-art"><img alt="" src={explorerRewardThumbnail(next?.tier ?? 5)} /></div>
       <div><small>{next ? tr("nextReward") : tr("collectionComplete")}</small><h3>{tr(`reward.${next?.tier ?? 5}`)}</h3><span>{next ? t(`growth.rarity.${next.rarity}` as TranslationKey) : tr("permanent")}</span></div>

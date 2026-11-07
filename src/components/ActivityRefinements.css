@@ -48,6 +48,13 @@
 .activity-drawer .starry-night-hero-copy h2 img { width: 100%; }
 .activity-drawer .starry-night-hero-progress { bottom: 28px; }
 .activity-drawer .starry-night-journey { margin-top: 0; }
+.starry-reward-teaser { display: flex; gap: 14px; align-items: center; margin: 20px 0 0; padding: 15px; border: 1px solid #d5bd7638; border-radius: 18px; background: #c3a75a0a; color: #eddfb7; }
+.starry-reward-teaser > img { flex: 0 0 64px; width: 64px; height: 70px; border-radius: 11px; object-fit: cover; }
+.starry-reward-teaser > div { display: grid; gap: 5px; flex: 1; min-width: 0; }
+.starry-reward-teaser small,.starry-reward-teaser span { font-size: 10px; line-height: 1.5; color: #a9bbcc; }
+.starry-reward-teaser strong { font-size: 16px; }
+.starry-reward-teaser > b { font-size: 20px; }
+.vip-activity-drawer .activity-reward-rail { color: #eddfb7; }
 .activity-drawer .friendly-neighbor-hero { min-height: 420px; }
 .activity-drawer .friendly-neighbor-activity { min-height: 100%; background: #071523; color: #d5e2ec; }
 .activity-drawer .friendly-neighbor-hero > img { z-index: 0; }
