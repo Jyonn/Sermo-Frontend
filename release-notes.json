@@ -7,7 +7,7 @@
       "items": [
         "语音转写改为下方独立引用框，匹配各款气泡材质并保持底色清晰；语音长度随时长变化，长文本保持舒适阅读宽度",
         "修正首页语言选择按钮的异常椭圆外形",
-        "七个主 Tab 统一页面面板与标题栏风格，修正深色聊天列表的旧底色覆盖；手机滚动后浮现背景，适配深浅与生日皮肤"
+        "七个主 Tab 的深色内容区统一使用原聊天列表底色，Header 保留独立层次，手机滚动后浮现背景"
       ]
     },
     "en": {
@@ -15,7 +15,7 @@
       "items": [
         "Transcripts appear as separate readable quotes matching each bubble skin, with duration-based playback widths and comfortable text widths",
         "Corrected the stretched oval shape of the homepage language selector",
-        "Unified panel and header materials across all seven main tabs, removed legacy dark chat-list colors, and retained mobile scroll elevation and theme support"
+        "All seven main tabs share the original dark chat-list background, with distinct header surfaces and mobile scroll elevation"
       ]
     }
   }

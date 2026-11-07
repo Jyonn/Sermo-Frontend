@@ -4,6 +4,15 @@
   --tab-header-paint: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
   --tab-panel-paint: var(--bg-elevated);
 }
+html[data-theme="dark"] .shell-authenticated {
+  --tab-panel-paint: rgba(18, 26, 22, .94);
+  --tab-header-paint: var(--bg-elevated);
+}
+html[data-theme="dark"] body .shell.shell-authenticated > .page-stack,
+html[data-theme="dark"] body .shell.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
+html[data-theme="dark"] body .shell.shell-authenticated > .square-desktop-workspace > .square-feed-screen {
+  background: var(--tab-panel-paint);
+}
 body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
   isolation: isolate;
   background: var(--tab-header-paint);
@@ -13,7 +22,7 @@ body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.squar
   box-shadow: 0 8px 20px color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 @media (min-width:720px) {
-  .shell-authenticated { --tab-header-paint: var(--tab-panel-paint); }
+  .shell-authenticated { --tab-header-paint: var(--bg-elevated); }
   body .shell-authenticated.desktop-tab-shell > .page-stack,
   body .desktop-panel-workspace.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
   body .desktop-panel-workspace.shell-authenticated > .square-desktop-workspace > .square-feed-screen {
