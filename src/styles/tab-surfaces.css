@@ -8,11 +8,6 @@ html[data-theme="dark"] .shell-authenticated {
   --tab-panel-paint: rgba(18, 26, 22, .94);
   --tab-header-paint: var(--bg-elevated);
 }
-html[data-theme="dark"] body .shell.shell-authenticated > .page-stack,
-html[data-theme="dark"] body .shell.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
-html[data-theme="dark"] body .shell.shell-authenticated > .square-desktop-workspace > .square-feed-screen {
-  background: var(--tab-panel-paint);
-}
 body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
   isolation: isolate;
   background: var(--tab-header-paint);
@@ -32,6 +27,14 @@ body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.squar
   }
 }
 @media (max-width:719px) {
+  html body .shell.shell-authenticated > .page-stack,
+  html body .shell.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
+  html body .shell.shell-authenticated > .square-desktop-workspace > .square-feed-screen,
+  html[data-theme="dark"] body .shell.shell-authenticated > .page-stack,
+  html[data-theme="dark"] body .shell.shell-authenticated > .chat-mobile-layout > .mobile-chat-list-screen,
+  html[data-theme="dark"] body .shell.shell-authenticated > .square-desktop-workspace > .square-feed-screen {
+    background: transparent;
+  }
   body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
     background: transparent;
     border-bottom-color: transparent;

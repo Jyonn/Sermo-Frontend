@@ -1,25 +1,17 @@
 {
-  "id": "2026.11.07.2",
+  "id": "2026.11.07.3",
   "publishedAt": "2026-11-07",
   "locales": {
     "zh-CN": {
-      "title": "聊天与界面样式优化",
+      "title": "修复手机端 Tab 背景",
       "items": [
-        "语音转写改为下方独立引用框，匹配各款气泡材质并保持底色清晰；语音长度随时长变化，长文本保持舒适阅读宽度",
-        "修正首页语言选择按钮的异常椭圆外形",
-        "七个主 Tab 的深色内容区统一使用原聊天列表底色，Header 保留独立层次，手机滚动后浮现背景",
-        "活动新增奖励节点与概览，规则奖池收进下一级并适配深浅色；八仙移除联名标识，更新星旋与 VIP 字标",
-        "活动无法领取时明确展示未满足的空间功能条件"
+        "手机端各 Tab 恢复透明背景，Header 仅在下滑后浮现底色；桌面端保留原有背景层次"
       ]
     },
     "en": {
-      "title": "Chat and interface refinements",
+      "title": "Mobile tab background fix",
       "items": [
-        "Transcripts appear as separate readable quotes matching each bubble skin, with duration-based playback widths and comfortable text widths",
-        "Corrected the stretched oval shape of the homepage language selector",
-        "All seven main tabs share the original dark chat-list background, with distinct header surfaces and mobile scroll elevation",
-        "Activities add reward milestones and previews with theme-aware secondary panels; Baxian drops co-branding, and Starry Night and VIP gain new lettering",
-        "Unavailable activity claims clearly explain unmet space feature requirements"
+        "Mobile tabs restore transparent backgrounds and reveal header surfaces only after scrolling; desktop surface hierarchy is preserved"
       ]
     }
   }
