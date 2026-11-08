@@ -310,6 +310,7 @@ export interface PermanentVipCampaignDTO {
     email: boolean;
     phone: boolean;
     level: boolean;
+    phone_claim_available?: boolean;
   };
 }
 

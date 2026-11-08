@@ -4224,4 +4224,6 @@
 ,"feature.unavailable": "{{feature}} is not enabled in this space"
 ,"feature.availableElsewhere": "You can continue using the features available in this space."
 ,"feature.backMenu": "Back to menu"
+,"vip.phoneRule": "Across all spaces, each phone number may have only one permanent VIP account below LV9. Accounts at LV9 or above are exempt."
+,"vip.phoneLimit": "This phone number already has a permanent VIP account below LV9. Reach LV9 on this account to claim."
 }

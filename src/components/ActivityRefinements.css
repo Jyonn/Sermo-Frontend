@@ -93,3 +93,4 @@
   .vip-activity-drawer .vip-campaign-hero { padding: 22px; min-height: 250px; }
 }
 @media(prefers-reduced-motion:reduce) { .activity-drawer .starry-night-orbit { animation: none; } }
+.vip-campaign-phone-limit { margin: 16px 0; padding: 12px 14px; border-left: 2px solid #bd9656; border-radius: 0 10px 10px 0; background: #bd965610; color: #d5bf94; font-size: 13px; line-height: 1.6; }

@@ -4222,4 +4222,6 @@
 ,"feature.unavailable": "此空间暂未开放{{feature}}"
 ,"feature.availableElsewhere": "你可以继续使用空间中已开放的功能。"
 ,"feature.backMenu": "返回菜单"
+,"vip.phoneRule": "所有空间共用手机号领取限制：同一手机号仅允许一个低于 LV9 的永久 VIP 账号，LV9 及以上不受此限制。"
+,"vip.phoneLimit": "此手机号已有低于 LV9 的永久 VIP 账号；当前账号达到 LV9 后可领取。"
 }
