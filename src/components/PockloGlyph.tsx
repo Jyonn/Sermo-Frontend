@@ -1,4 +1,7 @@
 const paths = {
+  list: "M4 6h2 M10 6h10 M4 12h2 M10 12h10 M4 18h2 M10 18h10",
+  grid: "M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z",
+  refresh: "M20 6v5h-5 M20 11a8 8 0 1 0-1.6 6",
   file: "M6 3h8l4 4v14H6z M14 3v5h4 M9 13h6 M9 17h6",
   folder: "M3 6h7l2 2h9v12H3z",
   link: "M10 13a3 3 0 0 0 4 0l4-4a3 3 0 0 0-4-4l-2 2 M14 11a3 3 0 0 0-4 0l-4 4a3 3 0 0 0 4 4l2-2",

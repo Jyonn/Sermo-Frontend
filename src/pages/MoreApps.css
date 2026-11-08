@@ -2,7 +2,10 @@
 .more-apps-group{display:grid;gap:8px}
 .more-apps-group>h2{margin:0;padding-inline:4px;color:var(--text-secondary);font-size:13px}
 .more-apps-detail{display:grid;align-content:start;gap:12px}
-.more-apps-detail>a{justify-self:start}
+.more-apps-detail .more-apps-row{text-decoration:none}
+.chronelle-app-identity{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line-soft);border-radius:16px;background:var(--bg-surface)}
+.chronelle-app-identity>div{display:grid;gap:4px;min-width:0}
+.chronelle-app-identity small{color:var(--text-secondary);font-size:12px;line-height:1.5}
 .more-apps-section{display:grid;gap:10px}
 .more-apps-section h2{margin:0 0 4px;color:var(--text-muted);font-size:12px;font-weight:700;letter-spacing:.12em}
 .more-apps-row{display:grid;grid-template-columns:52px minmax(0,1fr) 24px;align-items:center;gap:14px;min-height:78px;width:100%;padding:12px 16px;border:1px solid var(--line-soft);border-radius:20px;background:var(--bg-surface);color:var(--text-primary);text-align:left;cursor:pointer}

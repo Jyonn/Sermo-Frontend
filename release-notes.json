@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.08.7",
+  "id": "2026.11.08.8",
   "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
       "title": "小兜文件与文件夹分享",
       "items": [
-        "小兜文件选择器和聊天卡片显示图片、视频缩略图，并沿用小兜的文件类型图标"
+        "小兜可切换列表和缩略图、刷新目录，返回上一级会恢复浏览位置",
+        "留幅相册改为独立聊天操作，时序的日历设置和打开入口更清楚"
       ]
     },
     "en": {
       "title": "Share Pocklo files and folders",
       "items": [
-        "See photo and video thumbnails and Pocklo’s file type icons in the file picker and chat cards."
+        "Switch Pocklo between list and thumbnail views, refresh a folder, and return to your previous position.",
+        "Open StillFolio albums directly from chat actions and manage Chronelle from its redesigned drawer."
       ]
     }
   }

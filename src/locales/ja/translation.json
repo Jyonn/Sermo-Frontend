@@ -2762,7 +2762,7 @@
   "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。",
  "chat.editFailedText": "未送信メッセージを編集"
   ,"apps.more": "アプリとプラグイン"
-  ,"chronelle.title": "Chronelle"
+  ,"chronelle.title": "时序·Chronelle"
   ,"chronelle.introduction": "公開予定を Frienden のプロフィールに表示。"
   ,"chronelle.manage": "カレンダーを管理"
   ,"chronelle.open": "Open calendar"
@@ -2792,7 +2792,7 @@
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"
   ,"apps.cloudHint": "Organize your cloud files"
-  ,"apps.stillfolio": "Stillfolio"
+  ,"apps.stillfolio": "留幅·StillFolio"
   ,"apps.supervision": "Supervision"
   ,"apps.stillfolioSubtitle": "Photography portfolio studio"
   ,"apps.stillfolioDescription": "Organize photos, create portfolios, and share your work in Stillfolio."

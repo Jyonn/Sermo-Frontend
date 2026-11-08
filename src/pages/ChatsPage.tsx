@@ -46,6 +46,7 @@ import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
 import { PockloDrawer, usePockloReturn } from "../components/PockloDrawer";
 import { openStillfolioPicker } from "../lib/stillfolioPicker";
+import pockloMark from "../assets/pocklo-mark.svg";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
@@ -7525,7 +7526,16 @@ function LiveChatsPage({
     setEmojiPickerOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setComposerActionSheet(null);
     setComposerMoreOpen((open) => !open);
   }}><ComposerSvgIcon kind="plus" /></button>;
-  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
+  const chooseStillfolio = !submissionMode && !embeddedChat && selectedChatId ? () => {
+    const chatId = selectedChatId;
+    setComposerMoreOpen(false);
+    stopStillfolioPicker.current?.();
+    stopStillfolioPicker.current = openStillfolioPicker((url) => {
+      if (selectedChatIdRef.current === chatId) mentionEditorRef.current?.insertTextWithoutFocus(` ${url} `);
+    });
+    if (!stopStillfolioPicker.current) showToast(t("apps.allowPopup"), "error");
+  } : undefined;
+  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
   const openMessageSearch = () => {
     setMessageSearchKeyword("");
@@ -7602,20 +7612,10 @@ function LiveChatsPage({
       </ComposerActionsPopover> : null}
       <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t("cloudResources.fileSourceTitle")} actions={[
         { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
-        { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
         ...(!submissionMode && !embeddedChat ? [
-          { key: "pocklo", label: t("pocklo.choose"), description: t("pocklo.selectHint"), icon: <span className="material-symbols-outlined">folder_open</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setPockloPickerOpen(true); } },
-          { key: "stillfolio", label: t("apps.pickStillfolio"), description: t("apps.pickStillfolioHint"), icon: <span className="material-symbols-outlined">photo_library</span>, disabled: composerBusy, onSelect: () => {
-            const chatId = selectedChatId;
-            if (!chatId) return;
-            setComposerMoreOpen(false);
-            stopStillfolioPicker.current?.();
-            stopStillfolioPicker.current = openStillfolioPicker((url) => {
-              if (selectedChatIdRef.current === chatId) mentionEditorRef.current?.insertTextWithoutFocus(` ${url} `);
-            });
-            if (!stopStillfolioPicker.current) showToast(t("apps.allowPopup"), "error");
-          } },
+          { key: "pocklo", label: t("pocklo.choose"), description: t("pocklo.selectHint"), icon: <img src={pockloMark} alt="" width={26} height={26} />, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setPockloPickerOpen(true); } },
         ] : []),
+        { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
         <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPickerOpen} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}

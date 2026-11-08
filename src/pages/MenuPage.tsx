@@ -2257,15 +2257,15 @@ export default function MenuPage() {
           <section className="more-apps-group" aria-label={t("apps.externalGroup")}>
             <h2>{t("apps.externalGroup")}</h2>
             <div className="more-apps-section">
-            <button className="more-apps-row" type="button" onClick={() => setPockloOpen(true)}>
-              <span className="more-apps-icon is-pocklo"><img alt="" src={pockloIcon} /></span>
-              <span><strong>{t("pocklo.name")}</strong><small>{t("pocklo.menuHint")}</small></span>
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-            </button>
             <button className="more-apps-row" type="button" onClick={() => setChronelleDetailsOpen(true)}>
               <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
               <span><strong>{t("chronelle.title")}</strong><small>{session ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button className="more-apps-row" type="button" onClick={() => setPockloOpen(true)}>
+              <span className="more-apps-icon is-pocklo"><img alt="" src={pockloIcon} /></span>
+              <span><strong>{t("pocklo.name")}</strong><small>{t("pocklo.menuHint")}</small></span>
+              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
             </button>
             <button className="more-apps-row" onClick={() => setStillfolioInfoOpen(true)} type="button">
               <span className="more-apps-icon is-stillfolio"><img alt="" src={stillfolioMark} /></span>
@@ -2293,9 +2293,23 @@ export default function MenuPage() {
       </SideDrawer>
       <PockloDrawer key={pockloScope} open={pockloOpen} onClose={() => setPockloOpen(false)} scope={pockloScope} returnError={pockloReturnError} />
       <SideDrawer open={chronelleDetailsOpen} onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
-        <div className="more-apps-detail">
-          <a className="button" href={chronelleOrigin() + "/"} target="_blank" rel="noreferrer">{t("apps.openChronelle")}</a>
-          <button className="button" type="button" onClick={() => setChronelleInfoOpen(true)}>{t("apps.chronelleDisplay")}</button>
+        <div className="more-apps-detail menu-settings-section">
+          <div className="chronelle-app-identity">
+            <span className="more-apps-icon is-chronelle"><img src={chronelleIcon} alt="" /></span>
+            <div><strong>{t("chronelle.title")}</strong><small>{t("apps.chronelleSummary")}</small></div>
+          </div>
+          <div className="more-apps-section">
+            <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
+              <span className="more-apps-icon material-symbols-outlined" aria-hidden="true">calendar_month</span>
+              <span><strong>{t("apps.chronelleDisplay")}</strong><small>{session && chronelleDetailsOpen ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
+              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            </button>
+            <a className="more-apps-row" href={chronelleOrigin() + "/"} target="_blank" rel="noreferrer">
+              <span className="more-apps-icon material-symbols-outlined" aria-hidden="true">event</span>
+              <span><strong>{t("apps.openChronelle")}</strong><small>{t("apps.chronelleOpenHint")}</small></span>
+              <span className="material-symbols-outlined" aria-hidden="true">north_east</span>
+            </a>
+          </div>
         </div>
       </SideDrawer>
       <ConfirmDialog

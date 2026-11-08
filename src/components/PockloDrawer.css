@@ -1,4 +1,5 @@
 .pocklo-drawer { display: grid; align-content: start; gap: 16px; }
+.pocklo-picker-drawer > .drawer-body { overflow-anchor: none; }
 .pocklo-drawer p { margin: 0; color: var(--text-secondary); overflow-wrap: anywhere; }
 .pocklo-drawer button, .pocklo-drawer a { touch-action: manipulation; }
 .pocklo-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); }
@@ -27,6 +28,20 @@
 .pocklo-folder-header > div { display: grid; gap: 2px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .pocklo-folder-header small, .pocklo-share-review small, .pocklo-file-row small { color: var(--text-secondary); font-size: 12px; }
 .pocklo-folder-header .secondary-button { flex: none; min-height: 44px; }
+.pocklo-folder-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pocklo-view-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line-soft); border-radius: 13px; background: var(--bg-surface); }
+.pocklo-view-switch button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 9px; border: 0; border-radius: 9px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.pocklo-view-switch button[aria-pressed="true"] { color: var(--text-primary); background: color-mix(in srgb, var(--brand-primary) 14%, var(--bg-surface)); }
+.pocklo-view-switch svg { width: 17px; height: 17px; }
+.pocklo-file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 104px), 1fr)); gap: 8px; }
+.pocklo-file-tile { position: relative; display: grid; align-content: start; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--line-soft); border-radius: 13px; background: var(--bg-surface); color: var(--text-primary); text-align: start; cursor: pointer; }
+.pocklo-file-tile[aria-pressed="true"] { border-color: var(--brand-primary); background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface)); }
+.pocklo-file-tile .pocklo-file-icon { width: 100%; height: auto; aspect-ratio: 1.2; }
+.pocklo-file-tile .pocklo-file-type-art { width: 55%; height: 72%; }
+.pocklo-file-tile .row-main { display: grid; gap: 2px; min-width: 0; }
+.pocklo-file-tile strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; font-size: 13px; line-height: 1.35; }
+.pocklo-file-tile small { color: var(--text-secondary); font-size: 11px; }
+.pocklo-file-tile > svg { position: absolute; top: 12px; right: 12px; width: 19px; height: 19px; padding: 2px; border-radius: 50%; background: var(--bg-surface); }
 .pocklo-file-row { min-height: 58px; gap: 10px; }
 .pocklo-file-row .row-main { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
 .pocklo-file-row[aria-pressed="true"], .pocklo-folder-header [aria-pressed="true"] { background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface)); }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useI18n } from "../lib/language";
@@ -14,6 +14,9 @@ import { pockloShareToken } from "./PockloShareCard";
 export const POCKLO_HOME = "https://pocklo.jyonn.space/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
 const RETURN_KEY = "frienden:pocklo-return";
+const VIEW_KEY = "frienden:pocklo-directory-view";
+const FOLDER_CACHE_TTL = 120_000;
+type FolderView = "list" | "grid";
 
 type PockloEntry = { id: string; name: string; folder: boolean; size?: number; preview?: string | null; thumbnail?: string | null };
 export type PockloFolder = {
@@ -21,6 +24,7 @@ export type PockloFolder = {
   entries: PockloEntry[];
   next_offset: number | null;
 };
+type FolderStep = { entry: PockloEntry; offset: number; scrollTop: number; view: FolderView };
 
 export function usePockloReturn(scope: string, onReturn: () => void) {
   const location = useLocation();
@@ -59,15 +63,24 @@ export function PockloDrawer({
   const [busy, setBusy] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const [revision, setRevision] = useState(0);
+  const [folderRevision, setFolderRevision] = useState(0);
   const [folderError, setFolderError] = useState(false);
-  const [trail, setTrail] = useState<PockloEntry[]>([]);
-  const [folder, setFolder] = useState<PockloFolder | null>(null);
+  const [trail, setTrail] = useState<FolderStep[]>([]);
+  const [loadedFolder, setLoadedFolder] = useState<{ key: string; value: PockloFolder } | null>(null);
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<PockloEntry | null>(null);
+  const [view, setView] = useState<FolderView>(() => localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list");
+  const drawerContent = useRef<HTMLDivElement>(null);
+  const cache = useRef(new Map<string, { value: PockloFolder; expires: number }>());
+  const restore = useRef<FolderStep | "top" | null>(null);
   const pendingShare = useRef<AbortController | null>(null);
   const operation = useRef<{ resourceId: string; key: string } | null>(null);
   const fileMode = Boolean(onShare);
-  const folderId = trail[trail.length - 1]?.id ?? "";
+  const current = trail[trail.length - 1]?.entry;
+  const folderId = current?.id ?? "";
+  const folderPrefix = `${scope}:${folderId}:`;
+  const folderKey = `${folderPrefix}${offset}`;
+  const folder = loadedFolder?.key === folderKey ? loadedFolder.value : null;
 
   useEffect(() => {
     if (!open) {
@@ -76,6 +89,8 @@ export function PockloDrawer({
       setTrail([]);
       setOffset(0);
       setSelected(null);
+      setLoadedFolder(null);
+      restore.current = null;
       setConfirmDisconnect(false);
       return;
     }
@@ -83,21 +98,35 @@ export function PockloDrawer({
     setStatus("");
     setError(returnError ?? "");
     api.pockloConnection().then((value) => {
-      if (live) setStatus(value.status ?? "unavailable");
+      if (!live) return;
+      const nextStatus = value.status ?? "unavailable";
+      if (nextStatus !== "connected") cache.current.clear();
+      setStatus(nextStatus);
     }).catch(() => {
       if (live) setStatus("unavailable");
     });
     return () => { live = false; };
   }, [open, scope, returnError, revision]);
   useEffect(() => () => pendingShare.current?.abort(), []);
+  useEffect(() => { cache.current.clear(); }, [scope]);
 
   useEffect(() => {
     if (!open || !fileMode || status !== "connected") return;
-    const controller = new AbortController();
-    setFolder(null);
     setFolderError(false);
+    const cached = cache.current.get(folderKey);
+    if (cached && cached.expires > Date.now()) {
+      setLoadedFolder({ key: folderKey, value: cached.value });
+      return;
+    }
+    const controller = new AbortController();
     api.pockloFiles(folderId, offset, controller.signal).then((value) => {
-      if (!controller.signal.aborted) setFolder(value);
+      if (controller.signal.aborted) return;
+      if (cache.current.size >= 48) {
+        const oldest = cache.current.keys().next();
+        if (!oldest.done) cache.current.delete(oldest.value);
+      }
+      cache.current.set(folderKey, { value, expires: Date.now() + FOLDER_CACHE_TTL });
+      setLoadedFolder({ key: folderKey, value });
     }).catch((cause) => {
       if (!controller.signal.aborted) {
         if (cause instanceof ApiError && ["connect_required", "account_mismatch"].includes(cause.identifier)) report(cause);
@@ -105,12 +134,63 @@ export function PockloDrawer({
       }
     });
     return () => controller.abort();
-  }, [open, fileMode, status, folderId, offset, revision]);
+  }, [open, fileMode, status, folderId, offset, folderKey, folderRevision]);
+
+  useLayoutEffect(() => {
+    if (!folder || !restore.current) return;
+    const scroller = drawerContent.current?.closest<HTMLElement>(".drawer-body");
+    if (!scroller) return;
+    const target = restore.current;
+    restore.current = null;
+    if (target === "top") scroller.scrollTop = 0;
+    else if (target.view === view) scroller.scrollTop = target.scrollTop;
+    else {
+      const row = drawerContent.current?.querySelector<HTMLElement>(`[data-pocklo-entry="${CSS.escape(target.entry.id)}"]`);
+      if (row) scroller.scrollTop += row.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+    }
+  }, [folder, view]);
+
+  function refreshFolder() {
+    for (const key of cache.current.keys()) {
+      if (key.startsWith(folderPrefix)) cache.current.delete(key);
+    }
+    setLoadedFolder(null);
+    setSelected(null);
+    setError("");
+    setFolderRevision((value) => value + 1);
+  }
+
+  function openFolder(entry: PockloEntry) {
+    const scrollTop = drawerContent.current?.closest<HTMLElement>(".drawer-body")?.scrollTop ?? 0;
+    restore.current = "top";
+    setTrail([...trail, { entry, offset, scrollTop, view }]);
+    setOffset(0);
+    setSelected(null);
+  }
+
+  function goToParent() {
+    const step = trail[trail.length - 1];
+    if (!step) return;
+    restore.current = step;
+    setTrail(trail.slice(0, -1));
+    setOffset(step.offset);
+    setSelected(null);
+    setError("");
+  }
+
+  function changeView(next: FolderView) {
+    setView(next);
+    localStorage.setItem(VIEW_KEY, next);
+  }
 
   function report(cause: unknown) {
     const code = cause instanceof ApiError ? cause.identifier : "unavailable";
     setError(code);
-    if (code === "connect_required" || code === "account_mismatch") setStatus("connect_required");
+    if (code === "connect_required" || code === "account_mismatch") {
+      cache.current.clear();
+      setLoadedFolder(null);
+      setStatus("connect_required");
+    }
   }
 
   async function connect() {
@@ -136,6 +216,7 @@ export function PockloDrawer({
     setError("");
     try {
       await api.pockloConnection({ action: "disconnect" });
+      cache.current.clear();
       setStatus("connect_required");
     } catch (cause) {
       report(cause);
@@ -178,8 +259,8 @@ export function PockloDrawer({
   const retry = <button className="secondary-button" type="button" onClick={() => setRevision((value) => value + 1)}>{t("common.retry")}</button>;
 
   return (
-    <SideDrawer open={open} onClose={onClose} title={fileMode ? t("pocklo.choose") : t("pocklo.name")} trapFocus>
-      <div className="pocklo-drawer">
+    <SideDrawer open={open} onClose={onClose} title={fileMode ? t("pocklo.choose") : t("pocklo.name")} className="pocklo-picker-drawer" trapFocus>
+      <div className="pocklo-drawer" ref={drawerContent}>
         {(!fileMode || !ready) && <div className="pocklo-identity">
           <img src={pockloIcon} alt="" />
           <div><strong>{t("pocklo.name")}</strong><p>{t("pocklo.menuHint")}</p></div>
@@ -210,20 +291,29 @@ export function PockloDrawer({
         {fileMode && ready && <>
           <div className="pocklo-folder-header">
             {trail.length > 0 && <button className="icon-button" aria-label={t("pocklo.parentFolder")} disabled={busy} type="button"
-              onClick={() => { setTrail(trail.slice(0, -1)); setOffset(0); setSelected(null); setError(""); }}>
+              onClick={goToParent}>
               <PockloGlyph name="back" />
             </button>}
-            <div><small>{t("pocklo.folderLabel")}</small><strong>{folder?.resource.name ?? trail[trail.length - 1]?.name ?? t("pocklo.name")}</strong></div>
+            <div><small>{t("pocklo.folderLabel")}</small><strong>{folder?.resource.name ?? current?.name ?? t("pocklo.name")}</strong></div>
             {trail.length > 0 && folder?.resource.folder && <button className="secondary-button" disabled={busy} type="button"
               aria-pressed={selected?.id === folder.resource.id} onClick={() => setSelected(folder.resource)}>{t("pocklo.selectFolder")}</button>}
           </div>
-          {folderError ? <FeedbackState tone="error" title={t("pocklo.folderError")} action={retry} /> : !folder && <FeedbackState tone="loading" title={t("common.loading")} />}
+          <div className="pocklo-folder-toolbar">
+            <div className="pocklo-view-switch" role="group" aria-label={t("pocklo.viewMode")}>
+              <button type="button" aria-pressed={view === "list"} onClick={() => changeView("list")}><PockloGlyph name="list" />{t("pocklo.listView")}</button>
+              <button type="button" aria-pressed={view === "grid"} onClick={() => changeView("grid")}><PockloGlyph name="grid" />{t("pocklo.gridView")}</button>
+            </div>
+            <button className="icon-button" type="button" onClick={refreshFolder} disabled={busy || (!folder && !folderError)}
+              aria-label={t("pocklo.refreshFolder")} title={t("pocklo.refreshFolder")}><PockloGlyph name="refresh" /></button>
+          </div>
+          {folderError ? <FeedbackState tone="error" title={t("pocklo.folderError")} action={<button className="secondary-button" type="button" onClick={refreshFolder}>{t("common.retry")}</button>} /> : !folder && <FeedbackState tone="loading" title={t("common.loading")} />}
           {folder?.entries.length === 0 && <FeedbackState tone="empty" icon="folder_open" title={t("pocklo.empty")} />}
-          {folder?.entries.length ? <div className="simple-list pocklo-file-list" aria-label={folder.resource.name}>
-            {folder.entries.map((entry) => <button key={entry.id} className="simple-row menu-link-row pocklo-file-row" disabled={busy}
+          {folder?.entries.length ? <div className={view === "grid" ? "pocklo-file-grid" : "simple-list pocklo-file-list"} aria-label={folder.resource.name}>
+            {folder.entries.map((entry) => <button key={entry.id} data-pocklo-entry={entry.id}
+              className={view === "grid" ? "pocklo-file-tile" : "simple-row menu-link-row pocklo-file-row"} disabled={busy}
               aria-pressed={entry.folder ? undefined : selected?.id === entry.id} type="button" onClick={() => {
                 setError("");
-                if (entry.folder) { setTrail([...trail, entry]); setOffset(0); setSelected(null); }
+                if (entry.folder) openFolder(entry);
                 else setSelected(entry);
               }}>
               <PockloFileVisual className="pocklo-file-icon" name={entry.name} folder={entry.folder}
