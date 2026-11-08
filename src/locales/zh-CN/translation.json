@@ -4009,6 +4009,7 @@
   ,"pocklo.folderLabel": "当前文件夹"
   ,"pocklo.folderError": "未能载入此文件夹"
   ,"pocklo.kindFile": "文件"
+  ,"pocklo.kindLink": "链接"
   ,"pocklo.kindFolder": "文件夹"
   ,"pocklo.shareDestination": "发送到 {{name}}"
   ,"pocklo.linkAccess": "持链接即可访问"

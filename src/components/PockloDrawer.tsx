@@ -6,6 +6,7 @@ import { SideDrawer } from "./SideDrawer";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { PockloGlyph } from "./PockloGlyph";
+import { PockloFileVisual, pockloCdnThumbnail } from "./PockloFileVisual";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
 import { pockloShareToken } from "./PockloShareCard";
@@ -14,7 +15,7 @@ export const POCKLO_HOME = "https://pocklo.jyonn.space/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
 const RETURN_KEY = "frienden:pocklo-return";
 
-type PockloEntry = { id: string; name: string; folder: boolean; size?: number };
+type PockloEntry = { id: string; name: string; folder: boolean; size?: number; preview?: string | null; thumbnail?: string | null };
 export type PockloFolder = {
   resource: PockloEntry;
   entries: PockloEntry[];
@@ -225,8 +226,9 @@ export function PockloDrawer({
                 if (entry.folder) { setTrail([...trail, entry]); setOffset(0); setSelected(null); }
                 else setSelected(entry);
               }}>
-              <span className="pocklo-file-icon"><PockloGlyph name={entry.folder ? "folder" : "file"} /></span>
-              <span className="row-main"><strong>{entry.name}</strong><small>{t(entry.folder ? "pocklo.kindFolder" : "pocklo.kindFile")}</small></span>
+              <PockloFileVisual className="pocklo-file-icon" name={entry.name} folder={entry.folder}
+                preview={entry.preview} thumbnail={pockloCdnThumbnail(entry.thumbnail)} />
+              <span className="row-main"><strong>{entry.name}</strong><small>{t(entry.folder ? "pocklo.kindFolder" : entry.preview === "link" ? "pocklo.kindLink" : "pocklo.kindFile")}</small></span>
               <PockloGlyph name={entry.folder ? "next" : selected?.id === entry.id ? "checked" : "unchecked"} />
             </button>)}
           </div> : null}

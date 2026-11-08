@@ -1,0 +1,4 @@
+.pocklo-file-visual { position: relative; overflow: hidden; }
+.pocklo-file-type-art { display: block; width: 100%; height: 100%; object-fit: contain; }
+.pocklo-file-thumbnail { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--bg-surface); opacity: 0; }
+.pocklo-file-thumbnail[data-ready="true"] { opacity: 1; }

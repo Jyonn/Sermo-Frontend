@@ -4011,6 +4011,7 @@
   ,"pocklo.folderLabel": "Current folder"
   ,"pocklo.folderError": "Couldn’t load this folder"
   ,"pocklo.kindFile": "File"
+  ,"pocklo.kindLink": "Link"
   ,"pocklo.kindFolder": "Folder"
   ,"pocklo.shareDestination": "Send to {{name}}"
   ,"pocklo.linkAccess": "Anyone with the link can access it"
