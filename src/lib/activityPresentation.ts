@@ -1,5 +1,6 @@
 import { EXPLORER_ART } from "./explorer.ts";
 import {activityAsset} from './activityAsset.ts';
+import {activityThemeForKey} from './activityTheme.ts';
 
 export interface ActivityPresentation {
   palette?: "sage" | "rose" | "ocean" | "gold";
@@ -18,13 +19,14 @@ export function safeActivityImage(value: unknown): string | undefined {
 }
 
 export function activityPresentation(activity?: { key?: string; theme?: string; presentation?: ActivityPresentation } | null): ActivityPresentation {
-  const bgm = activity?.theme === "bgm" || activity?.key === "main-character-bgm-2026";
-  const duel = activity?.theme === "number_duel" || activity?.key === "number-duel-2026";
-  const explorer = activity?.theme === "explorer" || activity?.key === "explorer-2026";
-  const friendly = activity?.theme === 'spider-man-4';
-  const starry = activity?.theme === 'starry-night';
-  const baxian = activity?.theme === 'baxian';
-  const vip = activity?.theme === 'permanent-vip' || activity?.key === 'permanent-vip-founding-100';
+  const theme=activity?.theme||activityThemeForKey(activity?.key);
+  const bgm = theme==='bgm';
+  const duel = theme==='number_duel';
+  const explorer = theme==='explorer';
+  const friendly = theme==='spider-man-4';
+  const starry = theme==='starry-night';
+  const baxian = theme==='baxian';
+  const vip = theme==='permanent-vip';
   const custom = activity?.presentation;
   return {
     palette: ["sage", "rose", "ocean", "gold"].includes(custom?.palette ?? "") ? custom!.palette : explorer ? "ocean" : "sage",

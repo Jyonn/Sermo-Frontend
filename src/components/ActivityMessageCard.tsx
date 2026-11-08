@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import {useActivityOverlay} from '../lib/activityOverlay';
 const baxianActivityBanner = "/assets/activity/baxian-banner-clean.webp";
 import { getActiveLocale, useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
@@ -17,6 +18,7 @@ interface ActivityMessageCardProps {
 
 export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, room }: ActivityMessageCardProps) {
   const navigate = useNavigate();
+  const openActivity=useActivityOverlay();
   const { t } = useI18n();
   const key = activity?.key || activityKey || "";
   const displayTitle = activity
@@ -24,10 +26,10 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
     : title || t("message.activityUnavailable");
 
   if (key === "number-duel-2026") {
-    return <NumberDuelCard room={room} className={className} onClick={() => navigate(roomCode ? `/app/number-duel/${roomCode}` : `/app/square/activities/${key}`)} />;
+    return <NumberDuelCard room={room} className={className} onClick={() => roomCode ? navigate(`/app/number-duel/${roomCode}`) : openActivity(key)} />;
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
-    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t("message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => navigate(`/app/square/activities/${key}`)} />;
+    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t("message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key)} />;
   }
 
   return (
@@ -36,7 +38,7 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
       disabled={!key}
       onClick={(event) => {
         event.stopPropagation();
-        if (key) navigate(`/app/square/activities/${key}`);
+        if (key) openActivity(key);
       }}
       type="button"
     >

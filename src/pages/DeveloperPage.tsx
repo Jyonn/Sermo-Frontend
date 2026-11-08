@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import {FeatureUnavailablePage} from '../components/FeatureUnavailablePage';
 import { AppChrome } from "../components/AppChrome";
 import { FeedbackState } from "../components/FeedbackState";
 import { OAuthApplicationWorkspace } from "../components/OAuthApplicationWorkspace";
@@ -28,7 +28,7 @@ export default function DeveloperPage() {
     return () => controller.abort();
   }, [spaceId, retry, t]);
   const current = result?.spaceId === spaceId ? result : null;
-  if (current?.space && !canManageOAuthApplications(current.space, spaceId)) return <Navigate replace to="/app/menu" />;
+  if (current?.space && !canManageOAuthApplications(current.space, spaceId)) return <FeatureUnavailablePage title={t('nav.developer')}/>;
   return <AppChrome title={t("nav.developer")} hideTopbar shellClassName="desktop-tab-shell developer-tab-shell">
     <section className="page-stack">
       <TabPageHeader title={t("nav.developer")} />

@@ -8,6 +8,20 @@ test('all built-in activity themes resolve dedicated navigation lettering', () =
 });
 import { readFileSync } from "node:fs";
 import { activityPresentation, safeActivityImage } from "../src/lib/activityPresentation.ts";
+import {activityDrawerClassName,activityThemeForKey} from '../src/lib/activityTheme.ts';
+
+test('initial activity surfaces are known before a detail response arrives',()=>{
+  for(const [key,theme] of [['explorer-2026','explorer'],['baxian-immortal-force-2026','baxian'],['number-duel-2026','number_duel'],['main-character-bgm-2026','bgm'],['spider-man-4-preview','spider-man-4'],['starry-night-five-evenings-2026','starry-night'],['permanent-vip-founding-100','permanent-vip']]) {
+    assert.equal(activityThemeForKey(key),theme);
+    assert.equal(activityPresentation({key}).title_art_url,activityPresentation({theme}).title_art_url);
+  }
+  assert.equal(activityThemeForKey('future-campaign'),'');
+  assert.equal(activityThemeForKey(),'');
+  assert.match(activityDrawerClassName('explorer-2026'),/is-explorer-activity/);
+  assert.match(activityDrawerClassName('permanent-vip-founding-100'),/vip-activity-drawer/);
+  assert.match(activityDrawerClassName('baxian-immortal-force-2026'),/is-baxian-activity/);
+  for(const key of ['explorer-2026','permanent-vip-founding-100','future-campaign'])assert.doesNotMatch(activityDrawerClassName(key),/is-baxian-activity/);
+});
 
 test("activity headers preserve lettering colors in dark mode", () => {
   const css = readFileSync(new URL("../src/components/ActivityCampaignCard.css", import.meta.url), "utf8");

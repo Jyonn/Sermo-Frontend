@@ -1,4 +1,5 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
+import {useActivityOverlay} from '../lib/activityOverlay';
 import {MonifaOtpCard} from '../components/MonifaOtpCard';
 import {monifaShareUrl} from '../lib/monifa';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
@@ -2565,6 +2566,7 @@ function LiveChatsPage({
   purpose?: "normal" | "submission";
   embeddedChat?: {id:number;onClose:()=>void;onProjectDetails?:()=>void};
 }) {
+  const openActivity=useActivityOverlay();
   const { t } = useI18n();
   const pageActive = usePageActive();
   const { discover: discoverFeature } = useFeatureDiscovery();
@@ -8755,7 +8757,7 @@ function LiveChatsPage({
                 } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
                   navigate(`/app/square/statements/${message.payload.statement_id}`);
                 } else if (message.type === MESSAGE_TYPE_ACTIVITY && message.payload?.activity_key) {
-                  navigate(message.payload.room_code ? `/app/number-duel/${message.payload.room_code}` : `/app/square/activities/${message.payload.activity_key}`);
+                  if(message.payload.room_code)navigate(`/app/number-duel/${message.payload.room_code}`);else if(message.payload.activity_key)openActivity(message.payload.activity_key);
                 } else {
                   revealMessageFromSearch(message.message_id);
                 }

@@ -1,4 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
+import {useEffect,type CSSProperties,type ReactNode} from "react";
+import {useActivityPageReady} from '../lib/activityOverlay';
+import {availableAppHome} from '../lib/availableAppHome';
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
@@ -54,12 +56,14 @@ export function AppChrome({
   const { session } = useAuth();
   const sessionSpace = useSpaceBrand();
   const location = useLocation();
+  const activityPageReady=useActivityPageReady();
+  useEffect(()=>{if(!embedded)activityPageReady(location.pathname);},[activityPageReady,embedded,location.pathname]);
   const { t, language, loadingLanguage, setPreference: setLanguagePreference } = useI18n();
   const { resolvedTheme, setPreference: setThemePreference } = useTheme();
   const features = useSpaceFeatures();
   const languageSwitching = Boolean(loadingLanguage && loadingLanguage !== language);
 
-  const brandTarget = session ? (!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square") : "/entry";
+  const brandTarget = session ? (!features.ready ? "/app" : availableAppHome(features)) : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
   const usePublicHeader = publicHeader || !session;
   const visibleSpaceBrand = guestSpaceBrand ?? (sessionSpace

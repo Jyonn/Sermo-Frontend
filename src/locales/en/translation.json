@@ -4221,4 +4221,7 @@
 ,"resources.assetCount": "{{count}} assets"
 ,"resources.reviewHint": "Sticker packs awaiting review appear here."
 ,"resources.noResults": "No matching assets"
+,"feature.unavailable": "{{feature}} is not enabled in this space"
+,"feature.availableElsewhere": "You can continue using the features available in this space."
+,"feature.backMenu": "Back to menu"
 }

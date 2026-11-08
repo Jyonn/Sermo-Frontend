@@ -4219,4 +4219,7 @@
 ,"resources.assetCount": "{{count}} 项素材"
 ,"resources.reviewHint": "待审表情集会显示在这里。"
 ,"resources.noResults": "没有找到匹配的素材"
+,"feature.unavailable": "此空间暂未开放{{feature}}"
+,"feature.availableElsewhere": "你可以继续使用空间中已开放的功能。"
+,"feature.backMenu": "返回菜单"
 }

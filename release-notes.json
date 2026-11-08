@@ -1,17 +1,21 @@
 {
-  "id": "2026.11.08.1",
+  "id": "2026.11.08.2",
   "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
-      "title": "菜单新增活动入口",
+      "title": "活动原地查看与功能状态优化",
       "items": [
-        "菜单新增活动入口，可在抽屉中查看当前空间活动、进度并进入活动详情"
+        "菜单、广场和聊天卡片可直接打开活动详情，关闭后保留原页面，不再跳转广场",
+        "活动详情统一加载动画，各活动独立加载自己的主题，不再闪现八仙背景",
+        "未开放的聊天、广场、投稿、科研和开发使用统一状态页，提供返回可用功能的入口"
       ]
     },
     "en": {
-      "title": "Activities in the menu",
+      "title": "Activities without leaving your page",
       "items": [
-        "Open Activities from the menu to browse space campaigns, see progress, and enter activity details"
+        "Activity details open over menus, feeds, and chat cards without navigating to Square; closing preserves your page",
+        "Activities share one loading animation and load their own theme without briefly displaying Baxian artwork",
+        "Disabled Chats, Square, Submissions, Research, and Developer tools share a clear status page with links to available features"
       ]
     }
   }

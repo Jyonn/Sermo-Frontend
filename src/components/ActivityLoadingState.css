@@ -1,0 +1,24 @@
+/* Shared surfaces contain no campaign artwork. A campaign opts into its own art. */
+.activity-drawer.side-drawer { container-type: inline-size; background: var(--drawer-surface,var(--bg-elevated)); }
+html body .activity-drawer.side-drawer:not(.is-baxian-activity) > .drawer-body { display: block; padding: 0; overflow-x: hidden; background: var(--drawer-surface,var(--bg-elevated)); }
+.activity-drawer.is-explorer-activity { --drawer-surface: #0c2136; --activity-loading-ink: #cbd9e5; }
+.activity-drawer.is-starry-night { --drawer-surface: #07142b; --activity-loading-ink: #cbd9e5; }
+.activity-drawer.is-friendly-neighbor { --drawer-surface: #071523; --activity-loading-ink: #cbd9e5; }
+.activity-drawer.is-number-duel-activity { --drawer-surface: var(--bg-canvas); }
+.activity-drawer.vip-activity-drawer { --drawer-surface: #201b12; --activity-loading-ink: #d5bf94; }
+html body .activity-drawer.vip-activity-drawer.is-custom-activity.side-drawer > .drawer-body { background: radial-gradient(ellipse at 100% 0,#63482755,transparent 60%),#201b12; }
+.activity-drawer.is-baxian-activity { --activity-loading-ink: #e1d4b1; }
+.activity-loading-state { display: grid; align-content: start; gap: 24px; min-height: 390px; padding: calc(86px + env(safe-area-inset-top)) 24px 30px; color: var(--activity-loading-ink,var(--text-muted)); }
+.activity-loading-state.is-compact { min-height: 240px; padding: 20px 0; }
+.activity-loading-signal { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.activity-loading-signal > span:first-child { display: flex; align-items: center; gap: 3px; height: 18px; }
+.activity-loading-signal i { width: 3px; height: 12px; border-radius: 99px; background: currentColor; animation: activity-loading-pulse 1.2s ease-in-out infinite; }
+.activity-loading-signal i:nth-child(2) { height: 18px; animation-delay: .15s; }
+.activity-loading-signal i:nth-child(3) { animation-delay: .3s; }
+.activity-loading-poster { height: clamp(150px,40cqw,240px); border: 1px solid color-mix(in srgb,currentColor 12%,transparent); border-radius: 18px; background: color-mix(in srgb,currentColor 5%,transparent); }
+.activity-loading-lines { display: grid; gap: 11px; }
+.activity-loading-lines i { width: 85%; height: 9px; border-radius: 99px; background: color-mix(in srgb,currentColor 12%,transparent); }
+.activity-loading-lines i:nth-child(2) { width: 65%; }
+.activity-loading-lines i:nth-child(3) { width: 42%; }
+@keyframes activity-loading-pulse { 0%,100% { opacity: .3; transform: scaleY(.7); } 50% { opacity: .85; transform: scaleY(1); } }
+@media(prefers-reduced-motion:reduce) { .activity-loading-signal i { animation: none; opacity: .6; } }

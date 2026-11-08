@@ -1,5 +1,9 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation,useParams } from "react-router-dom";
+import {ActivityOverlayProvider} from './lib/activityOverlay';
+import {FeatureUnavailablePage} from './components/FeatureUnavailablePage';
+import {useI18n} from './lib/language';
+import {availableAppHome} from './lib/availableAppHome';
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
 import {FrontendUpdatePoller} from './components/FrontendUpdatePoller';
@@ -62,28 +66,42 @@ function AppHomeRedirect() {
   const [oauthRequest] = useState(readOAuthRequest);
   if (!features.ready) return <RouteResourceState status="loading" />;
   if (oauthRequest) return <Navigate replace to={isOAuthLoginPending() ? "/pwa?oauth_login=1" : oauthRequest} />;
-  return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
+  return <Navigate replace to={availableAppHome(features)} />;
 }
 
 function RequireChatFeature({ children }: { children: ReactNode }) {
   const features = useSpaceFeatures();
+  const {t}=useI18n();
   if (!features.ready) return <RouteResourceState status="loading" />;
-  if (!features.chatEnabled) return <Navigate replace to="/app/square" />;
+  if (!features.chatEnabled) return <FeatureUnavailablePage title={t('nav.chats')}/>;
   return children;
 }
 
 function RequireSubmissionFeature({ children }: { children: ReactNode }) {
   const features = useSpaceFeatures();
+  const {t}=useI18n();
   if (!features.ready) return <RouteResourceState status="loading" />;
-  if (!features.submissionEnabled) return <Navigate replace to="/app/square" />;
+  if (!features.submissionEnabled) return <FeatureUnavailablePage title={t('nav.submissions')}/>;
   return children;
 }
 
 function SquareEntry() {
   // Every Square route uses this entry so opening an overlay preserves the feed instance.
   const location = useLocation();
+  const {activityKey}=useParams();
+  const features=useSpaceFeatures();
+  const {t}=useI18n();
   const destination = legacySubmissionDestination(location.pathname, location.search);
-  return destination ? <Navigate replace to={destination} /> : <SquarePage />;
+  if(activityKey)return <Navigate replace to={`/app/menu?panel=activities&activity=${encodeURIComponent(activityKey)}`}/>;
+  if(destination)return <Navigate replace to={destination}/>;
+  if(!features.ready)return <RouteResourceState status="loading"/>;
+  return features.squareEnabled?<SquarePage/>:<FeatureUnavailablePage title={t('nav.square')}/>;
+}
+
+function RequireResearchFeature({children}:{children:ReactNode}) {
+  const features=useSpaceFeatures();const {t}=useI18n();
+  if(!features.ready)return <RouteResourceState status="loading"/>;
+  return features.researchEnabled?children:<FeatureUnavailablePage title={t('research.title')}/>;
 }
 
 export default function App() {
@@ -117,7 +135,7 @@ export default function App() {
   const routeLocation = showFriendInviteOverlay
     ? {
         ...location,
-        pathname: features.ready && !features.chatEnabled ? "/app/square" : "/app/chats",
+        pathname: features.ready ? availableAppHome(features) : "/app/chats",
         search: "",
         hash: "",
         key: `${location.key}-invite-background`,
@@ -127,7 +145,7 @@ export default function App() {
   if (rootChronelleReturn && !session) return ready ? <><ChronelleReturnFailure/><AppToast/></> : <RouteResourceState status="loading"/>;
 
   return (
-    <>
+    <ActivityOverlayProvider>
       {ready&&session&&<ChronelleBindingGate key={session.user.user_id} userId={session.user.user_id}/>}
       {ready&&session&&birthdayActive&&<BirthdayExperience/>}
       <RouteResourceBoundary>
@@ -184,7 +202,7 @@ export default function App() {
         />
         <Route
           path="/app/research"
-          element={<RequireAuth><ResearchPage /></RequireAuth>}
+          element={<RequireAuth><RequireResearchFeature><ResearchPage /></RequireResearchFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions"
@@ -297,6 +315,6 @@ export default function App() {
       {ready && !isPlatformAdmin && !isDesignLab && location.pathname !== "/oauth/authorize" ? <SiteMigrationNotice /> : null}
       <AppToast />
       {!isPlatformAdmin && !isDesignLab ? <FrontendUpdatePoller/> : null}
-    </>
+    </ActivityOverlayProvider>
   );
 }

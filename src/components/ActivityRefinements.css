@@ -1,4 +1,6 @@
 .activity-secondary-actions { display: grid; gap: 16px; padding: 20px 0 28px; }
+.activity-generic-overview { padding: calc(86px + env(safe-area-inset-top)) 22px 30px; }
+.activity-generic-overview > p { color: var(--text-secondary); line-height: 1.7; }
 .activity-secondary-actions nav { display: flex; justify-content: center; gap: 24px; }
 .activity-secondary-actions nav button { display: inline-flex; align-items: center; gap: 7px; padding: 8px 0; border: 0; background: transparent; color: inherit; font-size: 13px; font-weight: 650; opacity: .8; cursor: pointer; }
 .activity-secondary-actions nav button span { opacity: .55; }
@@ -68,8 +70,6 @@
 .square-starry-night-title > strong { display: block; margin-top: 6px; }
 .square-activity-banner .square-activity-attention-tag { top: 12px; right: 12px; }
 .square-activity-banner:has(.square-activity-attention-tag) .square-campaign-arrow { top: auto; bottom: 24px; }
-.activity-drawer.vip-activity-drawer.side-drawer .drawer-body,
-html[data-theme="dark"] body .activity-drawer.vip-activity-drawer.side-drawer .drawer-body { background: radial-gradient(ellipse at 100% 0,#63482755,transparent 60%),#201b12; }
 .vip-activity-drawer .vip-campaign-panel { padding: calc(86px + env(safe-area-inset-top)) 24px 28px; }
 .vip-activity-drawer .vip-campaign-hero { display: grid; gap: 20px; min-height: 280px; padding: 28px; border-radius: 20px; }
 .vip-activity-drawer .vip-campaign-hero .campaign-title-art { width: min(340px,100%); height: auto; }
