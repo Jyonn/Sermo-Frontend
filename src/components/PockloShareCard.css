@@ -1,8 +1,12 @@
-.pocklo-share-card { display: flex; width: min(100%, 310px); border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); color: var(--text-primary); }
-.pocklo-share-main { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; color: inherit; text-decoration: none; }
-.pocklo-share-main img { width: 34px; height: 34px; }
-.pocklo-share-main > span:nth-child(2) { display: grid; flex: 1; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.pocklo-share-main small { color: var(--text-secondary); font-size: 11px; }
-.pocklo-share-main strong { font-size: 14px; line-height: 1.4; }
-.pocklo-share-open { display: grid; align-self: stretch; place-items: center; min-width: 44px; border-inline-start: 1px solid var(--line-soft); color: var(--text-secondary); text-decoration: none; }
-.pocklo-share-card .material-symbols-outlined { font-size: 19px; }
+.pocklo-share-card { display: flex; width: min(100%, 316px); min-width: 0; min-height: 68px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); color: var(--text-primary); }
+.pocklo-share-main { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; padding: 10px 11px; border-radius: 15px 0 0 15px; color: inherit; text-decoration: none; }
+.pocklo-share-kind { display: grid; place-items: center; flex: none; width: 36px; height: 40px; border-radius: 10px; background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-surface)); font-size: 22px; }
+.pocklo-share-copy { display: grid; flex: 1; gap: 4px; min-width: 0; }
+.pocklo-share-copy small { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 11px; }
+.pocklo-share-copy img { width: 13px; height: 13px; }
+.pocklo-share-copy strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; font-size: 14px; line-height: 1.4; }
+.pocklo-share-download { flex: none; color: var(--text-secondary); }
+.pocklo-share-open { display: grid; place-items: center; flex: 0 0 44px; border-inline-start: 1px solid var(--line-soft); border-radius: 0 15px 15px 0; color: var(--text-secondary); text-decoration: none; }
+.pocklo-share-open svg { width: 18px; height: 18px; }
+.pocklo-share-card a:hover { background: color-mix(in srgb, var(--brand-primary) 8%, transparent); color: var(--text-primary); }
+.pocklo-share-card a:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -3px; }

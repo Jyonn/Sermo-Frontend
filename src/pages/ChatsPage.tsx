@@ -7618,7 +7618,7 @@ function LiveChatsPage({
         ] : []),
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
-        <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPickerOpen} scope={pockloScope} returnError={pockloReturnError}
+        <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPickerOpen} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}
           onClose={() => setPockloPickerOpen(false)} onShare={async (url) => {
             if (selectedChatIdRef.current !== selectedChatId) return false;
             return sendText(url);

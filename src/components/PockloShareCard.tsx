@@ -1,6 +1,7 @@
 import { useI18n } from "../lib/language";
 import { API_BASE_URL } from "../lib/siteConfig";
 import pockloIcon from "../assets/pocklo-mark.svg";
+import { PockloGlyph } from "./PockloGlyph";
 import "./PockloShareCard.css";
 
 type PockloShare = { provider: "pocklo_share"; title: string; url: string; kind: "file" | "folder" | "link" };
@@ -18,18 +19,20 @@ export function isPockloShare(value: unknown): value is PockloShare {
 export function PockloShareCard({ share }: { share: PockloShare }) {
   const { t } = useI18n();
   const file = share.kind === "file";
-  const label = t(file ? "pocklo.sharedFile" : share.kind === "folder" ? "pocklo.sharedFolder" : "pocklo.sharedLink");
+  const folder = share.kind === "folder";
+  const label = t(file ? "pocklo.sharedFile" : folder ? "pocklo.sharedFolder" : "pocklo.sharedLink");
   const href = file ? `${API_BASE_URL}/users/pocklo/shares/${pockloShareToken(share.url)}/download` : share.url;
   return (
-    <div className="pocklo-share-card">
-      <a className="pocklo-share-main" href={href} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
-        <img alt="" src={pockloIcon} />
-        <span><small>{label}</small><strong>{share.title}</strong></span>
-        {file && <span className="material-symbols-outlined" aria-label={t("pocklo.download")}>download</span>}
+    <div className="pocklo-share-card" data-kind={share.kind}>
+      <a className="pocklo-share-main" href={href} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}
+        aria-label={t(file ? "pocklo.downloadNamed" : "pocklo.openNamed", { name: share.title })}>
+        <span className="pocklo-share-kind"><PockloGlyph name={share.kind} /></span>
+        <span className="pocklo-share-copy"><small><img alt="" src={pockloIcon} />{label}</small><strong>{share.title}</strong></span>
+        {file && <PockloGlyph name="download" className="pocklo-share-download" />}
       </a>
       <a className="pocklo-share-open" href={share.url} target="_blank" rel="noreferrer"
         aria-label={t("pocklo.open")} title={t("pocklo.open")} onClick={(event) => event.stopPropagation()}>
-        <span className="material-symbols-outlined" aria-hidden="true">north_east</span>
+        <PockloGlyph name="open" />
       </a>
     </div>
   );

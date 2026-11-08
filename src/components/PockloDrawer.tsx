@@ -3,6 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { SideDrawer } from "./SideDrawer";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { FeedbackState } from "./FeedbackState";
+import { PockloGlyph } from "./PockloGlyph";
+import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
 import { pockloShareToken } from "./PockloShareCard";
 
@@ -39,18 +43,22 @@ export function usePockloReturn(scope: string, onReturn: () => void) {
 }
 
 export function PockloDrawer({
-  open, onClose, scope, returnError, onShare,
+  open, onClose, scope, returnError, onShare, chatName,
 }: {
   open: boolean;
   onClose: () => void;
   scope: string;
   returnError?: string;
+  chatName?: string;
   onShare?: (url: string) => Promise<boolean | void>;
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [revision, setRevision] = useState(0);
+  const [folderError, setFolderError] = useState(false);
   const [trail, setTrail] = useState<PockloEntry[]>([]);
   const [folder, setFolder] = useState<PockloFolder | null>(null);
   const [offset, setOffset] = useState(0);
@@ -67,6 +75,7 @@ export function PockloDrawer({
       setTrail([]);
       setOffset(0);
       setSelected(null);
+      setConfirmDisconnect(false);
       return;
     }
     let live = true;
@@ -78,20 +87,24 @@ export function PockloDrawer({
       if (live) setStatus("unavailable");
     });
     return () => { live = false; };
-  }, [open, scope, returnError]);
+  }, [open, scope, returnError, revision]);
   useEffect(() => () => pendingShare.current?.abort(), []);
 
   useEffect(() => {
     if (!open || !fileMode || status !== "connected") return;
     const controller = new AbortController();
     setFolder(null);
+    setFolderError(false);
     api.pockloFiles(folderId, offset, controller.signal).then((value) => {
       if (!controller.signal.aborted) setFolder(value);
     }).catch((cause) => {
-      if (!controller.signal.aborted) report(cause);
+      if (!controller.signal.aborted) {
+        if (cause instanceof ApiError && ["connect_required", "account_mismatch"].includes(cause.identifier)) report(cause);
+        else setFolderError(true);
+      }
     });
     return () => controller.abort();
-  }, [open, fileMode, status, folderId, offset]);
+  }, [open, fileMode, status, folderId, offset, revision]);
 
   function report(cause: unknown) {
     const code = cause instanceof ApiError ? cause.identifier : "unavailable";
@@ -126,6 +139,7 @@ export function PockloDrawer({
     } catch (cause) {
       report(cause);
     } finally {
+      setConfirmDisconnect(false);
       setBusy(false);
     }
   }
@@ -144,6 +158,7 @@ export function PockloDrawer({
       if (!pockloShareToken(url)) throw Error();
       if (!controller.signal.aborted) {
         if (await onShare(url) !== false) onClose();
+        else setError("send_failed");
       }
     } catch (cause) {
       if (!controller.signal.aborted) report(cause);
@@ -155,49 +170,82 @@ export function PockloDrawer({
 
   const message = error === "account_mismatch" ? t("pocklo.mismatch")
     : error === "denied" ? t("pocklo.denied")
-    : error === "connect_required" ? t("pocklo.connect")
+    : error === "send_failed" ? t("pocklo.sendFailed")
+    : error === "connect_required" ? ""
     : error ? t("pocklo.unavailable") : "";
+  const ready = status === "connected";
+  const retry = <button className="secondary-button" type="button" onClick={() => setRevision((value) => value + 1)}>{t("common.retry")}</button>;
 
   return (
-    <SideDrawer open={open} onClose={onClose} title={t("pocklo.name")} actionLabel={fileMode ? t("pocklo.sendShare") : undefined}
-      actionDisabled={!selected || busy || status !== "connected"} actionBusy={busy} onAction={fileMode ? () => void sendShare() : undefined}>
+    <SideDrawer open={open} onClose={onClose} title={fileMode ? t("pocklo.choose") : t("pocklo.name")} trapFocus>
       <div className="pocklo-drawer">
-        {!fileMode && <a className="button" href={POCKLO_HOME} target="_blank" rel="noreferrer">{t("pocklo.open")}</a>}
-        {!status ? <p role="status">{t("common.loading")}</p> : null}
-        {message ? <p role="alert">{message}</p> : null}
-        {status === "unavailable" ? <p>{t("pocklo.unavailable")}</p> : null}
-        {status === "phone_required" ? <p>{t("pocklo.phoneRequired")}</p> : null}
-        {status === "connect_required" && <>
-          <p>{t("pocklo.connectHint")}</p>
-          <button className="button" disabled={busy} type="button" onClick={() => void connect()}>{t("pocklo.connect")}</button>
-        </>}
-        {!fileMode && status === "connected" && <>
-          <p>{t("pocklo.connectedHint")}</p>
-          <button className="button" disabled={busy} type="button" onClick={() => void disconnect()}>{t("pocklo.disconnect")}</button>
-        </>}
-        {fileMode && status === "connected" && <>
-          <p>{selected ? t("pocklo.shareHint", { name: selected.name }) : t("pocklo.selectHint")}</p>
-          {trail.length > 0 && <button className="button" disabled={busy} type="button" onClick={() => { setTrail(trail.slice(0, -1)); setOffset(0); setSelected(null); setError(""); }}>{t("pocklo.parentFolder")}</button>}
-          {trail.length > 0 && folder?.resource.folder && <button className="button" disabled={busy} type="button"
-            aria-pressed={selected?.id === folder.resource.id} onClick={() => setSelected(folder.resource)}>{t("pocklo.selectFolder")}</button>}
-          {!folder && !error ? <p role="status">{t("common.loading")}</p> : null}
-          {folder?.entries.length === 0 ? <p>{t("pocklo.empty")}</p> : null}
-          {folder?.entries.length ? <div className="simple-list" aria-label={folder.resource.name}>
-            {folder.entries.map((entry) => <button key={entry.id} className="simple-row menu-link-row" disabled={busy}
+        {(!fileMode || !ready) && <div className="pocklo-identity">
+          <img src={pockloIcon} alt="" />
+          <div><strong>{t("pocklo.name")}</strong><p>{t("pocklo.menuHint")}</p></div>
+          {status && <span className="pocklo-status" data-connected={ready}>
+            <span aria-hidden="true" />{t(ready ? "pocklo.statusConnected" : status === "unavailable" ? "pocklo.statusUnavailable" : "pocklo.statusDisconnected")}
+          </span>}
+        </div>}
+        {message && <p className="pocklo-notice" role="alert">{message}</p>}
+        {!status && <FeedbackState tone="loading" title={t("common.loading")} />}
+        {status === "unavailable" && <FeedbackState tone="error" title={t("pocklo.unavailable")} action={retry} />}
+        {status === "phone_required" && <FeedbackState icon="verified_user" title={t("pocklo.phoneTitle")} description={t("pocklo.phoneRequired")} />}
+        {(status === "connect_required" || (!fileMode && ready)) && <div className="pocklo-connection">
+          <div className="pocklo-section-title">{t("pocklo.permissions")}</div>
+          <ul className="pocklo-permissions">
+            <li><PockloGlyph name="folder" />{t("pocklo.permissionBrowse")}</li>
+            <li><PockloGlyph name="link" />{t("pocklo.permissionShare")}</li>
+          </ul>
+          <p>{t(ready ? "pocklo.connectedHint" : "pocklo.connectHint")}</p>
+          {status === "connect_required" && <button className="button" disabled={busy} type="button" onClick={() => void connect()}>
+            {t(busy ? "pocklo.connecting" : "pocklo.connect")}
+            <PockloGlyph name="open" />
+          </button>}
+        </div>}
+        {!fileMode && <div className="pocklo-management">
+          <a href={POCKLO_HOME} target="_blank" rel="noreferrer">{t("pocklo.open")} <PockloGlyph name="open" /></a>
+          {ready && <button disabled={busy} type="button" onClick={() => setConfirmDisconnect(true)}>{t("pocklo.disconnect")}</button>}
+        </div>}
+        {fileMode && ready && <>
+          <div className="pocklo-folder-header">
+            {trail.length > 0 && <button className="icon-button" aria-label={t("pocklo.parentFolder")} disabled={busy} type="button"
+              onClick={() => { setTrail(trail.slice(0, -1)); setOffset(0); setSelected(null); setError(""); }}>
+              <PockloGlyph name="back" />
+            </button>}
+            <div><small>{t("pocklo.folderLabel")}</small><strong>{folder?.resource.name ?? trail[trail.length - 1]?.name ?? t("pocklo.name")}</strong></div>
+            {trail.length > 0 && folder?.resource.folder && <button className="secondary-button" disabled={busy} type="button"
+              aria-pressed={selected?.id === folder.resource.id} onClick={() => setSelected(folder.resource)}>{t("pocklo.selectFolder")}</button>}
+          </div>
+          {folderError ? <FeedbackState tone="error" title={t("pocklo.folderError")} action={retry} /> : !folder && <FeedbackState tone="loading" title={t("common.loading")} />}
+          {folder?.entries.length === 0 && <FeedbackState tone="empty" icon="folder_open" title={t("pocklo.empty")} />}
+          {folder?.entries.length ? <div className="simple-list pocklo-file-list" aria-label={folder.resource.name}>
+            {folder.entries.map((entry) => <button key={entry.id} className="simple-row menu-link-row pocklo-file-row" disabled={busy}
               aria-pressed={entry.folder ? undefined : selected?.id === entry.id} type="button" onClick={() => {
                 setError("");
                 if (entry.folder) { setTrail([...trail, entry]); setOffset(0); setSelected(null); }
                 else setSelected(entry);
               }}>
-              <span className="material-symbols-outlined" aria-hidden="true">{entry.folder ? "folder" : "draft"}</span>
-              <span className="row-main"><strong>{entry.name}</strong></span>
-              <span className="material-symbols-outlined" aria-hidden="true">{entry.folder ? "chevron_right" : selected?.id === entry.id ? "check_circle" : "radio_button_unchecked"}</span>
+              <span className="pocklo-file-icon"><PockloGlyph name={entry.folder ? "folder" : "file"} /></span>
+              <span className="row-main"><strong>{entry.name}</strong><small>{t(entry.folder ? "pocklo.kindFolder" : "pocklo.kindFile")}</small></span>
+              <PockloGlyph name={entry.folder ? "next" : selected?.id === entry.id ? "checked" : "unchecked"} />
             </button>)}
           </div> : null}
-          {offset > 0 && <button className="button" disabled={busy} type="button" onClick={() => { setOffset(Math.max(0, offset - 100)); setSelected(null); }}>{t("pocklo.previousPage")}</button>}
-          {folder?.next_offset != null && <button className="button" disabled={busy} type="button" onClick={() => { setOffset(folder.next_offset!); setSelected(null); }}>{t("common.next")}</button>}
+          {(offset > 0 || folder?.next_offset != null) && <div className="pocklo-pagination">
+            <button className="secondary-button" disabled={busy || offset === 0} type="button" onClick={() => { setOffset(Math.max(0, offset - 100)); setSelected(null); }}>{t("pocklo.previousPage")}</button>
+            <button className="secondary-button" disabled={busy || folder?.next_offset == null} type="button" onClick={() => { if (folder?.next_offset != null) setOffset(folder.next_offset); setSelected(null); }}>{t("common.next")}</button>
+          </div>}
+          <div className="pocklo-share-review">
+            <div aria-live="polite">
+              <small>{chatName ? t("pocklo.shareDestination", { name: chatName }) : t("pocklo.sendShare")}</small>
+              <strong>{selected?.name ?? t("pocklo.selectHint")}</strong>
+              {selected && <p><PockloGlyph name="link" />{t("pocklo.linkAccess")}</p>}
+            </div>
+            <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.sendingShare" : "pocklo.sendShare")}</button>
+          </div>
         </>}
       </div>
+      <ConfirmDialog open={open && confirmDisconnect} title={t("pocklo.disconnect")} description={t("pocklo.disconnectDetail")}
+        confirmLabel={t("pocklo.disconnectAction")} danger busy={busy} onClose={() => setConfirmDisconnect(false)} onConfirm={() => void disconnect()} />
     </SideDrawer>
   );
 }

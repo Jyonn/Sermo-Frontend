@@ -1,4 +1,40 @@
-.pocklo-drawer { display: grid; align-content: start; gap: 12px; }
-.pocklo-drawer > .button { justify-self: start; }
+.pocklo-drawer { display: grid; align-content: start; gap: 16px; }
 .pocklo-drawer p { margin: 0; color: var(--text-secondary); overflow-wrap: anywhere; }
-.pocklo-drawer .row-main { min-width: 0; overflow-wrap: anywhere; }
+.pocklo-drawer button, .pocklo-drawer a { touch-action: manipulation; }
+.pocklo-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); }
+.pocklo-identity img { width: 44px; height: 44px; flex: none; }
+.pocklo-identity > div { flex: 1; min-width: 104px; }
+.pocklo-identity strong { font-size: 16px; }
+.pocklo-identity p { margin-top: 3px; font-size: 12px; line-height: 1.45; }
+.pocklo-status { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding-inline: 8px; border: 1px solid var(--line-soft); border-radius: 999px; color: var(--text-secondary); font-size: 11px; white-space: nowrap; }
+.pocklo-status[data-connected="true"] { color: var(--text-primary); background: color-mix(in srgb, var(--brand-primary) 12%, transparent); }
+.pocklo-status > span { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pocklo-status[data-connected="true"] > span { background: var(--brand-primary); }
+.pocklo-connection { display: grid; gap: 10px; }
+.pocklo-section-title { color: var(--text-secondary); padding-inline: 3px; font-size: 12px; font-weight: 700; }
+.pocklo-permissions { margin: 0; padding: 0; list-style: none; overflow: hidden; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); }
+.pocklo-permissions li { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 8px 13px; font-size: 13px; }
+.pocklo-permissions li + li { border-block-start: 1px solid var(--line-soft); }
+.pocklo-permissions svg, .pocklo-management svg { color: var(--text-secondary); width: 18px; height: 18px; flex: none; }
+.pocklo-connection p, .pocklo-notice { font-size: 13px; line-height: 1.55; }
+.pocklo-connection .button { display: flex; justify-content: center; gap: 8px; min-height: 44px; }
+.pocklo-connection .button svg { width: 17px; height: 17px; }
+.pocklo-management { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; border-block-start: 1px solid var(--line-soft); }
+.pocklo-management > :is(a, button) { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; border: 0; padding: 0 3px; color: var(--text-secondary); background: transparent; font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+.pocklo-management > :is(a, button):hover { color: var(--text-primary); }
+.pocklo-notice { padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--bg-surface); }
+.pocklo-folder-header { display: flex; align-items: center; gap: 9px; }
+.pocklo-folder-header > div { display: grid; gap: 2px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pocklo-folder-header small, .pocklo-share-review small, .pocklo-file-row small { color: var(--text-secondary); font-size: 12px; }
+.pocklo-folder-header .secondary-button { flex: none; min-height: 44px; }
+.pocklo-file-row { min-height: 58px; gap: 10px; }
+.pocklo-file-row .row-main { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.pocklo-file-row[aria-pressed="true"], .pocklo-folder-header [aria-pressed="true"] { background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface)); }
+.pocklo-file-row > svg { flex: none; color: var(--text-secondary); }
+.pocklo-file-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 9px; color: var(--text-primary); background: color-mix(in srgb, var(--brand-primary) 10%, var(--bg-surface)); }
+.pocklo-pagination { display: flex; justify-content: space-between; gap: 8px; }
+.pocklo-share-review { position: sticky; bottom: 0; display: grid; gap: 10px; padding: 13px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); }
+.pocklo-share-review > div { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.pocklo-share-review p { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.pocklo-share-review p svg { width: 15px; height: 15px; flex: none; }
+.pocklo-share-review .button { min-height: 44px; }

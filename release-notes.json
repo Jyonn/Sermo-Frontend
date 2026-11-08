@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.08.5",
+  "id": "2026.11.08.6",
   "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
       "title": "小兜文件与文件夹分享",
       "items": [
-        "在聊天中分享小兜文件或文件夹，文件卡片可直接下载，所有卡片均可跳转小兜"
+        "小兜连接页清楚显示授权状态，分享前可确认发送对象和链接可见范围",
+        "聊天卡片更容易区分文件和文件夹，下载与打开小兜各有独立入口"
       ]
     },
     "en": {
       "title": "Share Pocklo files and folders",
       "items": [
-        "Share Pocklo files or folders in chat. Download files from the card or open any share in Pocklo."
+        "See your Pocklo connection status and check the destination and link access before sharing.",
+        "File and folder cards are easier to tell apart, with distinct download and Pocklo actions."
       ]
     }
   }
