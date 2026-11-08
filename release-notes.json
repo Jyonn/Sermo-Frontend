@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.08.3",
+  "id": "2026.11.08.4",
   "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 领取规则优化",
+      "title": "应用与工具",
       "items": [
-        "同一手机号在所有空间仅可领取一个低于 LV9 的永久 VIP 账号，LV9 及以上不受此限制；领取页展示限制原因"
+        "外部应用和友间工具集中展示，可在一处打开小兜、Chronelle 和留幅并管理连接",
+        "聊天中可选取小兜文件发送副本，或把留幅的已分享相册加入消息"
       ]
     },
     "en": {
-      "title": "Permanent VIP claim rules",
+      "title": "Apps and tools",
       "items": [
-        "Across all spaces, each phone number may claim only one permanent VIP account below LV9. LV9+ accounts are exempt; the claim page explains any restriction"
+        "Find external apps and Frienden tools together, with shortcuts to open and manage connections",
+        "Send a copy of a Pocklo file or add a shared StillFolio album to a chat message"
       ]
     }
   }

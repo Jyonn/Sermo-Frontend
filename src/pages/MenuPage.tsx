@@ -26,6 +26,8 @@ import {ChatPageThumbnail} from '../components/ChatPageThumbnail';
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
+import { PockloDrawer, usePockloReturn } from "../components/PockloDrawer";
+import { chronelleOrigin } from "../lib/chronelleOrigin";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { GrowthAtlas } from "../components/GrowthAtlas";
@@ -67,6 +69,7 @@ import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import stillfolioMark from "../assets/stillfolio-mark.svg";
 import chronelleIcon from "../assets/chronelle-icon.png";
+import pockloIcon from "../assets/pocklo-mark.svg";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
@@ -460,8 +463,11 @@ export default function MenuPage() {
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
   const [activitiesOpen,setActivitiesOpen]=useState(false);
-  const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
+  const [chronelleDetailsOpen, setChronelleDetailsOpen] = useState(false);
+  const [pockloOpen, setPockloOpen] = useState(false);
+  const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
+  const pockloReturnError = usePockloReturn(pockloScope, () => { setMoreAppsOpen(true); setPockloOpen(true); });
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
@@ -2248,13 +2254,29 @@ export default function MenuPage() {
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
         <div className="more-apps-drawer menu-settings-section">
           {platformAdminSession ? <button className="simple-row menu-link-row" type="button" onClick={() => navigate("/admin?section=oauth")}>{t("oauth.platformManage")}</button> : null}
-          <DrawerTabs label={t("apps.more")} value={appsTab} onChange={setAppsTab} items={[{ value: "apps", label: t("apps.appTab") }, { value: "plugins", label: t("apps.pluginTab") }]} />
-          {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
-            <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
+          <section className="more-apps-group" aria-label={t("apps.externalGroup")}>
+            <h2>{t("apps.externalGroup")}</h2>
+            <div className="more-apps-section">
+            <button className="more-apps-row" type="button" onClick={() => setPockloOpen(true)}>
+              <span className="more-apps-icon is-pocklo"><img alt="" src={pockloIcon} /></span>
+              <span><strong>{t("pocklo.name")}</strong><small>{t("pocklo.menuHint")}</small></span>
+              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            </button>
+            <button className="more-apps-row" type="button" onClick={() => setChronelleDetailsOpen(true)}>
               <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
               <span><strong>{t("chronelle.title")}</strong><small>{session ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="more-apps-row" onClick={() => setStillfolioInfoOpen(true)} type="button">
+              <span className="more-apps-icon is-stillfolio"><img alt="" src={stillfolioMark} /></span>
+              <span><strong>{t("apps.stillfolio")}</strong><small>{t("apps.stillfolioSubtitle")}</small></span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            </div>
+          </section>
+          <section className="more-apps-group" aria-label={t("apps.builtinGroup")}>
+            <h2>{t("apps.builtinGroup")}</h2>
+            <div className="more-apps-section">
             <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setTravelMapOpen(true); }} type="button">
               <span className="more-apps-icon material-symbols-outlined">explore</span>
               <span><strong>{t("travelMap.myTitle")}</strong><small>{t("apps.travelHint")}</small></span>
@@ -2265,13 +2287,15 @@ export default function MenuPage() {
               <span><strong>{t("cloudResources.title")}</strong><small>{t("apps.cloudHint")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-          </section> : <section className="more-apps-section" role="tabpanel" aria-label={t("apps.appTab")}>
-            <button className="more-apps-row" onClick={() => setStillfolioInfoOpen(true)} type="button">
-              <span className="more-apps-icon is-stillfolio"><img alt="" src={stillfolioMark} /></span>
-              <span><strong>{t("apps.stillfolio")}</strong><small>{t("apps.stillfolioSubtitle")}</small></span>
-              <span className="material-symbols-outlined">north_east</span>
-            </button>
-          </section>}
+            </div>
+          </section>
+        </div>
+      </SideDrawer>
+      <PockloDrawer key={pockloScope} open={pockloOpen} onClose={() => setPockloOpen(false)} scope={pockloScope} returnError={pockloReturnError} />
+      <SideDrawer open={chronelleDetailsOpen} onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
+        <div className="more-apps-detail">
+          <a className="button" href={chronelleOrigin() + "/"} target="_blank" rel="noreferrer">{t("apps.openChronelle")}</a>
+          <button className="button" type="button" onClick={() => setChronelleInfoOpen(true)}>{t("apps.chronelleDisplay")}</button>
         </div>
       </SideDrawer>
       <ConfirmDialog

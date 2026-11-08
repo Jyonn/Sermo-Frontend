@@ -118,7 +118,7 @@ type RequestOptions = {
   platformAdminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
-  responseFormat?: "envelope" | "oauth";
+  responseFormat?: "envelope" | "oauth" | "blob";
 };
 
 export class ApiError extends Error {
@@ -313,7 +313,9 @@ async function completeSessionAvatar(session: AuthSession): Promise<AuthSession>
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
-  const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
+  const parseResponse = (response: Response) => responseFormat === "blob" && response.ok
+    ? response.blob() as Promise<T>
+    : responseFormat === "envelope" ? parseEnvelope<T>(response) : parseOAuthResponse<T>(response);
   const session = auth ? authConfig.getSession() : null;
   const squareScope=buildTabCacheScope(session?.user.space_id,session?.user.user_id);
   const squareRevision=squareScope?squareSyncRevision(squareScope):0;
@@ -486,6 +488,15 @@ export const api = {
   ...createResearchApi(request),
   chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<import('./chronelleProfile').ChronelleProfileDTO>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
   chronelleAccount(action?:string,confirmed?:boolean,callback?:{code?:string;state:string;error?:string}) { return request<{status:string;authorize_url?:string;rebind_required?:boolean;permissions_review_required?:boolean}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed,...callback}}:{})}); },
+  pockloConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {
+    return request<{ status?: string; authorize_url?: string }>("/users/me/pocklo", { auth: true, responseFormat: "oauth", ...(body ? { method: "POST", body } : {}) });
+  },
+  pockloFiles(id: string, offset: number, signal: AbortSignal) {
+    return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: { offset }, signal });
+  },
+  pockloFile(id: string, signal: AbortSignal) {
+    return request<Blob>("/users/me/pocklo/files/" + encodeURIComponent(id) + "/download", { auth: true, responseFormat: "blob", signal });
+  },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},
   getOAuthMetadata(query: Record<string, string>) {

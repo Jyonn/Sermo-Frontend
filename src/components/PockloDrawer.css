@@ -1,0 +1,4 @@
+.pocklo-drawer { display: grid; align-content: start; gap: 12px; }
+.pocklo-drawer > .button { justify-self: start; }
+.pocklo-drawer p { margin: 0; color: var(--text-secondary); overflow-wrap: anywhere; }
+.pocklo-drawer .row-main { min-width: 0; overflow-wrap: anywhere; }
