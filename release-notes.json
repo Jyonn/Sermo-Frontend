@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.08.4",
+  "id": "2026.11.08.5",
   "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
-      "title": "应用与工具",
+      "title": "小兜文件与文件夹分享",
       "items": [
-        "外部应用和友间工具集中展示，可在一处打开小兜、Chronelle 和留幅并管理连接",
-        "聊天中可选取小兜文件发送副本，或把留幅的已分享相册加入消息"
+        "在聊天中分享小兜文件或文件夹，文件卡片可直接下载，所有卡片均可跳转小兜"
       ]
     },
     "en": {
-      "title": "Apps and tools",
+      "title": "Share Pocklo files and folders",
       "items": [
-        "Find external apps and Frienden tools together, with shortcuts to open and manage connections",
-        "Send a copy of a Pocklo file or add a shared StillFolio album to a chat message"
+        "Share Pocklo files or folders in chat. Download files from the card or open any share in Pocklo."
       ]
     }
   }

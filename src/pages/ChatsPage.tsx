@@ -5502,15 +5502,14 @@ function LiveChatsPage({
     };
   }, [selectedChat]);
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedChat) return;
+  const sendText = async (explicitText?: string) => {
+    if (!selectedChat) return false;
 
-    const message = draft.trim();
-    if (!message) return;
-    if (!await moveToLatestMessageWindow()) return;
+    const message = (explicitText ?? draft).trim();
+    if (!message) return false;
+    if (!await moveToLatestMessageWindow()) return false;
 
-    const reply = consumeReplyTarget();
+    const reply = explicitText === undefined ? consumeReplyTarget() : undefined;
     const mentionUserIds = mentionUserIdsForText(message);
     const optimisticMentions = selectedChat.detail.members
       .filter((member) => mentionUserIds.includes(member.userId))
@@ -5547,7 +5546,7 @@ function LiveChatsPage({
             )
           )
         );
-        updateDraft("");
+        if (explicitText === undefined) updateDraft("");
       });
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] optimistic inserted", {
@@ -5629,6 +5628,11 @@ function LiveChatsPage({
       finishSendTask(optimisticMessage.clientId);
       setSendState("idle");
     }
+  };
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    return sendText();
   };
 
   const retryFailedMessage = async (message: ChatMessage) => {
@@ -7615,9 +7619,9 @@ function LiveChatsPage({
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
         <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPickerOpen} scope={pockloScope} returnError={pockloReturnError}
-          onClose={() => setPockloPickerOpen(false)} onFile={(file) => {
-            if (selectedChatIdRef.current !== selectedChatId) return Promise.resolve(false);
-            return sendUploadedMediaMessage("file", file, { file_name: file.name, file_size: file.size });
+          onClose={() => setPockloPickerOpen(false)} onShare={async (url) => {
+            if (selectedChatIdRef.current !== selectedChatId) return false;
+            return sendText(url);
           }} />
       ) : null}
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>

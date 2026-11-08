@@ -1,0 +1,8 @@
+.pocklo-share-card { display: flex; width: min(100%, 310px); border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); color: var(--text-primary); }
+.pocklo-share-main { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; color: inherit; text-decoration: none; }
+.pocklo-share-main img { width: 34px; height: 34px; }
+.pocklo-share-main > span:nth-child(2) { display: grid; flex: 1; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.pocklo-share-main small { color: var(--text-secondary); font-size: 11px; }
+.pocklo-share-main strong { font-size: 14px; line-height: 1.4; }
+.pocklo-share-open { display: grid; align-self: stretch; place-items: center; min-width: 44px; border-inline-start: 1px solid var(--line-soft); color: var(--text-secondary); text-decoration: none; }
+.pocklo-share-card .material-symbols-outlined { font-size: 19px; }

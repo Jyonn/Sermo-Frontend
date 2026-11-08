@@ -118,7 +118,7 @@ type RequestOptions = {
   platformAdminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
-  responseFormat?: "envelope" | "oauth" | "blob";
+  responseFormat?: "envelope" | "oauth";
 };
 
 export class ApiError extends Error {
@@ -313,9 +313,7 @@ async function completeSessionAvatar(session: AuthSession): Promise<AuthSession>
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
-  const parseResponse = (response: Response) => responseFormat === "blob" && response.ok
-    ? response.blob() as Promise<T>
-    : responseFormat === "envelope" ? parseEnvelope<T>(response) : parseOAuthResponse<T>(response);
+  const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
   const session = auth ? authConfig.getSession() : null;
   const squareScope=buildTabCacheScope(session?.user.space_id,session?.user.user_id);
   const squareRevision=squareScope?squareSyncRevision(squareScope):0;
@@ -494,8 +492,9 @@ export const api = {
   pockloFiles(id: string, offset: number, signal: AbortSignal) {
     return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: { offset }, signal });
   },
-  pockloFile(id: string, signal: AbortSignal) {
-    return request<Blob>("/users/me/pocklo/files/" + encodeURIComponent(id) + "/download", { auth: true, responseFormat: "blob", signal });
+  pockloShare(id: string, operationId: string, signal: AbortSignal) {
+    return request<{ url: string }>("/users/me/pocklo/shares", { auth: true, responseFormat: "oauth", method: "POST",
+      body: { resource_id: id, operation_id: operationId }, signal });
   },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},

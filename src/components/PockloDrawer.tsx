@@ -4,6 +4,7 @@ import { api, ApiError } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { SideDrawer } from "./SideDrawer";
 import "./PockloDrawer.css";
+import { pockloShareToken } from "./PockloShareCard";
 
 export const POCKLO_HOME = "https://pocklo.jyonn.space/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
@@ -38,13 +39,13 @@ export function usePockloReturn(scope: string, onReturn: () => void) {
 }
 
 export function PockloDrawer({
-  open, onClose, scope, returnError, onFile,
+  open, onClose, scope, returnError, onShare,
 }: {
   open: boolean;
   onClose: () => void;
   scope: string;
   returnError?: string;
-  onFile?: (file: File) => Promise<unknown>;
+  onShare?: (url: string) => Promise<boolean | void>;
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState("");
@@ -54,13 +55,15 @@ export function PockloDrawer({
   const [folder, setFolder] = useState<PockloFolder | null>(null);
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<PockloEntry | null>(null);
-  const download = useRef<AbortController | null>(null);
-  const fileMode = Boolean(onFile);
+  const pendingShare = useRef<AbortController | null>(null);
+  const operation = useRef<{ resourceId: string; key: string } | null>(null);
+  const fileMode = Boolean(onShare);
   const folderId = trail[trail.length - 1]?.id ?? "";
 
   useEffect(() => {
     if (!open) {
-      download.current?.abort();
+      pendingShare.current?.abort();
+      operation.current = null;
       setTrail([]);
       setOffset(0);
       setSelected(null);
@@ -76,6 +79,7 @@ export function PockloDrawer({
     });
     return () => { live = false; };
   }, [open, scope, returnError]);
+  useEffect(() => () => pendingShare.current?.abort(), []);
 
   useEffect(() => {
     if (!open || !fileMode || status !== "connected") return;
@@ -126,35 +130,37 @@ export function PockloDrawer({
     }
   }
 
-  async function sendFile() {
-    if (!selected || !onFile || busy) return;
+  async function sendShare() {
+    if (!selected || !onShare || busy || pendingShare.current) return;
     const controller = new AbortController();
-    download.current = controller;
+    pendingShare.current = controller;
+    if (operation.current?.resourceId !== selected.id) {
+      operation.current = { resourceId: selected.id, key: crypto.randomUUID() };
+    }
     setBusy(true);
     setError("");
     try {
-      const blob = await api.pockloFile(selected.id, controller.signal);
+      const { url } = await api.pockloShare(selected.id, operation.current.key, controller.signal);
+      if (!pockloShareToken(url)) throw Error();
       if (!controller.signal.aborted) {
-        const sent = await onFile(new File([blob], selected.name, { type: blob.type }));
-        if (sent !== false) onClose();
+        if (await onShare(url) !== false) onClose();
       }
     } catch (cause) {
       if (!controller.signal.aborted) report(cause);
     } finally {
+      pendingShare.current = null;
       setBusy(false);
     }
   }
 
   const message = error === "account_mismatch" ? t("pocklo.mismatch")
-    : error === "file_too_large" ? t("pocklo.tooLarge")
-    : error === "unsupported_file" ? t("pocklo.unsupportedFile")
     : error === "denied" ? t("pocklo.denied")
     : error === "connect_required" ? t("pocklo.connect")
     : error ? t("pocklo.unavailable") : "";
 
   return (
-    <SideDrawer open={open} onClose={onClose} title={t("pocklo.name")} actionLabel={fileMode ? t("pocklo.sendCopy") : undefined}
-      actionDisabled={!selected || busy} actionBusy={busy} onAction={fileMode ? () => void sendFile() : undefined}>
+    <SideDrawer open={open} onClose={onClose} title={t("pocklo.name")} actionLabel={fileMode ? t("pocklo.sendShare") : undefined}
+      actionDisabled={!selected || busy || status !== "connected"} actionBusy={busy} onAction={fileMode ? () => void sendShare() : undefined}>
       <div className="pocklo-drawer">
         {!fileMode && <a className="button" href={POCKLO_HOME} target="_blank" rel="noreferrer">{t("pocklo.open")}</a>}
         {!status ? <p role="status">{t("common.loading")}</p> : null}
@@ -170,8 +176,10 @@ export function PockloDrawer({
           <button className="button" disabled={busy} type="button" onClick={() => void disconnect()}>{t("pocklo.disconnect")}</button>
         </>}
         {fileMode && status === "connected" && <>
-          <p>{selected ? t("pocklo.copyHint", { name: selected.name }) : t("pocklo.selectHint")}</p>
+          <p>{selected ? t("pocklo.shareHint", { name: selected.name }) : t("pocklo.selectHint")}</p>
           {trail.length > 0 && <button className="button" disabled={busy} type="button" onClick={() => { setTrail(trail.slice(0, -1)); setOffset(0); setSelected(null); setError(""); }}>{t("pocklo.parentFolder")}</button>}
+          {trail.length > 0 && folder?.resource.folder && <button className="button" disabled={busy} type="button"
+            aria-pressed={selected?.id === folder.resource.id} onClick={() => setSelected(folder.resource)}>{t("pocklo.selectFolder")}</button>}
           {!folder && !error ? <p role="status">{t("common.loading")}</p> : null}
           {folder?.entries.length === 0 ? <p>{t("pocklo.empty")}</p> : null}
           {folder?.entries.length ? <div className="simple-list" aria-label={folder.resource.name}>
