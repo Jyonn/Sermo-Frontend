@@ -12,6 +12,11 @@
 .campaign-card-object.is-image { top:8%; right:2%; height:84%; background-size:contain; background-position:center; transform:none; }
 .campaign-card-symbol { position:absolute; right:10%; top:12%; font-size:21cqw; opacity:.2; }
 .campaign-card-arrow { position:absolute; right:4%; bottom:9%; font-size:clamp(16px,5cqw,24px); z-index:3; }
+.campaign-card-progress { position:absolute; right:5%; bottom:9%; display:grid; gap:6px; width:25%; color:var(--campaign-ink); }
+.campaign-card-progress b { font-size:22px; text-align:right; }
+.campaign-card-progress small { font-size:11px; font-weight:500; }
+.campaign-card-progress progress { width:100%; height:3px; accent-color:var(--campaign-ink); }
+.campaign-card:has(.campaign-card-progress) .campaign-card-arrow { display:none; }
 html[data-theme="dark"] .campaign-card.campaign-card { border-color:#47665a; }
 .activity-drawer.is-custom-activity.side-drawer { background:var(--drawer-surface,#f7f5ed); border-color:var(--line-soft); }
 html body .activity-drawer.is-custom-activity.side-drawer > .drawer-body,

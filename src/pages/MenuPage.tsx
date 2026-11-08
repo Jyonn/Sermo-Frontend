@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { downloadFriendInviteImage } from "../lib/friendInviteImage";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
 import {BirthdayProfileRow} from '../components/BirthdayControls';
+import {ActivityDirectory} from '../components/ActivityDirectory';
 import { DrawerTabs } from "../components/DrawerTabs";
 import { notificationCategoriesForSpace, notificationTopicLabels, type NotificationTopic } from '../lib/notificationCategories';
 import { SignatureSettings } from '../components/SignatureSettings';
@@ -458,6 +459,7 @@ export default function MenuPage() {
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
+  const [activitiesOpen,setActivitiesOpen]=useState(false);
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
@@ -2168,6 +2170,7 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="simple-row menu-link-row" onClick={()=>setActivitiesOpen(true)} type="button"><div className="row-main"><strong>{t('activity.title')}</strong></div><span className="material-symbols-outlined">chevron_right</span></button>
             <button className="simple-row menu-link-row" onClick={() => setMoreAppsOpen(true)} type="button">
               <div className="row-main">
                 <strong>{t("apps.more")}</strong>
@@ -2241,6 +2244,7 @@ export default function MenuPage() {
       />
       <CloudResourceDrawer onRouteOpen={() => setCloudResourcesOpen(true)} onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
+      <SideDrawer historyKey="activities" onRouteOpen={()=>setActivitiesOpen(true)} open={activitiesOpen} onClose={()=>setActivitiesOpen(false)} title={t('activity.title')}>{activitiesOpen?<ActivityDirectory vip={me?.permanent_vip_campaign}/>:null}</SideDrawer>
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
         <div className="more-apps-drawer menu-settings-section">
           {platformAdminSession ? <button className="simple-row menu-link-row" type="button" onClick={() => navigate("/admin?section=oauth")}>{t("oauth.platformManage")}</button> : null}

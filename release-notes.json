@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.07.3",
-  "publishedAt": "2026-11-07",
+  "id": "2026.11.08.1",
+  "publishedAt": "2026-11-08",
   "locales": {
     "zh-CN": {
-      "title": "修复手机端 Tab 背景",
+      "title": "菜单新增活动入口",
       "items": [
-        "手机端各 Tab 恢复透明背景，Header 仅在下滑后浮现底色；桌面端保留原有背景层次"
+        "菜单新增活动入口，可在抽屉中查看当前空间活动、进度并进入活动详情"
       ]
     },
     "en": {
-      "title": "Mobile tab background fix",
+      "title": "Activities in the menu",
       "items": [
-        "Mobile tabs restore transparent backgrounds and reveal header surfaces only after scrolling; desktop surface hierarchy is preserved"
+        "Open Activities from the menu to browse space campaigns, see progress, and enter activity details"
       ]
     }
   }
