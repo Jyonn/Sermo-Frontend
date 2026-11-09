@@ -7,11 +7,12 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { PockloGlyph } from "./PockloGlyph";
 import { PockloFileVisual, pockloCdnThumbnail } from "./PockloFileVisual";
+import { PockloPicker } from "./PockloPicker";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
-import { pockloShareToken } from "./PockloShareCard";
+import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloPicker";
 
-export const POCKLO_HOME = "https://pocklo.jyonn.space/";
+export const POCKLO_HOME = POCKLO_ORIGIN + "/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
 const RETURN_KEY = "frienden:pocklo-return";
 const VIEW_KEY = "frienden:pocklo-directory-view";
@@ -48,7 +49,7 @@ export function usePockloReturn(scope: string, onReturn: () => void) {
 }
 
 export function PockloDrawer({
-  open, onClose, scope, returnError, onShare, chatName,
+  open, onClose, scope, returnError, onShare, chatName, onPick, onBrowse,
 }: {
   open: boolean;
   onClose: () => void;
@@ -56,6 +57,8 @@ export function PockloDrawer({
   returnError?: string;
   chatName?: string;
   onShare?: (url: string) => Promise<boolean | void>;
+  onPick?: (url: string) => boolean;
+  onBrowse?: () => void;
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState("");
@@ -76,6 +79,7 @@ export function PockloDrawer({
   const pendingShare = useRef<AbortController | null>(null);
   const operation = useRef<{ resourceId: string; key: string } | null>(null);
   const fileMode = Boolean(onShare);
+  const embedded = Boolean(onPick && onBrowse);
   const current = trail[trail.length - 1]?.entry;
   const folderId = current?.id ?? "";
   const folderPrefix = `${scope}:${folderId}:`;
@@ -94,6 +98,7 @@ export function PockloDrawer({
       setConfirmDisconnect(false);
       return;
     }
+    if (embedded) return;
     let live = true;
     setStatus("");
     setError(returnError ?? "");
@@ -106,12 +111,12 @@ export function PockloDrawer({
       if (live) setStatus("unavailable");
     });
     return () => { live = false; };
-  }, [open, scope, returnError, revision]);
+  }, [open, scope, returnError, revision, embedded]);
   useEffect(() => () => pendingShare.current?.abort(), []);
   useEffect(() => { cache.current.clear(); }, [scope]);
 
   useEffect(() => {
-    if (!open || !fileMode || status !== "connected") return;
+    if (!open || embedded || !fileMode || status !== "connected") return;
     setFolderError(false);
     const cached = cache.current.get(folderKey);
     if (cached && cached.expires > Date.now()) {
@@ -134,7 +139,7 @@ export function PockloDrawer({
       }
     });
     return () => controller.abort();
-  }, [open, fileMode, status, folderId, offset, folderKey, folderRevision]);
+  }, [open, embedded, fileMode, status, folderId, offset, folderKey, folderRevision]);
 
   useLayoutEffect(() => {
     if (!folder || !restore.current) return;
@@ -260,6 +265,7 @@ export function PockloDrawer({
 
   return (
     <SideDrawer open={open} onClose={onClose} title={fileMode ? t("pocklo.choose") : t("pocklo.name")} className="pocklo-picker-drawer" trapFocus>
+      {open && onPick && onBrowse ? <PockloPicker onSelect={onPick} onBrowse={onBrowse} /> :
       <div className="pocklo-drawer" ref={drawerContent}>
         {(!fileMode || !ready) && <div className="pocklo-identity">
           <img src={pockloIcon} alt="" />
@@ -335,7 +341,7 @@ export function PockloDrawer({
             <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.sendingShare" : "pocklo.sendShare")}</button>
           </div>
         </>}
-      </div>
+      </div>}
       <ConfirmDialog open={open && confirmDisconnect} title={t("pocklo.disconnect")} description={t("pocklo.disconnectDetail")}
         confirmLabel={t("pocklo.disconnectAction")} danger busy={busy} onClose={() => setConfirmDisconnect(false)} onConfirm={() => void disconnect()} />
     </SideDrawer>

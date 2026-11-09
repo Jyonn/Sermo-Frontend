@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.2",
+  "id": "2026.11.09.3",
   "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
-      "title": "时序日程绑定",
+      "title": "聊天中的小兜分享",
       "items": [
-        "绑定时序后返回发起入口，科研关闭的空间也能从我的名片绑定日程"
+        "从聊天打开小兜选择器，选好的文件、文件夹或链接会加入输入框，确认后即可发送分享卡片"
       ]
     },
     "en": {
-      "title": "Chronelle calendar connection",
+      "title": "Share from Pocklo in chat",
       "items": [
-        "Return to where you started after connecting Chronelle. You can connect from My profile card even in spaces with Research turned off."
+        "Open the Pocklo picker from chat and add a file, folder, or link to your draft before sending it as a share card."
       ]
     }
   }

@@ -2738,9 +2738,11 @@ function LiveChatsPage({
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
   const [composerActionSheet, setComposerActionSheet] = useState<"file" | null>(null);
-  const [pockloPickerOpen, setPockloPickerOpen] = useState(false);
+  const [pockloPicker, setPockloPicker] = useState<{ key: string; legacy: boolean } | null>(null);
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
-  const pockloReturnError = usePockloReturn(pockloScope, () => setPockloPickerOpen(true));
+  const pockloPickerKey = `${pockloScope}:${activeChatRouteValue}`;
+  useEffect(() => setPockloPicker(null), [pockloPickerKey]);
+  const pockloReturnError = usePockloReturn(pockloScope, () => setPockloPicker({ key: pockloPickerKey, legacy: true }));
   const stopStillfolioPicker = useRef<(() => void) | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
@@ -7613,13 +7615,20 @@ function LiveChatsPage({
       <ActionSheet open={composerActionSheet !== null} onClose={() => setComposerActionSheet(null)} title={t("cloudResources.fileSourceTitle")} actions={[
         { key: "cloud", label: t("cloudResources.chooseCloud"), description: t("composer.cloudFileHint"), icon: <span className="material-symbols-outlined">cloud</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setCloudFilePickerOpen(true); } },
         ...(!submissionMode && !embeddedChat ? [
-          { key: "pocklo", label: t("pocklo.choose"), description: t("pocklo.selectHint"), icon: <img src={pockloMark} alt="" width={26} height={26} />, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setPockloPickerOpen(true); } },
+          { key: "pocklo", label: t("pocklo.choose"), description: t("pocklo.selectHint"), icon: <img src={pockloMark} alt="" width={26} height={26} />, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); setPockloPicker({ key: pockloPickerKey, legacy: false }); } },
         ] : []),
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
-        <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPickerOpen} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}
-          onClose={() => setPockloPickerOpen(false)} onShare={async (url) => {
+        <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPicker?.key === pockloPickerKey} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}
+          onClose={() => setPockloPicker(null)} onBrowse={() => setPockloPicker({ key: pockloPickerKey, legacy: true })}
+          onPick={pockloPicker?.legacy ? undefined : (url) => {
+            const editor = mentionEditorRef.current;
+            if (!editor || selectedChatIdRef.current !== selectedChatId) return false;
+            editor.insertTextWithoutFocus(` ${url} `);
+            setPockloPicker(null);
+            return true;
+          }} onShare={async (url) => {
             if (selectedChatIdRef.current !== selectedChatId) return false;
             return sendText(url);
           }} />

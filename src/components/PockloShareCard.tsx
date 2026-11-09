@@ -1,5 +1,6 @@
 import { useI18n } from "../lib/language";
 import { API_BASE_URL } from "../lib/siteConfig";
+import { pockloShareToken } from "../lib/pockloPicker";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import { PockloGlyph } from "./PockloGlyph";
 import { PockloFileVisual, pockloFileType } from "./PockloFileVisual";
@@ -9,10 +10,6 @@ type PockloShare = {
   provider: "pocklo_share"; title: string; url: string; kind: "file" | "folder" | "link";
   preview?: string; has_thumbnail?: boolean;
 };
-
-export function pockloShareToken(value: string) {
-  return /^https:\/\/pocklo\.jyonn\.space\/share\/([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.exec(value)?.[1]?.toLowerCase();
-}
 
 export function isPockloShare(value: unknown): value is PockloShare {
   const item = value as Partial<PockloShare> | null;
