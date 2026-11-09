@@ -73,7 +73,7 @@ import pockloIcon from "../assets/pocklo-mark.svg";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
-import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
+import { useSquareChannelLayout, useSquareLayoutUnified } from "../lib/useSquareFeedLayout";
 import type {SquareFeedLayout} from '../lib/squareFeedLayout';
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
@@ -483,6 +483,7 @@ export default function MenuPage() {
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
+  const [squareLayoutDrawerOpen, setSquareLayoutDrawerOpen] = useState(false);
   const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string; activity: ActivityCampaignDTO } | null>(null);
   const [bgmSettingsOpen, setBgmSettingsOpen] = useState(false);
   const [quickActionsSettingsOpen, setQuickActionsSettingsOpen] = useState(false);
@@ -559,9 +560,14 @@ export default function MenuPage() {
   const pwaGrowthClaimedRef = useRef(false);
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
-  const [squareFeedLayout,setSquareFeedLayout]=useSquareFeedLayout(cacheScope);
-  const [squareFriendsLayout,setSquareFriendsLayout]=useSquareFeedLayout(cacheScope,'friends');
-  const [squareUserLayout,setSquareUserLayout]=useSquareFeedLayout(cacheScope,'user');
+  const [unifiedSquareLayout, setUnifiedSquareLayout] = useSquareLayoutUnified(cacheScope);
+  const [squareFeedLayout, setSquareFeedLayout] = useSquareChannelLayout(cacheScope, "explore");
+  const [squareFriendsLayout, setSquareFriendsLayout] = useSquareChannelLayout(cacheScope, "friends");
+  const [squareUserLayout, setSquareUserLayout] = useSquareChannelLayout(cacheScope, "user");
+  const squareLayoutOptions: { value: SquareFeedLayout; label: string }[] = [
+    { value: "list", label: t("square.layoutList") },
+    { value: "masonry", label: t("square.layoutMasonry") },
+  ];
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   useEffect(() => {
     if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
@@ -2475,9 +2481,8 @@ export default function MenuPage() {
             />
           </SettingGroup>
           <SettingGroup>
-            <SettingSelect<SquareFeedLayout> label={t('square.layoutExplore')} value={squareFeedLayout} onChange={setSquareFeedLayout} options={[{value:'list',label:t('square.layoutList')},{value:'masonry',label:t('square.layoutMasonry')}]}/>
-            <SettingSelect<SquareFeedLayout> label={t('square.layoutFriends')} value={squareFriendsLayout} onChange={setSquareFriendsLayout} options={[{value:'list',label:t('square.layoutList')},{value:'masonry',label:t('square.layoutMasonry')}]}/>
-            <SettingSelect<SquareFeedLayout> label={t('square.layoutUser')} value={squareUserLayout} onChange={setSquareUserLayout} options={[{value:'list',label:t('square.layoutList')},{value:'masonry',label:t('square.layoutMasonry')}]}/>
+            <SettingRow title={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
+              onClick={() => setSquareLayoutDrawerOpen(true)} />
           </SettingGroup>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
@@ -2514,6 +2519,20 @@ export default function MenuPage() {
             <span><strong>{t("bgm.myKeychain")}</strong><small>{t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button> : null}
+        </div>
+      </SideDrawer>
+      <SideDrawer historyKey="square-layout" open={squareLayoutDrawerOpen} onRouteOpen={() => setSquareLayoutDrawerOpen(true)}
+        onClose={() => setSquareLayoutDrawerOpen(false)} title={t("square.layout")} dismissAction="back">
+        <div className="personalization-drawer">
+          <SettingGroup>
+            <SettingRow title={t("square.layoutUnified")} description={t("square.layoutUnifiedHint")}
+              trailing={<SettingSwitch checked={unifiedSquareLayout} label={t("square.layoutUnified")} onChange={setUnifiedSquareLayout} />} />
+          </SettingGroup>
+          {!unifiedSquareLayout && <SettingGroup>
+            <SettingSelect label={t("square.layoutExplore")} value={squareFeedLayout} onChange={setSquareFeedLayout} options={squareLayoutOptions} />
+            <SettingSelect label={t("square.layoutFriends")} value={squareFriendsLayout} onChange={setSquareFriendsLayout} options={squareLayoutOptions} />
+            <SettingSelect label={t("square.layoutUser")} value={squareUserLayout} onChange={setSquareUserLayout} options={squareLayoutOptions} />
+          </SettingGroup>}
         </div>
       </SideDrawer>
 

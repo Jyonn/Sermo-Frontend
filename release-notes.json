@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.08.8",
-  "publishedAt": "2026-11-08",
+  "id": "2026.11.09.1",
+  "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
-      "title": "小兜文件与文件夹分享",
+      "title": "广场布局设置",
       "items": [
-        "小兜可切换列表和缩略图、刷新目录，返回上一级会恢复浏览位置",
-        "留幅相册改为独立聊天操作，时序的日历设置和打开入口更清楚"
+        "广场默认统一使用列表，关闭统一布局后可分别设置探索、好友和我的布局"
       ]
     },
     "en": {
-      "title": "Share Pocklo files and folders",
+      "title": "Square layout settings",
       "items": [
-        "Switch Pocklo between list and thumbnail views, refresh a folder, and return to your previous position.",
-        "Open StillFolio albums directly from chat actions and manage Chronelle from its redesigned drawer."
+        "Square uses lists by default. Turn off the unified layout to set Explore, Friends, and My posts separately."
       ]
     }
   }
