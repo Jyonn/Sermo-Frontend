@@ -95,7 +95,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
       </label>)}
       <button type="button" className="ghost-button" disabled={loading} onClick={()=>setMemberPicker(true)}><span className="material-symbols-outlined" aria-hidden="true">group_add</span>{t('research.selectMembers')}</button>
     </div>}
-    {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <QuietState icon="calendar_month" title={onboarding&&setup?.status==='binding_required'?t('research.connectCalendar'):errorText(setup?.status || 'chronelle_unavailable')} description={tr('bindingHint')} action={setup?.status !== 'integration_not_configured' ? <button className="button" onClick={() => {sessionStorage.setItem(`chronelle:return-project:${userId}`,String(project.id));setConsent(true);}}>{tr('bind')}</button> : undefined}/>
+    {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <QuietState icon="calendar_month" title={onboarding&&setup?.status==='binding_required'?t('research.connectCalendar'):errorText(setup?.status || 'chronelle_unavailable')} description={tr('bindingHint')} action={setup?.status !== 'integration_not_configured' ? <button className="button" onClick={() => setConsent(true)}>{tr('bind')}</button> : undefined}/>
     : !selected.length ? <QuietState icon="event_available" title={tr('choose')} description={tr('intro')}/> : displays?.displays.length ? <CalendarFrame
       url={displays.displays[0].url} tokens={displays.displays.map(d => d.token)} date={new Date().toLocaleDateString('en-CA')}
       onRange={value=>{setResume(null);setRange(value);}} onRenew={() => setTick(n => n + 1)} /> : null}
@@ -104,7 +104,8 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
 
     {memberPicker&&<MemberPickerSheet title={tr('members')} initial={selected} members={project.members.map(member=>({...member,description:member.id===userId?tr('self'):undefined}))} limit={20} onClose={()=>setMemberPicker(false)} onApply={setSelected}/>}
     <ChronellePermissionsDrawer open={settingsOpen} onClose={()=>setSettingsOpen(false)} onRebind={()=>{setSettingsOpen(false);setConsent(true);}}/>
-    <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId} onChange={()=>setTick(n=>n+1)}/>
+    <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId}
+      context={{entry:"research",project:project.id,onboarding}} onChange={()=>setTick(n=>n+1)}/>
     <SideDrawer className="research-workflow-drawer" historyKey="research-meeting-create" open={!!range} fullscreen onClose={() => setRange(null)} title={tr('meeting')}>
       {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
     </SideDrawer>

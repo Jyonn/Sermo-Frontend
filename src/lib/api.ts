@@ -486,6 +486,11 @@ export const api = {
   ...createResearchApi(request),
   chronelleProfile(userId:number,params:URLSearchParams,signal?:AbortSignal) { return request<import('./chronelleProfile').ChronelleProfileDTO>(`/users/${userId}/chronelle/calendar?${params}`,{auth:true,signal}); },
   chronelleAccount(action?:string,confirmed?:boolean,callback?:{code?:string;state:string;error?:string}) { return request<{status:string;authorize_url?:string;rebind_required?:boolean;permissions_review_required?:boolean}>('/users/me/chronelle/account',{auth:true,...(action?{method:'POST',body:{action,confirmed,...callback}}:{})}); },
+  authorizeChronelle(context: { entry: "menu" | "profile" } | { entry: "research"; project: number; onboarding: boolean } | { entry: "activity"; activity: string; page: "menu" | "square" }) {
+    return request<{ authorize_url: string }>("/users/me/chronelle/account", {
+      auth: true, method: "POST", body: { action: "authorize", confirmed: true, ...context },
+    });
+  },
   pockloConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {
     return request<{ status?: string; authorize_url?: string }>("/users/me/pocklo", { auth: true, responseFormat: "oauth", ...(body ? { method: "POST", body } : {}) });
   },

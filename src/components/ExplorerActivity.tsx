@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { EXPLORER_ART, explorerRewardThumbnail, explorerRewardPath, explorerTaskPath } from "../lib/explorer";
 import { useAuth } from "../lib/auth";
@@ -28,6 +28,7 @@ export function ExplorerActivity({ activity, onUpdate, onPublish, preview = fals
   const { t } = useI18n();
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [panel, setPanel] = useState<"tasks" | "rewards" | "rules" | null>(null);
   const [busy, setBusy] = useState(false);
   const [chronelleOpen, setChronelleOpen] = useState(false);
@@ -81,6 +82,8 @@ export function ExplorerActivity({ activity, onUpdate, onPublish, preview = fals
     <BottomSheet open={panel !== null} onClose={() => setPanel(null)} title={panel === "tasks" ? tr("viewTasks") : panel === "rewards" ? tr("viewRewards") : t("activity.rules")} className={panel === "rewards" ? "explorer-collection-sheet" : undefined} bodyClassName={`explorer-info${panel === "rewards" ? " is-collection" : ""}`}>
       {panel === "tasks" ? <div className="explorer-task-list">{data.themes.map((theme) => <section key={theme.key}><header><span className="material-symbols-outlined">{themeIcons[theme.key]}</span><h3>{tr(`theme.${theme.key}`)}</h3>{theme.completed ? <span className="explorer-done">{tr("done")}</span> : null}</header>{theme.checks.map((check) => <button disabled={check.completed || !activity.active} key={check.key} onClick={() => task(check.key)} type="button"><span className="material-symbols-outlined">{check.completed ? "check_circle" : "radio_button_unchecked"}</span><span>{tr(`check.${check.key}`)}{check.key === "welcome" ? <small>{tr("welcomeLevel")}</small> : null}</span>{!check.completed ? <span className="material-symbols-outlined">chevron_right</span> : null}</button>)}</section>)}</div> : panel === "rewards" ? <ExplorerRewardGallery rewards={data.rewards} onConfigure={configure} onTasks={() => setPanel("tasks")} /> : <div className="explorer-rules"><p>{tr("dates")}</p><p>{tr("rule1")}</p><p>{tr("rule2")}</p><p>{tr("rule3")}</p><p>{tr("rule4")}</p></div>}
     </BottomSheet>
-    {session ? <ChronellePluginDialog open={chronelleOpen} onClose={() => { setChronelleOpen(false); void refresh(); }} userId={session.user.user_id} onChange={() => void refresh()} /> : null}
+    {session ? <ChronellePluginDialog open={chronelleOpen} onClose={() => { setChronelleOpen(false); void refresh(); }}
+      userId={session.user.user_id} context={{ entry: "activity", activity: activity.key, page: pathname === "/app/square" ? "square" : "menu" }}
+      onChange={() => void refresh()} /> : null}
   </div>;
 }

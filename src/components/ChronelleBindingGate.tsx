@@ -13,10 +13,37 @@ export function ChronelleBindingGate({userId}:{userId:number}) {
   const {t}=useI18n();
   const [open,setOpen]=useState(false);
   const [permissionsOpen,setPermissionsOpen]=useState(false);
+  const [returned] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    const state = params.get("chronelle_state");
+    const result = params.get("chronelle_result");
+    if (!state || !result) return null;
+    return { state, result, entry: params.get("chronelle_entry"), context: readChronelleReturn(state, localStorage) };
+  });
   const [callback]=useState(()=>{const url=new URL(location.href);return isChronelleReturn(url)?{state:url.searchParams.get('state')||'',code:url.searchParams.get('code')||undefined,error:url.searchParams.get('error')||undefined}:null;});
   useEffect(()=>{
     let live=true;
-    if(callback){
+    if (returned) {
+      const url = new URL(location.href);
+      for (const key of ["chronelle_state", "chronelle_result", "chronelle_entry"]) url.searchParams.delete(key);
+      history.replaceState(history.state, "", url);
+      if (returned.context?.userId !== userId) {
+        showToast(t("chronelle.returnContextMissing"));
+        return;
+      }
+      clearChronelleReturn(returned.state, localStorage);
+      if (returned.result !== "active") {
+        showToast(t("chronelle.rebindFailed"));
+        return;
+      }
+      void api.chronelleAccount().then((value) => {
+        if (!live) return;
+        if (value.status !== "active") { showToast(t("chronelle.rebindFailed")); return; }
+        window.dispatchEvent(new Event("chronelle:bound"));
+        showToast(t("chronelle.bound"));
+        setPermissionsOpen(returned.entry === "profile" || Boolean(value.permissions_review_required));
+      }).catch(() => { if (live) showToast(t("chronelle.rebindFailed")); });
+    }else if(callback){
       const url=new URL(location.href);for(const key of ['code','state','error','error_description'])url.searchParams.delete(key);
       history.replaceState(history.state,'',url);
       const context=readChronelleReturn(callback.state,localStorage);
@@ -27,7 +54,7 @@ export function ChronelleBindingGate({userId}:{userId:number}) {
       void exchange.then(value=>{if(!live)return;if(value.status==='active'){sessionStorage.removeItem(`chronelle:full-pending:${userId}`);window.dispatchEvent(new Event('chronelle:bound'));showToast(t('chronelle.bound'));setPermissionsOpen(true);}else showToast(t('chronelle.rebindFailed'));}).catch(()=>{if(live)showToast(t('chronelle.rebindFailed'));});
     }else void api.chronelleAccount().then(value=>{if(!live)return;if(value.status==='active'&&value.permissions_review_required)setPermissionsOpen(true);else if(value.rebind_required&&sessionStorage.getItem(`chronelle:rebind-dismissed:${userId}`)!=='1')setOpen(true);}).catch(()=>{});
     return()=>{live=false;};
-  },[userId,callback]);
+  },[userId,callback,returned]);
   return <><ChronellePermissionsDrawer open={permissionsOpen} onClose={()=>setPermissionsOpen(false)} onRebind={()=>{setPermissionsOpen(false);setOpen(true);}}/>{open?<ChronellePluginDialog open rebind userId={userId} onClose={()=>{setOpen(false);sessionStorage.setItem(`chronelle:rebind-dismissed:${userId}`,'1');}} onChange={()=>window.dispatchEvent(new Event('chronelle:bound'))}/>:null}</>;
 }
 

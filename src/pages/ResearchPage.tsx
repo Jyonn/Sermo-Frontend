@@ -47,7 +47,7 @@ export default function ResearchPage() {
   const [list,setList]=useState<ResearchSummary[]>([]),[project,setProject]=useState<ResearchProject|null>(null),[id,setId]=useState<number|null>(()=>Number(search.get('project')||returning||localStorage.getItem(memoryKey))||null),[taskId,setTaskId]=useState<string|null>(null);
   const [chatOpen,setChatOpen]=useState(false),[onboarding,setOnboarding]=useState(!!returning||search.has('onboarding'));
   const [resourcesOpen,setResourcesOpen]=useState(false);
-  const [panel,setPanel]=useState<'create'|'manage'|'task'|'members'|'description'|'title'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning||search.has('onboarding')?'calendar':search.has('task')?'tasks':'overview');
+  const [panel,setPanel]=useState<'create'|'manage'|'task'|'members'|'description'|'title'|null>(null),[friends,setFriends]=useState<UserDTO[]>([]),[scope,setScope]=useState('mine'),[tab,setTab]=useState(returning||search.has('onboarding')||search.has('calendar')?'calendar':search.has('task')?'tasks':'overview');
   const [inviteOpen,setInviteOpen]=useState(false),[memberAction,setMemberAction]=useState<number|null>(null);
   const [memberPickerAction,setMemberPickerAction]=useState<'transfer'|'remove'|null>(null);
   const [listLoading,setListLoading]=useState(true),[loading,setLoading]=useState(!!id),[busy,setBusy]=useState(false),[error,setError]=useState(''),[tick,setTick]=useState(0),[confirm,setConfirm]=useState<string|null>(null);

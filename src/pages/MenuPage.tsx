@@ -2298,7 +2298,8 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
       <PockloDrawer key={pockloScope} open={pockloOpen} onClose={() => setPockloOpen(false)} scope={pockloScope} returnError={pockloReturnError} />
-      <SideDrawer open={chronelleDetailsOpen} onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
+      <SideDrawer historyKey="chronelle" open={chronelleDetailsOpen} onRouteOpen={() => setChronelleDetailsOpen(true)}
+        onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
         <div className="more-apps-detail menu-settings-section">
           <div className="chronelle-app-identity">
             <span className="more-apps-icon is-chronelle"><img src={chronelleIcon} alt="" /></span>

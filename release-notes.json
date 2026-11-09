@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.1",
+  "id": "2026.11.09.2",
   "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
-      "title": "广场布局设置",
+      "title": "时序日程绑定",
       "items": [
-        "广场默认统一使用列表，关闭统一布局后可分别设置探索、好友和我的布局"
+        "绑定时序后返回发起入口，科研关闭的空间也能从我的名片绑定日程"
       ]
     },
     "en": {
-      "title": "Square layout settings",
+      "title": "Chronelle calendar connection",
       "items": [
-        "Square uses lists by default. Turn off the unified layout to set Explore, Friends, and My posts separately."
+        "Return to where you started after connecting Chronelle. You can connect from My profile card even in spaces with Research turned off."
       ]
     }
   }
