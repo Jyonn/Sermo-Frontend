@@ -359,10 +359,7 @@ export function PockloDrawer({
       </div>
   );
   if (open && ready && onShare && !nativePicker) return (
-    <BottomSheet open onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}
-      className="pocklo-resource-sheet pocklo-embedded-sheet" bodyClassName="pocklo-resource-body">
-      <PockloPickerFrame onClose={onClose} onShare={onShare} onConnectionError={report} onFallback={() => setNativePicker(true)} />
-    </BottomSheet>
+    <PockloPickerFrame onClose={onClose} onShare={onShare} onConnectionError={report} onFallback={() => setNativePicker(true)} />
   );
   if (fileMode) return (
     <BottomSheet open={open} onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}

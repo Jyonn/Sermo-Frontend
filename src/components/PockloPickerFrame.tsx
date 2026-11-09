@@ -1,8 +1,12 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { api, ApiError } from "../lib/api";
+import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
+import { useModalFocus } from "../lib/modalFocus";
 import { readPockloPickerMessage } from "../lib/pockloPicker";
 import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
+import { showToast } from "../lib/toast";
 import { FeedbackState } from "./FeedbackState";
 
 export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallback }: {
@@ -12,11 +16,13 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
   onFallback: () => void;
 }) {
   const { t } = useI18n();
+  const overlay = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
-  const callbacks = useRef({ onClose, onShare, onConnectionError });
-  callbacks.current = { onClose, onShare, onConnectionError };
+  const callbacks = useRef({ onClose, onShare, onConnectionError, t });
+  callbacks.current = { onClose, onShare, onConnectionError, t };
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
-  const [draftError, setDraftError] = useState(false);
+  useBodyScrollLock(true);
+  useModalFocus(overlay, true, onClose);
 
   useLayoutEffect(() => {
     const element = frame.current;
@@ -58,7 +64,7 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
           created.delete(message.url);
           if (!lifetime.signal.aborted) callbacks.current.onClose();
         } catch {
-          if (!lifetime.signal.aborted) setDraftError(true);
+          if (!lifetime.signal.aborted) showToast(callbacks.current.t("pocklo.sendFailed"), "error");
         } finally {
           adding = false;
         }
@@ -114,12 +120,21 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
     };
   }, []);
 
-  return <div className="pocklo-picker-frame">
-    {status === "loading" && <FeedbackState tone="loading" title={t("common.loading")} />}
-    {status === "unavailable" && <FeedbackState tone="error" title={t("pocklo.unavailable")} />}
-    {draftError && <p className="pocklo-notice" role="alert">{t("pocklo.sendFailed")}</p>}
-    <iframe ref={frame} title={t("pocklo.choose")} hidden={status !== "ready"} tabIndex={0}
-      sandbox="allow-scripts allow-same-origin" referrerPolicy="no-referrer" />
-    {status !== "loading" && <button type="button" className="secondary-button" onClick={onFallback}>{t("pocklo.friendenPicker")}</button>}
-  </div>;
+  return createPortal(
+    <div ref={overlay} className="dialog-backdrop pocklo-picker-overlay" role="dialog" aria-modal="true"
+      aria-label={t("pocklo.choose")} tabIndex={-1} onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}>
+      {status !== "ready" && <div className="pocklo-picker-status">
+        {status === "loading"
+          ? <FeedbackState tone="loading" title={t("common.loading")} />
+          : <FeedbackState tone="error" title={t("pocklo.unavailable")} action={
+            <button type="button" className="secondary-button" onClick={onFallback}>{t("pocklo.friendenPicker")}</button>
+          } />}
+      </div>}
+      <iframe ref={frame} title={t("pocklo.choose")} hidden={status !== "ready"} tabIndex={0}
+        sandbox="allow-scripts allow-same-origin" referrerPolicy="no-referrer" />
+    </div>,
+    document.body,
+  );
 }

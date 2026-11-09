@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.6",
+  "id": "2026.11.09.7",
   "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
       "title": "聊天中的小兜分享",
       "items": [
-        "已绑定小兜时，可在聊天弹层里使用新版小兜选择器，选好资源后将分享链接加入草稿"
+        "从聊天直接打开小兜选择器，选好资源后将分享链接加入草稿"
       ]
     },
     "en": {
       "title": "Share from Pocklo in chat",
       "items": [
-        "Once connected, use the new Pocklo picker inside chat and add resource share links to your draft."
+        "Open the Pocklo picker directly in chat and add resource share links to your draft."
       ]
     }
   }
