@@ -1,6 +1,6 @@
 import { useI18n } from "../lib/language";
 import { API_BASE_URL } from "../lib/siteConfig";
-import { pockloShareToken } from "../lib/pockloPicker";
+import { pockloShareToken } from "../lib/pockloShare";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import { PockloGlyph } from "./PockloGlyph";
 import { PockloFileVisual, pockloFileType } from "./PockloFileVisual";

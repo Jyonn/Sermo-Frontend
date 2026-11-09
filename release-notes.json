@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.3",
+  "id": "2026.11.09.4",
   "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
       "title": "聊天中的小兜分享",
       "items": [
-        "从聊天打开小兜选择器，选好的文件、文件夹或链接会加入输入框，确认后即可发送分享卡片"
+        "直接在聊天弹层里浏览和搜索小兜资源，选好后将分享卡片链接加入输入框"
       ]
     },
     "en": {
       "title": "Share from Pocklo in chat",
       "items": [
-        "Open the Pocklo picker from chat and add a file, folder, or link to your draft before sending it as a share card."
+        "Browse and search Pocklo in a chat dialog, then add a share link to your draft."
       ]
     }
   }

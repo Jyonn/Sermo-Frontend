@@ -494,8 +494,8 @@ export const api = {
   pockloConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {
     return request<{ status?: string; authorize_url?: string }>("/users/me/pocklo", { auth: true, responseFormat: "oauth", ...(body ? { method: "POST", body } : {}) });
   },
-  pockloFiles(id: string, offset: number, signal: AbortSignal) {
-    return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: { offset }, signal });
+  pockloFiles(id: string, offset: number, signal: AbortSignal, search: string) {
+    return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: search ? { q: search } : { offset }, signal });
   },
   pockloShare(id: string, operationId: string, signal: AbortSignal) {
     return request<{ url: string }>("/users/me/pocklo/shares", { auth: true, responseFormat: "oauth", method: "POST",
