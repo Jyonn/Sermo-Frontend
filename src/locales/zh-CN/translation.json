@@ -4038,6 +4038,7 @@
   ,"pocklo.unavailable": "小兜暂时无法连接，请稍后重试。"
   ,"pocklo.selectHint": "选择要分享到当前聊天的文件、文件夹或链接"
   ,"pocklo.pickerDraftHint": "选好后，分享链接会添加到当前聊天的输入框。"
+  ,"pocklo.friendenPicker": "使用友间文件视图"
   ,"pocklo.search": "搜索此文件夹及其子目录"
   ,"pocklo.searchEmpty": "没有匹配的资源"
   ,"pocklo.searchLimit": "仅显示前 100 项，请缩小搜索范围。"

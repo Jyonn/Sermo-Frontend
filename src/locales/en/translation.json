@@ -4040,6 +4040,7 @@
   ,"pocklo.unavailable": "Pocklo is temporarily unavailable. Try again later."
   ,"pocklo.selectHint": "Choose a Pocklo file, folder, or link to share in this chat"
   ,"pocklo.pickerDraftHint": "Your share link will appear in the message composer for this chat."
+  ,"pocklo.friendenPicker": "Use Frienden’s file view"
   ,"pocklo.search": "Search this folder and subfolders"
   ,"pocklo.searchEmpty": "No matching resources"
   ,"pocklo.searchLimit": "Showing the first 100 results. Try a narrower search."

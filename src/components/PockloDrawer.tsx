@@ -8,6 +8,7 @@ import { FeedbackState } from "./FeedbackState";
 import { PockloGlyph } from "./PockloGlyph";
 import { PockloFileVisual, pockloCdnThumbnail } from "./PockloFileVisual";
 import { BottomSheet } from "./BottomSheet";
+import { PockloPickerFrame } from "./PockloPickerFrame";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
 import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
@@ -61,6 +62,7 @@ export function PockloDrawer({
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState("");
+  const [nativePicker, setNativePicker] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
@@ -88,6 +90,8 @@ export function PockloDrawer({
 
   useEffect(() => {
     if (!open) {
+      setNativePicker(false);
+      setStatus("");
       pendingShare.current?.abort();
       operation.current = null;
       setTrail([]);
@@ -116,7 +120,7 @@ export function PockloDrawer({
   useEffect(() => { cache.current.clear(); }, [scope]);
 
   useEffect(() => {
-    if (!open || !fileMode || status !== "connected") return;
+    if (!open || !fileMode || !nativePicker || status !== "connected") return;
     setFolderError(false);
     const cached = search ? undefined : cache.current.get(folderKey);
     if (cached && cached.expires > Date.now()) {
@@ -146,7 +150,7 @@ export function PockloDrawer({
       window.clearTimeout(debounce);
       controller.abort();
     };
-  }, [open, fileMode, status, folderId, offset, folderKey, folderRevision, search]);
+  }, [open, fileMode, nativePicker, status, folderId, offset, folderKey, folderRevision, search]);
 
   useLayoutEffect(() => {
     if (!folder || !restore.current) return;
@@ -353,6 +357,12 @@ export function PockloDrawer({
           </div>}
         </>}
       </div>
+  );
+  if (open && ready && onShare && !nativePicker) return (
+    <BottomSheet open onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}
+      className="pocklo-resource-sheet pocklo-embedded-sheet" bodyClassName="pocklo-resource-body">
+      <PockloPickerFrame onClose={onClose} onShare={onShare} onConnectionError={report} onFallback={() => setNativePicker(true)} />
+    </BottomSheet>
   );
   if (fileMode) return (
     <BottomSheet open={open} onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}
