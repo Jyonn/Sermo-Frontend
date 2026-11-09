@@ -16,6 +16,7 @@ interface BottomSheetProps {
   onClose: () => void;
   children: ReactNode;
   header?: ReactNode;
+  footer?: ReactNode;
   showCloseButton?: boolean;
   className?: string;
   bodyClassName?: string;
@@ -31,6 +32,7 @@ export function BottomSheet({
   onClose,
   children,
   header,
+  footer,
   showCloseButton = true,
   className,
   bodyClassName,
@@ -149,6 +151,7 @@ export function BottomSheet({
           </div>
         )}
         <div className={`sheet-body ${bodyClassName ?? ""}`.trim()}>{children}</div>
+        {footer}
       </section>
     </div></OverlayScope>,
     document.body

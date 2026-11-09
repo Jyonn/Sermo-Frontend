@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.4",
+  "id": "2026.11.09.5",
   "publishedAt": "2026-11-09",
   "locales": {
     "zh-CN": {
       "title": "聊天中的小兜分享",
       "items": [
-        "直接在聊天弹层里浏览和搜索小兜资源，选好后将分享卡片链接加入输入框"
+        "在聊天弹层里浏览和搜索小兜资源，底部的添加按钮始终可见"
       ]
     },
     "en": {
       "title": "Share from Pocklo in chat",
       "items": [
-        "Browse and search Pocklo in a chat dialog, then add a share link to your draft."
+        "Browse and search Pocklo in a chat dialog with the Add to draft button always in view."
       ]
     }
   }

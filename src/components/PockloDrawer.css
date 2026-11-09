@@ -1,6 +1,6 @@
 .pocklo-drawer { display: grid; align-content: start; gap: 16px; }
 .pocklo-resource-sheet.bottom-sheet { display: flex; flex-direction: column; }
-.pocklo-resource-sheet > .sheet-header { flex: none; }
+.pocklo-resource-sheet > :is(.sheet-header, .sheet-drag-zone) { flex: none; }
 .pocklo-resource-sheet > .pocklo-resource-body { min-height: 0; overflow: auto; overflow-anchor: none; }
 .pocklo-search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding-inline: 12px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--bg-surface); color: var(--text-secondary); }
 .pocklo-search:focus-within { border-color: var(--brand-primary); }
@@ -53,8 +53,8 @@
 .pocklo-file-row > svg { flex: none; color: var(--text-secondary); }
 .pocklo-file-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 9px; color: var(--text-primary); background: color-mix(in srgb, var(--brand-primary) 10%, var(--bg-surface)); }
 .pocklo-pagination { display: flex; justify-content: space-between; gap: 8px; }
-.pocklo-share-review { position: sticky; bottom: 0; display: grid; gap: 10px; padding: 13px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--bg-surface); }
+.pocklo-share-review { display: grid; flex: none; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
 .pocklo-share-review > div { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
-.pocklo-share-review p { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.pocklo-share-review p { display: flex; align-items: center; gap: 5px; margin: 0; color: var(--text-secondary); font-size: 12px; }
 .pocklo-share-review p svg { width: 15px; height: 15px; flex: none; }
 .pocklo-share-review .button { min-height: 44px; }

@@ -351,20 +351,20 @@ export function PockloDrawer({
             <button className="secondary-button" disabled={busy || offset === 0} type="button" onClick={() => { setOffset(Math.max(0, offset - 100)); setSelected(null); }}>{t("pocklo.previousPage")}</button>
             <button className="secondary-button" disabled={busy || folder?.next_offset == null} type="button" onClick={() => { if (folder?.next_offset != null) setOffset(folder.next_offset); setSelected(null); }}>{t("common.next")}</button>
           </div>}
-          <div className="pocklo-share-review">
-            <div aria-live="polite">
-              <small>{chatName ? t("pocklo.shareDestination", { name: chatName }) : t("pocklo.addShare")}</small>
-              <strong>{selected?.name ?? t("pocklo.selectHint")}</strong>
-              {selected && <p><PockloGlyph name="link" />{t("pocklo.linkAccess")}</p>}
-            </div>
-            <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.creatingShare" : "pocklo.addShare")}</button>
-          </div>
         </>}
       </div>
   );
   if (fileMode) return (
     <BottomSheet open={open} onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}
-      className="pocklo-resource-sheet" bodyClassName="pocklo-resource-body">{content}</BottomSheet>
+      className="pocklo-resource-sheet" bodyClassName="pocklo-resource-body"
+      footer={ready ? <footer className="pocklo-share-review">
+        <div aria-live="polite">
+          <small>{chatName ? t("pocklo.shareDestination", { name: chatName }) : t("pocklo.addShare")}</small>
+          <strong>{selected?.name ?? t("pocklo.selectHint")}</strong>
+          {selected && <p><PockloGlyph name="link" />{t("pocklo.linkAccess")}</p>}
+        </div>
+        <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.creatingShare" : "pocklo.addShare")}</button>
+      </footer> : undefined}>{content}</BottomSheet>
   );
   return (
     <SideDrawer open={open} onClose={onClose} title={t("pocklo.name")} trapFocus>
