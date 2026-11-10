@@ -26,7 +26,9 @@ import {ChatPageThumbnail} from '../components/ChatPageThumbnail';
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
-import { PockloDrawer, usePockloReturn } from "../components/PockloDrawer";
+import { PockloDrawer } from "../components/PockloDrawer";
+import { StillfolioDrawer } from "../components/StillfolioDrawer";
+import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { chronelleOrigin } from "../lib/chronelleOrigin";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
@@ -467,9 +469,13 @@ export default function MenuPage() {
   const [chronelleDetailsOpen, setChronelleDetailsOpen] = useState(false);
   const [pockloOpen, setPockloOpen] = useState(false);
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
-  const pockloReturnError = usePockloReturn(pockloScope, () => { setMoreAppsOpen(true); setPockloOpen(true); });
+  const pockloReturnError = useExternalPickerReturn("pocklo", pockloScope, () => { setMoreAppsOpen(true); setPockloOpen(true); });
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
+  const stillfolioReturnError = useExternalPickerReturn("stillfolio", pockloScope, () => {
+    setMoreAppsOpen(true);
+    setStillfolioInfoOpen(true);
+  });
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
   const [growthReportOpen, setGrowthReportOpen] = useState(false);
@@ -2319,20 +2325,14 @@ export default function MenuPage() {
           </div>
         </div>
       </SideDrawer>
-      <ConfirmDialog
+      <StillfolioDrawer
+        key={pockloScope}
         open={stillfolioInfoOpen}
         onClose={() => setStillfolioInfoOpen(false)}
-        onConfirm={() => { setStillfolioInfoOpen(false); window.open(buildStillfolioLoginUrl(space?.slug || getDetectedSpaceSlug() || "", session?.user.user_id), "_blank", "noopener,noreferrer"); }}
-        title={t("apps.stillfolio")}
-        description={t("apps.stillfolioDescription")}
-        confirmLabel={t("apps.visit")}
-      >
-        <div className="more-apps-consent">
-          <img alt="" src={stillfolioMark} />
-          <div><strong>{t("apps.permissions")}</strong><span>{t("apps.permissionProfile")}</span><span>{t("apps.permissionPhone")}</span><span>{t("apps.permissionVip")}</span></div>
-          <p>{t("apps.integrationPending")}</p>
-        </div>
-      </ConfirmDialog>
+        scope={pockloScope}
+        returnError={stillfolioReturnError}
+        openAppUrl={buildStillfolioLoginUrl(space?.slug || getDetectedSpaceSlug() || "", session?.user.user_id)}
+      />
 
       <SideDrawer historyKey="growth" onRouteOpen={() => setGrowthDrawerOpen(true)} open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
         <div className={`growth-drawer growth-workspace is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>

@@ -93,6 +93,7 @@ import type {
 import { i18n, resolveJoinLanguage, type SupportedLanguage } from "./i18n";
 import { showToast } from "./toast";
 import { API_BASE_URL } from "./siteConfig";
+import type { StillfolioAlbum } from "./stillfolioPicker";
 
 type AuthConfig = {
   getSession: () => AuthSession | null;
@@ -500,6 +501,21 @@ export const api = {
   pockloShare(id: string, operationId: string, signal: AbortSignal) {
     return request<{ url: string }>("/users/me/pocklo/shares", { auth: true, responseFormat: "oauth", method: "POST",
       body: { resource_id: id, operation_id: operationId }, signal });
+  },
+  stillfolioConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {
+    return request<{ status?: string; authorize_url?: string }>("/users/me/stillfolio", {
+      auth: true, responseFormat: "oauth", ...(body ? { method: "POST", body } : {}),
+    });
+  },
+  stillfolioAlbums(offset: number, signal: AbortSignal) {
+    return request<{ albums: StillfolioAlbum[]; next_offset: number | null }>("/users/me/stillfolio/albums", {
+      auth: true, responseFormat: "oauth", query: { offset }, signal,
+    });
+  },
+  stillfolioShare(albumId: string, operationId: string, signal: AbortSignal) {
+    return request<{ url: string }>("/users/me/stillfolio/shares", {
+      auth: true, responseFormat: "oauth", method: "POST", body: { album_id: albumId, operation_id: operationId }, signal,
+    });
   },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},

@@ -44,9 +44,11 @@ import { useOverlayLayer } from "../lib/overlayLayer";
 import { ComposerMoreActions } from "../components/ComposerMoreActions";
 import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
-import { PockloDrawer, usePockloReturn } from "../components/PockloDrawer";
+import { PockloDrawer } from "../components/PockloDrawer";
+import { StillfolioDrawer } from "../components/StillfolioDrawer";
+import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { pockloShareToken } from "../lib/pockloShare";
-import { openStillfolioPicker } from "../lib/stillfolioPicker";
+import { openStillfolioPicker, stillfolioShareUrl } from "../lib/stillfolioPicker";
 import pockloMark from "../assets/pocklo-mark.svg";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
@@ -2743,7 +2745,10 @@ function LiveChatsPage({
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
   const pockloPickerKey = `${pockloScope}:${activeChatRouteValue}`;
   useEffect(() => setPockloPicker(null), [pockloPickerKey]);
-  const pockloReturnError = usePockloReturn(pockloScope, () => setPockloPicker(pockloPickerKey));
+  const pockloReturnError = useExternalPickerReturn("pocklo", pockloScope, () => setPockloPicker(pockloPickerKey));
+  const [stillfolioPicker, setStillfolioPicker] = useState<string | null>(null);
+  useEffect(() => setStillfolioPicker(null), [pockloPickerKey]);
+  const stillfolioReturnError = useExternalPickerReturn("stillfolio", pockloScope, () => setStillfolioPicker(pockloPickerKey));
   const stopStillfolioPicker = useRef<(() => void) | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
@@ -5644,7 +5649,7 @@ function LiveChatsPage({
 
   const retryFailedMessage = async (message: ChatMessage) => {
     if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
-    if (message.kind === "text" && !pockloShareToken(message.text)) {
+    if (message.kind === "text" && !pockloShareToken(message.text) && !stillfolioShareUrl(message.text)) {
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== message.clientId),
@@ -7533,13 +7538,8 @@ function LiveChatsPage({
     setComposerMoreOpen((open) => !open);
   }}><ComposerSvgIcon kind="plus" /></button>;
   const chooseStillfolio = !submissionMode && !embeddedChat && selectedChatId ? () => {
-    const chatId = selectedChatId;
     setComposerMoreOpen(false);
-    stopStillfolioPicker.current?.();
-    stopStillfolioPicker.current = openStillfolioPicker((url) => {
-      if (selectedChatIdRef.current === chatId) mentionEditorRef.current?.insertTextWithoutFocus(` ${url} `);
-    });
-    if (!stopStillfolioPicker.current) showToast(t("apps.allowPopup"), "error");
+    setStillfolioPicker(pockloPickerKey);
   } : undefined;
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
@@ -7628,6 +7628,22 @@ function LiveChatsPage({
           onClose={() => setPockloPicker(null)}
           onShare={(url) => selectedChatIdRef.current === selectedChatId ? sendText(url) : Promise.resolve(false)} />
       ) : null}
+      {selectedChatId && !submissionMode && !embeddedChat && (
+        <StillfolioDrawer key={`${pockloScope}:${selectedChatId}`} open={stillfolioPicker === pockloPickerKey}
+          scope={pockloScope} returnError={stillfolioReturnError} onClose={() => setStillfolioPicker(null)}
+          onShare={(url) => selectedChatIdRef.current === selectedChatId ? sendText(url) : Promise.resolve(false)}
+          onLegacyPick={() => {
+            stopStillfolioPicker.current?.();
+            stopStillfolioPicker.current = openStillfolioPicker((url) => {
+              if (selectedChatIdRef.current !== selectedChatId) return;
+              void sendText(url).then((accepted) => {
+                if (accepted && selectedChatIdRef.current === selectedChatId) setStillfolioPicker(null);
+                else if (!accepted) showToast(t("stillfolio.sendFailed"), "error");
+              });
+            });
+            if (!stopStillfolioPicker.current) showToast(t("apps.allowPopup"), "error");
+          }} />
+      )}
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 

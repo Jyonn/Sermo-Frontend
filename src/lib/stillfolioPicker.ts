@@ -1,6 +1,16 @@
 const ORIGIN = "https://stillfolio.jyonn.space";
 const SHARE_PATH = /^\/share\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 
+export type StillfolioAlbum = { id: string; name: string; description: string; share_url: string | null };
+
+export function stillfolioShareUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (value === url.href && url.origin === ORIGIN && !url.username && !url.password && !url.hash && !url.search
+        && SHARE_PATH.test(url.pathname)) return url.href;
+  } catch { /* Invalid share address. */ }
+}
+
 export function openStillfolioPicker(onSelection: (url: string) => void, loginHint?: string) {
   const state = Array.from(crypto.getRandomValues(new Uint8Array(24)), (value) => value.toString(16).padStart(2, "0")).join("");
   const url = new URL("/frienden/pick/", ORIGIN);
@@ -18,11 +28,10 @@ export function openStillfolioPicker(onSelection: (url: string) => void, loginHi
     if (event.origin !== ORIGIN || event.source !== popup) return;
     const value = event.data;
     if (value?.type !== "frienden.stillfolio.selection" || value.state !== state || typeof value.url !== "string") return;
-    let selected: URL;
-    try { selected = new URL(value.url); } catch { return; }
-    if (selected.origin !== ORIGIN || selected.username || selected.password || selected.hash || selected.search || !SHARE_PATH.test(selected.pathname)) return;
+    const selected = stillfolioShareUrl(value.url);
+    if (!selected) return;
     stop();
-    onSelection(selected.href);
+    onSelection(selected);
   }
   window.addEventListener("message", receive);
   const expires = Date.now() + 10 * 60 * 1000;

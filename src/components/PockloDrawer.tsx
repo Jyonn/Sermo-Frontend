@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
+import { rememberExternalPickerReturn } from "../lib/externalPickerReturn";
 import { useI18n } from "../lib/language";
 import { SideDrawer } from "./SideDrawer";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -15,7 +15,6 @@ import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
 
 export const POCKLO_HOME = POCKLO_ORIGIN + "/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
-const RETURN_KEY = "frienden:pocklo-return";
 const VIEW_KEY = "frienden:pocklo-directory-view";
 const FOLDER_CACHE_TTL = 120_000;
 type FolderView = "list" | "grid";
@@ -28,27 +27,6 @@ export type PockloFolder = {
   has_more?: boolean;
 };
 type FolderStep = { entry: PockloEntry; offset: number; query: string; scrollTop: number; view: FolderView };
-
-export function usePockloReturn(scope: string, onReturn: () => void) {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [outcome, setOutcome] = useState("");
-  const open = useRef(onReturn);
-  open.current = onReturn;
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const result = query.get("pocklo");
-    if (!result) return;
-    query.delete("pocklo");
-    navigate({ pathname: location.pathname, search: query.toString() }, { replace: true });
-    if (scope && sessionStorage.getItem(RETURN_KEY) === scope + ":" + window.location.pathname) {
-      sessionStorage.removeItem(RETURN_KEY);
-      setOutcome(result === "connected" ? "" : result);
-      open.current();
-    }
-  }, [location.pathname, location.search, navigate, scope]);
-  return outcome;
-}
 
 export function PockloDrawer({
   open, onClose, scope, returnError, onShare, chatName,
@@ -220,7 +198,7 @@ export function PockloDrawer({
       const { authorize_url } = await api.pockloConnection({ action: "connect", origin, path });
       const target = new URL(authorize_url ?? "");
       if (target.origin + target.pathname !== POCKLO_AUTHORIZE || target.username || target.password || target.hash) throw Error();
-      sessionStorage.setItem(RETURN_KEY, scope + ":" + path);
+      rememberExternalPickerReturn("pocklo", scope, path);
       window.location.assign(target.href);
     } catch (cause) {
       report(cause);

@@ -1,0 +1,5 @@
+.stillfolio-drawer { display: grid; gap: 12px; }
+.stillfolio-drawer .stillfolio-album { display: grid; grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 10px; min-height: 60px; text-align: start; }
+.stillfolio-album > span:nth-child(2) { display: grid; gap: 3px; overflow-wrap: anywhere; }
+.stillfolio-album small { color: var(--text-secondary); }
+.stillfolio-drawer .stillfolio-album[aria-pressed="true"] { background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface)); }
