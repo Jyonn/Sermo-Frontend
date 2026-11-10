@@ -111,7 +111,8 @@ import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components
 import { ApiError, api } from "../lib/api";
 import { createNoiseReducedAudioCapture, preferredAudioMimeType, readMicrophonePermission, requestMicrophoneAccess, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
-import { buildChatCacheScope, chatCache } from "../lib/chatCache";
+import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT, type ChatListUpdatedDetail } from "../lib/chatCache";
+import { applyChatPresence } from "../lib/chatPresence";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { AUDIO_MIN_SIZE, resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
@@ -841,15 +842,6 @@ function formatChatListTime(value: number) {
   yesterday.setDate(now.getDate() - 1);
   if (date.toDateString() === yesterday.toDateString()) return i18n.t("time.yesterday");
   return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
-}
-
-function formatPresence(user: UserDTO | null) {
-  if (!user) return i18n.t("presence.unavailable");
-  if (user.is_alive) return i18n.t("presence.online");
-
-  const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return i18n.t("presence.recentlyActive");
-  return i18n.t("presence.offline");
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
@@ -2411,7 +2403,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const submissionCounterparts = chat.submission_role === "reviewer" ? submissionAuthors : submissionReviewers;
   const submissionCounterpart = submissionCounterparts[0];
   const title = chat.title || peer?.name || i18n.t("chat.unnamed");
-  const presence = formatPresence(peer);
+  const presence = i18n.t(peer?.is_alive ? "presence.online" : "presence.offline");
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
   const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
 
@@ -3371,6 +3363,18 @@ function LiveChatsPage({
 
     return () => controller.abort();
   }, [cacheScope, currentUserId, pageActive, purpose, submissionMode, submissionView]);
+
+  useEffect(() => {
+    if (!cacheScope) return;
+    const handleListUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<ChatListUpdatedDetail>).detail;
+      if (detail?.scope !== cacheScope || detail.source !== "server") return;
+      // Preserve local sends, unread counts and preference edits while updating presence.
+      setChats((current) => applyChatPresence(current, detail.chats));
+    };
+    window.addEventListener(CHAT_LIST_UPDATED_EVENT, handleListUpdate);
+    return () => window.removeEventListener(CHAT_LIST_UPDATED_EVENT, handleListUpdate);
+  }, [cacheScope]);
 
   useEffect(() => {
     if (!pageActive) return;
@@ -8084,7 +8088,7 @@ function LiveChatsPage({
                           <strong>{selectedChat.title}</strong>
                           <div className="meta-row">
                             {selectedChat.verified ? <span className="verified-badge">{t("admin.verified")}</span> : null}
-                            <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
+                            <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{t(selectedChat.online ? "presence.online" : "presence.offline")}</span>
                           </div>
                         </div>
                       </div>
@@ -8095,7 +8099,7 @@ function LiveChatsPage({
                         <div className="detail-text">{selectedChat.detail.relation}</div>
                       </div>
                       {selectedChat.type === "direct" ? (
-                        <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
+                        <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{t(selectedChat.online ? "presence.online" : "presence.offline")}</span>
                       ) : (
                         <span className="count-badge">{t("chat.memberCount", { count: selectedChat.members })}</span>
                       )}

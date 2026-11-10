@@ -1,16 +1,18 @@
 {
-  "id": "2026.11.10.3",
+  "id": "2026.11.10.4",
   "publishedAt": "2026-11-10",
   "locales": {
     "zh-CN": {
-      "title": "小兜分享卡片",
+      "title": "聊天在线状态",
       "items": [
+        "聊天页会自动刷新在线状态。停止活动两分钟后显示离线。",
         "修复 iOS 聊天中小兜分享卡片宽度不一、类型标签换行的问题"
       ]
     },
     "en": {
-      "title": "Pocklo share cards",
+      "title": "Online status in chat",
       "items": [
+        "Chat refreshes online status automatically and shows users as offline after two minutes without activity.",
         "Pocklo share cards use a consistent width and keep the resource type on one line in iOS chat."
       ]
     }

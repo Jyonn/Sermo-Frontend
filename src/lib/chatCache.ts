@@ -34,6 +34,7 @@ const memoryLists = new Map<string, ChatListRecord>();
 const memoryThreads = new Map<string, ChatThreadRecord>();
 
 export const CHAT_LIST_UPDATED_EVENT = "sermo:chat-list-updated";
+export type ChatListUpdatedDetail = { scope: string; chats: Chat[]; source: "local" | "server" };
 
 function normalizeMessages(messages: ChatMessage[]) {
   return [...messages].sort((left, right) => {
@@ -88,14 +89,11 @@ function deleteRecord(storeName: string, key: string) {
   });
 }
 
-function emitChatListUpdated(scope: string, chats: Chat[]) {
+function emitChatListUpdated(scope: string, chats: Chat[], source: ChatListUpdatedDetail["source"] = "local") {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
-    new CustomEvent(CHAT_LIST_UPDATED_EVENT, {
-      detail: {
-        scope,
-        chats,
-      },
+    new CustomEvent<ChatListUpdatedDetail>(CHAT_LIST_UPDATED_EVENT, {
+      detail: { scope, chats, source },
     })
   );
 }
@@ -181,14 +179,14 @@ export const chatCache = {
     return record;
   },
 
-  async persistChatList(scope: string, chats: Chat[]) {
+  async persistChatList(scope: string, chats: Chat[], source: ChatListUpdatedDetail["source"] = "local") {
     const record: ChatListRecord = {
       key: listKey(scope),
       chats: [...chats],
       updatedAt: Date.now(),
     };
     memoryLists.set(record.key, record);
-    emitChatListUpdated(scope, record.chats);
+    emitChatListUpdated(scope, record.chats, source);
     await writeRecord(LIST_STORE, record);
   },
 

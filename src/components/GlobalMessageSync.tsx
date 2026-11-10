@@ -18,7 +18,7 @@ import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageDTO } from "../lib/chatMessageMapper";
 import { emitAccountStateChanged } from "../lib/accountStateSync";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
-import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
+import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO } from "../types";
 
 const SYNC_LIMIT = 50;
 const MESSAGE_CACHE_PAGE_SIZE = 30;
@@ -59,15 +59,6 @@ function formatChatListTime(value: number) {
   return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
-function formatPresence(user: UserDTO | null) {
-  if (!user) return i18n.t("presence.unavailable");
-  if (user.is_alive) return i18n.t("presence.online");
-
-  const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return i18n.t("presence.recentlyActive");
-  return i18n.t("presence.offline");
-}
-
 function sortMessages(items: ChatMessage[]) {
   return [...items].sort((left, right) => Number(left.id) - Number(right.id));
 }
@@ -104,7 +95,7 @@ function getDirectPeer(chat: ChatDTO, currentUserId: number) {
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
   const title = chat.title || peer?.name || i18n.t("chat.unnamed");
-  const presence = formatPresence(peer);
+  const presence = i18n.t(peer?.is_alive ? "presence.online" : "presence.offline");
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
   const members = [...chat.members]
     .map((member) => ({
@@ -113,6 +104,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
       avatarUri: member.avatar_uri,
       isSelf: member.user_id === currentUserId,
       isOwner: Boolean(chat.owner?.user_id === member.user_id),
+      online: Boolean(member.is_alive),
     }))
     .sort((left, right) => {
       if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
@@ -398,7 +390,8 @@ export function GlobalMessageSync() {
         if (cancelled) return;
         if (chatsChanged && features.chatEnabled) {
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
-          await chatCache.persistChatList(scope, freshChats);
+          if (cancelled) return;
+          await chatCache.persistChatList(scope, freshChats, "server");
           presenceBaselineRef.current = new Map(freshChats.map((chat) => [chat.id, chat.online]));
         }
 
@@ -480,8 +473,8 @@ export function GlobalMessageSync() {
       if (!listRecord?.chats.length || hasMissingChats) {
         try {
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
-          chatCache.setChatList(scope, freshChats);
-          await chatCache.persistChatList(scope, freshChats);
+          if (cancelled) return;
+          await chatCache.persistChatList(scope, freshChats, "server");
           listRecord = chatCache.getChatList(scope);
         } catch {
           listRecord = chatCache.getChatList(scope) ?? listRecord;
@@ -556,14 +549,14 @@ export function GlobalMessageSync() {
         presencePollCountRef.current += 1;
         if (presencePollCountRef.current % 5 === 0) {
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
+          if (cancelled) return;
           const previousPresence = presenceBaselineRef.current;
           const newlyOnline = freshChats.find((chat) => {
             const previous = previousPresence?.get(chat.id);
             return chat.type === "direct" && chat.online && previous === false && chat.onlineReminderEnabled;
           });
           presenceBaselineRef.current = new Map(freshChats.map((chat) => [chat.id, chat.online]));
-          chatCache.setChatList(scope, freshChats);
-          void chatCache.persistChatList(scope, freshChats);
+          void chatCache.persistChatList(scope, freshChats, "server");
           if (newlyOnline && !accessSuppressed) {
             setPopup({
               chatId: newlyOnline.id,
@@ -632,8 +625,8 @@ export function GlobalMessageSync() {
         if (allRemoved.length) {
           await applyRemovalsToCache(allRemoved);
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
-          chatCache.setChatList(scope, freshChats);
-          void chatCache.persistChatList(scope, freshChats);
+          if (cancelled) return;
+          void chatCache.persistChatList(scope, freshChats, "server");
         }
         emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved, chatStates: [...allChatStates.values()] });
 
