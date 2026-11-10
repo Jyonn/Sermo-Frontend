@@ -33,7 +33,7 @@ export function PockloShareCard({ share }: { share: PockloShare }) {
         <PockloFileVisual className="pocklo-share-kind" name={share.title} folder={folder}
           preview={share.kind === "link" ? "link" : share.preview}
           thumbnail={file && hasThumbnail ? `${resourceUrl}/thumbnail` : undefined} />
-        <span className="pocklo-share-copy"><small><img alt="" src={pockloIcon} />{label}</small><strong>{share.title}</strong></span>
+        <span className="pocklo-share-copy"><small><img alt="" src={pockloIcon} /><span>{label}</span></small><strong>{share.title}</strong></span>
         {file && <PockloGlyph name="download" className="pocklo-share-download" />}
       </a>
       <a className="pocklo-share-open" href={share.url} target="_blank" rel="noreferrer"

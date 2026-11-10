@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.10.2",
+  "id": "2026.11.10.3",
   "publishedAt": "2026-11-10",
   "locales": {
     "zh-CN": {
-      "title": "聊天中的留幅相册",
+      "title": "小兜分享卡片",
       "items": [
-        "聊天的「更多操作」更新了留幅入口和图标，可选取相册发送到当前聊天"
+        "修复 iOS 聊天中小兜分享卡片宽度不一、类型标签换行的问题"
       ]
     },
     "en": {
-      "title": "Share StillFolio albums in chat",
+      "title": "Pocklo share cards",
       "items": [
-        "Find StillFolio under More actions in chat and send an album directly to the conversation."
+        "Pocklo share cards use a consistent width and keep the resource type on one line in iOS chat."
       ]
     }
   }
