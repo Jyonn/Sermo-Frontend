@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.09.7",
-  "publishedAt": "2026-11-09",
+  "id": "2026.11.10.1",
+  "publishedAt": "2026-11-10",
   "locales": {
     "zh-CN": {
       "title": "聊天中的小兜分享",
       "items": [
-        "从聊天直接打开小兜选择器，选好资源后将分享链接加入草稿"
+        "在小兜选择器确认分享后，分享卡片会直接发送到当前聊天"
       ]
     },
     "en": {
       "title": "Share from Pocklo in chat",
       "items": [
-        "Open the Pocklo picker directly in chat and add resource share links to your draft."
+        "Confirm a share in the Pocklo picker to send its card directly to the current chat."
       ]
     }
   }

@@ -45,6 +45,7 @@ import { ComposerMoreActions } from "../components/ComposerMoreActions";
 import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
 import { PockloDrawer, usePockloReturn } from "../components/PockloDrawer";
+import { pockloShareToken } from "../lib/pockloShare";
 import { openStillfolioPicker } from "../lib/stillfolioPicker";
 import pockloMark from "../assets/pocklo-mark.svg";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
@@ -5511,6 +5512,7 @@ function LiveChatsPage({
     const message = (explicitText ?? draft).trim();
     if (!message) return false;
     if (!await moveToLatestMessageWindow()) return false;
+    if (explicitText !== undefined && selectedChatIdRef.current !== selectedChat.id) return false;
 
     const reply = explicitText === undefined ? consumeReplyTarget() : undefined;
     const mentionUserIds = mentionUserIdsForText(message);
@@ -5631,6 +5633,8 @@ function LiveChatsPage({
       finishSendTask(optimisticMessage.clientId);
       setSendState("idle");
     }
+    // The chat owns this message now, including retries for failed deliveries.
+    return true;
   };
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -5640,7 +5644,7 @@ function LiveChatsPage({
 
   const retryFailedMessage = async (message: ChatMessage) => {
     if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
-    if (message.kind === "text") {
+    if (message.kind === "text" && !pockloShareToken(message.text)) {
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== message.clientId),
@@ -7621,12 +7625,8 @@ function LiveChatsPage({
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
         <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPicker === pockloPickerKey} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}
-          onClose={() => setPockloPicker(null)} onShare={async (url) => {
-            const editor = mentionEditorRef.current;
-            if (!editor || selectedChatIdRef.current !== selectedChatId) return false;
-            editor.insertTextWithoutFocus(` ${url} `);
-            return true;
-          }} />
+          onClose={() => setPockloPicker(null)}
+          onShare={(url) => selectedChatIdRef.current === selectedChatId ? sendText(url) : Promise.resolve(false)} />
       ) : null}
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>

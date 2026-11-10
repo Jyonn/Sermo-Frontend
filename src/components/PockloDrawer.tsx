@@ -257,8 +257,10 @@ export function PockloDrawer({
       const { url } = await api.pockloShare(selected.id, operation.current.key, controller.signal);
       if (!pockloShareToken(url)) throw Error();
       if (!controller.signal.aborted) {
-        if (await onShare(url) !== false) onClose();
-        else setError("send_failed");
+        const accepted = await onShare(url);
+        if (controller.signal.aborted) return;
+        if (accepted === false) setError("send_failed");
+        else onClose();
       }
     } catch (cause) {
       if (!controller.signal.aborted) report(cause);
@@ -362,15 +364,15 @@ export function PockloDrawer({
     <PockloPickerFrame onClose={onClose} onShare={onShare} onConnectionError={report} onFallback={() => setNativePicker(true)} />
   );
   if (fileMode) return (
-    <BottomSheet open={open} onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerDraftHint")}
+    <BottomSheet open={open} onClose={onClose} title={t("pocklo.choose")} description={t("pocklo.pickerSendHint")}
       className="pocklo-resource-sheet" bodyClassName="pocklo-resource-body"
       footer={ready ? <footer className="pocklo-share-review">
         <div aria-live="polite">
-          <small>{chatName ? t("pocklo.shareDestination", { name: chatName }) : t("pocklo.addShare")}</small>
+          <small>{chatName ? t("pocklo.shareDestination", { name: chatName }) : t("pocklo.sendShare")}</small>
           <strong>{selected?.name ?? t("pocklo.selectHint")}</strong>
           {selected && <p><PockloGlyph name="link" />{t("pocklo.linkAccess")}</p>}
         </div>
-        <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.creatingShare" : "pocklo.addShare")}</button>
+        <button className="button" disabled={!selected || busy} type="button" onClick={() => void sendShare()}>{t(busy ? "pocklo.sendingShare" : "pocklo.sendShare")}</button>
       </footer> : undefined}>{content}</BottomSheet>
   );
   return (
