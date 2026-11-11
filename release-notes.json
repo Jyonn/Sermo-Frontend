@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.12.1",
+  "id": "2026.11.12.2",
   "publishedAt": "2026-11-12",
   "locales": {
     "zh-CN": {
-      "title": "群语音通话",
+      "title": "年末来信",
       "items": [
-        "普通群聊支持发起和主动加入多人语音通话，发起人离开后其他成员可以继续聊。",
-        "永久 VIP 的语音通话额度提升至每周 30 分钟，私聊和群聊共用，群通话按个人参会时长计费。"
+        "空间开启年度回顾后，可在菜单里拆开年末来信，回看这一年的聊天点滴。"
       ]
     },
     "en": {
-      "title": "Group voice calls",
+      "title": "A year-end letter",
       "items": [
-        "Start or join a group voice call. Other members can keep talking after the host leaves.",
-        "Permanent VIPs get 30 minutes a week across direct and group calls. Group calls count only the time you participate."
+        "Once your space opens its annual recap, open your year-end letter from the menu and revisit a year of conversations."
       ]
     }
   }

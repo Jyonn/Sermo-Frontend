@@ -633,6 +633,10 @@ export const api = {
     return request<SpaceDTO>("/spaces/me", { auth: true, signal });
   },
 
+  getAnnualRecap(signal?: AbortSignal) {
+    return request<import("../components/AnnualRecap").AnnualRecapData>("/spaces/annual-recap", { auth: true, signal });
+  },
+
   getAdminDashboard(signal?: AbortSignal) {
     return request<SpaceAdminDashboardDTO>("/spaces/admin/dashboard", {
       adminAuth: true,
@@ -669,7 +673,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; research_enabled?:0|1; qixi_theme_enabled?:0|1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; research_enabled?:0|1; qixi_theme_enabled?:0|1; annual_recap_enabled?:0|1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,

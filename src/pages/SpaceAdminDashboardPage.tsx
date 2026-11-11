@@ -98,6 +98,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsResearchEnabled, setSettingsResearchEnabled] = useState(false);
   const [settingsQixiTheme, setSettingsQixiTheme] = useState(false);
+  const [settingsAnnualRecap, setSettingsAnnualRecap] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
@@ -313,6 +314,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsResearchEnabled(dashboard.space.research_enabled === true);
     setSettingsQixiTheme(dashboard.space.site_theme === 'qixi-2026');
+    setSettingsAnnualRecap(dashboard.space.annual_recap_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
     setSettingsOauthDeveloperEnabled(dashboard.space.oauth_developer_enabled === true);
@@ -474,6 +476,7 @@ export default function SpaceAdminDashboardPage() {
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         research_enabled: settingsResearchEnabled ? 1 : 0,
         qixi_theme_enabled: settingsQixiTheme ? 1 : 0,
+        ...(currentSpace.annual_recap_granted ? { annual_recap_enabled: settingsAnnualRecap ? 1 as const : 0 as const } : {}),
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
@@ -486,6 +489,7 @@ export default function SpaceAdminDashboardPage() {
         chatEnabled: payload.chat_enabled !== false,
         submissionEnabled: payload.submission_enabled === true,
         researchEnabled: payload.research_enabled === true,
+        annualRecapAvailable: payload.annual_recap_granted === true && payload.annual_recap_enabled === true,
         squareEnabled: payload.group_square_enabled !== false,
         squareFreePostEnabled: payload.square_free_post_enabled !== false,
         squareExploreEnabled: payload.square_explore_enabled !== false,
@@ -933,6 +937,7 @@ export default function SpaceAdminDashboardPage() {
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow title={t("research.title")} description={t("research.featureHint")} trailing={<SettingSwitch checked={settingsResearchEnabled} label={t("research.title")} onChange={setSettingsResearchEnabled}/>} />
+            {currentSpace?.annual_recap_granted && <SettingRow title={t("recap.title")} description={t("recap.adminHint")} trailing={<SettingSwitch checked={settingsAnnualRecap} label={t("recap.title")} onChange={setSettingsAnnualRecap}/>} />}
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
           </SettingGroup>
           {(currentSpace?.qq_binding_granted || currentSpace?.oauth_developer_granted) ? <SettingGroup>

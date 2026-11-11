@@ -81,6 +81,7 @@ import type {SquareFeedLayout} from '../lib/squareFeedLayout';
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
+import { AnnualRecap } from "../components/AnnualRecap";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import '../components/WebPushSettings.css';
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, QQIdentityDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
@@ -410,6 +411,7 @@ export default function MenuPage() {
   const { session, logout, patchSessionUser, setSession } = useAuth();
   const {acknowledge:acknowledgeCallShortcut}=useCallShortcutDiscovery();
   const spaceFeatures = useSpaceFeatures();
+  const [annualRecapOpen, setAnnualRecapOpen] = useState(false);
   const visibleNotificationCategories = notificationCategoriesForSpace(spaceFeatures);
   const { setSession: setAdminSession } = useAdminAuth();
   const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
@@ -2104,6 +2106,16 @@ export default function MenuPage() {
             </button>
           ) : null}
         />
+        {spaceFeatures.annualRecapAvailable && session && (
+          <>
+            <button className="simple-row menu-link-row" onClick={() => setAnnualRecapOpen(true)} type="button">
+              <span className="material-symbols-outlined" aria-hidden="true">mail</span>
+              <strong>{t("recap.title")}</strong>
+              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            </button>
+            {annualRecapOpen && <AnnualRecap key={session.user.user_id} name={session.user.name} onClose={() => setAnnualRecapOpen(false)} />}
+          </>
+        )}
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
             <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} />

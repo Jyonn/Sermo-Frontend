@@ -71,6 +71,9 @@ export interface UserDTO extends TinyUserDTO {
 export interface SpaceDTO {
   site_theme?: 'default' | 'qixi-2026';
   qixi_theme_granted?: boolean;
+  annual_recap_available?: boolean;
+  annual_recap_granted?: boolean;
+  annual_recap_enabled?: boolean;
   qixi_theme_enabled?: boolean;
   space_id: number;
   name: string;
@@ -359,6 +362,8 @@ export interface PlatformAdminSession {
 
 export interface PlatformAdminSpaceDTO {
   qixi_theme_granted: boolean;
+  annual_recap_granted?: boolean;
+  annual_recap_enabled?: boolean;
   qixi_theme_enabled: boolean;
   space_id: number;
   name: string;

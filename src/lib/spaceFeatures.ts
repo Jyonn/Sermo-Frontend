@@ -6,6 +6,7 @@ import { resolveSiteTheme, type SiteTheme } from './siteTheme';
 type SpaceFeatures = {
   siteTheme?: SiteTheme;
   researchEnabled?: boolean;
+  annualRecapAvailable?: boolean;
   chatEnabled: boolean;
   submissionEnabled: boolean;
   squareEnabled: boolean;
@@ -61,6 +62,7 @@ function loadSpaceFeatures(spaceId: number) {
     const features = {
       siteTheme: resolveSiteTheme(space.site_theme),
       researchEnabled: space.research_enabled === true,
+      annualRecapAvailable: space.annual_recap_available === true,
       chatEnabled: space.chat_enabled !== false,
       submissionEnabled: space.submission_enabled === true,
       squareEnabled: space.group_square_enabled !== false,
