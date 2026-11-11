@@ -1698,7 +1698,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 }: MessageBubbleRowProps) {
   const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
-  const canOpenActions = !['submission_invite','voice_call'].includes(message.kind) && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
+  const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1725,6 +1725,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     if (selectionMode) return;
     if (!canOpenActions) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    suppressClickRef.current = false;
     clearLongPress();
     pointerStartRef.current = { x: event.clientX, y: event.clientY };
     longPressTimerRef.current = window.setTimeout(() => openActions(true), 380);
@@ -6694,7 +6695,7 @@ function LiveChatsPage({
   });
 
   const canForwardMessage = (message: ChatMessage) => (
-    typeof message.id === "number" && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle"].includes(message.kind)
+    typeof message.id === "number" && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle", "voice_call"].includes(message.kind)
   );
 
   const eligibleForwardMessages = () => selectedActionMessages().filter(canForwardMessage);

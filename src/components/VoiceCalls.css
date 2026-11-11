@@ -91,3 +91,4 @@ body:has(.voice-screen, .voice-call-prompt, .voice-folded) > .app-toast-viewport
   .voice-avatar-orbit.is-ringing::after { animation: voice-ring 2s ease-out infinite; }
   @keyframes voice-ring { from { transform: scale(.9); opacity: .6; } to { transform: scale(1.12); opacity: 0; } }
 }
+.message-voice-call:disabled { pointer-events: none; }
