@@ -9,6 +9,7 @@
 .annual-medal-copy { display:grid;align-self:stretch;align-content:start;gap:4px;min-width:0;padding-top:8px; }
 .annual-medal .annual-medal-copy>small { font:500 10px/1.2 var(--font-body);font-variant-numeric:lining-nums tabular-nums;letter-spacing:.04em;color:var(--text-primary); }
 .annual-medal .annual-medal-copy>strong { font-size:12px;line-height:1.4;overflow-wrap:anywhere; }
+.annual-medal-woven { display:block;width:100%;min-width:0;height:auto;aspect-ratio:3; }
 .founder-medal-management { padding-block:18px;border-block:1px solid var(--line-soft);display:grid;gap:12px; }
 .founder-medal-management h3 { margin:0; }
 .founder-medal-management>div { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }

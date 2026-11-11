@@ -1,23 +1,17 @@
 {
-  "id": "2026.11.11.12",
+  "id": "2026.11.11.13",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
-      "title": "通话入口与引导",
+      "title": "年度徽章换新",
       "items": [
-        "移除聊天页右上角的通话按钮，保留更多操作与可配置快捷入口。",
-        "菜单、语言与个性化、聊天快捷操作及通话选项逐级显示新功能红点。",
-        "添加、拖拽通话快捷操作或查看设置后，引导红点在各设备同步消除。",
-        "聊天快捷操作随账号同步，自动迁移已有的本地设置。"
+        "个人资料中的 2026 探索者徽章和创始人奖章换上织标新样式，随界面语言显示中文或英文。"
       ]
     },
     "en": {
-      "title": "Call shortcuts and guidance",
+      "title": "A new look for annual badges",
       "items": [
-        "Remove the call button from the chat header, keeping More actions and configurable shortcuts.",
-        "New-feature dots guide you through Menu, Language and personalization, Chat shortcuts, and Call.",
-        "Guidance clears across devices after adding or reordering Call, or reviewing shortcut settings.",
-        "Chat shortcuts sync with your account, preserving existing local settings on first use."
+        "The 2026 Explorer Badge and Founder Medal on profiles now have woven designs with Chinese or English lettering."
       ]
     }
   }
