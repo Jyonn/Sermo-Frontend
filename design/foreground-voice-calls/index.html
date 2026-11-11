@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Frienden · 前台语音通话原型</title>
+<link rel="stylesheet" href="prototype.css">
+<style>.sheet{max-height:100%;overflow-y:auto;overscroll-behavior:contain;animation:none}.sheet .large-avatar{margin-top:22px}.sheet:has([data-action="timeout"]) .inline-notice{display:flex;flex-wrap:wrap;gap:7px;font-size:10px;margin-bottom:0}.sheet:has([data-action="timeout"]) .inline-notice>.secondary{width:auto;flex:1;font-size:10px;padding:8px 3px;margin:0}.sheet:has([data-action="timeout"]) .call-actions{margin-top:18px}.sheet:has([data-action="timeout"]) .call-center{padding-bottom:0}@media(max-width:700px){.review{padding-top:40px}.switches{top:20px}}</style>
+<body>
+<main class="studio">
+  <aside class="review">
+    <a class="wordmark" href="#">Frienden <span>友间</span></a>
+    <div class="eyebrow">PRODUCT STUDY / 01</div>
+    <h1 data-i="title"></h1><p class="intro" data-i="intro"></p>
+    <div class="switches"><button id="theme" data-i="theme"></button><button id="language">English</button></div>
+    <h2 data-i="scenarios"></h2><div id="scenarios" class="scenarios"></div>
+    <div class="rules"><p data-i="rule1"></p><p data-i="rule2"></p><p data-i="rule3"></p></div>
+    <p class="prototype-note" data-i="prototype"></p>
+  </aside>
+  <section class="phone" aria-label="Frienden chat prototype">
+    <header class="chat-header"><button class="icon-button" data-action="back" data-label="back"></button><div class="mini-avatar">林</div><div class="identity"><strong data-i="person"></strong><small data-i="online"></small></div><button class="icon-button phone-entry" data-action="dial" data-label="call"></button><button class="icon-button more" data-action="quota" data-label="details">···</button></header>
+    <button id="compact" class="compact" hidden data-action="expand"></button>
+    <div class="messages" id="messages"><p class="date" data-i="today"></p><div class="text-message received" data-i="hello"></div><div class="text-message sent" data-i="reply"></div><p class="date" data-i="now"></p><div id="records"></div></div>
+    <footer class="composer"><div class="input-placeholder" data-i="placeholder"></div><div class="composer-tools"><span>♧</span><span>☺</span><span>▧</span><span>⌖</span><button class="icon-button" data-action="dial" data-label="call">＋</button></div></footer>
+    <div id="surface" class="surface" hidden></div><div id="toast" role="status" class="toast" hidden></div>
+  </section>
+  <aside class="annotation"><span class="eyebrow" data-i="reviewLabel"></span><h2 id="state-title"></h2><p id="state-description"></p><div class="quota-summary"><span data-i="weekly"></span><strong id="quota-number"></strong><div class="quota-track"><i id="quota-fill"></i></div><small data-i="reset"></small></div><p class="subtle" data-i="privacy"></p></aside>
+</main>
+<script type="module" src="prototype.js"></script>
+</body>
+</html>
