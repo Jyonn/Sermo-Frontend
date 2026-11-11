@@ -10,6 +10,7 @@ import {VoiceCallPrompt} from './VoiceCallPrompt';
 import {voiceFeedbackSurface} from '../lib/voiceFeedback';
 import {showToast} from '../lib/toast';
 import {acquireVoiceMicrophone} from '../lib/voiceMicrophone';
+import {endVoiceCallMedia} from '../lib/voiceCallLifecycle';
 
 function errorReason(error:unknown) {
   if(error instanceof DOMException&&error.name==='NotSupportedError')return 'unsupported';
@@ -76,8 +77,9 @@ export function GlobalVoiceCalls() {
   const finish=useCallback(async()=>{
     const current=snapshot.current;
     if(!current||current.state==='ended')return;
-    releaseMedia();
-    try{apply(await api.voiceAction(current.call_id,'end',device.current))}
+    try{apply(await endVoiceCallMedia(
+      ()=>stream.current?.getTracks().forEach(track=>{track.enabled=false}),
+      ()=>api.voiceAction(current.call_id,'end',device.current),releaseMedia))}
     catch(err){if(live.current){transient(errorText(err));apply({...current,state:'ended',reason:'disconnected',server_now:Date.now()/1000,duration_seconds:current.connected_at?Math.min(current.max_seconds,Math.max(0,Math.ceil((Date.now()+serverOffset.current)/1000-current.connected_at))):0})}}
   },[apply,releaseMedia,transient]);
 
