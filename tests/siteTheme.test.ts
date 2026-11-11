@@ -7,6 +7,7 @@ test('only explicit supported space themes can activate', () => {
   for (const value of [undefined, null, '', 'default', 'unknown', true]) assert.equal(resolveSiteTheme(value), 'default');
   assert.equal(resolveSiteTheme('qixi-2026'), 'qixi-2026');
   assert.equal(resolveSiteTheme('birthday-botanical'), 'birthday-botanical');
+  assert.equal(resolveSiteTheme('christmas-2026'), 'christmas-2026');
 });
 
 test('switching space or signing out clears the previous skin', () => {

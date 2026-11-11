@@ -97,7 +97,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsSquareFreePostEnabled, setSettingsSquareFreePostEnabled] = useState(true);
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsResearchEnabled, setSettingsResearchEnabled] = useState(false);
-  const [settingsQixiTheme, setSettingsQixiTheme] = useState(false);
+  const [settingsSiteTheme, setSettingsSiteTheme] = useState<'default' | 'qixi-2026' | 'christmas-2026'>('default');
   const [settingsAnnualRecap, setSettingsAnnualRecap] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
@@ -313,7 +313,8 @@ export default function SpaceAdminDashboardPage() {
     setSettingsSquareFreePostEnabled(dashboard.space.square_free_post_enabled !== false);
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsResearchEnabled(dashboard.space.research_enabled === true);
-    setSettingsQixiTheme(dashboard.space.site_theme === 'qixi-2026');
+    const theme = dashboard.space.site_theme;
+    setSettingsSiteTheme(theme === 'qixi-2026' || theme === 'christmas-2026' ? theme : 'default');
     setSettingsAnnualRecap(dashboard.space.annual_recap_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
@@ -460,7 +461,6 @@ export default function SpaceAdminDashboardPage() {
         square_free_post_enabled: currentSpace.square_free_post_enabled !== false ? 1 : 0,
         submission_enabled: currentSpace.submission_enabled ? 1 : 0,
         research_enabled: currentSpace.research_enabled ? 1 : 0,
-        qixi_theme_enabled: currentSpace.site_theme === 'qixi-2026' ? 1 : 0,
         square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
         qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
@@ -475,7 +475,8 @@ export default function SpaceAdminDashboardPage() {
         square_free_post_enabled: settingsSquareFreePostEnabled ? 1 : 0,
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         research_enabled: settingsResearchEnabled ? 1 : 0,
-        qixi_theme_enabled: settingsQixiTheme ? 1 : 0,
+        qixi_theme_enabled: settingsSiteTheme === 'qixi-2026' ? 1 : 0,
+        christmas_theme_enabled: settingsSiteTheme === 'christmas-2026' ? 1 : 0,
         ...(currentSpace.annual_recap_granted ? { annual_recap_enabled: settingsAnnualRecap ? 1 as const : 0 as const } : {}),
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
@@ -974,7 +975,11 @@ export default function SpaceAdminDashboardPage() {
               <button aria-label={t("admin.copyMemberEntry")} title={t("admin.copyMemberEntry")} onClick={() => void copyEntryLink()} type="button"><span aria-hidden="true" className="material-symbols-outlined">content_copy</span></button>
             </div>
             <SettingGroup>
-              <SettingRow title={t('admin.spaceTheme')} description={t(currentSpace?.qixi_theme_granted ? 'admin.spaceThemeHint' : 'admin.spaceThemeLocked')} trailing={<SelectControl label={t('admin.spaceTheme')} value={settingsQixiTheme ? 'qixi-2026' : 'default'} disabled={settingsSaving || !currentSpace?.qixi_theme_granted} options={[{value: 'default', label: t('admin.defaultTheme')}, ...(currentSpace?.qixi_theme_granted ? [{value: 'qixi-2026', label: t('admin.qixiTheme')}] : [])]} onChange={(value) => setSettingsQixiTheme(value === 'qixi-2026')} />} />
+              <SettingRow title={t('admin.spaceTheme')} description={t(currentSpace?.qixi_theme_granted || currentSpace?.christmas_theme_granted ? 'admin.spaceThemeHint' : 'admin.spaceThemeLocked')} trailing={<SelectControl label={t('admin.spaceTheme')} value={settingsSiteTheme} disabled={settingsSaving || !(currentSpace?.qixi_theme_granted || currentSpace?.christmas_theme_granted)} options={[
+                { value: 'default', label: t('admin.defaultTheme') },
+                ...(currentSpace?.qixi_theme_granted ? [{ value: 'qixi-2026', label: t('admin.qixiTheme') }] : []),
+                ...(currentSpace?.christmas_theme_granted ? [{ value: 'christmas-2026', label: t('admin.christmasTheme') }] : []),
+              ]} onChange={(value) => setSettingsSiteTheme(value === 'qixi-2026' || value === 'christmas-2026' ? value : 'default')} />} />
             </SettingGroup>
             <div className="management-setting-fields">
               <div className="management-field"><label htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div>

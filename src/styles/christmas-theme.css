@@ -1,0 +1,51 @@
+html[data-site-theme="christmas-2026"] {
+  --bg-canvas: #f3eee2;
+  --bg-surface: #faf6ed;
+  --bg-elevated: #fffbf2;
+  --bg-panel: #f8f4e9;
+  --bg-panel-strong: #fffbf2;
+  --text-primary: #243d33;
+  --text-secondary: #41564b;
+  --text-muted: #58685a;
+  --line-soft: #d9dfd1;
+  --line-strong: #bacaba;
+  --brand-primary: #9e363d;
+  --brand-primary-press: #7e2630;
+  --christmas-snow: #fffdf5;
+  --christmas-lights: #a27338;
+}
+
+html[data-site-theme="christmas-2026"][data-theme="dark"] {
+  --bg-canvas: #102821;
+  --bg-surface: #17342a;
+  --bg-elevated: #204236;
+  --bg-panel: #17342a;
+  --bg-panel-strong: #1a392f;
+  --text-primary: #fff2dc;
+  --text-secondary: #dfd8c7;
+  --text-muted: #bebeb0;
+  --line-soft: #385448;
+  --line-strong: #587062;
+  --brand-primary: #efaaa4;
+  --brand-primary-press: #ffc6bc;
+  --christmas-snow: #c8e1d6;
+  --christmas-lights: #e5b572;
+}
+
+html[data-site-theme="christmas-2026"] body {
+  background-color: var(--bg-canvas);
+  background-image:
+    radial-gradient(circle at 24% 27%, var(--christmas-snow) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 69% 71%, var(--christmas-snow) 0 1px, transparent 1.7px);
+  background-size: 63px 67px, 101px 87px;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header, .drawer-topbar) {
+  background-color: var(--bg-panel-strong);
+  border-bottom-color: color-mix(in srgb, var(--christmas-lights) 55%, var(--line-soft));
+}
+
+html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
+  background-color: var(--bg-panel-strong);
+  border-color: var(--line-strong);
+}

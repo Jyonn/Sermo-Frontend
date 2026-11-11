@@ -1,4 +1,5 @@
 {
+  "admin.christmasTheme": "Christmas Eve",
   "recap.title": "A year-end letter",
   "recap.adminHint": "Let members read their own year in review.",
   "recap.dear": "Dear {{name}},",
