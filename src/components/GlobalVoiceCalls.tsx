@@ -2,12 +2,18 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import type {Room} from 'livekit-client';
 import {api,ApiError} from '../lib/api';
 import {useAuth} from '../lib/auth';
-import {useI18n,i18n} from '../lib/language';
+import {i18n} from '../lib/language';
 import {getGestureLockScope,isGestureAccessSuppressed} from '../lib/gestureLock';
-import {voiceCallsEnabled,voiceTime,voiceErrorKey,type VoiceCall,type VoiceCapability} from '../lib/voiceCalls';
+import {voiceCallsEnabled,voiceErrorKey,type VoiceCall,type VoiceCapability} from '../lib/voiceCalls';
 import {VoiceCallScreen} from './VoiceCallScreen';
-import {BottomSheet} from './BottomSheet';
-import {UserAvatar} from './UserAvatar';
+import {VoiceCallPrompt} from './VoiceCallPrompt';
+import {voiceFeedbackSurface} from '../lib/voiceFeedback';
+import {showToast} from '../lib/toast';
+
+function errorReason(error:unknown) {
+  if(error instanceof DOMException&&['NotAllowedError','NotFoundError','NotReadableError','SecurityError'].includes(error.name))return 'microphone';
+  return error instanceof ApiError?error.identifier.replace(/^VOICE_/,'').toLowerCase():'network';
+}
 
 function errorText(error: unknown): string {
   if(error instanceof DOMException && ['NotAllowedError','NotFoundError','NotReadableError','SecurityError'].includes(error.name))return i18n.t('voice.error.microphone');
@@ -17,7 +23,6 @@ function errorText(error: unknown): string {
 
 export function GlobalVoiceCalls() {
   const {session}=useAuth();
-  const {t}=useI18n();
   const userId=session?.user.user_id;
   const userScope=session?`${session.user.space_id}:${userId}`:'';
   const [call,setCall]=useState<VoiceCall|null>(null);
@@ -42,6 +47,15 @@ export function GlobalVoiceCalls() {
   const reconnectTimer=useRef<number|undefined>(undefined);
   const mediaReconnecting=useRef(false);
   const signalingLost=useRef(false);
+  const lastToast=useRef({message:'',at:0});
+  const transient=useCallback((message:string)=>{
+    if(lastToast.current.message===message&&Date.now()-lastToast.current.at<3500)return;
+    lastToast.current={message,at:Date.now()};showToast(message,'error');
+  },[]);
+  const report=useCallback((err:unknown)=>{
+    if(voiceFeedbackSurface(errorReason(err))==='modal')setError(errorText(err));
+    else transient(errorText(err));
+  },[transient]);
 
   const releaseMedia=useCallback(()=>{
     window.clearTimeout(reconnectTimer.current);reconnectTimer.current=undefined;mediaReconnecting.current=false;
@@ -64,8 +78,8 @@ export function GlobalVoiceCalls() {
     if(!current||current.state==='ended')return;
     releaseMedia();
     try{apply(await api.voiceAction(current.call_id,'end',device.current))}
-    catch(err){if(live.current){setError(errorText(err));apply({...current,state:'ended',reason:'disconnected',server_now:Date.now()/1000,duration_seconds:current.connected_at?Math.min(current.max_seconds,Math.max(0,Math.ceil((Date.now()+serverOffset.current)/1000-current.connected_at))):0})}}
-  },[apply,releaseMedia]);
+    catch(err){if(live.current){transient(errorText(err));apply({...current,state:'ended',reason:'disconnected',server_now:Date.now()/1000,duration_seconds:current.connected_at?Math.min(current.max_seconds,Math.max(0,Math.ceil((Date.now()+serverOffset.current)/1000-current.connected_at))):0})}}
+  },[apply,releaseMedia,transient]);
 
   useEffect(()=>{
     if(!voiceCallsEnabled||!userScope)return;
@@ -87,7 +101,7 @@ export function GlobalVoiceCalls() {
         else if(current&&current.state!=='ended'){
           releaseMedia();snapshot.current=null;setCall(null);
         }
-      }catch(err){if(!stopped&&snapshot.current?.owned){signalingLost.current=true;setError(errorText(err));setReconnecting(true)}}
+      }catch(err){if(!stopped&&snapshot.current?.owned){if(!signalingLost.current)transient(errorText(err));signalingLost.current=true;setReconnecting(true)}}
       finally{requestBusy=false;if(!stopped)timer=window.setTimeout(poll,snapshot.current&&snapshot.current.state!=='ended'?1000:3000)}
     };
     const visibility=()=>{
@@ -107,7 +121,7 @@ export function GlobalVoiceCalls() {
       releaseMedia();snapshot.current=null;setCall(null);setPreflight(false);
     };
   // Scope changes must end the old account's media session; UI updates must not restart the poller.
-  },[userScope,apply,finish,releaseMedia]);
+  },[userScope,apply,finish,releaseMedia,transient]);
 
   useEffect(()=>{
     if(!voiceCallsEnabled||!userScope)return;
@@ -117,12 +131,12 @@ export function GlobalVoiceCalls() {
       if(snapshot.current?.state!=='ended'&&snapshot.current){setFolded(false);return}
       snapshot.current=null;setCall(null);setPreflight(true);setCap(null);setError('');
       const stamp=++generation.current;
-      try{const next=await api.getVoiceCapability(chatId);if(stamp===generation.current&&live.current)setCap(next)}
-      catch(err){if(stamp===generation.current&&live.current)setError(errorText(err))}
+      try{const next=await api.getVoiceCapability(chatId);if(stamp===generation.current&&live.current){if(!next.can_call&&voiceFeedbackSurface(next.reason)==='toast'){setPreflight(false);transient(i18n.t(voiceErrorKey(next.reason)))}else setCap(next)}}
+      catch(err){if(stamp===generation.current&&live.current){setPreflight(false);report(err)}}
     };
     window.addEventListener('frienden:voice-open',open);
     return()=>window.removeEventListener('frienden:voice-open',open);
-  },[userScope]);
+  },[userScope,report,transient]);
 
   useEffect(()=>{
     if(!call?.owned||!['connecting','active'].includes(call.state)||room.current)return;
@@ -147,12 +161,12 @@ export function GlobalVoiceCalls() {
         await next.localParticipant.publishTrack(microphone,{source:Track.Source.Microphone});
         await next.startAudio().catch(()=>setPlaybackBlocked(true));
         setReconnecting(false);setError('');
-      }catch(err){if(!cancelled){setError(errorText(err));void finish()}}
+      }catch(err){if(!cancelled){report(err);void finish()}}
     };
     void join();
     return()=>{cancelled=true};
   // One connection per call, not per state transition or clock tick.
-  },[call?.call_id,Boolean(call?.owned&&['connecting','active'].includes(call.state)),finish]);
+  },[call?.call_id,Boolean(call?.owned&&['connecting','active'].includes(call.state)),finish,report]);
 
   useEffect(()=>{
     if(!call||call.state==='ended')return;
@@ -173,23 +187,21 @@ export function GlobalVoiceCalls() {
     if(!cap?.can_call||operation.current)return;
     operation.current=true;setBusy(true);setError('');const stamp=++generation.current;
     try{await microphone();const next=await api.createVoiceCall(cap.chat_id,crypto.randomUUID(),device.current);if(stamp!==generation.current||!live.current){void api.voiceAction(next.call_id,'end',device.current).catch(()=>{});releaseMedia();return}setPreflight(false);apply(next)}
-    catch(err){releaseMedia();if(live.current)setError(errorText(err))}
+    catch(err){releaseMedia();if(live.current)report(err)}
     finally{operation.current=false;if(live.current)setBusy(false)}
   };
   const answer=async()=>{
     if(!call||operation.current)return;
     operation.current=true;setBusy(true);setError('');const id=call.call_id;
     try{await microphone();const next=await api.voiceAction(id,'accept',device.current);if(!live.current||document.visibilityState!=='visible'){releaseMedia();void api.voiceAction(id,'end',device.current).catch(()=>{});return}apply(next)}
-    catch(err){releaseMedia();if(live.current)setError(errorText(err))}
+    catch(err){releaseMedia();if(live.current)report(err)}
     finally{operation.current=false;if(live.current)setBusy(false)}
   };
   const toggleMute=()=>{
     const next=!muted;stream.current?.getAudioTracks().forEach(track=>{track.enabled=!next});setMuted(next);
   };
   return <><div ref={audio} hidden/>
-    {call?<VoiceCallScreen call={call} incoming={call.callee_id===userId} folded={folded} muted={muted} busy={busy} elapsed={Math.min(elapsed,call.max_seconds)} remaining={remaining} reconnecting={reconnecting} playbackBlocked={playbackBlocked} error={error} onFold={setFolded} onMute={toggleMute} onAnswer={()=>void answer()} onEnd={()=>void finish()} onDismiss={()=>{snapshot.current=null;setCall(null);setError('')}} onPlayback={()=>void room.current?.startAudio().then(()=>setPlaybackBlocked(false))}/>:null}
-    <BottomSheet open={preflight} title={t('voice.title')} onClose={()=>{if(!busy){generation.current++;setPreflight(false)}}}>
-      <div className="voice-preflight">{cap?<><div className="voice-preflight-person"><UserAvatar className="voice-preflight-avatar" name={cap.peer.name} userId={cap.peer.user_id} uri={cap.peer.avatar_uri}/><span><strong>{cap.peer.name}</strong>{cap.can_call?<small>{t('voice.maximum',{time:voiceTime(cap.max_seconds)})}</small>:null}</span></div>{!cap.can_call?<p className="voice-preflight-error">{t(`voice.error.${cap.reason}`,{defaultValue:t('voice.error.unavailable')})}</p>:null}</>:!error?<p role="status">{t('common.loading')}</p>:null}{error?<p className="voice-error" role="alert">{error}</p>:null}{cap?.can_call?<button className="voice-start-button" disabled={busy} type="button" onClick={()=>void start()}><span className="material-symbols-outlined" aria-hidden="true">call</span>{t(busy?'voice.connecting':'voice.dial')}</button>:null}</div>
-    </BottomSheet>
+    {call?<VoiceCallScreen call={call} incoming={call.callee_id===userId} folded={folded} muted={muted} busy={busy} elapsed={Math.min(elapsed,call.max_seconds)} remaining={remaining} reconnecting={reconnecting} playbackBlocked={playbackBlocked} onFold={setFolded} onMute={toggleMute} onAnswer={()=>void answer()} onEnd={()=>void finish()} onDismiss={()=>{snapshot.current=null;setCall(null);setError('')}} onPlayback={()=>void room.current?.startAudio().then(()=>setPlaybackBlocked(false))}/>:null}
+    <VoiceCallPrompt open={preflight||Boolean(error)} cap={preflight?cap:null} error={error} busy={busy} onClose={()=>{if(!busy){generation.current++;setPreflight(false);setError('')}}} onConfirm={()=>void start()}/>
   </>;
 }

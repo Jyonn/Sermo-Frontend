@@ -232,6 +232,7 @@ const chatPreviewDemoKinds: Array<{ icon: string; kind: ChatPreviewDemoKind; lab
   { kind: "video", icon: "videocam", label: "menu.previewKindVideo" },
   { kind: "gallery", icon: "photo_library", label: "menu.previewKindGallery" },
   { kind: "audio", icon: "mic", label: "menu.previewKindAudio" },
+  { kind: "voice_call", icon: "call", label: "voice.title" },
   { kind: "file", icon: "description", label: "menu.previewKindFile" },
   { kind: "location", icon: "location_on", label: "menu.previewKindLocation" },
   { kind: "statement", icon: "speaker_notes", label: "menu.previewKindStatement" },

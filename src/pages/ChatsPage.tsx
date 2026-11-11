@@ -9584,7 +9584,7 @@ export interface ChatsPagePreviewConfig {
   selfOnly?: boolean;
 }
 
-export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link";
+export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link" | "voice_call";
 
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
 
@@ -9605,6 +9605,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
     text: from === "self" ? i18n.t("menu.bubblePreviewSelf") : i18n.t("menu.bubblePreviewOther"),
     status: index === 15 ? "pending" : "sent",
   };
+  if (kind === 'voice_call') return {...base,type:14,status:'sent',text:i18n.t('voice.title'),payload:{kind,call_id:`preview-call-${index}`,chat_id:0,state:'ended',reason:'completed',duration_seconds:[8,45,85][index%3],caller_id:from==='self'?1:2,callee_id:from==='self'?2:1,max_seconds:200,connected_at:null,deadline_at:null}};
   if (kind === "image") return { ...base, type: MESSAGE_TYPE_IMAGE, payload: { kind, uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE, image_metadata: { status: 1, pixel_width: 640, pixel_height: 420 } } };
   if (kind === "video") return { ...base, type: MESSAGE_TYPE_VIDEO, payload: { kind, uri: "preview://video", thumbnail_uri: CHAT_PREVIEW_IMAGE, duration_seconds: 28, video_metadata: { status: 1, duration_seconds: 28, pixel_width: 640, pixel_height: 420 } } };
   if (kind === "audio") {
@@ -9712,7 +9713,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
   return base;
 }
 
-const CHAT_PREVIEW_MIXED_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "audio", "submission_invite", "image", "location", "link", "activity", "forward_bundle"];
+const CHAT_PREVIEW_MIXED_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "audio", "voice_call", "submission_invite", "image", "location", "link", "activity", "forward_bundle"];
 
 function previewMessagesForDemo(
   kind: ChatPreviewDemoKind,

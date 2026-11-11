@@ -43,6 +43,14 @@ The remaining family chart patterns map to existing architecture: Modal/Popconfi
 
 ## Verification
 
+### Foreground voice calls
+
+The real direct-chat header opens the shared `VoiceCallPrompt` (`ConfirmDialog`): participant and maximum duration, then explicit Dial. VIP, weekly-allowance and microphone-permission decisions use the same modal with a concise reason; busy, expired, unavailable and network failures use the shared `AppToast`. Repeated network failures are deduplicated. No call hint uses BottomSheet. The call itself remains a full-screen, collapsible `VoiceCallScreen`.
+
+Chat appearance previews include the real voice-call bubble renderer. The development-only `/design/voice-calls` page also uses the real `ChatPreview`, prompt and full-screen components; its simulated controls never appear inside a real space. The integrated entry was checked in the isolated local `voice-local` space using the actual chat page and capability API. Production calling remains gated and is not deployed by this change.
+
+### Shared interaction checks
+
 - Pure tests: snap normalization/release, responsive tour placement, localization, destructive-confirmation behavior and real integration contracts.
 - Browser checks: pointer handle drag and 60/80% detents, keyboard Tab/Escape, action cancellation, real local undo, persistent validation, tour completion, Lightbox dismissal, 390px/desktop and light/dark. Physical iPhone touch, keyboard safe-area behavior and PWA installation remain device-level follow-up checks.
 - Run `node --test tests/interactionPatterns.test.ts`, related regression suites and `npm run build`.
