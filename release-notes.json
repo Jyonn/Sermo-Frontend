@@ -1,23 +1,23 @@
 {
-  "id": "2026.11.11.10",
+  "id": "2026.11.11.11",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
-      "title": "前台通话",
+      "title": "通话入口与引导",
       "items": [
-        "优化 Safari 与 iPhone 的通话连接兼容性，支持全屏使用或折叠。",
-        "双方 VIP 每人每周五分钟，接通后计时，额度耗尽自动结束。",
-        "更多操作和聊天快捷操作均可拨打，挂断结果与通话记录准确同步。",
-        "来电通过已开启的通知渠道提醒，不支持通话的浏览器会在拨打前提示。"
+        "移除聊天页右上角的通话按钮，保留更多操作与可配置快捷入口。",
+        "菜单、语言与个性化、聊天快捷操作及通话选项逐级显示新功能红点。",
+        "查看快捷操作后，引导红点在各设备同步消除。",
+        "聊天快捷操作随账号同步，自动迁移已有的本地设置。"
       ]
     },
     "en": {
-      "title": "Foreground calls",
+      "title": "Call shortcuts and guidance",
       "items": [
-        "Improve call connection compatibility on Safari and iPhone, with full-screen and minimized views.",
-        "Both VIP participants receive five minutes per week. Connected time counts toward each allowance, and calls end when time runs out.",
-        "Start calls from More actions or chat shortcuts, with hangup results and call records kept in sync.",
-        "Incoming calls use your enabled notification channels, with browser support checked before dialing."
+        "Remove the call button from the chat header, keeping More actions and configurable shortcuts.",
+        "New-feature dots guide you through Menu, Language and personalization, Chat shortcuts, and Call.",
+        "Guidance clears across devices after reviewing shortcuts.",
+        "Chat shortcuts sync with your account, preserving existing local settings on first use."
       ]
     }
   }

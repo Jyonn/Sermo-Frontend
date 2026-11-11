@@ -120,6 +120,7 @@ type RequestOptions = {
   retryOn401?: boolean;
   signal?: AbortSignal;
   responseFormat?: "envelope" | "oauth";
+  expectedScope?: string;
 };
 
 export class ApiError extends Error {
@@ -316,6 +317,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
   const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
   const session = auth ? authConfig.getSession() : null;
+  if (options.expectedScope !== undefined && options.expectedScope !== `${session?.user.space_id}:${session?.user.user_id}`) throw new DOMException('Account changed', 'AbortError');
   const squareScope=buildTabCacheScope(session?.user.space_id,session?.user.user_id);
   const squareRevision=squareScope?squareSyncRevision(squareScope):0;
   const rememberSquare=(value:T)=>rememberSquareResponse(squareScope,path,method,value,squareRevision);
@@ -371,6 +373,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
           ? latestSession
           : await refreshSessionSingleFlight(session);
       const retryHeaders = new Headers(headers);
+      if (options.expectedScope !== undefined && options.expectedScope !== `${nextSession.user.space_id}:${nextSession.user.user_id}`) throw new DOMException('Account changed', 'AbortError');
       retryHeaders.set("Authorization", `Bearer ${nextSession.accessToken}`);
       const retryResponse = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
         method,
@@ -417,6 +420,8 @@ function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Prom
 
 function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", auth = false, adminAuth = false, platformAdminAuth = false, query, signal } = options;
+  const expectedSession=authConfig.getSession();
+  if(options.expectedScope!==undefined&&options.expectedScope!==`${expectedSession?.user.space_id}:${expectedSession?.user.user_id}`)return Promise.reject(new DOMException('Account changed','AbortError'));
   if (method !== "GET") {
     return requestCore<T>(path, options).then((result) => {
       if (auth && path !== "/users/me/growth" && path !== '/square/statements/sync') {
@@ -1084,6 +1089,13 @@ export const api = {
       auth: true,
       signal,
     });
+  },
+
+  getChatQuickActions(scope: string) {
+    return request<import('./chatQuickActionSync').ShortcutSnapshot>('/users/me/chat-quick-actions', {auth:true, expectedScope:scope});
+  },
+  saveChatQuickActions(scope: string, body: unknown) {
+    return request<import('./chatQuickActionSync').ShortcutSnapshot>('/users/me/chat-quick-actions', {auth:true, expectedScope:scope, method:'POST', body});
   },
 
   createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string, file_size?: number, content_hash?: string) {

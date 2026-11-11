@@ -63,6 +63,7 @@ import { buildStillfolioLoginUrl } from "../lib/stillfolioLogin";
 import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
 import { FeatureDiscoveryMarker, useFeatureDiscovery } from "../lib/featureDiscovery";
+import {CallShortcutDiscoveryMarker,useCallShortcutDiscovery} from '../lib/callShortcutDiscovery';
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -407,6 +408,7 @@ export default function MenuPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser, setSession } = useAuth();
+  const {acknowledge:acknowledgeCallShortcut}=useCallShortcutDiscovery();
   const spaceFeatures = useSpaceFeatures();
   const visibleNotificationCategories = notificationCategoriesForSpace(spaceFeatures);
   const { setSession: setAdminSession } = useAdminAuth();
@@ -2185,7 +2187,7 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong>{t("menu.personalization")}</strong>
+                <strong className="menu-update-label">{t("menu.personalization")}<CallShortcutDiscoveryMarker/></strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2442,7 +2444,7 @@ export default function MenuPage() {
       <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
       </SideDrawer>
-      <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => setQuickActionsSettingsOpen(false)} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
+      <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
@@ -2486,7 +2488,7 @@ export default function MenuPage() {
             <SettingRow title={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
               onClick={() => setSquareLayoutDrawerOpen(true)} />
           </SettingGroup>
-          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong>{t("quickActions.title")}</strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong className="menu-update-label">{t("quickActions.title")}<CallShortcutDiscoveryMarker/></strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
             className="personalization-background-entry personalization-feature-entry personalization-chat-page-entry"
             onClick={() => discoverThen("capability.custom_background", () => {

@@ -1464,7 +1464,7 @@ export interface MessageEventSyncBaselineDTO {
   next_after: number;
 }
 
-export type UserStateEventKind = "chats.changed" | "friends.changed" | "friend_requests.changed";
+export type UserStateEventKind = "chats.changed" | "friends.changed" | "friend_requests.changed" | "chat_shortcuts.changed";
 
 export interface UserStateEventDTO {
   event_id: number;

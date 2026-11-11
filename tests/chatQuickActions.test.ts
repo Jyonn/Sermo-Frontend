@@ -38,21 +38,6 @@ test('voice calls are selectable in direct chats only and do not replace saved d
   assert.deepEqual(actionsForKind(null,'direct'),['locked','calendar']);
   assert.deepEqual(availableChatActions(['call','search'],{call:false,search:true}),['search']);
 });
-test("saving either tab preserves the other tab and isolates account storage", () => {
-  const values = new Map<string, string>(); const exports: Record<string, any> = {};
-  const source = fs.readFileSync(new URL("../src/lib/useChatQuickActions.ts", import.meta.url), "utf8");
-  values.set("frienden:chat-quick-actions:v1:space:user", JSON.stringify(["status", "calendar", "locked", "copy"]));
-  vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, {
-    exports, Event, window: { dispatchEvent() {} }, localStorage: { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) },
-    require(name: string) { if (name === "react") return { useMemo: (fn: () => unknown) => fn(), useSyncExternalStore: (_subscribe: unknown, snapshot: () => unknown) => snapshot() }; if (name === "./chatQuickActions") return { actionsForKind }; throw new Error(name); },
-  });
-  assert.deepEqual(exports.useChatQuickActions("space:user", "direct").actions, ["calendar", "locked"]);
-  assert.equal(exports.useChatQuickActions("space:user", "direct").save(["search"]), true);
-  assert.deepEqual(exports.useChatQuickActions("space:user", "group").actions, ["status", "locked", "copy"]);
-  exports.useChatQuickActions("space:user", "group").save(["copy", "status"]);
-  assert.deepEqual(exports.useChatQuickActions("space:user", "direct").actions, ["search"]);
-  assert.deepEqual(exports.useChatQuickActions("space:other", "direct").actions, ["locked", "calendar"]);
-});
 test("quick action copy is available in every supported language", () => {
   const keys = ["title", "status", "entryHint", "order", "dragHint", "direct", "group", "selected", "available", "remove", "preview", "reset", "noCopies", "online", "onlineCount", "detailActions"];
   for (const language of ["zh-CN", "zh-TW", "en", "ja", "ko", "es"]) {

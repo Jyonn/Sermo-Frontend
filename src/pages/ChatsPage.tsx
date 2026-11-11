@@ -58,7 +58,6 @@ import { reportGroupCopies } from "../components/GroupCopyReporting";
 import { GroupCopySheet } from "../components/GroupCopySheet";
 import { ChatQuickActions } from "../components/ChatQuickActions";
 import {VoiceCallBubble} from '../components/VoiceCallBubble';
-import {CallIcon} from '../components/CallIcon';
 import {voiceCallsEnabled,openVoiceCall,type VoiceCallRecord} from '../lib/voiceCalls';
 import { RetryingMediaImage, MessageMediaImage, MessageMediaVideo } from "../components/ChatMedia";
 import { readLocalMediaSize, releaseLocalMedia } from "../lib/messageMedia";
@@ -7691,7 +7690,6 @@ function LiveChatsPage({
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
                   : !messageSelectionMode ? <div className="conversation-header-actions">
-                    {canVoiceCall ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={startVoiceCall}><CallIcon/></button>:null}
                     {quickActionsHeaderButton}
                     <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>

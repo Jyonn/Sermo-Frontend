@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
+import {refreshChatShortcuts} from '../lib/chatQuickActionSync';
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { preserveStableMediaUri } from "../lib/chatMessageReconciliation";
@@ -371,6 +372,7 @@ export function GlobalMessageSync() {
         let hasMore = true;
         let loopCount = 0;
         let chatsChanged = false;
+        let shortcutsChanged = false;
         let friendsChanged = false;
         let friendRequestsChanged = false;
 
@@ -378,6 +380,7 @@ export function GlobalMessageSync() {
           const response = await api.getUserStateEventsSync({ after: cursor, limit: SYNC_LIMIT });
           response.events.forEach((event) => {
             chatsChanged ||= event.kind === "chats.changed";
+            shortcutsChanged ||= event.kind === 'chat_shortcuts.changed';
             friendsChanged ||= event.kind === "friends.changed";
             friendRequestsChanged ||= event.kind === "friend_requests.changed";
           });
@@ -388,6 +391,7 @@ export function GlobalMessageSync() {
         }
 
         if (cancelled) return;
+        if(shortcutsChanged)void refreshChatShortcuts(scope).catch(()=>undefined);
         if (chatsChanged && features.chatEnabled) {
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
           if (cancelled) return;
