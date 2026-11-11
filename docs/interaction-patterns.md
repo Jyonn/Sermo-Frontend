@@ -47,6 +47,8 @@ The remaining family chart patterns map to existing architecture: Modal/Popconfi
 
 The real direct-chat header opens the shared `VoiceCallPrompt` (`ConfirmDialog`): participant and maximum duration, then explicit Dial. VIP, weekly-allowance and microphone-permission decisions use the same modal with a concise reason; busy, expired, unavailable and network failures use the shared `AppToast`. Repeated network failures are deduplicated. No call hint uses BottomSheet. The call itself remains a full-screen, collapsible `VoiceCallScreen`.
 
+Direct chats also expose Call in composer More actions and as an optional, sortable chat shortcut (Menu → Language & personalization → Chat shortcuts → Direct chats). All entries use the same handler and close the invoking controls before presenting the call prompt. Existing shortcut choices remain unchanged; group and submission conversations do not expose Call. Focused action tests pass; the existing composer test for pinned-message source text still fails on the unchanged HEAD baseline.
+
 Chat appearance previews include the real voice-call bubble renderer. The development-only `/design/voice-calls` page also uses the real `ChatPreview`, prompt and full-screen components; its simulated controls never appear inside a real space. The integrated entry was checked in the isolated local `voice-local` space using the actual chat page and capability API. Production calling remains gated and is not deployed by this change.
 
 ### Shared interaction checks

@@ -7,7 +7,7 @@ import { showToast } from "../lib/toast";
 import { DrawerTabs } from "./DrawerTabs";
 import { ChatActionIcon } from "./ChatActionIcon";
 import "./ChatQuickActions.css";
-const labels = { locked: "pin.label", calendar: "chronelle.chatCalendar", copy: "copyShelf.title", status: "quickActions.status", search: "messageSearch.action" } as const;
+const labels = { locked: "pin.label", calendar: "chronelle.chatCalendar", copy: "copyShelf.title", status: "quickActions.status", search: "messageSearch.action", call: "voice.title" } as const;
 export function ChatQuickActionSettings() {
   const { session } = useAuth(); const { t } = useI18n();
   const [kind, setKind] = useState<ChatActionKind>("direct");

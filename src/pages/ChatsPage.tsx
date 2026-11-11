@@ -7556,7 +7556,9 @@ function LiveChatsPage({
     setComposerMoreOpen(false);
     setStillfolioPicker(pockloPickerKey);
   } : undefined;
-  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
+  const canVoiceCall=voiceCallsEnabled && displayedChat?.type==='direct' && (!displayedChat.purpose || displayedChat.purpose==='normal');
+  const startVoiceCall=()=>{if(!canVoiceCall||!displayedChat)return;setComposerMoreOpen(false);setDesktopComposerTool(null);setQuickActionsExpanded(false);openVoiceCall(displayedChat.id)};
+  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onCall={canVoiceCall?startVoiceCall:undefined} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
   const openMessageSearch = () => {
     setMessageSearchKeyword("");
@@ -7569,7 +7571,7 @@ function LiveChatsPage({
     setMessageSearchOpen(true);
   };
   const videoPreviewMessage = videoPreview?.messageId ? selectedMessages.find(message => message.id === videoPreview.messageId) : undefined;
-  const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat) }) : [];
+  const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat), call: canVoiceCall }) : [];
   const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
     preferredQuickActions.includes("locked") && pinnedLoadedScope !== `${currentUserId}:${displayedChat.id}` ||
     preferredQuickActions.includes("calendar") && calendarLoading ||
@@ -7687,7 +7689,7 @@ function LiveChatsPage({
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
                   : !messageSelectionMode ? <div className="conversation-header-actions">
-                    {voiceCallsEnabled && displayedChat.type==='direct' && (!displayedChat.purpose || displayedChat.purpose==='normal') ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={()=>openVoiceCall(displayedChat.id)}><span className="material-symbols-outlined" aria-hidden="true">call</span></button>:null}
+                    {canVoiceCall ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={startVoiceCall}><span className="material-symbols-outlined" aria-hidden="true">call</span></button>:null}
                     {quickActionsHeaderButton}
                     <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>
@@ -7717,7 +7719,7 @@ function LiveChatsPage({
                 }}
               >
               {narrowComposerLayout || chatBackgroundTheme === "explorer-duality" ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
-              {displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} open={showQuickActions} loading={quickActionsLoading} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
+              {displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} open={showQuickActions} loading={quickActionsLoading} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onCall={startVoiceCall} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
               <div
                 ref={messageScrollRef}
                 className="message-scroll"

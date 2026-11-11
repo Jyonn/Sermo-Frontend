@@ -32,6 +32,12 @@ test("dragging retains neighbors and neither duplicates nor loses actions", () =
   assert.deepEqual(reorderChatActions(["locked", "copy", "status"], "locked", "status"), ["copy", "status", "locked"]);
   assert.deepEqual(reorderChatActions(["locked"], "search", "locked"), ["locked"]);
 });
+test('voice calls are selectable in direct chats only and do not replace saved defaults',()=>{
+  assert.deepEqual(actionsForKind(['call','search'],'direct'),['call','search']);
+  assert.deepEqual(actionsForKind(['call','status'],'group'),['status']);
+  assert.deepEqual(actionsForKind(null,'direct'),['locked','calendar']);
+  assert.deepEqual(availableChatActions(['call','search'],{call:false,search:true}),['search']);
+});
 test("saving either tab preserves the other tab and isolates account storage", () => {
   const values = new Map<string, string>(); const exports: Record<string, any> = {};
   const source = fs.readFileSync(new URL("../src/lib/useChatQuickActions.ts", import.meta.url), "utf8");
@@ -69,7 +75,7 @@ test("the shared row retains one to four ordered actions, routes actions and nev
   } });
   const elements = (node: any): any[] => node?.props ? [node, ...React.Children.toArray(node.props.children).flatMap(elements)] : [];
   const selected: string[] = [];
-  const props = { lockedCount: 3, lockedPreview: "locked", lockedBy: "author", copyCount: 2, copyPreview: "copy", members: Array.from({ length: 8 }, (_, userId) => ({ userId, name: "member", online: userId < 6 })), onLocked: () => selected.push("locked"), onCopy: () => selected.push("copy"), onStatus: () => selected.push("status") };
+  const props = { lockedCount: 3, lockedPreview: "locked", lockedBy: "author", copyCount: 2, copyPreview: "copy", members: Array.from({ length: 8 }, (_, userId) => ({ userId, name: "member", online: userId < 6 })), onLocked: () => selected.push("locked"), onCopy: () => selected.push("copy"), onStatus: () => selected.push("status"), onCall:()=>selected.push('call') };
   for (let count = 1; count <= 4; count++) {
     const row = exports.ChatQuickActions({ ...props, actions: DEFAULT_CHAT_ACTIONS.slice(0, count), calendar: React.createElement("button", null, "calendar") });
     assert.equal(row.props.style, undefined);
@@ -88,6 +94,10 @@ test("the shared row retains one to four ordered actions, routes actions and nev
   assert.equal(hidden.props["aria-hidden"], true);
   assert.equal(hidden.props.inert, "");
   const loading = exports.ChatQuickActions({ ...props, actions: [], loading: true });
+  const callButton=elements(exports.ChatQuickActions({...props,actions:['call']})).find(node=>node.type==='button');
+  assert.equal(callButton.props['aria-label'],'voice.title');
+  callButton.props.onClick();
+  assert.equal(selected.at(-1),'call');
   assert.equal(loading.props["aria-busy"], true);
   assert.equal(loading.props["aria-hidden"], false);
   const collapsed = exports.ChatQuickActions({ ...props, actions: ["locked"], open: false });

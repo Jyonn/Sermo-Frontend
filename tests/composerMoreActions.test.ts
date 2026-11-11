@@ -13,6 +13,8 @@ const realRequire = createRequire(import.meta.url);
 runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText, {
   module, exports: module.exports, require: (id: string) => {
     if (id.endsWith(".css")) return {};
+    if (id.endsWith('.svg')) return 'test-mark.svg';
+    if (id === './ChatActionIcon') return {ChatActionIcon:()=>createElement('svg')};
     if (id === "../lib/language") return { useI18n: () => ({ t: (key: string) => key }) };
     if (id === "./ComposerSvgIcon") return { ComposerSvgIcon: () => createElement("svg") };
     return realRequire(id);
@@ -34,6 +36,12 @@ test("submission mode omits footprints and busy operations cannot be selected", 
   assert.equal((render({ footprintEnabled: false }).match(/<button/g) ?? []).length, 1);
   assert.equal((render({ disabled: true }).match(/disabled=""/g) ?? []).length, 2);
   assert.equal((render({ footprintBusy: true }).match(/disabled=""/g) ?? []).length, 1);
+});
+test('the call entry is opt-in and obeys composer visibility and busy state',()=>{
+  assert.doesNotMatch(render(),/voice.title/);
+  assert.match(render({onCall(){}}),/voice.title/);
+  assert.equal((render({onCall(){},open:false}).match(/disabled=""/g)??[]).length,3);
+  assert.equal((render({onCall(){},disabled:true}).match(/disabled=""/g)??[]).length,3);
 });
 
 test("chat layouts share the same expansion and remove the old file/map popovers", () => {
