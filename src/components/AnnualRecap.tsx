@@ -12,7 +12,8 @@ export interface AnnualRecapData {
   space_message_count: number;
   personal_message_count: number;
   active_days: number;
-  favorite_chat: { chat_id: number; count: number } | null;
+  favorite_chat: { chat_id: number; count: number; name: string | null } | null;
+  favorite_public_sticker: { uri: string; count: number } | null;
   latest_local_time: string | null;
 }
 
@@ -37,15 +38,23 @@ export function AnnualRecap({ name, onClose }: { name: string; onClose: () => vo
   const lateTime = recap?.latest_local_time && new Intl.DateTimeFormat(language, {
     hour: "2-digit", minute: "2-digit", timeZone: "Asia/Shanghai",
   }).format(new Date(recap.latest_local_time));
-  const pages = recap ? [
+  const through = recap && new Intl.DateTimeFormat(language, {
+    month: "long", day: "numeric", timeZone: "Asia/Shanghai",
+  }).format(new Date(Date.parse(recap.through) - 1));
+  const pages: { title: string; value?: string; body: string; image?: string; detail?: string }[] = recap ? [
     { title: t("recap.dear", { name }), body: t("recap.opening") },
-    { title: t("recap.together"), value: number(recap.space_message_count), body: t("recap.togetherBody") },
+    { title: t("recap.together"), value: number(recap.space_message_count), body: t("recap.togetherBody", { date: through }) },
+    ...(recap.favorite_public_sticker ? [{
+      title: t("recap.sticker"), image: recap.favorite_public_sticker.uri,
+      body: t("recap.stickerBody", { count: number(recap.favorite_public_sticker.count) }),
+    }] : []),
     ...(recap.personal_message_count ? [{
       title: t("recap.showedUp"), value: number(recap.personal_message_count),
       body: t("recap.days", { days: number(recap.active_days) }),
     }] : []),
     ...(recap.favorite_chat ? [{
       title: t("recap.favorite"), value: number(recap.favorite_chat.count), body: t("recap.favoriteBody"),
+      detail: recap.favorite_chat.name ?? undefined,
     }] : []),
     ...(lateTime ? [{ title: t("recap.night"), value: lateTime, body: t("recap.nightBody") }] : []),
     { title: t("recap.untilNext"), body: t("recap.closing") },
@@ -61,6 +70,8 @@ export function AnnualRecap({ name, onClose }: { name: string; onClose: () => vo
       </header>
       {current ? <article className="annual-recap-paper" key={page} aria-live="polite">
         <h1>{current.title}</h1>
+        {current.detail && <strong>{current.detail}</strong>}
+        {current.image && <img className="annual-recap-sticker" src={current.image} alt={t("recap.sticker")} />}
         {current.value && <strong className="annual-recap-number">{current.value}</strong>}
         <p>{current.body}</p>
       </article> : <p role={error ? "alert" : "status"}>{t(error ? "recap.loadError" : "common.loading")}</p>}

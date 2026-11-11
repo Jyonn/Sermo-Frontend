@@ -49,3 +49,4 @@
 .annual-recap-paper h1 { font: 600 clamp(27px, 6vw, 49px)/1.18 "Songti SC", Georgia, serif; }
 .annual-recap-paper p { font-size: clamp(15px, 3vw, 19px); line-height: 1.7; }
 .annual-recap-number { font: 500 clamp(44px, 10vw, 82px)/1 Georgia, serif; color: #963f3a; }
+.annual-recap-sticker { width: 112px; height: 112px; object-fit: contain; }
