@@ -29,6 +29,7 @@
 .voice-control { display: grid; justify-items: center; gap: 12px; min-width: 76px; border: 0; padding: 8px 0; background: transparent; color: var(--text-muted); font: inherit; font-size: 12px; cursor: pointer; }
 .voice-control-disc { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; background: var(--surface-soft); color: var(--text-primary); }
 .voice-control-disc .material-symbols-outlined { font-size: 29px; }
+.voice-control-disc .call-icon { width: 29px; height: 29px; }
 .voice-control.is-danger .voice-control-disc { background: #bc5751; color: #fff8f5; }
 .voice-control.is-answer .voice-control-disc { background: var(--brand-primary); color: #0b291e; }
 .voice-control.is-muted .voice-control-disc { background: var(--text-primary); color: var(--bg-canvas, #f4f2ec); }
@@ -36,19 +37,28 @@
 .voice-control:focus-visible, .voice-folded button:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 4px; }
 .voice-error { margin: 0 0 20px; text-align: center; font-size: 13px; line-height: 1.6; }
 .voice-playback { display: block; margin: 0 auto 20px; border: 0; padding: 12px 18px; border-radius: 20px; color: var(--brand-primary); background: var(--surface-soft); font: inherit; font-size: 13px; }
-.voice-folded { position: fixed; z-index: 1200; top: max(12px, env(safe-area-inset-top)); right: 16px; display: flex; width: min(330px, calc(100vw - 32px)); padding: 7px; border: 1px solid var(--line-soft); border-radius: 22px; background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 8px 26px rgba(13, 35, 24, .12); }
+.voice-folded { position: fixed; z-index: 1200; top: max(12px, env(safe-area-inset-top)); right: 16px; display: flex; align-items: center; width: min(330px, calc(100vw - 32px)); padding: 8px; border: 1px solid var(--line-soft); border-radius: 22px; background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 8px 26px rgba(13, 35, 24, .12); }
 .voice-folded-open { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 7px 10px; background: transparent; border: 0; color: inherit; text-align: left; cursor: pointer; }
 .voice-folded-open > span:nth-child(2) { flex: 1; display: grid; gap: 3px; min-width: 0; }
 .voice-folded-open strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.voice-folded-open small { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.voice-folded-open > .material-symbols-outlined:first-child { color: var(--brand-primary); }
+.voice-folded-open small { overflow: hidden; color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; text-overflow: ellipsis; }
+.voice-folded-open > .call-icon { display: block; flex: 0 0 24px; color: var(--brand-primary); }
 .voice-folded-open > .material-symbols-outlined:last-child { font-size: 17px; color: var(--text-muted); }
-.voice-folded-end { display: grid; place-items: center; width: 44px; border: 0; border-radius: 16px; background: #bc5751; color: #fff8f5; cursor: pointer; }
-.message-voice-call { display: inline-flex; align-items: center; gap: 16px; inline-size: clamp(184px, 54vw, 240px); max-inline-size: calc(100vw - 152px); border: 0; padding: 8px 2px; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
-.message-voice-call > .material-symbols-outlined { flex: 0 0 28px; font-size: 26px; }
-.message-voice-call > span:last-child { display: grid; gap: 6px; }
-.message-voice-call strong { font-size: 14px; font-weight: 600; }
-.message-voice-call small { color: var(--text-muted); font-size: 11px; }
+.voice-folded-end { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; aspect-ratio: 1; padding: 0; border: 0; border-radius: 14px; background: #bc5751; color: #fff8f5; cursor: pointer; }
+.voice-folded-end-icon { display: grid; place-items: center; width: 24px; height: 24px; line-height: 1; }
+.message-voice-call { display: inline-flex; align-items: center; gap: 12px; inline-size: clamp(184px, 54vw, 240px); max-inline-size: calc(100vw - 152px); min-height: 48px; border: 0; padding: 5px 0; color: var(--call-ink, inherit); background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.message-call-symbol { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 12px; background: var(--call-icon-surface, color-mix(in srgb, currentColor 9%, transparent)); }
+.message-call-symbol .call-icon { display: block; width: 22px; height: 22px; }
+.message-call-copy { display: grid; flex: 1; min-width: 0; gap: 4px; }
+.message-call-copy strong { font-size: .9em; font-weight: 600; }
+.message-call-copy small { color: var(--call-muted, color-mix(in srgb, currentColor 78%, transparent)); font-size: .8em; }
+.message-call-duration { flex: 0 0 auto; align-self: flex-start; padding-top: 3px; font-size: .86em; font-variant-numeric: tabular-nums; }
+.message-group.other:not(.bubble-style-default) .is-voice-call { --call-ink: var(--bubble-skin-other-color, inherit); --call-muted: var(--bubble-theme-muted-other, color-mix(in srgb, currentColor 78%, transparent)); --call-icon-surface: var(--bubble-theme-icon-other, color-mix(in srgb, currentColor 9%, transparent)); }
+.message-group.self:not(.bubble-style-default) .is-voice-call { --call-ink: var(--bubble-skin-self-color, inherit); --call-muted: var(--bubble-theme-muted-self, color-mix(in srgb, currentColor 78%, transparent)); --call-icon-surface: var(--bubble-theme-icon-self, color-mix(in srgb, currentColor 9%, transparent)); }
+.message-group:is(.bubble-style-typewriter,.bubble-style-newspaper,.bubble-style-receipt,.bubble-style-postcard) .message-call-symbol { border: 1px solid color-mix(in srgb, currentColor 24%, transparent); border-radius: 3px; background: transparent; }
+.message-group:is(.bubble-style-comic,.bubble-style-doodle) .message-call-symbol { border: 2px solid currentColor; border-radius: 9px 6px 10px 5px; background: transparent; }
+.message-group:is(.bubble-style-blueprint,.bubble-style-terminal,.bubble-style-mech) .message-call-symbol { border: 1px solid color-mix(in srgb, currentColor 35%, transparent); border-radius: 4px; background: transparent; }
+.message-group:is(.bubble-style-cloud,.bubble-style-orbital,.bubble-style-pebble) .message-call-symbol { border-radius: 50%; }
 .voice-preflight-person { display: flex; align-items: center; gap: 14px; }
 .voice-preflight-avatar { width: 48px; height: 48px; border-radius: 16px; }
 .voice-preflight-person > span { display: grid; gap: 6px; }

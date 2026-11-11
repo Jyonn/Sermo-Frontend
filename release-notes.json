@@ -1,22 +1,22 @@
 {
-  "id": "2026.11.11.5",
+  "id": "2026.11.11.6",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
-      "title": "前台语音通话",
+      "title": "前台通话",
       "items": [
-        "语音通话支持全屏与折叠，聊天中保留加宽的通话记录气泡。",
+        "通话支持全屏与折叠，聊天中保留适配各个气泡主题的通话记录。",
         "私聊的更多操作与可配置快捷操作均可发起通话。",
-        "拨打菜单仅保留语音通话和取消，额度与权限异常使用简洁提示。",
+        "拨打菜单仅保留通话和取消，统一图标与横幅按钮样式。",
         "VIP 双方各有每周五分钟额度，拨打前检查双方可用时长。"
       ]
     },
     "en": {
-      "title": "Foreground voice calls",
+      "title": "Foreground calls",
       "items": [
-        "Voice calls support full-screen and minimized views, with wider call-record bubbles in chat.",
+        "Calls support full-screen and minimized views, with call records matching each chat bubble theme.",
         "Start calls from direct-chat More actions or configurable chat shortcuts.",
-        "The call menu offers only Voice call and Cancel, with concise allowance and permission feedback.",
+        "The menu offers only Call and Cancel, with consistent call icons and banner controls.",
         "Both VIP participants receive five minutes per week, checked before dialing."
       ]
     }

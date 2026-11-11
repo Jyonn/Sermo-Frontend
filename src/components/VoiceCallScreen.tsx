@@ -5,6 +5,7 @@ import {useBodyScrollLock} from '../lib/bodyLock';
 import {useModalFocus} from '../lib/modalFocus';
 import {voiceStatus,voiceTime,type VoiceCall} from '../lib/voiceCalls';
 import {UserAvatar} from './UserAvatar';
+import {CallIcon} from './CallIcon';
 type ControlKey = 'voice.answer'|'voice.decline'|'voice.cancel'|'voice.hangup'|'voice.mute'|'voice.unmute'|'common.close';
 import './VoiceCalls.css';
 
@@ -35,8 +36,8 @@ export function VoiceCallScreen({call,incoming,folded,muted,busy,elapsed,remaini
   useModalFocus(root,!folded,()=>onFold(true));
   const label=t(reconnecting?'voice.reconnecting':voiceStatus(call,incoming));
   const active=call.state==='active';
-  const control=(icon:string,key:ControlKey,onClick:()=>void,kind='',disabled=false)=><button className={`voice-control ${kind}`} onClick={onClick} disabled={disabled} type="button"><span className="voice-control-disc"><span className="material-symbols-outlined" aria-hidden="true">{icon}</span></span><span>{t(key)}</span></button>;
-  return createPortal(folded?<div className="voice-folded" role="region" aria-label={t('voice.title')}><button type="button" className="voice-folded-open" onClick={()=>onFold(false)}><span className="material-symbols-outlined" aria-hidden="true">call</span><span><strong>{call.peer.name}</strong><small>{active?voiceTime(elapsed):label}</small></span><span className="material-symbols-outlined" aria-hidden="true">open_in_full</span></button><button type="button" className="voice-folded-end" aria-label={t(ended?'common.close':'voice.hangup')} disabled={busy} onClick={ended?onDismiss:onEnd}><span className="material-symbols-outlined" aria-hidden="true">{ended?'close':'call_end'}</span></button></div>:
+  const control=(icon:string,key:ControlKey,onClick:()=>void,kind='',disabled=false)=><button className={`voice-control ${kind}`} onClick={onClick} disabled={disabled} type="button"><span className="voice-control-disc">{icon==='call'||icon==='call_end'?<CallIcon ended={icon==='call_end'}/>:<span className="material-symbols-outlined" aria-hidden="true">{icon}</span>}</span><span>{t(key)}</span></button>;
+  return createPortal(folded?<div className="voice-folded" role="region" aria-label={t('voice.title')}><button type="button" className="voice-folded-open" onClick={()=>onFold(false)}><CallIcon/><span><strong>{call.peer.name}</strong><small>{active?voiceTime(elapsed):label}</small></span><span className="material-symbols-outlined" aria-hidden="true">open_in_full</span></button><button type="button" className="voice-folded-end" aria-label={t(ended?'common.close':'voice.hangup')} disabled={busy} onClick={ended?onDismiss:onEnd}><span className="voice-folded-end-icon">{ended?<span className="material-symbols-outlined" aria-hidden="true">close</span>:<CallIcon ended/>}</span></button></div>:
     <div className={`voice-screen${active?' is-active':''}${ended?' is-ended':''}`} ref={root} role="dialog" aria-modal="true" aria-labelledby="voice-call-name" tabIndex={-1} data-overlay-layer>
       <header className="voice-screen-header"><span>{t('voice.title')}</span><button className="icon-button" type="button" aria-label={t('voice.fold')} onClick={()=>onFold(true)}><span className="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span></button></header>
       <div className="voice-screen-person"><div className={`voice-avatar-orbit${call.state==='ringing'?' is-ringing':''}`}><UserAvatar className="voice-person-avatar" name={call.peer.name} userId={call.peer.user_id} uri={call.peer.avatar_uri} cacheKey={call.peer.avatar_cache_key}/></div><h1 id="voice-call-name">{call.peer.name}</h1><p className="voice-state" role="status">{label}</p>

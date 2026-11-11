@@ -58,6 +58,7 @@ import { reportGroupCopies } from "../components/GroupCopyReporting";
 import { GroupCopySheet } from "../components/GroupCopySheet";
 import { ChatQuickActions } from "../components/ChatQuickActions";
 import {VoiceCallBubble} from '../components/VoiceCallBubble';
+import {CallIcon} from '../components/CallIcon';
 import {voiceCallsEnabled,openVoiceCall,type VoiceCallRecord} from '../lib/voiceCalls';
 import { RetryingMediaImage, MessageMediaImage, MessageMediaVideo } from "../components/ChatMedia";
 import { readLocalMediaSize, releaseLocalMedia } from "../lib/messageMedia";
@@ -1770,6 +1771,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             from === "self" ? "self" : "other",
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.kind === "audio" ? "is-audio" : "",
+            message.kind === 'voice_call' ? 'is-voice-call' : '',
             message.kind === "location" ? "is-location" : "",
             message.kind === "submission_invite" ? "is-submission-invite" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
@@ -7689,7 +7691,7 @@ function LiveChatsPage({
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
                   : !messageSelectionMode ? <div className="conversation-header-actions">
-                    {canVoiceCall ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={startVoiceCall}><span className="material-symbols-outlined" aria-hidden="true">call</span></button>:null}
+                    {canVoiceCall ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={startVoiceCall}><CallIcon/></button>:null}
                     {quickActionsHeaderButton}
                     <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>
