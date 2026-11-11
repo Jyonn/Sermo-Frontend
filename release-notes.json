@@ -1,11 +1,11 @@
 {
-  "id": "2026.11.11.9",
+  "id": "2026.11.11.10",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
       "title": "前台通话",
       "items": [
-        "好友私聊支持前台通话，可全屏使用或折叠。",
+        "优化 Safari 与 iPhone 的通话连接兼容性，支持全屏使用或折叠。",
         "双方 VIP 每人每周五分钟，接通后计时，额度耗尽自动结束。",
         "更多操作和聊天快捷操作均可拨打，挂断结果与通话记录准确同步。",
         "来电通过已开启的通知渠道提醒，不支持通话的浏览器会在拨打前提示。"
@@ -14,7 +14,7 @@
     "en": {
       "title": "Foreground calls",
       "items": [
-        "Call friends in direct chats, with full-screen and minimized views.",
+        "Improve call connection compatibility on Safari and iPhone, with full-screen and minimized views.",
         "Both VIP participants receive five minutes per week. Connected time counts toward each allowance, and calls end when time runs out.",
         "Start calls from More actions or chat shortcuts, with hangup results and call records kept in sync.",
         "Incoming calls use your enabled notification channels, with browser support checked before dialing."

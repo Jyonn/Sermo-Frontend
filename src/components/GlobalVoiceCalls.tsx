@@ -149,7 +149,8 @@ export function GlobalVoiceCalls() {
       try{
         const [{Room,RoomEvent,Track},credentials]=await Promise.all([import('livekit-client'),api.getVoiceMedia(targetId,device.current)]);
         if(cancelled||snapshot.current?.call_id!==targetId||snapshot.current.state==='ended')return;
-        const next=new Room({adaptiveStream:false,dynacast:false});room.current=next;
+        // Keep Safari/iOS on the established dual-PC protocol instead of the v1 join path.
+        const next=new Room({adaptiveStream:false,dynacast:false,singlePeerConnection:false});room.current=next;
         next.on(RoomEvent.TrackSubscribed,(track)=>{if(track.kind===Track.Kind.Audio){const element=track.attach();element.setAttribute('playsinline','');audio.current?.append(element)}});
         next.on(RoomEvent.TrackUnsubscribed,(track)=>track.detach().forEach(element=>element.remove()));
         next.on(RoomEvent.Reconnecting,()=>{mediaReconnecting.current=true;setReconnecting(true);reconnectTimer.current??=window.setTimeout(()=>void finish(),10000)});
