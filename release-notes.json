@@ -1,5 +1,5 @@
 {
-  "id": "2026.11.11.2",
+  "id": "2026.11.11.3",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
@@ -7,7 +7,8 @@
       "items": [
         "VIP 语音通话支持全屏和折叠，聊天中保留通话记录。",
         "双方共用各自每周五分钟额度，拨打前检查可用时长。",
-        "通话提示改用模态框和 Toast，个性化聊天预览新增通话气泡。"
+        "通话提示改用模态框和 Toast，个性化聊天预览新增通话气泡。",
+        "折叠按钮移至右上角，移除通话页 VIP 标签，加宽通话气泡。"
       ]
     },
     "en": {
@@ -15,7 +16,8 @@
       "items": [
         "VIP voice calls support full-screen and minimized views, with a call record in chat.",
         "Calls check both participants’ weekly five-minute allowances before dialing.",
-        "Call prompts use dialogs and Toast, with call bubbles included in chat appearance previews."
+        "Call prompts use dialogs and Toast, with call bubbles included in chat appearance previews.",
+        "Move the minimize control to the top right, remove the call-screen VIP label, and widen call bubbles."
       ]
     }
   }

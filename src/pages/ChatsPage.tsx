@@ -1652,6 +1652,11 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
       text: message.text,
       uri: message.payload?.uri,
       thumbnailUri: message.payload?.thumbnail_uri,
+      voiceCall: message.kind === 'voice_call' ? {
+        state: message.payload?.state,
+        reason: message.payload?.reason,
+        duration: message.payload?.duration_seconds,
+      } : null,
       linkPreview: message.payload?.link_preview
         ? {
             status: message.payload.link_preview.status,
