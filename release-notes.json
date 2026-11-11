@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.11.14",
-  "publishedAt": "2026-11-11",
+  "id": "2026.11.12.2",
+  "publishedAt": "2026-11-12",
   "locales": {
     "zh-CN": {
-      "title": "通话消息操作",
+      "title": "年末来信",
       "items": [
-        "修复聊天中长按通话气泡无法打开消息操作栏的问题。"
+        "空间开启年度回顾后，可在菜单里拆开年末来信，回看这一年的聊天点滴。"
       ]
     },
     "en": {
-      "title": "Call message actions",
+      "title": "A year-end letter",
       "items": [
-        "Long-press a call bubble in chat to open its message actions."
+        "Once your space opens its annual recap, open your year-end letter from the menu and revisit a year of conversations."
       ]
     }
   }

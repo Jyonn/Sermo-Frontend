@@ -1,0 +1,51 @@
+.annual-recap {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  align-items: center;
+  gap: 20px;
+  overflow: auto;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 50% 28%, #533b36, #2d231f 80%);
+  color: #fbecda;
+}
+.annual-recap-header, .annual-recap-footer {
+  width: min(100%, 620px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.annual-recap button {
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 14px;
+  color: inherit;
+  background: #ffffff12;
+  border: 1px solid #ffffff36;
+  border-radius: 999px;
+  font: inherit;
+}
+.annual-recap button:disabled { opacity: .42; }
+.annual-recap button:focus-visible { outline: 2px solid #f2b981; outline-offset: 3px; }
+.annual-recap-paper {
+  width: min(100%, 620px);
+  min-height: min(45vh, 360px);
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  box-sizing: border-box;
+  padding: clamp(25px, 7vw, 66px);
+  color: #472a23;
+  background: repeating-linear-gradient(#f8ead6 0 29px, #e8d8c3 30px, #f8ead6 31px);
+  border: 1px solid #e0c8ac;
+  border-radius: 3px 18px 5px 8px;
+  box-shadow: 0 18px 55px #1c100b77;
+}
+.annual-recap-paper h1, .annual-recap-paper p { margin: 0; }
+.annual-recap-paper h1 { font: 600 clamp(27px, 6vw, 49px)/1.18 "Songti SC", Georgia, serif; }
+.annual-recap-paper p { font-size: clamp(15px, 3vw, 19px); line-height: 1.7; }
+.annual-recap-number { font: 500 clamp(44px, 10vw, 82px)/1 Georgia, serif; color: #963f3a; }
