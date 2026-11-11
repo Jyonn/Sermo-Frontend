@@ -1,5 +1,5 @@
 {
-  "id": "2026.11.11.11",
+  "id": "2026.11.11.12",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
@@ -7,7 +7,7 @@
       "items": [
         "移除聊天页右上角的通话按钮，保留更多操作与可配置快捷入口。",
         "菜单、语言与个性化、聊天快捷操作及通话选项逐级显示新功能红点。",
-        "查看快捷操作后，引导红点在各设备同步消除。",
+        "添加、拖拽通话快捷操作或查看设置后，引导红点在各设备同步消除。",
         "聊天快捷操作随账号同步，自动迁移已有的本地设置。"
       ]
     },
@@ -16,7 +16,7 @@
       "items": [
         "Remove the call button from the chat header, keeping More actions and configurable shortcuts.",
         "New-feature dots guide you through Menu, Language and personalization, Chat shortcuts, and Call.",
-        "Guidance clears across devices after reviewing shortcuts.",
+        "Guidance clears across devices after adding or reordering Call, or reviewing shortcut settings.",
         "Chat shortcuts sync with your account, preserving existing local settings on first use."
       ]
     }
