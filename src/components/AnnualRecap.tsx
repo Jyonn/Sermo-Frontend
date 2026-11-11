@@ -20,6 +20,7 @@ export interface AnnualRecapData {
 export function AnnualRecap({ name, onClose }: { name: string; onClose: () => void }) {
   const { t, language } = useI18n();
   const root = useRef<HTMLDivElement>(null);
+  const gestureStart = useRef<{ x: number; y: number } | null>(null);
   const [recap, setRecap] = useState<AnnualRecapData | null>(null);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(0);
@@ -68,7 +69,23 @@ export function AnnualRecap({ name, onClose }: { name: string; onClose: () => vo
         <span>{recap?.year ?? 2026} · {t("recap.title")}</span>
         <button type="button" onClick={onClose} aria-label={t("common.close")}>×</button>
       </header>
-      {current ? <article className="annual-recap-paper" key={page} aria-live="polite">
+      {current ? <article className="annual-recap-paper" key={page} aria-live="polite"
+        onTouchStart={({ touches }) => {
+          const finger = touches.length === 1 ? touches[0] : null;
+          gestureStart.current = finger ? { x: finger.clientX, y: finger.clientY } : null;
+        }}
+        onTouchCancel={() => { gestureStart.current = null; }}
+        onTouchEnd={({ changedTouches }) => {
+          const start = gestureStart.current;
+          gestureStart.current = null;
+          const finger = changedTouches[0];
+          if (!start || !finger) return;
+          const x = finger.clientX - start.x;
+          const y = finger.clientY - start.y;
+          if (Math.abs(x) < 56 || Math.abs(x) < Math.abs(y) * 1.5) return;
+          setPage((index) => Math.max(0, Math.min(pages.length - 1, index + (x < 0 ? 1 : -1))));
+        }}
+      >
         <h1>{current.title}</h1>
         {current.detail && <strong>{current.detail}</strong>}
         {current.image && <img className="annual-recap-sticker" src={current.image} alt={t("recap.sticker")} />}
