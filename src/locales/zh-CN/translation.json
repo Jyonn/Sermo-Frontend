@@ -1,4 +1,5 @@
 {
+  "admin.christmasTheme": "平安夜小镇",
   "recap.title": "年末来信",
   "recap.adminHint": "开启后，成员可阅读自己的年度回顾。",
   "recap.dear": "亲爱的 {{name}}",
