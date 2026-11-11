@@ -9,16 +9,16 @@ import {VoiceCallScreen} from './VoiceCallScreen';
 import {VoiceCallPrompt} from './VoiceCallPrompt';
 import {voiceFeedbackSurface} from '../lib/voiceFeedback';
 import {showToast} from '../lib/toast';
+import {acquireVoiceMicrophone} from '../lib/voiceMicrophone';
 
 function errorReason(error:unknown) {
+  if(error instanceof DOMException&&error.name==='NotSupportedError')return 'unsupported';
   if(error instanceof DOMException&&['NotAllowedError','NotFoundError','NotReadableError','SecurityError'].includes(error.name))return 'microphone';
   return error instanceof ApiError?error.identifier.replace(/^VOICE_/,'').toLowerCase():'network';
 }
 
 function errorText(error: unknown): string {
-  if(error instanceof DOMException && ['NotAllowedError','NotFoundError','NotReadableError','SecurityError'].includes(error.name))return i18n.t('voice.error.microphone');
-  const reason=error instanceof ApiError?error.identifier.replace(/^VOICE_/,'').toLowerCase():'network';
-  return i18n.t(voiceErrorKey(reason));
+  return i18n.t(voiceErrorKey(errorReason(error)));
 }
 
 export function GlobalVoiceCalls() {
@@ -178,8 +178,7 @@ export function GlobalVoiceCalls() {
   useEffect(()=>{if(call?.state==='active'&&remaining<=0)void finish()},[call?.state,remaining,finish]);
 
   const microphone=async()=>{
-    if(!navigator.mediaDevices?.getUserMedia)throw new DOMException('Microphone unavailable','NotFoundError');
-    const media=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+    const media=await acquireVoiceMicrophone();
     if(!live.current||document.visibilityState!=='visible'){media.getTracks().forEach(track=>track.stop());throw new DOMException('Not in foreground','NotAllowedError')}
     stream.current=media;
   };

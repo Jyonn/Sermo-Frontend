@@ -1,5 +1,5 @@
 {
-  "id": "2026.11.11.7",
+  "id": "2026.11.11.8",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
@@ -8,7 +8,7 @@
         "好友私聊支持前台通话，可全屏使用或折叠。",
         "双方 VIP 每人每周五分钟，接通后计时，额度耗尽自动结束。",
         "更多操作和聊天快捷操作均可拨打，通话记录适配各个气泡主题。",
-        "来电通过已开启的通知渠道提醒。"
+        "来电通过已开启的通知渠道提醒，不支持通话的浏览器会在拨打前提示。"
       ]
     },
     "en": {
@@ -17,7 +17,7 @@
         "Call friends in direct chats, with full-screen and minimized views.",
         "Both VIP participants receive five minutes per week. Connected time counts toward each allowance, and calls end when time runs out.",
         "Start calls from More actions or chat shortcuts, with call records matching each bubble theme.",
-        "Incoming calls use your enabled notification channels."
+        "Incoming calls use your enabled notification channels, with browser support checked before dialing."
       ]
     }
   }

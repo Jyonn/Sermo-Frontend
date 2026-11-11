@@ -4344,6 +4344,7 @@
 ,"voice.error.expired": "此次通话已结束。"
 ,"voice.error.microphone": "请允许浏览器使用麦克风后重试。"
 ,"voice.error.network": "连接失败，请重试。"
+,"voice.error.unsupported": "当前浏览器不支持通话，请检查 WebRTC 支持。"
 ,"voice.lab.title": "前台通话"
 ,"voice.lab.local": "本地预览 · 不使用麦克风，不发送真实通知"
 ,"voice.lab.outgoing": "拨出通话"

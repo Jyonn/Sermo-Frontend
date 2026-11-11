@@ -41,7 +41,7 @@ const endedLabels = {cancelled:'voice.cancelled', declined:'voice.declined', mis
 const errorLabels = {vip_required:'voice.error.vip_required', quota_empty:'voice.error.quota_empty',peer_quota_empty:'voice.error.peer_quota_empty',
   phone_required:'voice.error.phone_required',same_person:'voice.error.same_person',busy:'voice.error.busy',other_device:'voice.error.other_device',
   unavailable:'voice.error.unavailable',forbidden:'voice.error.forbidden',expired:'voice.error.expired',microphone:'voice.error.microphone',network:'voice.error.network'} as const;
-export function voiceErrorKey(reason:string) {return errorLabels[reason as keyof typeof errorLabels]??'voice.error.network'}
+export function voiceErrorKey(reason:string) {return reason==='unsupported'?'voice.error.unsupported':errorLabels[reason as keyof typeof errorLabels]??'voice.error.network'}
 export function voiceStatus(call: VoiceCallRecord, incoming = false) {
   if (call.state === 'ringing') return incoming ? 'voice.incoming' : 'voice.ringing';
   if (call.state === 'connecting') return 'voice.connecting';
