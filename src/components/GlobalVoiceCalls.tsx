@@ -77,6 +77,7 @@ export function GlobalVoiceCalls() {
   const finish=useCallback(async()=>{
     const current=snapshot.current;
     if(!current||current.state==='ended')return;
+    generation.current++;
     try{apply(await endVoiceCallMedia(
       ()=>stream.current?.getTracks().forEach(track=>{track.enabled=false}),
       ()=>api.voiceAction(current.call_id,'end',device.current),releaseMedia))}

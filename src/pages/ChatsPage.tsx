@@ -7558,7 +7558,8 @@ function LiveChatsPage({
     setComposerMoreOpen(false);
     setStillfolioPicker(pockloPickerKey);
   } : undefined;
-  const canVoiceCall=voiceCallsEnabled && displayedChat?.type==='direct' && (!displayedChat.purpose || displayedChat.purpose==='normal');
+  const canVoiceCall = voiceCallsEnabled && Boolean(displayedChat)
+    && (!displayedChat?.purpose || displayedChat.purpose === 'normal');
   const startVoiceCall=()=>{if(!canVoiceCall||!displayedChat)return;setComposerMoreOpen(false);setDesktopComposerTool(null);setQuickActionsExpanded(false);openVoiceCall(displayedChat.id)};
   const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onCall={canVoiceCall?startVoiceCall:undefined} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
