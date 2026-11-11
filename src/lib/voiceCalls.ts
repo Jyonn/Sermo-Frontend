@@ -7,7 +7,8 @@ export interface VoiceCallRecord {
   call_id: string;
   chat_id: number;
   caller_id: number;
-  callee_id: number;
+  callee_id: number | null;
+  group?: boolean;
   state: VoiceState;
   reason: string;
   max_seconds: number;
@@ -16,6 +17,8 @@ export interface VoiceCallRecord {
   deadline_at: number | null;
 }
 export interface VoiceCall extends VoiceCallRecord {
+  group_name?: string | null;
+  participants?: TinyUserDTO[];
   peer: TinyUserDTO;
   owned: boolean;
   expires_at: number;
@@ -23,6 +26,8 @@ export interface VoiceCall extends VoiceCallRecord {
   message_id: number;
 }
 export interface VoiceCapability {
+  group?: boolean;
+  ongoing?: boolean;
   enabled: boolean;
   can_call: boolean;
   reason: string;

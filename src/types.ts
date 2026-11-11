@@ -1159,7 +1159,8 @@ export interface ChatMessagePayloadDTO {
   call_id?: string;
   chat_id?: number;
   caller_id?: number;
-  callee_id?: number;
+  callee_id?: number | null;
+  group?: boolean;
   state?: import('./lib/voiceCalls').VoiceState;
   reason?: string;
   max_seconds?: number;

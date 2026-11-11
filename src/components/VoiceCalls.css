@@ -92,3 +92,6 @@ body:has(.voice-screen, .voice-call-prompt, .voice-folded) > .app-toast-viewport
   @keyframes voice-ring { from { transform: scale(.9); opacity: .6; } to { transform: scale(1.12); opacity: 0; } }
 }
 .message-voice-call:disabled { pointer-events: none; }
+.voice-group-members { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:min(70vw,240px); }
+.voice-group-avatar { width:44px; height:44px; border-radius:14px; }
+.voice-avatar-orbit.is-group::before, .voice-avatar-orbit.is-group::after { content:none; }
