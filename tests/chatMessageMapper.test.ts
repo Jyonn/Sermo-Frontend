@@ -6,6 +6,7 @@ import type { ChatMessageDTO } from "../src/types.ts";
 const expectedKinds = [
   "text", "image", "file", "system", "video", "audio", "location", "map_access",
   "statement", "sticker", "forward_bundle", "activity", "official_notice", "submission_invite",
+  "voice_call",
 ];
 
 function message(type = 0): ChatMessageDTO {

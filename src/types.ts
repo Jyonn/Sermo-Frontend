@@ -10,7 +10,7 @@ export interface ChatMuteState {
   muted_until: number | null;
   scope?: "group" | "global" | null;
 }
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "unsupported";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "voice_call" | "unsupported";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -1146,6 +1146,16 @@ export interface AudioTranscriptDTO {
 }
 
 export interface ChatMessagePayloadDTO {
+  call?: import('./lib/voiceCalls').VoiceCallRecord;
+  call_id?: string;
+  chat_id?: number;
+  caller_id?: number;
+  callee_id?: number;
+  state?: import('./lib/voiceCalls').VoiceState;
+  reason?: string;
+  max_seconds?: number;
+  connected_at?: number | null;
+  deadline_at?: number | null;
   bgm_entrance?: boolean;
   song_title?: string;
   song_author?: string;
@@ -1437,7 +1447,7 @@ export interface QuotedMessageDTO {
 
 export interface MessageSyncEventDTO {
   event_id: number;
-  type: "message.created" | "message.hidden" | "message.recalled" | "message.restored";
+  type: "message.created" | "message.hidden" | "message.recalled" | "message.restored" | "message.updated";
   chat_id: number;
   message_id: number;
   message?: ChatMessageDTO;

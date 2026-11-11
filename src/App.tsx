@@ -12,6 +12,8 @@ import { isChronelleReturn } from './lib/chronelleReturn';
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
+import {GlobalVoiceCalls} from './components/GlobalVoiceCalls';
+import {voiceCallsEnabled} from './lib/voiceCalls';
 import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
 import { GlobalChatLayoutDiagnostics } from "./components/GlobalChatLayoutDiagnostics";
 import { PwaRecommendation } from "./components/PwaRecommendation";
@@ -41,6 +43,7 @@ const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
 const NumberDuelRoomPage = lazy(() => import("./pages/NumberDuelRoomPage"));
 const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
 const ChatsPage = lazy(routeResources.chats);
+const VoiceCallLabPage = lazy(()=>import('./pages/VoiceCallLabPage'));
 const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
 const MenuPage = lazy(routeResources.menu);
 const DeveloperPage = lazy(routeResources.developer);
@@ -160,6 +163,7 @@ export default function App() {
         <Route path="/oauth/authorize" element={<OAuthAuthorizePage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/design/interactions" element={<InteractionPatternsPage />} />
+        {import.meta.env.DEV ? <Route path="/design/voice-calls" element={<VoiceCallLabPage/>}/>:null}
         <Route path="/design/explorer" element={<ExplorerActivityLabPage />} />
         <Route
           path="/design/square-composer"
@@ -307,6 +311,7 @@ export default function App() {
       ) : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <DocumentTitle /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GlobalMessageSync /> : null}
+      {ready && session && !isPlatformAdmin && !isDesignLab && voiceCallsEnabled ? <GlobalVoiceCalls/>:null}
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalMediaLocationMap /> : null}
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalChatLayoutDiagnostics /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}

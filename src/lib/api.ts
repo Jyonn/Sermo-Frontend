@@ -443,6 +443,21 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  getVoiceCapability(chatId: number) {
+    return request<import('./voiceCalls').VoiceCapability>('/chats/voice/capability', {auth:true,query:{chat_id:chatId}});
+  },
+  getCurrentVoiceCall(deviceId: string) {
+    return request<{enabled:boolean;call:import('./voiceCalls').VoiceCall|null}>('/chats/voice/current', {auth:true,query:{device_id:deviceId}});
+  },
+  createVoiceCall(chatId: number, clientKey: string, deviceId: string) {
+    return request<import('./voiceCalls').VoiceCall>('/chats/voice/calls', {auth:true,method:'POST',body:{chat_id:chatId,client_key:clientKey,device_id:deviceId}});
+  },
+  voiceAction(callId: string, action: 'accept'|'end'|'heartbeat', deviceId: string) {
+    return request<import('./voiceCalls').VoiceCall>(`/chats/voice/calls/${encodeURIComponent(callId)}/${action}`, {auth:true,method:'POST',body:{device_id:deviceId}});
+  },
+  getVoiceMedia(callId: string, deviceId: string) {
+    return request<{url:string;token:string}>(`/chats/voice/calls/${encodeURIComponent(callId)}/media`, {auth:true,method:'POST',body:{device_id:deviceId}});
+  },
   getBirthday(signal?: AbortSignal) {
     return request<import('./birthdayTypes').BirthdayStatus>('/users/me/birthday', {auth:true, signal});
   },

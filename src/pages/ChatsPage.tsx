@@ -57,6 +57,8 @@ import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
 import { reportGroupCopies } from "../components/GroupCopyReporting";
 import { GroupCopySheet } from "../components/GroupCopySheet";
 import { ChatQuickActions } from "../components/ChatQuickActions";
+import {VoiceCallBubble} from '../components/VoiceCallBubble';
+import {voiceCallsEnabled,openVoiceCall,type VoiceCallRecord} from '../lib/voiceCalls';
 import { RetryingMediaImage, MessageMediaImage, MessageMediaVideo } from "../components/ChatMedia";
 import { readLocalMediaSize, releaseLocalMedia } from "../lib/messageMedia";
 import { availableChatActions } from "../lib/chatQuickActions";
@@ -113,7 +115,7 @@ import { createNoiseReducedAudioCapture, preferredAudioMimeType, readMicrophoneP
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT, type ChatListUpdatedDetail } from "../lib/chatCache";
 import { applyChatPresence } from "../lib/chatPresence";
-import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
+import { CHAT_SYNC_EVENT, newestChatActivity, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { AUDIO_MIN_SIZE, resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
@@ -1556,6 +1558,10 @@ function renderMessageContent(
     );
   }
 
+  if (message.kind === 'voice_call' && message.payload?.call_id) {
+    return <VoiceCallBubble call={message.payload as unknown as VoiceCallRecord} incoming={message.from==='other'}/>;
+  }
+
   if (message.kind === "submission_invite") {
     const invitation = message.payload?.invitation;
     if (!invitation) {
@@ -1687,7 +1693,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 }: MessageBubbleRowProps) {
   const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
-  const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
+  const canOpenActions = !['submission_invite','voice_call'].includes(message.kind) && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -4916,7 +4922,7 @@ function LiveChatsPage({
       });
 
       const currentChatIncoming = selectedChat ? grouped.get(selectedChat.id) : undefined;
-      const shouldRevealCurrentChat = Boolean(currentChatIncoming?.length) && isNearThreadBottom(messageScrollRef.current, 120);
+      const shouldRevealCurrentChat = Boolean(currentChatIncoming?.some(item=>!item.updated)) && isNearThreadBottom(messageScrollRef.current, 120);
       if (selectedChat && shouldRevealCurrentChat) {
         stickToBottomRef.current = true;
       }
@@ -4946,7 +4952,7 @@ function LiveChatsPage({
             const incoming = grouped.get(chat.id);
             const readState = chatStates.get(chat.id);
             if (!incoming?.length && !readState) return chat;
-            const newest = incoming?.[incoming.length - 1]?.message;
+            const newest = newestChatActivity(incoming??[],chat.lastActivity);
             return {
               ...chat,
               ...(newest ? {
@@ -4968,7 +4974,7 @@ function LiveChatsPage({
       const selectedIncoming = grouped.get(selectedChat.id);
       if (!selectedIncoming?.length) return;
 
-      if (selectedIncoming.some((item) => item.message.from === "other")) {
+      if (selectedIncoming.some((item) => !item.updated&&item.message.from === "other")) {
         void api.markChatRead(selectedChat.id).then(() => {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
@@ -7676,6 +7682,7 @@ function LiveChatsPage({
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
                   : !messageSelectionMode ? <div className="conversation-header-actions">
+                    {voiceCallsEnabled && displayedChat.type==='direct' && (!displayedChat.purpose || displayedChat.purpose==='normal') ? <button type="button" className="icon-button" aria-label={t('voice.title')} onClick={()=>openVoiceCall(displayedChat.id)}><span className="material-symbols-outlined" aria-hidden="true">call</span></button>:null}
                     {quickActionsHeaderButton}
                     <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>

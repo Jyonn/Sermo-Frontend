@@ -4,7 +4,7 @@ import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { preserveStableMediaUri } from "../lib/chatMessageReconciliation";
-import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
+import { emitChatSync, newestChatActivity, type SyncedChatMessageItem } from "../lib/chatSync";
 import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
@@ -452,7 +452,7 @@ export function GlobalMessageSync() {
             rows.slice(0, MESSAGE_CACHE_PAGE_SIZE).map((message) => mapChatMessageDTO(message, session.user.user_id)),
           );
           const snapshot = {
-            messages: mergeMessages([], latestWindowCandidates(existingThread.messages, latest)),
+            messages: mergeMessages([], latestWindowCandidates(mergeMessages(existingThread.messages, grouped.get(chatId)??[]), latest)),
             hasOlderMessages: rows.length > MESSAGE_CACHE_PAGE_SIZE,
             hasNewerMessages: false,
             scrollTop: existingThread.scrollTop,
@@ -488,8 +488,7 @@ export function GlobalMessageSync() {
           const incoming = grouped.get(chat.id);
           const readState = chatStates.get(chat.id);
           if (!incoming?.length && !readState) return chat;
-          const ordinaryIncoming = incoming?.filter((message) => message.kind !== "system") ?? [];
-          const newest = ordinaryIncoming[ordinaryIncoming.length - 1];
+          const newest = newestChatActivity(items.filter(item=>item.chatId===chat.id), chat.lastActivity);
           return {
             ...chat,
             ...(newest ? {
@@ -582,10 +581,13 @@ export function GlobalMessageSync() {
           }
           const response = await api.getMessageEventsSync({ after: cursor, limit: SYNC_LIMIT });
           const normalizedItems = normalizeSyncItems(
-            response.events.filter((event) => (event.type === "message.created" || event.type === "message.restored") && event.message).map((event) => ({ chat_id: event.chat_id, message: event.message })),
+            response.events.filter((event) => (event.type === "message.created" || event.type === "message.restored" || event.type === "message.updated") && event.message).map((event) => ({ chat_id: event.chat_id, message: event.message })),
             session.user.user_id,
             activeChatId
           );
+          const createdIds=new Set(response.events.filter(event=>event.type==='message.created'||event.type==='message.restored').map(event=>event.message_id));
+          const updatedIds=new Set(response.events.filter(event=>event.type==='message.updated'&&!createdIds.has(event.message_id)).map(event=>event.message_id));
+          normalizedItems.forEach(item=>{if(updatedIds.has(Number(item.message.id)))item.updated=true});
           const removed = response.events
             .filter((event) => event.type === "message.hidden" || event.type === "message.recalled")
             .map((event) => ({ chatId: event.chat_id, messageId: event.message_id }));
@@ -631,7 +633,7 @@ export function GlobalMessageSync() {
         emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved, chatStates: [...allChatStates.values()] });
 
         const otherChatItems = allItems.filter((item) => {
-          if (item.chatId === activeChatId || item.message.from !== "other" || item.message.kind === "system") return false;
+          if (item.chatId === activeChatId || item.message.from !== "other" || item.message.kind === "system" || item.message.kind === "voice_call") return false;
           const readState = allChatStates.get(item.chatId);
           if (!readState || readState.unread_count <= 0) return false;
           return readState.last_read_at === null || item.message.createdAt > readState.last_read_at;
