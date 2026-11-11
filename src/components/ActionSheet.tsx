@@ -16,7 +16,7 @@ export interface SheetAction {
   onSelect: () => void | Promise<void>;
 }
 
-export function ActionSheet({ open, title, description, actions, onClose, compactHeader=false, headerAccessory }: { open: boolean; title: string; description?: string; actions: SheetAction[]; onClose: () => void; compactHeader?: boolean; headerAccessory?: ReactNode }) {
+export function ActionSheet({ open, title, description, actions, onClose, compactHeader=false, headerAccessory, showHeader=true, closeOnSelect=true, className='' }: { open: boolean; title: string; description?: string; actions: SheetAction[]; onClose: () => void; compactHeader?: boolean; headerAccessory?: ReactNode; showHeader?: boolean; closeOnSelect?: boolean; className?: string }) {
   const { t } = useI18n();
   const titleId = useId();
   const root = useRef<HTMLElement | null>(null);
@@ -30,13 +30,13 @@ export function ActionSheet({ open, title, description, actions, onClose, compac
   async function select(action: SheetAction) {
     if (running.current || action.disabled) return;
     running.current = true; setBusy(action.key); setError(false);
-    try { await action.onSelect(); onClose(); }
+    try { await action.onSelect(); if(closeOnSelect)onClose(); }
     catch { setError(true); }
     finally { running.current = false; setBusy(null); }
   }
   return createPortal(<div className="pattern-backdrop" onClick={() => { if (!running.current) onClose(); }} role="presentation">
-    <section className={`action-sheet${compactHeader?' has-compact-header':''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={root} onClick={(event) => event.stopPropagation()}>
-      <div className="action-sheet-group"><header><h2 id={titleId}>{title}</h2>{description ? <p>{description}</p> : null}{headerAccessory}</header>
+    <section className={`action-sheet${compactHeader?' has-compact-header':''}${showHeader?'':' has-no-header'} ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={root} onClick={(event) => event.stopPropagation()}>
+      <div className="action-sheet-group"><header hidden={!showHeader}><h2 id={titleId}>{title}</h2>{description ? <p>{description}</p> : null}{headerAccessory}</header>
         {actions.map((action) => <button key={action.key} className={action.danger ? "is-danger" : ""} disabled={Boolean(busy) || action.disabled} onClick={() => void select(action)} type="button">
           {action.icon ? <span className="action-sheet-icon" aria-hidden="true">{action.icon}</span> : null}<span><strong>{action.label}</strong>{action.description ? <small>{action.description}</small> : null}</span>{busy === action.key ? <span className="media-wait-spinner" aria-hidden="true" /> : null}
         </button>)}

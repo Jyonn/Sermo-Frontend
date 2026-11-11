@@ -1,25 +1,23 @@
 {
-  "id": "2026.11.11.4",
+  "id": "2026.11.11.5",
   "publishedAt": "2026-11-11",
   "locales": {
     "zh-CN": {
       "title": "前台语音通话",
       "items": [
-        "VIP 语音通话支持全屏和折叠，聊天中保留通话记录。",
-        "双方共用各自每周五分钟额度，拨打前检查可用时长。",
-        "通话提示改用模态框和 Toast，个性化聊天预览新增通话气泡。",
-        "折叠按钮移至右上角，移除通话页 VIP 标签，加宽通话气泡。",
-        "私聊更多操作新增语音通话，也可将其加入聊天快捷操作。"
+        "语音通话支持全屏与折叠，聊天中保留加宽的通话记录气泡。",
+        "私聊的更多操作与可配置快捷操作均可发起通话。",
+        "拨打菜单仅保留语音通话和取消，额度与权限异常使用简洁提示。",
+        "VIP 双方各有每周五分钟额度，拨打前检查双方可用时长。"
       ]
     },
     "en": {
       "title": "Foreground voice calls",
       "items": [
-        "VIP voice calls support full-screen and minimized views, with a call record in chat.",
-        "Calls check both participants’ weekly five-minute allowances before dialing.",
-        "Call prompts use dialogs and Toast, with call bubbles included in chat appearance previews.",
-        "Move the minimize control to the top right, remove the call-screen VIP label, and widen call bubbles.",
-        "Start voice calls from direct-chat More actions or add them to your chat shortcuts."
+        "Voice calls support full-screen and minimized views, with wider call-record bubbles in chat.",
+        "Start calls from direct-chat More actions or configurable chat shortcuts.",
+        "The call menu offers only Voice call and Cancel, with concise allowance and permission feedback.",
+        "Both VIP participants receive five minutes per week, checked before dialing."
       ]
     }
   }

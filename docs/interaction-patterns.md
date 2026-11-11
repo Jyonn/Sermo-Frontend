@@ -45,7 +45,7 @@ The remaining family chart patterns map to existing architecture: Modal/Popconfi
 
 ### Foreground voice calls
 
-The real direct-chat header opens the shared `VoiceCallPrompt` (`ConfirmDialog`): participant and maximum duration, then explicit Dial. VIP, weekly-allowance and microphone-permission decisions use the same modal with a concise reason; busy, expired, unavailable and network failures use the shared `AppToast`. Repeated network failures are deduplicated. No call hint uses BottomSheet. The call itself remains a full-screen, collapsible `VoiceCallScreen`.
+The real direct-chat header opens the shared `VoiceCallPrompt`: a headerless `ActionSheet` containing only Voice call and a separate Cancel button. There is no participant summary or duration description. Async dialing is owned by the call controller, so the sheet does not automatically close or invalidate a pending call. Other action sheets retain automatic closing by default. VIP, weekly-allowance and microphone-permission decisions use `ConfirmDialog` with a concise reason; busy, expired, unavailable and network failures use the shared `AppToast`. Repeated network failures are deduplicated. The call itself remains a full-screen, collapsible `VoiceCallScreen`.
 
 Direct chats also expose Call in composer More actions and as an optional, sortable chat shortcut (Menu → Language & personalization → Chat shortcuts → Direct chats). All entries use the same handler and close the invoking controls before presenting the call prompt. Existing shortcut choices remain unchanged; group and submission conversations do not expose Call. Focused action tests pass; the existing composer test for pinned-message source text still fails on the unchanged HEAD baseline.
 

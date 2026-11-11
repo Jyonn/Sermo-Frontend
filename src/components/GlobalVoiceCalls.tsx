@@ -202,6 +202,6 @@ export function GlobalVoiceCalls() {
   };
   return <><div ref={audio} hidden/>
     {call?<VoiceCallScreen call={call} incoming={call.callee_id===userId} folded={folded} muted={muted} busy={busy} elapsed={Math.min(elapsed,call.max_seconds)} remaining={remaining} reconnecting={reconnecting} playbackBlocked={playbackBlocked} onFold={setFolded} onMute={toggleMute} onAnswer={()=>void answer()} onEnd={()=>void finish()} onDismiss={()=>{snapshot.current=null;setCall(null);setError('')}} onPlayback={()=>void room.current?.startAudio().then(()=>setPlaybackBlocked(false))}/>:null}
-    <VoiceCallPrompt open={preflight||Boolean(error)} cap={preflight?cap:null} error={error} busy={busy} onClose={()=>{if(!busy){generation.current++;setPreflight(false);setError('')}}} onConfirm={()=>void start()}/>
+    <VoiceCallPrompt open={preflight||Boolean(error)} cap={preflight?cap:null} error={error} busy={busy} onClose={()=>{if(!busy){generation.current++;setPreflight(false);setError('')}}} onConfirm={start}/>
   </>;
 }
