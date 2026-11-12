@@ -2,7 +2,7 @@ export const DEFAULT_CHAT_ACTIONS = ["locked", "calendar", "copy", "status"] as 
 export const CHAT_ACTION_OPTIONS = [...DEFAULT_CHAT_ACTIONS, "search", "call"] as const;
 export type ChatQuickAction = typeof CHAT_ACTION_OPTIONS[number];
 export type ChatActionKind = "direct" | "group";
-export const CHAT_ACTIONS_BY_KIND: Record<ChatActionKind, readonly ChatQuickAction[]> = { direct: ["locked", "calendar", "search", "call"], group: ["locked", "copy", "status", "search"] };
+export const CHAT_ACTIONS_BY_KIND: Record<ChatActionKind, readonly ChatQuickAction[]> = { direct: ["locked", "calendar", "search", "call"], group: ["locked", "copy", "status", "search", "call"] };
 export function actionsForKind(value: unknown, kind: ChatActionKind): ChatQuickAction[] {
   const source = Array.isArray(value) ? value : (value as Partial<Record<ChatActionKind, unknown>> | null)?.[kind];
   const allowed = CHAT_ACTIONS_BY_KIND[kind];
