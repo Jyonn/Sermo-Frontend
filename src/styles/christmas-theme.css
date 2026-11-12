@@ -13,6 +13,8 @@ html[data-site-theme="christmas-2026"] {
   --brand-primary-press: #7e2630;
   --christmas-snow: #fffdf5;
   --christmas-lights: #a27338;
+  --christmas-village: url("/themes/christmas-2026/village.webp");
+  --christmas-tree: url("/themes/christmas-2026/tree.webp");
 }
 
 html[data-site-theme="christmas-2026"][data-theme="dark"] {
@@ -48,4 +50,24 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header, .drawer-
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
+}
+
+html[data-site-theme="christmas-2026"] .festival-theme-mark {
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 36px;
+  background: var(--christmas-tree) center / contain no-repeat;
+}
+
+.christmas-village { display: none; }
+
+html[data-site-theme="christmas-2026"] .christmas-village {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2.15;
+  min-height: 150px;
+  max-height: 330px;
+  border-radius: 16px;
+  background: var(--christmas-village) center 47% / cover no-repeat;
 }
