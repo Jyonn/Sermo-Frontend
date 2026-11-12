@@ -2106,7 +2106,6 @@ export default function MenuPage() {
             </button>
           ) : null}
         />
-        {spaceFeatures.siteTheme === "christmas-2026" && <div className="christmas-village" aria-hidden="true" />}
         {spaceFeatures.annualRecapAvailable && session && (
           <>
             <button className="simple-row menu-link-row" onClick={() => setAnnualRecapOpen(true)} type="button">

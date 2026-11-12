@@ -13,8 +13,9 @@ html[data-site-theme="christmas-2026"] {
   --brand-primary-press: #7e2630;
   --christmas-snow: #fffdf5;
   --christmas-lights: #a27338;
-  --christmas-village: url("/themes/christmas-2026/village.webp");
   --christmas-tree: url("/themes/christmas-2026/tree.webp");
+  --christmas-garland: url("/themes/christmas-2026/garland.svg");
+  --christmas-sleigh: url("/themes/christmas-2026/sleigh.svg");
 }
 
 html[data-site-theme="christmas-2026"][data-theme="dark"] {
@@ -47,6 +48,13 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header, .drawer-
   border-bottom-color: color-mix(in srgb, var(--christmas-lights) 55%, var(--line-soft));
 }
 
+html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header) {
+  background-image: var(--christmas-garland);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 64px 8px;
+}
+
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
@@ -60,14 +68,37 @@ html[data-site-theme="christmas-2026"] .festival-theme-mark {
   background: var(--christmas-tree) center / contain no-repeat;
 }
 
-.christmas-village { display: none; }
+.christmas-title-sleigh { display: none; }
 
-html[data-site-theme="christmas-2026"] .christmas-village {
+html[data-site-theme="christmas-2026"] .christmas-title-sleigh {
   display: block;
-  width: 100%;
-  aspect-ratio: 2.15;
-  min-height: 150px;
-  max-height: 330px;
-  border-radius: 16px;
-  background: var(--christmas-village) center 47% / cover no-repeat;
+  flex: 0 1 64px;
+  width: clamp(38px, 13vw, 64px);
+  height: 23px;
+  align-self: center;
+  background: var(--christmas-sleigh) center / contain no-repeat;
+  pointer-events: none;
+  animation: christmas-sleigh-glide 5s ease-in-out infinite;
+}
+
+html[data-site-theme="christmas-2026"] .page-head:has(.christmas-title-sleigh) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .action-sheet, .dialog-backdrop > [aria-modal="true"]) {
+  background-image: var(--christmas-garland);
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-size: 72px 9px;
+}
+
+@keyframes christmas-sleigh-glide {
+  0%, 100% { transform: translate(-2px, 1px); }
+  50% { transform: translate(3px, -2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-site-theme="christmas-2026"] .christmas-title-sleigh { animation: none; }
 }

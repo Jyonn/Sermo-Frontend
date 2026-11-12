@@ -293,7 +293,7 @@ export function AppBottomNav() {
                 <UnreadIndicator count={totalUnread} />
               ) : null}
               {route.key === "square" ? <UnreadIndicator count={squareUnread} fresh={squareHasFreshContent} /> : null}
-              {route.key === 'menu' ? <UpdateAvailableDot fresh={callShortcutNew} label={t('voice.title')}/> : null}
+              {route.key === 'menu' ? <UpdateAvailableDot navigation fresh={callShortcutNew} label={t('voice.title')}/> : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
                 <UnreadIndicator count={incomingRequestCount} />
               ) : null}

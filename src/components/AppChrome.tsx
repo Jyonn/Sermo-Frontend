@@ -116,6 +116,7 @@ export function AppChrome({
           {!hidePageTitle ? (
             <div className="page-head">
               <p className="topbar-title">{title}</p>
+              <span className="christmas-title-sleigh" aria-hidden="true" />
             </div>
           ) : (
             <div className="page-head page-head-collapsed" />

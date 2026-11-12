@@ -7272,7 +7272,6 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   z-index: 260;
 }
 .update-available-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#ef4b56; flex-shrink:0; }
-.nav-button-icon-wrap>.update-available-dot { position:absolute; top:0; right:-2px; }
 .menu-update-label { display:inline-flex; align-items:center; gap:7px; }
 .update-check-dialog.is-compact { width:min(400px,100%); border-radius:18px; }
 .is-compact .update-check-header { grid-template-columns:minmax(0,1fr) 32px; gap:10px; padding:18px 18px 12px; border:0; }
