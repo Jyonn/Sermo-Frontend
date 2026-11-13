@@ -57,23 +57,22 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header) {
 
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) {
   --christmas-chat-ink: #fff5dc;
-  --christmas-chat-bow-width: clamp(36px, 9vw, 70px);
+  --christmas-chat-corner-width: clamp(112px, 29vw, 202px);
   color: var(--christmas-chat-ink);
   border-bottom-color: #806741;
   background-color: #112d20;
   background-image:
-    url("/themes/christmas-2026/conversation-bow.webp"),
-    url("/themes/christmas-2026/conversation-garland.webp"),
-    url("/themes/christmas-2026/conversation-garland.webp"),
+    url("/themes/christmas-2026/conversation-corner.webp"),
+    url("/themes/christmas-2026/conversation-lights.webp"),
     linear-gradient(90deg, rgb(8 28 19 / 32%), transparent 75%),
     url("/themes/christmas-2026/conversation-velvet.webp");
-  background-position: right 104px top 2px, left top, left 34px bottom -10px, center, center;
-  background-size: var(--christmas-chat-bow-width) auto, auto 18px, auto 16px, 100% 100%, 300px auto;
-  background-repeat: no-repeat, repeat-x, repeat-x, no-repeat, repeat;
+  background-position: right 58px top, left bottom, center, center;
+  background-size: var(--christmas-chat-corner-width) auto, auto 19px, 100% 100%, 300px auto;
+  background-repeat: no-repeat, repeat-x, no-repeat, repeat;
 }
 
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header):has(.chat-conversation-topbar) .chat-topbar-meta {
-  margin-inline-end: var(--christmas-chat-bow-width);
+  margin-inline-end: clamp(44px, 13vw, 104px);
 }
 
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)
@@ -94,7 +93,7 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
 
 @media (max-width: 360px) {
   html[data-site-theme="christmas-2026"] .topbar.conversation-topbar {
-    --christmas-chat-bow-width: 0px;
+    --christmas-chat-corner-width: 94px;
   }
 }
 
