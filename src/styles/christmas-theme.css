@@ -135,9 +135,9 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobi
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet {
   background:
-    url("/themes/christmas-2026/conversation-hanging-fir.webp") left -25px bottom / 62px auto no-repeat,
-    url("/themes/christmas-2026/conversation-edge-fir.webp") right -22px bottom / 60px auto no-repeat,
-    url("/themes/christmas-2026/composer-snow.svg") left bottom / 188px 8px repeat-x,
+    url("/themes/christmas-2026/conversation-hanging-fir.webp") left -29px bottom -16px / clamp(80px, 20vw, 102px) auto no-repeat,
+    url("/themes/christmas-2026/conversation-edge-fir.webp") right -27px bottom -16px / clamp(78px, 20vw, 100px) auto no-repeat,
+    url("/themes/christmas-2026/composer-snow.webp") left bottom / auto 12px repeat-x,
     #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
 }
 
