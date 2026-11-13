@@ -1769,6 +1769,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
+            message.kind === "text" ? "is-text-message" : "",
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.kind === "audio" ? "is-audio" : "",
             message.kind === 'voice_call' ? 'is-voice-call' : '',

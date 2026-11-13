@@ -238,6 +238,24 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-
   padding: 0 30px 20px;
 }
 
+html[data-site-theme="christmas-2026"] .chat-detail-scene .message-group.bubble-style-default .message-bubble.is-text-message:not(.is-link-preview, .has-reply) {
+  border: 1px solid #c49965;
+  border-radius: 17px 17px 17px 6px;
+  color: #43271f;
+  background: radial-gradient(ellipse at 20% 0%, #fff9ed, #f5e5cb);
+  box-shadow: inset 0 0 0 2px #fff8e9a6, 0 2px 5px #50321b26;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-scene .message-group.bubble-style-default .message-bubble.is-text-message.self:not(.is-link-preview, .has-reply) {
+  border-color: #eac68c;
+  border-radius: 17px 17px 6px 17px;
+  color: #fff7e8;
+  background:
+    radial-gradient(ellipse at 28% 0%, #ad253aeF, #720a20f8),
+    url("/themes/christmas-2026/conversation-velvet.webp") center / 220px auto;
+  box-shadow: inset 0 0 0 3px #6b0b20, inset 0 0 0 4px #cf59665c, 0 3px 6px #57241942;
+}
+
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
