@@ -57,7 +57,8 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header) {
 
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) {
   --christmas-chat-ink: #fff5dc;
-  --christmas-chat-corner-width: clamp(112px, 29vw, 202px);
+  --christmas-chat-corner-width: clamp(108px, 34vw, 204px);
+  --christmas-chat-corner-inset: 114px;
   color: var(--christmas-chat-ink);
   border-bottom-color: #806741;
   background-color: #112d20;
@@ -66,13 +67,17 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
     url("/themes/christmas-2026/conversation-lights.webp"),
     linear-gradient(90deg, rgb(8 28 19 / 32%), transparent 75%),
     url("/themes/christmas-2026/conversation-velvet.webp");
-  background-position: right 58px top, left bottom, center, center;
-  background-size: var(--christmas-chat-corner-width) auto, auto 19px, 100% 100%, 300px auto;
+  background-position: right var(--christmas-chat-corner-inset) top, left bottom, center, center;
+  background-size: var(--christmas-chat-corner-width) auto, auto 20px, 100% 100%, 300px auto;
   background-repeat: no-repeat, repeat-x, no-repeat, repeat;
 }
 
+html[data-site-theme="christmas-2026"] .topbar.conversation-topbar {
+  --christmas-chat-corner-inset: 70px;
+}
+
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header):has(.chat-conversation-topbar) .chat-topbar-meta {
-  margin-inline-end: clamp(44px, 13vw, 104px);
+  margin-inline-end: clamp(48px, 17vw, 116px);
 }
 
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)
