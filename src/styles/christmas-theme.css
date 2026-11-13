@@ -126,6 +126,68 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
   }
 }
 
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk) {
+  --chat-chrome-border: #b29561;
+  --chat-input-surface: #fbefd9;
+  border-top: 1px solid #ad8b52;
+  background: #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap {
+  border: 1px solid #c3a46c;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fff8e9, #f8e9cf);
+  box-shadow: inset 0 0 0 2px #fff4df, 0 2px 5px #081c1366;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap:focus-within {
+  outline: 2px solid #ebca84;
+  outline-offset: 2px;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-tool-row, .desktop-writing-desk-tools) button,
+html[data-site-theme="christmas-2026"] .chat-detail-active .desktop-writing-desk-shortcut {
+  color: #fff2d5;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-tool-row, .desktop-writing-desk-tools) button:is(:hover, :focus-visible, .is-active) {
+  color: #fff2d5;
+  background: #ffffff24;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-input-wrap, .desktop-writing-desk-input) .composer-rich-input {
+  color: #38281e;
+  caret-color: #8b2731;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-input-wrap, .desktop-writing-desk-input) .composer-rich-input::before {
+  color: #6d5747;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .composer-more-actions {
+  border: 1px solid #c3a46c;
+  border-radius: 16px;
+  background: #fbefd9;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .composer-more-actions button {
+  color: #493128;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .composer-more-actions button > span {
+  color: #842f35;
+  background: #f0dcc0;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .desktop-writing-desk-input {
+  margin-block-start: 8px;
+  padding-inline: 14px;
+  border: 1px solid #c3a46c;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #fff8e9, #f8e9cf);
+  box-shadow: inset 0 0 0 2px #fff4df;
+}
+
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
