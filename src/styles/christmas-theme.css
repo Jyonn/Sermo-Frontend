@@ -55,6 +55,49 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header) {
   background-size: 64px 8px;
 }
 
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) {
+  --christmas-chat-ink: #fff5dc;
+  --christmas-chat-bow-width: clamp(36px, 9vw, 70px);
+  color: var(--christmas-chat-ink);
+  border-bottom-color: #806741;
+  background-color: #112d20;
+  background-image:
+    url("/themes/christmas-2026/conversation-bow.webp"),
+    url("/themes/christmas-2026/conversation-garland.webp"),
+    url("/themes/christmas-2026/conversation-garland.webp"),
+    linear-gradient(90deg, rgb(8 28 19 / 32%), transparent 75%),
+    url("/themes/christmas-2026/conversation-velvet.webp");
+  background-position: right 104px top 2px, left top, left 34px bottom -10px, center, center;
+  background-size: var(--christmas-chat-bow-width) auto, auto 18px, auto 16px, 100% 100%, 300px auto;
+  background-repeat: no-repeat, repeat-x, repeat-x, no-repeat, repeat;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header):has(.chat-conversation-topbar) .chat-topbar-meta {
+  margin-inline-end: var(--christmas-chat-bow-width);
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)
+  :is(.chat-topbar-name, .chat-topbar-status, .chat-back-button) {
+  color: var(--christmas-chat-ink);
+  text-shadow: 0 1px 3px #081c13;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) .chat-details-button {
+  color: #44221c;
+  border-color: #d6bb89;
+  background: #faedd4;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) .chat-details-button:is(:hover, :focus-visible) {
+  background: #fff7e7;
+}
+
+@media (max-width: 360px) {
+  html[data-site-theme="christmas-2026"] .topbar.conversation-topbar {
+    --christmas-chat-bow-width: 0px;
+  }
+}
+
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
@@ -66,6 +109,10 @@ html[data-site-theme="christmas-2026"] .festival-theme-mark {
   width: 32px;
   height: 36px;
   background: var(--christmas-tree) center / contain no-repeat;
+}
+
+html[data-site-theme="christmas-2026"] .conversation-topbar .festival-theme-mark {
+  display: none;
 }
 
 .christmas-title-sleigh { display: none; }
