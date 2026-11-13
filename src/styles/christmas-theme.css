@@ -128,8 +128,8 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk) {
   --christmas-composer-fir-size: 154px;
-  --christmas-composer-fir-overhang: 28px;
   isolation: isolate;
+  overflow: visible;
   position: relative;
   --chat-chrome-border: #b29561;
   --chat-input-surface: #fbefd9;
@@ -139,13 +139,13 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobi
     #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk)::before,
+html[data-site-theme="christmas-2026"] .chat-detail-active .chat-detail-scene:has(> .composer:is(.is-mobile-quiet, .is-desktop-writing-desk))::after,
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk)::after {
   position: absolute;
   left: 0;
   bottom: 0;
   z-index: -1;
-  width: calc(var(--christmas-composer-fir-size) - var(--christmas-composer-fir-overhang));
+  width: var(--christmas-composer-fir-size);
   height: var(--christmas-composer-fir-size);
   content: "";
   pointer-events: none;
@@ -160,16 +160,6 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobi
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet .mobile-quiet-tool-row {
   padding-inline: clamp(8px, calc((100vw - 320px) / 4), 48px);
-}
-
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet {
-  --christmas-composer-fir-overhang: 24px;
-  overflow: visible;
-}
-
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet::before,
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet::after {
-  clip-path: polygon(0 0, 72% 0, 72% 36%, 47% 36%, 47% 100%, 0 100%);
 }
 
 html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap {
@@ -228,7 +218,6 @@ html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .deskto
 }
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-writing-desk {
-  --christmas-composer-fir-overhang: 20px;
   padding: 0 30px 20px;
 }
 
