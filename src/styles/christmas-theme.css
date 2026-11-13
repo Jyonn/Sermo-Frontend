@@ -238,22 +238,23 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-
   padding: 0 30px 20px;
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-scene .message-group.bubble-style-default .message-bubble.is-text-message:not(.is-link-preview, .has-reply) {
-  border: 1px solid #c49965;
-  border-radius: 17px 17px 17px 6px;
-  color: #43271f;
-  background: radial-gradient(ellipse at 20% 0%, #fff9ed, #f5e5cb);
-  box-shadow: inset 0 0 0 2px #fff8e9a6, 0 2px 5px #50321b26;
+html[data-site-theme="christmas-2026"] .chat-detail-scene.chat-background-default > .message-scroll {
+  --christmas-chat-wash: rgb(251 237 214 / 80%);
+  --christmas-chat-paper: #faecd6;
+  background:
+    url("/themes/christmas-2026/shop-window.webp") left 14% / auto clamp(104px, 41%, 295px) no-repeat,
+    url("/themes/christmas-2026/hanging-pine.webp") right 12% / clamp(42px, 12%, 118px) auto no-repeat,
+    url("/themes/christmas-2026/reader-gifts.webp") left bottom / clamp(105px, 27%, 230px) auto no-repeat,
+    url("/themes/christmas-2026/lantern-corner.webp") right bottom / clamp(60px, 16%, 158px) auto no-repeat,
+    linear-gradient(var(--christmas-chat-wash), var(--christmas-chat-wash)),
+    url("/themes/christmas-2026/paper-forest-watercolor.webp") left 30% / min(55%, 440px) auto no-repeat,
+    url("/themes/christmas-2026/paper-forest-watercolor.webp") right 76% / min(62%, 510px) auto no-repeat,
+    var(--christmas-chat-paper);
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-scene .message-group.bubble-style-default .message-bubble.is-text-message.self:not(.is-link-preview, .has-reply) {
-  border-color: #eac68c;
-  border-radius: 17px 17px 6px 17px;
-  color: #fff7e8;
-  background:
-    radial-gradient(ellipse at 28% 0%, #ad253aeF, #720a20f8),
-    url("/themes/christmas-2026/conversation-velvet.webp") center / 220px auto;
-  box-shadow: inset 0 0 0 3px #6b0b20, inset 0 0 0 4px #cf59665c, 0 3px 6px #57241942;
+html[data-site-theme="christmas-2026"][data-theme="dark"] .chat-detail-scene.chat-background-default > .message-scroll {
+  --christmas-chat-wash: rgb(18 40 30 / 90%);
+  --christmas-chat-paper: #18362a;
 }
 
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
