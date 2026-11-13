@@ -59,17 +59,32 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
   --christmas-chat-ink: #fff5dc;
   --christmas-chat-corner-width: clamp(108px, 34vw, 204px);
   --christmas-chat-corner-inset: 114px;
+  overflow: visible;
   color: var(--christmas-chat-ink);
   border-bottom-color: #806741;
   background-color: #112d20;
   background-image:
     url("/themes/christmas-2026/conversation-corner.webp"),
-    url("/themes/christmas-2026/conversation-lights.webp"),
+    url("/themes/christmas-2026/conversation-edge-fir.webp"),
     linear-gradient(90deg, rgb(8 28 19 / 32%), transparent 75%),
     url("/themes/christmas-2026/conversation-velvet.webp");
-  background-position: right var(--christmas-chat-corner-inset) top, left bottom, center, center;
-  background-size: var(--christmas-chat-corner-width) auto, auto 20px, 100% 100%, 300px auto;
-  background-repeat: no-repeat, repeat-x, no-repeat, repeat;
+  background-position: right var(--christmas-chat-corner-inset) top, right top, center, center;
+  background-size: var(--christmas-chat-corner-width) auto, calc(var(--christmas-chat-corner-inset) + 45px) 17px, 100% 100%, 300px auto;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)::after {
+  position: absolute;
+  inset: auto 0 -8px;
+  z-index: 1;
+  height: 20px;
+  content: "";
+  pointer-events: none;
+  background: url("/themes/christmas-2026/conversation-lights.webp") left bottom / auto 100% repeat-x;
+}
+
+html[data-site-theme="christmas-2026"] .desktop-conversation-header {
+  z-index: 2;
 }
 
 html[data-site-theme="christmas-2026"] .topbar.conversation-topbar {
