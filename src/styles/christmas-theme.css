@@ -133,6 +133,14 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobi
   background: #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
 }
 
+html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-mobile-quiet {
+  background:
+    url("/themes/christmas-2026/conversation-hanging-fir.webp") left -25px bottom / 62px auto no-repeat,
+    url("/themes/christmas-2026/conversation-edge-fir.webp") right -22px bottom / 60px auto no-repeat,
+    url("/themes/christmas-2026/composer-snow.svg") left bottom / 188px 8px repeat-x,
+    #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
+}
+
 html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap {
   border: 1px solid #c3a46c;
   border-radius: 16px;
@@ -186,6 +194,17 @@ html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .deskto
   border-radius: 12px;
   background: linear-gradient(160deg, #fff8e9, #f8e9cf);
   box-shadow: inset 0 0 0 2px #fff4df;
+}
+
+html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .desktop-writing-desk-input::after {
+  position: absolute;
+  right: -14px;
+  bottom: -7px;
+  width: 54px;
+  height: 13px;
+  content: "";
+  pointer-events: none;
+  background: url("/themes/christmas-2026/conversation-edge-fir.webp") right bottom / contain no-repeat;
 }
 
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
