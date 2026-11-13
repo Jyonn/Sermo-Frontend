@@ -1,11 +1,11 @@
 {
-  "id": "2026.11.13.45",
+  "id": "2026.11.13.46",
   "publishedAt": "2026-11-13",
   "locales": {
     "zh-CN": {
       "title": "年末来信",
       "items": [
-        "圣诞聊天的折叠和展开输入栏都添上起伏的积雪，两侧松枝从角落探出。",
+        "展开的圣诞聊天输入栏两侧添上更饱满的松枝。",
         "空间开启年度回顾后，可在菜单里拆开年末来信，回看这一年的聊天点滴。",
         "普通群聊支持主动加入多人语音，永久 VIP 的私聊与群聊共享每周 30 分钟，群聊按个人参会时长扣除额度。",
         "群聊也可以在聊天快捷操作里添加通话按钮。",
@@ -15,7 +15,7 @@
     "en": {
       "title": "A year-end letter",
       "items": [
-        "Uneven snow drifts and snowy fir frame both Christmas chat composer layouts.",
+        "Fuller fir sprigs frame the expanded Christmas chat composer.",
         "Once your space opens its annual recap, open your year-end letter from the menu and revisit a year of conversations.",
         "Join group voice calls from chat. Permanent VIPs share 30 minutes a week across direct and group calls, with group time counted per person.",
         "Add Call to your group chat shortcuts.",

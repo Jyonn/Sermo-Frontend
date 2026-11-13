@@ -204,12 +204,13 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-writing-desk::after {
   position: absolute;
   inset: auto 0 0;
-  height: 20px;
+  height: 62px;
   content: "";
+  clip-path: polygon(0 0, 20px 0, 20px 68%, calc(100% - 20px) 68%, calc(100% - 20px) 0, 100% 0, 100% 100%, 0 100%);
   pointer-events: none;
   background:
-    url("/themes/christmas-2026/conversation-hanging-fir.webp") left -24px bottom -13px / 106px auto no-repeat,
-    url("/themes/christmas-2026/conversation-edge-fir.webp") right -22px bottom -13px / 108px auto no-repeat,
+    url("/themes/christmas-2026/conversation-hanging-fir.webp") left -48px bottom 3px / 112px 54px no-repeat,
+    url("/themes/christmas-2026/conversation-edge-fir.webp") right -52px bottom 2px / 118px 59px no-repeat,
     url("/themes/christmas-2026/composer-snow.webp") left bottom / auto 12px repeat-x;
 }
 
