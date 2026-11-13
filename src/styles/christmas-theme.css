@@ -55,6 +55,59 @@ html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header) {
   background-size: 64px 8px;
 }
 
+html[data-site-theme="christmas-2026"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header, .square-feed-header) {
+  --christmas-tab-ink: #fff5dc;
+  --tab-header-paint:
+    url("/themes/christmas-2026/composer-snow.webp") center bottom / auto 8px repeat-x,
+    var(--christmas-tab-ornament, url("/themes/christmas-2026/conversation-corner.webp")) var(--christmas-tab-ornament-position, 61%) top / auto 43px no-repeat,
+    url("/themes/christmas-2026/tab-top-fir.webp") center top / auto 16px repeat-x,
+    #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
+  color: var(--christmas-tab-ink);
+  border-bottom-color: #b2925b;
+  background: var(--tab-header-paint);
+}
+
+html[data-site-theme="christmas-2026"] body .square-feed-header {
+  --christmas-tab-ornament: none;
+}
+
+html[data-site-theme="christmas-2026"] body .square-feed-header :is(.square-workspace-tab-group > button, .square-feed-user-tab > button:first-child, .square-header-tool, .square-feed-publish) {
+  color: #fff2d6;
+}
+
+html[data-site-theme="christmas-2026"] body .square-feed-header .square-workspace-tab-group > button::after {
+  background: #edbe72;
+}
+
+html[data-site-theme="christmas-2026"] body .menu-tab-shell .tab-header-surface {
+  --christmas-tab-ornament-position: 88%;
+}
+
+html[data-site-theme="christmas-2026"] body .tab-header-surface .menu-header-account-switch {
+  color: #244636;
+  background: #f5e9cc;
+}
+
+html[data-site-theme="christmas-2026"] body .tab-header-surface :is(.panel-title, .page-toolbar-title-status) {
+  color: var(--christmas-tab-ink);
+  text-shadow: 0 1px 3px #082216;
+}
+
+html[data-site-theme="christmas-2026"] body .tab-header-surface .page-toolbar-actions button {
+  color: #452b20;
+  background-color: #faedd4;
+  border-color: #d6bb89;
+}
+
+html[data-site-theme="christmas-2026"] body .tab-header-surface .christmas-title-sleigh {
+  display: none;
+}
+
+html[data-site-theme="christmas-2026"] body .tab-header-surface .tab-sticky-header-secondary {
+  background: var(--bg-panel-strong);
+  color: var(--text-primary);
+}
+
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header) {
   --christmas-chat-ink: #fff5dc;
   --christmas-chat-corner-width: clamp(108px, 34vw, 204px);
@@ -261,6 +314,69 @@ html[data-site-theme="christmas-2026"][data-theme="dark"] .chat-detail-scene.cha
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {
   background-color: var(--bg-panel-strong);
   border-color: var(--line-strong);
+}
+
+html[data-site-theme="christmas-2026"] body .app-mobile-nav {
+  color: #fff2d6;
+  border-color: #aa8851;
+  background:
+    url("/themes/christmas-2026/composer-snow.webp") center bottom / auto 9px repeat-x,
+    #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
+}
+
+html[data-site-theme="christmas-2026"] body .app-mobile-nav :is(.nav-button, .nav-button-icon, .desktop-nav-toggle, .desktop-nav-user) {
+  color: #fff2d6;
+}
+
+html[data-site-theme="christmas-2026"] body .app-mobile-nav .nav-button:hover {
+  background-color: #ffffff1a;
+}
+
+html[data-site-theme="christmas-2026"] body .app-mobile-nav .nav-button.active {
+  color: #fff2d6;
+  border-color: #c8995e;
+  border-radius: 14px;
+  background: linear-gradient(155deg, #a82931, #720c1e);
+}
+
+@media (max-width: 719px) {
+  html[data-site-theme="christmas-2026"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header, .square-feed-header) {
+    background: transparent;
+  }
+
+  html[data-site-theme="christmas-2026"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header, .square-feed-header)::before {
+    opacity: 1;
+    background: var(--tab-header-paint);
+  }
+
+  html[data-site-theme="christmas-2026"] body .app-mobile-nav {
+    background:
+      url("/themes/christmas-2026/tab-top-fir.webp") center top / auto 13px repeat-x,
+      url("/themes/christmas-2026/composer-snow.webp") center bottom / auto 9px repeat-x,
+      #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
+  }
+
+  html[data-site-theme="christmas-2026"] body .app-mobile-nav::before,
+  html[data-site-theme="christmas-2026"] body .app-mobile-nav::after {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: clamp(17px, 5.5vw, 33px);
+    height: 30px;
+    content: "";
+    pointer-events: none;
+    background: url("/themes/christmas-2026/tab-nav-gifts.webp") left bottom / contain no-repeat;
+  }
+
+  html[data-site-theme="christmas-2026"] body .app-mobile-nav::after {
+    left: auto;
+    right: 0;
+    transform: scaleX(-1);
+  }
+
+  html[data-site-theme="christmas-2026"] body .app-mobile-nav .app-nav-routes {
+    padding-block: 7px;
+  }
 }
 
 html[data-site-theme="christmas-2026"] .festival-theme-mark {
