@@ -1,6 +1,6 @@
 {
-  "id": "2026.11.12.4",
-  "publishedAt": "2026-11-12",
+  "id": "2026.11.13.49",
+  "publishedAt": "2026-11-13",
   "locales": {
     "zh-CN": {
       "title": "年末来信",
@@ -9,7 +9,7 @@
         "获授权的空间可换上「平安夜小镇」主题，看看飘雪、圣诞树和送礼物的圣诞老人。",
         "普通群聊支持主动加入多人语音，永久 VIP 的私聊与群聊共享每周 30 分钟，群聊按个人参会时长扣除额度。",
         "群聊也可以在聊天快捷操作里添加通话按钮。",
-        "圣诞装饰融入各页标题和弹层，广场与菜单采用统一的提醒圆点。"
+        "桌面聊天使用折叠输入栏时，切换到其他操作会收起表情包面板。"
       ]
     },
     "en": {
@@ -19,7 +19,7 @@
         "Spaces with access can switch to Christmas Eve, with a snowy village, a decorated tree, and Santa delivering gifts.",
         "Join group voice calls from chat. Permanent VIPs share 30 minutes a week across direct and group calls, with group time counted per person.",
         "Add Call to your group chat shortcuts.",
-        "Christmas details now trim page headers and dialogs, and Square and Menu share the same notification dot."
+        "The sticker picker now closes when switching tools in the compact desktop chat composer."
       ]
     }
   }

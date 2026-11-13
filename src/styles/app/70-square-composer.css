@@ -1944,7 +1944,9 @@ html[data-theme="dark"] .verification-banner-action {
     height: 21px;
     font-size: 21px;
   }
+}
 
+/* Compact composers also appear in desktop conversations. */
   .mobile-composer-reveal {
     display: grid;
     grid-template-rows: 0fr;
@@ -2006,6 +2008,7 @@ html[data-theme="dark"] .verification-banner-action {
     pointer-events: auto;
   }
 
+@media (max-width: 719px) {
   .mobile-composer-options {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
