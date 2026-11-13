@@ -127,10 +127,6 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
 }
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk) {
-  --christmas-composer-fir-size: 154px;
-  isolation: isolate;
-  overflow: visible;
-  position: relative;
   --chat-chrome-border: #b29561;
   --chat-input-surface: #fbefd9;
   border-top: 1px solid #ad8b52;
@@ -139,20 +135,31 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobi
     #112d20 url("/themes/christmas-2026/conversation-velvet.webp") center / 300px auto repeat;
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-active .chat-detail-scene:has(> .composer:is(.is-mobile-quiet, .is-desktop-writing-desk))::after,
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk)::after {
+.christmas-composer-fir {
+  display: none;
+}
+
+html[data-site-theme="christmas-2026"] .chat-detail-scene:has(> form.composer) > .christmas-composer-fir {
+  display: block;
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.christmas-composer-fir::before,
+.christmas-composer-fir::after {
   position: absolute;
   left: 0;
   bottom: 0;
-  z-index: -1;
-  width: var(--christmas-composer-fir-size);
-  height: var(--christmas-composer-fir-size);
+  width: 154px;
+  height: 154px;
   content: "";
   pointer-events: none;
-  background: url("/themes/christmas-2026/composer-corner-fir.webp") right bottom / var(--christmas-composer-fir-size) auto no-repeat;
+  background: url("/themes/christmas-2026/composer-corner-fir.webp") left bottom / contain no-repeat;
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk)::after {
+.christmas-composer-fir::after {
   right: 0;
   left: auto;
   transform: scaleX(-1);

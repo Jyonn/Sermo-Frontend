@@ -7721,6 +7721,7 @@ function LiveChatsPage({
                 }}
               >
               {narrowComposerLayout || chatBackgroundTheme === "explorer-duality" ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
+              <div className="christmas-composer-fir" aria-hidden="true" />
               {displayedChat ? <ChatQuickActions key={`${currentUserId}:${displayedChat.id}`} open={showQuickActions} loading={quickActionsLoading} actions={effectiveQuickActions} calendar={chatCalendar ? <ChatCalendarAvailability data={chatCalendar} quick /> : undefined} lockedCount={orderedPinnedMessages.length} lockedBy={orderedPinnedMessages[0] ? pinnedByLabel(orderedPinnedMessages[0]) : ""} lockedPreview={orderedPinnedMessages[0] ? pinnedMessagePreview(orderedPinnedMessages[0]) : ""} copyCount={copySuggestions.items.length} copyPreview={copySuggestions.items[0] ? `${copySuggestions.items[0].author} · ${copySuggestions.items[0].content}` : ""} members={displayedChat.detail.members} onSearch={openMessageSearch} onCall={startVoiceCall} onLocked={() => { setPinnedDrawerOpen(true); setQuickActionsExpanded(false); }} onCopy={() => { setGroupCopyOpen(true); setQuickActionsExpanded(false); }} onStatus={() => { setDetailsSheetOpen(true); setQuickActionsExpanded(false); }} /> : null}
               <div
                 ref={messageScrollRef}
