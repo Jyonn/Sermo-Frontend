@@ -73,14 +73,23 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
   background-repeat: no-repeat, no-repeat, no-repeat, repeat;
 }
 
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)::before,
 html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)::after {
   position: absolute;
-  inset: auto 0 -8px;
+  inset: auto 0 0;
   z-index: 1;
   height: 20px;
   content: "";
   pointer-events: none;
   background: url("/themes/christmas-2026/conversation-lights.webp") left bottom / auto 100% repeat-x;
+}
+
+html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop-conversation-header)::before {
+  inset: 100% 0 auto;
+  height: 26px;
+  background:
+    url("/themes/christmas-2026/conversation-hanging-fir.webp") 9% top / 72px auto no-repeat,
+    url("/themes/christmas-2026/conversation-hanging-fir.webp") 77% top / 96px auto no-repeat;
 }
 
 html[data-site-theme="christmas-2026"] .desktop-conversation-header {
