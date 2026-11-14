@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.12.2",
-  "publishedAt": "2026-11-12",
+  "id": "2026.11.14.1",
+  "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "年末来信",
+      "title": "永久 VIP 无最低等级限制",
       "items": [
-        "空间开启年度回顾后，可在菜单里拆开年末来信，回看这一年的聊天点滴。"
+        "取消永久 VIP 领取的 LV4–6 门槛，新手机号的 LV1 用户完成认证即可领取；同手机号跨空间限制保持不变。"
       ]
     },
     "en": {
-      "title": "A year-end letter",
+      "title": "Permanent VIP without a minimum level",
       "items": [
-        "Once your space opens its annual recap, open your year-end letter from the menu and revisit a year of conversations."
+        "Removed the LV4–6 claim thresholds. Verified LV1 users with a new phone number can claim permanent VIP; the cross-space phone limit still applies."
       ]
     }
   }
