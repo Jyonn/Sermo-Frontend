@@ -1,25 +1,17 @@
 {
-  "id": "2026.11.13.55",
-  "publishedAt": "2026-11-13",
+  "id": "2026.11.14.1",
+  "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "年末来信",
+      "title": "永久 VIP 无最低等级限制",
       "items": [
-        "圣诞主题为各个标签页的页头和导航添上松枝、积雪与红绒点缀。",
-        "空间开启年度回顾后，可在菜单里拆开年末来信，回看这一年的聊天点滴。",
-        "普通群聊支持主动加入多人语音，永久 VIP 的私聊与群聊共享每周 30 分钟，群聊按个人参会时长扣除额度。",
-        "群聊也可以在聊天快捷操作里添加通话按钮。",
-        "桌面聊天使用折叠输入栏时，切换到其他操作会收起表情包面板。"
+        "取消永久 VIP 领取的 LV4–6 门槛，新手机号的 LV1 用户完成认证即可领取；同手机号跨空间限制保持不变。"
       ]
     },
     "en": {
-      "title": "A year-end letter",
+      "title": "Permanent VIP without a minimum level",
       "items": [
-        "Christmas fir, snow, and red accents now decorate tab headers and navigation.",
-        "Once your space opens its annual recap, open your year-end letter from the menu and revisit a year of conversations.",
-        "Join group voice calls from chat. Permanent VIPs share 30 minutes a week across direct and group calls, with group time counted per person.",
-        "Add Call to your group chat shortcuts.",
-        "The sticker picker now closes when switching tools in the compact desktop chat composer."
+        "Removed the LV4–6 claim thresholds. Verified LV1 users with a new phone number can claim permanent VIP; the cross-space phone limit still applies."
       ]
     }
   }

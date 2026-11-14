@@ -322,7 +322,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
             <ActivityTitle activity={{key:'permanent-vip-founding-100',theme:'permanent-vip'}} title={t('vip.campaignTitle')}/>
             <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "---" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
           </section>
-          <ActivityDetails overview={open=><ActivityRewardRail label={t('vip.privilegesTitle')} onOpen={open} items={[{key:'recall',title:t('vip.recallTitle'),step:'7D',reached:vipCampaign.claimed_by_user},{key:'growth',title:t('vip.growthTitle'),step:'+500',reached:vipCampaign.claimed_by_user},{key:'badge',title:t('vip.badgeTitle'),step:vipCampaign.slot?String(vipCampaign.slot).padStart(3,'0'):'VIP',reached:vipCampaign.claimed_by_user}]}/>} rules={<><p>{t('vip.levelTiers')}</p><p>{t('vip.phoneRule')}</p></>} rewards={<section className="vip-campaign-benefits">
+          <ActivityDetails overview={open=><ActivityRewardRail label={t('vip.privilegesTitle')} onOpen={open} items={[{key:'recall',title:t('vip.recallTitle'),step:'7D',reached:vipCampaign.claimed_by_user},{key:'growth',title:t('vip.growthTitle'),step:'+500',reached:vipCampaign.claimed_by_user},{key:'badge',title:t('vip.badgeTitle'),step:vipCampaign.slot?String(vipCampaign.slot).padStart(3,'0'):'VIP',reached:vipCampaign.claimed_by_user}]}/>} rules={<p>{t('vip.phoneRule')}</p>} rewards={<section className="vip-campaign-benefits">
             <header><span>{t("vip.privilegesEyebrow")}</span><strong>{t("vip.privilegesTitle")}</strong></header>
             <div className="vip-campaign-benefit-grid">
               <article className="is-featured"><b>7D</b><span><strong>{t("vip.recallTitle")}</strong><small>{t("vip.recallDescription")}</small></span></article>
@@ -336,7 +336,6 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
           {!vipCampaign.claimed_by_user ? <div className="vip-campaign-requirements">{[
             ["email", t("contact.verifyEmail"), vipCampaign.requirements.email],
             ["phone", t("contact.bindPhone"), vipCampaign.requirements.phone],
-            ["level", t("vip.reachLevel", { level: vipCampaign.required_level }), vipCampaign.requirements.level],
           ].map(([key, label, complete]) => <button className={complete ? "is-complete" : ""} disabled={Boolean(complete)} key={String(key)} onClick={() => { onClose(); navigate("/app/menu"); }} type="button"><i>{complete ? "✓" : ""}</i><strong>{label}</strong><span>{complete ? t("common.completed") : t("vip.goComplete")}</span></button>)}</div> : <div className="vip-campaign-owned"><b>VIP</b><span>{t("vip.permanentOwned")}</span></div>}
           {!vipCampaign.claimed_by_user && vipCampaign.requirements.phone_claim_available === false && vipCampaign.requirements.phone ? <p className="vip-campaign-phone-limit" role="status">{t('vip.phoneLimit')}</p> : null}
           {!vipCampaign.claimed_by_user ? <button className="vip-campaign-claim" disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">{vipClaiming ? t("vip.reserving") : vipCampaign.eligible ? t("vip.claim") : t("vip.completeRequirements")}</button> : null}
