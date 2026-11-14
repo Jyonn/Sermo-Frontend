@@ -114,7 +114,7 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
           <strong>{music.title}</strong>
           <span>{artists}</span>
-          <small><img alt="" src={brand.logo} />{music.provider==='pocklo_music'?'小兜':brand.name}{music.provider!=='pocklo_music'&&music.album?` · ${music.album}`:''}{music.provider!=='pocklo_music'&&duration?` · ${formatTime(duration)}`:''}</small>
+          <small><img alt="" src={brand.logo} />{brand.name}</small>
         </button>
         <span className="netease-music-card-progress" style={{ "--music-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as CSSProperties} />
       </article>

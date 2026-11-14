@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.14.5",
+  "id": "2026.11.14.6",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "统一音乐卡片宽度",
+      "title": "精简音乐卡片来源栏",
       "items": [
-        "修复小兜歌曲卡片随内容变窄的问题，统一音乐卡片及加载状态的宽度，并适配手机屏幕。"
+        "所有音乐卡片底部统一只展示来源图标和名称，移除专辑与时长。"
       ]
     },
     "en": {
-      "title": "Consistent music card widths",
+      "title": "Simpler music card sources",
       "items": [
-        "Music cards and loading states now keep a consistent, responsive width regardless of title length."
+        "All music cards now show only the source icon and name in the footer."
       ]
     }
   }
