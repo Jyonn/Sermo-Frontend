@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom';
 import { createNoiseReducedAudioCapture, preferredAudioMimeType, audioFileExtension } from '../lib/audioCapture';
 import { HoldToTalkRecorder, voiceDropGesture, type HoldGesture, type HoldRecordingState } from '../lib/holdToTalk';
 import { LiveTranscription, type LiveTranscript } from '../lib/liveTranscription';
-import { api } from '../lib/api';
-import { API_BASE_URL } from '../lib/siteConfig';
+import {startChatLiveTranscription} from '../lib/chatLiveTranscription';
 import { useI18n } from '../lib/language';
 import { showToast } from '../lib/toast';
 import './HoldToTalkInput.css';
@@ -83,10 +82,7 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
   const start=()=>{
     live.current?.cancel();const token=++generation.current;
     disposition.current='recording';setTranscript(emptyTranscript);
-    const session=new LiveTranscription(value=>{if(mounted.current&&token===generation.current)setTranscript(value);});live.current=session;
-    const base=new URL(API_BASE_URL,window.location.href);
-    base.protocol=base.protocol==='https:'?'wss:':'ws:';base.pathname='/ws/voice-transcription';base.search='';base.hash='';
-    session.connect(signal=>api.voiceStreamTicket(options.current.admin,signal),base.href);
+    const session=startChatLiveTranscription(value=>{if(mounted.current&&token===generation.current)setTranscript(value);},options.current.admin);live.current=session;
     void recorder.current?.start();setGesture('recording');
   };
   const begin=(event:PointerEvent<HTMLButtonElement>)=>{

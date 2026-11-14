@@ -54,6 +54,8 @@ import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
 import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
+import {startChatLiveTranscription} from '../lib/chatLiveTranscription';
+import type {LiveTranscription,LiveTranscript} from '../lib/liveTranscription';
 import { reportGroupCopies } from "../components/GroupCopyReporting";
 import { GroupCopySheet } from "../components/GroupCopySheet";
 import { ChatQuickActions } from "../components/ChatQuickActions";
@@ -2316,7 +2318,7 @@ function formatImageFileSize(fileSize?: number | null) {
   return `${Math.max(1, Math.round(fileSize / 1024))} KB`;
 }
 
-type VoiceComposerPhase = "idle" | "requesting" | "recording" | "stopping" | "recorded" | "sending";
+type VoiceComposerPhase = "idle" | "requesting" | "recording" | "stopping" | "recorded" | "sending" | "transcribing";
 
 export interface VoiceComposerState {
   open: boolean;
@@ -2990,6 +2992,11 @@ function LiveChatsPage({
   const recordingStopRequestedRef = useRef(false);
   const recordingAttemptRef = useRef(0);
   const recordingStartedAtRef = useRef(0);
+  const desktopLiveRef=useRef<LiveTranscription|null>(null);
+  const desktopTextRequested=useRef(false);
+  const desktopTextBusy=useRef(false);
+  const latestVoiceDraft=useRef(draft);latestVoiceDraft.current=draft;
+  const [desktopTranscript,setDesktopTranscript]=useState<LiveTranscript>({status:'connecting',text:'',finalText:'',partialText:''});
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [visualViewportHeight, setVisualViewportHeight] = useState(0);
@@ -3068,7 +3075,7 @@ function LiveChatsPage({
     setDraft(value);
     if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
   };
-  const composerBusy = sendState === "sending" || mobileHoldBusy || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationSending;
+  const composerBusy = sendState === "sending" || mobileHoldBusy || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || voiceComposer.phase === "transcribing" || locationSending;
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
 
@@ -3142,6 +3149,12 @@ function LiveChatsPage({
   };
 
   const resetVoiceComposer = () => {
+    const recorder=mediaRecorderRef.current;
+    if(recorder)recorder.ondataavailable=null;
+    if(recorder?.state==='recording'){recorder.onstop=null;try{recorder.stop()}catch{/* Capture may already have ended. */}}
+    desktopLiveRef.current?.cancel();desktopLiveRef.current=null;
+    desktopTextRequested.current=false;desktopTextBusy.current=false;
+    setDesktopTranscript({status:'connecting',text:'',finalText:'',partialText:''});
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
     cleanupRecordingResources();
@@ -3861,7 +3874,6 @@ function LiveChatsPage({
     recordingCancelledRef.current = true;
     if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.stop();
-      return;
     }
     resetVoiceComposer();
   }, [selectedChat?.id]);
@@ -6341,6 +6353,23 @@ function LiveChatsPage({
     );
   };
 
+  const insertDesktopVoiceText=async(attempt:number,live:LiveTranscription|null)=>{
+    if(desktopTextBusy.current)return;
+    desktopTextBusy.current=true;
+    voicePreviewAudioRef.current?.pause();
+    setVoiceComposer(current=>({...current,phase:'transcribing'}));
+    const result=await(live?.finish()??Promise.resolve({ok:false,text:''}));
+    if(attempt!==recordingAttemptRef.current)return;
+    desktopTextBusy.current=false;
+    const text=result.text.trim();
+    if(!text){showToast(t('voiceLive.noText'),'info');desktopTextRequested.current=false;setVoiceComposer(current=>({...current,phase:'recorded'}));return;}
+    if(!result.ok)showToast(t('voiceLive.incomplete'),'info');
+    const current=latestVoiceDraft.current;
+    updateDraft(current?`${current}\n${text}`:text);
+    resetVoiceComposer();setDesktopComposerTool(null);
+    requestAnimationFrame(()=>mentionEditorRef.current?.focus());
+  };
+
   const startVoiceRecording = async () => {
     if (composerBusy || voiceComposer.open) return;
     if (!requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) return;
@@ -6353,6 +6382,8 @@ function LiveChatsPage({
     setComposerMoreOpen(false);
     const attempt = recordingAttemptRef.current + 1;
     recordingAttemptRef.current = attempt;
+    desktopLiveRef.current?.cancel();desktopTextRequested.current=false;
+    setDesktopTranscript({status:'connecting',text:'',finalText:'',partialText:''});
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
     recordingChunksRef.current = [];
@@ -6373,6 +6404,10 @@ function LiveChatsPage({
       }
       const mimeType = preferredAudioMimeType();
       audioCaptureRef.current = capture;
+      const live=startChatLiveTranscription(value=>{if(attempt===recordingAttemptRef.current)setDesktopTranscript(value)});
+      desktopLiveRef.current=live;
+      await live.attach(capture.stream,capture.analyser?.context as AudioContext|null);
+      if(attempt!==recordingAttemptRef.current){live.cancel();capture.cleanup();return;}
       const mediaRecorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
       mediaRecorderRef.current = mediaRecorder;
 
@@ -6399,12 +6434,16 @@ function LiveChatsPage({
       }
 
       mediaRecorder.ondataavailable = (recordEvent) => {
+        if(attempt!==recordingAttemptRef.current)return;
         if (recordEvent.data.size > 0) {
           recordingChunksRef.current.push(recordEvent.data);
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
+        if(attempt!==recordingAttemptRef.current)return;
+        await live.flush();
+        if(attempt!==recordingAttemptRef.current)return;
         const nextMimeType = mediaRecorder.mimeType || mimeType || "audio/webm";
         const blob = new Blob(recordingChunksRef.current, { type: nextMimeType });
         const durationSeconds = Math.min(
@@ -6435,6 +6474,8 @@ function LiveChatsPage({
           mimeType: nextMimeType,
           bars: current.bars,
         }));
+        void live.finish();
+        if(desktopTextRequested.current)void insertDesktopVoiceText(attempt,live);
       };
 
       mediaRecorder.start();
@@ -6490,12 +6531,23 @@ function LiveChatsPage({
   const cancelVoiceRecording = () => {
     recordingAttemptRef.current += 1;
     recordingCancelledRef.current = true;
+    desktopLiveRef.current?.cancel();
     if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.stop();
-      return;
     }
     resetVoiceComposer();
   };
+
+  const convertDesktopVoiceToText=()=>{
+    if(!['recording','recorded'].includes(voiceComposer.phase)||desktopTextBusy.current)return;
+    desktopTextRequested.current=true;
+    if(voiceComposer.phase==='recording')stopVoiceRecording();
+    else void insertDesktopVoiceText(recordingAttemptRef.current,desktopLiveRef.current);
+  };
+
+  useEffect(()=>{
+    if((desktopComposerTool!=='voice'||mobileComposerLayout)&&(voiceComposer.open||desktopLiveRef.current))cancelVoiceRecording();
+  },[desktopComposerTool,mobileComposerLayout]);
 
   const toggleVoicePreview = async () => {
     const audio = voicePreviewAudioRef.current;
@@ -7978,7 +8030,7 @@ function LiveChatsPage({
                     tools={<>
                       <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={composerBusy || voiceComposer.phase === "sending"} onClick={() => { if (requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) toggleDesktopComposerTool("voice"); }} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
-                        {desktopComposerTool === "voice" ? <DesktopVoiceStudio onClose={()=>setDesktopComposerTool(null)} phase={voiceComposer.phase} open={voiceComposer.open} bars={voiceComposer.bars} duration={voiceComposer.durationSeconds} previewPlaying={voicePreviewPlaying} onStart={()=>void startVoiceRecording()} onStop={stopVoiceRecording} onCancel={cancelVoiceRecording} onPreview={()=>void toggleVoicePreview()} onSend={()=>void sendRecordedVoiceMessage()}>
+                        {desktopComposerTool === "voice" ? <DesktopVoiceStudio key={selectedChat?.id} transcript={desktopTranscript} onText={convertDesktopVoiceToText} onClose={()=>{cancelVoiceRecording();setDesktopComposerTool(null)}} phase={voiceComposer.phase} open={voiceComposer.open} bars={voiceComposer.bars} duration={voiceComposer.durationSeconds} previewPlaying={voicePreviewPlaying} onStart={()=>void startVoiceRecording()} onStop={stopVoiceRecording} onCancel={cancelVoiceRecording} onPreview={()=>void toggleVoicePreview()} onSend={()=>void sendRecordedVoiceMessage()}>
                             <audio ref={voicePreviewAudioRef} hidden onEnded={() => { setVoicePreviewPlaying(false); if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null; }} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
                         </DesktopVoiceStudio> : null}
                       </span>

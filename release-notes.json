@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.3",
+  "id": "2026.11.15.4",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "主题随特别的日子到来",
+      "title": "桌面语音支持实时转文字",
       "items": [
-        "语言与个性化新增主题：生日当天与圣诞季自动解锁、切换，也可手动选择。",
-        "新主题解锁时，菜单、语言与个性化及主题入口会显示红点。"
+        "展开输入框的语音面板实时展示识别文字，可直接转入草稿，编辑后发送。",
+        "保留语音试听与发送，关闭面板或切换聊天时自动结束录制。"
       ]
     },
     "en": {
-      "title": "Themes for your special days",
+      "title": "Live transcription for desktop voice input",
       "items": [
-        "Choose a theme in Language & personalization. Birthday and Christmas themes unlock and activate automatically on their dates.",
-        "Newly unlocked themes are marked in Menu, Language & personalization, and Theme."
+        "See recognized speech live in the expanded composer, then add it directly to your draft to edit and send.",
+        "Preview and send voice recordings as before. Closing the panel or switching chats ends recording."
       ]
     }
   }

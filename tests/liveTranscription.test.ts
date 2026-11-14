@@ -37,6 +37,20 @@ test('cancel while grant pending never connects later',async()=>{
   const session=new LiveTranscription(()=>{});session.connect(()=>new Promise(done=>{resolve=done;}),'wss://test',()=>{created++;return new Socket();});
   session.cancel();resolve({ticket:'late'});await Promise.resolve();assert.equal(created,0);
 });
+test('stopping for preview and later converting share one final transcript request',async()=>{
+  const {session,socket}=await fixture();socket.message({type:'ready'});
+  const preview=session.finish(),convert=session.finish();
+  assert.equal(socket.sent.filter(value=>typeof value==='string'&&value.includes('finish')).length,1);
+  socket.message({type:'done',text:'最终识别结果'});
+  assert.deepEqual(await preview,{ok:true,text:'最终识别结果'});
+  assert.deepEqual(await convert,await preview);
+});
+test('closing while finalization is pending releases the socket and ignores late text',async()=>{
+  const {session,socket,updates}=await fixture();socket.message({type:'ready'});
+  const result=session.finish();const count=updates.length;
+  session.cancel();socket.message({type:'done',text:'不应写入草稿'});
+  assert.equal((await result).ok,false);assert.equal(socket.readyState,3);assert.equal(updates.length,count);
+});
 test('gesture returns to voice when moved back; left cancels and right converts',()=>{
   const bounds={left:20,right:370,top:360,bottom:470};
   assert.equal(voiceDropGesture(730,50,450,bounds),'cancel');
