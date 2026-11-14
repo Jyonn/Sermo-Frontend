@@ -46,7 +46,6 @@ interface UserProfilePanelProps {
   initialIsFriend?: boolean;
   onSyncingChange?: (syncing: boolean) => void;
   onOpenChat?: (chatId: number) => void;
-  onManageChronelle?: () => void;
   onOpenStatements?: (user: Pick<UserDTO,'user_id'|'name'>) => void;
   friendRequestSource?: "direct" | "square";
 }
@@ -68,7 +67,7 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
-export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, onOpenStatements, friendRequestSource = "direct", previewAudience, onManageChronelle }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, onOpenStatements, friendRequestSource = "direct", previewAudience }: UserProfilePanelProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -406,7 +405,6 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         {squareEnabled && <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>}
       </div>
 
-      {isSelfAccount && onManageChronelle && <button className="secondary-button" type="button" onClick={onManageChronelle}>{t("apps.chronelleDisplay")}</button>}
       <ChronelleCalendar key={`${cacheScope}:${userId}:${previewAudience||''}`} ownerId={userId} previewAudience={previewAudience} />
 
       {squareEnabled && <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} disabled={recentState === "loading" && !recentStatement} onClick={recentState === "error" ? () => setRecentReload((value) => value + 1) : recentStatement ? openRecentStatement : openStatements} type="button">

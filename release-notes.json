@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.14.1",
+  "id": "2026.11.14.2",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 无最低等级限制",
+      "title": "更精简的日历展示",
       "items": [
-        "取消永久 VIP 领取的 LV4–6 门槛，新手机号的 LV1 用户完成认证即可领取；同手机号跨空间限制保持不变。"
+        "日历品牌跳转与日期切换合并为一行，个人名片移除日程管理按钮。"
       ]
     },
     "en": {
-      "title": "Permanent VIP without a minimum level",
+      "title": "A more compact calendar",
       "items": [
-        "Removed the LV4–6 claim thresholds. Verified LV1 users with a new phone number can claim permanent VIP; the cross-space phone limit still applies."
+        "Calendar navigation and the Chronelle link now share one row. Removed schedule management from personal profile cards."
       ]
     }
   }

@@ -127,11 +127,13 @@ export function ChronelleCalendar({ ownerId, previewAudience }: { ownerId: numbe
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
   const items = loadedKey === requestKey ? agendaEventsOn(events, selectedDay) : [];
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
-    <div className="chronelle-calendar-heading"><div><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong></div><a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.open")} ↗</a></div>
-    <div className="chronelle-calendar-navigation">
+    <div className="chronelle-calendar-heading">
+      <a className="chronelle-calendar-brand" href={shareUrl} target="_blank" rel="noopener noreferrer" aria-label={`${t("chronelle.title")} · ${t("chronelle.open")}`}><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg></a>
+      <div className="chronelle-calendar-navigation">
       <button type="button" aria-label={t("chronelle.previousDay")} onClick={() => navigate(-1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg></button>
-      <button className="chronelle-selected-date" type="button" title={t("chronelle.returnToday")} aria-label={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.returnToday")}`} onClick={returnToday}><strong aria-live="polite">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</strong></button>
+      <button className="chronelle-selected-date" type="button" title={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.returnToday")}`} aria-label={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.returnToday")}`} onClick={returnToday}><strong aria-live="polite"><span className="chronelle-date-full">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</span><span className="chronelle-date-compact">{selectedDay.toLocaleDateString(language, { month: "short", day: "numeric" })}</span></strong></button>
       <button type="button" aria-label={t("chronelle.nextDay")} onClick={() => navigate(1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg></button>
+      </div>
     </div>
     <div ref={viewport} className="chronelle-strip-viewport" role="group" aria-label={t("chronelle.chooseDay")} onScroll={scrollDates} onKeyDown={event => {
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); keyboardFocus.current = true; navigate(event.key === "ArrowRight" ? 1 : -1); }

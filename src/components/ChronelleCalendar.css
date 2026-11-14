@@ -1,12 +1,21 @@
 .chronelle-calendar { display: grid; gap: 16px; min-width: 0; margin-block: 24px 0; padding: 18px; border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 22px; color: var(--profile-ink, var(--text-primary)); background: var(--profile-card, var(--bg-canvas)); }
 .chronelle-calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.chronelle-calendar-heading > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.chronelle-calendar-heading img { width: 28px; height: 28px; border-radius: 8px; }
-.chronelle-calendar-heading strong { font-size: .9rem; }
-.chronelle-calendar a { color: var(--profile-muted, var(--text-muted)); font-size: .72rem; text-decoration: none; }
-.chronelle-calendar-navigation { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 4px; }
+.chronelle-calendar { container-type: inline-size; }
+.chronelle-calendar .chronelle-calendar-brand { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 36px; color: inherit; text-decoration: none; }
+.chronelle-calendar-brand img { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 7px; }
+.chronelle-calendar-brand strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .84rem; }
+.chronelle-calendar-brand > svg { flex: 0 0 auto; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; opacity: .65; }
+.chronelle-calendar-brand:hover { color: var(--brand-primary); }
+.chronelle-calendar-brand:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; border-radius: 6px; }
+.chronelle-calendar-navigation { display: grid; grid-template-columns: 28px minmax(0, 1fr) 28px; flex: 0 0 auto; align-items: center; gap: 2px; }
 .chronelle-calendar-navigation .chronelle-selected-date { width: auto; min-width: 0; text-align: center; font-size: .82rem; line-height: 1.5; }
-.chronelle-calendar-navigation button { display: grid; place-items: center; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; }
+.chronelle-calendar-navigation button { display: grid; place-items: center; width: 28px; min-height: 36px; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; }
+.chronelle-selected-date strong { white-space: nowrap; font-size: .76rem; font-variant-numeric: tabular-nums; }
+.chronelle-date-compact { display: none; }
+@container (max-width: 420px) {
+  .chronelle-date-full { display: none; }
+  .chronelle-date-compact { display: inline; }
+}
 .chronelle-calendar-navigation button > svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .chronelle-calendar-navigation button:hover { color: var(--brand-primary); }
 .chronelle-calendar-navigation button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -5px; }
