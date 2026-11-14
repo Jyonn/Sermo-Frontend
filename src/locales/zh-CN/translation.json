@@ -4387,7 +4387,5 @@
 ,"voiceLive.releaseVoice": "松开发送语音，上滑选择操作"
 ,"voiceLive.finishing": "正在完成转写…"
 ,"voiceLive.noText": "没有识别到文字"
-,"voiceLive.incomplete": "转写未完成，请检查文字，或发送原语音。"
-,"voiceLive.sendVoice": "发送语音"
-,"voiceLive.useText": "放入输入框"
+,"voiceLive.incomplete": "转写未完成，已保留识别文字，请检查后发送。"
 }

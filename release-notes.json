@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.14.8",
-  "publishedAt": "2026-11-14",
+  "id": "2026.11.15.1",
+  "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "长按语音，实时转文字",
+      "title": "语音转文字直接进入草稿",
       "items": [
-        "长按录音时实时显示识别文字，向左滑取消，向右滑转文字。",
-        "转写结果可编辑后放入输入框，也可继续发送语音。"
+        "右滑转文字后，识别结果直接填入输入框，修改后即可发送。",
+        "保留原有草稿，取消额外确认弹窗。"
       ]
     },
     "en": {
-      "title": "Live transcription while recording",
+      "title": "Voice transcription goes straight to your draft",
       "items": [
-        "See words as you speak. Slide left to cancel or right to convert your recording to text.",
-        "Review and edit the transcript before adding it to your draft, or send the voice recording."
+        "Slide right to add recognized speech directly to the input, ready to edit and send.",
+        "Existing drafts are preserved, with no extra confirmation dialog."
       ]
     }
   }

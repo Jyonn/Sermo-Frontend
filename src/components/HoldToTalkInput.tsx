@@ -7,23 +7,21 @@ import { api } from '../lib/api';
 import { API_BASE_URL } from '../lib/siteConfig';
 import { useI18n } from '../lib/language';
 import { showToast } from '../lib/toast';
-import { useModalFocus } from '../lib/modalFocus';
 import './HoldToTalkInput.css';
 
 const emptyTranscript:LiveTranscript={status:'connecting',text:'',finalText:'',partialText:''};
-interface VoiceReview {file:File;duration:number;text:string;pending:boolean;failed:boolean}
 
 export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin=false}:{disabled?:boolean;onSend:(file:File,duration:number)=>Promise<unknown>;onText:(text:string)=>void;onBusyChange?:(busy:boolean)=>void;admin?:boolean}) {
   const {t}=useI18n();
   const [state,setState]=useState<HoldRecordingState>({phase:'idle',duration:0,bars:[]});
   const [gesture,setGesture]=useState<HoldGesture>('idle');
   const [transcript,setTranscript]=useState(emptyTranscript);
-  const [review,setReview]=useState<VoiceReview|null>(null);
+  const [finishing,setFinishing]=useState(false);
   const [sending,setSending]=useState(false);
   const pointer=useRef<{id:number;y:number}|null>(null);
   const disposition=useRef<HoldGesture>('recording');
   const targets=useRef<HTMLDivElement|null>(null);
-  const reviewRoot=useRef<HTMLDivElement|null>(null);
+  const recording=useRef(false);
   const textScroll=useRef<HTMLDivElement|null>(null);
   const live=useRef<LiveTranscription|null>(null);
   const generation=useRef(0);
@@ -32,7 +30,7 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
   const recorder=useRef<HoldToTalkRecorder|null>(null);
   const send=async(file:File,duration:number)=>{
     setSending(true);
-    try {await options.current.onSend(file,duration);if(mounted.current)setReview(null);}
+    try {await options.current.onSend(file,duration);}
     catch {if(mounted.current)showToast(options.current.t('audio.sendRetry'),'error');}
     finally {if(mounted.current)setSending(false);}
   };
@@ -45,36 +43,42 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
     },
     recorder:stream=>{const mime=preferredAudioMimeType();return mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);},
     beforeStop:async()=>{await live.current?.flush();},
-    onState:next=>{if(!mounted.current)return;setState(next);if(next.phase==='idle'){setGesture('idle');pointer.current=null;}},
+    onState:next=>{recording.current=next.phase!=='idle';if(!mounted.current)return;setState(next);if(next.phase==='idle'){setGesture('idle');pointer.current=null;}},
     onError:error=>{
       live.current?.cancel();
       if(mounted.current)showToast(options.current.t(error instanceof Error&&error.message==='too-short'?'audio.tooShort':error instanceof DOMException&&error.name==='NotAllowedError'?'audio.permissionRequired':'audio.startUnavailable'),'error');
     },
     onRecorded:(blob,duration,mime)=>{
       if(!mounted.current)return;
-      const file=new File([blob],`voice-message.${audioFileExtension(mime)}`,{type:mime});
       const session=live.current,token=generation.current;
       if(disposition.current==='cancel'){session?.cancel();return;}
-      if(disposition.current!=='text'){session?.cancel();void send(file,duration);return;}
-      setReview({file,duration,text:'',pending:true,failed:false});
-      void session?.finish().then(result=>{
+      if(disposition.current!=='text'){
+        session?.cancel();
+        void send(new File([blob],`voice-message.${audioFileExtension(mime)}`,{type:mime}),duration);
+        return;
+      }
+      setFinishing(true);
+      void (session?.finish()??Promise.resolve({ok:false,text:''})).then(result=>{
         if(!mounted.current||token!==generation.current)return;
-        setReview({file,duration,text:result.text,pending:false,failed:!result.ok});
+        setFinishing(false);
+        const text=result.text.trim();
+        if(!text)showToast(options.current.t('voiceLive.noText'),'info');
+        else if(!result.ok)showToast(options.current.t('voiceLive.incomplete'),'info');
+        options.current.onText(text);
       });
     },
   });
-  const busy=sending||!!review||state.phase!=='idle';
+  const busy=sending||finishing||state.phase!=='idle';
   useEffect(()=>{options.current.onBusyChange?.(busy);},[busy]);
   useEffect(()=>{const el=textScroll.current;if(el)el.scrollTop=el.scrollHeight;},[transcript.text]);
-  const transcriptRef=useRef(transcript);transcriptRef.current=transcript;
-  const cancel=()=>{generation.current++;pointer.current=null;live.current?.cancel();recorder.current?.cancel();setGesture('idle');setReview(value=>value?.pending?{...value,text:transcriptRef.current.text,pending:false,failed:true}:value);};
-  useModalFocus(reviewRoot,!!review,()=>{if(!sending){cancel();setReview(null);}});
+  const cancel=()=>{generation.current++;pointer.current=null;live.current?.cancel();recorder.current?.cancel();setGesture('idle');setFinishing(false);};
   useEffect(()=>{
     mounted.current=true;
-    const hidden=()=>{if(document.hidden)cancel();};
-    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){cancel();setReview(null);}};
-    window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',hidden);window.addEventListener('keydown',escape);
-    return()=>{mounted.current=false;generation.current++;live.current?.cancel();recorder.current?.cancel();options.current.onBusyChange?.(false);window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',hidden);window.removeEventListener('keydown',escape);};
+    const blur=()=>{if(recording.current)cancel();};
+    const hidden=()=>{if(document.hidden)blur();};
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')cancel();};
+    window.addEventListener('blur',blur);document.addEventListener('visibilitychange',hidden);window.addEventListener('keydown',escape);
+    return()=>{mounted.current=false;generation.current++;live.current?.cancel();recorder.current?.cancel();options.current.onBusyChange?.(false);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden);window.removeEventListener('keydown',escape);};
   },[]);
   const start=()=>{
     live.current?.cancel();const token=++generation.current;
@@ -103,12 +107,12 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
     if(aborted||disposition.current==='cancel'||state.phase==='requesting')cancel();else recorder.current?.stop();
   };
   return <>
-    <button className={`mobile-voice-hold is-${gesture}`} disabled={disabled||sending||!!review} onContextMenu={event=>event.preventDefault()}
+    <button className={`mobile-voice-hold is-${gesture}`} disabled={disabled||sending||finishing} aria-busy={finishing||sending} onContextMenu={event=>event.preventDefault()}
       onBlur={()=>{if(pointer.current)cancel();}}
       onPointerDown={begin} onPointerMove={move} onPointerUp={event=>end(event)} onPointerCancel={event=>end(event,true)} onLostPointerCapture={event=>end(event,true)}
       onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();if(!event.repeat&&!disabled&&!busy)start();}if(event.key==='ArrowLeft'){disposition.current='cancel';setGesture('cancel');}if(event.key==='ArrowRight'){disposition.current='text';setGesture('text');}}}
       onKeyUp={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();if(disposition.current==='cancel'||state.phase==='requesting')cancel();else recorder.current?.stop();}}} type="button">
-      {sending?t('common.sendingPlain'):state.phase==='requesting'?t('audio.preparingMicrophone'):t('composer.holdToTalk')}
+      {sending?t('common.sendingPlain'):finishing?t('voiceLive.finishing'):state.phase==='requesting'?t('audio.preparingMicrophone'):t('composer.holdToTalk')}
     </button>
     {gesture!=='idle'?createPortal(<div className={`voice-live-overlay is-${gesture}`}>
       <div className="voice-live-transcript">
@@ -121,11 +125,5 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
       </div>
       <div className="voice-live-bottom"><div className="voice-live-wave" aria-hidden="true">{state.bars.map((level,index)=><i key={index} style={{'--voice-scale':Math.max(.12,level)} as CSSProperties}/>)}</div><p>{t(gesture==='cancel'?'composer.releaseToCancel':gesture==='text'?'voiceLive.releaseText':'voiceLive.releaseVoice')}</p></div>
     </div>,document.body):null}
-    {review?createPortal(<div className="voice-review-backdrop" ref={reviewRoot}><section className="voice-review" role="dialog" aria-modal="true" aria-labelledby="voice-review-title">
-      <div className="voice-review-header"><strong id="voice-review-title">{t('voiceLive.toText')}</strong><button aria-label={t('common.close')} onClick={()=>{cancel();setReview(null);}} disabled={sending} type="button"><span className="material-symbols-outlined">close</span></button></div>
-      {review.pending?<div className="voice-review-wait"><span className="composer-recording-spinner"/>{t('voiceLive.finishing')}</div>:<textarea className="textarea" aria-label={t('voiceLive.toText')} value={review.text} onChange={event=>setReview({...review,text:event.target.value})} placeholder={t('voiceLive.noText')} />}
-      {!review.pending&&review.failed?<p className="voice-review-notice" role="status">{t('voiceLive.incomplete')}</p>:null}
-      <div className="voice-review-actions"><button className="button secondary" disabled={sending||review.pending} onClick={()=>void send(review.file,review.duration)} type="button">{t('voiceLive.sendVoice')}</button><button className="button" disabled={sending||review.pending||!review.text.trim()} onClick={()=>{options.current.onText(review.text.trim());setReview(null);}} type="button">{t('voiceLive.useText')}</button></div>
-    </section></div>,document.body):null}
   </>;
 }

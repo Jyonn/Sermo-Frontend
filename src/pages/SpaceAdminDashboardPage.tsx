@@ -1063,7 +1063,7 @@ export default function SpaceAdminDashboardPage() {
             <form ref={broadcastComposerRef} className={`composer admin-broadcast-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
               {!mobileComposerLayout || broadcastRecording.phase === "idle" ? (
                 <ChatComposerLayout mobile={mobileComposerLayout} toolCount={4}
-                  mobileInput={voiceInputReady ? <HoldToTalkInput admin disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onText={text=>{setBroadcastContent(value=>value?`${value}\n${text}`:text);setVoiceInputReady(false);}} onSend={(file,duration)=>sendBroadcastMedia([{file,kind:"audio",duration}])}/> : undefined}
+                  mobileInput={voiceInputReady ? <HoldToTalkInput admin disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onText={text=>{if(text)setBroadcastContent(value=>value?`${value}\n${text}`:text);setVoiceInputReady(false);}} onSend={(file,duration)=>sendBroadcastMedia([{file,kind:"audio",duration}])}/> : undefined}
                   input={<MentionComposerInput ref={broadcastInputRef}
                     className="textarea composer-input composer-rich-input"
                     members={[]} value={broadcastContent}

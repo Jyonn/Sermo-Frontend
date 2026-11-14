@@ -7915,7 +7915,7 @@ function LiveChatsPage({
                     toolCount={selectedChat?.type === "group" ? 6 : 5}
                     more={composerMoreActions}
                     input={mobileVoiceReady ? (
-                        <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onText={text=>{updateDraft(draft?`${draft}\n${text}`:text);setMobileVoiceReady(false);}} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
+                        <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onText={text=>{if(text)updateDraft(draft?`${draft}\n${text}`:text);setMobileVoiceReady(false);}} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
                       ) : (
                         <div className="mobile-quiet-input-wrap" ref={mobileMentionAnchorRef}>
                           <MentionComposerInput

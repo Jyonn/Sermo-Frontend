@@ -4389,7 +4389,5 @@
 ,"voiceLive.releaseVoice": "Release to send voice · Slide up for options"
 ,"voiceLive.finishing": "Finishing transcription…"
 ,"voiceLive.noText": "No speech recognized"
-,"voiceLive.incomplete": "Transcription is incomplete. Check the text or send the original voice."
-,"voiceLive.sendVoice": "Send voice"
-,"voiceLive.useText": "Use text"
+,"voiceLive.incomplete": "Transcription is incomplete. Recognized text was added to your draft; check it before sending."
 }
