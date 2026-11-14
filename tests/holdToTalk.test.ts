@@ -45,3 +45,10 @@ test('too-short recordings and denied microphone access never produce messages',
   const denied=new HoldToTalkRecorder({...f.options,capture:async()=>{throw Error('denied');}});
   await denied.start();assert.equal(f.errors.length,2);assert.equal(f.sent.length,0);denied.cancel();
 });
+test('cancelling during the final PCM flush prevents a delayed recording send',async()=>{
+  const f=fixture();let flushed!:()=>void;
+  const controller=new HoldToTalkRecorder({...f.options,beforeStop:()=>new Promise<void>(resolve=>{flushed=resolve;})});
+  await controller.start();f.advance(1200);controller.stop();controller.cancel();flushed();
+  await Promise.resolve();
+  assert.equal(f.sent.length,0);assert.equal(f.cleaned(),1);
+});

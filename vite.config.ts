@@ -22,6 +22,10 @@ export default defineConfig({
     port: 5173,
     allowedHosts: [".sermo.jyonn.space", "sermo.jyonn.space", "sermo.6-79.cn"],
     proxy: {
+      '/ws/voice-transcription': {
+        target: process.env.FRIENDEN_DEV_ASR_TARGET || 'wss://api.sermo.jyonn.space',
+        ws: true, changeOrigin: true,
+      },
       "/api": {
         target: process.env.FRIENDEN_DEV_API_TARGET || "https://api.sermo.jyonn.space",
         // target: "http://127.0.0.1:8000",

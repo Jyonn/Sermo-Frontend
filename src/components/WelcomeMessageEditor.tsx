@@ -521,7 +521,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
         <form className={`composer welcome-template-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${voiceComposer.open ? " is-recording-mode" : ""}`} onSubmit={(event) => void addText(event)} ref={composerRef}>
           {!mobileComposerLayout || !voiceComposer.open ? <ChatComposerLayout
             mobile={mobileComposerLayout}
-            mobileInput={voiceInputReady ? <HoldToTalkInput disabled={!state?.can_add || saving} onBusyChange={setHoldBusy} onSend={(file,duration)=>addMedia(file,duration)}/> : undefined}
+            mobileInput={voiceInputReady ? <HoldToTalkInput disabled={!state?.can_add || saving} onBusyChange={setHoldBusy} onText={text=>{setDraft(value=>value?`${value}\n${text}`:text);setVoiceInputReady(false);}} onSend={(file,duration)=>addMedia(file,duration)}/> : undefined}
             toolCount={4}
             input={<MentionComposerInput
               className="textarea composer-input composer-rich-input"

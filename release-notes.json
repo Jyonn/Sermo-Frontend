@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.14.7",
+  "id": "2026.11.14.8",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "修复歌曲详情歌词展示",
+      "title": "长按语音，实时转文字",
       "items": [
-        "打开或恢复小兜歌曲详情时重新获取歌词，避免沿用旧数据。",
-        "修复桌面短窗口下歌词区域被压缩隐藏的问题。"
+        "长按录音时实时显示识别文字，向左滑取消，向右滑转文字。",
+        "转写结果可编辑后放入输入框，也可继续发送语音。"
       ]
     },
     "en": {
-      "title": "Song lyrics display fixes",
+      "title": "Live transcription while recording",
       "items": [
-        "Opening or restoring Pocklo song details now refreshes lyrics instead of reusing stale metadata.",
-        "Lyrics remain accessible in short desktop windows."
+        "See words as you speak. Slide left to cancel or right to convert your recording to text.",
+        "Review and edit the transcript before adding it to your draft, or send the voice recording."
       ]
     }
   }

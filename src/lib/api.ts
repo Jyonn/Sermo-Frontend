@@ -448,6 +448,9 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  voiceStreamTicket(admin=false,signal?:AbortSignal) {
+    return request<import('./liveTranscription').StreamGrant>(admin?'/spaces/admin/voice-stream-ticket':'/messages/voice-stream-ticket', {auth:!admin,adminAuth:admin,method:'POST',signal});
+  },
   getVoiceCapability(chatId: number) {
     return request<import('./voiceCalls').VoiceCapability>('/chats/voice/capability', {auth:true,query:{chat_id:chatId}});
   },

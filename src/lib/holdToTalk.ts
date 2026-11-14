@@ -1,4 +1,9 @@
-export type HoldGesture = "idle" | "recording" | "sliding" | "cancel";
+export type HoldGesture = "idle" | "recording" | "sliding" | "cancel" | "text";
+export function voiceDropGesture(startY:number, x:number, y:number, target:{left:number;right:number;top:number;bottom:number}):HoldGesture {
+  if(startY-y<36)return 'recording';
+  if(y<=target.bottom+24)return x<(target.left+target.right)/2?'cancel':'text';
+  return 'sliding';
+}
 export function holdGesture(startY:number, currentY:number, height:number, sliding:boolean):HoldGesture {
   const moved = sliding || startY-currentY>12;
   return moved && currentY<=Math.min(startY-72,height/2+44) ? "cancel" : moved ? "sliding" : "recording";
@@ -7,7 +12,7 @@ export function holdGesture(startY:number, currentY:number, height:number, slidi
 interface Capture {stream:MediaStream;analyser:AnalyserNode|null;cleanup:()=>void}
 export interface HoldRecordingState {phase:"idle"|"requesting"|"recording";duration:number;bars:number[]}
 interface RecorderOptions {capture:()=>Promise<Capture>;recorder:(stream:MediaStream)=>MediaRecorder;now?:()=>number;
-  onState:(state:HoldRecordingState)=>void;onRecorded:(blob:Blob,duration:number,mime:string)=>void;onError:(error:unknown)=>void}
+  onState:(state:HoldRecordingState)=>void;onRecorded:(blob:Blob,duration:number,mime:string)=>void;onError:(error:unknown)=>void;beforeStop?:()=>Promise<void>}
 export class HoldToTalkRecorder {
   private generation=0;
   private capture:Capture|null=null;
@@ -60,7 +65,9 @@ export class HoldToTalkRecorder {
     if(this.stopping)return;
     if(!this.recorder){this.cancel();return;}
     this.stopping=true;
-    try {if(this.recorder.state==="recording")this.recorder.stop();}catch(error){this.cancel();this.options.onError(error);}
+    const token=this.generation;
+    const stop=()=>{if(token!==this.generation)return;try {if(this.recorder?.state==="recording")this.recorder.stop();}catch(error){this.cancel();this.options.onError(error);}};
+    if(this.options.beforeStop)void this.options.beforeStop().then(stop,stop);else stop();
   }
   cancel() {
     this.generation++;
