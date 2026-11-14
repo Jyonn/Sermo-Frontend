@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.14.6",
+  "id": "2026.11.14.7",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "精简音乐卡片来源栏",
+      "title": "修复歌曲详情歌词展示",
       "items": [
-        "所有音乐卡片底部统一只展示来源图标和名称，移除专辑与时长。"
+        "打开或恢复小兜歌曲详情时重新获取歌词，避免沿用旧数据。",
+        "修复桌面短窗口下歌词区域被压缩隐藏的问题。"
       ]
     },
     "en": {
-      "title": "Simpler music card sources",
+      "title": "Song lyrics display fixes",
       "items": [
-        "All music cards now show only the source icon and name in the footer."
+        "Opening or restoring Pocklo song details now refreshes lyrics instead of reusing stale metadata.",
+        "Lyrics remain accessible in short desktop windows."
       ]
     }
   }

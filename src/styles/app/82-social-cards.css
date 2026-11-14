@@ -114,9 +114,10 @@ html[data-theme="dark"] .netease-music-card { background: linear-gradient(135deg
 
 @media (min-width: 521px) {
   .netease-music-drawer { height: 100dvh; }
-  .netease-music-drawer .drawer-body { min-height: 0; overflow: hidden; }
-  .netease-music-drawer .netease-player { box-sizing: border-box; height: 100%; min-height: 0; }
-  .netease-music-drawer .netease-player-lyrics { min-height: 0; max-height: none; flex: 1 1 180px; }
+  .netease-music-drawer .drawer-body { min-height: 0; overflow-y: auto; }
+  .netease-music-drawer .netease-player { box-sizing: border-box; min-height: 100%; }
+  /* Artwork and controls must never squeeze the lyrics to zero on short windows. */
+  .netease-music-drawer .netease-player-lyrics { min-height: 180px; max-height: 35dvh; flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

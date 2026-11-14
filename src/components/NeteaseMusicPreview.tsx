@@ -4,7 +4,8 @@ import { useMusicPlayer } from "../lib/musicPlayer";
 import { musicBrand, sameMusic } from "../lib/musicBrand";
 import type { MusicProviderDataDTO } from "../types";
 import { SideDrawer } from "./SideDrawer";
-import {isPockloSong,cueLines} from '../lib/pockloSong';
+import {isPockloSong,cueLines,songPresentation} from '../lib/pockloSong';
+import {useSongMetadata} from '../lib/pockloSongResource';
 
 interface LyricLine {
   time: number;
@@ -64,9 +65,11 @@ export function isMusicData(value: unknown): value is MusicProviderDataDTO {
 export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
   const { t } = useI18n();
   const player = useMusicPlayer();
-  const music=sameMusic(player.music,supplied)&&player.music?.provider==='pocklo_music'?player.music:supplied;
   const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const metadata=useSongMetadata(isPockloSong(supplied)?supplied:null,drawerOpen);
+  const baseMusic=sameMusic(player.music,supplied)&&player.music?.provider==='pocklo_music'?player.music:supplied;
+  const music:MusicProviderDataDTO=metadata.song?{...baseMusic,...songPresentation(metadata.song)}:baseMusic;
   const [failedCover,setFailedCover]=useState<string>();
   const brand = musicBrand(music.provider);
   const active = sameMusic(player.music, music);
@@ -122,6 +125,7 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
         className="netease-music-drawer"
         historyKey={`${music.provider}-song-${music.song_id}`}
         onClose={() => setDrawerOpen(false)}
+        onRouteOpen={() => setDrawerOpen(true)}
         open={drawerOpen}
         style={{ "--netease-red": brand.color } as CSSProperties}
         title={music.title}
@@ -151,7 +155,7 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
             </button>
           </div>
           <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>
-            {lyrics.length ? lyrics.map((line, index) => (
+            {metadata.loading?<div className="netease-player-no-lyrics" role="status">{t('common.loading')}</div>:metadata.error?<div className="netease-player-no-lyrics" role="status">{t(metadata.error===404?'pocklo.songRevoked':metadata.error===410?'pocklo.songMissing':'pocklo.songFailed')}</div>:lyrics.length ? lyrics.map((line, index) => (
               <p
                 className={index === activeLyricIndex ? "is-active" : ""}
                 key={`${line.time}:${index}`}

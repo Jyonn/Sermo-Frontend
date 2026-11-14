@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {SongSession,SongError,isPockloSong,playbackFresh,cueLines,type SongMetadata,type SongPlayback,type SongReference} from '../src/lib/pockloSong.ts';
+import {SongSession,SongError,isPockloSong,playbackFresh,cueLines,songPresentation,type SongMetadata,type SongPlayback,type SongReference} from '../src/lib/pockloSong.ts';
 import {readPockloPickerMessage} from '../src/lib/pockloPicker.ts';
 const id='11111111-1111-4111-8111-111111111111';
 const ref:SongReference={provider:'pocklo_music',schema:'pocklo.song.v1',song_id:id,title:'Silent',artists:[],canonical_url:'https://pocklo.jyonn.space/share/'+id,audio_url:''};
@@ -8,6 +8,13 @@ const meta:SongMetadata={schema:'pocklo.song.v1',type:'song',song_id:id,version:
 function media(version=1):SongPlayback{return {schema:'pocklo.song.v1',song_id:id,version,expires_at:new Date(Date.now()+300000).toISOString(),audio:{url:'https://res.6-79.cn/test?revision='+version,mime:'audio/mpeg'},cover:null}}
 class Audio extends EventTarget{src='';paused=true;currentTime=0;duration=20;volume=.4;muted=true;crossOrigin='';preload='';loads=0;playCount=0;pause(){this.paused=true}removeAttribute(name:string){if(name==='src')this.src=''}load(){this.loads++;if(this.src)setTimeout(()=>this.dispatchEvent(new Event('loadedmetadata')),0)}async play(){this.paused=false;this.playCount++}}
 const tick=()=>new Promise(r=>setTimeout(r,25));
+test('fresh metadata replaces missing cached lyrics even without a version change',()=>{
+ const stale={...ref,version:meta.version,lyrics:{original:'',cues:[]}};
+ const fresh={...stale,...songPresentation(meta)};
+ assert.equal(fresh.version,stale.version);
+ assert.equal(fresh.lyrics.original,'hello');
+ assert.deepEqual(cueLines(fresh.lyrics.cues),[{time:1.234,text:'hello'}]);
+});
 function session(fetcher:(path:string,signal:AbortSignal)=>Promise<unknown>){const audio=new Audio(),states:number[]=[],updates:SongMetadata[]=[];const session=new SongSession(audio as unknown as HTMLAudioElement,fetcher as never,s=>updates.push(s),(_,e)=>states.push(e));return {audio,session,states,updates}}
 test('replaying a completed song starts from zero',async()=>{const h=session(async path=>path.endsWith('/song')?meta:media());h.session.start(ref);await tick();h.audio.currentTime=20;h.audio.paused=true;Object.defineProperty(h.audio,'ended',{value:true});h.session.resume();await tick();assert.equal(h.audio.currentTime,0);assert.equal(h.audio.paused,false);h.session.stop()});
 test('stable reference validation, millisecond cues and expiry safety margin',()=>{

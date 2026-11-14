@@ -17,6 +17,23 @@ export async function fetchSong<T>(path:string,signal:AbortSignal):Promise<T>{
 }
 type Entry={promise:Promise<{song:SongMetadata;cover?:string}>;controller:AbortController;users:number};
 const pending=new Map<string,Entry>();
+/** Opening a lyrics panel is a new metadata read, independent of audio/CDN state. */
+export function useSongMetadata(reference:SongReference|null,open:boolean){
+  const [state,setState]=useState<{song?:SongMetadata;error?:number;loading:boolean}>({loading:false});
+  const token=reference?pockloShareToken(reference.canonical_url):null;
+  const id=reference?.song_id;
+  useEffect(()=>{
+    if(!open||!token||!id){setState({loading:false});return}
+    const controller=new AbortController();
+    setState({loading:true});
+    void fetchSong<SongMetadata>('/users/pocklo/shares/'+token+'/song',controller.signal).then(song=>{
+      if(song.schema!=='pocklo.song.v1'||song.song_id!==id)throw new SongError(503);
+      if(!controller.signal.aborted)setState({song,loading:false});
+    }).catch(error=>{if(!controller.signal.aborted)setState({loading:false,error:error instanceof SongError?error.status:503})});
+    return()=>controller.abort();
+  },[token,id,open]);
+  return state;
+}
 export function useSongResource(reference:SongReference){
   const [state,setState]=useState<{song?:SongMetadata;cover?:string;error?:number;loading:boolean}>({loading:true});
   const [revision,setRevision]=useState(0);

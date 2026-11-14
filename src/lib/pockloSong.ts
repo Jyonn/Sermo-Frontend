@@ -8,6 +8,7 @@ const uuid=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 export function isPockloSong(value:unknown):value is SongReference {const v=value as SongReference|null;return !!v&&v.provider==='pocklo_music'&&v.schema==='pocklo.song.v1'&&uuid.test(v.song_id)&&!!pockloShareToken(v.canonical_url)&&typeof v.title==='string'&&Array.isArray(v.artists)}
 export function songSummary(value:unknown){const v=value as {song_id?:unknown;version?:unknown;title?:unknown}|null;return v&&typeof v.song_id==='string'&&uuid.test(v.song_id)&&Number.isSafeInteger(v.version)&&typeof v.title==='string'?{song_id:v.song_id,version:Number(v.version),title:v.title}:undefined}
 export function songLyrics(song:SongMetadata){return {original:song.lyrics.text,cues:song.lyrics.cues}}
+export function songPresentation(song:SongMetadata){return {title:song.title,artists:song.artists,album:song.album,version:song.version,duration_ms:song.duration_ms??undefined,available:song.available,lyrics:songLyrics(song)}}
 export function validPlayback(data:SongPlayback,id:string){return data?.schema==='pocklo.song.v1'&&data.song_id===id&&Number.isFinite(Date.parse(data.expires_at))&&!!data.audio?.url&&data.audio.mime.startsWith('audio/')}
 export function playbackFresh(data:SongPlayback,now=Date.now()){return Date.parse(data.expires_at)-now>15_000}
 export function cueLines(cues?:{time_ms:number;text:string}[]){return cues?.filter(c=>Number.isFinite(c.time_ms)&&c.time_ms>=0&&typeof c.text==='string').map(c=>({time:c.time_ms/1000,text:c.text})).sort((a,b)=>a.time-b.time)??[]}
