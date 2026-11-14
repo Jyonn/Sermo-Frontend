@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.14.4",
+  "id": "2026.11.14.5",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "小兜歌曲分享与完整播放",
+      "title": "统一音乐卡片宽度",
       "items": [
-        "支持选择小兜歌曲并分享，展示音乐封面、专辑和同步歌词，支持完整播放与进度拖动。",
-        "统一不同位置的歌曲播放状态，优化签名刷新、分享撤销和资源失效提示。"
+        "修复小兜歌曲卡片随内容变窄的问题，统一音乐卡片及加载状态的宽度，并适配手机屏幕。"
       ]
     },
     "en": {
-      "title": "Pocklo song sharing and full playback",
+      "title": "Consistent music card widths",
       "items": [
-        "Share Pocklo songs with artwork, album details, synchronized lyrics, full playback and seeking.",
-        "Shared playback state, expiring address refresh and clear revoked or unavailable states."
+        "Music cards and loading states now keep a consistent, responsive width regardless of title length."
       ]
     }
   }

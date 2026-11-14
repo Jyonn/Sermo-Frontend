@@ -1,4 +1,12 @@
-.message-text-stack.has-link-preview:has(> .netease-music-card) { width: min(78vw, 310px); }
+/* Music width must not depend on title length or an asynchronously loaded cover. */
+.message-bubble.is-link-preview:has(> .message-text-stack > :is(.netease-music-card, .pocklo-song-state)) {
+  width: min(78vw, 310px);
+  max-width: min(78vw, 310px, calc(100vw - 92px));
+}
+.message-bubble.is-link-preview > .message-text-stack.has-link-preview:has(> :is(.netease-music-card, .pocklo-song-state)) {
+  width: 100%;
+}
+.message-text-stack.has-link-preview:has(> :is(.netease-music-card, .pocklo-song-state)) { width: min(78vw, 310px); }
 .message-text-stack.has-link-preview:has(> .platform-media-card) { width: min(78vw, 310px); }
 
 .netease-music-card {
