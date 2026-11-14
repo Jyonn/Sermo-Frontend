@@ -32,6 +32,7 @@ import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { refreshSpaceFeatures, useSpaceFeatures } from "./lib/spaceFeatures";
 import { applySiteTheme } from './lib/siteTheme';
+import {usePersonalTheme} from './lib/personalTheme';
 import {useBirthday} from './lib/birthday';
 import {BirthdayExperience} from './components/BirthdayExperience';
 import {birthdayAssets} from './lib/birthdayAssets';
@@ -111,14 +112,15 @@ export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
   const features = useSpaceFeatures();
+  const {theme:personalTheme}=usePersonalTheme();
   const birthday=useBirthday();
   const birthdayActive=Boolean(birthday.status?.active&&location.pathname.startsWith('/app/'));
   const spaceId = session?.user.space_id;
   useEffect(() => {
     for(const [key,value] of Object.entries(birthdayAssets))document.documentElement.style.setProperty(`--birthday-${key}`,`url("${value}")`);
-    applySiteTheme(spaceId ? birthdayActive?'birthday-botanical':features.siteTheme : 'default');
+    applySiteTheme(spaceId&&location.pathname.startsWith('/app/') ? personalTheme : 'default');
     return () => {applySiteTheme('default');for(const key of Object.keys(birthdayAssets))document.documentElement.style.removeProperty(`--birthday-${key}`);};
-  }, [spaceId, features.siteTheme,birthdayActive]);
+  }, [spaceId,personalTheme,location.pathname]);
   useEffect(() => {
     if (!spaceId) return;
     const refresh = () => {

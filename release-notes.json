@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.2",
+  "id": "2026.11.15.3",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "花间来日，生日边饰焕新",
+      "title": "主题随特别的日子到来",
       "items": [
-        "Tab 与聊天页加入玫瑰缎带、香槟金边线和花卉礼盒，让生日氛围贯穿日常聊天。",
-        "适配深浅色、手机与桌面，并保留自选聊天背景和气泡。"
+        "语言与个性化新增主题：生日当天与圣诞季自动解锁、切换，也可手动选择。",
+        "新主题解锁时，菜单、语言与个性化及主题入口会显示红点。"
       ]
     },
     "en": {
-      "title": "A fresh birthday finish",
+      "title": "Themes for your special days",
       "items": [
-        "Rose ribbons, champagne-gold borders and a floral gift bring birthday details to tabs and chats.",
-        "Refined for light and dark modes on mobile and desktop, with your chosen wallpapers and bubbles preserved."
+        "Choose a theme in Language & personalization. Birthday and Christmas themes unlock and activate automatically on their dates.",
+        "Newly unlocked themes are marked in Menu, Language & personalization, and Theme."
       ]
     }
   }

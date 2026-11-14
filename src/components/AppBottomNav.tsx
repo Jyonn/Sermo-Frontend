@@ -8,6 +8,7 @@ import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
 import { UnreadIndicator } from "./UnreadIndicator";
 import {UpdateAvailableDot} from './UpdateAvailableDot';
 import {useCallShortcutDiscovery} from '../lib/callShortcutDiscovery';
+import {usePersonalTheme} from '../lib/personalTheme';
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { canManageOAuthApplications } from "../lib/oauthDeveloperAccess";
@@ -40,6 +41,7 @@ function activeKey(pathname: string) {
 
 export function AppBottomNav() {
   const {pending:callShortcutNew}=useCallShortcutDiscovery();
+  const {pending:themeNew}=usePersonalTheme();
   const shortViewport = useShortViewport();
   const location = useLocation();
   const { session, patchSessionUser } = useAuth();
@@ -293,7 +295,7 @@ export function AppBottomNav() {
                 <UnreadIndicator count={totalUnread} />
               ) : null}
               {route.key === "square" ? <UnreadIndicator count={squareUnread} fresh={squareHasFreshContent} /> : null}
-              {route.key === 'menu' ? <UpdateAvailableDot navigation fresh={callShortcutNew} label={t('voice.title')}/> : null}
+              {route.key === 'menu' ? <UpdateAvailableDot navigation fresh={callShortcutNew||themeNew} label={t(themeNew?'menu.themeNew':'voice.title')}/> : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
                 <UnreadIndicator count={incomingRequestCount} />
               ) : null}

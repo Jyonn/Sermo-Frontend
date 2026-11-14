@@ -88,6 +88,8 @@ import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPre
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
+import {usePersonalTheme,ThemeDiscoveryDot} from '../lib/personalTheme';
+import {PersonalThemeSettings,personalThemeLabels} from '../components/PersonalThemeSettings';
 import { checkForPwaUpdate, CURRENT_RELEASE, getPwaUpdateCheckSnapshot, subscribePwaUpdateCheck } from "../lib/pwaUpdate";
 import { getChatLayoutDiagnostics, setChatLayoutDiagnosticsEnabled, setDebuggerVisible, subscribeChatLayoutDiagnostics } from "../lib/chatLayoutDiagnostics";
 
@@ -406,6 +408,8 @@ export default function MenuPage() {
   const { session: platformAdminSession } = usePlatformAdminAuth();
   const { t, preference: languagePreference, setPreference: setLanguagePreference, saving: languageSaving } = useI18n();
   const { preference: themePreference, setPreference: setThemePreference } = useTheme();
+  const {theme:personalTheme,pending:themeNew}=usePersonalTheme();
+  const [themeDrawerOpen,setThemeDrawerOpen]=useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser, setSession } = useAuth();
@@ -2199,7 +2203,7 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong className="menu-update-label">{t("menu.personalization")}<CallShortcutDiscoveryMarker/></strong>
+                <strong className="menu-update-label">{t("menu.personalization")}{themeNew?<ThemeDiscoveryDot/>:<CallShortcutDiscoveryMarker/>}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2457,6 +2461,7 @@ export default function MenuPage() {
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
       </SideDrawer>
       <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
+      <SideDrawer historyKey="site-theme" onRouteOpen={()=>setThemeDrawerOpen(true)} open={themeDrawerOpen} onClose={()=>setThemeDrawerOpen(false)} title={t('menu.siteTheme')}>{themeDrawerOpen?<PersonalThemeSettings/>:null}</SideDrawer>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
@@ -2470,6 +2475,7 @@ export default function MenuPage() {
               ]}
               value={themePreference}
             />
+            <SettingRow title={<span className="menu-update-label">{t('menu.siteTheme')}<ThemeDiscoveryDot/></span>} value={t(personalThemeLabels[personalTheme])} onClick={()=>setThemeDrawerOpen(true)}/>
             <SettingSelect<LanguagePreference>
               disabled={languageSaving}
               label={t("menu.language")}
