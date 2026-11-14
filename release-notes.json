@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.14.2",
+  "id": "2026.11.14.3",
   "publishedAt": "2026-11-14",
   "locales": {
     "zh-CN": {
-      "title": "更精简的日历展示",
+      "title": "小兜歌曲分享与完整播放",
       "items": [
-        "日历品牌跳转与日期切换合并为一行，个人名片移除日程管理按钮。"
+        "支持选择小兜歌曲并分享，展示音乐封面、专辑和同步歌词，支持完整播放与进度拖动。",
+        "统一不同位置的歌曲播放状态，优化签名刷新、分享撤销和资源失效提示。"
       ]
     },
     "en": {
-      "title": "A more compact calendar",
+      "title": "Pocklo song sharing and full playback",
       "items": [
-        "Calendar navigation and the Chronelle link now share one row. Removed schedule management from personal profile cards."
+        "Share Pocklo songs with artwork, album details, synchronized lyrics, full playback and seeking.",
+        "Shared playback state, expiring address refresh and clear revoked or unavailable states."
       ]
     }
   }

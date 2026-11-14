@@ -4,14 +4,15 @@ import { api, ApiError } from "../lib/api";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { useModalFocus } from "../lib/modalFocus";
-import { readPockloPickerMessage } from "../lib/pockloPicker";
+import { readPockloPickerMessage,type PockloSelection } from "../lib/pockloPicker";
+import {songSummary} from '../lib/pockloSong';
 import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
 import { showToast } from "../lib/toast";
 import { FeedbackState } from "./FeedbackState";
 
 export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallback }: {
   onClose: () => void;
-  onShare: (url: string) => Promise<boolean | void>;
+  onShare: (url: string,selection?:PockloSelection) => Promise<boolean | void>;
   onConnectionError: (error: ApiError) => void;
   onFallback: () => void;
 }) {
@@ -30,7 +31,7 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
     const target = element.contentWindow;
     const lifetime = new AbortController();
     const pending = new Map<string, AbortController>();
-    const created = new Set<string>();
+    const created = new Map<string,PockloSelection>();
     let ready = false;
     let sharing = false;
     let adding = false;
@@ -60,7 +61,7 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
         if (adding || !created.has(message.url)) return;
         adding = true;
         try {
-          if (await callbacks.current.onShare(message.url) === false) throw Error();
+          if (await callbacks.current.onShare(message.url,created.get(message.url)) === false) throw Error();
           created.delete(message.url);
           if (!lifetime.signal.aborted) callbacks.current.onClose();
         } catch {
@@ -86,13 +87,14 @@ export function PockloPickerFrame({ onClose, onShare, onConnectionError, onFallb
           const result = await api.pockloFiles(message.resourceId, message.offset, signal, message.query);
           post("response", { requestId, result });
         } else {
-          const { url } = await api.pockloShare(message.resourceId, message.operationId, signal);
+          const response = await api.pockloShare(message.resourceId, message.operationId, signal);
+          const {url}=response;
           const token = pockloShareToken(url);
           if (!token) throw Error();
           const canonical = POCKLO_ORIGIN + "/share/" + token;
           created.clear();
-          created.add(canonical);
-          post("response", { requestId, result: { url: canonical } });
+          created.set(canonical,{url:canonical,type:response.type,song:songSummary(response.song)});
+          post("response", { requestId, result: {...response,url:canonical} });
         }
       } catch (cause) {
         if (lifetime.signal.aborted) return;

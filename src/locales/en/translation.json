@@ -1,4 +1,8 @@
 {
+  "pocklo.songRevoked":"Song share unavailable or revoked",
+  "pocklo.songMissing":"Source audio was removed",
+  "pocklo.songFailed":"Unable to load this song",
+  "pocklo.unknownArtist":"Unknown artist",
   "admin.christmasTheme": "Christmas Eve",
   "recap.title": "A year-end letter",
   "recap.adminHint": "Let members read their own year in review.",

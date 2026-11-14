@@ -1,4 +1,6 @@
 import { POCKLO_ORIGIN, pockloShareToken } from "./pockloShare.ts";
+import {songSummary} from './pockloSong.ts';
+export type PockloSelection={url:string;type?:'song'|'file'|'folder';song?:{song_id:string;version:number;title:string}};
 
 const resourcePattern = /^[A-Za-z0-9_-]{1,128}$/;
 const uuidPattern = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
@@ -14,9 +16,14 @@ export function readPockloPickerMessage(event: MessageEvent, frame: Window | nul
   switch (data.type) {
     case "pocklo.picker.ready": return { type: "ready" } as const;
     case "pocklo.picker.cancelled": return { type: "cancelled" } as const;
+    case 'song':
+    case 'file':
+    case 'folder':
     case "pocklo.picker.selected": {
       const token = typeof data.url === "string" ? pockloShareToken(data.url) : undefined;
-      return token ? { type: "selected", url: POCKLO_ORIGIN + "/share/" + token } as const : null;
+      if(!token)return null;
+      const song=songSummary(data.song);
+      return {type:'selected',url:POCKLO_ORIGIN+'/share/'+token,...(song?{song}: {})} as const;
     }
     case "pocklo.picker.request": {
       const { action, requestId, resourceId, operationId, query, offset } = data;

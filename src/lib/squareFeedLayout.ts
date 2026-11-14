@@ -1,7 +1,7 @@
 import type {SquareStatementDTO} from '../types';
 export type SquareFeedLayout='list'|'masonry';
 export function squareMediaRatio(width?:number|null,height?:number|null){return width&&height&&Number.isFinite(width)&&Number.isFinite(height)&&width>0&&height>0?Math.max(2/3,Math.min(3/2,width/height)):.8}
-const musicProviders=new Set(['netease_music','qq_music','kugou_music','qishui_music','apple_music','kuwo_music']);
+const musicProviders=new Set(['netease_music','qq_music','kugou_music','qishui_music','apple_music','kuwo_music','pocklo_music']);
 export function squareCover(statement:SquareStatementDTO){
   const images=statement.media.filter(item=>item.kind==='image');
   const media=images.find(item=>item.kind==='image')??statement.media.find(item=>item.kind==='video')??statement.media.find(item=>item.kind==='audio');

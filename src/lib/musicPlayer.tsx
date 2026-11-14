@@ -5,6 +5,8 @@ import {claimMediaPlayback} from './mediaPlaybackFocus';
 import { useI18n } from "./language";
 import { SideDrawer } from "../components/SideDrawer";
 import { usePlaybackWait } from "../components/MediaWaitFeedback";
+import {SongSession,isPockloSong,cueLines,songLyrics} from './pockloSong';
+import {fetchSong} from './pockloSongResource';
 
 type Player = {
   music: MusicProviderDataDTO | null;
@@ -13,6 +15,7 @@ type Player = {
   duration: number;
   unavailable: boolean;
   loading: boolean;
+  songError: number;
   play: (music: MusicProviderDataDTO) => void;
   toggle: () => void;
   seek: (time: number) => void;
@@ -56,6 +59,9 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(false);
+  const [songError,setSongError]=useState(0);
+  const songSession=useRef<SongSession|null>(null);
+  const currentMusic=useRef(music);currentMusic.current=music;
   const playbackWait = usePlaybackWait();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [compact, setCompact] = useState(true);
@@ -66,7 +72,12 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const suppressClick = useRef(false);
   const [dragging, setDragging] = useState(false);
   const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
-  const lyrics = useMemo(() => timedLyrics(music?.lyrics?.original), [music?.lyrics?.original]);
+  const lyrics = useMemo(() => music?.lyrics?.cues?.length?cueLines(music.lyrics.cues):timedLyrics(music?.lyrics?.original), [music?.lyrics]);
+  useEffect(()=>{
+    const element=audio.current;if(!element)return;
+    const session=new SongSession(element,fetchSong,(song,media)=>{setMusic(current=>current&&current.provider==='pocklo_music'&&current.song_id===song.song_id?{...current,title:song.title,artists:song.artists,album:song.album,duration_ms:song.duration_ms??undefined,version:song.version,cover_url:media.cover?.url,lyrics:songLyrics(song)}:current)},(loading,error)=>{setSongError(error);setUnavailable(!!error);if(loading)playbackWait.start();else if(error)playbackWait.fail();else playbackWait.ready()});
+    songSession.current=session;return()=>{session.stop();songSession.current=null};
+  },[]);
   const activeLyricIndex = useMemo(() => {
     for (let index = lyrics.length - 1; index >= 0; index -= 1) {
       if (time + .08 >= lyrics[index].time) return index;
@@ -136,6 +147,11 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
   const toggle = () => {
     if (!audio.current) return;
+    if(isPockloSong(currentMusic.current)){
+      if(songError===404||songError===410)return;
+      if(!audio.current.paused&&!unavailable){songSession.current?.pause();return}
+      songSession.current?.resume();return;
+    }
     if (audio.current.paused || unavailable) {
       if (unavailable) { setUnavailable(false); audio.current.load(); }
       playbackWait.start();
@@ -146,29 +162,33 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const play = (next: MusicProviderDataDTO) => {
     if (sameMusic(music, next)) { toggle(); return; }
     audio.current?.pause();
+    songSession.current?.stop();setSongError(0);
     setTime(0);
     setDuration((next.duration_ms || 0) / 1000);
     setUnavailable(false);
     playbackWait.start();
-    pendingPlay.current = true;
+    pendingPlay.current = !isPockloSong(next);
     setCompact(true);
     setMusic(next);
+    currentMusic.current=next;
+    if(isPockloSong(next))songSession.current?.start(next);
   };
   const seek = (next: number) => {
     if (!audio.current) return;
+    if(isPockloSong(currentMusic.current)){songSession.current?.seek(next);return}
     audio.current.currentTime = next;
     setTime(next);
   };
-  const close = () => { audio.current?.pause(); playbackWait.ready(); setMusic(null); setTime(0); setDrawerOpen(false); };
+  const close = () => { songSession.current?.stop();setSongError(0);audio.current?.pause(); playbackWait.ready(); setMusic(null); setTime(0); setDrawerOpen(false); };
   const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
   const brand = music ? musicBrand(music.provider) : null;
 
-  return <Context.Provider value={{ music, playing, time, duration, unavailable, loading:playbackWait.visible&&playbackWait.phase!=='error', play, toggle, seek, close }}>
+  return <Context.Provider value={{ music, playing, time, duration, unavailable, songError, loading:playbackWait.visible&&playbackWait.phase!=='error', play, toggle, seek, close }}>
     {children}
-    <audio ref={audio} src={music?.audio_url || undefined} preload="none"
+    <audio ref={audio} src={music?.provider==='pocklo_music'?undefined:music?.audio_url || undefined} crossOrigin={music?.provider==='pocklo_music'?'anonymous':undefined} preload={music?.provider==='pocklo_music'?'metadata':'none'}
       onPlay={event => {claimMediaPlayback(event.currentTarget);setUnavailable(false)}} onPlaying={() => { setPlaying(true); playbackWait.ready(); }}
       onPause={() => { setPlaying(false); playbackWait.stop(); }} onWaiting={playbackWait.waiting} onStalled={playbackWait.waiting}
-      onEnded={() => { setPlaying(false); playbackWait.ready(); }} onError={() => { playbackWait.fail(); setUnavailable(true); setPlaying(false); }}
+      onEnded={() => { setPlaying(false); playbackWait.ready(); }} onError={() => { setPlaying(false);if(isPockloSong(currentMusic.current)){songSession.current?.mediaError();return}playbackWait.fail(); setUnavailable(true); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
       onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
     {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={brand?.name} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg`, "--netease-red": brand?.color } as CSSProperties}
@@ -192,8 +212,8 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       <div className="netease-player">
         <div className={`netease-player-cover music-disc is-active${playing && playbackWait.phase === "idle" ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
-        <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle}>{playbackWait.visible && playbackWait.phase !== "error" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}{unavailable ? t("common.retry") : playbackWait.visible && playbackWait.phase !== "error" ? t("media.buffering") : playing ? t("music.pause") : t("music.play")}</button></div>
-        <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
+        <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" disabled={songError===404||songError===410} onClick={toggle}>{playbackWait.visible && playbackWait.phase !== "error" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}{songError===404?t("pocklo.songRevoked"):songError===410?t("pocklo.songMissing"):unavailable ? t("common.retry") : playbackWait.visible && playbackWait.phase !== "error" ? t("media.buffering") : playing ? t("music.pause") : t("music.play")}</button></div>
+        <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : music.lyrics?.original?<p style={{whiteSpace:"pre-wrap"}}>{music.lyrics.original}</p>:<div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
         <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank"><img alt="" src={brand?.logo} style={{ width: 18, height: 18, borderRadius: "50%" }} />{brand?.name}<span aria-hidden="true">↗</span></a>
       </div>
     </SideDrawer> : null}

@@ -1,4 +1,8 @@
 {
+  "pocklo.songRevoked":"歌曲分享已撤销或不存在",
+  "pocklo.songMissing":"源音频已删除，暂时无法播放",
+  "pocklo.songFailed":"歌曲暂时无法加载",
+  "pocklo.unknownArtist":"未知歌手",
   "admin.christmasTheme": "平安夜小镇",
   "recap.title": "年末来信",
   "recap.adminHint": "开启后，成员可阅读自己的年度回顾。",

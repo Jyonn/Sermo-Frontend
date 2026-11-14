@@ -1128,7 +1128,10 @@ export interface DouyinVideoDataDTO {
 }
 
 export interface MusicProviderDataDTO {
-  provider: "netease_music" | "qq_music" | "kugou_music" | "qishui_music" | "apple_music" | "kuwo_music";
+  provider: "netease_music" | "qq_music" | "kugou_music" | "qishui_music" | "apple_music" | "kuwo_music" | "pocklo_music";
+  schema?: 'pocklo.song.v1';
+  version?: number;
+  available?: boolean;
   song_id: number | string;
   title: string;
   artists: string[];
@@ -1138,6 +1141,7 @@ export interface MusicProviderDataDTO {
   audio_url: string;
   canonical_url: string;
   lyrics?: {
+    cues?: {time_ms:number;text:string}[];
     original?: string;
     translation?: string;
     romanization?: string;

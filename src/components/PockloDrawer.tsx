@@ -12,6 +12,8 @@ import { PockloPickerFrame } from "./PockloPickerFrame";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
 import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
+import type {PockloSelection} from '../lib/pockloPicker';
+import {songSummary} from '../lib/pockloSong';
 
 export const POCKLO_HOME = POCKLO_ORIGIN + "/";
 const POCKLO_AUTHORIZE = "https://disk.6-79.cn/api/oauth/authorize/";
@@ -19,7 +21,7 @@ const VIEW_KEY = "frienden:pocklo-directory-view";
 const FOLDER_CACHE_TTL = 120_000;
 type FolderView = "list" | "grid";
 
-type PockloEntry = { id: string; name: string; folder: boolean; size?: number; preview?: string | null; thumbnail?: string | null };
+type PockloEntry = { id: string; name: string; folder: boolean; size?: number; preview?: string | null; thumbnail?: string | null;type?:'song'|'file'|'folder';song?:{song_id:string;version:number;title:string} };
 export type PockloFolder = {
   resource: PockloEntry;
   entries: PockloEntry[];
@@ -36,7 +38,7 @@ export function PockloDrawer({
   scope: string;
   returnError?: string;
   chatName?: string;
-  onShare?: (url: string) => Promise<boolean | void>;
+  onShare?: (url: string,selection?:PockloSelection) => Promise<boolean | void>;
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState("");
@@ -232,10 +234,11 @@ export function PockloDrawer({
     setBusy(true);
     setError("");
     try {
-      const { url } = await api.pockloShare(selected.id, operation.current.key, controller.signal);
+      const response = await api.pockloShare(selected.id, operation.current.key, controller.signal);
+      const {url}=response;
       if (!pockloShareToken(url)) throw Error();
       if (!controller.signal.aborted) {
-        const accepted = await onShare(url);
+        const accepted = await onShare(url,{url,type:response.type,song:songSummary(response.song)});
         if (controller.signal.aborted) return;
         if (accepted === false) setError("send_failed");
         else onClose();

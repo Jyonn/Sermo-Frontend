@@ -9,6 +9,8 @@ import { isStillfolioCollection, StillfolioPreview } from "./StillfolioPreview";
 import { isPockloShare, PockloShareCard } from "./PockloShareCard";
 import { CURRENT_RELEASE } from "../lib/pwaUpdate";
 import { needsContentUpgrade } from "../lib/contentCompatibility";
+import {isPockloSong} from '../lib/pockloSong';
+import {PockloSongCard} from './PockloSongCard';
 
 export function isSupportedExternalMedia(preview?: LinkPreviewDTO | null) {
   return !needsContentUpgrade(preview?.min_client_version, CURRENT_RELEASE.id)
@@ -19,6 +21,7 @@ export function ExternalMediaPreview({ preview,fitMedia=false }: { preview: Link
   if (!isSupportedExternalMedia(preview)) return <UnsupportedContentNotice minVersion={preview.min_client_version} title={preview.title || preview.site_name} url={preview.url} />;
   const monifaUrl=monifaShareUrl(preview.url);
   if(monifaUrl)return <MonifaOtpCard url={monifaUrl}/>;
+  if (isPockloSong(preview.provider_data)) return <PockloSongCard reference={preview.provider_data}/>;
   if (isMusicData(preview.provider_data)) return <MusicPreview music={preview.provider_data} />;
   if (isDouyinVideoData(preview.provider_data)) {
     return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} fitMedia={fitMedia} />;

@@ -4,6 +4,7 @@ import { useMusicPlayer } from "../lib/musicPlayer";
 import { musicBrand, sameMusic } from "../lib/musicBrand";
 import type { MusicProviderDataDTO } from "../types";
 import { SideDrawer } from "./SideDrawer";
+import {isPockloSong,cueLines} from '../lib/pockloSong';
 
 interface LyricLine {
   time: number;
@@ -49,6 +50,7 @@ function formatTime(value: number) {
 }
 
 export function isMusicData(value: unknown): value is MusicProviderDataDTO {
+  if(isPockloSong(value))return true;
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<MusicProviderDataDTO>;
   return ["netease_music", "qq_music", "kugou_music", "qishui_music", "apple_music", "kuwo_music"].includes(String(candidate.provider))
@@ -59,20 +61,22 @@ export function isMusicData(value: unknown): value is MusicProviderDataDTO {
     && Array.isArray(candidate.artists);
 }
 
-export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
+export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
   const { t } = useI18n();
   const player = useMusicPlayer();
+  const music=sameMusic(player.music,supplied)&&player.music?.provider==='pocklo_music'?player.music:supplied;
   const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [failedCover,setFailedCover]=useState<string>();
   const brand = musicBrand(music.provider);
   const active = sameMusic(player.music, music);
   const playing = active && player.playing;
   const currentTime = active ? player.time : 0;
   const duration = active ? player.duration : (music.duration_ms || 0) / 1000;
-  const audioUnavailable = !music.audio_url || (active && player.unavailable);
+  const audioUnavailable = music.provider==='pocklo_music'?(active&&(player.songError===404||player.songError===410)):!music.audio_url || (active && player.unavailable);
   const lyrics = useMemo(
-    () => combineLyrics(music.lyrics?.original, music.lyrics?.translation),
-    [music.lyrics?.original, music.lyrics?.translation]
+    ():LyricLine[] => music.lyrics?.cues?.length?cueLines(music.lyrics.cues):combineLyrics(music.lyrics?.original, music.lyrics?.translation),
+    [music.lyrics]
   );
   const activeLyricIndex = useMemo(() => {
     let index = -1;
@@ -82,7 +86,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
     }
     return index;
   }, [currentTime, lyrics]);
-  const artists = music.artists.join(" / ");
+  const artists = music.artists.join(" / ") || (music.provider==='pocklo_music'?t('pocklo.unknownArtist'):'');
 
   useEffect(() => {
     if (!drawerOpen || activeLyricIndex < 0) return;
@@ -92,7 +96,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
   const togglePlayback = () => { if (active) player.toggle(); else player.play(music); };
   const seek = (value: number) => { if (!active) player.play(music); player.seek(value); };
 
-  const cover = music.cover_url ? <img alt="" src={music.cover_url} /> : <span className="material-symbols-outlined">music_note</span>;
+  const cover = music.cover_url&&failedCover!==music.cover_url ? <img alt="" src={music.cover_url} onError={()=>setFailedCover(music.cover_url)} /> : <span className="material-symbols-outlined">music_note</span>;
 
   return (
     <>
@@ -110,7 +114,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
           <strong>{music.title}</strong>
           <span>{artists}</span>
-          <small><img alt="" src={brand.logo} />{brand.name}</small>
+          <small><img alt="" src={brand.logo} />{brand.name}{music.album?` · ${music.album}`:''}{duration?` · ${formatTime(duration)}`:''}</small>
         </button>
         <span className="netease-music-card-progress" style={{ "--music-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as CSSProperties} />
       </article>
@@ -157,7 +161,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
                 <span>{line.text}</span>
                 {line.translation ? <small>{line.translation}</small> : null}
               </p>
-            )) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}
+            )) : music.lyrics?.original?<p style={{whiteSpace:'pre-wrap'}}>{music.lyrics.original}</p>:<div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}
           </section>
           <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">
             <img alt="" src={brand.logo} style={{ width: 18, height: 18, borderRadius: "50%" }} />{brand.name}<span aria-hidden="true">↗</span>

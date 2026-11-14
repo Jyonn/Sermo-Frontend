@@ -519,7 +519,7 @@ export const api = {
     return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: search ? { q: search } : { offset }, signal });
   },
   pockloShare(id: string, operationId: string, signal: AbortSignal) {
-    return request<{ url: string }>("/users/me/pocklo/shares", { auth: true, responseFormat: "oauth", method: "POST",
+    return request<import('./pockloPicker').PockloSelection>("/users/me/pocklo/shares", { auth: true, responseFormat: "oauth", method: "POST",
       body: { resource_id: id, operation_id: operationId }, signal });
   },
   stillfolioConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {

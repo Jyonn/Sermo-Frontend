@@ -11,3 +11,6 @@
 .pocklo-share-open svg { width: 18px; height: 18px; }
 .pocklo-share-card a:hover { background: color-mix(in srgb, var(--brand-primary) 8%, transparent); color: var(--text-primary); }
 .pocklo-share-card a:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -3px; }
+.pocklo-song-state {display:flex;align-items:center;gap:12px;padding:16px;border:1px solid var(--line-soft);border-radius:16px;background:var(--bg-surface);color:var(--text-primary)}
+.pocklo-song-state>div {min-width:0;flex:1}.pocklo-song-state strong {overflow-wrap:anywhere}.pocklo-song-state p {margin:4px 0 0;font-size:12px;color:var(--text-muted)}
+.pocklo-song-state button {border:0;border-radius:8px;padding:8px;color:var(--brand-primary);background:transparent}

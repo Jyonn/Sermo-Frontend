@@ -1,6 +1,8 @@
 import type { MusicProviderDataDTO } from "../types";
+import pockloLogo from '../assets/pocklo-mark.svg';
 
 const BRANDS = {
+  pocklo_music: {name:'小兜 Pocklo',logo:pockloLogo,color:'#56785f'},
   netease_music: { name: "网易云音乐", logo: "/icons/netease-music.ico", color: "#e6433a" },
   qq_music: { name: "QQ音乐", logo: "/icons/qq-music.ico", color: "#25b96a" },
   kugou_music: { name: "酷狗音乐", logo: "/icons/kugou-music.ico", color: "#168fe2" },

@@ -5,17 +5,30 @@ import {sameMusic} from '../lib/musicBrand';
 import {claimMediaPlayback,releaseMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {usePlaybackWait} from './MediaWaitFeedback';
 import type {MusicProviderDataDTO} from '../types';
+import {isPockloSong,type SongReference,songLyrics} from '../lib/pockloSong';
+import {useSongResource} from '../lib/pockloSongResource';
 
 export function SquareMusicCover({music,uri}:{music:MusicProviderDataDTO;uri:string|null}){
+  return isPockloSong(music)?<PockloMusicCover reference={music}/>:<MusicCover music={music} uri={uri}/>;
+}
+function PockloMusicCover({reference}:{reference:SongReference}){
+  const {t}=useI18n();
+  const resource=useSongResource(reference);
+  const song=resource.song;
+  const error=resource.error??(song?.available===false?410:0);
+  const status=resource.loading?t('common.loading'):error?t(error===404?'pocklo.songRevoked':error===410?'pocklo.songMissing':'pocklo.songFailed'):undefined;
+  return <MusicCover music={{...reference,duration_ms:reference.duration_ms??undefined,...(song?{title:song.title,artists:song.artists,album:song.album,version:song.version,duration_ms:song.duration_ms??undefined,lyrics:songLyrics(song)}:{})}} uri={resource.cover??null} disabled={resource.loading||error===404||error===410} status={status} retry={error&&error!==404&&error!==410?resource.retry:undefined}/>;
+}
+function MusicCover({music,uri,disabled=false,status,retry}:{music:MusicProviderDataDTO;uri:string|null;disabled?:boolean;status?:string;retry?:()=>void}){
   const {t}=useI18n(),player=useMusicPlayer();
   const active=sameMusic(player.music,music),playing=active&&player.playing;
   const failed=active&&player.unavailable;
-  return <button type="button" className={`square-note-cover square-note-music${playing?' is-playing':''}`} style={{aspectRatio:1}} onClick={()=>{if(active)player.toggle();else player.play(music)}} aria-label={`${failed?t('common.retry'):playing?t('music.pause'):t('music.play')} · ${music.title}`} aria-pressed={playing} disabled={!music.audio_url}>
+  return <button type="button" className={`square-note-cover square-note-music${playing?' is-playing':''}`} style={{aspectRatio:1}} onClick={()=>{if(retry)retry();else if(active)player.toggle();else player.play(music)}} aria-label={`${status??(failed?t('common.retry'):playing?t('music.pause'):t('music.play'))} · ${music.title}`} aria-pressed={playing} disabled={disabled||(!isPockloSong(music)&&!music.audio_url)||(active&&(player.songError===404||player.songError===410))}>
     {uri?<img className="square-note-music-backdrop" src={uri} loading="lazy" alt=""/>:null}
     <span className="square-note-disc" aria-hidden="true">{uri?<img src={uri} loading="lazy" alt=""/>:<span className="material-symbols-outlined">music_note</span>}</span>
     <span className="square-note-play-control" aria-hidden="true">{active&&player.loading?<span className="media-wait-spinner"/>:<span className="material-symbols-outlined">{failed?'refresh':playing?'pause':'play_arrow'}</span>}</span>
     <span className="square-note-media-tag" aria-hidden="true"><span className="material-symbols-outlined">music_note</span></span>
-    {failed?<span className="square-note-play-status" role="status">{t('common.retry')}</span>:null}
+    {status||failed?<span className="square-note-play-status" role="status">{status??t('common.retry')}</span>:null}
   </button>;
 }
 
