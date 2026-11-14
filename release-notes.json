@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.1",
+  "id": "2026.11.15.2",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "语音转文字直接进入草稿",
+      "title": "花间来日，生日边饰焕新",
       "items": [
-        "右滑转文字后，识别结果直接填入输入框，修改后即可发送。",
-        "保留原有草稿，取消额外确认弹窗。"
+        "Tab 与聊天页加入玫瑰缎带、香槟金边线和花卉礼盒，让生日氛围贯穿日常聊天。",
+        "适配深浅色、手机与桌面，并保留自选聊天背景和气泡。"
       ]
     },
     "en": {
-      "title": "Voice transcription goes straight to your draft",
+      "title": "A fresh birthday finish",
       "items": [
-        "Slide right to add recognized speech directly to the input, ready to edit and send.",
-        "Existing drafts are preserved, with no extra confirmation dialog."
+        "Rose ribbons, champagne-gold borders and a floral gift bring birthday details to tabs and chats.",
+        "Refined for light and dark modes on mobile and desktop, with your chosen wallpapers and bubbles preserved."
       ]
     }
   }

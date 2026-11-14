@@ -1,0 +1,158 @@
+/* Flower-garden stationery: fixed-size edge details, fluid uninterrupted rules.
+   The wallpaper and bubble continue to belong to the conversation. */
+html[data-site-theme="birthday-botanical"] {
+  --birthday-edge-art: url("../assets/birthday/ribbon-edge.svg");
+  --birthday-edge-repeat: 360px 24px;
+  --birthday-edge-ink: #b39768;
+  --birthday-header-paper: #fbf7e9;
+  --birthday-header-grain: #a286580c;
+  --birthday-header-ink: #34483b;
+  --birthday-edge-shadow: #72573d16;
+}
+html[data-site-theme="birthday-botanical"][data-theme="dark"] {
+  --birthday-edge-ink: #bda574;
+  --birthday-header-paper: #283b30;
+  --birthday-header-grain: #e3c7a108;
+  --birthday-header-ink: #f5ecd8;
+  --birthday-edge-shadow: #0c161e30;
+}
+
+/* Tab surfaces use the existing scroll elevation; no opaque mobile slab. */
+html[data-site-theme="birthday-botanical"] .shell-authenticated {
+  --tab-header-paint:
+    repeating-linear-gradient(102deg, transparent 0 4px, var(--birthday-header-grain) 4px 4.5px, transparent 4.5px 9px),
+    var(--birthday-header-paper);
+}
+html[data-site-theme="birthday-botanical"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
+  border-bottom-color: var(--birthday-edge-ink);
+  box-shadow: inset 0 1px var(--birthday-header-grain);
+}
+html[data-site-theme="birthday-botanical"] body .tab-header-surface::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -10px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--birthday-edge-art) center bottom / var(--birthday-edge-repeat) repeat-x;
+}
+html[data-site-theme="birthday-botanical"] .tab-header-surface .page-toolbar {
+  position: relative;
+}
+html[data-site-theme="birthday-botanical"] .tab-header-surface .page-toolbar::after {
+  content: '';
+  position: absolute;
+  right: 20%;
+  bottom: -15px;
+  width: 92px;
+  height: 39px;
+  background: var(--birthday-gift) center bottom / contain no-repeat;
+  pointer-events: none;
+  z-index: 3;
+}
+html[data-site-theme="birthday-botanical"] .tab-header-surface.has-secondary .page-toolbar::after {
+  bottom: -5px;
+  opacity: .75;
+}
+html[data-site-theme="birthday-botanical"] .tab-header-surface .page-toolbar-actions .icon-button {
+  border: 1px solid color-mix(in srgb,var(--birthday-edge-ink) 46%,transparent);
+  background: color-mix(in srgb,var(--bg-elevated) 88%,transparent);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb,var(--birthday-rose) 8%,transparent);
+}
+
+/* Conversation edges are decoration only, including over custom wallpapers. */
+html[data-site-theme="birthday-botanical"] :is(.desktop-conversation-header,.topbar.conversation-topbar) {
+  overflow: visible;
+  border-bottom: 1px solid var(--birthday-edge-ink);
+  box-shadow: 0 4px 12px var(--birthday-edge-shadow);
+}
+html[data-site-theme="birthday-botanical"] :is(.desktop-conversation-header,.topbar.conversation-topbar).chat-background-default {
+  color: var(--birthday-header-ink);
+  background: var(--birthday-header-paper);
+}
+html[data-site-theme="birthday-botanical"] :is(.desktop-conversation-header,.topbar.conversation-topbar)::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -10px;
+  height: 24px;
+  z-index: 2;
+  background: var(--birthday-edge-art) center bottom / var(--birthday-edge-repeat) repeat-x;
+  pointer-events: none;
+}
+html[data-site-theme="birthday-botanical"] .desktop-conversation-header {
+  z-index: 2;
+}
+html[data-site-theme="birthday-botanical"] .chat-main-pane {
+  border-color: color-mix(in srgb,var(--birthday-edge-ink) 65%,var(--line-soft));
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .message-scroll {
+  padding-bottom: 44px;
+  scroll-padding-bottom: 44px;
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer {
+  border-top: 1px solid var(--birthday-edge-ink);
+  box-shadow: 0 -4px 14px var(--birthday-edge-shadow);
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer::before {
+  content: '';
+  position: absolute;
+  inset: -15px 0 auto;
+  height: 24px;
+  z-index: 2;
+  background: var(--birthday-edge-art) left top / var(--birthday-edge-repeat) repeat-x;
+  pointer-events: none;
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer::after {
+  content: '';
+  position: absolute;
+  right: 20px;
+  top: -35px;
+  width: 112px;
+  height: 48px;
+  background: var(--birthday-gift) center bottom / contain no-repeat;
+  pointer-events: none;
+  z-index: 3;
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer:focus-within::after {
+  opacity: .7;
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer :is(.mobile-quiet-input-wrap,.desktop-writing-desk-input) {
+  border-color: color-mix(in srgb,var(--birthday-edge-ink) 48%,var(--line-soft));
+}
+html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer :is(.mobile-quiet-input-wrap,.desktop-writing-desk-input):focus-within {
+  border-color: var(--birthday-rose);
+  box-shadow: 0 0 0 2px color-mix(in srgb,var(--birthday-rose) 14%,transparent);
+}
+
+@media (max-width:719px) {
+  html[data-site-theme="birthday-botanical"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header) {
+    border-bottom-color: transparent;
+    box-shadow: none;
+  }
+  html[data-site-theme="birthday-botanical"] body .shell.shell-authenticated .tab-header-surface:is(.tab-sticky-header,.square-feed-header)::before {
+    background: var(--tab-header-paint);
+    border-bottom-color: var(--birthday-edge-ink);
+  }
+  html[data-site-theme="birthday-botanical"] body .tab-header-surface::after {
+    left: calc((100vw - 100%) / -2);
+    right: calc((100vw - 100%) / -2);
+  }
+  html[data-site-theme="birthday-botanical"] .tab-header-surface .page-toolbar::after {
+    right: 20%;
+    width: 80px;
+    height: 34px;
+  }
+  html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer::after {
+    right: 14px;
+    top: -28px;
+    width: 92px;
+    height: 39px;
+  }
+}
+@media (max-height:500px) {
+  html[data-site-theme="birthday-botanical"] .chat-detail-scene > .composer::after {
+    width: 62px;
+    height: 27px;
+    top: -22px;
+  }
+}
