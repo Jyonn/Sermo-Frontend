@@ -521,6 +521,15 @@ export const api = {
   dropConnection(body?: {action:'connect';origin:string;path:string}|{action:'disconnect'}) {
     return request<{status?:string;authorize_url?:string;client_id?:string}>('/users/me/drop',{auth:true,responseFormat:'oauth',...(body?{method:'POST',body}:{})});
   },
+  dropDiaryPreview(url:string,signal:AbortSignal){
+    return request<import('./dropDiary').DropDiaryPreview>('/users/drop/preview',{auth:true,responseFormat:'oauth',method:'POST',body:{url},signal});
+  },
+  dropDiaryDetails(url:string,signal:AbortSignal){
+    return request<import('./dropDiary').DropDiaryPreview>('/users/drop/diary',{auth:true,responseFormat:'oauth',method:'POST',body:{url},signal});
+  },
+  dropDiaryAudio(url:string,recordingId:string,signal:AbortSignal){
+    return request<{status:'ready'|'gone'|'error';url?:string;expires_in?:number}>('/users/drop/audio',{auth:true,responseFormat:'oauth',method:'POST',body:{url,recording_id:recordingId},signal});
+  },
   dropEntries(query:string,offset:number,signal:AbortSignal){
     return request<{entries:unknown[];allowed_fields:string[];has_more:boolean;next_offset:number|null}>('/users/me/drop/entries',{auth:true,responseFormat:'oauth',query:{q:query,offset},signal});
   },

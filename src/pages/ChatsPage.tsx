@@ -47,6 +47,7 @@ import { ActionSheet } from "../components/ActionSheet";
 import { PockloDrawer } from "../components/PockloDrawer";
 import {DropDrawer} from '../components/DropDrawer';
 import {dropShareUrl} from '../lib/dropPicker';
+import {DropDiaryCard} from '../components/DropDiaryCard';
 import { StillfolioDrawer } from "../components/StillfolioDrawer";
 import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { pockloShareToken } from "../lib/pockloShare";
@@ -1231,7 +1232,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   const pageActive = usePageActive();
   const [currentPreview, setCurrentPreview] = useState<LinkPreviewDTO | null>(preview ?? null);
   const previewUrl = currentPreview?.url || preview?.url || url;
-  const isPollable = typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
+  const isPollable = !dropShareUrl(url) && !dropShareUrl(preview?.url) && typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
 
   useEffect(() => {
     setCurrentPreview(preview ?? null);
@@ -1266,6 +1267,8 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   const monifaUrl=monifaShareUrl(url)||monifaShareUrl(previewUrl);
   if(monifaUrl)return <MonifaOtpCard url={monifaUrl}/>;
+  const dropUrl=dropShareUrl(url)||dropShareUrl(previewUrl);
+  if(dropUrl)return <DropDiaryCard url={dropUrl}/>;
 
   if (currentPreview?.status === "pending") {
     const pendingHostname = hostnameFromUrl(previewUrl);
@@ -7701,7 +7704,7 @@ function LiveChatsPage({
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
       ]} />
       {selectedChatId && !submissionMode && !embeddedChat ? (
-        <DropDrawer key={`drop:${pockloScope}:${selectedChatId}`} open={dropPicker===pockloPickerKey} scope={pockloScope} returnError={dropReturnError} chatName={selectedChat?.title} onClose={()=>setDropPicker(null)} onShare={url=>selectedChatIdRef.current===selectedChatId?sendText(url):Promise.resolve(false)}/>
+        <DropDrawer key={`drop:${pockloScope}:${selectedChatId}`} open={dropPicker===pockloPickerKey} scope={pockloScope} returnError={dropReturnError} onClose={()=>setDropPicker(null)} onShare={url=>selectedChatIdRef.current===selectedChatId?sendText(url):Promise.resolve(false)}/>
       ):null}
       {selectedChatId && !submissionMode && !embeddedChat ? (
         <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPicker === pockloPickerKey} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}

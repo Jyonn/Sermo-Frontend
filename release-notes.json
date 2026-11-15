@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.6",
+  "id": "2026.11.15.7",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "更从容的音乐播放体验",
+      "title": "一滴日记卡片与限时阅读",
       "items": [
-        "音乐播放器重新排版，歌词独立滚动，播放控制始终可见，适配手机与桌面窗口。",
-        "卡片与悬浮播放器共用详情页，新增前后跳转十秒，歌词跟随更平稳。"
+        "选择一滴日记后直接发送，卡片展示文字摘要与分享倒计时。",
+        "点击卡片即可在友间阅读正文、播放声音与查看位置，分享到期后自动停止展示。"
       ]
     },
     "en": {
-      "title": "A calmer music player",
+      "title": "Drop diary cards and time-limited reading",
       "items": [
-        "A refined layout keeps playback controls visible while lyrics scroll independently on phones and desktops.",
-        "Cards and the floating player now share one detail view, with ten-second seeking and smoother lyric following."
+        "Selected Drop diaries send directly, with text excerpts and a share countdown on their cards.",
+        "Read diaries, play recordings and view shared locations in Frienden. Content closes automatically when its share expires."
       ]
     }
   }
