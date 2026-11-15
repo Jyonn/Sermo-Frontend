@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-type PickerProvider = "pocklo" | "stillfolio";
+type PickerProvider = "pocklo" | "stillfolio" | "drop";
 const storageKey = (provider: PickerProvider) => `frienden:${provider}-return`;
 
 export function rememberExternalPickerReturn(provider: PickerProvider, scope: string, path: string) {

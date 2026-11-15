@@ -16,6 +16,7 @@
 .more-apps-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:var(--line-soft);font-size:27px}
 .more-apps-icon.is-stillfolio{background:#ece8df}
 .more-apps-icon.is-pocklo{overflow:hidden;background:none}
+.more-apps-icon.is-drop{background:none}
 .more-apps-icon.is-pocklo img{width:100%;height:100%;object-fit:contain;border-radius:inherit}
 .more-apps-icon img{width:36px;height:36px}
 .more-apps-icon.is-chronelle{overflow:hidden;background:none}

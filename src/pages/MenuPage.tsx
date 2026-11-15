@@ -27,6 +27,8 @@ import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
 import { PockloDrawer } from "../components/PockloDrawer";
+import {DropDrawer} from '../components/DropDrawer';
+import {DROP_ICON} from '../lib/dropPicker';
 import { StillfolioDrawer } from "../components/StillfolioDrawer";
 import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { chronelleOrigin } from "../lib/chronelleOrigin";
@@ -477,8 +479,10 @@ export default function MenuPage() {
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [chronelleDetailsOpen, setChronelleDetailsOpen] = useState(false);
   const [pockloOpen, setPockloOpen] = useState(false);
+  const [dropOpen,setDropOpen]=useState(false);
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
   const pockloReturnError = useExternalPickerReturn("pocklo", pockloScope, () => { setMoreAppsOpen(true); setPockloOpen(true); });
+  const dropReturnError=useExternalPickerReturn('drop',pockloScope,()=>{setMoreAppsOpen(true);setDropOpen(true)});
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const stillfolioReturnError = useExternalPickerReturn("stillfolio", pockloScope, () => {
@@ -2293,6 +2297,7 @@ export default function MenuPage() {
               <span><strong>{t("chronelle.title")}</strong><small>{session ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="more-apps-row" type="button" onClick={()=>setDropOpen(true)}><span className="more-apps-icon is-drop"><img src={DROP_ICON} alt=""/></span><span><strong>{t('drop.name')}</strong><small>{t('drop.hint')}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
             <button className="more-apps-row" type="button" onClick={() => setPockloOpen(true)}>
               <span className="more-apps-icon is-pocklo"><img alt="" src={pockloIcon} /></span>
               <span><strong>{t("pocklo.name")}</strong><small>{t("pocklo.menuHint")}</small></span>
@@ -2323,6 +2328,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
       <PockloDrawer key={pockloScope} open={pockloOpen} onClose={() => setPockloOpen(false)} scope={pockloScope} returnError={pockloReturnError} />
+      <DropDrawer key={'drop:'+pockloScope} open={dropOpen} onClose={()=>setDropOpen(false)} scope={pockloScope} returnError={dropReturnError}/>
       <SideDrawer historyKey="chronelle" open={chronelleDetailsOpen} onRouteOpen={() => setChronelleDetailsOpen(true)}
         onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
         <div className="more-apps-detail menu-settings-section">

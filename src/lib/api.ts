@@ -518,6 +518,15 @@ export const api = {
   pockloConnection(body?: { action: "connect"; origin: string; path: string } | { action: "disconnect" }) {
     return request<{ status?: string; authorize_url?: string }>("/users/me/pocklo", { auth: true, responseFormat: "oauth", ...(body ? { method: "POST", body } : {}) });
   },
+  dropConnection(body?: {action:'connect';origin:string;path:string}|{action:'disconnect'}) {
+    return request<{status?:string;authorize_url?:string;client_id?:string}>('/users/me/drop',{auth:true,responseFormat:'oauth',...(body?{method:'POST',body}:{})});
+  },
+  dropEntries(query:string,offset:number,signal:AbortSignal){
+    return request<{entries:unknown[];allowed_fields:string[];has_more:boolean;next_offset:number|null}>('/users/me/drop/entries',{auth:true,responseFormat:'oauth',query:{q:query,offset},signal});
+  },
+  dropShare(entryIds:string[],fields:string[],expiresIn:number,operationId:string,signal:AbortSignal){
+    return request<import('./dropPicker').DropShare>('/users/me/drop/shares',{auth:true,responseFormat:'oauth',method:'POST',body:{entry_ids:entryIds,fields,expires_in:expiresIn,operation_id:operationId},signal});
+  },
   pockloFiles(id: string, offset: number, signal: AbortSignal, search: string) {
     return request<import("../components/PockloDrawer").PockloFolder>("/users/me/pocklo/files" + (id ? "/" + encodeURIComponent(id) : ""), { auth: true, responseFormat: "oauth", query: search ? { q: search } : { offset }, signal });
   },

@@ -45,6 +45,8 @@ import { ComposerMoreActions } from "../components/ComposerMoreActions";
 import { ComposerActionsPopover } from "../components/ComposerActionsPopover";
 import { ActionSheet } from "../components/ActionSheet";
 import { PockloDrawer } from "../components/PockloDrawer";
+import {DropDrawer} from '../components/DropDrawer';
+import {dropShareUrl} from '../lib/dropPicker';
 import { StillfolioDrawer } from "../components/StillfolioDrawer";
 import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { pockloShareToken } from "../lib/pockloShare";
@@ -2749,9 +2751,12 @@ function LiveChatsPage({
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
   const [composerActionSheet, setComposerActionSheet] = useState<"file" | null>(null);
   const [pockloPicker, setPockloPicker] = useState<string | null>(null);
+  const [dropPicker,setDropPicker]=useState<string|null>(null);
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
   const pockloPickerKey = `${pockloScope}:${activeChatRouteValue}`;
   useEffect(() => setPockloPicker(null), [pockloPickerKey]);
+  useEffect(()=>setDropPicker(null),[pockloPickerKey]);
+  const dropReturnError=useExternalPickerReturn('drop',pockloScope,()=>setDropPicker(pockloPickerKey));
   const pockloReturnError = useExternalPickerReturn("pocklo", pockloScope, () => setPockloPicker(pockloPickerKey));
   const [stillfolioPicker, setStillfolioPicker] = useState<string | null>(null);
   useEffect(() => setStillfolioPicker(null), [pockloPickerKey]);
@@ -5678,7 +5683,7 @@ function LiveChatsPage({
 
   const retryFailedMessage = async (message: ChatMessage) => {
     if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
-    if (message.kind === "text" && !pockloShareToken(message.text) && !stillfolioShareUrl(message.text)) {
+    if (message.kind === "text" && !pockloShareToken(message.text) && !stillfolioShareUrl(message.text) && !dropShareUrl(message.text)) {
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== message.clientId),
@@ -7613,7 +7618,7 @@ function LiveChatsPage({
   const canVoiceCall = voiceCallsEnabled && Boolean(displayedChat)
     && (!displayedChat?.purpose || displayedChat.purpose === 'normal');
   const startVoiceCall=()=>{if(!canVoiceCall||!displayedChat)return;setComposerMoreOpen(false);setDesktopComposerTool(null);setQuickActionsExpanded(false);openVoiceCall(displayedChat.id)};
-  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onCall={canVoiceCall?startVoiceCall:undefined} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
+  const composerMoreActions = <ComposerMoreActions open={composerMoreOpen} disabled={composerBusy} footprintEnabled={!submissionMode} footprintBusy={travelMapSaving} onFile={() => setComposerActionSheet("file")} onStillfolio={chooseStillfolio} onDrop={!submissionMode&&!embeddedChat&&selectedChatId?()=>{setComposerMoreOpen(false);setDropPicker(pockloPickerKey)}:undefined} onCall={canVoiceCall?startVoiceCall:undefined} onFootprint={() => void openComposerFootprintActions()} compact={mobileComposerLayout} onToggleLayout={narrowComposerLayout ? undefined : () => { setCompactComposerOverride(!mobileComposerLayout); setComposerMoreOpen(false); setDesktopComposerTool(null); setMobileVoiceReady(false); setEmojiPickerOpen(false); }} />;
 
   const openMessageSearch = () => {
     setMessageSearchKeyword("");
@@ -7695,6 +7700,9 @@ function LiveChatsPage({
         ] : []),
         { key: "local", label: t("cloudResources.chooseLocal"), description: t("composer.localFileHint"), icon: <span className="material-symbols-outlined">upload_file</span>, disabled: composerBusy, onSelect: () => { setComposerMoreOpen(false); fileInputRef.current?.click(); } },
       ]} />
+      {selectedChatId && !submissionMode && !embeddedChat ? (
+        <DropDrawer key={`drop:${pockloScope}:${selectedChatId}`} open={dropPicker===pockloPickerKey} scope={pockloScope} returnError={dropReturnError} chatName={selectedChat?.title} onClose={()=>setDropPicker(null)} onShare={url=>selectedChatIdRef.current===selectedChatId?sendText(url):Promise.resolve(false)}/>
+      ):null}
       {selectedChatId && !submissionMode && !embeddedChat ? (
         <PockloDrawer key={`${pockloScope}:${selectedChatId}`} open={pockloPicker === pockloPickerKey} scope={pockloScope} returnError={pockloReturnError} chatName={selectedChat?.title}
           onClose={() => setPockloPicker(null)}
