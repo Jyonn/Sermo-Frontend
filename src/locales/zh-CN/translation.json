@@ -1468,6 +1468,8 @@
   "menu.languageUpdated": "语言已更新",
   "menu.languageUpdateFailed": "语言更新失败",
   "menu.appearance": "外观",
+  "music.backTen": "后退 10 秒",
+  "music.forwardTen": "快进 10 秒",
   "drop.name": "Drop · 一滴",
   "drop.shortName": "一滴",
   "drop.hint": "留住此刻，选择日记与好友分享",

@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.5",
+  "id": "2026.11.15.6",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "一滴日记，分享进聊天",
+      "title": "更从容的音乐播放体验",
       "items": [
-        "应用与工具正式加入 Drop · 一滴，可连接账号、管理授权并打开应用。",
-        "聊天操作栏新增一滴入口，选择日记与公开字段，确认后分享至当前会话。"
+        "音乐播放器重新排版，歌词独立滚动，播放控制始终可见，适配手机与桌面窗口。",
+        "卡片与悬浮播放器共用详情页，新增前后跳转十秒，歌词跟随更平稳。"
       ]
     },
     "en": {
-      "title": "Share diary moments from Drop",
+      "title": "A calmer music player",
       "items": [
-        "Drop joins Apps & tools with account connection and authorization management.",
-        "Choose diary entries and sharing fields from the chat toolbar, then confirm sharing to your current chat."
+        "A refined layout keeps playback controls visible while lyrics scroll independently on phones and desktops.",
+        "Cards and the floating player now share one detail view, with ten-second seeking and smoother lyric following."
       ]
     }
   }

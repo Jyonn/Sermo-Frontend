@@ -1470,6 +1470,8 @@
   "menu.languageUpdated": "Language updated",
   "menu.languageUpdateFailed": "Could not update language",
   "menu.appearance": "Appearance",
+  "music.backTen": "Back 10 seconds",
+  "music.forwardTen": "Forward 10 seconds",
   "drop.name": "Drop · 一滴",
   "drop.shortName": "Drop",
   "drop.hint": "Keep a moment. Share selected diary entries.",
