@@ -1,0 +1,19 @@
+.message-context-lock-info {
+  contain: inline-size;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 3px 5px 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+.message-context-lock-info .member-avatar-stack { width: 100%; gap: 7px; }
+.message-context-lock-info .member-avatar-stack-copy { flex: 1; }
+.message-context-lock-info .member-avatar-stack-copy > span { white-space: nowrap; }
+.message-lock-label { display: flex; align-items: baseline; min-width: 0; gap: 3px; }
+.message-lock-label > span { flex-shrink: 0; }
+.message-lock-label > .message-lock-name { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }

@@ -1,6 +1,7 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
 import {useActivityOverlay} from '../lib/activityOverlay';
 import {MonifaOtpCard} from '../components/MonifaOtpCard';
+import {MessageLockAttribution} from '../components/MessageLockAttribution';
 import {monifaShareUrl} from '../lib/monifa';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
@@ -1702,6 +1703,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onToggleSelection,
   selected,
   selectionMode,
+  messageTitle,
 }: MessageBubbleRowProps) {
   const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
@@ -1773,6 +1775,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
         <div
           ref={bubbleRef}
           data-message-id={typeof message.id === "number" ? message.id : undefined}
+          title={messageTitle}
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
@@ -1932,7 +1935,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selfAvatarName,
   selfAvatarUri,
   selfIsPermanentVip,
-  renderMessageFooter,
+  messageTitle,
   systemContext,
 }: MessageGroupBlockProps) {
   const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
@@ -2085,7 +2088,6 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
                 selectedClientIds={selectedClientIds}
                 selectionMode={selectionMode}
               />
-              {row.messages.map((message) => renderMessageFooter?.(message))}
             </Fragment>
           ) : (
             <Fragment key={row.message.clientId}>
@@ -2096,6 +2098,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
                 isFirst={row.startIndex === 0}
                 isLast={row.startIndex === group.messages.length - 1}
                 message={row.message}
+                messageTitle={messageTitle?.(row.message)}
                 onOpenImage={onOpenImage}
                 onOpenVideo={onOpenVideo}
                 onOpenActions={onOpenActions}
@@ -2104,7 +2107,6 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
                 selected={selectedClientIds.includes(row.message.clientId)}
                 selectionMode={selectionMode}
               />
-              {renderMessageFooter?.(row.message)}
             </Fragment>
           ))}
         </div>
@@ -2120,7 +2122,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   && prev.selfAvatarName === next.selfAvatarName
   && prev.selfAvatarUri === next.selfAvatarUri
   && prev.selfIsPermanentVip === next.selfIsPermanentVip
-  && prev.renderMessageFooter === next.renderMessageFooter
+  && prev.messageTitle === next.messageTitle
   && prev.selectionMode === next.selectionMode
   && prev.selectedClientIds.join("|") === next.selectedClientIds.join("|")
   && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds)
@@ -2244,6 +2246,7 @@ function estimateMessageGroupHeight(group: MessageGroup) {
 }
 
 interface MessageBubbleRowProps {
+  messageTitle?: string;
   bubbleStyle?: ChatBubbleStyle;
   from: "self" | "other";
   isEntering: boolean;
@@ -2282,7 +2285,7 @@ interface MessageGroupBlockProps {
   selfAvatarName?: string;
   selfAvatarUri?: string;
   selfIsPermanentVip?: boolean;
-  renderMessageFooter?: (message: ChatMessage) => ReactNode;
+  messageTitle?: (message: ChatMessage) => string | undefined;
 }
 
 interface MessageMenuState {
@@ -3346,6 +3349,7 @@ function LiveChatsPage({
     const menu = messageMenuRef.current;
     if (!menu || !messageMenu) return;
     menu.style.setProperty("--message-menu-shift-x", "0px");
+    menu.style.setProperty("--message-menu-shift-y", "0px");
     const rect = menu.getBoundingClientRect();
     const safeInset = 12;
     let shift = 0;
@@ -3354,7 +3358,10 @@ function LiveChatsPage({
       shift -= rect.right + shift - (window.innerWidth - safeInset);
     }
     menu.style.setProperty("--message-menu-shift-x", `${Math.round(shift)}px`);
-  }, [messageMenu]);
+    const shiftY = rect.top < safeInset ? safeInset - rect.top
+      : rect.bottom > window.innerHeight - safeInset ? window.innerHeight - safeInset - rect.bottom : 0;
+    menu.style.setProperty("--message-menu-shift-y", `${Math.round(shiftY)}px`);
+  }, [messageMenu, pinnedMessages]);
 
   useEffect(() => {
     if (!cacheScope) return;
@@ -8484,11 +8491,11 @@ function LiveChatsPage({
       {selectedChat?.type === "group" ? <GroupCopySheet key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId} open={groupCopyOpen} onClose={() => setGroupCopyOpen(false)} {...copySuggestions} /> : null}
       <SideDrawer
         className={`pinned-message-drawer chat-background-${currentUserMe?.chat_background_theme ?? "default"}`}
+        headerless
         historyKey="pinned-messages"
         onRouteOpen={() => setPinnedDrawerOpen(true)}
         open={pinnedDrawerOpen}
         title={t("pin.messages")}
-        titleAccessory={<span className="pinned-message-title-count">{orderedPinnedMessages.length}</span>}
         onClose={() => setPinnedDrawerOpen(false)}
       >
         <ChatPreview
@@ -8501,19 +8508,9 @@ function LiveChatsPage({
           onMessageAction={openPinnedMessageMenu}
           onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
           onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
-          renderMessageFooter={(message) => {
+          messageTitle={(message) => {
             const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
-            if (!pin?.pinned_by_users.length) return null;
-            return (
-              <div className="pinned-message-attribution" key={`pin-by:${message.message_id}`}>
-                {pin.pinned_by_users.map((user) => (
-                  <span className="pinned-message-attribution-person" key={`${message.message_id}:${user.user_id}`}>
-                    <UserAvatar className="pinned-message-attribution-avatar" name={user.name} uri={user.avatar_uri} cacheKey={user.avatar_cache_key} />
-                    <span>{t("pin.by", { names: user.name })}</span>
-                  </span>
-                ))}
-              </div>
-            );
+            return pin?.pinned_by_users.length ? t("pin.by", { names: pin.pinned_by_users.map(user => user.name).join('、') }) : undefined;
           }}
           separateMessages
           showSelfAuthors
@@ -9443,6 +9440,7 @@ function LiveChatsPage({
               top: messageMenu.anchorY,
             }}
           >
+            <MessageLockAttribution users={pinnedMessages.find(pin => pin.message.message_id === messageMenu.message.id)?.pinned_by_users ?? []}/>
             {(() => {
               const primaryActions: ReactNode[] = [];
               const secondaryActions: ReactNode[] = [];
@@ -9950,7 +9948,7 @@ export function ChatPreview({
   showDividers = true,
   showSelfAuthors = false,
   separateMessages = false,
-  renderMessageFooter,
+  messageTitle,
 }: {
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string | null;
@@ -9969,7 +9967,7 @@ export function ChatPreview({
   showDividers?: boolean;
   showSelfAuthors?: boolean;
   separateMessages?: boolean;
-  renderMessageFooter?: (message: ChatMessageDTO) => ReactNode;
+  messageTitle?: (message: ChatMessageDTO) => string | undefined;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
@@ -10065,10 +10063,10 @@ export function ChatPreview({
           selfAvatarName={firstPersonAuthor?.name}
           selfAvatarUri={firstPersonAuthor?.avatar_uri}
           selfIsPermanentVip={firstPersonAuthor?.is_permanent_vip}
-          renderMessageFooter={renderMessageFooter ? (message) => {
-            if (typeof message.id !== "number") return null;
+          messageTitle={messageTitle ? (message) => {
+            if (typeof message.id !== "number") return undefined;
             const source = dtoById.get(message.id);
-            return source ? renderMessageFooter(source) : null;
+            return source ? messageTitle(source) : undefined;
           } : undefined}
         />
       ))}

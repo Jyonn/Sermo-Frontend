@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.7",
+  "id": "2026.11.15.8",
   "publishedAt": "2026-11-15",
   "locales": {
     "zh-CN": {
-      "title": "一滴日记卡片与限时阅读",
+      "title": "更清爽的锁定消息",
       "items": [
-        "选择一滴日记后直接发送，卡片展示文字摘要与分享倒计时。",
-        "点击卡片即可在友间阅读正文、播放声音与查看位置，分享到期后自动停止展示。"
+        "锁定消息页移除顶部栏和气泡旁的锁定者说明，保留完整聊天外观。",
+        "长按消息可在操作栏查看锁定者头像与人数，桌面悬停也可查看。"
       ]
     },
     "en": {
-      "title": "Drop diary cards and time-limited reading",
+      "title": "Cleaner locked messages",
       "items": [
-        "Selected Drop diaries send directly, with text excerpts and a share countdown on their cards.",
-        "Read diaries, play recordings and view shared locations in Frienden. Content closes automatically when its share expires."
+        "Locked messages keep their chat appearance without a header row or inline locker labels.",
+        "Long-press to see who locked a message above its actions, or hover on desktop."
       ]
     }
   }
