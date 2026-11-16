@@ -13,7 +13,7 @@ import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
-import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
+import {LinkPreviewCard} from '../components/LinkPreviewCard';
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { ExplorerBanner } from "../components/ExplorerActivity";
 import { BgmBanner } from "../components/BgmActivity";
@@ -343,9 +343,9 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
-      {statement.external_media?.status === "ready" ? (
+      {statement.external_media ? (
         <div className="square-external-media" onClick={(event) => event.stopPropagation()}>
-          <ExternalMediaPreview preview={statement.external_media} />
+          <LinkPreviewCard preview={statement.external_media} />
         </div>
       ) : null}
       {statement.chat_record?.items?.length ? (
@@ -1524,12 +1524,8 @@ export default function SquarePage() {
     if (!candidate || externalMediaResolving) return;
     setExternalMediaResolving(true);
     try {
-      let preview = await api.resolveExternalMedia(candidate);
-      for (let attempt = 0; preview.status === "pending" && attempt < 11; attempt += 1) {
-        await new Promise((resolve) => window.setTimeout(resolve, 1000));
-        preview = await api.resolveExternalMedia(candidate);
-      }
-      if (preview.status !== "ready" || !preview.supported || !isSupportedExternalMedia(preview)) {
+      const preview = await api.resolveExternalMedia(candidate);
+      if (preview.status === "none" || !preview.url) {
         showToast(t("square.externalMediaUnsupported"), "error");
         return;
       }

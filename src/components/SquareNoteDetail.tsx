@@ -7,7 +7,7 @@ import {useMediaSource} from '../lib/useMediaSource';
 import {claimMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {UserAvatar} from './UserAvatar';
 import {OfficialBadge} from './OfficialBadge';
-import {ExternalMediaPreview} from './ExternalMediaPreview';
+import {LinkPreviewCard} from './LinkPreviewCard';
 import {isStillfolioCollection,revalidateCollection} from './StillfolioPreview';
 import {MediaLightbox} from './ImageLightbox';
 import {MediaMetadataPanel} from './MediaMetadataPanel';
@@ -53,7 +53,7 @@ export function SquareNoteDetail(p:Props){
   return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
     <header className="square-reader-header"><button className={p.panel?'native-panel-back':undefined} aria-label={t('common.back')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">arrow_back</span></button><button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button><button aria-label={t('square.share')} onClick={p.onShare} type="button"><span className="material-symbols-outlined">ios_share</span></button>{s.can_delete||s.can_pin||s.can_mute?<button aria-label={t('common.more')} onClick={p.onMore} type="button"><span className="material-symbols-outlined">more_horiz</span></button>:null}{p.panel?<button className="native-panel-close" aria-label={t('common.close')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">close</span></button>:null}</header>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
-      {!photos.length&&s.external_media?.status==='ready'?<div className="square-reader-external"><ExternalMediaPreview preview={s.external_media} fitMedia/></div>:null}
+      {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} fitMedia/></div>:null}
       {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={p.onVideo}/>:null}
       {audio?<audio className="square-reader-audio" src={audio.uri} controls preload="metadata" onPlay={event=>claimMediaPlayback(event.currentTarget)}/>:null}
       {s.chat_record?<button className="square-reader-chat-record" onClick={()=>window.dispatchEvent(new CustomEvent('sermo:forward-bundle',{detail:s.chat_record}))} type="button"><span className="material-symbols-outlined">forum</span>{t('message.forwardBundleSnapshot')}<span className="material-symbols-outlined">chevron_right</span></button>:null}

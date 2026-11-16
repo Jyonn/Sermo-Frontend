@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.15.8",
-  "publishedAt": "2026-11-15",
+  "id": "2026.11.16.1",
+  "publishedAt": "2026-11-16",
   "locales": {
     "zh-CN": {
-      "title": "更清爽的锁定消息",
+      "title": "聊天与广场共用链接卡片",
       "items": [
-        "锁定消息页移除顶部栏和气泡旁的锁定者说明，保留完整聊天外观。",
-        "长按消息可在操作栏查看锁定者头像与人数，桌面悬停也可查看。"
+        "广场外部分享支持聊天中的全部链接卡片，包括一滴、小兜、Monifa 和普通网页。",
+        "发布预览、列表、瀑布流与详情共用卡片，保留播放、限时阅读和验证码刷新等交互。"
       ]
     },
     "en": {
-      "title": "Cleaner locked messages",
+      "title": "Shared link cards across chat and Square",
       "items": [
-        "Locked messages keep their chat appearance without a header row or inline locker labels.",
-        "Long-press to see who locked a message above its actions, or hover on desktop."
+        "Square accepts every chat link card, including Drop, Pocklo, Monifa and ordinary websites.",
+        "Composer previews, feeds and details share the same cards, with playback, expiring diaries and refreshable codes."
       ]
     }
   }

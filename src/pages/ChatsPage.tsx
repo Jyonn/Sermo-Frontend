@@ -1,8 +1,6 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
 import {useActivityOverlay} from '../lib/activityOverlay';
-import {MonifaOtpCard} from '../components/MonifaOtpCard';
 import {MessageLockAttribution} from '../components/MessageLockAttribution';
-import {monifaShareUrl} from '../lib/monifa';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
@@ -48,7 +46,6 @@ import { ActionSheet } from "../components/ActionSheet";
 import { PockloDrawer } from "../components/PockloDrawer";
 import {DropDrawer} from '../components/DropDrawer';
 import {dropShareUrl} from '../lib/dropPicker';
-import {DropDiaryCard} from '../components/DropDiaryCard';
 import { StillfolioDrawer } from "../components/StillfolioDrawer";
 import { useExternalPickerReturn } from "../lib/externalPickerReturn";
 import { pockloShareToken } from "../lib/pockloShare";
@@ -96,7 +93,7 @@ import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { getChatLayoutDiagnostics, recordChatLayout } from "../lib/chatLayoutDiagnostics";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
-import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
+import {LinkPreviewCard} from '../components/LinkPreviewCard';
 import { UnsupportedContentNotice } from "../components/UnsupportedContentNotice";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { PageTabs } from "../components/PageTabs";
@@ -453,14 +450,6 @@ function extractFirstMessageUrl(text: string) {
   const match = TEXT_URL_RE.exec(text);
   TEXT_URL_RE.lastIndex = 0;
   return match ? normalizeMessageUrl(match[0]) : null;
-}
-
-function hostnameFromUrl(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
-  }
 }
 
 const AUDIO_WAVE_PATTERN = [0.34, 0.58, 0.44, 0.76, 0.41, 0.66, 0.52, 0.84, 0.49, 0.7, 0.39, 0.62, 0.47, 0.8];
@@ -1229,106 +1218,6 @@ function LinkedMessageText({ hiddenUrl, mentions = [], text, prefix }: { hiddenU
   );
 }
 
-const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId, preview, url }: { messageId: number | string; preview?: LinkPreviewDTO | null; url: string }) {
-  const pageActive = usePageActive();
-  const [currentPreview, setCurrentPreview] = useState<LinkPreviewDTO | null>(preview ?? null);
-  const previewUrl = currentPreview?.url || preview?.url || url;
-  const isPollable = !dropShareUrl(url) && !dropShareUrl(preview?.url) && typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
-
-  useEffect(() => {
-    setCurrentPreview(preview ?? null);
-  }, [preview?.url, preview?.status, preview?.title, preview?.description, preview?.image_url, preview?.site_name, preview?.provider_data]);
-
-  useEffect(() => {
-    if (!isPollable || !pageActive) return;
-
-    let cancelled = false;
-    let attempts = 0;
-    let timer: number | null = null;
-
-    const poll = async () => {
-      attempts += 1;
-      try {
-        const nextPreview = await api.getMessageLinkPreview(messageId);
-        if (cancelled) return;
-        setCurrentPreview(nextPreview);
-        if (nextPreview.status !== "pending" || attempts >= 12) return;
-      } catch {
-        if (cancelled || attempts >= 12) return;
-      }
-      timer = window.setTimeout(poll, 2000);
-    };
-
-    timer = window.setTimeout(poll, 900);
-    return () => {
-      cancelled = true;
-      if (timer !== null) window.clearTimeout(timer);
-    };
-  }, [isPollable, messageId, pageActive]);
-
-  const monifaUrl=monifaShareUrl(url)||monifaShareUrl(previewUrl);
-  if(monifaUrl)return <MonifaOtpCard url={monifaUrl}/>;
-  const dropUrl=dropShareUrl(url)||dropShareUrl(previewUrl);
-  if(dropUrl)return <DropDiaryCard url={dropUrl}/>;
-
-  if (currentPreview?.status === "pending") {
-    const pendingHostname = hostnameFromUrl(previewUrl);
-    return (
-      <a className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")} href={url || previewUrl} onClick={(event) => event.stopPropagation()} rel="noreferrer" target="_blank">
-        <div className="message-link-preview-text">
-          <span className="message-link-preview-site">{pendingHostname ? pendingHostname.toUpperCase() : i18n.t("link.preview")}</span>
-          <span className="message-link-preview-title shimmer-line" />
-          <span className="message-link-preview-desc shimmer-line short" />
-        </div>
-        <div className="message-link-preview-image shimmer-block" />
-      </a>
-    );
-  }
-
-  const unavailable = !currentPreview || currentPreview.status === "none" || currentPreview.status === "failed";
-  if (unavailable) {
-    const unavailableHostname = hostnameFromUrl(previewUrl);
-    return (
-      <a
-        className="message-link-preview-card no-image is-unavailable"
-        href={url || previewUrl}
-        onClick={(event) => event.stopPropagation()}
-        rel="noreferrer"
-        target="_blank"
-      >
-        <div className="message-link-preview-text">
-          <strong className="message-link-preview-title">{unavailableHostname ? unavailableHostname.toUpperCase() : i18n.t("link.preview")}</strong>
-        </div>
-        <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>
-      </a>
-    );
-  }
-
-  const hostname = hostnameFromUrl(currentPreview.url || "");
-  if (isSupportedExternalMedia(currentPreview)) return <ExternalMediaPreview preview={currentPreview} />;
-  if (currentPreview.min_client_version && currentPreview.provider_data) return <ExternalMediaPreview preview={currentPreview} />;
-  const rawTitle = currentPreview.title || hostname || currentPreview.url || i18n.t("link.title");
-  const title = hostname && rawTitle.trim().toLowerCase() === hostname.toLowerCase()
-    ? hostname.toUpperCase()
-    : rawTitle;
-
-  return (
-    <a
-      className={`message-link-preview-card ${currentPreview.image_url ? "has-image" : "no-image"}`}
-      href={url || currentPreview.url}
-      onClick={(event) => event.stopPropagation()}
-      rel="noreferrer"
-      target="_blank"
-    >
-      <div className="message-link-preview-text">
-        <strong className="message-link-preview-title">{title}</strong>
-        {currentPreview.description ? <span className="message-link-preview-desc">{currentPreview.description}</span> : null}
-      </div>
-      {currentPreview.image_url ? <img alt="" className="message-link-preview-image" loading="lazy" src={currentPreview.image_url} /> : <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>}
-    </a>
-  );
-});
-
 export function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): ChatMessageDTO[] {
   return items.map((item, index) => ({
     message_id: -(index + 1),
@@ -1639,7 +1528,7 @@ function renderMessageContent(
           <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} prefix={prefix} />
         </span>
       ) : null}
-      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} />
+      <LinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} />
     </div>
   );
 }

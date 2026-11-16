@@ -1,0 +1,24 @@
+:is(.square-external-media,.square-reader-external,.square-note-external,.square-editor-external) { min-width: 0; }
+:is(.square-note-external,.square-editor-external) > * { width: 100%; max-width: 100%; box-sizing: border-box; }
+.square-note-external { overflow: hidden; container: shared-link-cover / inline-size; }
+.square-note-external .drop-diary-card { border-radius: 0; }
+.square-note-external .square-note-cover { border-radius: 0; }
+.square-editor-external { position: relative; width: min(100%,360px); margin-block: 12px 20px; }
+.square-editor-external > .square-editor-remove { position: absolute; z-index: 2; top: 6px; right: 6px; }
+@container shared-link-cover (max-width:260px) {
+  .message-link-preview-card { grid-template-columns: minmax(0,1fr); height: auto; max-height: none; }
+  .message-link-preview-card .message-link-preview-image { width: 100%; max-height: 150px; }
+  .drop-diary-card .drop-diary-paper { padding: 20px 14px; }
+  .drop-diary-card .square-note-lettering { font-size: 14px; }
+  .drop-diary-card .drop-diary-footer { flex-wrap: wrap; }
+  .drop-diary-card .drop-diary-expiry { font-size: 9px; }
+  .monifa-otp-card { padding: 12px; }
+  .monifa-otp-card header { gap: 4px; }
+  .monifa-otp-brand { gap: 3px; font-size: 10px; letter-spacing: .04em; }
+  .monifa-otp-card .monifa-otp-code > span:first-child { font-size: clamp(18px,9cqi,24px); white-space: nowrap; }
+  .monifa-otp-code > span:last-child { flex-shrink: 0; }
+  .monifa-otp-card footer { flex-wrap: wrap; gap: 4px; }
+  .pocklo-share-main { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 10px; }
+  .pocklo-share-copy { width: 100%; }
+  .pocklo-share-open { flex-basis: 30px; }
+}
