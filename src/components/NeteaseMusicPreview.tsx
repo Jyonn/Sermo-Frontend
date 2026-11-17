@@ -59,7 +59,7 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
         </button>
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
           <strong title={music.title}>{music.title}</strong>
-          {artists?<span title={artists}>{artists}</span>:null}
+          {artists?<><i aria-hidden="true">·</i><span title={artists}>{artists}</span></>:null}
         </button>
         <button className="netease-music-source" onClick={() => setDrawerOpen(true)} type="button">
           <img alt="" src={brand.logo}/>

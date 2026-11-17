@@ -1,18 +1,18 @@
 {
-  "id": "2026.11.17.1",
+  "id": "2026.11.17.2",
   "publishedAt": "2026-11-17",
   "locales": {
     "zh-CN": {
-      "title": "更舒展的音乐卡片",
+      "title": "更紧凑的音乐卡片",
       "items": [
-        "歌名与歌手集中呈现，来源移至独立底栏，长歌名支持两行显示。",
+        "歌名与歌手合并为一行，来源在下一行展示，卡片更加小巧。",
         "小兜歌曲卡片显示「小兜 · 听完一整首」。"
       ]
     },
     "en": {
-      "title": "A more spacious music card",
+      "title": "More compact music cards",
       "items": [
-        "Song titles and artists now have more room, with a separate source footer and two-line titles.",
+        "Song titles and artists share one line, with the source below for a more compact card.",
         "Pocklo song cards now say “Pocklo · Listen to the full song”."
       ]
     }
