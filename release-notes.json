@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.16.1",
-  "publishedAt": "2026-11-16",
+  "id": "2026.11.17.1",
+  "publishedAt": "2026-11-17",
   "locales": {
     "zh-CN": {
-      "title": "聊天与广场共用链接卡片",
+      "title": "更舒展的音乐卡片",
       "items": [
-        "广场外部分享支持聊天中的全部链接卡片，包括一滴、小兜、Monifa 和普通网页。",
-        "发布预览、列表、瀑布流与详情共用卡片，保留播放、限时阅读和验证码刷新等交互。"
+        "歌名与歌手集中呈现，来源移至独立底栏，长歌名支持两行显示。",
+        "小兜歌曲卡片显示「小兜 · 听完一整首」。"
       ]
     },
     "en": {
-      "title": "Shared link cards across chat and Square",
+      "title": "A more spacious music card",
       "items": [
-        "Square accepts every chat link card, including Drop, Pocklo, Monifa and ordinary websites.",
-        "Composer previews, feeds and details share the same cards, with playback, expiring diaries and refreshable codes."
+        "Song titles and artists now have more room, with a separate source footer and two-line titles.",
+        "Pocklo song cards now say “Pocklo · Listen to the full song”."
       ]
     }
   }

@@ -58,9 +58,12 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
           <span className="netease-music-play-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
         </button>
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
-          <strong>{music.title}</strong>
-          <span>{artists}</span>
-          <small><img alt="" src={brand.logo} />{brand.name}</small>
+          <strong title={music.title}>{music.title}</strong>
+          {artists?<span title={artists}>{artists}</span>:null}
+        </button>
+        <button className="netease-music-source" onClick={() => setDrawerOpen(true)} type="button">
+          <img alt="" src={brand.logo}/>
+          <span>{music.provider==='pocklo_music'?t('pocklo.musicCardSource'):brand.name}</span>
         </button>
         <span className="netease-music-card-progress" style={{ "--music-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as CSSProperties} />
       </article>
