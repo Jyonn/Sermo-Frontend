@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.17.2",
-  "publishedAt": "2026-11-17",
+  "id": "2026.11.18.1",
+  "publishedAt": "2026-11-18",
   "locales": {
     "zh-CN": {
-      "title": "更紧凑的音乐卡片",
+      "title": "恢复抖音与小红书链接解析",
       "items": [
-        "歌名与歌手合并为一行，来源在下一行展示，卡片更加小巧。",
-        "小兜歌曲卡片显示「小兜 · 听完一整首」。"
+        "抖音、小红书链接改用新解析服务，支持视频及图文预览。",
+        "VIP 每周共可解析 7 次；有效缓存免费查看，过期刷新计入当前请求者额度。"
       ]
     },
     "en": {
-      "title": "More compact music cards",
+      "title": "Douyin and RedNote link previews return",
       "items": [
-        "Song titles and artists share one line, with the source below for a more compact card.",
-        "Pocklo song cards now say “Pocklo · Listen to the full song”."
+        "Douyin and RedNote links now use a new media resolution service.",
+        "VIP includes 7 resolutions per week. Valid cached previews are free; refreshes count toward the requester’s quota."
       ]
     }
   }

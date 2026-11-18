@@ -33,7 +33,7 @@ export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messa
   useEffect(()=>{
     if(!active||!visible||drop||monifa||resolved?.status!=='pending')return;
     let cancelled=false,attempts=0,timer:ReturnType<typeof setTimeout>|undefined;
-    const poll=async()=>{try{const next=typeof messageId==='number'?await api.getMessageLinkPreview(messageId):await api.resolveExternalMedia(currentUrl);if(cancelled)return;setResolved(next);if(next.status!=='pending')return}catch{if(cancelled)return}if(++attempts<12)timer=setTimeout(()=>void poll(),2000)};
+    const poll=async()=>{try{const next=typeof messageId==='number'?await api.getMessageLinkPreview(messageId):await api.resolveExternalMedia(currentUrl);if(cancelled)return;setResolved(next);if(next.status!=='pending')return}catch{if(cancelled)return}if(++attempts<40)timer=setTimeout(()=>void poll(),2000)};
     timer=setTimeout(()=>void poll(),900);return()=>{cancelled=true;clearTimeout(timer)};
   },[active,visible,drop,monifa,resolved?.status,currentUrl,messageId]);
 
@@ -48,15 +48,16 @@ export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messa
       if(isPockloSong(data))return <PockloSongCard reference={data}/>;
       if(isMusicData(data))return <MusicPreview music={data}/>;
       if(isDouyinVideoData(data))return <DouyinVideoPreview previewId={resolved.preview_id} video={data} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
-      if(isSocialMediaData(data))return <SocialMediaPreview media={data} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
+      if(isSocialMediaData(data))return <SocialMediaPreview media={data} previewId={resolved.preview_id} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
       if(isStillfolioCollection(data))return <StillfolioPreview collection={data} previewId={resolved.preview_id}/>;
       if(isPockloShare(data))return <PockloShareCard share={data}/>;
     }
     const loading=resolved?.status==='pending',unavailable=!resolved||resolved.status==='none'||resolved.status==='failed';
+    const parseHint=resolved?.parse_error?t(`link.parse.${resolved.parse_error}`):'';
     const host=hostname(currentUrl),rawTitle=resolved?.title||host||currentUrl||t('link.title');
     const title=unavailable?(host?host.toUpperCase():t('link.preview')):host&&rawTitle.trim().toLowerCase()===host.toLowerCase()?host.toUpperCase():rawTitle;
     return <a ref={root} className={`message-link-preview-card ${loading?'is-loading':resolved?.image_url&&!unavailable?'has-image':'no-image'}${unavailable?' is-unavailable':''}`} href={url||currentUrl} aria-label={loading?t('link.generatingPreview'):undefined} onClick={event=>event.stopPropagation()} rel="noreferrer" target="_blank">
-      <div className="message-link-preview-text">{loading?<><span className="message-link-preview-site">{host?host.toUpperCase():t('link.preview')}</span><span className="message-link-preview-title shimmer-line"/><span className="message-link-preview-desc shimmer-line short"/></>:<><strong className="message-link-preview-title">{title}</strong>{!unavailable&&resolved?.description?<span className="message-link-preview-desc">{resolved.description}</span>:null}</>}</div>
+      <div className="message-link-preview-text">{loading?<><span className="message-link-preview-site">{host?host.toUpperCase():t('link.preview')}</span><span className="message-link-preview-title shimmer-line"/><span className="message-link-preview-desc shimmer-line short"/></>:<><strong className="message-link-preview-title">{title}</strong>{parseHint||(!unavailable&&resolved?.description)?<span className="message-link-preview-desc">{parseHint||resolved?.description}</span>:null}</>}</div>
       {loading?<div className="message-link-preview-image shimmer-block"/>:resolved?.image_url&&!unavailable?<img alt="" className="message-link-preview-image" loading="lazy" src={resolved.image_url}/>:<span className="message-link-preview-placeholder" aria-hidden="true">↗</span>}
     </a>;
   }
