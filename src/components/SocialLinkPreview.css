@@ -1,7 +1,9 @@
 .social-link-row { display:flex; align-items:flex-start; gap:7px; min-width:0; width:100%; }
 .social-link-card { min-width:0; flex:1; }
 .social-link-card > .platform-media-card { width:100%; }
-.social-link-parse { display:inline-flex; flex:none; align-items:center; gap:2px; margin-top:16px; padding:4px 7px; border:1px solid var(--line-soft); border-radius:999px; color:var(--text-secondary); background:var(--bg-panel); font-size:11px; cursor:pointer; }
+/* Like voice transcription, actions sit toward the conversation's center. */
+.message-group.self .social-link-row { flex-direction:row-reverse; }
+.social-link-parse { display:inline-flex; flex:none; align-items:center; gap:2px; margin-top:16px; padding:4px 7px; border:1px solid var(--line-soft); border-radius:999px; color:var(--text-secondary); background:var(--bg-panel); font-size:11px; white-space:nowrap; cursor:pointer; }
 .social-link-parse .material-symbols-outlined { font-size:14px; }
 .social-link-parse:disabled { opacity:.5; cursor:wait; }
 .social-link-notice { display:block; margin-top:7px; font-size:12px; line-height:1.5; color:var(--text-muted); }
