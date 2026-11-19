@@ -52,3 +52,14 @@ test('cancelling during the final PCM flush prevents a delayed recording send',a
   await Promise.resolve();
   assert.equal(f.sent.length,0);assert.equal(f.cleaned(),1);
 });
+test('the duration limit stops unattended tap recordings once and releases capture',async context=>{
+  context.mock.timers.enable({apis:['setInterval']});
+  const f=fixture();let duration=0;
+  const controller=new HoldToTalkRecorder({...f.options,onRecorded:(blob,seconds)=>{f.sent.push(blob);duration=seconds;}});
+  try {
+    await controller.start();f.advance(61000);context.mock.timers.tick(100);
+    assert.equal(duration,60);assert.equal(f.sent.length,1);assert.equal(f.cleaned(),1);
+    context.mock.timers.tick(1000);controller.stop();
+    assert.equal(f.sent.length,1);
+  } finally {controller.cancel();context.mock.timers.reset();}
+});

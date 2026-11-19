@@ -1,4 +1,9 @@
 {
+  "voiceInput.mode": "Entrada de voz móvil",
+  "voiceInput.modeHint": "Para el editor contraído, en este dispositivo",
+  "voiceInput.tapToRecord": "Tocar para grabar",
+  "voiceInput.stop": "Detener grabación",
+  "voiceInput.review": "Grabación detenida",
   "quickActions.entryHint": "Diseño, orden y visibilidad",
   "quickActions.direct": "Privado",
   "quickActions.group": "Grupos",

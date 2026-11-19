@@ -18,6 +18,17 @@
 .voice-live-wave{display:flex;align-items:center;justify-content:center;height:44px;gap:5px}
 .voice-live-wave i{width:4px;height:44px;transform:scaleY(var(--voice-scale,.2));border-radius:6px;background:var(--brand-primary);transition:transform .1s linear}
 .voice-live-overlay.is-cancel .voice-live-wave i{background:#bc5056}
+.voice-live-overlay.is-tap{pointer-events:auto;touch-action:manipulation}
+.voice-live-overlay.is-tap .voice-live-copy{touch-action:pan-y}
+.voice-live-overlay.is-tap .voice-live-bottom{grid-row:3}
+button.voice-live-target{padding:0;border:0;background:none;font:inherit;cursor:pointer}
+button.voice-live-target:disabled{opacity:.5;cursor:wait}
+.voice-live-stop{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:18px;padding:12px 24px;border:1px solid color-mix(in srgb,var(--brand-primary) 28%,transparent);border-radius:999px;background:var(--bg-panel);color:var(--text-primary);font:inherit;font-weight:650;cursor:pointer}
+.voice-live-stop>.material-symbols-outlined{color:var(--brand-primary);font-size:24px}
+.voice-live-stop:disabled{opacity:.5;cursor:wait}
+.voice-live-stop.is-send{background:var(--brand-primary);border-color:var(--brand-primary);color:var(--bg-canvas)}
+.voice-live-stop.is-send>.material-symbols-outlined{color:inherit}
+.voice-live-overlay.is-tap button:focus-visible{outline:2px solid var(--brand-primary);outline-offset:6px}
 @keyframes voice-live-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@media(max-height:500px){.voice-live-overlay{grid-template-rows:minmax(0,1fr) auto;grid-template-columns:1fr 180px;gap:12px;padding:20px}.voice-live-transcript{grid-row:1/3;padding:0}.voice-live-targets{gap:12px}.voice-live-target{min-width:74px;font-size:.7rem}.voice-live-target>.material-symbols-outlined{width:54px;height:54px}.voice-live-bottom{padding:0}}
+@media(max-height:500px){.voice-live-overlay{grid-template-rows:minmax(0,1fr) auto;grid-template-columns:1fr 180px;gap:12px;padding:20px}.voice-live-transcript{grid-row:1/3;padding:0}.voice-live-targets{gap:12px}.voice-live-target{min-width:74px;font-size:.7rem}.voice-live-target>.material-symbols-outlined{width:54px;height:54px}.voice-live-bottom{padding:0}.voice-live-overlay.is-tap .voice-live-bottom{grid-column:2;grid-row:2}}
 @media(prefers-reduced-motion:reduce){.voice-live-overlay{animation:none}.voice-live-target,.voice-live-target>.material-symbols-outlined,.voice-live-wave i{transition:none}}

@@ -90,6 +90,7 @@ import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPre
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
+import {MobileVoiceInputSettings} from '../components/MobileVoiceInputSettings';
 import {usePersonalTheme,ThemeDiscoveryDot} from '../lib/personalTheme';
 import {PersonalThemeSettings,personalThemeLabels} from '../components/PersonalThemeSettings';
 import { checkForPwaUpdate, CURRENT_RELEASE, getPwaUpdateCheckSnapshot, subscribePwaUpdateCheck } from "../lib/pwaUpdate";
@@ -2509,6 +2510,7 @@ export default function MenuPage() {
             />
           </SettingGroup>
           <SettingGroup>
+            <MobileVoiceInputSettings/>
             <SettingRow title={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
               onClick={() => setSquareLayoutDrawerOpen(true)} />
           </SettingGroup>

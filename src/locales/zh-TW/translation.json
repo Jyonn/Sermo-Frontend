@@ -1,4 +1,9 @@
 {
+  "voiceInput.mode": "手機語音輸入",
+  "voiceInput.modeHint": "輸入框收合時使用，僅在此裝置生效",
+  "voiceInput.tapToRecord": "點擊錄製",
+  "voiceInput.stop": "停止錄製",
+  "voiceInput.review": "錄音已停止",
   "quickActions.entryHint": "版面、順序與顯示",
   "quickActions.direct": "私聊",
   "quickActions.group": "群聊",

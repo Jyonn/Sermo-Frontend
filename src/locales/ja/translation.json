@@ -1,4 +1,9 @@
 {
+  "voiceInput.mode": "モバイル音声入力",
+  "voiceInput.modeHint": "この端末の折りたたみ入力欄で使用",
+  "voiceInput.tapToRecord": "タップして録音",
+  "voiceInput.stop": "録音を停止",
+  "voiceInput.review": "録音が停止しました",
   "quickActions.entryHint": "配置・順序・表示",
   "quickActions.direct": "個別",
   "quickActions.group": "グループ",

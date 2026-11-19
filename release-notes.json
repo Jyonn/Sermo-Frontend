@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.2",
+  "id": "2026.11.19.3",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "链接解析入口调整",
+      "title": "点击录制语音",
       "items": [
-        "未解析链接的解析按钮朝向屏幕中央：我方消息显示在卡片左侧，他方消息显示在右侧。"
+        "个性化设置新增手机语音输入方式：按住说话或点击录制。点击录制停止后，可选择发送、取消或转文字。"
       ]
     },
     "en": {
-      "title": "Refined link resolution action",
+      "title": "Tap to record voice messages",
       "items": [
-        "Resolve sits toward the conversation center: left of your link cards and right of others’ cards."
+        "Choose hold-to-talk or tap-to-record in Personalization. Stop a tap recording, then send, cancel, or turn it into an editable text draft."
       ]
     }
   }
