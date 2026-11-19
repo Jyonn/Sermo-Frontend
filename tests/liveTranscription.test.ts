@@ -25,6 +25,14 @@ test('queues PCM until ready, streams partials and waits for final sentence afte
   assert.deepEqual(await result,{ok:true,text:'你好，明天见。'});
   assert.equal(updates.at(-1).status,'complete');assert.equal(socket.readyState,3);
 });
+test('final server receipt survives stopping, previewing and sending without another session',async()=>{
+  const {session,socket}=await fixture();socket.message({type:'ready'});
+  const first=session.finish();
+  socket.message({type:'done',text:'录音时的最终结果',receipt:'signed-test-receipt'});
+  assert.deepEqual(await first,{ok:true,text:'录音时的最终结果',receipt:'signed-test-receipt'});
+  assert.deepEqual(await session.finish(),await first);
+  assert.equal(socket.sent.filter(value=>typeof value==='string'&&value.includes('finish')).length,1);
+});
 test('failure retains recognized text, cancellation drops late callbacks and bounded queue fails safely',async()=>{
   const {session,socket}=await fixture();socket.message({type:'ready'});
   socket.message({type:'transcript',text:'partial',partial_text:'partial'});socket.emit('error',{});

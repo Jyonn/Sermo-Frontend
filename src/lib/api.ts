@@ -777,7 +777,7 @@ export const api = {
     });
   },
 
-  broadcastAdminMessage(payload: { content: string; type: number; broadcast_id: string }) {
+  broadcastAdminMessage(payload: { content: string; type: number; broadcast_id: string; live_transcript_receipt?:string }) {
     return request<SpaceAdminBroadcastResultDTO>("/spaces/admin/broadcast", {
       method: "POST",
       adminAuth: true,
@@ -1375,12 +1375,12 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], resource_id?: number) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], resource_id?: number, live_transcript_receipt?:string) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, resource_id: resource_id ?? null },
+      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, resource_id: resource_id ?? null, live_transcript_receipt },
     });
   },
 
@@ -1541,11 +1541,11 @@ export const api = {
     });
   },
 
-  refreshExternalMedia(preview_id: number, force = false) {
+  refreshExternalMedia(preview_id: number, force = false, confirmed=false) {
     return request<LinkPreviewDTO & { supported?: boolean; refreshed?: boolean }>("/messages/external-media-preview/refresh", {
       method: "POST",
       auth: true,
-      body: { preview_id, force },
+      body: { preview_id, force, confirmed },
     });
   },
 

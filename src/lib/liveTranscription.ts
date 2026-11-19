@@ -3,6 +3,7 @@ export interface LiveTranscript {
   text: string; finalText: string; partialText: string;
 }
 export interface StreamGrant {ticket:string}
+export interface LiveRecordingResult {ok:boolean;text:string;receipt?:string}
 interface SocketLike {
   readyState:number; bufferedAmount:number;
   send:(data:string|ArrayBuffer)=>void; close:()=>void;
@@ -19,8 +20,9 @@ export class LiveTranscription {
   private queuedBytes=0;
   private timer:ReturnType<typeof setTimeout>|undefined;
   private finishTimer:ReturnType<typeof setTimeout>|undefined;
-  private resolve!: (result:{ok:boolean;text:string})=>void;
-  private done=new Promise<{ok:boolean;text:string}>(resolve=>{this.resolve=resolve;});
+  private resolve!: (result:LiveRecordingResult)=>void;
+  private done=new Promise<LiveRecordingResult>(resolve=>{this.resolve=resolve;});
+  private receipt='';
   private abort=new AbortController();
   private state:LiveTranscript={status:'connecting',text:'',finalText:'',partialText:''};
   private node:AudioWorkletNode|null=null;
@@ -49,6 +51,7 @@ export class LiveTranscription {
             this.state={status:'listening',text:data.text,finalText:typeof data.final_text==='string'?data.final_text:'',partialText:typeof data.partial_text==='string'?data.partial_text:''};
             this.onChange(this.state);
           } else if(data.type==='done'&&typeof data.text==='string') {
+            this.receipt=typeof data.receipt==='string'&&data.receipt.length<=24000?data.receipt:'';
             this.state={status:'complete',text:data.text,finalText:data.text,partialText:''};this.settle(true);
           } else if(data.type==='error')this.settle(false);
         } catch {this.settle(false);}
@@ -111,6 +114,6 @@ export class LiveTranscription {
     this.queue=[];this.disconnectPCM();
     if(this.socket&&this.socket.readyState<2)this.socket.close();
     if(!cancelled){this.state={...this.state,status:ok?'complete':'unavailable'};this.onChange(this.state);}
-    this.resolve({ok,text:this.state.text});
+    this.resolve({ok,text:this.state.text,...(ok&&this.receipt?{receipt:this.receipt}:{})});
   }
 }

@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.18.1",
-  "publishedAt": "2026-11-18",
+  "id": "2026.11.19.1",
+  "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "恢复抖音与小红书链接解析",
+      "title": "主动解析与录音转写复用",
       "items": [
-        "抖音、小红书链接改用新解析服务，支持视频及图文预览。",
-        "VIP 每周共可解析 7 次；有效缓存免费查看，过期刷新计入当前请求者额度。"
+        "链接元数据长期保留，发送时首次解析；后续刷新需主动确认扣次，无元数据的链接气泡提供右侧解析入口。",
+        "录音实时转写结果随语音保存，再次转文字直接复用；未缓存的语音改用阿里识别。"
       ]
     },
     "en": {
-      "title": "Douyin and RedNote link previews return",
+      "title": "Explicit link refreshes and reusable voice transcripts",
       "items": [
-        "Douyin and RedNote links now use a new media resolution service.",
-        "VIP includes 7 resolutions per week. Valid cached previews are free; refreshes count toward the requester’s quota."
+        "Link metadata stays cached. Initial resolution happens on send; later refreshes require confirmation. Unresolved link bubbles have a Resolve button.",
+        "Live recording transcripts are saved with voice messages and reused. Uncached voice transcription now uses Aliyun."
       ]
     }
   }

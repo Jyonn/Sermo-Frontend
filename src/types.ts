@@ -1071,7 +1071,8 @@ export interface ActivityCampaignDTO {
 }
 
 export interface LinkPreviewDTO {
-  parse_error?: 'vip_required' | 'weekly_limit' | 'provider_unavailable' | 'unavailable';
+  parse_error?: 'vip_required' | 'weekly_limit' | 'provider_unavailable' | 'unavailable' | 'confirmation_required';
+  requires_parse?:boolean;
   preview_id?: number;
   url?: string;
   status: LinkPreviewStatus;

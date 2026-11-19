@@ -10,7 +10,7 @@ import './HoldToTalkInput.css';
 
 const emptyTranscript:LiveTranscript={status:'connecting',text:'',finalText:'',partialText:''};
 
-export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin=false}:{disabled?:boolean;onSend:(file:File,duration:number)=>Promise<unknown>;onText:(text:string)=>void;onBusyChange?:(busy:boolean)=>void;admin?:boolean}) {
+export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin=false}:{disabled?:boolean;onSend:(file:File,duration:number,receipt?:string)=>Promise<unknown>;onText:(text:string)=>void;onBusyChange?:(busy:boolean)=>void;admin?:boolean}) {
   const {t}=useI18n();
   const [state,setState]=useState<HoldRecordingState>({phase:'idle',duration:0,bars:[]});
   const [gesture,setGesture]=useState<HoldGesture>('idle');
@@ -27,9 +27,9 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
   const options=useRef({onSend,onText,onBusyChange,t,admin});options.current={onSend,onText,onBusyChange,t,admin};
   const mounted=useRef(true);
   const recorder=useRef<HoldToTalkRecorder|null>(null);
-  const send=async(file:File,duration:number)=>{
+  const send=async(file:File,duration:number,receipt?:string)=>{
     setSending(true);
-    try {await options.current.onSend(file,duration);}
+    try {await options.current.onSend(file,duration,receipt);}
     catch {if(mounted.current)showToast(options.current.t('audio.sendRetry'),'error');}
     finally {if(mounted.current)setSending(false);}
   };
@@ -52,8 +52,12 @@ export function HoldToTalkInput({disabled=false,onSend,onText,onBusyChange,admin
       const session=live.current,token=generation.current;
       if(disposition.current==='cancel'){session?.cancel();return;}
       if(disposition.current!=='text'){
-        session?.cancel();
-        void send(new File([blob],`voice-message.${audioFileExtension(mime)}`,{type:mime}),duration);
+        setFinishing(true);
+        void (session?.finish()??Promise.resolve({ok:false,text:'',receipt:undefined})).then(result=>{
+          if(!mounted.current||token!==generation.current)return;
+          setFinishing(false);
+          void send(new File([blob],`voice-message.${audioFileExtension(mime)}`,{type:mime}),duration,result.receipt);
+        });
         return;
       }
       setFinishing(true);

@@ -19,6 +19,7 @@ import {isStillfolioCollection,StillfolioPreview} from './StillfolioPreview';
 import {SquareMusicCover} from './SquarePlayableCovers';
 import {UnsupportedContentNotice} from './UnsupportedContentNotice';
 import './LinkPreviewCard.css';
+import {isSocialUrl,SocialLinkPreview} from './SocialLinkPreview';
 
 function hostname(url:string){try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}}
 
@@ -42,6 +43,7 @@ export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messa
     if(needsContentUpgrade(resolved?.min_client_version,CURRENT_RELEASE.id))return <UnsupportedContentNotice minVersion={resolved?.min_client_version} title={resolved?.title||resolved?.site_name} url={currentUrl}/>;
     if(drop)return <DropDiaryCard url={drop}/>;
     if(monifa)return <MonifaOtpCard url={monifa}/>;
+    if(isSocialUrl(currentUrl))return <SocialLinkPreview preview={resolved} url={currentUrl} fitMedia={fitMedia}/>;
     const data=resolved?.provider_data;
     if(resolved?.status==='ready'){
       if(presentation==='cover'&&isMusicData(data))return <SquareMusicCover music={data} uri={data.cover_url||resolved.image_url||null}/>;

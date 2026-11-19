@@ -2893,6 +2893,7 @@ function LiveChatsPage({
   const recordingAttemptRef = useRef(0);
   const recordingStartedAtRef = useRef(0);
   const desktopLiveRef=useRef<LiveTranscription|null>(null);
+  const pendingLiveReceipts=useRef(new Map<string,string>());
   const desktopTextRequested=useRef(false);
   const desktopTextBusy=useRef(false);
   const latestVoiceDraft=useRef(draft);latestVoiceDraft.current=draft;
@@ -5645,6 +5646,7 @@ function LiveChatsPage({
           retryMessage.clientId,
           [],
           upload.resource?.resource_id,
+          pendingLiveReceipts.current.get(retryMessage.clientId),
         );
       } else {
         recordOptimisticEmojiUsage(retryMessage.text);
@@ -5699,7 +5701,8 @@ function LiveChatsPage({
   const sendUploadedMediaMessage = async (
     kind: MessageMediaKind,
     file: File,
-    extraPayload: Partial<ChatMessagePayloadDTO> = {}
+    extraPayload: Partial<ChatMessagePayloadDTO> = {},
+    liveReceipt?:string
   ) => {
     if (!selectedChat) return;
     if (!await moveToLatestMessageWindow()) return false;
@@ -5751,6 +5754,7 @@ function LiveChatsPage({
       } : message) }));
     });
 
+    if(liveReceipt)pendingLiveReceipts.current.set(pendingMessage.clientId,liveReceipt);
     try {
       const upload = await uploadMessageMedia(file, kind, (progress) => {
         updateSendTask(pendingMessage.clientId, 0.05 + progress * 0.84);
@@ -5765,7 +5769,9 @@ function LiveChatsPage({
         pendingMessage.clientId,
         [],
         upload.resource?.resource_id,
+        liveReceipt,
       );
+      pendingLiveReceipts.current.delete(pendingMessage.clientId);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
         ...current,
@@ -6484,9 +6490,10 @@ function LiveChatsPage({
     });
 
     setVoiceComposer((current) => ({ ...current, phase: "sending" }));
+    const result = await desktopLiveRef.current?.finish();
     const sent = await sendUploadedMediaMessage("audio", file, {
       duration_seconds: voiceComposer.durationSeconds,
-    });
+    }, result?.receipt);
     resetVoiceComposer();
     if (!sent) showToast(t("audio.sendRetry"), "error");
   };
@@ -7874,7 +7881,7 @@ function LiveChatsPage({
                     toolCount={selectedChat?.type === "group" ? 6 : 5}
                     more={composerMoreActions}
                     input={mobileVoiceReady ? (
-                        <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onText={text=>{if(text)updateDraft(draft?`${draft}\n${text}`:text);setMobileVoiceReady(false);}} onSend={(file,duration)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration})}/>
+                        <HoldToTalkInput key={selectedChat?.id} disabled={sendState === "sending"} onBusyChange={setMobileHoldBusy} onText={text=>{if(text)updateDraft(draft?`${draft}\n${text}`:text);setMobileVoiceReady(false);}} onSend={(file,duration,receipt)=>sendUploadedMediaMessage("audio",file,{duration_seconds:duration},receipt)}/>
                       ) : (
                         <div className="mobile-quiet-input-wrap" ref={mobileMentionAnchorRef}>
                           <MentionComposerInput

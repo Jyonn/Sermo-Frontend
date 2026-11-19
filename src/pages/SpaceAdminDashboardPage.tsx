@@ -613,11 +613,12 @@ export default function SpaceAdminDashboardPage() {
     }
   };
 
-  const sendBroadcastPayload = async (type: number, content: string, broadcastId: string) => {
+  const sendBroadcastPayload = async (type: number, content: string, broadcastId: string, receipt?:string) => {
     return api.broadcastAdminMessage({
       content,
       type,
       broadcast_id: broadcastId,
+      live_transcript_receipt:receipt,
     });
   };
 
@@ -743,7 +744,7 @@ export default function SpaceAdminDashboardPage() {
   };
 
   const sendBroadcastMedia = async (
-    files: Array<{ file: File; kind: MessageMediaKind; duration?: number }>
+    files: Array<{ file: File; kind: MessageMediaKind; duration?: number; receipt?:string }>
   ) => {
     if (!files.length || broadcastState === "sending") return;
     setBroadcastState("sending");
@@ -770,7 +771,7 @@ export default function SpaceAdminDashboardPage() {
         const result = await sendBroadcastPayload(
           broadcastTypeForKind(kind),
           content,
-          `admin-broadcast:${crypto.randomUUID()}`
+          `admin-broadcast:${crypto.randomUUID()}`, files[index].receipt
         );
         results.push(result);
         setBroadcastProgress((index + 1) / files.length);
@@ -1063,7 +1064,7 @@ export default function SpaceAdminDashboardPage() {
             <form ref={broadcastComposerRef} className={`composer admin-broadcast-composer ${mobileComposerLayout ? "is-mobile-quiet" : "is-desktop-writing-desk"}${broadcastRecording.phase !== "idle" ? " is-recording-mode" : ""}`} onSubmit={(event) => void sendBroadcast(event)}>
               {!mobileComposerLayout || broadcastRecording.phase === "idle" ? (
                 <ChatComposerLayout mobile={mobileComposerLayout} toolCount={4}
-                  mobileInput={voiceInputReady ? <HoldToTalkInput admin disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onText={text=>{if(text)setBroadcastContent(value=>value?`${value}\n${text}`:text);setVoiceInputReady(false);}} onSend={(file,duration)=>sendBroadcastMedia([{file,kind:"audio",duration}])}/> : undefined}
+                  mobileInput={voiceInputReady ? <HoldToTalkInput admin disabled={broadcastState === "sending"} onBusyChange={setHoldBusy} onText={text=>{if(text)setBroadcastContent(value=>value?`${value}\n${text}`:text);setVoiceInputReady(false);}} onSend={(file,duration,receipt)=>sendBroadcastMedia([{file,kind:"audio",duration,receipt}])}/> : undefined}
                   input={<MentionComposerInput ref={broadcastInputRef}
                     className="textarea composer-input composer-rich-input"
                     members={[]} value={broadcastContent}
