@@ -5,7 +5,6 @@ import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {
-  createContext,
   memo,
   lazy,
   Suspense,
@@ -15,7 +14,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useContext,
   type ChangeEvent,
   type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
@@ -1231,30 +1229,22 @@ export function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): Cha
 
 export { StickerImage } from "../components/StickerImage";
 
-const ForwardBundlePreviewDepthContext = createContext(2);
-const ForwardBundlePresentationContext = createContext<{
-  viewerUserId: number | null;
-  backgroundTheme: ChatBackgroundTheme;
-  backgroundUri: string | null;
-}>({ viewerUserId: null, backgroundTheme: "default", backgroundUri: null });
-
 function openForwardBundle(payload?: ChatMessagePayloadDTO | null) {
   if (payload) window.dispatchEvent(new CustomEvent("sermo:forward-bundle", { detail: payload }));
 }
 
 function ForwardBundleCard({ groupClassName, message }: { groupClassName: string; message: ChatMessage }) {
   const items = message.payload?.items ?? [];
-  const firstItem = items[0];
-  const firstItemPreview = firstItem
-    ? previewFromKind(messageKindFromType(firstItem.type), firstItem.content)
-    : i18n.t("message.forwardBundlePlaceholder");
   return (
     <button className={`message-forward-bundle-card ${groupClassName}`.trim()} onClick={(event) => { event.stopPropagation(); openForwardBundle(message.payload); }} type="button">
       <span className="message-forward-bundle-heading">
         <span className="message-forward-bundle-icon material-symbols-outlined" aria-hidden="true">forum</span>
-        <span><strong>{i18n.t("message.forwardBundleTitle")}</strong>{message.payload?.summary ? <small>{message.payload.summary}</small> : null}</span>
+        <strong>{i18n.t("message.forwardBundleTitle")}</strong>
       </span>
-      <span className="message-forward-bundle-preview"><span><b>{firstItem?.author?.name || i18n.t("message.unknownSender")}</b><i>{firstItemPreview}</i></span></span>
+      <span className="message-forward-bundle-preview">{items.length?items.slice(0,3).map((item,index)=><span key={index}>
+        <b>{item.author?.name || i18n.t("message.unknownSender")}</b>
+        <i>{previewFromKind(messageKindFromType(item.type),item.payload?.text??item.content)}</i>
+      </span>):<span className="message-forward-bundle-empty">{message.payload?.summary||i18n.t("message.forwardBundlePlaceholder")}</span>}</span>
       <span className="message-forward-bundle-footer">
         <span className="message-forward-bundle-count">{i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}</span>
         <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
@@ -1263,65 +1253,11 @@ function ForwardBundleCard({ groupClassName, message }: { groupClassName: string
   );
 }
 
-function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo, previewDepth }: {
-  message: ChatMessage;
-  onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined;
-  onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined;
-  previewDepth: number;
-}) {
-  const items = message.payload?.items ?? [];
-  const open = () => openForwardBundle(message.payload);
-  const presentation = useContext(ForwardBundlePresentationContext);
-  return (
-    <section className="message-forward-bundle-inline">
-      <header>
-        <span className="message-forward-bundle-icon material-symbols-outlined" aria-hidden="true">forum</span>
-        <span><strong>{i18n.t("message.forwardBundleTitle")}</strong><small>{message.payload?.summary || i18n.t("message.forwardBundleSnapshotHint")}</small></span>
-      </header>
-      <div
-        aria-label={i18n.t("message.forwardBundleSnapshot")}
-        className="message-forward-bundle-inline-body"
-        onClick={(event) => {
-          if ((event.target as HTMLElement).closest("button, a, audio, video, input")) return;
-          event.stopPropagation();
-          open();
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          open();
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <ChatPreview
-          backgroundTheme={presentation.backgroundTheme}
-          backgroundUri={presentation.backgroundUri}
-          className="message-forward-bundle-inline-scroll"
-          firstPersonUserId={presentation.viewerUserId ?? message.payload?.first_person_user_id}
-          forwardBundlePreviewDepth={Math.max(0, previewDepth - 1)}
-          messages={forwardBundleItemsAsMessages(items)}
-          onOpenImage={onOpenImage}
-          onOpenVideo={onOpenVideo}
-          showDividers={false}
-          showSelfAuthors
-        />
-      </div>
-      <button className="message-forward-bundle-inline-open" onClick={(event) => { event.stopPropagation(); open(); }} type="button">
-        <span>{i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}</span>
-        <span>{i18n.t("message.forwardBundleSnapshot")}</span>
-        <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-      </button>
-    </section>
-  );
-}
-
 function renderMessageContent(
   message: ChatMessage,
   onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined,
   onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined,
   groupClassName: string,
-  forwardBundlePreviewDepth: number,
   onRetry?: () => void,
   bubbleStyle?: ChatBubbleStyle,
 ) {
@@ -1503,9 +1439,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "forward_bundle") {
-    return forwardBundlePreviewDepth > 0
-      ? <ForwardBundleInlinePreview message={message} onOpenImage={onOpenImage} onOpenVideo={onOpenVideo} previewDepth={forwardBundlePreviewDepth} />
-      : <ForwardBundleCard groupClassName={groupClassName} message={message} />;
+    return <ForwardBundleCard groupClassName={groupClassName} message={message} />;
   }
 
   const text = message.payload?.text ?? message.text;
@@ -1594,7 +1528,6 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   selectionMode,
   messageTitle,
 }: MessageBubbleRowProps) {
-  const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
@@ -1728,7 +1661,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message), bubbleStyle)}
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
@@ -2101,7 +2034,7 @@ function estimateMessageRowHeight(message: ChatMessage) {
   if (message.kind === "location" || message.kind === "map_access") return 112 + replyHeight;
   if (message.kind === "statement") return 214 + replyHeight;
   if (message.kind === "activity") return 148 + replyHeight;
-  if (message.kind === "forward_bundle") return 184 + replyHeight;
+  if (message.kind === "forward_bundle") return 132 + replyHeight;
 
   const text = message.payload?.text ?? message.text ?? "";
   const hasLink = Boolean(extractFirstMessageUrl(text));
@@ -7755,11 +7688,6 @@ function LiveChatsPage({
                     </button>
                   </div>
                 ) : null}
-                <ForwardBundlePresentationContext.Provider value={{
-                  viewerUserId: currentUserId || null,
-                  backgroundTheme: chatBackgroundTheme,
-                  backgroundUri: usesPersonalCustomBackground ? paintedChatBackgroundUri : null,
-                }}>
                 <VirtualDynamicList
                   estimateSize={estimateMessageGroupHeight}
                   followEnd={() => shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)}
@@ -7809,7 +7737,6 @@ function LiveChatsPage({
                     />
                   )}
                 />
-                </ForwardBundlePresentationContext.Provider>
                 {hasNewerMessages ? (
                   <div className="message-history-actions is-newer">
                     <button className="ghost-button" disabled={newerState === "loading"} onClick={() => void loadNewerMessages()} type="button">
@@ -8365,23 +8292,16 @@ function LiveChatsPage({
         historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
         onClose={() => setForwardBundlePreview(null)}
       >
-        <ForwardBundlePresentationContext.Provider value={{
-          viewerUserId: currentUserId || null,
-          backgroundTheme: currentUserMe?.chat_background_theme ?? "default",
-          backgroundUri: paintedChatBackgroundUri,
-        }}>
           <ChatPreview
             backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
             backgroundUri={paintedChatBackgroundUri}
             className="forward-bundle-chat-preview"
-            forwardBundlePreviewDepth={1}
             firstPersonUserId={currentUserId || null}
             messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
             onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
             onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
             showSelfAuthors
           />
-        </ForwardBundlePresentationContext.Provider>
       </SideDrawer>
 
       {selectedChat?.type === "group" ? <GroupCopySheet key={`${currentUserId}:${selectedChat.id}`} chatId={selectedChat.id} userId={currentUserId} open={groupCopyOpen} onClose={() => setGroupCopyOpen(false)} {...copySuggestions} /> : null}
@@ -9831,7 +9751,6 @@ export function ChatPreview({
   backgroundUri,
   bare = false,
   className = "",
-  forwardBundlePreviewDepth = 0,
   firstPersonUserId,
   initialScrollToEnd = false,
   wheelScrollMode = "internal",
@@ -9850,7 +9769,6 @@ export function ChatPreview({
   backgroundUri?: string | null;
   bare?: boolean;
   className?: string;
-  forwardBundlePreviewDepth?: number;
   firstPersonUserId?: number | null;
   initialScrollToEnd?: boolean;
   wheelScrollMode?: "internal" | "parent";
@@ -9969,7 +9887,7 @@ export function ChatPreview({
     </div>
   );
 
-  if (bare) return <ForwardBundlePreviewDepthContext.Provider value={forwardBundlePreviewDepth}>{messageList}</ForwardBundlePreviewDepthContext.Provider>;
+  if (bare) return messageList;
 
   return (
     <section
@@ -9978,7 +9896,7 @@ export function ChatPreview({
     >
       <div className={`chat-detail-scene is-preview-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
         <FriendenLivingWallpaper theme={backgroundTheme} />
-        <ForwardBundlePreviewDepthContext.Provider value={forwardBundlePreviewDepth}>{messageList}</ForwardBundlePreviewDepthContext.Provider>
+        {messageList}
       </div>
     </section>
   );

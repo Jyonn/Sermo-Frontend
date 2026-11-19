@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.3",
+  "id": "2026.11.19.4",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "点击录制语音",
+      "title": "更轻巧的聊天记录卡片",
       "items": [
-        "个性化设置新增手机语音输入方式：按住说话或点击录制。点击录制停止后，可选择发送、取消或转文字。"
+        "合并聊天记录改为紧凑摘要，随当前气泡主题呈现底色、边线与装饰，点击卡片查看完整内容。"
       ]
     },
     "en": {
-      "title": "Tap to record voice messages",
+      "title": "Compact, themed chat records",
       "items": [
-        "Choose hold-to-talk or tap-to-record in Personalization. Stop a tap recording, then send, cancel, or turn it into an editable text draft."
+        "Merged chat records now show compact summaries inside your selected bubble theme. Open the card to read the full conversation."
       ]
     }
   }
