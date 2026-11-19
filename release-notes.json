@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.5",
+  "id": "2026.11.19.6",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "纯头像个人名片",
+      "title": "名片与科研内容分享",
       "items": [
-        "个人名片及名片预览统一展示纯头像。"
+        "新增个人名片、科研任务、评论和回复消息卡片，可从详情分享至聊天，并直接打开对应内容。科研分享遵循项目访问权限。"
       ]
     },
     "en": {
-      "title": "Plain avatars on profile cards",
+      "title": "Share profiles and research discussions",
       "items": [
-        "Profile cards and their previews now use plain avatars."
+        "Share profile cards, research tasks, comments and replies to chat. Cards open the corresponding content while respecting project membership."
       ]
     }
   }

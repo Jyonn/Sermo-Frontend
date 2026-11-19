@@ -1,4 +1,10 @@
 {
+  "references.share": "分享到聊天",
+  "references.profile": "個人名片",
+  "references.research_task": "科研任務",
+  "references.research_comment": "科研評論",
+  "references.research_reply": "科研回覆",
+  "references.unavailable": "內容暫不可用或無存取權限",
   "voiceInput.mode": "手機語音輸入",
   "voiceInput.modeHint": "輸入框收合時使用，僅在此裝置生效",
   "voiceInput.tapToRecord": "點擊錄製",

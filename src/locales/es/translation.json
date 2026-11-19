@@ -1,4 +1,10 @@
 {
+  "references.share": "Compartir en el chat",
+  "references.profile": "Tarjeta de perfil",
+  "references.research_task": "Tarea de investigación",
+  "references.research_comment": "Comentario de investigación",
+  "references.research_reply": "Respuesta de investigación",
+  "references.unavailable": "No disponible o acceso restringido",
   "voiceInput.mode": "Entrada de voz móvil",
   "voiceInput.modeHint": "Para el editor contraído, en este dispositivo",
   "voiceInput.tapToRecord": "Tocar para grabar",

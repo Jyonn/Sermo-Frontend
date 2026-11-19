@@ -16,6 +16,10 @@ const MESSAGE_KIND_BY_TYPE: Record<number, MessageKind> = {
   12: "official_notice",
   13: "submission_invite",
   14: "voice_call",
+  15: "profile",
+  16: "research_task",
+  17: "research_comment",
+  18: "research_reply",
 };
 const KNOWN_KINDS = new Set<MessageKind>(Object.values(MESSAGE_KIND_BY_TYPE));
 

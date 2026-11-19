@@ -1,4 +1,10 @@
 {
+  "references.share": "채팅으로 공유",
+  "references.profile": "프로필 카드",
+  "references.research_task": "연구 과제",
+  "references.research_comment": "연구 댓글",
+  "references.research_reply": "연구 답글",
+  "references.unavailable": "이용할 수 없거나 접근 권한이 없습니다",
   "voiceInput.mode": "모바일 음성 입력",
   "voiceInput.modeHint": "이 기기의 접힌 입력창에서 사용",
   "voiceInput.tapToRecord": "탭하여 녹음",

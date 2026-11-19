@@ -8,6 +8,7 @@ import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
 import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
+import {ReferenceShareButton} from './ReferenceShareButton';
 import { UserAvatar } from "./UserAvatar";
 import { UserProfileCard } from "./UserProfileCard";
 import { ChronelleCalendar } from "./ChronelleCalendar";
@@ -371,6 +372,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   return (
     <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}${isSelf ? " is-self" : ""}`}>
+      <ReferenceShareButton key={userId} className="profile-share-action" reference={{kind:'profile',profile_user_id:userId}}/>
       <UserProfileCard
         profileTheme={user.profile_card_theme}
         avatarLabel={t("profile.avatarLabel", { name: user.name })}

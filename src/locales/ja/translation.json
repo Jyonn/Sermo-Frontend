@@ -1,4 +1,10 @@
 {
+  "references.share": "チャットに共有",
+  "references.profile": "プロフィール",
+  "references.research_task": "研究タスク",
+  "references.research_comment": "研究コメント",
+  "references.research_reply": "研究への返信",
+  "references.unavailable": "利用不可、またはアクセス権がありません",
   "voiceInput.mode": "モバイル音声入力",
   "voiceInput.modeHint": "この端末の折りたたみ入力欄で使用",
   "voiceInput.tapToRecord": "タップして録音",

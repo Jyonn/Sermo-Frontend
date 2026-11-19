@@ -10,7 +10,7 @@ export interface ChatMuteState {
   muted_until: number | null;
   scope?: "group" | "global" | null;
 }
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "voice_call" | "unsupported";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "voice_call" | "profile" | "research_task" | "research_comment" | "research_reply" | "unsupported";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -1161,6 +1161,13 @@ export interface AudioTranscriptDTO {
 }
 
 export interface ChatMessagePayloadDTO {
+  profile_user_id?: number;
+  profile?: TinyUserDTO & {signature?:string} | null;
+  project_id?: number;
+  project_title?: string;
+  task_id?: string;
+  progress_id?: string;
+  author_name?: string;
   call?: import('./lib/voiceCalls').VoiceCallRecord;
   call_id?: string;
   chat_id?: number;

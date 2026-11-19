@@ -1,4 +1,10 @@
 {
+  "references.share": "分享到聊天",
+  "references.profile": "个人名片",
+  "references.research_task": "科研任务",
+  "references.research_comment": "科研评论",
+  "references.research_reply": "科研回复",
+  "references.unavailable": "内容暂不可用或无访问权限",
   "pocklo.songRevoked":"歌曲分享已撤销或不存在",
   "pocklo.songMissing":"源音频已删除，暂时无法播放",
   "pocklo.songFailed":"歌曲暂时无法加载",

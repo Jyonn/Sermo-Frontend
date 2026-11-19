@@ -52,6 +52,7 @@ import pockloMark from "../assets/pocklo-mark.svg";
 import { ComposerSvgIcon } from "../components/ComposerSvgIcon";
 import { ChatEmojiPickerPanel } from "../components/ChatEmojiPickerPanel";
 import { HoldToTalkInput } from "../components/HoldToTalkInput";
+import {SharedReferenceMessage} from '../components/SharedReferenceMessage';
 import { DesktopVoiceStudio } from "../components/DesktopVoiceStudio";
 import {startChatLiveTranscription} from '../lib/chatLiveTranscription';
 import type {LiveTranscription,LiveTranscript} from '../lib/liveTranscription';
@@ -186,6 +187,10 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
   { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
   { value: MESSAGE_TYPE_ACTIVITY, label: "messageSearch.activities" },
+  { value: 15, label: 'references.profile' },
+  { value: 16, label: 'references.research_task' },
+  { value: 17, label: 'references.research_comment' },
+  { value: 18, label: 'references.research_reply' },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 
@@ -249,6 +254,7 @@ function sortEmojiUsage(rows: EmojiUsageDTO[]) {
 }
 
 function messageResultPreview(message: ChatMessageDTO) {
+  if(message.type>=15&&message.type<=18)return message.payload?.unavailable?i18n.t('references.unavailable'):message.payload?.profile?.name||message.payload?.title||previewFromKind(messageKindFromType(message.type),'');
   if (message.type === MESSAGE_TYPE_TEXT) return readableMentionText(message.content, message.mentions ?? []);
   if (message.type === MESSAGE_TYPE_STATEMENT && !message.payload?.statement) return i18n.t("message.statementUnavailable");
   return {
@@ -284,6 +290,7 @@ function statementAttachmentSummary(message: ChatMessageDTO) {
 }
 
 function compactSearchMessagePreview(message: ChatMessageDTO) {
+  if(message.type>=15&&message.type<=18)return messageResultPreview(message);
   const duration = message.payload?.duration_seconds ? i18n.t("messageSearch.durationSeconds", { seconds: Math.round(message.payload.duration_seconds) }) : "";
   if (message.type === MESSAGE_TYPE_IMAGE) return i18n.t("messageSearch.compactImage");
   if (message.type === MESSAGE_TYPE_VIDEO) return i18n.t("messageSearch.compactVideo", { duration });
@@ -917,6 +924,7 @@ function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
 }
 
 function previewFromKind(kind: MessageKind, text: string) {
+  if(['profile','research_task','research_comment','research_reply'].includes(kind))return i18n.t(`references.${kind}` as TranslationKey);
   if (kind === "image") return i18n.t("message.imagePlaceholder");
   if (kind === "video") return i18n.t("message.videoPlaceholder");
   if (kind === "audio") return i18n.t("message.audioPlaceholder");
@@ -1441,6 +1449,7 @@ function renderMessageContent(
   if (message.kind === "forward_bundle") {
     return <ForwardBundleCard groupClassName={groupClassName} message={message} />;
   }
+  if(['profile','research_task','research_comment','research_reply'].includes(message.kind)&&message.payload)return <SharedReferenceMessage payload={message.payload}/>;
 
   const text = message.payload?.text ?? message.text;
   const prefix = groupClassName.split(" ").includes("group-start")
@@ -2035,6 +2044,7 @@ function estimateMessageRowHeight(message: ChatMessage) {
   if (message.kind === "statement") return 214 + replyHeight;
   if (message.kind === "activity") return 148 + replyHeight;
   if (message.kind === "forward_bundle") return 132 + replyHeight;
+  if(['profile','research_task','research_comment','research_reply'].includes(message.kind))return 132 + replyHeight;
 
   const text = message.payload?.text ?? message.text ?? "";
   const hasLink = Boolean(extractFirstMessageUrl(text));
@@ -8695,6 +8705,10 @@ function LiveChatsPage({
                 [MESSAGE_TYPE_STATEMENT]: "campaign",
                 [MESSAGE_TYPE_ACTIVITY]: "celebration",
                 [MESSAGE_TYPE_FORWARD_BUNDLE]: "layers",
+                15: 'person',
+                16: 'assignment',
+                17: 'forum',
+                18: 'reply',
               }[message.type] ?? "chat_bubble";
               const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button>;
               const openResult = () => {

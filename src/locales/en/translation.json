@@ -1,4 +1,10 @@
 {
+  "references.share": "Share to chat",
+  "references.profile": "Profile card",
+  "references.research_task": "Research task",
+  "references.research_comment": "Research comment",
+  "references.research_reply": "Research reply",
+  "references.unavailable": "Unavailable or access restricted",
   "pocklo.songRevoked":"Song share unavailable or revoked",
   "pocklo.songMissing":"Source audio was removed",
   "pocklo.songFailed":"Unable to load this song",
