@@ -1349,6 +1349,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   padding: 20px;
   background: rgba(17, 19, 24, 0.34);
   backdrop-filter: blur(12px);
+  container-type: size;
 }
 
 .chat-clipboard-dialog {
@@ -1360,7 +1361,20 @@ html[data-theme="dark"] .personalization-bubble-stage {
   border-radius: 20px;
   background: var(--bg-canvas);
   box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+  box-sizing: border-box;
+  max-height: calc(100% - 16px);
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
+
+.chat-clipboard-dialog.has-images { width: min(100%, 640px); }
+.chat-clipboard-dialog.has-images .chat-clipboard-items { max-height: min(62dvh, 620px); }
+.chat-clipboard-items.is-image-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.chat-clipboard-items.is-single-image { grid-template-columns: minmax(0, 1fr); }
+.chat-clipboard-image { display: grid; place-items: center; min-width: 0; min-height: 0; margin: 0; overflow: hidden; border-radius: 10px; background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-elevated)); }
+.chat-clipboard-image img { display: block; width: 100%; height: auto; max-height: min(62dvh, 620px, max(80px, calc(100cqh - 190px))); object-fit: contain; }
+.is-image-gallery:not(.is-single-image) .chat-clipboard-image img { height: min(28dvh, 240px); }
+.chat-clipboard-image > .material-symbols-outlined { padding: 32px; color: var(--text-muted); }
 
 .chat-clipboard-copy {
   display: flex;

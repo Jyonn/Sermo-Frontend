@@ -240,6 +240,43 @@ type ClipboardUploadCandidate = {
   source: "clipboard" | "drop";
 };
 
+export function ClipboardUploadDialog({ candidate, onCancel, onConfirm }: {
+  candidate: ClipboardUploadCandidate;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const { t } = useI18n();
+  const imageCount = candidate.files.filter(file => file.type.startsWith('image/')).length;
+  const imagesOnly = imageCount === candidate.files.length;
+  return <div className="chat-clipboard-backdrop" role="presentation">
+    <section aria-modal="true" aria-label={t('clipboard.sendThese')} className={`chat-clipboard-dialog${imageCount ? ' has-images' : ''}`} role="dialog">
+      <div className="chat-clipboard-copy">
+        {!imagesOnly ? <span className="chat-clipboard-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span> : null}
+        <div>
+          <h3>{t('clipboard.sendThese')}</h3>
+          {!imagesOnly || candidate.files.length > 1 ? <p>{t(candidate.source === 'drop' ? 'clipboard.itemsDropped' : 'clipboard.itemsRead', { count: candidate.files.length })}</p> : null}
+        </div>
+      </div>
+      <div className={`chat-clipboard-items${imagesOnly ? ' is-image-gallery' : ''}${imagesOnly && imageCount === 1 ? ' is-single-image' : ''}`}>
+        {candidate.files.map((file, index) => file.type.startsWith('image/') ? (
+          <figure className="chat-clipboard-image" key={`${file.name}:${file.size}:${index}`}>
+            {candidate.previewUris[index] ? <img alt={t('clipboard.image')} src={candidate.previewUris[index]!} /> : <span className="material-symbols-outlined" aria-label={t('clipboard.image')}>image</span>}
+          </figure>
+        ) : (
+          <div className="chat-clipboard-item" key={`${file.name}:${file.size}:${index}`}>
+            <span className="chat-clipboard-file-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
+            <div><strong>{file.name || t('clipboard.file')}</strong><span>{formatFileSize(file.size)}</span></div>
+          </div>
+        ))}
+      </div>
+      <div className="chat-clipboard-actions">
+        <button className="ghost-button" onClick={onCancel} type="button">{t('common.cancel')}</button>
+        <button className="button" onClick={onConfirm} type="button">{t('common.upload')}</button>
+      </div>
+    </section>
+  </div>;
+}
+
 function extractMessageEmojis(text: string) {
   return text.match(EMOJI_SEQUENCE_RE) ?? [];
 }
@@ -7951,38 +7988,7 @@ function LiveChatsPage({
           )}
           {fileDropActive ? <FileDropGuide/> : null}
           {clipboardUpload ? (
-            <div className="chat-clipboard-backdrop" role="presentation">
-              <section aria-modal="true" className="chat-clipboard-dialog" role="dialog">
-                <div className="chat-clipboard-copy">
-                  <span className="chat-clipboard-icon" aria-hidden="true">
-                    <ComposerSvgIcon kind="file" />
-                  </span>
-                  <div>
-                    <h3>{t("clipboard.sendThese")}</h3>
-                    <p>{t(clipboardUpload.source === "drop" ? "clipboard.itemsDropped" : "clipboard.itemsRead", { count: clipboardUpload.files.length })}</p>
-                  </div>
-                </div>
-                <div className="chat-clipboard-items">
-                  {clipboardUpload.files.map((file, index) => (
-                    <div className="chat-clipboard-item" key={`${file.name}:${file.size}:${index}`}>
-                      {clipboardUpload.previewUris[index] ? (
-                        <img alt="" src={clipboardUpload.previewUris[index] ?? undefined} />
-                      ) : (
-                        <span className="chat-clipboard-file-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
-                      )}
-                      <div>
-                        <strong>{file.name || (file.type.startsWith("image/") ? t("clipboard.image") : t("clipboard.file"))}</strong>
-                        <span>{formatFileSize(file.size)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="chat-clipboard-actions">
-                  <button className="ghost-button" onClick={closeClipboardUpload} type="button">{t("common.cancel")}</button>
-                  <button className="button" onClick={() => void confirmClipboardUpload()} type="button">{t("common.upload")}</button>
-                </div>
-              </section>
-            </div>
+            <ClipboardUploadDialog candidate={clipboardUpload} onCancel={closeClipboardUpload} onConfirm={() => void confirmClipboardUpload()} />
           ) : null}
         </section>
 

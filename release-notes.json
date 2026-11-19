@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.8",
+  "id": "2026.11.19.9",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "保留头像原图透明效果",
+      "title": "更清晰的粘贴图片预览",
       "items": [
-        "优化头像裁剪与透明预览；iPhone 和 iPad 新增从文件选择原图入口，避免相册转换导致透明区域变成底色。"
+        "粘贴或拖入图片时直接展示大图预览，省去文件名与大小信息，支持多图并保留完整画面。"
       ]
     },
     "en": {
-      "title": "Keep your avatar's transparency",
+      "title": "Larger pasted-image previews",
       "items": [
-        "Refine avatar crops and transparent previews. iPhone and iPad can select the original image from Files to avoid Photos flattening transparent areas."
+        "Pasted and dropped images now appear as larger, uncropped previews without filenames or file sizes, including multiple images."
       ]
     }
   }
