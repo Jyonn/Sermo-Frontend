@@ -1,6 +1,33 @@
 export interface AvatarCrop { x: number; y: number; size: number }
 export interface AvatarImageSize { width: number; height: number; transparent: boolean }
 
+// Enumerate common formats as well as accepting images generally. Some WebKit
+// versions treat image/* literally when deciding whether to transcode a PNG.
+export const AVATAR_IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,image/avif,image/bmp,image/svg+xml,image/*';
+
+export function avatarOriginalFileAccept(userAgent: string, platform: string, touchPoints: number) {
+  // public.data opens the iOS document picker, bypassing Photos' compatible
+  // representation. On other platforms keep the ordinary image-file filter.
+  return /iPad|iPhone|iPod/.test(userAgent) || (platform === 'MacIntel' && touchPoints > 1)
+    ? 'application/octet-stream' : AVATAR_IMAGE_ACCEPT;
+}
+
+export function avatarImageMime(bytes: Uint8Array, declaredType: string) {
+  const text = (start: number, end: number) => String.fromCharCode(...bytes.slice(start, end));
+  if ([137,80,78,71,13,10,26,10].every((value, index) => bytes[index] === value)) return 'image/png';
+  if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return 'image/jpeg';
+  if (text(0,6) === 'GIF87a' || text(0,6) === 'GIF89a') return 'image/gif';
+  if (text(0,4) === 'RIFF' && text(8,12) === 'WEBP') return 'image/webp';
+  if (text(0,2) === 'BM') return 'image/bmp';
+  if (text(4,8) === 'ftyp') {
+    const brands = text(8,32);
+    if (/avif|avis/.test(brands)) return 'image/avif';
+    if (/heic|heix|hevc|hevx|mif1|msf1/.test(brands)) return 'image/heic';
+  }
+  if (/^\s*(?:<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text(0,bytes.length))) return 'image/svg+xml';
+  return declaredType.startsWith('image/') ? declaredType : '';
+}
+
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 export function avatarCropBounds(image: AvatarImageSize) {

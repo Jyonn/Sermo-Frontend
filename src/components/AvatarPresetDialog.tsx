@@ -13,6 +13,7 @@ interface AvatarPresetDialogProps {
   onRouteOpen?: () => void;
   onSave: (presetId: number) => void | Promise<void>;
   onRequestCustomUpload?: () => void;
+  onRequestOriginalUpload?: () => void;
   customUploadEnabled?: boolean;
   customUploadHint?: string;
 }
@@ -50,6 +51,7 @@ export function AvatarPresetDialog({
   onRouteOpen,
   onSave,
   onRequestCustomUpload,
+  onRequestOriginalUpload,
   customUploadEnabled = true,
   customUploadHint,
 }: AvatarPresetDialogProps) {
@@ -124,6 +126,7 @@ export function AvatarPresetDialog({
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           ) : null}
+          {onRequestOriginalUpload ? <button className="avatar-preset-upload-row" disabled={saving || !customUploadEnabled} onClick={onRequestOriginalUpload} type="button"><span className="material-symbols-outlined" aria-hidden="true">folder_open</span><span><strong>{t('avatar.cropChooseOriginal')}</strong><small>{t('avatar.originalUploadHint')}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button> : null}
         </section>
       </div>
     </SideDrawer>

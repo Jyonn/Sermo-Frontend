@@ -2913,4 +2913,7 @@
 ,"avatar.cropReset": "重設"
 ,"avatar.cropUse": "使用此頭像"
 ,"avatar.cropFailed": "無法處理此圖片，請重新選擇較小的圖片。"
+,"avatar.cropOriginalHint": "If a transparent original shows a solid background here, save it to Files and select the original again."
+,"avatar.cropChooseOriginal": "Choose original from Files"
+,"avatar.originalUploadHint": "Recommended for transparent images"
 }

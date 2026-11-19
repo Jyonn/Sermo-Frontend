@@ -4457,4 +4457,7 @@
 ,"avatar.cropReset": "Reset"
 ,"avatar.cropUse": "Use avatar"
 ,"avatar.cropFailed": "Could not process this image. Try a smaller image."
+,"avatar.cropOriginalHint": "If a transparent original shows a solid background here, save it to Files and select the original again."
+,"avatar.cropChooseOriginal": "Choose original from Files"
+,"avatar.originalUploadHint": "Recommended for transparent images"
 }

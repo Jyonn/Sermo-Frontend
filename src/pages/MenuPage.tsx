@@ -52,7 +52,8 @@ import { UserProfileCard } from "../components/UserProfileCard";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
-import { AvatarUploadError, uploadCustomAvatar, validateAvatarImageFile } from "../lib/avatarUpload";
+import { AvatarUploadError, uploadCustomAvatar, prepareAvatarImageFile } from "../lib/avatarUpload";
+import { AVATAR_IMAGE_ACCEPT, avatarOriginalFileAccept } from '../lib/avatarCrop';
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
 import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -437,6 +438,8 @@ export default function MenuPage() {
   const [prefs, setPrefs] = useState<NotificationPreferences>(emptyPrefs);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null);
+  const avatarOriginalFileInputRef = useRef<HTMLInputElement>(null);
+  const avatarSelectionRef = useRef(0);
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
@@ -1632,7 +1635,7 @@ export default function MenuPage() {
     }
   };
 
-  const requestCustomAvatarUpload = () => {
+  const requestCustomAvatarUpload = (original = false) => {
     if (!hasPassword) {
       showPasswordReminder(t("avatar.passwordRequired"));
       return;
@@ -1641,7 +1644,7 @@ export default function MenuPage() {
       showToast(t("avatar.levelRequired", { level: 4 }), "error");
       return;
     }
-    avatarFileInputRef.current?.click();
+    (original ? avatarOriginalFileInputRef : avatarFileInputRef).current?.click();
   };
 
   const saveChatPagePersonalization = async () => {
@@ -1805,12 +1808,13 @@ export default function MenuPage() {
     }
   };
 
-  const handleCustomAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    try { validateAvatarImageFile(file); setAvatarCropFile(file); }
-    catch (error) { showToast(error instanceof Error ? error.message : t('upload.avatarFailed'), 'error'); }
+    const selection = ++avatarSelectionRef.current;
+    try { const prepared = await prepareAvatarImageFile(file); if (avatarSelectionRef.current === selection) setAvatarCropFile(prepared); }
+    catch (error) { if (avatarSelectionRef.current === selection) showToast(error instanceof Error ? error.message : t('upload.avatarFailed'), 'error'); }
   };
 
   const saveCroppedAvatar = async (file: File) => {
@@ -3565,19 +3569,21 @@ export default function MenuPage() {
         onRouteOpen={() => setAvatarDialogOpen(true)}
         customUploadEnabled={canUploadCustomAvatar && hasPassword}
         customUploadHint={!canUploadCustomAvatar ? t("avatar.unlockAtLevel", { level: 4 }) : t("avatar.setPasswordToUpload")}
-        onRequestCustomUpload={requestCustomAvatarUpload}
+        onRequestCustomUpload={() => requestCustomAvatarUpload()}
+        onRequestOriginalUpload={avatarOriginalFileAccept(navigator.userAgent, navigator.platform, navigator.maxTouchPoints) === 'application/octet-stream' ? () => requestCustomAvatarUpload(true) : undefined}
         onSave={savePresetAvatar}
         open={avatarDialogOpen}
         saving={avatarSaving}
       />
       <input
         ref={avatarFileInputRef}
-        accept="image/*"
+        accept={AVATAR_IMAGE_ACCEPT}
         hidden
         onChange={(event) => void handleCustomAvatarChange(event)}
         type="file"
       />
-      <AvatarCropDialog file={avatarCropFile} busy={avatarSaving} onClose={() => setAvatarCropFile(null)} onConfirm={saveCroppedAvatar} />
+      <input ref={avatarOriginalFileInputRef} accept={avatarOriginalFileAccept(navigator.userAgent, navigator.platform, navigator.maxTouchPoints)} hidden onChange={(event) => void handleCustomAvatarChange(event)} type="file" />
+      <AvatarCropDialog file={avatarCropFile} busy={avatarSaving} onClose={() => { avatarSelectionRef.current++; setAvatarCropFile(null); }} onConfirm={saveCroppedAvatar} onRequestOriginal={() => avatarOriginalFileInputRef.current?.click()} />
       <InputDialog
         busy={basicEditSaving}
         confirmLabel={t("profile.saveNickname")}

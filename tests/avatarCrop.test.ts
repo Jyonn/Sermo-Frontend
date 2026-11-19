@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { avatarCropBounds, constrainAvatarCrop, hasTransparentPixels, initialAvatarCrop, resizeAvatarCrop, sizeAvatarCrop } from '../src/lib/avatarCrop.ts';
+import { AVATAR_IMAGE_ACCEPT, avatarOriginalFileAccept, avatarImageMime, avatarCropBounds, constrainAvatarCrop, hasTransparentPixels, initialAvatarCrop, resizeAvatarCrop, sizeAvatarCrop } from '../src/lib/avatarCrop.ts';
 
 test('opaque portraits crop to the short edge and stay within the image', () => {
   for (const [width, height] of [[1200, 800], [800, 1200], [64, 64], [8, 20]]) {
@@ -46,4 +46,21 @@ test('transparency is detected from alpha pixels, including partial alpha, not t
   assert.equal(hasTransparentPixels(new Uint8ClampedArray([0,0,0,255, 20,30,40,255])), false);
   assert.equal(hasTransparentPixels(new Uint8ClampedArray([0,0,0,255, 20,30,40,254])), true);
   assert.equal(hasTransparentPixels(new Uint8ClampedArray([0,0,0,0])), true);
+});
+
+test('original-file selection bypasses the iOS photo picker and still filters images elsewhere', () => {
+  assert.equal(avatarOriginalFileAccept('Mozilla iPhone', 'iPhone', 5), 'application/octet-stream');
+  assert.equal(avatarOriginalFileAccept('Mozilla Mac', 'MacIntel', 5), 'application/octet-stream');
+  assert.equal(avatarOriginalFileAccept('Mozilla Android', 'Linux', 5), AVATAR_IMAGE_ACCEPT);
+  assert.equal(avatarOriginalFileAccept('Mozilla Mac', 'MacIntel', 0), AVATAR_IMAGE_ACCEPT);
+  assert.ok(AVATAR_IMAGE_ACCEPT.startsWith('image/png,'));
+});
+
+test('file signatures override generic or wrong picker MIME without pretending JPEG has alpha', () => {
+  const png = new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,0]);
+  assert.equal(avatarImageMime(png, ''), 'image/png');
+  assert.equal(avatarImageMime(png, 'application/octet-stream'), 'image/png');
+  assert.equal(avatarImageMime(png, 'image/jpeg'), 'image/png');
+  assert.equal(avatarImageMime(new Uint8Array([255,216,255,224]), 'image/png'), 'image/jpeg');
+  assert.equal(avatarImageMime(new Uint8Array([20,30,40]), 'application/octet-stream'), '');
 });

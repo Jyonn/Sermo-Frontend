@@ -1,5 +1,6 @@
 import { ApiError, api } from "./api";
 import { i18n } from "./language";
+import { avatarImageMime } from './avatarCrop';
 
 export const MAX_CUSTOM_AVATAR_SIZE = 5 * 1024 * 1024;
 
@@ -17,6 +18,16 @@ export function validateAvatarImageFile(file: File) {
   if (file.size > MAX_CUSTOM_AVATAR_SIZE) {
     throw new AvatarUploadError(i18n.t("upload.imageLimit", { size: "5 MB" }));
   }
+}
+
+export async function prepareAvatarImageFile(file: File) {
+  if (file.size > MAX_CUSTOM_AVATAR_SIZE) throw new AvatarUploadError(i18n.t('upload.imageLimit', { size: '5 MB' }));
+  const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
+  const type = avatarImageMime(bytes, file.type);
+  if (!type) throw new AvatarUploadError(i18n.t('upload.selectImage'));
+  // The original-file picker can return an empty/generic MIME. Normalize its
+  // metadata only; the original bytes, alpha channel and filename stay intact.
+  return type === file.type ? file : new File([file], file.name, { type, lastModified: file.lastModified });
 }
 
 export async function uploadCustomAvatar(file: File) {

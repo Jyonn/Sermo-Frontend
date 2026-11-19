@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.7",
+  "id": "2026.11.19.8",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "自由裁剪头像",
+      "title": "保留头像原图透明效果",
       "items": [
-        "本地头像上传后可调整裁剪范围与位置；透明图片支持额外留白，并在聊天与名片中保留透明效果。"
+        "优化头像裁剪与透明预览；iPhone 和 iPad 新增从文件选择原图入口，避免相册转换导致透明区域变成底色。"
       ]
     },
     "en": {
-      "title": "Frame your avatar",
+      "title": "Keep your avatar's transparency",
       "items": [
-        "Crop and reposition uploaded avatars. Transparent artwork supports extra padding and keeps its transparency across chat and profiles."
+        "Refine avatar crops and transparent previews. iPhone and iPad can select the original image from Files to avoid Photos flattening transparent areas."
       ]
     }
   }

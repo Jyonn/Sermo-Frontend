@@ -5,9 +5,9 @@ import { SideDrawer } from './SideDrawer';
 import './AvatarCropDialog.css';
 
 interface LoadedImage extends AvatarImageSize { element: HTMLImageElement; uri: string }
-interface Props { file: File | null; busy: boolean; onClose: () => void; onConfirm: (file: File) => Promise<void> }
+interface Props { file: File | null; busy: boolean; onClose: () => void; onConfirm: (file: File) => Promise<void>; onRequestOriginal?: () => void }
 
-export function AvatarCropDialog({ file, busy, onClose, onConfirm }: Props) {
+export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOriginal }: Props) {
   const { t } = useI18n();
   const [image, setImage] = useState<LoadedImage>();
   const [crop, setCrop] = useState<AvatarCrop>();
@@ -92,6 +92,7 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm }: Props) {
   return <SideDrawer open={Boolean(file)} title={t('avatar.cropTitle')} historyKey="avatar-crop" trapFocus className="avatar-crop-drawer" onClose={() => { if (!saving) onClose(); }}>
     <div className="avatar-crop-editor">
       <div className="avatar-crop-intro"><h2>{t('avatar.cropTitle')}</h2><p>{t('avatar.cropHint')}</p></div>
+      {((image && !image.transparent) || error) && onRequestOriginal ? <div className="avatar-crop-original"><p>{t('avatar.cropOriginalHint')}</p><button type="button" disabled={saving} onClick={onRequestOriginal}>{t('avatar.cropChooseOriginal')}<span className="material-symbols-outlined" aria-hidden="true">folder_open</span></button></div> : null}
       {image && crop && bounds ? <>
         <div className="avatar-crop-stage-wrap">
           <div ref={stage} className={`avatar-crop-stage${image.transparent ? ' is-transparent' : ''}`} onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}>

@@ -4455,4 +4455,7 @@
 ,"avatar.cropReset": "重置"
 ,"avatar.cropUse": "使用此头像"
 ,"avatar.cropFailed": "无法处理此图片，请重新选择较小的图片。"
+,"avatar.cropOriginalHint": "如果原图透明，但这里出现底色，请将原图存储到“文件”后重新选择。"
+,"avatar.cropChooseOriginal": "从文件选择原图"
+,"avatar.originalUploadHint": "透明图片推荐，保留原始透明效果"
 }
