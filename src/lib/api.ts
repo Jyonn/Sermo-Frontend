@@ -2064,7 +2064,7 @@ export const api = {
   },
 
   setPresetAvatar(avatar_preset_id: number) {
-    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string }>("/users/me/avatar/preset", {
+    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string; avatar_cache_key: string }>("/users/me/avatar/preset", {
       method: "POST",
       auth: true,
       body: { avatar_preset_id },
@@ -2080,7 +2080,7 @@ export const api = {
   },
 
   setCustomAvatar(key: string) {
-    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string }>("/users/me/avatar/custom", {
+    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string; avatar_cache_key: string }>("/users/me/avatar/custom", {
       method: "POST",
       auth: true,
       body: { key },

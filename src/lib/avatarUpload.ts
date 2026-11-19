@@ -10,7 +10,7 @@ export class AvatarUploadError extends Error {
   }
 }
 
-function validateImageFile(file: File) {
+export function validateAvatarImageFile(file: File) {
   if (!file.type.startsWith("image/")) {
     throw new AvatarUploadError(i18n.t("upload.selectImage"));
   }
@@ -20,7 +20,7 @@ function validateImageFile(file: File) {
 }
 
 export async function uploadCustomAvatar(file: File) {
-  validateImageFile(file);
+  validateAvatarImageFile(file);
 
   const upload = await api.createCustomAvatarUpload(file.name, file.type);
   const formData = new FormData();

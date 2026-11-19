@@ -13,6 +13,7 @@ import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
+import { AvatarCropDialog } from "../components/AvatarCropDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { AccountSwitchList } from "../components/AccountSwitchList";
@@ -51,7 +52,7 @@ import { UserProfileCard } from "../components/UserProfileCard";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
-import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
+import { AvatarUploadError, uploadCustomAvatar, validateAvatarImageFile } from "../lib/avatarUpload";
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
 import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -435,6 +436,7 @@ export default function MenuPage() {
   const [me, setMe] = useState<UserMeDTO | null>(null);
   const [prefs, setPrefs] = useState<NotificationPreferences>(emptyPrefs);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null);
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
@@ -1618,8 +1620,9 @@ export default function MenuPage() {
       patchSessionUser({
         avatar_type: payload.avatar_type,
         avatar_uri: payload.avatar_uri,
+        avatar_cache_key: payload.avatar_cache_key,
       });
-      setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
+      setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri, avatar_cache_key: payload.avatar_cache_key } : current));
       setAvatarDialogOpen(false);
       showToast(t("avatar.updated"));
     } catch (apiError) {
@@ -1802,19 +1805,25 @@ export default function MenuPage() {
     }
   };
 
-  const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCustomAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    try { validateAvatarImageFile(file); setAvatarCropFile(file); }
+    catch (error) { showToast(error instanceof Error ? error.message : t('upload.avatarFailed'), 'error'); }
+  };
 
+  const saveCroppedAvatar = async (file: File) => {
     try {
       setAvatarSaving(true);
       const payload = await uploadCustomAvatar(file);
       patchSessionUser({
         avatar_type: payload.avatar_type,
         avatar_uri: payload.avatar_uri,
+        avatar_cache_key: payload.avatar_cache_key,
       });
-      setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
+      setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri, avatar_cache_key: payload.avatar_cache_key } : current));
+      setAvatarCropFile(null);
       setAvatarDialogOpen(false);
       showToast(t("avatar.uploaded"));
     } catch (uploadError) {
@@ -3568,6 +3577,7 @@ export default function MenuPage() {
         onChange={(event) => void handleCustomAvatarChange(event)}
         type="file"
       />
+      <AvatarCropDialog file={avatarCropFile} busy={avatarSaving} onClose={() => setAvatarCropFile(null)} onConfirm={saveCroppedAvatar} />
       <InputDialog
         busy={basicEditSaving}
         confirmLabel={t("profile.saveNickname")}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.6",
+  "id": "2026.11.19.7",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "名片与科研内容分享",
+      "title": "自由裁剪头像",
       "items": [
-        "新增个人名片、科研任务、评论和回复消息卡片，可从详情分享至聊天，并直接打开对应内容。科研分享遵循项目访问权限。"
+        "本地头像上传后可调整裁剪范围与位置；透明图片支持额外留白，并在聊天与名片中保留透明效果。"
       ]
     },
     "en": {
-      "title": "Share profiles and research discussions",
+      "title": "Frame your avatar",
       "items": [
-        "Share profile cards, research tasks, comments and replies to chat. Cards open the corresponding content while respecting project membership."
+        "Crop and reposition uploaded avatars. Transparent artwork supports extra padding and keeps its transparency across chat and profiles."
       ]
     }
   }

@@ -33,6 +33,15 @@
   box-shadow: 0 0 0 1px rgba(17, 38, 31, .1), 0 4px 14px rgba(17, 19, 24, .1);
 }
 
+/* A portrait carries its own pixels. Transparent artwork must reveal the
+   surrounding chat/profile surface, rather than a synthetic avatar tile. */
+.user-avatar.avatar-has-image,
+.user-avatar.avatar-has-image > .avatar-frame-clip {
+  background: transparent;
+}
+
+.user-avatar .avatar-image { object-fit: contain; }
+
 .user-avatar.status-online { overflow: visible; }
 .user-avatar.status-online::after { z-index: 2; }
 
