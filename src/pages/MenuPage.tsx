@@ -2582,7 +2582,6 @@ export default function MenuPage() {
             <div className={`user-profile-panel profile-card-preview-scale profile-theme-${personalizationDraft.profile_card_theme}`}>
               <UserProfileCard
                 profileTheme={personalizationDraft.profile_card_theme}
-                avatarFrame={me?.avatar_frame_style}
                 avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
                 explorerBadgeYears={me?.explorer_badge_years}
                 growthLevel={growthLevel}

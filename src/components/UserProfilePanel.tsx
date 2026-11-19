@@ -374,7 +374,6 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       <UserProfileCard
         profileTheme={user.profile_card_theme}
         avatarLabel={t("profile.avatarLabel", { name: user.name })}
-        avatarFrame={user.avatar_frame_style}
         avatarUri={user.avatar_uri}
         growthLevel={user.growth_level}
         growthLevelName={user.growth_level_name}

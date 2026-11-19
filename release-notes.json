@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.4",
+  "id": "2026.11.19.5",
   "publishedAt": "2026-11-19",
   "locales": {
     "zh-CN": {
-      "title": "更轻巧的聊天记录卡片",
+      "title": "纯头像个人名片",
       "items": [
-        "合并聊天记录改为紧凑摘要，随当前气泡主题呈现底色、边线与装饰，点击卡片查看完整内容。"
+        "个人名片及名片预览统一展示纯头像。"
       ]
     },
     "en": {
-      "title": "Compact, themed chat records",
+      "title": "Plain avatars on profile cards",
       "items": [
-        "Merged chat records now show compact summaries inside your selected bubble theme. Open the card to read the full conversation."
+        "Profile cards and their previews now use plain avatars."
       ]
     }
   }

@@ -30,7 +30,7 @@ export function ExplorerRewardPreview({ tier }: { tier: number }) {
       <div className="explorer-wallpaper-messages"><span>{t("explorer.previewLine")}</span><span>{t("explorer.previewReply")}</span></div>
       <span className="explorer-scene-caption">{t("explorer.sceneTransition")}</span>
     </div> : tier === 4 ? <div className="explorer-profile-display user-profile-panel profile-theme-explorer-romance">
-      <UserProfileCard profileTheme="explorer-romance" name={name} avatarUri={session?.user.avatar_uri} avatarFrame="explorer-conan" presence={t("explorer.profileSignature")} />
+      <UserProfileCard profileTheme="explorer-romance" name={name} avatarUri={session?.user.avatar_uri} presence={t("explorer.profileSignature")} />
     </div> : <div className="explorer-medal-display">
       <span className="explorer-display-orbit" aria-hidden="true" />
       <img alt={t("explorer.reward.5")} src={EXPLORER_ART.medal} />

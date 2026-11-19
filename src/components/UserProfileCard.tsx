@@ -1,7 +1,7 @@
 import { GrowthLevelBadge } from "./GrowthLevelBadge";
 import { OfficialBadge } from "./OfficialBadge";
 import { OperatorBadge } from "./OperatorBadge";
-import { UserAvatar } from "./UserAvatar";
+import { PlainAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
 import { useI18n } from "../lib/language";
 import "./FounderMedals.css";
@@ -12,7 +12,6 @@ import { AnnualMedal } from "./AnnualMedal";
 interface UserProfileCardProps {
   profileTheme?: UserDTO["profile_card_theme"];
   avatarLabel?: string;
-  avatarFrame?: UserDTO["avatar_frame_style"];
   avatarUri?: string;
   growthLevel?: number;
   growthLevelName?: string;
@@ -33,7 +32,6 @@ interface UserProfileCardProps {
 export function UserProfileCard({
   profileTheme,
   avatarLabel,
-  avatarFrame,
   avatarUri,
   growthLevel,
   growthLevelName,
@@ -64,9 +62,8 @@ export function UserProfileCard({
           tabIndex={onAvatarClick ? undefined : -1}
           type="button"
         >
-          <UserAvatar
+          <PlainAvatar
             className={`user-profile-avatar${isOnline ? " status-online" : ""}`}
-            frame={avatarFrame}
             name={name}
             uri={avatarUri}
           />
