@@ -3,7 +3,7 @@ import {usePersonalTheme} from '../lib/personalTheme';
 import {useI18n,type TranslationKey} from '../lib/language';
 import type {PersonalTheme,ThemeUnlock} from '../lib/personalThemePolicy';
 import './PersonalThemeSettings.css';
-import {BottomSheet} from './BottomSheet';
+import {SettingsDialog} from './SettingsDialog';
 import {SettingGroup,SettingRow,SettingSwitch} from './SettingRow';
 
 export const personalThemeLabels:Record<PersonalTheme,TranslationKey>={default:'menu.themeDefault','christmas-2026':'menu.themeChristmas','birthday-botanical':'menu.themeBirthday'};
@@ -16,9 +16,9 @@ export function PersonalThemeSettings(){
   const period=unlocks.map(item=>item.token).join('|');
   useEffect(()=>{acknowledge()},[scope,period]);
   return <><PersonalThemeChoices theme={theme} unlocks={unlocks} select={select} onChristmasMore={()=>setMoreScope(scope)}/>
-    <BottomSheet open={christmasUnlocked&&moreScope===scope} title={t('menu.christmasMoreSettings')} onClose={()=>setMoreScope(null)}>
+    <SettingsDialog open={christmasUnlocked&&moreScope===scope} title={t('menu.christmasMoreSettings')} onClose={()=>setMoreScope(null)}>
       <SettingGroup><SettingRow title={t('menu.christmasBackgroundOverride')} description={t('menu.christmasBackgroundOverrideHint')} trailing={<SettingSwitch label={t('menu.christmasBackgroundOverride')} checked={christmasBackgroundOverride} onChange={setChristmasBackgroundOverride}/>}/></SettingGroup>
-    </BottomSheet>
+    </SettingsDialog>
   </>;
 }
 export function PersonalThemeChoices({theme,unlocks,select,onChristmasMore}:{theme:PersonalTheme;unlocks:ThemeUnlock[];select:(theme:PersonalTheme)=>void;onChristmasMore?:()=>void}){

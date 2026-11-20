@@ -219,7 +219,8 @@
   "researchFlow.needsAnswer": "需要答复",
   "researchFlow.answerTarget": "请谁答复",
   "researchFlow.answered": "已答复",
-  "monifa.card": "Monifa 动态验证码",
+  "monifa.name": "时符 · Monifa",
+  "monifa.card": "时符 · Monifa 动态验证码",
   "monifa.open": "在 Monifa 查看",
   "monifa.shared": "共享验证码",
   "monifa.copy": "复制验证码",
@@ -1476,7 +1477,7 @@
   "menu.appearance": "外观",
   "music.backTen": "后退 10 秒",
   "music.forwardTen": "快进 10 秒",
-  "drop.name": "Drop · 一滴",
+  "drop.name": "一滴 · Drop",
   "drop.shortName": "一滴",
   "drop.hint": "留住此刻，选择日记与好友分享",
   "drop.choose": "从一滴选择日记",
@@ -4085,7 +4086,7 @@
   ,"stillfolio.disconnectHint": "解除当前空间账号与留幅的绑定。已有分享链接可以在留幅管理。"
   ,"stillfolio.legacyPicker": "在留幅中选择已分享的相册"
   ,"apps.allowPopup": "请允许打开留幅窗口后重试"
-  ,"pocklo.name": "小兜·Pocklo"
+  ,"pocklo.name": "小兜 · Pocklo"
   ,"pocklo.menuHint": "在聊天中分享网盘文件和文件夹"
   ,"pocklo.statusConnected": "已连接"
   ,"pocklo.statusDisconnected": "未连接"
@@ -4140,7 +4141,7 @@
   ,"pocklo.empty": "这个文件夹没有文件。"
   ,"pocklo.parentFolder": "上一级"
   ,"pocklo.previousPage": "上一页"
-  ,"chronelle.title": "时序·Chronelle"
+  ,"chronelle.title": "时序 · Chronelle"
   ,"chronelle.introduction": "把公开日程展示在你的友间名片中。"
   ,"chronelle.manage": "管理日历"
   ,"chronelle.open": "打开日历"
@@ -4233,7 +4234,7 @@
   ,"apps.thirdParty": "第三方应用"
   ,"apps.travelHint": "收集你的足迹与打卡"
   ,"apps.cloudHint": "整理和管理云端文件"
-  ,"apps.stillfolio": "留幅"
+  ,"apps.stillfolio": "留幅 · StillFolio"
   ,"apps.supervision": "Supervision"
   ,"apps.stillfolioSubtitle": "摄影作品集工作台"
   ,"apps.stillfolioDescription": "在留幅整理照片、制作并分享摄影作品集。"

@@ -219,7 +219,8 @@
   "researchFlow.needsAnswer": "Request an answer",
   "researchFlow.answerTarget": "Who should answer",
   "researchFlow.answered": "Answered",
-  "monifa.card": "Monifa one-time code",
+  "monifa.name": "时符 · Monifa",
+  "monifa.card": "时符 · Monifa one-time code",
   "monifa.open": "Open in Monifa",
   "monifa.shared": "Shared one-time code",
   "monifa.copy": "Copy code",
@@ -1478,7 +1479,7 @@
   "menu.appearance": "Appearance",
   "music.backTen": "Back 10 seconds",
   "music.forwardTen": "Forward 10 seconds",
-  "drop.name": "Drop · 一滴",
+  "drop.name": "一滴 · Drop",
   "drop.shortName": "Drop",
   "drop.hint": "Keep a moment. Share selected diary entries.",
   "drop.choose": "Choose from Drop",
@@ -4087,7 +4088,7 @@
   ,"stillfolio.disconnectHint": "Disconnect StillFolio from this space account. Manage existing share links in StillFolio."
   ,"stillfolio.legacyPicker": "Choose a shared album in StillFolio"
   ,"apps.allowPopup": "Allow the StillFolio window to open and try again."
-  ,"pocklo.name": "小兜·Pocklo"
+  ,"pocklo.name": "小兜 · Pocklo"
   ,"pocklo.menuHint": "Share files and folders from your drive in chat"
   ,"pocklo.statusConnected": "Connected"
   ,"pocklo.statusDisconnected": "Not connected"
@@ -4142,7 +4143,7 @@
   ,"pocklo.empty": "This folder is empty."
   ,"pocklo.parentFolder": "Parent folder"
   ,"pocklo.previousPage": "Previous page"
-  ,"chronelle.title": "时序·Chronelle"
+  ,"chronelle.title": "时序 · Chronelle"
   ,"chronelle.introduction": "Show your public schedule on your Frienden profile."
   ,"chronelle.manage": "Manage calendar"
   ,"chronelle.open": "Open calendar"
@@ -4235,7 +4236,7 @@
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"
   ,"apps.cloudHint": "Organize your cloud files"
-  ,"apps.stillfolio": "StillFolio"
+  ,"apps.stillfolio": "留幅 · StillFolio"
   ,"apps.supervision": "Supervision"
   ,"apps.stillfolioSubtitle": "Photography portfolio studio"
   ,"apps.stillfolioDescription": "Organize photos, create portfolios, and share your work in Stillfolio."

@@ -41,7 +41,9 @@ import { GrowthReport } from "../components/GrowthReport";
 import { signedGrowthPoints } from "../lib/growthPoints";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
-import { SelectControl, SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
+import { SelectControl, SettingDialogRow, SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
+import {SettingsDialog} from '../components/SettingsDialog';
+import {SquareLayoutSettings} from '../components/SquareLayoutSettings';
 import { UserAvatar } from "../components/UserAvatar";
 import { BgmIcon } from "../components/BgmIcon";
 import { BgmEntranceSettings } from "../components/BgmEntranceSettings";
@@ -82,8 +84,7 @@ import pockloIcon from "../assets/pocklo-mark.svg";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
-import { useSquareChannelLayout, useSquareLayoutUnified } from "../lib/useSquareFeedLayout";
-import type {SquareFeedLayout} from '../lib/squareFeedLayout';
+import {useSquareLayoutUnified} from '../lib/useSquareFeedLayout';
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
@@ -416,7 +417,7 @@ export default function MenuPage() {
   const { t, preference: languagePreference, setPreference: setLanguagePreference, saving: languageSaving } = useI18n();
   const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const {theme:personalTheme,pending:themeNew}=usePersonalTheme();
-  const [themeDrawerOpen,setThemeDrawerOpen]=useState(false);
+  const [themeDialogOpen,setThemeDialogOpen]=useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser, setSession } = useAuth();
@@ -510,7 +511,7 @@ export default function MenuPage() {
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
-  const [squareLayoutDrawerOpen, setSquareLayoutDrawerOpen] = useState(false);
+  const [squareLayoutDialogOpen, setSquareLayoutDialogOpen] = useState(false);
   const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string; activity: ActivityCampaignDTO } | null>(null);
   const [bgmSettingsOpen, setBgmSettingsOpen] = useState(false);
   const { available: bgmPlaybackAvailable, refresh: refreshBgmPlayback } = useBgmPlayback();
@@ -592,14 +593,7 @@ export default function MenuPage() {
   const pwaGrowthClaimedRef = useRef(false);
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
-  const [unifiedSquareLayout, setUnifiedSquareLayout] = useSquareLayoutUnified(cacheScope);
-  const [squareFeedLayout, setSquareFeedLayout] = useSquareChannelLayout(cacheScope, "explore");
-  const [squareFriendsLayout, setSquareFriendsLayout] = useSquareChannelLayout(cacheScope, "friends");
-  const [squareUserLayout, setSquareUserLayout] = useSquareChannelLayout(cacheScope, "user");
-  const squareLayoutOptions: { value: SquareFeedLayout; label: string }[] = [
-    { value: "list", label: t("square.layoutList") },
-    { value: "masonry", label: t("square.layoutMasonry") },
-  ];
+  const [unifiedSquareLayout] = useSquareLayoutUnified(cacheScope);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   useEffect(() => {
     if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
@@ -2488,7 +2482,7 @@ export default function MenuPage() {
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
       </SideDrawer> : null}
       <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
-      <SideDrawer historyKey="site-theme" onRouteOpen={()=>setThemeDrawerOpen(true)} open={themeDrawerOpen} onClose={()=>setThemeDrawerOpen(false)} title={t('menu.siteTheme')}>{themeDrawerOpen?<PersonalThemeSettings/>:null}</SideDrawer>
+      <SettingsDialog open={themeDialogOpen} onClose={()=>setThemeDialogOpen(false)} title={t('menu.siteTheme')}>{themeDialogOpen?<PersonalThemeSettings/>:null}</SettingsDialog>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
@@ -2502,7 +2496,7 @@ export default function MenuPage() {
               ]}
               value={themePreference}
             />
-            <SettingRow title={<span className="menu-update-label">{t('menu.siteTheme')}<ThemeDiscoveryDot/></span>} value={t(personalThemeLabels[personalTheme])} onClick={()=>setThemeDrawerOpen(true)}/>
+            <SettingDialogRow label={<span className="menu-update-label">{t('menu.siteTheme')}<ThemeDiscoveryDot/></span>} value={t(personalThemeLabels[personalTheme])} open={themeDialogOpen} onClick={()=>setThemeDialogOpen(true)}/>
             <SettingSelect<LanguagePreference>
               disabled={languageSaving}
               label={t("menu.language")}
@@ -2531,8 +2525,8 @@ export default function MenuPage() {
           </SettingGroup>
           <SettingGroup>
             <MobileVoiceInputSettings/>
-            <SettingRow title={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
-              onClick={() => setSquareLayoutDrawerOpen(true)} />
+            <SettingDialogRow label={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
+              open={squareLayoutDialogOpen} onClick={() => setSquareLayoutDialogOpen(true)} />
           </SettingGroup>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong className="menu-update-label">{t("quickActions.title")}<CallShortcutDiscoveryMarker/></strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
@@ -2571,20 +2565,10 @@ export default function MenuPage() {
           </button> : null}
         </div>
       </SideDrawer>
-      <SideDrawer historyKey="square-layout" open={squareLayoutDrawerOpen} onRouteOpen={() => setSquareLayoutDrawerOpen(true)}
-        onClose={() => setSquareLayoutDrawerOpen(false)} title={t("square.layout")} dismissAction="back">
-        <div className="personalization-drawer">
-          <SettingGroup>
-            <SettingRow title={t("square.layoutUnified")} description={t("square.layoutUnifiedHint")}
-              trailing={<SettingSwitch checked={unifiedSquareLayout} label={t("square.layoutUnified")} onChange={setUnifiedSquareLayout} />} />
-          </SettingGroup>
-          {!unifiedSquareLayout && <SettingGroup>
-            <SettingSelect label={t("square.layoutExplore")} value={squareFeedLayout} onChange={setSquareFeedLayout} options={squareLayoutOptions} />
-            <SettingSelect label={t("square.layoutFriends")} value={squareFriendsLayout} onChange={setSquareFriendsLayout} options={squareLayoutOptions} />
-            <SettingSelect label={t("square.layoutUser")} value={squareUserLayout} onChange={setSquareUserLayout} options={squareLayoutOptions} />
-          </SettingGroup>}
-        </div>
-      </SideDrawer>
+      <SettingsDialog open={squareLayoutDialogOpen}
+        onClose={() => setSquareLayoutDialogOpen(false)} title={t("square.layout")}>
+        <SquareLayoutSettings scope={cacheScope}/>
+      </SettingsDialog>
 
       <SideDrawer
         actionBusy={personalizationSaving}

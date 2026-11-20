@@ -2776,7 +2776,8 @@
   "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat.",
  "chat.editFailedText": "Editar mensaje no enviado"
   ,"apps.more": "Aplicaciones y complementos"
-  ,"chronelle.title": "时序·Chronelle"
+  ,"monifa.name": "时符 · Monifa"
+  ,"chronelle.title": "时序 · Chronelle"
   ,"chronelle.introduction": "Muestra tu agenda pública en tu perfil de Frienden."
   ,"chronelle.manage": "Gestionar calendario"
   ,"chronelle.open": "Open calendar"
@@ -2806,7 +2807,7 @@
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"
   ,"apps.cloudHint": "Organize your cloud files"
-  ,"apps.stillfolio": "留幅·StillFolio"
+  ,"apps.stillfolio": "留幅 · StillFolio"
   ,"apps.supervision": "Supervision"
   ,"apps.stillfolioSubtitle": "Photography portfolio studio"
   ,"apps.stillfolioDescription": "Organize photos, create portfolios, and share your work in Stillfolio."

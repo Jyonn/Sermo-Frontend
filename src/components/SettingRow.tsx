@@ -52,9 +52,23 @@ export function SettingRow({
   return onClick ? <button className={classes} disabled={disabled} onClick={onClick} type="button">{content}</button> : <div className={classes}>{content}</div>;
 }
 
-export function SelectControl<T extends string>({ disabled = false, label, onChange, options, value, compact = false, onOpen, triggerLabel }: {
+export function SettingDialogRow({label, description, value, open, onClick}: {
+  label: ReactNode;
+  description?: ReactNode;
+  value: ReactNode;
+  open: boolean;
+  onClick: () => void;
+}) {
+  return <button type="button" className="setting-select setting-select-trigger is-row" aria-haspopup="dialog" aria-expanded={open} onClick={onClick}>
+    <span className="setting-select-label">{label}{description ? <small>{description}</small> : null}</span>
+    <span className="setting-select-value">{value}</span><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
+  </button>;
+}
+
+export function SelectControl<T extends string>({ disabled = false, label, description, onChange, options, value, compact = false, onOpen, triggerLabel }: {
   disabled?: boolean;
   label: string;
+  description?: ReactNode;
   onChange: (value: T) => void | Promise<void>;
   options: Array<{ label: string; value: T }>;
   value: T;
@@ -96,7 +110,7 @@ export function SelectControl<T extends string>({ disabled = false, label, onCha
     <button className={`setting-select setting-select-trigger${compact ? ' is-compact' : ' is-row'}${disabled ? ' is-disabled' : ''}`} aria-label={`${label}: ${selected?.label || t('select.choose')}`} aria-haspopup="dialog" aria-expanded={open} disabled={disabled || !options.length} type="button" onClick={show} onKeyDown={event => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(); }
     }}>
-      {!compact && <span className="setting-select-label">{label}</span>}
+      {!compact && <span className="setting-select-label">{label}{description ? <small>{description}</small> : null}</span>}
       <span className="setting-select-value">{triggerLabel ?? (selected?.label || t('select.choose'))}</span><span className="material-symbols-outlined setting-row-chevron" aria-hidden="true">chevron_right</span>
     </button>
     {open && createPortal(<div className="dialog-backdrop option-picker-backdrop" role="presentation" onClick={event => { event.stopPropagation(); close(); }}>

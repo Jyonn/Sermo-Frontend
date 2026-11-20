@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.20.3",
+  "id": "2026.11.20.4",
   "publishedAt": "2026-11-20",
   "locales": {
     "zh-CN": {
-      "title": "圣诞背景覆盖设置",
+      "title": "个性化设置与应用名称统一",
       "items": [
-        "圣诞主题默认使用小镇背景；可在主题列表中打开圣诞的更多设置，关闭背景覆盖并恢复自选背景。"
+        "主题和广场布局改用模态框，统一手机语音输入等选项的样式。",
+        "外部应用名称统一采用“中文 · English”。"
       ]
     },
     "en": {
-      "title": "Christmas background preferences",
+      "title": "Consistent preferences and app names",
       "items": [
-        "Christmas uses its town background by default. Open Christmas's additional theme settings to turn off the override and restore your chosen background."
+        "Theme and Square layout settings now open in dialogs, with consistent option styling including mobile voice input.",
+        "External app names consistently use Chinese · English."
       ]
     }
   }
