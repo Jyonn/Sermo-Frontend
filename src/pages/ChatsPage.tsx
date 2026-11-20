@@ -1343,6 +1343,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "audio" && message.payload?.uri) {
+    if (message.payload.bgm_entrance) return <BgmAudioPill title={message.payload.song_title ?? 'BGM'} uri={message.payload.uri} />;
     return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined} previewTranscript={typeof message.id === "string" && message.id.startsWith("preview-")} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
 

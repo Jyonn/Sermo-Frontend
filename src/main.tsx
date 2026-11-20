@@ -21,6 +21,7 @@ import {BirthdayProvider} from './lib/birthday';
 import './styles/birthday-theme.css';
 import './styles/birthday-chrome.css';
 import {PersonalThemeProvider} from './lib/personalTheme';
+import { BgmPlaybackProvider } from './lib/bgmPlayback';
 import './styles/tab-surfaces.css';
 
 const PAGE_RELOAD_REASON_KEY = "sermo:diagnostics:reload-reason";
@@ -106,7 +107,7 @@ async function renderApp() {
         <PlatformAdminAuthProvider><AuthProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <FeatureDiscoveryProvider><MusicPlayerProvider><BirthdayProvider><PersonalThemeProvider><App /></PersonalThemeProvider></BirthdayProvider></MusicPlayerProvider></FeatureDiscoveryProvider>
+              <FeatureDiscoveryProvider><MusicPlayerProvider><BirthdayProvider><PersonalThemeProvider><BgmPlaybackProvider><App /></BgmPlaybackProvider></PersonalThemeProvider></BirthdayProvider></MusicPlayerProvider></FeatureDiscoveryProvider>
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider></PlatformAdminAuthProvider>

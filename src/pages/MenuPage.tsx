@@ -45,6 +45,8 @@ import { SelectControl, SettingGroup, SettingRow, SettingSelect, SettingSwitch }
 import { UserAvatar } from "../components/UserAvatar";
 import { BgmIcon } from "../components/BgmIcon";
 import { BgmEntranceSettings } from "../components/BgmEntranceSettings";
+import { bgmRunAvailable } from '../lib/bgmPolicy';
+import { useBgmPlayback } from '../lib/bgmPlayback';
 import { ActionSheet } from "../components/ActionSheet";
 import { AlertDialog } from "../components/AlertDialog";
 import type { ActivityCampaignDTO } from "../types";
@@ -511,16 +513,21 @@ export default function MenuPage() {
   const [squareLayoutDrawerOpen, setSquareLayoutDrawerOpen] = useState(false);
   const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string; activity: ActivityCampaignDTO } | null>(null);
   const [bgmSettingsOpen, setBgmSettingsOpen] = useState(false);
+  const { available: bgmPlaybackAvailable, refresh: refreshBgmPlayback } = useBgmPlayback();
+  const bgmSettingsAvailable = bgmPlaybackAvailable && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` && bgmRunAvailable(bgmCollection?.activity);
+  useEffect(() => { if (!bgmSettingsAvailable) setBgmSettingsOpen(false); }, [bgmSettingsAvailable]);
   const [quickActionsSettingsOpen, setQuickActionsSettingsOpen] = useState(false);
   useEffect(() => {
     if (!personalizationDrawerOpen || !session) return;
     const controller = new AbortController();
     const scope = `${session.user.space_id}:${session.user.user_id}`;
+    setBgmCollection(null);
+    void refreshBgmPlayback();
     void api.getMyBgm(controller.signal).then((activity) => {
-      if (!controller.signal.aborted) setBgmCollection(activity?.bgm?.joined ? { scope, key: activity.key, activity } : null);
+      if (!controller.signal.aborted) setBgmCollection(bgmRunAvailable(activity) && activity?.bgm?.joined ? { scope, key: activity.key, activity } : null);
     }).catch(() => undefined);
     return () => controller.abort();
-  }, [personalizationDrawerOpen, session?.user.space_id, session?.user.user_id]);
+  }, [personalizationDrawerOpen, session?.user.space_id, session?.user.user_id, refreshBgmPlayback]);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [chatBackgroundDraft, setChatBackgroundDraft] = useState<ChatBackgroundTheme>("default");
@@ -2477,9 +2484,9 @@ export default function MenuPage() {
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} onChange={()=>setChronelleInfoOpen(false)} /> : null}
       {session ? <MyProfileCardDrawer onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} user={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }} /> : null}
 
-      <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen && bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}`} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
+      {bgmSettingsAvailable ? <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
-      </SideDrawer>
+      </SideDrawer> : null}
       <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
       <SideDrawer historyKey="site-theme" onRouteOpen={()=>setThemeDrawerOpen(true)} open={themeDrawerOpen} onClose={()=>setThemeDrawerOpen(false)} title={t('menu.siteTheme')}>{themeDrawerOpen?<PersonalThemeSettings/>:null}</SideDrawer>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
@@ -2557,7 +2564,7 @@ export default function MenuPage() {
             <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
-          {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setBgmSettingsOpen(true)} type="button">
+          {bgmSettingsAvailable && bgmCollection ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setBgmSettingsOpen(true)} type="button">
             <span className="personalization-entry-preview bgm-key-entry-preview"><BgmIcon name="music_note" /></span>
             <span><strong>{t("bgm.myKeychain")}</strong><small>{t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>

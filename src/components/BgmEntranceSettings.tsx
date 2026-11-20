@@ -4,10 +4,14 @@ import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "./SettingRow";
 import "./BgmActivity.css";
+import { bgmRunAvailable } from '../lib/bgmPolicy';
+import { useBgmPlayback, useBgmRunActive } from '../lib/bgmPlayback';
 
 export function BgmEntranceSettings({ activity, onUpdate }: { activity: ActivityCampaignDTO; onUpdate: (activity: ActivityCampaignDTO) => void }) {
   const { t } = useI18n();
   const data = activity.bgm;
+  const { available } = useBgmPlayback();
+  const runActive = useBgmRunActive(activity);
   const [mode, setMode] = useState(data?.mode ?? "off");
   const [track, setTrack] = useState(data?.track ?? "random");
   const [receiveAudio, setReceiveAudio] = useState(data?.receive_audio ?? true);
@@ -16,10 +20,10 @@ export function BgmEntranceSettings({ activity, onUpdate }: { activity: Activity
   const alive = useRef(true);
   const saving = useRef(false);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  if (!data?.joined || !data.style) return null;
+  if (!available || !runActive || !data?.joined || !data.style) return null;
   const owned = data.tracks.filter((item) => item.owned);
   async function save(next: { mode?: typeof mode; track?: string; receive_audio?: boolean }) {
-    if (saving.current || !data?.style) return;
+    if (saving.current || !available || !bgmRunAvailable(activity) || !data?.style) return;
     saving.current = true;
     setBusy(true); setStatus("");
     try {

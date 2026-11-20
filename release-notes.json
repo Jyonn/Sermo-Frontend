@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.19.9",
-  "publishedAt": "2026-11-19",
+  "id": "2026.11.20.1",
+  "publishedAt": "2026-11-20",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的粘贴图片预览",
+      "title": "主角按键随活动结束收起",
       "items": [
-        "粘贴或拖入图片时直接展示大图预览，省去文件名与大小信息，支持多图并保留完整画面。"
+        "空间的主角按键活动结束后，收起相关设置与播放入口，停止自动、手动和入场音乐播放，保留收集记录。"
       ]
     },
     "en": {
-      "title": "Larger pasted-image previews",
+      "title": "Main-character keys follow the event period",
       "items": [
-        "Pasted and dropped images now appear as larger, uncropped previews without filenames or file sizes, including multiple images."
+        "When a space's keychain event ends, its settings and playback controls disappear and automatic, manual and entrance music stop. Collection records remain."
       ]
     }
   }

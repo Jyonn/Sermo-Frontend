@@ -4343,7 +4343,7 @@
   ,"bgm.rule1": "The event lasts 30 days. Days follow Beijing time. Progress starts after joining; active days need not be consecutive."
   ,"bgm.rule2": "Earn 6 for your first public post, 3 each for comments on 3 different posts by others, and 1 each for likes on 5 different authors. Maximum 20 daily."
   ,"bgm.rule3": "Post once or comment on two different posts by others for an active day. Anonymous, friends-only, self-interactions and repeat actions do not count."
-  ,"bgm.rule4": "Get your first track on joining. One daily post collects all 12 in 15 days; comments and likes can shorten this to 10 active days (90 inspiration required). For example, one post, comment and like each day completes the collection in 10 days. Days need not be consecutive and existing progress is kept. Equip up to six tracks; earned tracks remain after the event."
+  ,"bgm.rule4": "Get your first track on joining. One daily post collects all 12 in 15 days; comments and likes can shorten this to 10 active days (90 inspiration required). For example, one post, comment and like each day completes the collection in 10 days. Days need not be consecutive and existing progress is kept. Equip up to six tracks. After the event ends, collection records remain; playback stops and its settings are removed."
   ,"bgm.saveFailed": "Could not save. Please try again."
   ,"bgm.playFailed": "Could not play. Tap to try again."
   ,"bgm.verifyFirst": "Verify your account to join"
