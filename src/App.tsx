@@ -118,9 +118,9 @@ export default function App() {
   const spaceId = session?.user.space_id;
   useEffect(() => {
     for(const [key,value] of Object.entries(birthdayAssets))document.documentElement.style.setProperty(`--birthday-${key}`,`url("${value}")`);
-    applySiteTheme(spaceId&&location.pathname.startsWith('/app/') ? personalTheme : 'default');
+    applySiteTheme(spaceId&&location.pathname.startsWith('/app/') ? (personalTheme === 'default' && features.siteTheme === 'qixi-2026' ? features.siteTheme : personalTheme) : 'default');
     return () => {applySiteTheme('default');for(const key of Object.keys(birthdayAssets))document.documentElement.style.removeProperty(`--birthday-${key}`);};
-  }, [spaceId,personalTheme,location.pathname]);
+  }, [spaceId,personalTheme,features.siteTheme,location.pathname]);
   useEffect(() => {
     if (!spaceId) return;
     const refresh = () => {

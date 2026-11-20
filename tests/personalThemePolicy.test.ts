@@ -29,3 +29,24 @@ test('unlock identities distinguish celebrations and Christmas years for discove
   assert.deepEqual(availablePersonalThemes(now,true,'occasion-1').map(x=>x.token),['default','christmas:2026','birthday:occasion-1']);
   assert.deepEqual(availablePersonalThemes(at('2027-01-01T00:00:00'),false).map(x=>x.token),['default']);
 });
+
+test('an enabled space Christmas theme unlocks immediately outside seasonal dates',()=>{
+  const now=at('2026-11-20T12:00:00');
+  const before=availablePersonalThemes(now,false);
+  const saved={period:before.map(x=>x.token).join('|'),theme:'default'};
+  const enabled=availablePersonalThemes(now,false,null,{id:42,theme:'christmas-2026'});
+  assert.equal(selectedPersonalTheme(enabled,saved),'christmas-2026');
+  assert.deepEqual(enabled.map(x=>x.token),['default','christmas:space:42']);
+  assert.equal(selectedPersonalTheme(availablePersonalThemes(at('2027-01-01T12:00:00'),false,null,{id:42,theme:'christmas-2026'}),null),'christmas-2026');
+});
+
+test('space theme changes retain birthday priority and remove revoked unlocks',()=>{
+  const now=at('2026-11-20T12:00:00');
+  const enabled=availablePersonalThemes(now,false,null,{id:42,theme:'christmas-2026'});
+  const saved={period:enabled.map(x=>x.token).join('|'),theme:'christmas-2026'};
+  assert.equal(selectedPersonalTheme(availablePersonalThemes(now,true,'birthday', {id:42,theme:'christmas-2026'}),saved),'birthday-botanical');
+  assert.equal(selectedPersonalTheme(availablePersonalThemes(now,false,null,{id:42,theme:'default'}),saved),'default');
+  assert.equal(selectedPersonalTheme(availablePersonalThemes(now,false,null,{id:43,theme:'default'}),saved),'default');
+  const seasonal=availablePersonalThemes(at('2026-12-01T12:00:00'),false,null,{id:42,theme:'christmas-2026'});
+  assert.equal(seasonal.filter(x=>x.theme==='christmas-2026').length,1);
+});

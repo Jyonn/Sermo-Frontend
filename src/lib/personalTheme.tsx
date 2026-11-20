@@ -3,12 +3,14 @@ import {useAuth} from './auth';
 import {useBirthday} from './birthday';
 import {useI18n} from './language';
 import {availablePersonalThemes,selectedPersonalTheme,type PersonalTheme} from './personalThemePolicy';
+import {useSpaceFeatures} from './spaceFeatures';
 
 interface SavedTheme {period?:string;theme?:string;seen?:string[]}
 function read(key:string):SavedTheme {try{const value=JSON.parse(localStorage.getItem(key)||'{}');return value&&typeof value==='object'?value:{}}catch{return {}}}
 const Context=createContext<ReturnType<typeof useThemeState>|null>(null);
 function useThemeState(){
   const {session}=useAuth(),{status}=useBirthday();
+  const features=useSpaceFeatures();
   const key=`frienden:personal-theme:${session?.user.space_id??''}:${session?.user.user_id??''}`;
   const [tick,setTick]=useState(Date.now),[revision,setRevision]=useState(0);
   // Keep the server's clock advancing between responses, even if the device clock differs.
@@ -17,7 +19,7 @@ function useThemeState(){
   useEffect(()=>{const refresh=()=>setTick(Date.now());const storage=(event:StorageEvent)=>{if(event.key===key)setRevision(x=>x+1)};const timer=window.setInterval(refresh,30_000);window.addEventListener('focus',refresh);window.addEventListener('storage',storage);document.addEventListener('visibilitychange',refresh);return()=>{clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('storage',storage);document.removeEventListener('visibilitychange',refresh)}},[key]);
   const now=clock?clock.server+Math.max(0,tick-clock.local):tick;
   const birthdayActive=Boolean(status?.active&&(!status.ends_at||now<status.ends_at*1000));
-  const unlocks=availablePersonalThemes(now,birthdayActive,status?.celebration_id);
+  const unlocks=availablePersonalThemes(now,birthdayActive,status?.celebration_id,session?{id:session.user.space_id,theme:features.siteTheme}:undefined);
   const saved=read(key);void revision;
   const theme=session?selectedPersonalTheme(unlocks,saved):'default';
   const seen=Array.isArray(saved.seen)?saved.seen:[];

@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.20.1",
+  "id": "2026.11.20.2",
   "publishedAt": "2026-11-20",
   "locales": {
     "zh-CN": {
-      "title": "主角按键随活动结束收起",
+      "title": "空间主题即时生效",
       "items": [
-        "空间的主角按键活动结束后，收起相关设置与播放入口，停止自动、手动和入场音乐播放，保留收集记录。"
+        "修复已授权并启用的平安夜小镇主题未向成员展示的问题；空间主题立即开放，不受个人节日日期限制，生日主题仍优先。"
       ]
     },
     "en": {
-      "title": "Main-character keys follow the event period",
+      "title": "Space themes take effect immediately",
       "items": [
-        "When a space's keychain event ends, its settings and playback controls disappear and automatic, manual and entrance music stop. Collection records remain."
+        "Enabled, authorized Christmas themes now appear for space members immediately, outside the personal seasonal window. Birthday themes retain priority."
       ]
     }
   }
