@@ -2916,4 +2916,7 @@
 ,"avatar.cropOriginalHint": "If a transparent original shows a solid background here, save it to Files and select the original again."
 ,"avatar.cropChooseOriginal": "Choose original from Files"
 ,"avatar.originalUploadHint": "Recommended for transparent images"
+,"menu.christmasMoreSettings": "Christmas · More settings"
+,"menu.christmasBackgroundOverride": "Override chat background"
+,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background."
 }

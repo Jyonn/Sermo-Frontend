@@ -291,7 +291,7 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-
   padding: 0 30px 20px;
 }
 
-html[data-site-theme="christmas-2026"] .chat-detail-scene.chat-background-default > .message-scroll {
+html[data-site-theme="christmas-2026"]:not([data-christmas-background="personal"]) .chat-detail-scene > .message-scroll {
   --christmas-chat-wash: rgb(251 237 214 / 80%);
   --christmas-chat-paper: #faecd6;
   background:
@@ -306,9 +306,16 @@ html[data-site-theme="christmas-2026"] .chat-detail-scene.chat-background-defaul
     var(--christmas-chat-paper);
 }
 
-html[data-site-theme="christmas-2026"][data-theme="dark"] .chat-detail-scene.chat-background-default > .message-scroll {
+html[data-site-theme="christmas-2026"][data-theme="dark"]:not([data-christmas-background="personal"]) .chat-detail-scene > .message-scroll {
   --christmas-chat-wash: rgb(18 40 30 / 90%);
   --christmas-chat-paper: #18362a;
+}
+
+/* Suspend wallpaper layers without changing the user's saved background. */
+html[data-site-theme="christmas-2026"]:not([data-christmas-background="personal"]) .chat-detail-scene::before,
+html[data-site-theme="christmas-2026"]:not([data-christmas-background="personal"]) .chat-detail-scene::after,
+html[data-site-theme="christmas-2026"]:not([data-christmas-background="personal"]) .chat-detail-scene > :is(.frienden-starry-wallpaper,.frienden-living-wallpaper,.explorer-living-wallpaper) {
+  display: none;
 }
 
 html[data-site-theme="christmas-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-nav) {

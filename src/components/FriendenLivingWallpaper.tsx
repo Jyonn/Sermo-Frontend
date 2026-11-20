@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import type { ChatBackgroundTheme } from "../types";
 import { ExplorerTransformationWallpaper } from "./ExplorerTransformationWallpaper";
+import {useChristmasBackgroundOverride} from '../lib/personalTheme';
 
 type LivingTheme = Extract<ChatBackgroundTheme, "frienden-night" | "frienden-garden">;
 type LayerKind = "back" | "actor" | "front";
@@ -90,6 +91,7 @@ function SceneEffect({ item }: { item: SceneItem }) {
 }
 
 export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: boolean; theme?: ChatBackgroundTheme }) {
+  const overridden=useChristmasBackgroundOverride();
   const sceneRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -106,7 +108,9 @@ export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: 
       observer.disconnect();
       document.removeEventListener("visibilitychange", setActive);
     };
-  }, [theme]);
+  }, [theme,overridden]);
+
+  if(overridden)return null;
 
   if (theme === "explorer-duality") return <ExplorerTransformationWallpaper compact={compact} />;
 

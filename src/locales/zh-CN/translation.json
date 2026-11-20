@@ -4458,4 +4458,7 @@
 ,"avatar.cropOriginalHint": "如果原图透明，但这里出现底色，请将原图存储到“文件”后重新选择。"
 ,"avatar.cropChooseOriginal": "从文件选择原图"
 ,"avatar.originalUploadHint": "透明图片推荐，保留原始透明效果"
+,"menu.christmasMoreSettings": "圣诞 · 更多设置"
+,"menu.christmasBackgroundOverride": "覆盖聊天背景"
+,"menu.christmasBackgroundOverrideHint": "使用平安夜小镇背景。关闭后显示原来选择的聊天背景。"
 }

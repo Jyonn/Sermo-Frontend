@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {availablePersonalThemes,selectedPersonalTheme} from '../src/lib/personalThemePolicy.ts';
+import {availablePersonalThemes,selectedPersonalTheme,christmasBackgroundOverride} from '../src/lib/personalThemePolicy.ts';
 const at=(date:string)=>Date.parse(date+'+08:00');
 const auto=(date:string,birthday=false)=>selectedPersonalTheme(availablePersonalThemes(at(date),birthday),null);
+test('Christmas covers personal backgrounds unless explicitly switched off',()=>{
+  for(const saved of [undefined,null,{}, {christmasBackgroundOverride:true}, {christmasBackgroundOverride:'false'}])assert.equal(christmasBackgroundOverride(saved),true);
+  assert.equal(christmasBackgroundOverride({christmasBackgroundOverride:false}),false);
+});
 test('Christmas unlocks at Beijing midnight on November 26 and expires January 1',()=>{
   assert.equal(auto('2026-11-25T23:59:59'),'default');
   assert.equal(auto('2026-11-26T00:00:00'),'christmas-2026');

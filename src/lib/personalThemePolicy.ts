@@ -1,6 +1,10 @@
 export type PersonalTheme = 'default' | 'christmas-2026' | 'birthday-botanical';
 export interface ThemeUnlock { theme: PersonalTheme; token: string }
 
+export function christmasBackgroundOverride(saved: { christmasBackgroundOverride?: unknown } | null | undefined) {
+  return saved?.christmasBackgroundOverride !== false;
+}
+
 /** Seasonal dates use Beijing time, matching birthday celebrations. */
 export function availablePersonalThemes(now: number, birthdayActive: boolean, celebrationId?: string | null, space?: { id: number; theme?: string }): ThemeUnlock[] {
   const date = new Date(now + 8 * 3600_000);

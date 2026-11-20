@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.20.2",
+  "id": "2026.11.20.3",
   "publishedAt": "2026-11-20",
   "locales": {
     "zh-CN": {
-      "title": "空间主题即时生效",
+      "title": "圣诞背景覆盖设置",
       "items": [
-        "修复已授权并启用的平安夜小镇主题未向成员展示的问题；空间主题立即开放，不受个人节日日期限制，生日主题仍优先。"
+        "圣诞主题默认使用小镇背景；可在主题列表中打开圣诞的更多设置，关闭背景覆盖并恢复自选背景。"
       ]
     },
     "en": {
-      "title": "Space themes take effect immediately",
+      "title": "Christmas background preferences",
       "items": [
-        "Enabled, authorized Christmas themes now appear for space members immediately, outside the personal seasonal window. Birthday themes retain priority."
+        "Christmas uses its town background by default. Open Christmas's additional theme settings to turn off the override and restore your chosen background."
       ]
     }
   }

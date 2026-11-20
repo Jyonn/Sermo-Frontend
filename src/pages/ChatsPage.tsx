@@ -3,6 +3,7 @@ import {useActivityOverlay} from '../lib/activityOverlay';
 import {MessageLockAttribution} from '../components/MessageLockAttribution';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
+import { useChristmasBackgroundOverride } from '../lib/personalTheme';
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {
   memo,
@@ -2458,6 +2459,7 @@ function LiveChatsPage({
   embeddedChat?: {id:number;onClose:()=>void;onProjectDetails?:()=>void};
 }) {
   const openActivity=useActivityOverlay();
+  const christmasOverridesBackground=useChristmasBackgroundOverride();
   const { t } = useI18n();
   const pageActive = usePageActive();
   const { discover: discoverFeature } = useFeatureDiscovery();
@@ -7444,7 +7446,7 @@ function LiveChatsPage({
   const preferredChatBackgroundTheme = selectedChat?.type === "group" && selectedChat.groupBackgroundTheme && !selectedChat.usePersonalBackground
     ? selectedChat.groupBackgroundTheme
     : personalChatBackgroundTheme;
-  const chatBackgroundTheme = narrowComposerLayout ? preferredChatBackgroundTheme : "default";
+  const chatBackgroundTheme = narrowComposerLayout && !christmasOverridesBackground ? preferredChatBackgroundTheme : "default";
   const hasDecorativeChatBackground = chatBackgroundTheme !== "default";
   const chatWallpaperToneClass = hasDecorativeChatBackground
     ? DARK_CHAT_BACKGROUND_THEMES.has(chatBackgroundTheme) ? " is-dark-wallpaper" : " is-light-wallpaper"
