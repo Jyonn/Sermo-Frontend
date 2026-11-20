@@ -382,8 +382,9 @@ html[data-theme="dark"] body .drawer-body .user-profile-panel .user-profile-grou
   pointer-events: none;
 }
 
-.user-profile-panel.profile-theme-level-12 > *,
-.user-profile-panel.profile-theme-vip > * {
+/* Floating share controls must stay out of the profile's content grid. */
+.user-profile-panel.profile-theme-level-12 > :not(.profile-share-action),
+.user-profile-panel.profile-theme-vip > :not(.profile-share-action) {
   position: relative;
   z-index: 1;
 }

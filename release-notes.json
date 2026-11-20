@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.20.4",
+  "id": "2026.11.20.5",
   "publishedAt": "2026-11-20",
   "locales": {
     "zh-CN": {
-      "title": "个性化设置与应用名称统一",
+      "title": "个人名片顶部显示修复",
       "items": [
-        "主题和广场布局改用模态框，统一手机语音输入等选项的样式。",
-        "外部应用名称统一采用“中文 · English”。"
+        "修复部分个人名片封面上方多出空白、分享按钮位置异常的问题。"
       ]
     },
     "en": {
-      "title": "Consistent preferences and app names",
+      "title": "Profile cover layout fix",
       "items": [
-        "Theme and Square layout settings now open in dialogs, with consistent option styling including mobile voice input.",
-        "External app names consistently use Chinese · English."
+        "Fixed extra space above some profile covers and restored the floating share button's position."
       ]
     }
   }
