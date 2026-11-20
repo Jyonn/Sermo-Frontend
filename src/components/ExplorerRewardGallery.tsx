@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ExplorerAiExpression } from "./ExplorerAiExpression";
 import { useAuth } from "../lib/auth";
-import { EXPLORER_ART, explorerRewardThumbnail } from "../lib/explorer";
+import {explorerRewardThumbnail} from '../lib/explorer';
+import {AnnualMedal} from './AnnualMedal';
 import { useI18n, type TranslationKey } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
 import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";
@@ -33,14 +34,14 @@ export function ExplorerRewardPreview({ tier }: { tier: number }) {
       <UserProfileCard profileTheme="explorer-romance" name={name} avatarUri={session?.user.avatar_uri} presence={t("explorer.profileSignature")} />
     </div> : <div className="explorer-medal-display">
       <span className="explorer-display-orbit" aria-hidden="true" />
-      <img alt={t("explorer.reward.5")} src={EXPLORER_ART.medal} />
+      <AnnualMedal kind="explorer" year={2026} name={t('explorer.reward.5')}/>
       <span>{t("explorer.specimen.medal")}</span>
     </div>}
   </div>;
 }
 
 export function ExplorerRewardGallery({ rewards, onConfigure, onTasks }: { rewards: ExplorerReward[]; onConfigure: (tier: number) => void; onTasks: () => void }) {
-  const { t } = useI18n();
+  const {t, language} = useI18n();
   const [tier, setTier] = useState(1);
   const reward = rewards.find((item) => item.tier === tier) ?? rewards[0];
   if (!reward) return null;
@@ -49,7 +50,7 @@ export function ExplorerRewardGallery({ rewards, onConfigure, onTasks }: { rewar
     <header className="explorer-collection-heading"><span>{tr("collectionEdition")}</span><p>{tr("collectionIntro")}</p></header>
     <div className="explorer-collection-picker" aria-label={tr("viewRewards")}>
       {rewards.map((item) => <button type="button" key={item.tier} aria-pressed={item.tier === reward.tier} aria-label={`${tr(`reward.${item.tier}`)} · ${item.claimed ? tr("owned") : t("explorer.unlockAt", { count: item.tier })}`} onClick={() => setTier(item.tier)}>
-        <img alt="" src={explorerRewardThumbnail(item.tier)} /><span>0{item.tier}</span><i className="material-symbols-outlined" aria-hidden="true">{item.claimed ? "check_circle" : "lock"}</i>
+        <img alt="" src={explorerRewardThumbnail(item.tier, language)} /><span>0{item.tier}</span><i className="material-symbols-outlined" aria-hidden="true">{item.claimed ? "check_circle" : "lock"}</i>
       </button>)}
     </div>
     <article className={`explorer-collection-piece rarity-${reward.rarity}`}>

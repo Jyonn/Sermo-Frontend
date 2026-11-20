@@ -1,4 +1,5 @@
 import {activityAsset} from './activityAsset.ts';
+import {annualMedalArtwork2026} from './annualMedalArtwork.ts';
 import {explorerExpressionSrc,explorerExpressionDisplaySrc} from './explorerExpressions.ts';
 export function explorerRewardPath(tier: number) {
   if (tier === 1) return "/app/menu?panel=personalization/avatar-frames";
@@ -22,14 +23,15 @@ export const EXPLORER_ART = {
   background: "https://api.sermo.jyonn.space/resources/assets/63/display/39a1c869fb7c1b494fd13cf3638a84998d19b5dcfd21feda18e7afb4e49ac184",
   backgroundAlternate: "https://api.sermo.jyonn.space/resources/assets/74/display/c198e7c161d1930c8859d600e1af60145f71b6a8eaa1d1efb898647339d7e216",
   profile: "https://api.sermo.jyonn.space/resources/assets/71/display/e872798c26456da5d450f57d3db1e7f4638f94b86de62a5ce0da271b348266ee",
-  medal: "https://api.sermo.jyonn.space/resources/assets/59/display/78375e5cd9fc9a864cd6aba1ec328bd64f5aea5248b713818f2358b77b5d4f19",
+  medal: annualMedalArtwork2026('explorer'),
 } as const;
 
 export function explorerRewardArt(tier: number) {
   return [EXPLORER_ART.frame, EXPLORER_ART.bubble, EXPLORER_ART.background, EXPLORER_ART.profile, EXPLORER_ART.medal][tier - 1] ?? EXPLORER_ART.medal;
 }
 
-export function explorerRewardThumbnail(tier: number) {
+export function explorerRewardThumbnail(tier: number, language = 'zh-CN') {
   if (tier === 2) return explorerExpressionSrc('cool');
-  return activityAsset(['/activity/explorer-2026/frame-thumb-v2.webp','','/activity/explorer-2026/conan-night-thumb-v2.webp','/activity/explorer-2026/romance-thumb-v2.webp','/activity/explorer-2026/badge-thumb-v2.webp'][tier-1]??'/activity/explorer-2026/badge-thumb-v2.webp');
+  const path = ['/activity/explorer-2026/frame-thumb-v2.webp','','/activity/explorer-2026/conan-night-thumb-v2.webp','/activity/explorer-2026/romance-thumb-v2.webp'][tier-1];
+  return path ? activityAsset(path) : annualMedalArtwork2026('explorer', language);
 }
