@@ -104,7 +104,7 @@ export function FlashImageMessage({id, payload, sent}: {id: number; payload?: Ch
       {thumbnail && <img src={`data:image/jpeg;base64,${thumbnail}`} alt="" draggable={false}/>}
       <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
       <strong>{t('photo.flash')}</strong>
-      <small>{t(canOpen ? 'photo.flashOpen' : sent && !expired ? 'photo.flashSent' : 'photo.flashExpired')}</small>
+      <small>{t(canOpen ? 'photo.flashOpen' : viewed ? 'photo.flashViewed' : sent && !expired ? 'photo.flashSent' : 'photo.flashExpired')}</small>
     </button>
     {open && createPortal(<div className="dialog-backdrop flash-view-backdrop" onClick={event => {event.stopPropagation(); close();}}>
       <section className="flash-view" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={title} onClick={event => event.stopPropagation()}>

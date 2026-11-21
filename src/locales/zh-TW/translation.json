@@ -2951,6 +2951,7 @@
   "photo.flashOpen": "輕觸查看 · 3 秒",
   "photo.flashSent": "已傳送 · 僅收件者可查看",
   "photo.flashExpired": "閃圖無法查看",
+  "photo.flashViewed": "已查看",
   "photo.flashFailed": "無法開啟閃圖",
   "photo.decodeFailed": "無法讀取這張照片，請改用其他格式。",
   "photo.skip": "跳過這張照片",

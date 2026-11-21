@@ -2931,6 +2931,7 @@
   "photo.flashOpen": "눌러서 보기 · 3초",
   "photo.flashSent": "보냄 · 받는 사람만 볼 수 있음",
   "photo.flashExpired": "사진을 볼 수 없음",
+  "photo.flashViewed": "이미 봄",
   "photo.flashFailed": "사라지는 사진을 열 수 없습니다",
   "photo.decodeFailed": "사진을 읽을 수 없습니다. 다른 형식을 사용해 보세요.",
   "photo.skip": "이 사진 건너뛰기",

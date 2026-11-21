@@ -2931,6 +2931,7 @@
   "photo.flashOpen": "タップして 3 秒間表示",
   "photo.flashSent": "送信済み · 受信者のみ",
   "photo.flashExpired": "この写真は表示できません",
+  "photo.flashViewed": "閲覧済み",
   "photo.flashFailed": "消える写真を開けませんでした",
   "photo.decodeFailed": "写真を読み込めません。別の形式をお試しください。",
   "photo.skip": "この写真をスキップ",

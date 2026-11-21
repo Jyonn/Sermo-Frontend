@@ -4477,6 +4477,7 @@
 ,"photo.flashOpen": "Tap to view · 3 seconds"
 ,"photo.flashSent": "Sent · Recipient only"
 ,"photo.flashExpired": "Flash photo unavailable"
+,"photo.flashViewed": "Already viewed"
 ,"photo.flashFailed": "Couldn't open the flash photo"
 ,"photo.decodeFailed": "Couldn't open this photo. Try a different format."
 ,"photo.skip": "Skip this photo"

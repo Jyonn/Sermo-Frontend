@@ -2931,6 +2931,7 @@
   "photo.flashOpen": "Toca para ver · 3 segundos",
   "photo.flashSent": "Enviada · Solo para destinatarios",
   "photo.flashExpired": "Foto efímera no disponible",
+  "photo.flashViewed": "Ya vista",
   "photo.flashFailed": "No se pudo abrir la foto efímera",
   "photo.decodeFailed": "No se pudo abrir la foto. Prueba con otro formato.",
   "photo.skip": "Omitir esta foto",
