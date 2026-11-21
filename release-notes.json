@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.20.6",
-  "publishedAt": "2026-11-20",
+  "id": "2026.11.21.1",
+  "publishedAt": "2026-11-21",
   "locales": {
     "zh-CN": {
-      "title": "探索者徽章展示更新",
+      "title": "发送前编辑照片",
       "items": [
-        "探索者活动的奖励预览和缩略图统一使用新版长条织标，与个人名片保持一致。"
+        "选图后可裁剪、旋转翻转、涂马赛克和选择保留哪些信息，多图可逐张切换。",
+        "闪图每位收件人可看一次，展示 3 秒，不可转发。头像裁剪支持双指缩放。"
       ]
     },
     "en": {
-      "title": "Updated Explorer badge artwork",
+      "title": "Edit photos before sending",
       "items": [
-        "Explorer reward previews and thumbnails now use the same woven badge as profile cards."
+        "Crop, rotate, flip, pixelate and choose which photo information to keep. Swipe between selected photos to edit each one.",
+        "Recipients can view a flash photo once for 3 seconds. Flash photos cannot be forwarded. Pinch to zoom when cropping avatars."
       ]
     }
   }

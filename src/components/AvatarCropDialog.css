@@ -25,10 +25,6 @@
 .avatar-crop-handle.is-ne::after { right: 10px; top: 10px; border-width: 3px 3px 0 0; border-top-right-radius: 3px; }
 .avatar-crop-handle.is-sw::after { left: 10px; bottom: 10px; border-width: 0 0 3px 3px; border-bottom-left-radius: 3px; }
 .avatar-crop-handle.is-se::after { right: 10px; bottom: 10px; border-width: 0 3px 3px 0; border-bottom-right-radius: 3px; }
-.avatar-crop-range { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-size: 12px; }
-.avatar-crop-range label { font-weight: 650; }
-.avatar-crop-range span { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-.avatar-crop-range input { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: var(--brand-primary); min-height: 28px; cursor: ew-resize; }
 .avatar-crop-preview-row { display: flex; align-items: center; gap: 14px; }
 .avatar-crop-preview { flex: 0 0 64px; height: 64px; overflow: hidden; border-radius: 28%; box-shadow: inset 0 0 0 1px #74827633; }
 .avatar-crop-preview img { display: block; width: 100%; height: 100%; }

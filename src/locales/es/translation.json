@@ -2881,7 +2881,7 @@
 ,"voice.lab.low": "Last 15 seconds"
 ,"voice.lab.reset": "Reset"
 ,"avatar.cropTitle": "Adjust avatar"
-,"avatar.cropHint": "Drag the selection to reposition. Drag a corner or use the slider to resize."
+,"avatar.cropHint": "Arrastra para mover la selección. Pellizca, usa la rueda o arrastra una esquina para cambiar el tamaño."
 ,"avatar.cropSelection": "Avatar crop selection. Use arrow keys to move."
 ,"avatar.cropRange": "Crop size"
 ,"avatar.cropPreview": "Avatar preview"
@@ -2899,5 +2899,44 @@
 ,"avatar.originalUploadHint": "Recommended for transparent images"
 ,"menu.christmasMoreSettings": "Christmas · More settings"
 ,"menu.christmasBackgroundOverride": "Override chat background"
-,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background."
+,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background.",
+  "photo.edit": "Editar fotos",
+  "photo.send": "Enviar ({{count}})",
+  "photo.canvas": "Lienzo de la foto",
+  "photo.photos": "Fotos seleccionadas",
+  "photo.select": "Editar foto {{count}}",
+  "photo.previous": "Foto anterior",
+  "photo.next": "Foto siguiente",
+  "photo.crop": "Recortar",
+  "photo.rotate": "Girar",
+  "photo.mosaic": "Pixelar",
+  "photo.privacy": "Privacidad",
+  "photo.flash": "Foto efímera",
+  "photo.undo": "Deshacer",
+  "photo.original": "Original",
+  "photo.turn": "Girar 90°",
+  "photo.flipHorizontal": "Voltear horizontalmente",
+  "photo.flipVertical": "Voltear verticalmente",
+  "photo.small": "Pequeño",
+  "photo.medium": "Mediano",
+  "photo.large": "Grande",
+  "photo.cropHelp": "Arrastra los controles o pellizca para ajustar el recorte.",
+  "photo.mosaicHelp": "Pinta sobre las zonas que quieras ocultar.",
+  "photo.keepLocation": "Conservar ubicación",
+  "photo.keepDescription": "Conservar descripción",
+  "photo.privacyHelp": "La ubicación y la descripción se eliminan de forma predeterminada. Puedes conservar las que figuren en el original.",
+  "photo.flashPrivacy": "Las fotos efímeras se envían sin metadatos integrados.",
+  "photo.enableFlash": "Enviar como foto efímera",
+  "photo.flashHelp": "Cada destinatario puede verla una vez durante 3 segundos. No se puede reenviar.",
+  "photo.flashOpen": "Toca para ver · 3 segundos",
+  "photo.flashSent": "Enviada · Solo para destinatarios",
+  "photo.flashExpired": "Foto efímera no disponible",
+  "photo.flashFailed": "No se pudo abrir la foto efímera",
+  "photo.decodeFailed": "No se pudo abrir la foto. Prueba con otro formato.",
+  "photo.skip": "Omitir esta foto",
+  "photo.skipped": "Foto omitida",
+  "photo.sendFailed": "No se pudo enviar la foto. Inténtalo de nuevo.",
+  "photo.discard": "¿Descartar los cambios?",
+  "photo.discardChanges": "Descartar cambios",
+  "photo.continueEdit": "Seguir editando"
 }

@@ -18,9 +18,13 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOrig
   const stage = useRef<HTMLDivElement>(null);
   const previewCanvas = useRef<HTMLCanvasElement>(null);
   const drag = useRef<{ id: number; x: number; y: number; crop: AvatarCrop; corner: string; scale: number }>();
+  const touches = useRef(new Map<number, {x: number; y: number}>());
+  const pinch = useRef<{crop: AvatarCrop; distance: number; x: number; y: number; scale: number}>();
   const saving = busy || exporting;
 
   useEffect(() => {
+    drag.current = pinch.current = undefined;
+    touches.current.clear();
     if (!file) { setImage(undefined); setCrop(undefined); return; }
     const uri = URL.createObjectURL(file);
     let active = true;
@@ -58,7 +62,24 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOrig
   }, [image, crop]);
 
   const start = (event: PointerEvent<HTMLDivElement>) => {
-    if (!image || !crop || saving || event.button !== 0 || !stage.current || drag.current) return;
+    if (!image || !crop || saving || event.button !== 0 || !stage.current) return;
+    if (event.pointerType === 'touch') {
+      touches.current.set(event.pointerId, {x: event.clientX, y: event.clientY});
+      event.currentTarget.setPointerCapture(event.pointerId);
+      if (touches.current.size === 2) {
+        const [a, b] = [...touches.current.values()];
+        const bounds = avatarCropBounds(image);
+        pinch.current = {
+          crop, distance: Math.max(8, Math.hypot(a.x - b.x, a.y - b.y)), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2,
+          scale: stage.current.getBoundingClientRect().width / Math.max(bounds.width, bounds.height),
+        };
+        drag.current = undefined;
+        event.preventDefault();
+        return;
+      }
+      if (touches.current.size > 2) return;
+    }
+    if (drag.current) return;
     const target = event.target as HTMLElement;
     const corner = target.closest<HTMLElement>('[data-corner]')?.dataset.corner ?? '';
     if (!corner && !target.closest('.avatar-crop-selection')) return;
@@ -69,12 +90,28 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOrig
     event.preventDefault();
   };
   const move = (event: PointerEvent<HTMLDivElement>) => {
+    if (touches.current.has(event.pointerId)) touches.current.set(event.pointerId, {x: event.clientX, y: event.clientY});
+    if (pinch.current && touches.current.size >= 2 && image && !saving) {
+      const [a, b] = [...touches.current.values()];
+      const start = pinch.current;
+      const distance = Math.max(8, Math.hypot(a.x - b.x, a.y - b.y));
+      const next = sizeAvatarCrop(image, start.crop, start.crop.size * start.distance / distance);
+      setCrop(constrainAvatarCrop(image, {...next,
+        x: next.x + (start.x - (a.x + b.x) / 2) / start.scale,
+        y: next.y + (start.y - (a.y + b.y) / 2) / start.scale,
+      }));
+      return;
+    }
     const active = drag.current;
     if (!active || active.id !== event.pointerId || !image || saving) return;
     const dx = (event.clientX - active.x) / active.scale, dy = (event.clientY - active.y) / active.scale;
     setCrop(active.corner ? resizeAvatarCrop(image, active.crop, active.corner, dx, dy) : constrainAvatarCrop(image, { ...active.crop, x: active.crop.x + dx, y: active.crop.y + dy }));
   };
-  const stop = (event: PointerEvent<HTMLDivElement>) => { if (drag.current?.id === event.pointerId) drag.current = undefined; };
+  const stop = (event: PointerEvent<HTMLDivElement>) => {
+    if (drag.current?.id === event.pointerId) drag.current = undefined;
+    touches.current.delete(event.pointerId);
+    if (touches.current.size < 2) pinch.current = undefined;
+  };
   const confirm = async () => {
     if (!image || !crop || saving) return;
     setExporting(true); setError(false);
@@ -95,9 +132,15 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOrig
       {((image && !image.transparent) || error) && onRequestOriginal ? <div className="avatar-crop-original"><p>{t('avatar.cropOriginalHint')}</p><button type="button" disabled={saving} onClick={onRequestOriginal}>{t('avatar.cropChooseOriginal')}<span className="material-symbols-outlined" aria-hidden="true">folder_open</span></button></div> : null}
       {image && crop && bounds ? <>
         <div className="avatar-crop-stage-wrap">
-          <div ref={stage} className={`avatar-crop-stage${image.transparent ? ' is-transparent' : ''}`} onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}>
+          <div ref={stage} className={`avatar-crop-stage${image.transparent ? ' is-transparent' : ''}`} onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
+            onWheel={event => { if (!saving) setCrop(sizeAvatarCrop(image, crop, crop.size * (event.deltaY > 0 ? 1.12 : .89))); }}>
             <img className="avatar-crop-source" alt="" draggable={false} src={image.uri} style={imageStyle} />
             <div className="avatar-crop-selection" style={cropStyle} role="group" tabIndex={0} aria-label={t('avatar.cropSelection')} onKeyDown={event => {
+              if (!saving && ['+', '=', '-'].includes(event.key)) {
+                event.preventDefault();
+                setCrop(sizeAvatarCrop(image, crop, crop.size * (event.key === '-' ? 1.12 : .89)));
+                return;
+              }
               if (saving || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
               event.preventDefault(); const step = event.shiftKey ? 1 : crop.size / 50;
               setCrop(constrainAvatarCrop(image, { ...crop, x: crop.x + (event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0), y: crop.y + (event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0) }));
@@ -107,7 +150,6 @@ export function AvatarCropDialog({ file, busy, onClose, onConfirm, onRequestOrig
             </div>
           </div>
         </div>
-        <div className="avatar-crop-range"><label htmlFor="avatar-crop-size">{t('avatar.cropRange')}</label><span>{Math.round(crop.size)} × {Math.round(crop.size)}</span><input id="avatar-crop-size" type="range" min={bounds.minSize} max={bounds.maxSize} step="any" disabled={saving} value={crop.size} onChange={event => setCrop(sizeAvatarCrop(image, crop, Number(event.target.value)))} /></div>
         <div className="avatar-crop-preview-row">
           <div className={`avatar-crop-preview is-${previewMode}`}><img src={preview} alt={t('avatar.cropPreview')} /></div>
           <div className="avatar-crop-preview-copy"><strong>{t('avatar.cropPreview')}</strong><span>{t(image.transparent ? 'avatar.cropTransparent' : 'avatar.cropOpaque')}</span>

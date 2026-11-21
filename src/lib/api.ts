@@ -119,7 +119,8 @@ type RequestOptions = {
   platformAdminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
-  responseFormat?: "envelope" | "oauth";
+  responseFormat?: "envelope" | "oauth" | "image";
+  cache?: RequestCache;
   expectedScope?: string;
 };
 
@@ -315,7 +316,11 @@ async function completeSessionAvatar(session: AuthSession): Promise<AuthSession>
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
-  const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
+  const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : async (response: Response) => {
+    if (responseFormat !== "image") return parseEnvelope<T>(response);
+    if (response.ok && response.headers.get("Content-Type")?.startsWith("image/jpeg")) return await response.blob() as T;
+    throw new ApiError(i18n.t(response.status === 410 ? "photo.flashExpired" : "photo.flashFailed"), "FLASH_IMAGE", response.status);
+  };
   const session = auth ? authConfig.getSession() : null;
   if (options.expectedScope !== undefined && options.expectedScope !== `${session?.user.space_id}:${session?.user.user_id}`) throw new DOMException('Account changed', 'AbortError');
   const squareScope=buildTabCacheScope(session?.user.space_id,session?.user.user_id);
@@ -336,7 +341,9 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
     session?.user.language
       ?? resolveJoinLanguage(typeof navigator === "undefined" ? undefined : navigator.language)
   );
-  if (body !== undefined) {
+  const form = typeof FormData !== "undefined" && body instanceof FormData ? body : null;
+  const requestBody = form ?? (body === undefined ? undefined : JSON.stringify(body));
+  if (body !== undefined && !form) {
     headers.set("Content-Type", "application/json");
   }
   if (auth && session?.accessToken) {
@@ -352,8 +359,9 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   const response = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: requestBody,
     signal,
+    cache: options.cache,
   });
 
   if (response.status === 401 && adminAuth) {
@@ -378,8 +386,9 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
       const retryResponse = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
         method,
         headers: retryHeaders,
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: requestBody,
         signal,
+        cache: options.cache,
       });
       return parseResponse(retryResponse).then(rememberAvatarFrames).then(rememberSquare).catch(rememberSquareError);
     } catch (error) {
@@ -1123,10 +1132,11 @@ export const api = {
     return request<import('./chatQuickActionSync').ShortcutSnapshot>('/users/me/chat-quick-actions', {auth:true, expectedScope:scope, method:'POST', body});
   },
 
-  createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string, file_size?: number, content_hash?: string) {
+  createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string, file_size?: number, content_hash?: string, expectedScope?: string) {
     return request<MessageUploadDTO>("/messages/upload", {
       method: "POST",
       auth: true,
+      expectedScope,
       body: { kind, file_name, content_type, file_size, content_hash },
     });
   },
@@ -1139,9 +1149,9 @@ export const api = {
     });
   },
 
-  finalizeCloudResource(kind: MessageMediaKind, key: string, file_name: string, content_type: string, file_size: number, content_hash: string, duration_seconds?: number) {
+  finalizeCloudResource(kind: MessageMediaKind, key: string, file_name: string, content_type: string, file_size: number, content_hash: string, duration_seconds?: number, expectedScope?: string) {
     return request<{ resource: CloudResourceDTO; instant: boolean; quota: CloudResourceListDTO["quota"] }>("/messages/resources/finalize", {
-      method: "POST", auth: true, body: { kind, content: key, file_name, content_type, file_size, content_hash, duration_seconds },
+      method: "POST", auth: true, expectedScope, body: { kind, content: key, file_name, content_type, file_size, content_hash, duration_seconds },
     });
   },
 
@@ -1375,12 +1385,28 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], resource_id?: number, live_transcript_receipt?:string) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], resource_id?: number, live_transcript_receipt?:string, expectedScope?: string) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
+      expectedScope,
       query: { chat_id },
       body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, resource_id: resource_id ?? null, live_transcript_receipt },
+    });
+  },
+
+  sendFlashImage(chatId: number, file: File, clientId: string, scope: string) {
+    const body = new FormData();
+    body.set("image", file);
+    body.set("client_message_id", clientId);
+    return request<ChatMessageDTO>("/messages/flash-image", {
+      method: "POST", query: {chat_id: chatId}, body, auth: true, expectedScope: scope, cache: "no-store",
+    });
+  },
+
+  revealFlashImage(messageId: number, signal: AbortSignal) {
+    return request<Blob>("/messages/flash-image/reveal", {
+      method: "POST", query: {message_id: messageId}, auth: true, signal, responseFormat: "image", cache: "no-store",
     });
   },
 

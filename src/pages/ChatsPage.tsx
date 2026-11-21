@@ -83,6 +83,8 @@ import { OfficialBadge } from "../components/OfficialBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
 import { ChatImagePreview } from "../components/ChatImagePreview";
+import { PhotoEditorDrawer } from "../components/PhotoEditorDrawer";
+import { FlashImageMessage } from "../components/FlashImageMessage";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { ChatConversationIdentity } from '../components/ChatConversationIdentity';
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
@@ -166,6 +168,7 @@ const STICKER_EXPLORE_CACHE_KEY = "stickers:explore";
 const HistoryManagerPage = lazy(() => import("./HistoryManagerPage"));
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
+const MESSAGE_TYPE_FLASH_IMAGE = 19;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
@@ -964,6 +967,7 @@ function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
 function previewFromKind(kind: MessageKind, text: string) {
   if(['profile','research_task','research_comment','research_reply'].includes(kind))return i18n.t(`references.${kind}` as TranslationKey);
   if (kind === "image") return i18n.t("message.imagePlaceholder");
+  if (kind === "flash_image") return i18n.t("photo.flash");
   if (kind === "video") return i18n.t("message.videoPlaceholder");
   if (kind === "audio") return i18n.t("message.audioPlaceholder");
   if (kind === "file") return i18n.t("message.filePlaceholder");
@@ -1309,6 +1313,9 @@ function renderMessageContent(
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
+  }
+  if (message.kind === "flash_image" && typeof message.id === "number") {
+    return <FlashImageMessage id={message.id} payload={message.payload} sent={message.from === "self"}/>;
   }
   if (message.kind === "sticker") {
     if (!message.payload?.uri || message.payload.unavailable) {
@@ -2064,6 +2071,7 @@ function estimateMessageRowHeight(message: ChatMessage) {
   if (message.kind === "system") return 34;
   if (message.kind === "official_notice") return 92;
   if (message.kind === "submission_invite") return 196;
+  if (message.kind === "flash_image") return 148 + replyHeight;
   if (message.kind === "image") {
     const width = Number(message.payload?.pixel_width || message.payload?.image_metadata?.pixel_width || 0);
     const height = Number(message.payload?.pixel_height || message.payload?.image_metadata?.pixel_height || 0);
@@ -2689,6 +2697,7 @@ function LiveChatsPage({
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
   const [desktopComposerTool, setDesktopComposerTool] = useState<"voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
+  const [photoEditor, setPhotoEditor] = useState<{files: File[]; others: File[]; chatId: number; scope: string} | null>(null);
   const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
@@ -3488,6 +3497,10 @@ function LiveChatsPage({
   }, [chats, profileDrawerUserId]);
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
+  useEffect(() => {
+    setPhotoEditor(current => current && current.chatId === selectedChat?.id
+      && current.scope === `${session?.user.space_id}:${session?.user.user_id}` ? current : null);
+  }, [selectedChat?.id, session?.user.space_id, session?.user.user_id]);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
   const { data: chatCalendar, loading: calendarLoading } = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
   const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`, displayedChat?.type === "direct" ? "direct" : "group");
@@ -6132,6 +6145,7 @@ function LiveChatsPage({
     event.target.value = "";
     if (!files.length) return;
     setComposerMoreOpen(false);
+    if (openPhotoEditor(files)) return;
 
     await Promise.all(
       files.map(async (file) => {
@@ -6156,6 +6170,7 @@ function LiveChatsPage({
 
   const openUploadCandidate = (files: File[], source: ClipboardUploadCandidate["source"]) => {
     closeClipboardUpload();
+    if (files.every(file => resolveMediaKind(file) === "image") && openPhotoEditor(files)) return;
     const previewUris = files.map((file) => {
       if (!file.type.startsWith("image/")) return null;
       const uri = URL.createObjectURL(file);
@@ -6164,6 +6179,44 @@ function LiveChatsPage({
     });
     setComposerMoreOpen(false);
     setClipboardUpload({ files, previewUris, source });
+  };
+
+  const openPhotoEditor = (files: File[]) => {
+    const images = files.filter(file => resolveMediaKind(file) === "image");
+    if (!images.length) return false;
+    if (!session || !selectedChat || selectedChat.id <= 0 || photoEditor) return true;
+    if (!requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return true;
+    setComposerMoreOpen(false);
+    setPhotoEditor({
+      files: images,
+      others: files.filter(file => resolveMediaKind(file) !== "image"),
+      chatId: selectedChat.id,
+      scope: `${session.user.space_id}:${session.user.user_id}`,
+    });
+    return true;
+  };
+
+  const sendEditedPhoto = async (file: File, flash: boolean, clientId: string) => {
+    if (!photoEditor || !selectedChat || selectedChat.id !== photoEditor.chatId || !await moveToLatestMessageWindow()) {
+      throw new Error("Photo conversation is unavailable");
+    }
+    const {chatId, scope} = photoEditor;
+    let created: ChatMessageDTO;
+    if (flash) {
+      created = await api.sendFlashImage(chatId, file, clientId, scope);
+    } else {
+      const upload = await uploadMessageMedia(file, "image", undefined, undefined, scope);
+      created = await api.sendMessage(chatId, MESSAGE_TYPE_IMAGE, "", undefined, clientId, [], upload.resource?.resource_id, undefined, scope);
+    }
+    const delivered = mapChatMessage(created, currentUserId);
+    setMessages(current => ({
+      ...current,
+      [chatId]: confirmPendingMessage(current[chatId] ?? [], clientId, delivered),
+    }));
+    setChats(current => sortChats(current.map(chat => chat.id === chatId
+      ? updateChatSummary(chat, previewFromMessage(delivered), delivered.createdAt) : chat)));
+    stickToBottomRef.current = true;
+    triggerMessageEntrance(delivered.clientId);
   };
 
   const handleComposerPaste = (event: ReactClipboardEvent<HTMLDivElement>) => {
@@ -6231,6 +6284,7 @@ function LiveChatsPage({
     if (!clipboardUpload) return;
     const files = clipboardUpload.files;
     closeClipboardUpload();
+    if (openPhotoEditor(files)) return;
     await Promise.all(
       files.map(async (file) => {
         try {
@@ -6641,7 +6695,8 @@ function LiveChatsPage({
   });
 
   const canForwardMessage = (message: ChatMessage) => (
-    typeof message.id === "number" && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle", "voice_call"].includes(message.kind)
+    typeof message.id === "number" && message.type !== MESSAGE_TYPE_FLASH_IMAGE
+    && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle", "voice_call"].includes(message.kind)
   );
 
   const eligibleForwardMessages = () => selectedActionMessages().filter(canForwardMessage);
@@ -9146,6 +9201,13 @@ function LiveChatsPage({
         type="file"
       />
       <CloudFilePickerSheet onClose={() => setCloudFilePickerOpen(false)} onSelect={sendCloudFileMessage} open={cloudFilePickerOpen} />
+      {photoEditor && photoEditor.chatId === selectedChat?.id && photoEditor.scope === `${session?.user.space_id}:${session?.user.user_id}` ? (
+        <PhotoEditorDrawer files={photoEditor.files} onSend={sendEditedPhoto} onClose={() => setPhotoEditor(null)}
+          onComplete={() => {
+            setPhotoEditor(null);
+            if (photoEditor.others.length) openUploadCandidate(photoEditor.others, "drop");
+          }}/>
+      ) : null}
       <input
         ref={fileInputRef}
         hidden

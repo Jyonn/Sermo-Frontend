@@ -10,7 +10,7 @@ export interface ChatMuteState {
   muted_until: number | null;
   scope?: "group" | "global" | null;
 }
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "voice_call" | "profile" | "research_task" | "research_comment" | "research_reply" | "unsupported";
+export type MessageKind = "text" | "image" | "flash_image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "voice_call" | "profile" | "research_task" | "research_comment" | "research_reply" | "unsupported";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -1161,6 +1161,9 @@ export interface AudioTranscriptDTO {
 }
 
 export interface ChatMessagePayloadDTO {
+  flash_thumbnail?: string | null;
+  flash_available?: boolean;
+  flash_expires_at?: number;
   profile_user_id?: number;
   profile?: TinyUserDTO & {signature?:string} | null;
   project_id?: number;

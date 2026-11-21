@@ -2881,7 +2881,7 @@
 ,"voice.lab.low": "Last 15 seconds"
 ,"voice.lab.reset": "Reset"
 ,"avatar.cropTitle": "Adjust avatar"
-,"avatar.cropHint": "Drag the selection to reposition. Drag a corner or use the slider to resize."
+,"avatar.cropHint": "끌어서 위치를 옮기세요. 두 손가락, 마우스 휠 또는 모서리를 끌어 크기를 조정하세요."
 ,"avatar.cropSelection": "Avatar crop selection. Use arrow keys to move."
 ,"avatar.cropRange": "Crop size"
 ,"avatar.cropPreview": "Avatar preview"
@@ -2899,5 +2899,44 @@
 ,"avatar.originalUploadHint": "Recommended for transparent images"
 ,"menu.christmasMoreSettings": "Christmas · More settings"
 ,"menu.christmasBackgroundOverride": "Override chat background"
-,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background."
+,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background.",
+  "photo.edit": "사진 편집",
+  "photo.send": "보내기 ({{count}})",
+  "photo.canvas": "사진 캔버스",
+  "photo.photos": "선택한 사진",
+  "photo.select": "{{count}}번째 사진 편집",
+  "photo.previous": "이전 사진",
+  "photo.next": "다음 사진",
+  "photo.crop": "자르기",
+  "photo.rotate": "회전",
+  "photo.mosaic": "모자이크",
+  "photo.privacy": "개인정보",
+  "photo.flash": "사라지는 사진",
+  "photo.undo": "실행 취소",
+  "photo.original": "원본",
+  "photo.turn": "90° 회전",
+  "photo.flipHorizontal": "좌우 뒤집기",
+  "photo.flipVertical": "상하 뒤집기",
+  "photo.small": "작게",
+  "photo.medium": "보통",
+  "photo.large": "크게",
+  "photo.cropHelp": "핸들을 끌거나 두 손가락으로 확대·축소해 자르기를 조정하세요.",
+  "photo.mosaicHelp": "가리고 싶은 부분을 문지르세요.",
+  "photo.keepLocation": "촬영 위치 유지",
+  "photo.keepDescription": "사진 설명 유지",
+  "photo.privacyHelp": "위치와 설명은 기본적으로 삭제됩니다. 원본에 있는 정보는 유지할 수 있습니다.",
+  "photo.flashPrivacy": "사라지는 사진은 내장 정보를 삭제합니다.",
+  "photo.enableFlash": "사라지는 사진으로 보내기",
+  "photo.flashHelp": "받는 사람마다 한 번, 3초 동안 볼 수 있습니다. 전달할 수 없습니다.",
+  "photo.flashOpen": "눌러서 보기 · 3초",
+  "photo.flashSent": "보냄 · 받는 사람만 볼 수 있음",
+  "photo.flashExpired": "사진을 볼 수 없음",
+  "photo.flashFailed": "사라지는 사진을 열 수 없습니다",
+  "photo.decodeFailed": "사진을 읽을 수 없습니다. 다른 형식을 사용해 보세요.",
+  "photo.skip": "이 사진 건너뛰기",
+  "photo.skipped": "사진을 건너뛰었습니다",
+  "photo.sendFailed": "사진을 보낼 수 없습니다. 다시 시도하세요.",
+  "photo.discard": "편집 내용을 버릴까요?",
+  "photo.discardChanges": "편집 내용 버리기",
+  "photo.continueEdit": "계속 편집"
 }

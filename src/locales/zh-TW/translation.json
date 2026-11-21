@@ -2901,7 +2901,7 @@
 ,"voice.lab.low": "Last 15 seconds"
 ,"voice.lab.reset": "Reset"
 ,"avatar.cropTitle": "調整頭像"
-,"avatar.cropHint": "拖動選框調整位置，拖動四角或滑動下方滑桿調整範圍。"
+,"avatar.cropHint": "拖曳選框可移動位置，雙指縮放或拖曳角點可調整範圍。"
 ,"avatar.cropSelection": "頭像裁剪框，可使用方向鍵移動"
 ,"avatar.cropRange": "裁剪範圍"
 ,"avatar.cropPreview": "頭像預覽"
@@ -2919,5 +2919,44 @@
 ,"avatar.originalUploadHint": "Recommended for transparent images"
 ,"menu.christmasMoreSettings": "Christmas · More settings"
 ,"menu.christmasBackgroundOverride": "Override chat background"
-,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background."
+,"menu.christmasBackgroundOverrideHint": "Use the Christmas town background. Turn off to show your chosen chat background.",
+  "photo.edit": "編輯照片",
+  "photo.send": "傳送（{{count}}）",
+  "photo.canvas": "照片畫布",
+  "photo.photos": "所選照片",
+  "photo.select": "編輯第 {{count}} 張",
+  "photo.previous": "上一張",
+  "photo.next": "下一張",
+  "photo.crop": "裁切",
+  "photo.rotate": "旋轉",
+  "photo.mosaic": "馬賽克",
+  "photo.privacy": "隱私",
+  "photo.flash": "閃圖",
+  "photo.undo": "復原",
+  "photo.original": "原始",
+  "photo.turn": "旋轉 90°",
+  "photo.flipHorizontal": "水平翻轉",
+  "photo.flipVertical": "垂直翻轉",
+  "photo.small": "小",
+  "photo.medium": "中",
+  "photo.large": "大",
+  "photo.cropHelp": "拖曳邊角裁切，雙指縮放。",
+  "photo.mosaicHelp": "在想遮蔽的位置塗抹。",
+  "photo.keepLocation": "保留拍攝位置",
+  "photo.keepDescription": "保留照片說明",
+  "photo.privacyHelp": "預設移除位置與說明。可保留原始照片已有的資訊。",
+  "photo.flashPrivacy": "閃圖會移除照片內嵌資訊。",
+  "photo.enableFlash": "以閃圖傳送",
+  "photo.flashHelp": "每位收件者可查看一次，顯示 3 秒。無法轉傳。",
+  "photo.flashOpen": "輕觸查看 · 3 秒",
+  "photo.flashSent": "已傳送 · 僅收件者可查看",
+  "photo.flashExpired": "閃圖無法查看",
+  "photo.flashFailed": "無法開啟閃圖",
+  "photo.decodeFailed": "無法讀取這張照片，請改用其他格式。",
+  "photo.skip": "跳過這張照片",
+  "photo.skipped": "已跳過這張照片",
+  "photo.sendFailed": "無法傳送這張照片，請重試。",
+  "photo.discard": "要捨棄這些編輯嗎？",
+  "photo.discardChanges": "捨棄編輯",
+  "photo.continueEdit": "繼續編輯"
 }
