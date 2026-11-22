@@ -2114,7 +2114,13 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-composer-external-media > .square-external-media-remove { position: absolute; z-index: 3; top: 7px; right: 7px; display: grid; width: 30px; height: 30px; place-items: center; margin: 0; padding: 0; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(17,25,22,.72); color: #fff; font-size: 18px; backdrop-filter: blur(10px); }
 
 .square-composer-photos,
-.square-statement-images { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 12px; overflow: hidden; border-radius: 14px; }
+.square-statement-images { display: grid; grid-template-columns: repeat(var(--square-photo-columns, 3), minmax(0, 1fr)); gap: var(--square-photo-gap, 4px); margin-top: 12px; overflow: hidden; border-radius: 14px; }
+.square-statement-images {
+  --square-photo-width: 420px;
+  --square-photo-columns: 3;
+  --square-photo-gap: 4px;
+  width: min(100%, calc(var(--square-photo-width) * var(--square-photo-columns) + var(--square-photo-gap) * (var(--square-photo-columns) - 1)));
+}
 .square-compose-drawer .square-composer-photos { flex: none; width: 100%; margin: 4px 0 20px; overflow: visible; }
 .square-compose-drawer .square-composer-photos > button { display: block; width: 100%; aspect-ratio: 1; border-radius: 12px; }
 .square-compose-drawer .square-composer-photos img { position: absolute; inset: 0; display: block; }
@@ -2123,10 +2129,10 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-composer-photos img,
 .square-statement-images img { width: 100%; height: 100%; object-fit: cover; }
 .square-composer-photos button > span { position: absolute; top: 5px; right: 5px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; font-size: 16px; background: rgba(12, 22, 18, .68); }
-.square-statement-images.count-1 { grid-template-columns: minmax(0, 420px); }
+.square-statement-images.count-1 { --square-photo-columns: 1; }
 .square-statement-images.count-1 > button { aspect-ratio: 4 / 3; }
 .square-statement-images.count-2,
-.square-statement-images.count-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.square-statement-images.count-4 { --square-photo-columns: 2; }
 .square-photo-location { position: absolute; right: 7px; bottom: 7px; display: flex; align-items: center; max-width: calc(100% - 14px); gap: 3px; padding: 4px 7px; overflow: hidden; border-radius: 999px; color: white; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; background: rgba(17, 33, 27, .65); backdrop-filter: blur(10px); }
 .square-photo-location span { font-size: 13px; }
 

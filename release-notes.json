@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.1",
+  "id": "2026.11.22.2",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "闪图查看与消息转发",
+      "title": "广场分享和图片布局",
       "items": [
-        "闪图与图片气泡样式一致。发送者可重复查看，也能看到收件人查看状态。",
-        "你发送的闪图和语音可逐条或合并转发到聊天。"
+        "广场会复用已加载的音乐信息和一滴分享摘要，来回切换时更快显示。",
+        "广场发言的多栏图片采用与单图相同的单张宽度上限。"
       ]
     },
     "en": {
-      "title": "Flash photo receipts and forwarding",
+      "title": "Square shares and photo layouts",
       "items": [
-        "Flash photos now use the photo bubble style. Senders can reopen them and see how many recipients have viewed them.",
-        "Forward your own flash photos and voice messages individually or in chat history bundles."
+        "Square reuses music details and Drop share previews when you switch views.",
+        "Photos in two- and three-column grids use the same per-photo width limit as a single photo."
       ]
     }
   }
