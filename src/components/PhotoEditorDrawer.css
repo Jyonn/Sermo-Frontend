@@ -39,6 +39,17 @@
 }
 
 .photo-editor-header h2 { margin: 0; font-size: 17px; font-weight: 700; }
+.photo-editor-dismiss {
+  --overlay-control-fill: #222b26;
+  --overlay-control-hover: #303c35;
+  --overlay-control-ink: #f0f4ee;
+  --overlay-control-line: var(--photo-line);
+  --overlay-control-focus: var(--photo-active);
+}
+@media (min-width: 720px) {
+  .photo-editor-header { grid-template-columns: minmax(0, 1fr) auto auto; text-align: start; }
+  .photo-editor-dismiss { order: 1; }
+}
 .photo-editor-header small { color: var(--photo-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .photo-editor button:disabled { opacity: .42; cursor: default; }
 .photo-editor button:focus-visible, .photo-editor-frame:focus-visible { outline: 2px solid var(--photo-active); outline-offset: 2px; }

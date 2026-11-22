@@ -9,6 +9,7 @@ import { UpdateFailureFeedback } from "./UpdateReportButton";
 import { SITE_ORIGINS, updateSiteLabel } from "../lib/siteOrigins";
 import { updateDestination } from "../lib/updateDestination";
 import {localizedReleaseNotes} from '../lib/releaseNotes';
+import {OverlayIconButton} from './OverlayIconButton';
 import './UpdateCheckDialog.css';
 
 interface UpdateCheckDialogProps {
@@ -44,7 +45,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
       <section ref={root} aria-labelledby="update-check-title" aria-modal="true" className="update-check-dialog is-compact" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="update-check-header">
           <div><h2 id="update-check-title">{t("update.check")}</h2><p className="update-installed-version">{t('update.current',{version:result?.currentRelease.id??CURRENT_RELEASE.id})}</p></div>
-          <button aria-label={t("common.close")} className="icon-button" disabled={installing} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button>
+          <OverlayIconButton icon="close" aria-label={t("common.close")} disabled={installing} onClick={onClose}/>
         </header>
 
         <div className="update-check-body">

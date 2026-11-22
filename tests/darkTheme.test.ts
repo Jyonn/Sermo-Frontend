@@ -6,7 +6,10 @@ import postcss from "postcss";
 const css = (name: string) => postcss.parse(readFileSync(new URL(`../src/styles/app/${name}.css`, import.meta.url), "utf8"));
 function declarations(file: string, selector: string) {
   const result: Record<string, string> = {};
-  css(file).walkRules((rule) => {
+  const source = file === "overlay-controls"
+    ? postcss.parse(readFileSync(new URL("../src/components/OverlayIconButton.css", import.meta.url), "utf8"))
+    : css(file);
+  source.walkRules((rule) => {
     if (rule.selector.split(",").map((item) => item.trim()).includes(selector)) {
       rule.walkDecls((decl) => { result[decl.prop] = decl.value; });
     }
@@ -20,7 +23,8 @@ test("shared borders and secondary controls use theme tokens", () => {
   for (const selector of [".input-dialog", ".confirm-dialog", ".async-dialog"]) {
     assert.equal(declarations("20-profile-settings", selector).border, "1px solid var(--line-soft)");
   }
-  assert.equal(declarations("10-chat-city", ".sheet-close").background, "var(--control-surface)");
+  assert.equal(declarations("overlay-controls", ".overlay-icon-button").border, "1px solid var(--overlay-control-line, var(--line-soft))");
+  assert.match(declarations("overlay-controls", ".overlay-icon-button").background, /var\(--bg-surface\)/);
   assert.equal(declarations("10-chat-city", ".sheet-header")["border-bottom"], "1px solid var(--line-soft)");
 });
 

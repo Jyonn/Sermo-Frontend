@@ -3544,21 +3544,6 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
   top: 14px;
   right: 14px;
   z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 999px;
-  color: var(--text-secondary);
-  background: var(--control-surface);
-  border: 1px solid var(--line-soft);
-}
-
-.sheet-close .material-symbols-outlined {
-  display: block;
-  font-size: 22px;
-  line-height: 1;
 }
 
 .sheet-drag-zone {

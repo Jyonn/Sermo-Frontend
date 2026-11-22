@@ -14,6 +14,7 @@ import {MediaMetadataPanel} from './MediaMetadataPanel';
 import {MediaWaitFeedback} from './MediaWaitFeedback';
 import {StatementVideoThumbnail} from './StatementVideoThumbnail';
 import {BottomSheet} from './BottomSheet';
+import {DrawerDismissButton, OverlayIconButton} from './OverlayIconButton';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareNoteDetail.css';
 
@@ -51,7 +52,12 @@ export function SquareNoteDetail(p:Props){
     {photos.length>1?<div className="square-reader-pagination"><button disabled={index===0} aria-label={t('media.previousImage')} onClick={()=>page(index-1)} type="button"><span className="material-symbols-outlined">chevron_left</span></button><div className="square-reader-dots" role="group" aria-label={t('square.photo')} >{photos.map((photo,i)=><button key={photo.uri} aria-label={`${i+1} / ${photos.length}`} aria-current={i===index?'true':undefined} onClick={()=>page(i)} type="button"><i/></button>)}</div><span>{index+1} / {photos.length}</span><button disabled={index===photos.length-1} aria-label={t('media.nextImage')} onClick={()=>page(index+1)} type="button"><span className="material-symbols-outlined">chevron_right</span></button></div>:null}
   </section>:null;
   return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
-    <header className="square-reader-header"><button className={p.panel?'native-panel-back':undefined} aria-label={t('common.back')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">arrow_back</span></button><button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button><button aria-label={t('square.share')} onClick={p.onShare} type="button"><span className="material-symbols-outlined">ios_share</span></button>{s.can_delete||s.can_pin||s.can_mute?<button aria-label={t('common.more')} onClick={p.onMore} type="button"><span className="material-symbols-outlined">more_horiz</span></button>:null}{p.panel?<button className="native-panel-close" aria-label={t('common.close')} onClick={p.onBack} type="button"><span className="material-symbols-outlined">close</span></button>:null}</header>
+    <header className="square-reader-header">
+      <DrawerDismissButton className="square-reader-dismiss" onClick={p.onBack} />
+      <button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button>
+      <OverlayIconButton icon="share" aria-label={t('square.share')} onClick={p.onShare} />
+      {s.can_delete||s.can_pin||s.can_mute ? <OverlayIconButton icon="more_horiz" aria-label={t('common.more')} onClick={p.onMore} /> : null}
+    </header>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
       {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} fitMedia/></div>:null}
       {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={p.onVideo}/>:null}

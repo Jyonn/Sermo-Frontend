@@ -6,6 +6,7 @@ import { useModalFocus } from "../lib/modalFocus";
 import "./SquareExperience.css";
 import { CalendarDatePicker } from "./CalendarDatePicker";
 import { DateRangeSummary } from "./DateRangeField";
+import { OverlayIconButton } from "./OverlayIconButton";
 
 export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, onClear }: {
   open: boolean; keyword: string; from: string; to: string;
@@ -32,7 +33,7 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
   if (!open) return null;
   return createPortal(<div className="dialog-backdrop square-search-modal-backdrop" role="presentation" onClick={onClose}>
     <section className="square-search-modal" ref={root} tabIndex={-1} role="dialog" aria-modal="true" aria-label={t("square.search")} onClick={(event) => event.stopPropagation()}>
-      <header><h2>{t(editing ? editing === "from" ? "square.dateFrom" : "square.dateTo" : "square.search")}</h2><button type="button" className="square-search-close" aria-label={t(editing ? "common.back" : "common.close")} onClick={() => editing ? setEditing(null) : onClose()}><span className="material-symbols-outlined" aria-hidden="true">{editing ? "arrow_back" : "close"}</span></button></header>
+      <header><h2>{t(editing ? editing === "from" ? "square.dateFrom" : "square.dateTo" : "square.search")}</h2><OverlayIconButton icon={editing ? "arrow_back" : "close"} aria-label={t(editing ? "common.back" : "common.close")} onClick={() => editing ? setEditing(null) : onClose()} /></header>
       {editing ? <div className="square-date-step">
         <p className="square-date-selected">{format(date, true)}</p>
         <CalendarDatePicker value={date} onChange={(value) => { setDate(value); setError(false); }} />

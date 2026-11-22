@@ -1016,7 +1016,7 @@ export default function SpaceAdminDashboardPage() {
         </div>
 
 
-      <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
+      <SideDrawer showTitle historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
         {selectedMember ? <div className="admin-member-drawer">
           <BirthdayLetterComposer key={selectedMember.user_id} userId={selectedMember.user_id}/>
           <section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section>

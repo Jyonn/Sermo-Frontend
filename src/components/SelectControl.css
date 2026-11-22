@@ -20,8 +20,6 @@ body .guest-language-tool:has(>.setting-select-trigger),.management-header-actio
 .option-picker-dialog{display:flex;flex-direction:column;min-height:0;width:min(100%,460px);max-height:min(80dvh,640px);overflow:hidden;border:1px solid var(--line-soft);border-radius:24px;background:var(--bg-panel-strong);color:var(--text-primary);box-shadow:var(--shadow-lg);animation:surface-enter 160ms ease-out}
 .option-picker-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--line-soft);flex-shrink:0}
 .option-picker-dialog h2{margin:0;min-width:0;font-size:18px;line-height:1.5;overflow-wrap:anywhere}
-.option-picker-close{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;padding:0;border:1px solid var(--line-soft);border-radius:12px;background:var(--control-surface);color:var(--text-secondary)}
-.option-picker-close>.material-symbols-outlined{font-size:21px}
 .settings-dialog-backdrop{touch-action:pan-y}
 .settings-dialog-body{display:grid;gap:18px;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:18px}
 .settings-dialog-body>.personal-theme-options{padding:0}

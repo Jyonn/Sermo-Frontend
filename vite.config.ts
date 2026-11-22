@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
+import { overlayInventoryPlugin } from "./scripts/overlay-inventory";
 const release = JSON.parse(readFileSync(new URL("./release-notes.json", import.meta.url), "utf8"));
 
 export default defineConfig({
-  plugins: [react(), { name: "release-marker", transformIndexHtml: () => [{ tag: "meta", attrs: { name: "frienden-release", content: release.id }, injectTo: "head" }] }],
+  plugins: [react(), overlayInventoryPlugin(), { name: "release-marker", transformIndexHtml: () => [{ tag: "meta", attrs: { name: "frienden-release", content: release.id }, injectTo: "head" }] }],
   build: {
     rollupOptions: {
       output: {

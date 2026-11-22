@@ -64,15 +64,6 @@
     margin-left: auto;
   }
 
-  .desktop-panel-layer .drawer-floating-back.desktop-panel-close {
-    left: auto;
-    right: 16px;
-  }
-
-  .desktop-panel-layer .side-drawer:has(> .desktop-panel-close) > .drawer-floating-accessory {
-    right: 68px;
-  }
-
   .desktop-panel-slot .desktop-panel-layer > .side-drawer > .drawer-body {
     min-height: 0;
     overscroll-behavior: contain;

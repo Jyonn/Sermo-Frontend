@@ -10,6 +10,7 @@ import {showToast} from '../lib/toast';
 import {getDetectedSpaceSlug,buildSpaceHrefForCurrentHost} from '../lib/spaceEntry';
 import type {ActivityCampaignDTO,PermanentVipCampaignDTO,ChatDTO} from '../types';
 import {SideDrawer} from './SideDrawer';
+import {OverlayIconButton} from './OverlayIconButton';
 import {BottomSheet} from './BottomSheet';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {ActivityDetails} from './ActivityDetails';
@@ -249,7 +250,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
       <SideDrawer
         className={activityDrawerClassName(activityKey,theme)}
         contentUnderToolbar
-        headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null}
+        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t("square.share")} onClick={() => openActivityShare(activeActivity)} /> : null}
         historyMode="route"
         onClose={onClose}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
@@ -315,7 +316,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
           }} type="button" />)}
         </div>
       </BottomSheet>
-      <SideDrawer historyMode="route" className={activityDrawerClassName(activityKey,theme)} contentUnderToolbar headerAction={<button aria-label={t('square.share')} className="activity-drawer-share" onClick={() => { void api.getActivity('permanent-vip-founding-100').then(openActivityShare).catch(cause=>showToast(cause instanceof Error?cause.message:t('square.shareLoadFailed'),'error')); }} type="button"><span className="material-symbols-outlined">share</span></button>} onClose={onClose} open={activityKey==='permanent-vip-founding-100'} title={t("vip.campaignTitle")}>
+      <SideDrawer historyMode="route" className={activityDrawerClassName(activityKey,theme)} contentUnderToolbar headerAction={<OverlayIconButton icon="share" aria-label={t('square.share')} onClick={() => { void api.getActivity('permanent-vip-founding-100').then(openActivityShare).catch(cause=>showToast(cause instanceof Error?cause.message:t('square.shareLoadFailed'),'error')); }} />} onClose={onClose} open={activityKey==='permanent-vip-founding-100'} title={t("vip.campaignTitle")}>
         {vipCampaign ? <div className={`vip-campaign-panel${vipCampaign.claimed_by_user ? " is-claimed" : ""}`}>
           <section className="vip-campaign-hero">
             <span>FOUNDING 100</span>

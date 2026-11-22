@@ -11,6 +11,7 @@ import { BottomSheet } from "./BottomSheet";
 import { PockloPickerFrame } from "./PockloPickerFrame";
 import pockloIcon from "../assets/pocklo-mark.svg";
 import "./PockloDrawer.css";
+import {ExternalAppAction, ExternalAppActions, ExternalAppIdentity} from './ExternalAppPanel';
 import { POCKLO_ORIGIN, pockloShareToken } from "../lib/pockloShare";
 import type {PockloSelection} from '../lib/pockloPicker';
 import {songSummary} from '../lib/pockloSong';
@@ -261,32 +262,25 @@ export function PockloDrawer({
 
   const content = (
       <div className="pocklo-drawer" ref={drawerContent}>
-        {(!fileMode || !ready) && <div className="pocklo-identity">
-          <img src={pockloIcon} alt="" />
-          <div><strong>{t("pocklo.name")}</strong><p>{t("pocklo.menuHint")}</p></div>
-          {status && <span className="pocklo-status" data-connected={ready}>
-            <span aria-hidden="true" />{t(ready ? "pocklo.statusConnected" : status === "unavailable" ? "pocklo.statusUnavailable" : "pocklo.statusDisconnected")}
-          </span>}
-        </div>}
+        {(!fileMode || !ready) && <ExternalAppIdentity logo={pockloIcon} title={t("pocklo.name")} description={t("pocklo.menuHint")}
+          connection={status ? ready ? 'connected' : status === 'unavailable' ? 'unavailable' : 'disconnected' : undefined} />}
         {message && <p className="pocklo-notice" role="alert">{message}</p>}
         {!status && <FeedbackState tone="loading" title={t("common.loading")} />}
         {status === "unavailable" && <FeedbackState tone="error" title={t("pocklo.unavailable")} action={retry} />}
         {status === "phone_required" && <FeedbackState icon="verified_user" title={t("pocklo.phoneTitle")} description={t("pocklo.phoneRequired")} />}
+        {(!fileMode || status === "connect_required") && <ExternalAppActions>
+          {status === "connect_required" && <ExternalAppAction icon="link" disabled={busy} onClick={() => void connect()}
+            label={t(busy ? "pocklo.connecting" : "pocklo.connect")} />}
+          {!fileMode && <ExternalAppAction icon="open_in_new" label={t("pocklo.open")} href={POCKLO_HOME} />}
+          {!fileMode && ready && <ExternalAppAction icon="link_off" disabled={busy} label={t("pocklo.disconnect")} onClick={() => setConfirmDisconnect(true)} />}
+        </ExternalAppActions>}
         {(status === "connect_required" || (!fileMode && ready)) && <div className="pocklo-connection">
           <div className="pocklo-section-title">{t("pocklo.permissions")}</div>
           <ul className="pocklo-permissions">
             <li><PockloGlyph name="folder" />{t("pocklo.permissionBrowse")}</li>
             <li><PockloGlyph name="link" />{t("pocklo.permissionShare")}</li>
           </ul>
-          <p>{t(ready ? "pocklo.connectedHint" : "pocklo.connectHint")}</p>
-          {status === "connect_required" && <button className="button" disabled={busy} type="button" onClick={() => void connect()}>
-            {t(busy ? "pocklo.connecting" : "pocklo.connect")}
-            <PockloGlyph name="open" />
-          </button>}
-        </div>}
-        {!fileMode && <div className="pocklo-management">
-          <a href={POCKLO_HOME} target="_blank" rel="noreferrer">{t("pocklo.open")} <PockloGlyph name="open" /></a>
-          {ready && <button disabled={busy} type="button" onClick={() => setConfirmDisconnect(true)}>{t("pocklo.disconnect")}</button>}
+          {!ready && <p>{t("pocklo.connectHint")}</p>}
         </div>}
         {fileMode && ready && <>
           <div className="pocklo-folder-header">

@@ -6,6 +6,7 @@ import {showToast} from '../lib/toast';
 import {referenceTypes,type MessageReference} from '../lib/messageReferences';
 import type {ChatDTO} from '../types';
 import {ChatTargetPicker} from './ChatTargetPicker';
+import {OverlayIconButton} from './OverlayIconButton';
 import './SharedReferenceMessage.css';
 
 export function ReferenceShareButton({reference,className=''}:{reference:MessageReference;className?:string}) {
@@ -27,7 +28,8 @@ export function ReferenceShareButton({reference,className=''}:{reference:Message
     finally{running.current=false;setBusy(null);}
   };
   return <>
-    <button type="button" className={`reference-share-button ${className}`} aria-label={t('references.share')} onClick={event=>{event.stopPropagation();setChats([]);setOpen(true);}}><span className="material-symbols-outlined" aria-hidden="true">share</span></button>
+    <OverlayIconButton icon="share" className={`reference-share-button ${className}`} aria-label={t('references.share')}
+      onClick={event=>{event.stopPropagation();setChats([]);setOpen(true);}} />
     <ChatTargetPicker open={open} title={t('square.shareToChat')} targets={chats.map(chat=>{const peer=chat.members.find(member=>member.user_id!==session?.user.user_id)||chat.members[0];return {id:chat.chat_id,title:chat.title||peer?.name||t('nav.chats'),preview:chat.last_message?.content||'',avatarUri:chat.group?undefined:peer?.avatar_uri,groupMembers:chat.group?chat.members.map(member=>({name:member.name,uri:member.avatar_uri})):undefined};})} loading={loading} busy={busy!==null} busyTargetId={busy} emptyTitle={t('square.noChatsToShare')} onClose={()=>{if(!running.current)setOpen(false);}} onSubmit={send}/>
   </>;
 }

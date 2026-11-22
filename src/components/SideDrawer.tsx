@@ -7,6 +7,7 @@ import { useDesktopPanels } from "./DesktopPanelWorkspace";
 import {useOverlayLayer,OverlayScope} from '../lib/overlayLayer';
 import { useModalFocus } from "../lib/modalFocus";
 import {BirthdaySurfaceArt} from './BirthdaySurfaceArt';
+import {DrawerDismissButton} from './OverlayIconButton';
 import './SideDrawer.css';
 
 const activeDrawerIds = new Set<string>();
@@ -29,6 +30,7 @@ interface SideDrawerProps {
   historyMode?: "stack" | "route";
   onRouteOpen?: () => void;
   headerless?: boolean;
+  showTitle?: boolean;
   contentUnderToolbar?: boolean;
   fullscreen?: boolean;
   fullViewport?: boolean;
@@ -36,7 +38,6 @@ interface SideDrawerProps {
   floatingAccessory?: ReactNode;
   style?: CSSProperties;
   trapFocus?: boolean;
-  dismissAction?: "auto" | "back";
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -74,6 +75,7 @@ export function SideDrawer({
   historyMode = "stack",
   onRouteOpen,
   headerless = false,
+  showTitle = false,
   contentUnderToolbar = false,
   fullscreen = false,
   fullViewport = false,
@@ -81,7 +83,6 @@ export function SideDrawer({
   floatingAccessory,
   style,
   trapFocus = false,
-  dismissAction = "auto",
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
@@ -270,9 +271,6 @@ export function SideDrawer({
   useModalFocus(surfaceRef, visible && trapFocus, requestClose,{manageLayer:false});
   if (!visible || typeof document === "undefined") return null;
 
-  const desktopClose = desktopPanel && !panels?.single && dismissAction !== "back";
-  const dismissLabel = t(desktopClose ? "common.close" : "common.back");
-  const dismissIcon = desktopClose ? "close" : "arrow_back";
   return <OverlayScope root={surfaceRef}>
     {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
       <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} style={overlayLevel?{zIndex:overlayLevel-1}:undefined} onClick={requestClose} aria-hidden="true" />,
@@ -292,19 +290,12 @@ export function SideDrawer({
       >
         {!headerless&&!fullscreen?<BirthdaySurfaceArt kind="drawer"/>:null}
         {headerless ? (
-          floatingBack || desktopPanel ? <button className={`drawer-floating-back${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
-            <span className="material-symbols-outlined">{dismissIcon}</span>
-          </button> : null
+          floatingBack ? <DrawerDismissButton className="drawer-floating-back" onClick={requestClose} /> : null
         ) : <header className="drawer-floating-toolbar">
-            <button className="drawer-surface-dismiss" onClick={requestClose} type="button">
-              <span className="drawer-dismiss-mobile material-symbols-outlined" aria-hidden="true">arrow_back</span>
-              <span className="drawer-dismiss-mobile drawer-control-label">{t('common.back')}</span>
-              <span className="drawer-dismiss-desktop material-symbols-outlined" aria-hidden="true">close</span>
-              <span className="drawer-dismiss-desktop drawer-control-label">{t('common.close')}</span>
-            </button>
+            <DrawerDismissButton className="drawer-surface-dismiss" onClick={requestClose} />
             <div className="drawer-floating-identity">
               {titleLeading}
-              <h3 className="drawer-control-label">{title}</h3>
+              <h2 className={showTitle ? "drawer-visible-title" : "drawer-control-label"} title={showTitle ? title : undefined}>{title}</h2>
               {titleAccessory}
             </div>
             <div className="drawer-floating-actions">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActivityCampaignCard, ActivityTitle } from "../components/ActivityCampaignCard";
 import { ExplorerActivity } from "../components/ExplorerActivity";
 import { SideDrawer } from "../components/SideDrawer";
+import { OverlayIconButton } from "../components/OverlayIconButton";
 import { useI18n } from "../lib/language";
 import { useTheme } from "../lib/theme";
 import type { ActivityCampaignDTO } from "../types";
@@ -66,7 +67,7 @@ export default function ExplorerActivityLabPage() {
       <button className="ghost-button" type="button" aria-label={t("menu.appearance")} onClick={() => setPreference(resolvedTheme === "dark" ? "light" : "dark")}><span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span></button>
     </div>
     <ActivityCampaignCard activity={activity} title={t("explorer.title")} eyebrow={t("message.activityEyebrow")} hint={t("message.activityOpen")} onClick={() => setOpen(true)} />
-    <SideDrawer className="activity-drawer activity-transparent-header is-custom-activity" dismissAction="back" open={open} onClose={() => setOpen(false)} title={t("explorer.title")} titleAccessory={<ActivityTitle activity={activity} title={t("explorer.title")} />} headerAction={<button className="activity-drawer-share" aria-label={t("square.share")} onClick={() => setOpen(false)} type="button"><span className="material-symbols-outlined">share</span></button>}>
+    <SideDrawer className="activity-drawer activity-transparent-header is-custom-activity" open={open} onClose={() => setOpen(false)} title={t("explorer.title")} titleAccessory={<ActivityTitle activity={activity} title={t("explorer.title")} />} headerAction={<OverlayIconButton icon="share" aria-label={t("square.share")} onClick={() => setOpen(false)} />}>
       <ExplorerActivity key={completed} activity={activity} onUpdate={() => undefined} onPublish={() => undefined} preview />
     </SideDrawer>
   </main>;

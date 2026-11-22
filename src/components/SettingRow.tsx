@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useI18n } from '../lib/language';
 import { useBodyScrollLock } from '../lib/bodyLock';
 import { useModalFocus } from '../lib/modalFocus';
+import { OverlayIconButton } from './OverlayIconButton';
 import './SelectControl.css';
 
 export type SettingRowTone = "default" | "danger";
@@ -115,7 +116,7 @@ export function SelectControl<T extends string>({ disabled = false, label, descr
     </button>
     {open && createPortal(<div className="dialog-backdrop option-picker-backdrop" role="presentation" onClick={event => { event.stopPropagation(); close(); }}>
       <section ref={root} tabIndex={-1} className="option-picker-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={event => event.stopPropagation()}>
-        <header><h2 id={titleId}>{label}</h2><button type="button" className="option-picker-close" disabled={busy} aria-label={t('common.close')} onClick={close}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+        <header><h2 id={titleId}>{label}</h2><OverlayIconButton icon="close" disabled={busy} aria-label={t('common.close')} onClick={close}/></header>
         {options.length > 8 && <label className="option-picker-search"><span className="material-symbols-outlined" aria-hidden="true">search</span><input aria-label={t('select.search')} placeholder={t('select.search')} value={query} onChange={event => setQuery(event.target.value)} disabled={busy}/></label>}
         <div className="option-picker-list" role="listbox" aria-label={label} aria-busy={busy} onKeyDown={event => {
           if (!['ArrowDown','ArrowUp','Home','End'].includes(event.key)) return;

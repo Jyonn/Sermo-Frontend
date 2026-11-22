@@ -24,7 +24,6 @@ html[data-theme="dark"] body .activity-drawer.is-custom-activity.side-drawer > .
 .activity-drawer.is-custom-activity .drawer-topbar { background:var(--drawer-surface,#f7f5ed); border-color:var(--line-soft); }
 .activity-drawer.is-custom-activity .drawer-title { position:static; width:auto; height:auto; clip:auto; clip-path:none; overflow:visible; color:var(--text-primary); }
 .activity-drawer.is-custom-activity .drawer-back-button { color:var(--text-primary); }
-.activity-drawer.is-custom-activity .activity-drawer-share { color:var(--text-primary); background:color-mix(in srgb,#77b89a 14%,transparent); border-color:var(--line-soft); }
 .activity-drawer.activity-transparent-header .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; }
 html[data-theme="dark"] body .side-drawer.activity-drawer.activity-transparent-header > .drawer-topbar { background:transparent; border-bottom:0; box-shadow:none; backdrop-filter:none; }
 .activity-drawer.activity-transparent-header .drawer-topbar-shell { min-height:42px; }
@@ -33,12 +32,6 @@ html[data-theme="dark"] body .side-drawer.activity-drawer.activity-transparent-h
 .activity-transparent-header .drawer-title-row .campaign-title-art,
 .activity-transparent-header .drawer-title-row .activity-drawer-title-art { display:block; width:auto; max-width:min(140px,40vw); height:32px; max-height:32px; object-fit:contain; object-position:left center; }
 .activity-transparent-header .drawer-title-row .campaign-title-text { font-size:17px; line-height:1.25; -webkit-line-clamp:1; }
-.activity-drawer.activity-transparent-header .drawer-back-button,
-.activity-drawer.activity-transparent-header .activity-drawer-share { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; padding:0; border:0; border-radius:50%; background:transparent; box-shadow:none; }
-.activity-transparent-header .drawer-back-button .material-symbols-outlined,
-.activity-transparent-header .activity-drawer-share .material-symbols-outlined { font-size:23px; }
-.activity-transparent-header .drawer-back-button:hover,
-.activity-transparent-header .activity-drawer-share:hover { background:color-mix(in srgb,currentColor 7%,transparent); }
 .activity-drawer.activity-transparent-header .drawer-back-button { flex-basis:44px; width:44px; height:44px; border:1px solid rgba(255,255,255,.78); background:rgba(170,226,198,.72); color:#204d3d; box-shadow:inset 0 1px 0 rgba(255,255,255,.24); }
 .activity-transparent-header .drawer-back-button .material-symbols-outlined { font-size:26px; }
 html[data-theme="dark"] .activity-drawer.activity-transparent-header .drawer-back-button { border-color:rgba(183,234,207,.4); background:rgba(102,178,140,.25); color:#dbf6e8; }

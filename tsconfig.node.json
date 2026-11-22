@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "outDir": "./.tsbuild/node"
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/overlay-inventory.ts", "src/lib/overlayInventory.ts"]
 }

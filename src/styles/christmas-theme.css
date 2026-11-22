@@ -11,6 +11,9 @@ html[data-site-theme="christmas-2026"] {
   --line-strong: #bacaba;
   --brand-primary: #9e363d;
   --brand-primary-press: #7e2630;
+  --primary-button-ink: #fff8ec;
+  --control-surface: var(--bg-surface);
+  --control-hover: var(--bg-elevated);
   --christmas-snow: #fffdf5;
   --christmas-lights: #a27338;
   --christmas-tree: url("/themes/christmas-2026/tree.webp");
@@ -31,6 +34,7 @@ html[data-site-theme="christmas-2026"][data-theme="dark"] {
   --line-strong: #587062;
   --brand-primary: #efaaa4;
   --brand-primary-press: #ffc6bc;
+  --primary-button-ink: #34191b;
   --christmas-snow: #c8e1d6;
   --christmas-lights: #e5b572;
 }

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useI18n } from "../lib/language";
 import { useTheme } from "../lib/theme";
 import { ActionSheet } from "../components/ActionSheet";
@@ -53,7 +54,7 @@ export default function InteractionPatternsPage() {
         <footer><strong>{t("patterns.useWhen")}</strong><p>{t(`patterns.${active}.use`)}</p></footer>
       </section>
     </div>
-    <section id="pattern-mapping" className="patterns-mapping"><header><small>RIGHT PLACE, RIGHT PATTERN</small><h2>{t("patterns.mapping")}</h2><p>{t("patterns.mappingHint")}</p></header><div>{patterns.map((key, index) => <article key={key}><span>0{index + 1}</span><div><h3>{names[key]}</h3><p>{t(`patterns.${key}.use`)}</p></div><small>{t(["actions", "alert", "inline"].includes(key) ? "patterns.adopted" : ["sheet", "lightbox"].includes(key) ? "patterns.reused" : "patterns.ready")}</small></article>)}</div></section>
+    <section id="pattern-mapping" className="patterns-mapping"><header><small>RIGHT PLACE, RIGHT PATTERN</small><h2>{t("patterns.mapping")}</h2><p>{t("patterns.mappingHint")}</p><Link to="/design/components">{t('atlas.title')} ↗</Link></header><div>{patterns.map((key, index) => <article key={key}><span>0{index + 1}</span><div><h3>{names[key]}</h3><p>{t(`patterns.${key}.use`)}</p></div><small>{t(["actions", "alert", "inline"].includes(key) ? "patterns.adopted" : ["sheet", "lightbox"].includes(key) ? "patterns.reused" : "patterns.ready")}</small></article>)}</div></section>
     <BottomSheet open={open === "sheet"} title={t("patterns.agendaTitle")} description={t("patterns.sheet.sample")} snapPoints={DEFAULT_SHEET_STOPS} initialSnap={1} onClose={() => setOpen(null)}>
       <div className="patterns-stops" aria-label={t("patterns.sheetStops")}>{t("patterns.sheetStops")}</div>{["10:00", "13:30", "17:00", "19:30"].map((time, index) => <div className="patterns-agenda-row" key={time}><time>{time}</time><div><strong>{t(index % 2 ? "patterns.focus" : "patterns.free")}</strong><small>{t("patterns.localOnly")}</small></div></div>)}
     </BottomSheet>

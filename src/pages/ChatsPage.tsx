@@ -106,6 +106,7 @@ import {SystemMessageText} from '../components/SystemMessageText';
 import type {SystemMessageContext} from '../lib/systemMessage';
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
+import { OverlayIconButton } from "../components/OverlayIconButton";
 import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { BirthdayNameMark, PlainAvatar, UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
@@ -8701,10 +8702,12 @@ function LiveChatsPage({
       <SideDrawer
         className="message-search-drawer"
         historyKey="message-search"
+        showTitle
         onRouteOpen={() => setMessageSearchOpen(true)}
         open={messageSearchOpen}
         title={t("messageSearch.title")}
-        titleAccessory={selectedChat ? <button type="button" className="history-manager-entry" onClick={() => setHistoryManagerOpen(true)} aria-haspopup="dialog" aria-expanded={historyManagerOpen} aria-label={t("historyManager.title")} title={t("historyManager.title")}><span className="material-symbols-outlined" aria-hidden="true">tune</span></button> : null}
+        headerAction={selectedChat ? <OverlayIconButton icon="tune" onClick={() => setHistoryManagerOpen(true)} aria-haspopup="dialog"
+          aria-expanded={historyManagerOpen} aria-label={t("historyManager.title")} title={t("historyManager.title")} /> : null}
         onClose={() => setMessageSearchOpen(false)}
       >
         <div className="message-search-panel" ref={messageSearchPanelRef}>

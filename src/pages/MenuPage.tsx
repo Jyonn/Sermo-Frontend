@@ -26,7 +26,9 @@ import {UpdateAvailableDot} from '../components/UpdateAvailableDot';
 import {ChatPageThumbnail} from '../components/ChatPageThumbnail';
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
-import { ChronellePluginDialog, ChronelleAccountSummary } from "../components/ChronellePluginDialog";
+import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
+import { ExternalAppAction, ExternalAppActions, ExternalAppIdentity, type AppConnectionState } from "../components/ExternalAppPanel";
+import { OverlayIconButton } from "../components/OverlayIconButton";
 import { PockloDrawer } from "../components/PockloDrawer";
 import {DropDrawer} from '../components/DropDrawer';
 import {DROP_ICON} from '../lib/dropPicker';
@@ -487,6 +489,20 @@ export default function MenuPage() {
   const [activitiesOpen,setActivitiesOpen]=useState(false);
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [chronelleDetailsOpen, setChronelleDetailsOpen] = useState(false);
+  const [chronelleConnection, setChronelleConnection] = useState<{userId: number; state: AppConnectionState}>();
+  const chronelleUserId = session?.user.user_id;
+  const showChronelleConnection = moreAppsOpen || chronelleDetailsOpen;
+  const chronelleStatus = chronelleConnection?.userId === chronelleUserId ? chronelleConnection?.state : undefined;
+  useEffect(() => {
+    if (!showChronelleConnection || chronelleInfoOpen || !chronelleUserId) return;
+    let active = true;
+    api.chronelleAccount().then(({status}) => {
+      if (active) setChronelleConnection({userId: chronelleUserId, state: status === 'active' ? 'connected' : 'disconnected'});
+    }).catch(() => {
+      if (active) setChronelleConnection({userId: chronelleUserId, state: 'unavailable'});
+    });
+    return () => {active = false;};
+  }, [chronelleUserId, chronelleInfoOpen, showChronelleConnection]);
   const [pockloOpen, setPockloOpen] = useState(false);
   const [dropOpen,setDropOpen]=useState(false);
   const pockloScope = session ? `${session.user.space_id}:${session.user.user_id}` : "";
@@ -2309,7 +2325,7 @@ export default function MenuPage() {
             <div className="more-apps-section">
             <button className="more-apps-row" type="button" onClick={() => setChronelleDetailsOpen(true)}>
               <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
-              <span><strong>{t("chronelle.title")}</strong><small>{session ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
+              <span><strong>{t("chronelle.title")}</strong><small>{t(chronelleStatus === 'connected' ? "chronelle.bound" : "apps.chronelleSummary")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="more-apps-row" type="button" onClick={()=>setDropOpen(true)}><span className="more-apps-icon is-drop"><img src={DROP_ICON} alt=""/></span><span><strong>{t('drop.name')}</strong><small>{t('drop.hint')}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
@@ -2346,23 +2362,15 @@ export default function MenuPage() {
       <DropDrawer key={'drop:'+pockloScope} open={dropOpen} onClose={()=>setDropOpen(false)} scope={pockloScope} returnError={dropReturnError}/>
       <SideDrawer historyKey="chronelle" open={chronelleDetailsOpen} onRouteOpen={() => setChronelleDetailsOpen(true)}
         onClose={() => setChronelleDetailsOpen(false)} title={t("chronelle.title")}>
-        <div className="more-apps-detail menu-settings-section">
-          <div className="chronelle-app-identity">
-            <span className="more-apps-icon is-chronelle"><img src={chronelleIcon} alt="" /></span>
-            <div><strong>{t("chronelle.title")}</strong><small>{t("apps.chronelleSummary")}</small></div>
-          </div>
-          <div className="more-apps-section">
-            <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
-              <span className="more-apps-icon material-symbols-outlined" aria-hidden="true">calendar_month</span>
-              <span><strong>{t("apps.chronelleDisplay")}</strong><small>{session && chronelleDetailsOpen ? <ChronelleAccountSummary userId={session.user.user_id} refresh={chronelleInfoOpen}/> : t("chronelle.bind")}</small></span>
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-            </button>
-            <a className="more-apps-row" href={chronelleOrigin() + "/"} target="_blank" rel="noreferrer">
-              <span className="more-apps-icon material-symbols-outlined" aria-hidden="true">event</span>
-              <span><strong>{t("apps.openChronelle")}</strong><small>{t("apps.chronelleOpenHint")}</small></span>
-              <span className="material-symbols-outlined" aria-hidden="true">north_east</span>
-            </a>
-          </div>
+        <div className="external-app-panel">
+          <ExternalAppIdentity logo={chronelleIcon} title={t("chronelle.title")}
+            description={t("apps.chronelleSummary")} connection={chronelleStatus} />
+          <ExternalAppActions>
+            <ExternalAppAction icon="open_in_new" label={t("apps.openChronelle")} href={chronelleOrigin() + "/"} />
+            <ExternalAppAction icon="calendar_month"
+              label={t(chronelleStatus === 'disconnected' ? "chronelle.bind" : "apps.chronelleDisplay")}
+              onClick={() => setChronelleInfoOpen(true)} />
+          </ExternalAppActions>
         </div>
       </SideDrawer>
       <StillfolioDrawer
@@ -3680,9 +3688,7 @@ export default function MenuPage() {
                 <h2>{t("notification.offlineThreshold")}</h2>
                 <p>{t("notification.thresholdHint")}</p>
               </div>
-              <button className="icon-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button" aria-label={t("common.close")}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
+              <OverlayIconButton icon="close" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} aria-label={t("common.close")} />
             </div>
             <div className="notification-threshold-editor">
               <strong>{formatThreshold(Number(prefEditorValue))}</strong>

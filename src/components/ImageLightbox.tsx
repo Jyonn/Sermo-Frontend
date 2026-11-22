@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 import { MediaWaitFeedback, type MediaWaitPhase } from "./MediaWaitFeedback";
 import { PhotoArchivePlate } from "./PhotoArchivePlate";
+import { DrawerDismissButton, OverlayIconButton } from "./OverlayIconButton";
 import { UserAvatar } from "./UserAvatar";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useModalFocus } from "../lib/modalFocus";
@@ -371,9 +372,7 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy, fixedFit }:
           type="button"
         >＋</button>
       </div>
-      <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
-      </button>
+      <OverlayIconButton aria-label={t("common.close")} className="immersive-image-close" icon="close" onClick={onClose} />
     </div>}
   </div>;
 }
@@ -465,6 +464,7 @@ function ArchiveVideoPlayer({ active, poster, src, width, height }: { active: bo
 
 interface ImmersiveVideoProps {
   context?: ReactNode;
+  drawerDismiss?: boolean;
   loop?: boolean;
   onClose: () => void;
   onError?: () => void;
@@ -472,7 +472,7 @@ interface ImmersiveVideoProps {
   src: string;
 }
 
-export function ImmersiveVideo({ context, loop = false, onClose, onError, poster, src }: ImmersiveVideoProps) {
+export function ImmersiveVideo({ context, drawerDismiss = false, loop = false, onClose, onError, poster, src }: ImmersiveVideoProps) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -597,7 +597,7 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
     >
       {phase === "buffering" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}
     </button>
-    <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+    <div className={`immersive-image-actionbar immersive-video-actionbar${drawerDismiss ? " has-drawer-dismiss" : ""}${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
       <div className="immersive-image-view-modes" role="group" aria-label={t("media.viewMode")}>
         <button className={viewMode === "fit" ? "is-active" : ""} onClick={() => applyViewMode("fit")} type="button">{t("media.fitPage")}</button>
         <button className={viewMode === "fill" ? "is-active" : ""} onClick={() => applyViewMode("fill")} type="button">{t("media.fillScreen")}</button>
@@ -608,9 +608,8 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
         <span className="immersive-image-zoom">{Math.round(scale * 100)}%</span>
         <button aria-label={t("media.zoomIn")} disabled={scale >= scales.maximum - 0.0001} onClick={() => zoomBy(1.25)} type="button">＋</button>
       </div>
-      <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
-      </button>
+      {drawerDismiss ? <DrawerDismissButton className="immersive-image-close" onClick={onClose} />
+        : <OverlayIconButton aria-label={t("common.close")} className="immersive-image-close" icon="close" onClick={onClose} />}
     </div>
     {context ? <div
       className="immersive-video-context"
@@ -717,11 +716,11 @@ export function MediaLightbox({
   };
   const actions = <div className="photo-archive-actions" onClick={(event) => event.stopPropagation()}>
     {downloadError ? <span className="media-download-error" role="alert">{t(downloadError==='processing'?'media.downloadProcessing':"media.downloadFailed")}</span> : null}
-    <button aria-label={downloading ? t("media.downloading") : downloadLabel} title={downloadLabel} disabled={downloading} onClick={() => { setDownloadError(null); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(error => setDownloadError(error instanceof Error&&error.message==='media_processing'?'processing':'failed')).finally(() => setDownloading(false)); }} type="button">
-      {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
-    </button>
-    <button aria-label={t("common.fullscreen")} title={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg></button>
-    {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} title={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
+    <OverlayIconButton icon={downloading ? undefined : "download"} aria-label={downloading ? t("media.downloading") : downloadLabel} title={downloadLabel} disabled={downloading} onClick={() => { setDownloadError(null); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(error => setDownloadError(error instanceof Error&&error.message==='media_processing'?'processing':'failed')).finally(() => setDownloading(false)); }}>
+      {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : null}
+    </OverlayIconButton>
+    <OverlayIconButton icon="fullscreen" aria-label={t("common.fullscreen")} title={t("common.fullscreen")} onClick={() => setImmersive(true)} />
+    {onJumpToMessage ? <OverlayIconButton icon="my_location" aria-label={t("messageSearch.jumpToMessage")} title={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} /> : null}
   </div>;
 
   return createPortal(
@@ -776,11 +775,11 @@ export function MediaLightbox({
             </div>
             {loading ? <span className="media-wait-spinner" aria-label={t("common.loading")} role="status" /> : null}
           </div>
-          <div className="photo-preview-tools">{actions}<button aria-label={t("common.close")} onClick={close} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
+          <div className="photo-preview-tools">{actions}<OverlayIconButton icon="close" aria-label={t("common.close")} onClick={close} /></div>
         </div> : null}
         {!immersive && (items.length > 1 || hasPrevious || hasNext) ? <div className="photo-preview-paging" onClick={(event) => event.stopPropagation()}>
-          <button type="button" aria-label={t("media.previousImage")} disabled={index === 0 && (!hasPrevious || loading)} onClick={() => move(-1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
-          <button type="button" aria-label={t("media.nextImage")} disabled={index === items.length - 1 && (!hasNext || loading)} onClick={() => move(1)}><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+          <OverlayIconButton icon="chevron_left" aria-label={t("media.previousImage")} disabled={index === 0 && (!hasPrevious || loading)} onClick={() => move(-1)} />
+          <OverlayIconButton icon="chevron_right" aria-label={t("media.nextImage")} disabled={index === items.length - 1 && (!hasNext || loading)} onClick={() => move(1)} />
         </div> : null}
       </section>
     </div>,

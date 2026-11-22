@@ -33,6 +33,7 @@ function DouyinDrawerPlayer({ imageUrl, onClose, onPlaybackError, playbackKey, v
   return <div className="platform-video-shell">
     <ImmersiveVideo
       key={playbackKey}
+      drawerDismiss
       context={<PlatformVideoSource author={video.author || t("douyin.creator")} href={video.canonical_url} label={t("douyin.openOriginal")} logo="/icons/douyin-logo.svg" source={t("douyin.source")} title={video.title || t("douyin.video")} />}
       loop
       onClose={onClose}

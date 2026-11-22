@@ -9,12 +9,6 @@ import { ConfirmDialog } from './ConfirmDialog';
 import './ChronellePluginDialog.css';
 import {ChronellePermissionsDrawer} from './ChronellePermissionsDrawer';
 
-export function ChronelleAccountSummary({userId,refresh}:{userId:number;refresh:boolean}) {
-  const {t}=useI18n(),[active,setActive]=useState(false);
-  useEffect(()=>{let live=true;api.chronelleAccount().then(value=>{if(live)setActive(value.status==='active');}).catch(()=>{if(live)setActive(false);});return()=>{live=false;};},[userId,refresh]);
-  return <>{t(active?'chronelle.bound':'chronelle.bind')}</>;
-}
-
 export function ChronellePluginDialog({open,onClose,userId,onChange,rebind=false,context={entry:"menu"}}:{
   open:boolean;onClose:()=>void;userId:number;onChange:()=>void;rebind?:boolean;
   context?: Parameters<typeof api.authorizeChronelle>[0];

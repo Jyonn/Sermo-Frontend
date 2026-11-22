@@ -4,6 +4,7 @@ import {useBodyScrollLock} from '../lib/bodyLock';
 import {useI18n} from '../lib/language';
 import {useModalFocus} from '../lib/modalFocus';
 import {OverlayScope} from '../lib/overlayLayer';
+import {OverlayIconButton} from './OverlayIconButton';
 import './SelectControl.css';
 
 export function SettingsDialog({open, title, onClose, children}: {
@@ -20,7 +21,7 @@ export function SettingsDialog({open, title, onClose, children}: {
   return <OverlayScope root={root}>{open && typeof document !== 'undefined' && createPortal(
     <div className="dialog-backdrop option-picker-backdrop settings-dialog-backdrop" role="presentation" onClick={onClose}>
       <section ref={root} tabIndex={-1} className="option-picker-dialog settings-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={event => event.stopPropagation()}>
-        <header><h2 id={titleId}>{title}</h2><button type="button" className="option-picker-close" aria-label={t('common.close')} onClick={onClose}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+        <header><h2 id={titleId}>{title}</h2><OverlayIconButton icon="close" aria-label={t('common.close')} onClick={onClose}/></header>
         <div className="settings-dialog-body">{children}</div>
       </section>
     </div>, document.body

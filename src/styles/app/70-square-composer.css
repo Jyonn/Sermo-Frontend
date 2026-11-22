@@ -1089,28 +1089,14 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 }
 .drawer-floating-back {
   position: absolute;
-  top: calc(14px + env(safe-area-inset-top));
-  left: max(14px, env(safe-area-inset-left));
+  top: var(--drawer-control-top);
+  left: var(--drawer-control-start);
   z-index: 30;
-  display: grid;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.46);
-  border-radius: 50%;
-  color: #17372f;
-  background: rgba(247, 248, 244, 0.58);
-  box-shadow: 0 8px 24px rgba(14, 31, 26, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(18px) saturate(1.18);
-  -webkit-backdrop-filter: blur(18px) saturate(1.18);
 }
-.drawer-floating-back .material-symbols-outlined { font-size: 25px; font-weight: 400; }
-.drawer-floating-back:active { transform: scale(0.94); }
 .drawer-floating-accessory {
   position: absolute;
-  top: calc(14px + env(safe-area-inset-top));
-  right: max(14px, env(safe-area-inset-right));
+  top: var(--drawer-control-top);
+  right: var(--drawer-control-end);
   z-index: 30;
   max-width: calc(100% - 88px);
 }
@@ -1143,11 +1129,6 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 .profile-audience-switch > button[aria-pressed="true"] {
   color: var(--text-primary);
   background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
-}
-html[data-theme="dark"] .drawer-floating-back {
-  border-color: rgba(255, 255, 255, 0.16);
-  color: #eff8f4;
-  background: rgba(20, 30, 27, 0.58);
 }
 
 /* Full profile pages need a cinematic cover; compact theme previews stay at 132px. */

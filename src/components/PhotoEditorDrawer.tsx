@@ -4,6 +4,7 @@ import {useModalFocus} from '../lib/modalFocus';
 import {centeredPhotoCrop, clampPhoto, decodePhoto, exportPhoto, flipPhoto, fullPhoto, initialPhotoEdit, paintPhoto, photoLayers, photoSourcePoint, rotatePhoto, type PhotoEdit, type PhotoPoint, type PhotoRect} from '../lib/photoEdit';
 import {readPhotoMetadata, type PhotoMetadata} from '../lib/photoMetadata';
 import {SideDrawer} from './SideDrawer';
+import {DrawerDismissButton} from './OverlayIconButton';
 import './PhotoEditorDrawer.css';
 
 type Tool = 'crop' | 'rotate' | 'mosaic' | 'privacy' | 'flash';
@@ -274,7 +275,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
       }
     }}>
       <header className="photo-editor-header">
-        <button type="button" className="photo-editor-icon" aria-label={t('common.cancel')} onClick={close} disabled={Boolean(progress)}><Icon name="close"/></button>
+        <DrawerDismissButton className="photo-editor-dismiss" onClick={close} disabled={Boolean(progress)} />
         <div><h2>{t('photo.edit')}</h2><small>{index + 1} / {drafts.length}</small></div>
         <button type="button" className="photo-editor-submit" disabled={Boolean(progress) || !pendingCount || !uris.length || loadFailed && !draft.skipped} onClick={() => void send()}>{progress ? `${progress.current} / ${progress.total}` : t('photo.send', {count: pendingCount})}<Icon name={progress ? 'progress_activity' : 'send'}/></button>
       </header>

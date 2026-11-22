@@ -9,6 +9,7 @@ import type { HistoryManagementPageDTO, ManagedMessageDTO } from '../types';
 import { CompactMessageContent } from '../components/CompactMessageContent';
 import {DatePickerField} from '../components/DatePickerField';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { DrawerDismissButton, OverlayIconButton } from '../components/OverlayIconButton';
 import './HistoryManagerPage.css';
 
 type DeletePlan = { filters: HistoryFilters; ids: number[]; count: number; retained: number };
@@ -147,7 +148,13 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
     return t(historyTypeOptions.find(option => option.types.split(',').includes(String(message.type)))?.key || 'messageSearch.text');
   };
   return <main className="history-manager" aria-busy={busy || loading}>
-    <header className="history-manager-header">{onClose ? <button type="button" className="history-manager-back" disabled={busy} onClick={onClose} aria-label={t('common.back')}>{symbol('arrow_back')}</button> : <Link to={`/app/chats/${id}`} aria-label={t('common.back')}>{symbol('arrow_back')}</Link>}<div><h1>{t('historyManager.title')}</h1><p>{t('historyManager.privateHint')}</p></div><button type="button" className="history-refresh" disabled={busy || loading} onClick={() => setVersion(value => value + 1)} aria-label={t('historyManager.refresh')}>{symbol('refresh')}</button></header>
+    <header className="history-manager-header">
+      {onClose ? <DrawerDismissButton className="history-manager-dismiss" disabled={busy} onClick={onClose} />
+        : <Link to={`/app/chats/${id}`} aria-label={t('common.back')}>{symbol('arrow_back')}</Link>}
+      <div><h1>{t('historyManager.title')}</h1><p>{t('historyManager.privateHint')}</p></div>
+      <OverlayIconButton icon="refresh" className="history-refresh" disabled={busy || loading}
+        onClick={() => setVersion(value => value + 1)} aria-label={t('historyManager.refresh')} />
+    </header>
     <section className="history-manager-tools" aria-label={t('historyManager.filters')}><fieldset disabled={busy}>
       <div className="history-filter-line"><label className="history-search">{symbol('search')}<input type="search" value={keyword} onChange={event => setKeyword(event.target.value)} placeholder={t('messageSearch.placeholder')} aria-label={t('messageSearch.placeholder')} /></label>
         <div className="history-date-range"><DatePickerField label={t('historyManager.from')} value={from} onChange={setFrom}/><span aria-hidden="true">—</span><DatePickerField label={t('historyManager.to')} value={to} min={from} onChange={setTo}/></div>

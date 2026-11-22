@@ -57,6 +57,7 @@ const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage")
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 const MentionMobileLabPage = lazy(() => import("./pages/MentionMobileLabPage"));
 const InteractionPatternsPage = lazy(() => import("./pages/InteractionPatternsPage"));
+const ComponentAtlasPage = lazy(() => import("./pages/ComponentAtlasPage"));
 const ExplorerActivityLabPage = lazy(() => import("./pages/ExplorerActivityLabPage"));
 const OAuthAuthorizePage = lazy(() => import("./pages/OAuthAuthorizePage"));
 
@@ -165,6 +166,7 @@ export default function App() {
         <Route path="/oauth/authorize" element={<OAuthAuthorizePage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/design/interactions" element={<InteractionPatternsPage />} />
+        <Route path="/design/components" element={<ComponentAtlasPage />} />
         {import.meta.env.DEV ? <Route path="/design/voice-calls" element={<VoiceCallLabPage/>}/>:null}
         <Route path="/design/explorer" element={<ExplorerActivityLabPage />} />
         <Route

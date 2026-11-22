@@ -9,6 +9,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { SideDrawer } from "./SideDrawer";
 import "./StillfolioDrawer.css";
+import {ExternalAppAction, ExternalAppActions, ExternalAppIdentity} from './ExternalAppPanel';
 
 const AUTHORIZE = "https://api.stillfolio.jyonn.space/api/oauth/authorize/";
 
@@ -136,12 +137,9 @@ export function StillfolioDrawer({ open, onClose, scope, returnError, onShare, o
   const connected = status === "connected";
   const retry = () => setRevision((value) => value + 1);
   const retryButton = <button className="secondary-button" type="button" onClick={retry}>{t("common.retry")}</button>;
-  const content = <div className="stillfolio-drawer">
-    {!picker && <div className="pocklo-identity">
-      <img src={stillfolioMark} alt="" />
-      <div><strong>{title}</strong><p>{t("apps.stillfolioDescription")}</p></div>
-      {connected && <span className="pocklo-status" data-connected="true">{t("pocklo.statusConnected")}</span>}
-    </div>}
+  const content = <div className={picker ? "stillfolio-drawer" : "external-app-panel"}>
+    {!picker && <ExternalAppIdentity logo={stillfolioMark} title={title} description={t("apps.stillfolioDescription")}
+      connection={status ? connected ? 'connected' : status === 'unavailable' ? 'unavailable' : 'disconnected' : undefined} />}
     {error && error !== "connect_required" && <p className="pocklo-notice" role="alert">{
       error === "account_mismatch" ? t("stillfolio.accountMismatch")
         : error === "denied" ? t("stillfolio.denied")
@@ -150,7 +148,7 @@ export function StillfolioDrawer({ open, onClose, scope, returnError, onShare, o
     {!status && <FeedbackState tone="loading" title={t("common.loading")} />}
     {status === "unavailable" && <FeedbackState tone="error" title={t("stillfolio.unavailable")} action={retryButton} />}
     {status === "phone_required" && <FeedbackState icon="verified_user" title={t("pocklo.phoneTitle")} description={t("stillfolio.phoneRequired")} />}
-    {status === "connect_required" && <FeedbackState icon="link" title={t("stillfolio.connect")} description={t("stillfolio.connectHint")} action={
+    {picker && status === "connect_required" && <FeedbackState icon="link" title={t("stillfolio.connect")} description={t("stillfolio.connectHint")} action={
       <button className="button" disabled={busy} type="button" onClick={() => void changeConnection("connect")}>{t("stillfolio.connect")}</button>
     } />}
     {picker && connected && <>
@@ -168,10 +166,12 @@ export function StillfolioDrawer({ open, onClose, scope, returnError, onShare, o
       {next !== null && <button className="secondary-button" type="button" disabled={busy || loading}
         onClick={() => setOffset(next)}>{t("common.next")}</button>}
     </>}
-    {!picker && <div className="pocklo-management">
-      {openAppUrl && <a href={openAppUrl} target="_blank" rel="noreferrer">{t("stillfolio.open")}</a>}
-      {connected && <button type="button" onClick={() => setDisconnecting(true)}>{t("stillfolio.disconnect")}</button>}
-    </div>}
+    {!picker && (openAppUrl || connected || status === "connect_required") && <ExternalAppActions>
+      {status === "connect_required" && <ExternalAppAction icon="link" label={t("stillfolio.connect")} description={t("stillfolio.connectHint")}
+        disabled={busy} onClick={() => void changeConnection("connect")} />}
+      {openAppUrl && <ExternalAppAction icon="open_in_new" label={t("stillfolio.open")} href={openAppUrl} />}
+      {connected && <ExternalAppAction icon="link_off" label={t("stillfolio.disconnect")} disabled={busy} onClick={() => setDisconnecting(true)} />}
+    </ExternalAppActions>}
     {status === "unavailable" && onLegacyPick && <button className="secondary-button" type="button" onClick={onLegacyPick}>{t("stillfolio.legacyPicker")}</button>}
   </div>;
 

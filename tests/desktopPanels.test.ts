@@ -25,7 +25,10 @@ test("desktop container keeps scroll unlocked, uses a transparent dismiss layer 
   assert.match(source, /onClick=\{desktopPanel \? undefined : requestClose\}/);
   assert.match(source, /panels\?\.topId === drawerId/);
   assert.match(source, /desktop-panel-dismiss-mask.*onClick=\{requestClose\}/);
-  assert.match(source, /desktopPanel && !panels\?\.single/);
+  assert.match(source, /<DrawerDismissButton className="drawer-floating-back"/);
+  assert.match(source, /<DrawerDismissButton className="drawer-surface-dismiss"/);
+  const drawerCss = readFileSync(new URL("../src/components/SideDrawer.css", import.meta.url), "utf8");
+  assert.match(drawerCss, /@media\(min-width:720px\)[\s\S]+\.drawer-floating-back \{ left: auto; right: var\(--drawer-control-end\); \}/);
   assert.match(source, /desktopPanel && panels\?\.floating && panels.topId === drawerId/);
   const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");
   assert.match(css, /background: transparent/);
@@ -70,8 +73,8 @@ test("Square keeps readable cards and adapts actions to the panel rather than th
   }
   const css = readFileSync(new URL("../src/styles/app/10-chat-city.css", import.meta.url), "utf8");
   assert.match(css, /@container square-feed \(max-width: 440px\)/);
-  const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
-  assert.match(square, /aria-label=\{t\("square.publish"\)\}/);
+  const header = readFileSync(new URL("../src/components/SquareFeedHeader.tsx", import.meta.url), "utf8");
+  assert.match(header, /aria-label=\{t\(['"]square.publish['"]\)\}/);
 });
 
 test("chat and Square reserve a narrow list and prioritize detail space", () => {

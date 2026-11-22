@@ -1,17 +1,21 @@
 {
-  "id": "2026.11.22.3",
+  "id": "2026.11.22.4",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "闪图预览优化",
+      "title": "界面样式统一",
       "items": [
-        "闪图按原比例完整显示，右上角的环形倒计时提示剩余时间。"
+        "抽屉、常用弹窗和图片预览使用统一的圆形操作按钮。",
+        "一滴、小兜、时序和留幅采用一致的连接状态和操作列表。",
+        "新增组件样式总览，可按用户角色和组件类型预览。"
       ]
     },
     "en": {
-      "title": "Flash photo preview",
+      "title": "More consistent controls",
       "items": [
-        "Flash photos fit the screen at their original aspect ratio, with a circular countdown in the top corner."
+        "Drawers, common dialogs, and photo previews use matching circular controls.",
+        "Drop, Pocklo, Chronelle, and StillFolio share the same connection and action layout.",
+        "The component gallery shows previews by audience and component type."
       ]
     }
   }

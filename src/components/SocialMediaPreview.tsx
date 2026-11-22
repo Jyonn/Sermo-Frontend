@@ -70,7 +70,7 @@ export function SocialMediaPreview({ media: initialMedia, previewId, imageUrl,fi
     {open && !isVideo ? <ImageLightbox altPrefix={title} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={galleryDetails} uris={images} /> : null}
     <SideDrawer floatingBack={false} fullscreen headerless historyKey={`social-${media.canonical_url}`} open={open && isVideo} onClose={() => setOpen(false)} title={title}>
       {open && isVideo ? <div className="platform-video-shell">
-        <ImmersiveVideo context={<PlatformVideoSource author={media.author} href={media.canonical_url} label={`${t("social.openSource")} ${source}`} logo={logo} source={`${source} · ${t("social.video")}`} title={title} />} loop onClose={() => setOpen(false)} onError={() => {if(retried){setFailed(true);return}setRetried(true);void refresh(true).then(ok=>{if(!ok)setFailed(true)}).catch(()=>setFailed(true))}} poster={cover} src={media.video_url || ""} />
+        <ImmersiveVideo drawerDismiss context={<PlatformVideoSource author={media.author} href={media.canonical_url} label={`${t("social.openSource")} ${source}`} logo={logo} source={`${source} · ${t("social.video")}`} title={title} />} loop onClose={() => setOpen(false)} onError={() => {if(retried){setFailed(true);return}setRetried(true);void refresh(true).then(ok=>{if(!ok)setFailed(true)}).catch(()=>setFailed(true))}} poster={cover} src={media.video_url || ""} />
         {failed ? <PlatformVideoError href={media.canonical_url} label={`${t("social.openSource")} ${source}`}>{t("social.playbackUnavailable")}</PlatformVideoError> : null}
       </div> : null}
     </SideDrawer>
