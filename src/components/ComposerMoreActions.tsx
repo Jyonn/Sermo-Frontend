@@ -3,7 +3,6 @@ import { ComposerSvgIcon } from "./ComposerSvgIcon";
 import {ChatActionIcon} from './ChatActionIcon';
 import stillfolioMark from "../assets/stillfolio-mark.svg";
 import {DROP_ICON} from '../lib/dropPicker';
-import "./ComposerMoreActions.css";
 
 export function ComposerMoreActions({ open, disabled, footprintEnabled, footprintBusy, onFile, onStillfolio, onDrop, onFootprint, onCall, compact, onToggleLayout }: {
   open: boolean; disabled: boolean; footprintEnabled: boolean; footprintBusy: boolean;
@@ -21,9 +20,9 @@ export function ComposerMoreActions({ open, disabled, footprintEnabled, footprin
         <button type="button" disabled={disabled || !open} tabIndex={open ? 0 : -1} onClick={onFile}><span><ComposerSvgIcon kind="file" /></span><strong>{t("media.file")}</strong></button>
         {onCall ? <button type="button" disabled={disabled || !open} tabIndex={open ? 0 : -1} onClick={onCall}><span><ChatActionIcon action="call"/></span><strong>{t('voice.title')}</strong></button>:null}
         {onStillfolio && <button type="button" disabled={disabled || !open} tabIndex={open ? 0 : -1} onClick={onStillfolio}
-          aria-label={t("apps.pickStillfolio")} title={t("apps.pickStillfolioHint")}><span><img src={stillfolioMark} alt="" width={22} height={22} /></span><strong>{t("apps.stillfolio")}</strong></button>}
+          aria-label={t("apps.pickStillfolio")} title={t("apps.pickStillfolioHint")}><span><img src={stillfolioMark} alt="" width={22} height={22} /></span><strong>{t("stillfolio.shortName")}</strong></button>}
         {footprintEnabled ? <button type="button" disabled={disabled || footprintBusy || !open} tabIndex={open ? 0 : -1} onClick={onFootprint}><span><ComposerSvgIcon kind="map" /></span><strong>{t("travelMap.actionShort")}</strong></button> : null}
-        {onToggleLayout ? <button type="button" disabled={disabled || !open} tabIndex={open ? 0 : -1} onClick={onToggleLayout}><span><i className="material-symbols-outlined" aria-hidden="true">{compact ? "expand_all" : "collapse_all"}</i></span><strong>{t(compact ? "composer.expandLayout" : "composer.collapseLayout")}</strong></button> : null}
+        {onToggleLayout ? <button type="button" disabled={disabled || !open} tabIndex={open ? 0 : -1} onClick={onToggleLayout}><span><ComposerSvgIcon kind={compact ? "expand" : "collapse"} /></span><strong>{t(compact ? "composer.expandLayout" : "composer.collapseLayout")}</strong></button> : null}
       </div>
     </div>
   </div>;

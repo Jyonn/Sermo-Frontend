@@ -12,7 +12,10 @@ export function ComposerActionsPopover({ open, anchor, onClose, children, label 
     if (!open) return;
     const update = () => {
       const rect = anchor.current?.getBoundingClientRect();
-      if (rect) setPosition({ left: Math.max(12, Math.min(window.innerWidth - 292, rect.right - 280)), bottom: window.innerHeight - rect.top + 12 });
+      const width = panel.current?.offsetWidth;
+      if (rect && width) {
+        setPosition({ left: Math.max(12, Math.min(window.innerWidth - width - 12, rect.right - width)), bottom: window.innerHeight - rect.top + 12 });
+      }
     };
     const outside = (event: PointerEvent) => {
       if (!panel.current?.contains(event.target as Node) && !anchor.current?.contains(event.target as Node)) close.current();

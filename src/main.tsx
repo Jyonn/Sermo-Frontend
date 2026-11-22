@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "../styles.css";
+import "./components/ComposerMoreActions.css";
 import "./styles/qixi-theme.css";
 import "./styles/christmas-theme.css";
 import "./styles/cloud-resources.css";

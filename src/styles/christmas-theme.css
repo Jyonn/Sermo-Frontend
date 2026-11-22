@@ -205,6 +205,10 @@ html[data-site-theme="christmas-2026"] .chat-detail-scene:has(> form.composer) >
   pointer-events: none;
 }
 
+html[data-site-theme="christmas-2026"] .chat-detail-scene:has(> form.composer .composer-more-reveal.is-open) > .christmas-composer-fir {
+  z-index: 29;
+}
+
 .christmas-composer-fir::before,
 .christmas-composer-fir::after {
   position: absolute;

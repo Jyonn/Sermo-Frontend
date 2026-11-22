@@ -15,6 +15,7 @@ runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.Modul
     if (id.endsWith(".css")) return {};
     if (id.endsWith('.svg')) return 'test-mark.svg';
     if (id === './ChatActionIcon') return {ChatActionIcon:()=>createElement('svg')};
+    if (id === '../lib/dropPicker') return {DROP_ICON: 'test-drop.png'};
     if (id === "../lib/language") return { useI18n: () => ({ t: (key: string) => key }) };
     if (id === "./ComposerSvgIcon") return { ComposerSvgIcon: () => createElement("svg") };
     return realRequire(id);
@@ -42,6 +43,26 @@ test('the call entry is opt-in and obeys composer visibility and busy state',()=
   assert.match(render({onCall(){}}),/voice.title/);
   assert.equal((render({onCall(){},open:false}).match(/disabled=""/g)??[]).length,3);
   assert.equal((render({onCall(){},disabled:true}).match(/disabled=""/g)??[]).length,3);
+});
+
+test("more actions use the startup stylesheet and reserve a responsive four-to-eight-column grid", () => {
+  const entry = readFileSync(new URL("../src/main.tsx", import.meta.url), "utf8");
+  assert.match(entry, /import ".\/components\/ComposerMoreActions\.css"/);
+  assert.doesNotMatch(source, /import ".\/ComposerMoreActions\.css"/);
+  assert.doesNotMatch(render({onToggleLayout() {}}), /material-symbols-outlined/);
+
+  const css = readFileSync(new URL("../src/components/ComposerMoreActions.css", import.meta.url), "utf8");
+  for (const columns of [4, 5, 6, 7, 8]) {
+    assert.ok(css.includes(`grid-template-columns: repeat(${columns}, minmax(0, 1fr))`));
+  }
+});
+
+test("the StillFolio shortcut uses a localized short name", () => {
+  const actions = render({onStillfolio() {}});
+  assert.match(actions, /<strong>stillfolio.shortName<\/strong>/);
+  assert.match(actions, /aria-label="apps.pickStillfolio"/);
+  const chinese = JSON.parse(readFileSync(new URL("../src/locales/zh-CN/translation.json", import.meta.url), "utf8"));
+  assert.equal(chinese["stillfolio.shortName"], "留幅");
 });
 
 test("chat layouts share the same expansion and remove the old file/map popovers", () => {

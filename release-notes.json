@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.6",
+  "id": "2026.11.22.7",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "全新的照片与视频预览",
+      "title": "聊天输入框排列修复",
       "items": [
-        "聊天、广场和外链统一使用媒体 Drawer，可以滑动切换照片和视频，展开查看拍摄信息。",
-        "上传前可逐张裁剪照片、调整角度、打马赛克、应用滤镜，并选择保留的位置和说明。"
+        "修复网络较慢时「更多操作」的图标错位，图标现在随实际宽度排列为每行 4 至 8 列。",
+        "将聊天输入框中的留幅入口缩短为「留幅」。"
       ]
     },
     "en": {
-      "title": "A new photo and video viewer",
+      "title": "Chat composer layout fix",
       "items": [
-        "Chat, Square, and external links now share a media drawer with swipe navigation, video controls, and photo details.",
-        "Crop, straighten, pixelate, or apply filters to each photo before uploading. Choose whether to keep its location and caption."
+        "More actions stays aligned on slow connections and uses four to eight columns depending on the available width.",
+        "The StillFolio shortcut now uses the short app name."
       ]
     }
   }
