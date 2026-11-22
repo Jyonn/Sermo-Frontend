@@ -1,6 +1,11 @@
 export interface MediaSize {width: number; height: number}
 export interface MediaTransform {scale: number; x: number; y: number}
 export const fittedMediaTransform: MediaTransform = {scale: 1, x: 0, y: 0};
+export const mediaSlideGap = 14;
+
+export function mediaInfoProgress(open: boolean, distance: number, height: number) {
+  return Math.min(1, Math.max(0, Number(open) - distance / Math.max(1, height)));
+}
 
 export function fitMedia(stage: MediaSize, image: MediaSize) {
   if (!stage.width || !stage.height || !image.width || !image.height) return {width: 0, height: 0, maximum: 16};

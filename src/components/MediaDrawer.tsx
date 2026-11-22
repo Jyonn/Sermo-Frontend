@@ -5,7 +5,7 @@ import {claimMediaPlayback, releaseMediaPlayback} from '../lib/mediaPlaybackFocu
 import {useMediaSource} from '../lib/useMediaSource';
 import {mediaSourceCandidates} from '../lib/messageMedia';
 import {resolveStableResourceUri} from '../lib/stableResource';
-import {shouldCompleteSwipe} from '../lib/mediaDrawerGeometry';
+import {mediaInfoProgress, mediaSlideGap, shouldCompleteSwipe} from '../lib/mediaDrawerGeometry';
 import {downloadMedia, mediaFile, saveMediaFile} from '../lib/downloadMedia';
 import {copyText} from '../lib/presentation';
 import type {ImageMetadataDTO, TinyUserDTO} from '../types';
@@ -19,6 +19,7 @@ import {UserAvatar} from './UserAvatar';
 import {MediaDrawerFilm} from './MediaDrawerFilm';
 import {useMediaDrawerCarousel} from './useMediaDrawerCarousel';
 import {useMediaDrawerGestures} from './useMediaDrawerGestures';
+import {useMediaDrawerInfoDrag} from './useMediaDrawerInfoDrag';
 import './MediaDrawer.css';
 
 export interface MediaLightboxItem {
@@ -140,6 +141,7 @@ function MediaDrawerContent({
   const hasInfo = Boolean(editor || initialInfo || item.imageMetadata?.status === 1 || item.detail || sharedDetail || platform?.url);
   const canShowInfo = hasInfo && !adjusting && !fixedFitImage;
   const infoOpen = info && canShowInfo && !immersive;
+  const infoDrag = useMediaDrawerInfoDrag(infoPanel, infoOpen, infoHeight, () => setInfo(false));
   const media = useMediaSource(fixedFitImage || editor ? '' : item.uri, undefined, item.kind);
   const src = fixedFitImage || editor ? item.uri : media.src;
   const carousel = useMediaDrawerCarousel({index, identity, count: items.length, onIndexChange});
@@ -176,7 +178,10 @@ function MediaDrawerContent({
     onFreeRelease: ({y}, speed) => {
       const threshold = Math.min(190, Math.max(92, gestures.bounds.height * .3));
       if (Math.abs(y) < 24 || !shouldCompleteSwipe(y, threshold, speed)) return;
-      if (y > 0) swipeDismiss();
+      if (y > 0) {
+        if (infoOpen) setInfo(false);
+        else swipeDismiss();
+      }
       if (y < 0 && canShowInfo) {setMode('default'); setInfo(true);}
     },
   });
@@ -184,13 +189,17 @@ function MediaDrawerContent({
   useLayoutEffect(() => {
     const node = infoPanel.current;
     if (!node) return;
-    const resize = () => setInfoHeight(node.getBoundingClientRect().height);
-    const observer = new ResizeObserver(resize);
-    resize();
+    const observer = new ResizeObserver(([entry]) => setInfoHeight(entry.borderBoxSize?.[0]?.blockSize ?? node.offsetHeight));
+    setInfoHeight(node.offsetHeight);
     observer.observe(node);
     return () => observer.disconnect();
   }, [canShowInfo]);
-  useLayoutEffect(() => {if (infoPanel.current) infoPanel.current.inert = !infoOpen;}, [canShowInfo, infoOpen]);
+  useLayoutEffect(() => {
+    const node = infoPanel.current;
+    if (!node) return;
+    if (!infoOpen && node.contains(document.activeElement)) gestures.stage.current?.focus({preventScroll: true});
+    node.inert = !infoOpen;
+  }, [canShowInfo, infoOpen, gestures.stage]);
   useEffect(() => () => window.clearTimeout(dismissTimer.current), []);
 
   useLayoutEffect(() => {
@@ -206,7 +215,11 @@ function MediaDrawerContent({
     setDimensions({width: item.width ?? 0, height: item.height ?? 0});
     flashReady.current = false;
     const node = image.current;
-    if (node?.complete && node.naturalWidth) setDimensions({width: node.naturalWidth, height: node.naturalHeight});
+    if (node?.complete && node.naturalWidth) {
+      setDimensions({width: node.naturalWidth, height: node.naturalHeight});
+      if (!fixedFitImage && !editor) media.ready();
+    }
+    if (video.current && video.current.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) media.ready();
   }, [identity, src, activeInWindow]);
 
   useEffect(() => {
@@ -291,15 +304,18 @@ function MediaDrawerContent({
     ? (gestures.fitted.width || adjusting ? 'idle' : 'loading')
     : media.phase;
   const {bounds, fitted, freeDrag, transform} = gestures;
-  const infoPull = canShowInfo && !leaving
-    ? Math.min(1, Math.max(0, Number(infoOpen) - (freeDrag?.y ?? 0) / Math.max(1, infoHeight))) : 0;
+  const infoTracking = freeDrag !== undefined || infoDrag !== undefined;
+  const infoPull = canShowInfo && !leaving ? mediaInfoProgress(infoOpen, infoDrag ?? freeDrag?.y ?? 0, infoHeight) : 0;
   const wideScale = fitted.width ? bounds.width / fitted.width : 1;
   const wideY = (bounds.height - fitted.height * wideScale) / 2 - infoHeight;
-  const offsetX = (freeDrag?.x ?? 0) + (infoOpen ? 0 : transform.x);
-  const offsetY = leaving ? bounds.height : (infoOpen ? wideY : transform.y) + (freeDrag?.y ?? 0);
-  const scale = infoOpen && !freeDrag ? wideScale : transform.scale + (wideScale - transform.scale) * infoPull;
+  const offsetX = (freeDrag?.x ?? 0) + transform.x * (1 - infoPull);
+  const freeY = infoOpen || !freeDrag || canShowInfo && freeDrag.y < 0 ? 0 : freeDrag.y;
+  const offsetY = leaving ? bounds.height : transform.y + (wideY - transform.y) * infoPull + freeY;
+  const scale = transform.scale + (wideScale - transform.scale) * infoPull;
   const scaleStyle = {width: fitted.width || '100%', height: fitted.height || '100%',
     transform: `translate3d(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px), 0) scale(${scale})`};
+  const Identity = onJumpToMessage ? 'button' : 'div';
+  const identityLabel = item.owner?.name || platform?.author || platform?.name || title;
 
   return <FloatingDrawerScope standalone>
     <SideDrawer open fullscreen headerless floatingBack={false} trapFocus historyMode={historyKey ? 'stack' : 'route'} historyKey={historyKey}
@@ -318,7 +334,7 @@ function MediaDrawerContent({
             changeMode(immersive ? 'default' : 'immersive');
           }
         }}>
-        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`} tabIndex={interactionDisabled ? undefined : 0}
+        <div className={`media-drawer-stage${gestures.dragging || infoTracking ? ' is-dragging' : ''}${infoTracking || leaving ? ' is-free-drag' : ''}`} tabIndex={interactionDisabled ? undefined : 0}
           aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.stage} {...gestures.events}>
           {adjusting ? editor.stage : items.slice(first, last + 1).map((entry, visibleIndex) => {
             const position = first + visibleIndex;
@@ -327,7 +343,7 @@ function MediaDrawerContent({
             const entryImage = entry.kind === 'image';
             const imageSrc = active ? src : editor ? entry.uri : mediaSourceCandidates(resolveStableResourceUri(entry.uri) ?? entry.uri).primary;
             return <div key={mediaKey(entry, position)} className="media-drawer-slide" data-active={active} aria-hidden={!active}
-              style={{transform: `translate3d(${(position - cursor) * 100}%, 0, 0)`}}>
+              style={{transform: `translate3d(calc(${(position - cursor) * 100}% + ${(position - cursor) * mediaSlideGap}px), 0, 0)`}}>
               {active && videoItem && src ? <video key={src} ref={video} className="media-drawer-canvas" style={scaleStyle} src={src}
                 poster={item.posterUri ?? undefined} playsInline preload={item.deferPlayback ? 'none' : 'metadata'} loop={item.loop} muted={playback.muted}
                 onLoadedMetadata={event => {
@@ -374,16 +390,20 @@ function MediaDrawerContent({
         <header className="media-drawer-top" aria-label={adjusting ? t('photo.edit') : undefined}>
           <DrawerDismissButton className="media-drawer-dismiss" disabled={editor?.busy || leaving} onClick={() => closeRequestRef.current?.()} />
           {adjusting && <div className="media-drawer-editor-actions">{editor.headerActions}</div>}
-          {!immersive && !adjusting && <div className="media-drawer-identity">
-            {!adjusting && item.owner && <UserAvatar className="media-drawer-avatar" name={item.owner.name}
+          {!immersive && !adjusting && <Identity className="media-drawer-identity" onClick={onJumpToMessage}
+            type={onJumpToMessage ? 'button' : undefined}
+            title={onJumpToMessage ? t('messageSearch.jumpToMessage') : undefined}
+            aria-label={onJumpToMessage ? `${identityLabel} · ${t('messageSearch.jumpToMessage')}` : undefined}>
+            {item.owner && <UserAvatar className="media-drawer-avatar" name={item.owner.name}
               uri={item.owner.avatar_uri} cacheKey={item.owner.avatar_cache_key} />}
-            {!adjusting && !item.owner && platform?.logo && <img className="media-drawer-avatar" src={platform.logo} alt="" />}
-            <div>
-              <strong>{item.owner?.name || platform?.author || platform?.name || title}</strong>
+            {!item.owner && platform?.logo && <img className="media-drawer-avatar" src={platform.logo} alt="" />}
+            <span className="media-drawer-identity-text">
+              <strong>{identityLabel}</strong>
               {sentAt ? <time dateTime={sentAt.date.toISOString()}>{sentAt.label}</time>
                 : !fixedFitImage && (items.length > 1 || totalCount) ? <small>{navigationLabel ?? `${index + 1} / ${totalCount ?? items.length}`}</small> : null}
-            </div>
-          </div>}
+            </span>
+            {onJumpToMessage && icon('arrow_outward')}
+          </Identity>}
           <div className="media-drawer-top-actions">
             {fixedFitImage?.overlay}
 
@@ -393,9 +413,9 @@ function MediaDrawerContent({
           </div>
         </header>
 
-        {canShowInfo ? <section className={`media-drawer-info${freeDrag ? ' is-tracking-info' : ''}`} ref={infoPanel}
+        {canShowInfo ? <section className={`media-drawer-info${infoTracking ? ' is-tracking-info' : ''}`} ref={infoPanel}
           aria-label={t('mediaDrawer.info')} aria-hidden={!infoOpen} data-open={infoOpen}
-          style={{transform: `translate3d(0, ${(1 - infoPull) * 100}%, 0)`}}>
+          style={{opacity: infoPull, transform: `translate3d(0, ${(1 - infoPull) * 100}%, 0) scale(${.9 + infoPull * .1})`}}>
           <button className="media-drawer-handle" type="button" onClick={() => setInfo(false)} aria-label={t('common.close')}><span/></button>
           {platform?.url ? <a className="media-drawer-source" href={platform.url} target="_blank" rel="noreferrer">
             {platform.logo && <img src={platform.logo} alt="" />}{platform.name}{icon('north_east')}
@@ -415,9 +435,9 @@ function MediaDrawerContent({
                 onClick={() => {if (video.current) {video.current.muted = !video.current.muted; updatePlayback(video.current);}}} />
             </div>}
             {!immersive && (items.length > 1 || hasPrevious || hasNext) && <MediaDrawerFilm items={items} index={index}
-              width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} go={go} />}
+              width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} disabled={interactionDisabled} go={go} />}
             {!immersive && <div className="media-drawer-footer-actions">
-              {(editor ? editor.createShareFile : src || platform?.url || onJumpToMessage) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
+              {(editor ? editor.createShareFile : src || platform?.url) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
                 onClick={() => setShareOpen(true)} disabled={sharing} />}
               {editor && <OverlayIconButton icon="tune" className="media-drawer-adjust" aria-label={t('mediaDrawer.adjust')}
                 disabled={editor.busy || editor.adjustDisabled || !src} onClick={editor.onAdjust} />}
@@ -430,7 +450,6 @@ function MediaDrawerContent({
       <ActionSheet open={shareOpen} title={t('square.share')} onClose={() => setShareOpen(false)} actions={[
         ...(src || platform?.url ? [{key: 'share', label: t('square.share'), icon: icon('ios_share'), onSelect: () => void shareNative()}] : []),
         ...(src ? [{key: 'save', label: item.downloadLabel ? `${t('common.download')} · ${item.downloadLabel}` : t('common.download'), icon: icon('download'), onSelect: download}] : []),
-        ...(onJumpToMessage ? [{key: 'jump', label: t('messageSearch.jumpToMessage'), icon: icon('my_location'), onSelect: onJumpToMessage}] : []),
       ]} />
     </SideDrawer>
   </FloatingDrawerScope>;

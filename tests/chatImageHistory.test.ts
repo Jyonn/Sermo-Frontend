@@ -61,7 +61,7 @@ test('chat browsing uses scoped history, cancellation and stable slide identitie
   assert.match(chat, /api.getMessages\(\{ chat_id: chatId, after,/);
   assert.match(chat, /readNewerChatImagePage\(cursors.current.newer/);
   assert.match(chat, /controller\?\.abort\(\)/);
-  assert.match(chat, /next !== inside.current/);
+  assert.doesNotMatch(chat, /outsideCollection|backToCollection/);
   assert.match(drawer, /key=\{mediaKey\(entry, position\)\}/);
   assert.match(await read('useMediaDrawerGestures.ts'), /lockSwipeAxis\(dx, dy, start.axis\)/);
 });

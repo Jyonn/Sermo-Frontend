@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {constrainMediaTransform, filmTiles, fitMedia, lockSwipeAxis, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
+import {constrainMediaTransform, filmTiles, fitMedia, lockSwipeAxis, mediaInfoProgress, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
 
 test('media fits both stage dimensions and zoom tops out at sixteen times native size', () => {
   const stage = {width: 390, height: 844}, original = {width: 1600, height: 4300};
@@ -32,6 +32,14 @@ test('vertical intent stays locked after later horizontal movement', () => {
   assert.equal(vertical, 'free');
   assert.equal(lockSwipeAxis(100, -18, vertical), 'free');
   assert.equal(lockSwipeAxis(18, 6), 'horizontal');
+});
+
+test('dragging the information panel down reverses the same progress used to open it', () => {
+  assert.equal(mediaInfoProgress(false, -75, 300), .25);
+  assert.equal(mediaInfoProgress(true, 225, 300), .25);
+  assert.equal(mediaInfoProgress(true, 0, 300), 1);
+  assert.equal(mediaInfoProgress(true, 600, 300), 0);
+  assert.equal(mediaInfoProgress(false, -600, 300), 1);
 });
 
 test('film widths and outside gaps trade places while the shared gap stays large', () => {

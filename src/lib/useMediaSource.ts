@@ -15,12 +15,22 @@ export function useMediaSource(uri: string, fallbackUri?: string, kind: "image" 
   const fallback = candidates.fallback ?? fallbackUri;
   const active = current.fallback && fallback ? fallback : candidates.primary;
   const src = freshMediaUri(active, current.attempt, nonce.current);
-  useEffect(() => { setState({ uri, attempt: 0, fallback: false, phase: "loading" }); return () => window.clearTimeout(timer.current); }, [uri]);
+  const isCurrentSource = () => latest.current.uri === uri && latest.current.attempt === current.attempt
+    && latest.current.fallback === current.fallback;
+  useEffect(() => {
+    setState(value => value.uri === uri ? value : { uri, attempt: 0, fallback: false, phase: "loading" });
+    return () => window.clearTimeout(timer.current);
+  }, [uri]);
   return {
     src, phase: current.phase,
-    ready: () => { window.clearTimeout(timer.current); setState(value => value.uri === uri ? { ...value, phase: "idle" } : value); },
+    ready: () => {
+      if (!isCurrentSource()) return;
+      window.clearTimeout(timer.current);
+      setState(value => value.uri === uri && value.phase === "idle" ? value : { ...current, phase: "idle" });
+    },
     retry: () => { window.clearTimeout(timer.current); setState(value => ({ uri, fallback: false, attempt: value.attempt + 1, phase: "loading" })); },
     fail: () => {
+      if (!isCurrentSource()) return;
       window.clearTimeout(timer.current);
       const value = latest.current;
       const refreshed = mediaSourceCandidates(uri);

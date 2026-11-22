@@ -20,7 +20,6 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
   const galleryRef = useRef(gallery);
   galleryRef.current = gallery;
   const original = useRef(new Set(originalIds ?? images.map(image => image.messageId ?? image.uri)));
-  const inside = useRef(true);
   const ids = images.flatMap((image) => image.messageId === null ? [] : [image.messageId]);
   const cursors = useRef({ older: Math.min(...ids), newer: Math.max(...ids) });
   const controllers = useRef<Partial<Record<"older" | "newer", AbortController>>>({});
@@ -29,12 +28,6 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
   const [more, setMore] = useState({ older: Boolean(chatId && ids.length), newer: Boolean(chatId && ids.length) });
   const moreRef = useRef(more);
   moreRef.current = more;
-  const isOriginal = (image: ChatPreviewImage) => original.current.has(image.messageId === null ? image.uri : image.messageId);
-  const notifyCollection = (image: ChatPreviewImage) => {
-    const next = isOriginal(image);
-    if (next !== inside.current) showToast(t(next ? "media.backToCollection" : "media.outsideCollection"), "info", 3000);
-    inside.current = next;
-  };
   const load = async (direction: "older" | "newer", advance = false) => {
     if (!chatId || !moreRef.current[direction] || controllers.current[direction] || failed.current[direction] && !advance) return;
     failed.current[direction] = false;
@@ -68,7 +61,6 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
       const current = galleryRef.current;
       const next = mergeChatImages(current.items, incoming, current.index, direction);
       if (advance && incoming.length) next.index = Math.max(0, Math.min(next.items.length - 1, next.index + (direction === "older" ? -1 : 1)));
-      if (advance && next.items[next.index]) notifyCollection(next.items[next.index]);
       galleryRef.current = next;
       setGallery(next);
       moreRef.current = { ...moreRef.current, [direction]: hasMore };
@@ -104,11 +96,10 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
     downloadLabel: image.metadata?.file_size ? image.metadata.file_size >= 1048576 ? `${(image.metadata.file_size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(image.metadata.file_size / 1024))} KB` : undefined,
   }))} onClose={onClose} onIndexChange={(index) => {
     if (!gallery.items[index]) return;
-    notifyCollection(gallery.items[index]);
     setGallery((value) => ({ ...value, index }));
   }} onApproachingStart={() => void load("older")} onApproachingEnd={() => void load("newer")}
     hasPrevious={more.older} hasNext={more.newer} loading={pending.older || pending.newer}
     onBoundary={(direction) => void load(direction, true)}
-    onJumpToMessage={chatId && active?.messageId && onJumpToMessage ? () => onJumpToMessage(active.messageId!) : undefined}
+    onJumpToMessage={active?.messageId && onJumpToMessage ? () => onJumpToMessage(active.messageId!) : undefined}
     navigationLabel={`${collectionIndex >= 0 ? collectionIndex + 1 : gallery.index + 1} / ${collectionIndex >= 0 ? collection.length : gallery.items.length}`} />;
 }

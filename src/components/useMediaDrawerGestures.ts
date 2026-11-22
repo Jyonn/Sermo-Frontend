@@ -1,6 +1,6 @@
 import {useLayoutEffect, useRef, useState, type PointerEvent, type WheelEvent} from 'react';
 import {
-  constrainMediaTransform, fitMedia, fittedMediaTransform, lockSwipeAxis, swipeVelocity,
+  constrainMediaTransform, fitMedia, fittedMediaTransform, lockSwipeAxis, mediaSlideGap, swipeVelocity,
   type MediaSize, type MediaTransform, type SwipeAxis, type SwipeSample,
 } from '../lib/mediaDrawerGeometry';
 
@@ -110,7 +110,7 @@ export function useMediaDrawerGestures({
     if (start.transform.scale > 1.003) {
       zoom({...start.transform, x: start.transform.x + dx, y: start.transform.y + dy});
     } else if (axis === 'horizontal') {
-      onSwipeMove(start.startOffset - dx / Math.max(1, bounds.width));
+      onSwipeMove(start.startOffset - dx / (bounds.width + mediaSlideGap));
     } else {
       setFreeDrag({x: dx, y: dy});
     }
@@ -136,7 +136,7 @@ export function useMediaDrawerGestures({
       reset();
       onMode(mode === 'default' ? 'immersive' : 'default');
     } else if (start.transform.scale <= 1.003 && axis === 'horizontal') {
-      onSwipeEnd(dx - start.startOffset * bounds.width, swipeVelocity(start.samples, end, 'x'));
+      onSwipeEnd(dx - start.startOffset * (bounds.width + mediaSlideGap), swipeVelocity(start.samples, end, 'x'));
     } else if (start.transform.scale <= 1.003) {
       onFreeRelease({x: dx, y: dy}, swipeVelocity(start.samples, end, 'y'));
     }

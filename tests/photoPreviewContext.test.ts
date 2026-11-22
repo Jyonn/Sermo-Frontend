@@ -24,7 +24,7 @@ test('video previews reuse the photo shell and toolbar without the retired secon
   assert.match(preview, /releaseMediaPlayback\(node\); node.pause\(\)/);
   assert.match(preview, /video.current.currentTime = event.currentTarget.valueAsNumber/);
   assert.match(styles, /\.media-drawer-stage\.is-free-drag \.media-drawer-slide\[data-active="false"\]\s*\{\s*visibility: hidden/);
-  assert.match(preview, /style=\{\{transform: `translate3d\(0, \$\{\(1 - infoPull\) \* 100\}%/);
+  assert.match(preview, /style=\{\{opacity: infoPull, transform: `translate3d\(0, \$\{\(1 - infoPull\) \* 100\}%/);
 });
 test('chat and search previews share sender identity, sending time and message navigation', async () => {
   const chat = await read('components/ChatImagePreview.tsx');
@@ -37,5 +37,14 @@ test('chat and search previews share sender identity, sending time and message n
   assert.match(page, /owner: message.user,\s*createdAt: message.created_at/);
   assert.match(page, /onJumpToMessage=\{\(messageId\) => \{ setImagePreview\(null\); revealMessageFromSearch/);
   assert.match(preview, /media-drawer-avatar/);
+  assert.match(preview, /<Identity className="media-drawer-identity" onClick=\{onJumpToMessage\}/);
+  assert.doesNotMatch(preview, /key: 'jump'/);
   assert.match(preview, /dateTime=\{sentAt.date.toISOString\(\)\}/);
+});
+
+test('a decoded neighboring photo can become ready without a second image load event', async () => {
+  const preview = await read('components/MediaDrawer.tsx');
+  const source = await read('lib/useMediaSource.ts');
+  assert.match(preview, /if \(node\?\.complete && node.naturalWidth\) \{[\s\S]*?if \(!fixedFitImage && !editor\) media.ready\(\);/);
+  assert.match(source, /value.uri === uri \? value : \{ uri, attempt: 0, fallback: false, phase: "loading" \}/);
 });

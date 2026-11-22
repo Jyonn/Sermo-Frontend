@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.8",
+  "id": "2026.11.22.9",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "更流畅的照片和视频浏览",
+      "title": "媒体预览操作优化",
       "items": [
-        "照片与视频随手势滑动，缩略图跟随切换，退出沉浸模式后会恢复显示。",
-        "上滑照片可展开拍摄信息，下滑可退出预览。"
+        "拍摄信息随拖动渐显，向下收起后可继续浏览，再下滑才退出。",
+        "缩略条更容易拖动，已加载的缩略图可复用。点击顶部发送者信息可跳回原消息。"
       ]
     },
     "en": {
-      "title": "Smoother photo and video browsing",
+      "title": "Media viewer refinements",
       "items": [
-        "Photos, videos, and thumbnails move together. The thumbnail strip returns when you leave immersive view.",
-        "Swipe up for capture details or down to close the viewer."
+        "Photo details fade in as you drag. Swipe down to collapse the details, then swipe again to close the viewer.",
+        "The thumbnail strip is easier to scrub and reuses loaded thumbnails. Tap the sender at the top to jump to the original message."
       ]
     }
   }
