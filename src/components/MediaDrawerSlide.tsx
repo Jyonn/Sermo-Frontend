@@ -70,7 +70,8 @@ export function MediaDrawerSlide({
   }, [opened, stage, hasInfo]);
 
   return <div className={`media-drawer-slide${tracking ? ' is-tracking-info' : ''}`} data-active={active} aria-hidden={!active} style={style}>
-    <div className="media-drawer-slide-scroll" ref={viewport} data-scrollable={opened && overflow}>
+    <div className="media-drawer-slide-scroll" ref={viewport} data-scrollable={opened && overflow}
+      tabIndex={opened && overflow ? 0 : undefined} aria-label={opened && overflow ? t('mediaDrawer.info') : undefined}>
       <div className="media-drawer-slide-photo" style={{height: bounds.height || '100%'}}>
         {children}
       </div>

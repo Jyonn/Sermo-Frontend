@@ -5,6 +5,7 @@ import {centeredPhotoCrop, clampPhoto, decodePhoto, exportPhoto, flipPhoto, full
 import {readPhotoMetadata, type PhotoMetadata} from '../lib/photoMetadata';
 import {MediaDrawer} from './MediaDrawer';
 import {OverlayIconButton} from './OverlayIconButton';
+import {isDesktopMediaPreview} from './useMediaDrawerGestures';
 import './PhotoEditorDrawer.css';
 
 type Tool = 'crop' | 'rotate' | 'mosaic' | 'filter';
@@ -20,6 +21,11 @@ type Gesture =
   | {type: 'crop'; start: PhotoPoint; crop: PhotoRect; edge: string}
   | {type: 'pinch'; center: PhotoPoint; span: number; crop: PhotoRect; anchor: PhotoPoint}
   | {type: 'brush'; pointer: number};
+
+function scaleCrop(crop: PhotoRect, ratio: number, anchor?: PhotoPoint, shift?: PhotoPoint) {
+  const scale = clampPhoto(ratio, Math.max(.04 / crop.width, .04 / crop.height), Math.min(1 / crop.width, 1 / crop.height));
+  return centeredPhotoCrop(crop, crop.width * scale, crop.height * scale, anchor, shift);
+}
 
 function Icon({name}: {name: string}) {
   return <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
@@ -64,6 +70,8 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
   const original = useRef<PhotoEdit>();
   const saved = useRef<{edit: PhotoEdit; history: PhotoEdit[]}>();
   const sliderStart = useRef<PhotoEdit>();
+  const lastCropWheel = useRef(-Infinity);
+  const cropWheel = useRef<(event: WheelEvent) => void>(() => undefined);
   const sending = useRef(false);
   const active = useRef(true);
   const draft = drafts[index];
@@ -86,6 +94,15 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
     observer.observe(stage.current);
     return () => observer.disconnect();
   }, [adjusting]);
+
+  useLayoutEffect(() => {
+    const node = frame.current;
+    lastCropWheel.current = -Infinity;
+    if (!adjusting || tool !== 'crop' || !node) return;
+    const wheel = (event: WheelEvent) => cropWheel.current(event);
+    node.addEventListener('wheel', wheel, {passive: false});
+    return () => node.removeEventListener('wheel', wheel);
+  }, [adjusting, ready, tool]);
 
   useEffect(() => {
     if (!uris[index]) return;
@@ -180,7 +197,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
     finishAdjusting();
   };
 
-  const point = (event: PointerEvent) => {
+  const point = (event: {clientX: number; clientY: number}) => {
     const bounds = frame.current!.getBoundingClientRect();
     return {x: (event.clientX - bounds.left) / bounds.width, y: (event.clientY - bounds.top) / bounds.height};
   };
@@ -223,9 +240,8 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
     if (action.type === 'pinch') {
       const [a, b] = [...pointers.current.values()];
       if (!b) return;
-      const scale = Math.min(1 / action.crop.width, 1 / action.crop.height,
-        Math.max(.04 / action.crop.width, .04 / action.crop.height, action.span / Math.max(.02, Math.hypot(a.x - b.x, a.y - b.y))));
-      const crop = centeredPhotoCrop(action.crop, action.crop.width * scale, action.crop.height * scale, action.anchor,
+      const scale = action.span / Math.max(.02, Math.hypot(a.x - b.x, a.y - b.y));
+      const crop = scaleCrop(action.crop, scale, action.anchor,
         {x: action.center.x - (a.x + b.x) / 2, y: action.center.y - (a.y + b.y) / 2});
       update(value => ({...value, crop}), false);
     } else if (action.type === 'crop') {
@@ -322,6 +338,20 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
   };
 
   const locked = Boolean(progress) || draft.sent || draft.skipped;
+  cropWheel.current = event => {
+    if (locked || pointers.current.size || !event.deltaY || !isDesktopMediaPreview()) return;
+    event.preventDefault();
+    const {crop} = edit;
+    const cursor = point(event);
+    const anchor = {x: clampPhoto((cursor.x - crop.x) / crop.width, 0, 1), y: clampPhoto((cursor.y - crop.y) / crop.height, 0, 1)};
+    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? surface.height : 1);
+    const factor = Math.exp(clampPhoto(delta, -100, 100) * .002);
+    const next = scaleCrop(crop, factor, anchor);
+    if (Math.abs(crop.width - next.width) < .00001 && Math.abs(crop.height - next.height) < .00001) return;
+    const remember = event.timeStamp - lastCropWheel.current > 220;
+    lastCropWheel.current = event.timeStamp;
+    update(value => ({...value, crop: scaleCrop(value.crop, factor, anchor)}), remember);
+  };
   const pendingCount = drafts.filter(item => !item.sent && !item.skipped).length;
   const skipPhoto = () => {
     setDrafts(items => items.map((item, i) => i === index ? {...item, skipped: true} : item));
@@ -333,10 +363,10 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
       style={{width: stageWidth, height: stageWidth / ratio}} data-tool={tool}
       onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}
       onKeyDown={event => {
-        if (tool !== 'crop' || locked || !['+', '=', '-'].includes(event.key)) return;
+        if (tool !== 'crop' || locked || event.ctrlKey || event.metaKey || event.altKey || !['+', '=', '-'].includes(event.key)) return;
         event.preventDefault();
         const factor = event.key === '-' ? 1.12 : .89;
-        update(value => ({...value, crop: centeredPhotoCrop(value.crop, value.crop.width * factor, value.crop.height * factor)}));
+        update(value => ({...value, crop: scaleCrop(value.crop, factor)}));
       }}>
       <canvas ref={canvas} aria-hidden="true"/>
       {tool === 'crop' && <div className="photo-editor-crop" style={{

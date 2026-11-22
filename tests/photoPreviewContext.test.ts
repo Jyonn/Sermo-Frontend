@@ -52,3 +52,12 @@ test('a decoded neighboring photo can become ready without a second image load e
   assert.match(preview, /if \(node\?\.complete && node.naturalWidth\) \{[\s\S]*?if \(!fixedFitImage && !editor\) media.ready\(\);/);
   assert.match(source, /value.uri === uri \? value : \{ uri, attempt: 0, fallback: false, phase: "loading" \}/);
 });
+
+test('desktop preview rebinds its measurements and wheel input when the drawer moves into its floating host', async () => {
+  const preview = await read('components/MediaDrawer.tsx');
+  const gestures = await read('components/useMediaDrawerGestures.ts');
+  assert.match(preview, /ref=\{gestures.bindStage\}/);
+  assert.match(gestures, /bindStage = useCallback\(\(node: HTMLDivElement \| null\) => \{\s*stage.current = node;\s*setStageNode\(node\)/);
+  assert.match(gestures, /observer.observe\(stageNode\);\s*return \(\) => observer.disconnect\(\);\s*\}, \[stageNode\]\)/);
+  assert.match(gestures, /stageNode.addEventListener\('wheel'[\s\S]*?stageNode.removeEventListener\('wheel'[\s\S]*?\}, \[stageNode\]\)/);
+});

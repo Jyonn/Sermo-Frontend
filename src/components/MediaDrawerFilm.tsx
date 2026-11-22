@@ -91,10 +91,6 @@ export function MediaDrawerFilm({items, index, width, carousel, canLoadPrevious,
       window.clearTimeout(wheelEnd.current);
       carousel.drag(carousel.stop() + dx / filmPitch);
       wheelEnd.current = window.setTimeout(() => carousel.settle(carousel.stop()), 120);
-    }}
-    onKeyDown={event => {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      event.preventDefault(); go(event.key === 'ArrowLeft' ? -1 : 1);
     }}>
     <div className="media-drawer-film-tiles" style={{height: filmHeight}}>
       {tiles.map(tile => {

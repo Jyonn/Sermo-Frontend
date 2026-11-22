@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.10",
+  "id": "2026.11.22.11",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "媒体预览操作优化",
+      "title": "桌面媒体预览操作优化",
       "items": [
-        "上滑时照片随信息面板展开自动调整尺寸，长内容可以继续上滑查看，向下拉可收起信息。",
-        "打开信息后也能横滑切换照片及其详情。视频在沉浸模式下隐藏进度条。"
+        "桌面媒体预览可用两侧按钮、方向键或触控板左右切换，信息与沉浸查看可直接点击。",
+        "照片支持滚轮或双击缩放，放大后可拖动查看。编辑裁剪范围时也可以用滚轮。"
       ]
     },
     "en": {
-      "title": "Media viewer refinements",
+      "title": "Desktop media viewer controls",
       "items": [
-        "Photos resize as you reveal their details. Swipe up further to read longer details, or pull down to collapse them.",
-        "Swipe sideways to browse photos and their details. Video hides the seek bar in immersive mode."
+        "Browse media with the side buttons, arrow keys, or a trackpad swipe. Open media details and immersive view from the toolbar.",
+        "Zoom photos with the mouse wheel or a double-click, then drag to pan. The mouse wheel also adjusts the crop in the photo editor."
       ]
     }
   }

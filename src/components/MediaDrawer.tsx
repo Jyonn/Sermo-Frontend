@@ -1,4 +1,4 @@
-import {useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
 import {showToast} from '../lib/toast';
 import {claimMediaPlayback, releaseMediaPlayback} from '../lib/mediaPlaybackFocus';
@@ -19,7 +19,7 @@ import {UserAvatar} from './UserAvatar';
 import {MediaDrawerFilm} from './MediaDrawerFilm';
 import {MediaDrawerSlide} from './MediaDrawerSlide';
 import {useMediaDrawerCarousel} from './useMediaDrawerCarousel';
-import {useMediaDrawerGestures} from './useMediaDrawerGestures';
+import {isDesktopMediaPreview, useMediaDrawerGestures} from './useMediaDrawerGestures';
 import './MediaDrawer.css';
 
 export interface MediaLightboxItem {
@@ -138,6 +138,9 @@ function MediaDrawerContent({
   const hasInfo = Boolean(editor || initialInfo || item.imageMetadata?.status === 1 || item.detail || sharedDetail || platform?.url);
   const canShowInfo = hasInfo && !adjusting && !fixedFitImage;
   const infoOpen = Boolean(info && !adjusting && !fixedFitImage && !immersive);
+  const canBrowse = items.length > 1 || Boolean(hasPrevious || hasNext);
+  const canGoBack = index > 0 || Boolean(hasPrevious && !loading);
+  const canGoForward = index < items.length - 1 || Boolean(hasNext && !loading);
   const media = useMediaSource(fixedFitImage || editor ? '' : item.uri, undefined, item.kind);
   const src = fixedFitImage || editor ? item.uri : media.src;
   const carousel = useMediaDrawerCarousel({index, identity, count: items.length, onIndexChange});
@@ -174,6 +177,7 @@ function MediaDrawerContent({
   const gestures = useMediaDrawerGestures({
     mediaKey: identity, size: sizeOf(item, index), mode, infoOpen,
     disabled: interactionDisabled || !infoOpen && !src && !item.posterUri,
+    canBrowse, desktopImageZoom: !videoItem, onBrowse: go,
     onMode: changeMode, onSwipeStart: carousel.stop,
     onSwipeMove: offset => carousel.drag(Math.min(1, Math.max(-1, offset))),
     onSwipeEnd: (distance, speed, cancelled) => {
@@ -207,7 +211,7 @@ function MediaDrawerContent({
       if (!fixedFitImage && !editor) media.ready();
     }
     if (video.current && video.current.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) media.ready();
-  }, [identity, src, activeInWindow]);
+  }, [identity, src, activeInWindow, gestures.stageNode]);
 
   useEffect(() => {
     if (!fixedFitImage || !src || !gestures.fitted.width || flashReady.current || !image.current?.naturalWidth) return;
@@ -222,7 +226,7 @@ function MediaDrawerContent({
     const node = video.current;
     if (!node) return;
     return () => {releaseMediaPlayback(node); node.pause();};
-  }, [videoItem, src, activeInWindow]);
+  }, [videoItem, src, activeInWindow, gestures.stageNode]);
 
   const dismiss = () => {
     if (editor?.busy) return;
@@ -293,6 +297,50 @@ function MediaDrawerContent({
   const {bounds, freeDrag, transform} = gestures;
   const infoPull = infoOpen ? 1 : canShowInfo && !leaving ? mediaInfoProgress(false, freeDrag?.y ?? 0, infoHeight) : 0;
   const closeInfo = () => setInfo(false);
+  const canZoom = !videoItem && Boolean(src && gestures.fitted.width) && !interactionDisabled;
+  const zoomed = transform.scale > 1.003;
+  const zoomPercent = useMemo(() => new Intl.NumberFormat(locale, {style: 'percent', maximumFractionDigits: 0}), [locale]);
+  const toggleInfo = () => {
+    if (infoOpen) {closeInfo(); return;}
+    if (!canShowInfo) return;
+    gestures.fit();
+    setInfo(true);
+  };
+  const toggleImmersive = () => {
+    if (immersive) gestures.fit();
+    else changeMode('immersive');
+  };
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.nativeEvent.isComposing || interactionDisabled
+      || target.closest('input,textarea,select,[contenteditable],[role="alertdialog"]')) return;
+    const key = event.key;
+    if ((key === 'ArrowLeft' || key === 'ArrowRight') && canBrowse) {
+      event.preventDefault();
+      if (!event.repeat) go(key === 'ArrowLeft' ? -1 : 1);
+      return;
+    }
+    if (key === 'Enter' && target === gestures.stage.current && (src || item.posterUri)) {
+      event.preventDefault();
+      toggleImmersive();
+      return;
+    }
+    if (!isDesktopMediaPreview()) return;
+    if (key.toLowerCase() === 'i' && (canShowInfo || infoOpen)) {
+      event.preventDefault();
+      if (!event.repeat) toggleInfo();
+    } else if (key.toLowerCase() === 'f' && (src || item.posterUri)) {
+      event.preventDefault();
+      if (!event.repeat) toggleImmersive();
+    } else if (canZoom && !infoOpen && ['+', '=', '-', '0'].includes(key)) {
+      event.preventDefault();
+      if (key === '0') gestures.fit();
+      else gestures.stepZoom(key === '-' ? -1 : 1);
+    } else if (key === ' ' && videoItem && (src || item.onPlayRequest) && !target.closest('button,a')) {
+      event.preventDefault();
+      if (!event.repeat) play();
+    }
+  };
   const Identity = onJumpToMessage ? 'button' : 'div';
   const identityLabel = item.owner?.name || platform?.author || platform?.name || title;
 
@@ -301,20 +349,10 @@ function MediaDrawerContent({
       backdropClassName="media-drawer-backdrop" closeRequestRef={closeRequestRef}
       className={`media-drawer${dimmed ? ' is-dark-media' : ''}`} title={title} onClose={dismiss}>
       <section className={`media-drawer-layout${infoOpen ? ' has-media-info' : ''}${adjusting ? ' is-adjusting' : ''}${immersive ? ' is-immersive-media' : ''}${fixedFitImage ? ' is-flash-media' : ''}${leaving ? ' is-leaving-media' : ''}`}
-        onKeyDown={event => {
-          if ((event.target as HTMLElement).closest('input,textarea,select,button,a') || interactionDisabled) return;
-          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            event.preventDefault(); go(event.key === 'ArrowLeft' ? -1 : 1);
-          }
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            gestures.reset();
-            setInfo(false);
-            changeMode(immersive ? 'default' : 'immersive');
-          }
-        }}>
-        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`} tabIndex={interactionDisabled ? undefined : 0}
-          aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.stage} {...gestures.events}>
+        onKeyDown={onKeyDown}>
+        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`}
+          data-zoomable={canZoom && !infoOpen} data-zoomed={zoomed} tabIndex={interactionDisabled ? undefined : 0}
+          aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.bindStage} {...gestures.events}>
           {adjusting ? editor.stage : items.slice(first, last + 1).map((entry, visibleIndex) => {
             const position = first + visibleIndex;
             const active = position === index;
@@ -377,6 +415,13 @@ function MediaDrawerContent({
           })}
         </div>
 
+        {canBrowse && !adjusting && !fixedFitImage && <div className="media-drawer-navigation media-drawer-desktop">
+          <OverlayIconButton icon="chevron_left" aria-label={t('mediaDrawer.previous')} title={t('mediaDrawer.previous')}
+            aria-keyshortcuts="ArrowLeft" aria-disabled={!canGoBack || interactionDisabled} onClick={() => {if (canGoBack) go(-1);}} />
+          <OverlayIconButton icon="chevron_right" aria-label={t('mediaDrawer.next')} title={t('mediaDrawer.next')}
+            aria-keyshortcuts="ArrowRight" aria-disabled={!canGoForward || interactionDisabled} onClick={() => {if (canGoForward) go(1);}} />
+        </div>}
+
         <header className="media-drawer-top" aria-label={adjusting ? t('photo.edit') : undefined}>
           <DrawerDismissButton className="media-drawer-dismiss" disabled={editor?.busy || leaving} onClick={() => closeRequestRef.current?.()} />
           {adjusting && <div className="media-drawer-editor-actions">{editor.headerActions}</div>}
@@ -396,6 +441,14 @@ function MediaDrawerContent({
           </Identity>}
           <div className="media-drawer-top-actions">
             {fixedFitImage?.overlay}
+            {(canShowInfo || infoOpen) && <OverlayIconButton icon="info" className="media-drawer-desktop"
+              aria-label={t('mediaDrawer.info')} title={t('mediaDrawer.info')} aria-keyshortcuts="I"
+              aria-pressed={infoOpen} disabled={interactionDisabled} onClick={toggleInfo} />}
+            {!adjusting && !fixedFitImage && (src || item.posterUri) && <OverlayIconButton
+              icon={immersive ? 'fullscreen_exit' : 'fullscreen'} className="media-drawer-desktop"
+              aria-label={t(immersive ? 'mediaDrawer.exitImmersive' : 'mediaDrawer.immersive')}
+              title={t(immersive ? 'mediaDrawer.exitImmersive' : 'mediaDrawer.immersive')}
+              aria-keyshortcuts="F" disabled={interactionDisabled} onClick={toggleImmersive} />}
 
             {adjusting ? <button className="media-drawer-done" type="button" onClick={editor.onDone}>{t('common.done')}</button> : null}
             {editor && !adjusting && !immersive && <OverlayIconButton icon={editor.busy ? 'progress_activity' : editor.submitLabel ? 'check' : 'send'} aria-label={editor.submitLabel || t('common.send')}
@@ -416,12 +469,25 @@ function MediaDrawerContent({
             </div>}
             {!immersive && (items.length > 1 || hasPrevious || hasNext) && <MediaDrawerFilm items={items} index={index}
               width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} disabled={interactionDisabled} go={go} />}
-            {!immersive && <div className="media-drawer-footer-actions">
-              {(editor ? editor.createShareFile : src || platform?.url) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
+            {(!immersive || canZoom) && <div className="media-drawer-footer-actions" data-immersive={immersive}>
+              {!immersive && (editor ? editor.createShareFile : src || platform?.url) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
                 onClick={() => setShareOpen(true)} disabled={sharing} />}
-              {editor && <OverlayIconButton icon="tune" className="media-drawer-adjust" aria-label={t('mediaDrawer.adjust')}
-                disabled={editor.busy || editor.adjustDisabled || !src} onClick={editor.onAdjust} />}
-              {hasInfo && <OverlayIconButton icon="info" className="media-drawer-info-action" aria-label={t('mediaDrawer.info')} onClick={() => setInfo(true)} />}
+              {(canZoom || editor && !immersive) && <div className="media-drawer-center-actions">
+                {canZoom && <div className="media-drawer-zoom media-drawer-desktop" role="group" aria-label={t('mediaDrawer.zoom')}>
+                  <OverlayIconButton icon="remove" aria-label={t('media.zoomOut')} title={t('media.zoomOut')}
+                    aria-disabled={!zoomed} aria-keyshortcuts="-" onClick={() => {if (zoomed) gestures.stepZoom(-1);}} />
+                  <button type="button" className="media-drawer-zoom-fit" title={t('media.fitPage')}
+                    aria-label={`${t('media.fitPage')} (${zoomPercent.format(transform.scale)})`} aria-keyshortcuts="0" onClick={gestures.fit}>
+                    {zoomPercent.format(transform.scale)}
+                  </button>
+                  <OverlayIconButton icon="add" aria-label={t('media.zoomIn')} title={t('media.zoomIn')}
+                    aria-disabled={transform.scale >= gestures.fitted.maximum} aria-keyshortcuts="+"
+                    onClick={() => {if (transform.scale < gestures.fitted.maximum) gestures.stepZoom(1);}} />
+                </div>}
+                {editor && !immersive && <OverlayIconButton icon="tune" className="media-drawer-adjust" aria-label={t('mediaDrawer.adjust')}
+                  disabled={editor.busy || editor.adjustDisabled || !src} onClick={editor.onAdjust} />}
+              </div>}
+              {!immersive && hasInfo && <OverlayIconButton icon="info" className="media-drawer-info-action" aria-label={t('mediaDrawer.info')} onClick={toggleInfo} />}
             </div>}
           </>}
         </footer>}
