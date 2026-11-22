@@ -1,20 +1,22 @@
 import {useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode} from 'react';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {useModalFocus} from '../lib/modalFocus';
-import {centeredPhotoCrop, clampPhoto, decodePhoto, exportPhoto, flipPhoto, fullPhoto, initialPhotoEdit, paintPhoto, photoLayers, photoSourcePoint, rotatePhoto, type PhotoEdit, type PhotoPoint, type PhotoRect} from '../lib/photoEdit';
+import {centeredPhotoCrop, clampPhoto, decodePhoto, exportPhoto, flipPhoto, fullPhoto, initialPhotoEdit, paintPhoto, photoFilters, photoLayers, photoSourcePoint, renderPhotoPreview, rotatePhoto, straightenPhoto, type PhotoEdit, type PhotoFilter, type PhotoPoint, type PhotoRect} from '../lib/photoEdit';
 import {readPhotoMetadata, type PhotoMetadata} from '../lib/photoMetadata';
-import {SideDrawer} from './SideDrawer';
-import {DrawerDismissButton} from './OverlayIconButton';
+import {MediaDrawer} from './MediaDrawer';
+import {OverlayIconButton} from './OverlayIconButton';
 import './PhotoEditorDrawer.css';
 
-type Tool = 'crop' | 'rotate' | 'mosaic' | 'privacy' | 'flash';
+type Tool = 'crop' | 'rotate' | 'mosaic' | 'filter';
 const tools = [
-  ['crop', 'crop'], ['rotate', 'rotate_right'], ['mosaic', 'grid_on'],
-  ['privacy', 'shield'], ['flash', 'bolt'],
+  ['crop', 'crop'], ['mosaic', 'grid_on'], ['rotate', 'rotate_right'],
+  ['filter', 'palette'],
 ] as const;
+const ratios = [[9, 16], [4, 5], [5, 7], [3, 4], [3, 5], [2, 3]] as const;
+type Preset = 'original' | 'free' | 'square' | number;
+const filters = Object.keys(photoFilters) as PhotoFilter[];
 type Draft = {file: File; id: string; edit: PhotoEdit; history: PhotoEdit[]; sent: boolean; skipped?: boolean};
 type Gesture =
-  | {type: 'swipe'; start: PhotoPoint}
   | {type: 'crop'; start: PhotoPoint; crop: PhotoRect; edge: string}
   | {type: 'pinch'; center: PhotoPoint; span: number; crop: PhotoRect; anchor: PhotoPoint}
   | {type: 'brush'; pointer: number};
@@ -23,25 +25,27 @@ function Icon({name}: {name: string}) {
   return <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
 }
 
-function Action({icon, label, onClick, pressed}: {icon: string; label: string; onClick: () => void; pressed?: boolean}) {
-  return <button type="button" className="photo-editor-action" aria-pressed={pressed} onClick={onClick}><Icon name={icon}/>{label}</button>;
-}
-
 function Check({checked, onChange, children, disabled}: {checked: boolean; onChange: (value: boolean) => void; children: ReactNode; disabled?: boolean}) {
   return <label className="photo-editor-check"><input type="checkbox" checked={checked} disabled={disabled} onChange={event => onChange(event.target.checked)}/>{children}</label>;
 }
 
-export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
+export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlash = true, submitLabel}: {
   files: File[];
   onClose: () => void;
   onComplete?: () => void;
   onSend: (file: File, flash: boolean, id: string) => Promise<void>;
+  allowFlash?: boolean;
+  submitLabel?: string;
 }) {
   const {t} = useI18n();
   const [drafts, setDrafts] = useState<Draft[]>(() => files.map(file => ({file, id: `photo:${crypto.randomUUID()}`, edit: initialPhotoEdit(), history: [], sent: false})));
   const [uris, setUris] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [tool, setTool] = useState<Tool>('crop');
+  const [adjusting, setAdjusting] = useState(false);
+  const [preset, setPreset] = useState<Preset>('original');
+  const [turnedRatio, setTurnedRatio] = useState(false);
+  const [rendered, setRendered] = useState<{edit: PhotoEdit; uri: string}>();
   const [brush, setBrush] = useState(.09);
   const [surface, setSurface] = useState({width: 1, height: 1});
   const [loaded, setLoaded] = useState<{index: number; image: HTMLImageElement; layers: ReturnType<typeof photoLayers>}>();
@@ -54,10 +58,11 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
   const frame = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const discardDialog = useRef<HTMLDivElement>(null);
-  const stageSwipe = useRef<PhotoPoint>();
   const pointers = useRef(new Map<number, PhotoPoint>());
   const gesture = useRef<Gesture>();
   const original = useRef<PhotoEdit>();
+  const saved = useRef<{edit: PhotoEdit; history: PhotoEdit[]}>();
+  const sliderStart = useRef<PhotoEdit>();
   const sending = useRef(false);
   const active = useRef(true);
   const draft = drafts[index];
@@ -79,7 +84,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     const observer = new ResizeObserver(([entry]) => setSurface({width: entry.contentRect.width, height: entry.contentRect.height}));
     observer.observe(stage.current);
     return () => observer.disconnect();
-  }, []);
+  }, [adjusting]);
 
   useEffect(() => {
     if (!uris[index]) return;
@@ -92,13 +97,22 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     return () => {current = false;};
   }, [uris, index, draft.file]);
 
+  const changedPixels = Boolean(edit.turns || edit.angle || edit.flipX || edit.flipY || edit.filter !== 'original'
+    || edit.strokes.length || edit.crop.width !== 1 || edit.crop.height !== 1);
   useLayoutEffect(() => {
-    if (ready && canvas.current) paintPhoto(canvas.current, ready.layers, edit);
-  }, [ready, edit]);
-
+    if (adjusting && ready && canvas.current) paintPhoto(canvas.current, ready.layers, edit);
+  }, [ready, edit, adjusting]);
   useEffect(() => {
-    document.getElementById(`photo-editor-thumb-${draft.id}`)?.scrollIntoView({block: 'nearest', inline: 'nearest'});
-  }, [draft.id]);
+    if (!ready || !changedPixels || adjusting) return;
+    let live = true, uri = '';
+    const preview = renderPhotoPreview(ready.image, edit, ready.layers).canvas;
+    preview.toBlob(blob => {
+      if (!live || !blob) return;
+      uri = URL.createObjectURL(blob);
+      setRendered({edit, uri});
+    }, 'image/webp', .9);
+    return () => {live = false; if (uri) URL.revokeObjectURL(uri);};
+  }, [ready, edit, adjusting, changedPixels]);
 
   const update = (change: (edit: PhotoEdit) => PhotoEdit, remember = true) => setDrafts(items =>
     items.map((item, i) => i === index ? {...item, edit: change(item.edit),
@@ -111,7 +125,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
   }));
 
   const switchPhoto = (next: number) => {
-    if (sending.current || next < 0 || next >= drafts.length || next === index) return;
+    if (adjusting || sending.current || next < 0 || next >= drafts.length || next === index) return;
     pointers.current.clear();
     gesture.current = original.current = undefined;
     setError('');
@@ -125,9 +139,25 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     else onClose();
   };
 
-  const swipe = (start: PhotoPoint, event: PointerEvent) => {
-    const dx = event.clientX - start.x, dy = event.clientY - start.y;
-    if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.3) switchPhoto(index + (dx < 0 ? 1 : -1));
+  const startAdjusting = () => {
+    saved.current = {edit, history: draft.history};
+    pointers.current.clear();
+    original.current = gesture.current = undefined;
+    setTool('crop');
+    setPreset(edit.crop.width === 1 && edit.crop.height === 1 ? 'original' : 'free');
+    setTurnedRatio(false);
+    setAdjusting(true);
+  };
+  const finishAdjusting = () => {
+    saved.current = undefined;
+    pointers.current.clear();
+    gesture.current = original.current = undefined;
+    setAdjusting(false);
+  };
+  const cancelAdjusting = () => {
+    const previous = saved.current;
+    if (previous) setDrafts(items => items.map((item, position) => position === index ? {...item, ...previous} : item));
+    finishAdjusting();
   };
 
   const point = (event: PointerEvent) => {
@@ -141,7 +171,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     pointers.current.set(event.pointerId, p);
     event.currentTarget.setPointerCapture(event.pointerId);
     event.preventDefault();
-    if (pointers.current.size === 2 && tool !== 'mosaic') {
+    if (pointers.current.size === 2 && tool === 'crop') {
       const [a, b] = [...pointers.current.values()];
       const center = {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2};
       const {crop} = edit;
@@ -153,14 +183,15 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     if (pointers.current.size > 1) return;
     if (tool === 'mosaic') {
       gesture.current = {type: 'brush', pointer: event.pointerId};
-      update(value => ({...value, strokes: [...value.strokes, {points: [photoSourcePoint(p, value)], diameter: brush}]}));
+      update(value => ({...value, strokes: [...value.strokes, {points: [photoSourcePoint(p, value, ratio)],
+        diameter: brush / straightenPhoto(value.angle, ratio).scale}]}));
     } else {
       const target = event.target as HTMLElement;
       const edge = target.closest<HTMLElement>('[data-photo-edge]')?.dataset.photoEdge;
       if (tool === 'crop' && (edge || (edit.crop.width < .99 || edit.crop.height < .99) && target.closest('.photo-editor-crop'))) {
         original.current = edit;
         gesture.current = {type: 'crop', start: p, crop: edit.crop, edge: edge ?? ''};
-      } else gesture.current = {type: 'swipe', start: {x: event.clientX, y: event.clientY}};
+      }
     }
   };
 
@@ -172,7 +203,8 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     if (action.type === 'pinch') {
       const [a, b] = [...pointers.current.values()];
       if (!b) return;
-      const scale = action.span / Math.max(.02, Math.hypot(a.x - b.x, a.y - b.y));
+      const scale = Math.min(1 / action.crop.width, 1 / action.crop.height,
+        Math.max(.04 / action.crop.width, .04 / action.crop.height, action.span / Math.max(.02, Math.hypot(a.x - b.x, a.y - b.y))));
       const crop = centeredPhotoCrop(action.crop, action.crop.width * scale, action.crop.height * scale, action.anchor,
         {x: action.center.x - (a.x + b.x) / 2, y: action.center.y - (a.y + b.y) / 2});
       update(value => ({...value, crop}), false);
@@ -180,12 +212,23 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
       const {crop, edge, start} = action;
       const dx = p.x - start.x, dy = p.y - start.y;
       let next = centeredPhotoCrop(crop, crop.width, crop.height, undefined, {x: dx, y: dy});
-      if (edge) {
+      if (edge && preset === 'free') {
         const left = edge.includes('w') ? clampPhoto(crop.x + dx, 0, crop.x + crop.width - .04) : crop.x;
         const top = edge.includes('n') ? clampPhoto(crop.y + dy, 0, crop.y + crop.height - .04) : crop.y;
         const right = edge.includes('e') ? clampPhoto(crop.x + crop.width + dx, left + .04, 1) : crop.x + crop.width;
         const bottom = edge.includes('s') ? clampPhoto(crop.y + crop.height + dy, top + .04, 1) : crop.y + crop.height;
         next = {x: left, y: top, width: right - left, height: bottom - top};
+      } else if (edge) {
+        const west = edge.includes('w'), north = edge.includes('n');
+        const anchorX = west ? crop.x + crop.width : crop.x;
+        const anchorY = north ? crop.y + crop.height : crop.y;
+        const horizontal = (west ? -dx : dx) / crop.width;
+        const vertical = (north ? -dy : dy) / crop.height;
+        const growth = 1 + (Math.abs(horizontal) >= Math.abs(vertical) ? horizontal : vertical);
+        const maximum = Math.min((west ? anchorX : 1 - anchorX) / crop.width, (north ? anchorY : 1 - anchorY) / crop.height);
+        const scale = Math.min(maximum, Math.max(.04 / crop.width, .04 / crop.height, growth));
+        const width = crop.width * scale, height = crop.height * scale;
+        next = {x: west ? anchorX - width : anchorX, y: north ? anchorY - height : anchorY, width, height};
       }
       update(value => ({...value, crop: next}), false);
     } else if (action.type === 'brush' && action.pointer === event.pointerId) {
@@ -193,7 +236,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
         const strokes = value.strokes.slice();
         const last = strokes[strokes.length - 1];
         if (!last) return value;
-        const next = photoSourcePoint({x: clampPhoto(p.x, 0, 1), y: clampPhoto(p.y, 0, 1)}, value);
+        const next = photoSourcePoint({x: clampPhoto(p.x, 0, 1), y: clampPhoto(p.y, 0, 1)}, value, ratio);
         strokes[strokes.length - 1] = {...last, points: [...last.points, next]};
         return {...value, strokes};
       }, false);
@@ -202,24 +245,30 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
 
   const end = (event: PointerEvent<HTMLDivElement>) => {
     if (!pointers.current.delete(event.pointerId)) return;
-    const action = gesture.current;
     if (pointers.current.size) return;
     gesture.current = undefined;
     const before = original.current;
     original.current = undefined;
     if (before) setDrafts(items => items.map((item, i) => i === index && item.edit !== before
       ? {...item, history: [...item.history.slice(-29), before]} : item));
-    if (event.type === 'pointerup' && action?.type === 'swipe') swipe(action.start, event);
   };
 
   const ratio = ready ? (edit.turns % 2 ? ready.image.naturalHeight / ready.image.naturalWidth : ready.image.naturalWidth / ready.image.naturalHeight) : 1;
   const stageWidth = Math.min(surface.width, surface.height * ratio);
-  const selectRatio = (aspect?: number) => update(value => {
-    if (!aspect) return {...value, crop: fullPhoto};
-    const normalized = aspect / ratio;
-    const crop = centeredPhotoCrop(fullPhoto, Math.min(1, normalized), Math.min(1, 1 / normalized));
-    return {...value, crop};
-  });
+  const ratioFor = (position: number, reverse = false) => {
+    const [short, long] = ratios[position];
+    return (ratio >= 1) !== reverse ? [long, short] : [short, long];
+  };
+  const selectRatio = (choice: Preset) => {
+    const reverse = typeof choice === 'number' && preset === choice && !turnedRatio;
+    setPreset(choice);
+    setTurnedRatio(reverse);
+    if (choice === 'free') return;
+    if (choice === 'original') {update(value => ({...value, crop: fullPhoto})); return;}
+    const [w, h] = choice === 'square' ? [1, 1] : ratioFor(choice, reverse);
+    const normalized = w / h / ratio;
+    update(value => ({...value, crop: centeredPhotoCrop(value.crop, Math.min(1, normalized), Math.min(1, 1 / normalized))}));
+  };
 
   const send = async () => {
     if (sending.current) return;
@@ -231,8 +280,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
         setProgress({current: position + 1, total: queue.length});
         try {
           const image = await decodePhoto(uris[photoIndex]);
-          const metadata = !item.edit.flash && (item.edit.keepLocation || item.edit.keepDescription)
-            ? await readPhotoMetadata(item.file) : {};
+          const metadata = item.edit.flash ? {} : await readPhotoMetadata(item.file);
           const output = await exportPhoto(image, item.edit, metadata, item.file);
           if (!active.current) return;
           await onSend(output, item.edit.flash, item.id);
@@ -253,107 +301,121 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend}: {
     }
   };
 
-  const locked = Boolean(progress) || draft.sent;
+  const locked = Boolean(progress) || draft.sent || draft.skipped;
   const pendingCount = drafts.filter(item => !item.sent && !item.skipped).length;
   const skipPhoto = () => {
     setDrafts(items => items.map((item, i) => i === index ? {...item, skipped: true} : item));
     const next = drafts.findIndex((item, i) => i > index && !item.sent && !item.skipped);
     switchPhoto(next >= 0 ? next : drafts.findIndex((item, i) => i !== index && !item.sent && !item.skipped));
   };
-  return <SideDrawer open headerless floatingBack={false} fullViewport trapFocus historyMode="route" className="photo-editor-drawer" title={t('photo.edit')} onClose={close}>
-    <section className="photo-editor" onKeyDown={event => {
-      if (event.target !== frame.current || progress) return;
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        switchPhoto(index + (event.key === 'ArrowLeft' ? -1 : 1));
-      }
-      if (tool !== 'crop' || locked) return;
-      if (event.key === '+' || event.key === '=' || event.key === '-') {
+  const editStage = <div className="photo-editor-stage" ref={stage}>
+    {ready ? <div className="photo-editor-frame" ref={frame} tabIndex={0} aria-label={t('photo.canvas')}
+      style={{width: stageWidth, height: stageWidth / ratio}} data-tool={tool}
+      onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}
+      onKeyDown={event => {
+        if (tool !== 'crop' || locked || !['+', '=', '-'].includes(event.key)) return;
         event.preventDefault();
         const factor = event.key === '-' ? 1.12 : .89;
         update(value => ({...value, crop: centeredPhotoCrop(value.crop, value.crop.width * factor, value.crop.height * factor)}));
-      }
-    }}>
-      <header className="photo-editor-header">
-        <DrawerDismissButton className="photo-editor-dismiss" onClick={close} disabled={Boolean(progress)} />
-        <div><h2>{t('photo.edit')}</h2><small>{index + 1} / {drafts.length}</small></div>
-        <button type="button" className="photo-editor-submit" disabled={Boolean(progress) || !pendingCount || !uris.length || loadFailed && !draft.skipped} onClick={() => void send()}>{progress ? `${progress.current} / ${progress.total}` : t('photo.send', {count: pendingCount})}<Icon name={progress ? 'progress_activity' : 'send'}/></button>
-      </header>
-      <div className="photo-editor-stage" ref={stage}
-        onPointerDown={event => {
-          if (event.target !== event.currentTarget || event.button !== 0 || drafts.length < 2) return;
-          stageSwipe.current = {x: event.clientX, y: event.clientY};
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerUp={event => {
-          if (event.target === event.currentTarget && stageSwipe.current) swipe(stageSwipe.current, event);
-          stageSwipe.current = undefined;
-        }}
-        onPointerCancel={() => {stageSwipe.current = undefined;}}>
-        {ready ? <div className="photo-editor-frame" ref={frame} tabIndex={0} aria-label={t('photo.canvas')}
-          style={{width: stageWidth, height: stageWidth / ratio}} data-tool={tool}
-          onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}
-          onWheel={event => {
-            if (locked || tool !== 'crop') return;
-            const factor = event.deltaY > 0 ? 1.1 : .91;
-            update(value => ({...value, crop: centeredPhotoCrop(value.crop, value.crop.width * factor, value.crop.height * factor)}));
-          }}>
-          <canvas ref={canvas}/>
-          {tool === 'crop' || edit.crop.width < 1 || edit.crop.height < 1 ? <div className="photo-editor-crop" data-active={tool === 'crop'}
-            style={{left: `${edit.crop.x * 100}%`, top: `${edit.crop.y * 100}%`, width: `${edit.crop.width * 100}%`, height: `${edit.crop.height * 100}%`}}>
-            {tool === 'crop' && ['nw','n','ne','e','se','s','sw','w'].map(edge => <i key={edge} data-photo-edge={edge}/>)}
-          </div> : null}
-        </div> : <div className="photo-editor-stage-status">
-          <p role="status">{t(draft.skipped ? 'photo.skipped' : loadFailed ? 'photo.decodeFailed' : 'common.loading')}</p>
-          {loadFailed && !draft.skipped && pendingCount > 1 && <Action icon="hide_image" label={t('photo.skip')} onClick={skipPhoto}/>}
-        </div>}
-        {drafts.length > 1 && [-1, 1].map(step => <button type="button" key={step} className={`photo-editor-nav is-${step < 0 ? 'prev' : 'next'}`}
-          aria-label={t(step < 0 ? 'photo.previous' : 'photo.next')} onClick={() => switchPhoto(index + step)}
-          disabled={Boolean(progress) || index + step < 0 || index + step >= drafts.length}><Icon name={step < 0 ? 'chevron_left' : 'chevron_right'}/></button>)}
-      </div>
-      {drafts.length > 1 && <nav className="photo-editor-film" aria-label={t('photo.photos')}>
-        {drafts.map((item, i) => <button type="button" id={`photo-editor-thumb-${item.id}`} key={item.id} aria-current={i === index}
-          aria-label={t('photo.select', {count: i + 1})} disabled={Boolean(progress)} onClick={() => switchPhoto(i)}>
-          {uris[i] && <img src={uris[i]} alt="" draggable={false}/>}
-          {(item.sent || item.skipped || item.edit.flash) && <Icon name={item.sent ? 'check' : item.skipped ? 'hide_image' : 'bolt'}/>}
-        </button>)}
-      </nav>}
-      <div className="photo-editor-console">
-        <div className="photo-editor-utilities">
-          <button type="button" onClick={undo} disabled={locked || !draft.history.length}><Icon name="undo"/>{t('photo.undo')}</button>
-          <button type="button" onClick={() => update(initialPhotoEdit)} disabled={locked || !draft.history.length}><Icon name="restart_alt"/>{t('avatar.cropReset')}</button>
-        </div>
-        {error && <p className="photo-editor-error" role="alert">{error}</p>}
-        <fieldset className="photo-editor-tool-options" disabled={locked || !ready}>
-          {tool === 'crop' && <><div className="photo-editor-actions">
-            <Action icon="crop_free" label={t('photo.original')} onClick={() => selectRatio()}/>
-            <Action icon="crop_square" label="1:1" onClick={() => selectRatio(1)}/>
-            <Action icon="crop_portrait" label="4:5" onClick={() => selectRatio(.8)}/>
-            <Action icon="crop_16_9" label="16:9" onClick={() => selectRatio(16 / 9)}/>
-          </div><p>{t('photo.cropHelp')}</p></>}
-          {tool === 'rotate' && <div className="photo-editor-actions">
-            <Action icon="rotate_right" label={t('photo.turn')} onClick={() => update(rotatePhoto)}/>
-            <Action icon="flip" label={t('photo.flipHorizontal')} onClick={() => update(value => flipPhoto(value, 'x'))}/>
-            <Action icon="swap_vert" label={t('photo.flipVertical')} onClick={() => update(value => flipPhoto(value, 'y'))}/>
-          </div>}
-          {tool === 'mosaic' && <><div className="photo-editor-actions">
-            {[.045, .09, .18].map((size, i) => <Action key={size} icon="circle" label={t((['photo.small','photo.medium','photo.large'] as const)[i])} pressed={brush === size} onClick={() => setBrush(size)}/>)}
-          </div><p>{t('photo.mosaicHelp')}</p></>}
-          {tool === 'privacy' && <><div className="photo-editor-actions">
-            <Check checked={edit.keepLocation && !edit.flash} disabled={edit.flash || currentMetadata?.latitude === undefined} onChange={keepLocation => update(value => ({...value, keepLocation}))}><Icon name="location_on"/>{t('photo.keepLocation')}</Check>
-            <Check checked={edit.keepDescription && !edit.flash} disabled={edit.flash || !currentMetadata?.description} onChange={keepDescription => update(value => ({...value, keepDescription}))}><Icon name="notes"/>{t('photo.keepDescription')}</Check>
-          </div><p>{t(edit.flash ? 'photo.flashPrivacy' : 'photo.privacyHelp')}</p></>}
-          {tool === 'flash' && <><div className="photo-editor-actions"><Check checked={edit.flash} onChange={flash => update(value => ({...value, flash}))}><Icon name="bolt"/>{t('photo.enableFlash')}</Check></div><p>{t('photo.flashHelp')}</p></>}
-        </fieldset>
-        <nav className="photo-editor-toolbar" aria-label={t('photo.edit')}>
-          {tools.map(([key, icon]) => <button key={key} type="button" aria-pressed={tool === key} onClick={() => setTool(key)}>
-            <Icon name={icon}/><span>{t(`photo.${key}` as TranslationKey)}</span>
-          </button>)}
-        </nav>
-      </div>
-      {discard && <div ref={discardDialog} tabIndex={-1} className="photo-editor-discard" role="alertdialog" aria-modal="true" aria-label={t('photo.discard')}>
-        <div><strong>{t('photo.discard')}</strong><button type="button" onClick={onClose}>{t('photo.discardChanges')}</button><button type="button" autoFocus onClick={() => setDiscard(false)}>{t('photo.continueEdit')}</button></div>
+      }}>
+      <canvas ref={canvas} aria-hidden="true"/>
+      {tool === 'crop' && <div className="photo-editor-crop" style={{
+        left: edit.crop.x * 100 + '%', top: edit.crop.y * 100 + '%',
+        width: edit.crop.width * 100 + '%', height: edit.crop.height * 100 + '%',
+      }}>
+        <div className="photo-editor-grid" aria-hidden="true" />
+        {['nw', 'ne', 'sw', 'se'].map(edge => <span key={edge} data-photo-edge={edge} className={`photo-editor-corner ${edge}`} />)}
       </div>}
-    </section>
-  </SideDrawer>;
+    </div> : <p role="status">{t(loadFailed ? 'photo.decodeFailed' : 'common.loading')}</p>}
+  </div>;
+  const toolbar = <div className="photo-editor-tools">
+    {tool === 'crop' && <div className="photo-editor-ratios" aria-label={t('mediaDrawer.cropRatio')}>
+      {(['original', 'free', 'square', ...ratios.map((_, position) => position)] as Preset[]).map(choice => (
+        <button key={choice} type="button" aria-pressed={choice === preset} onClick={() => selectRatio(choice)}>
+          {typeof choice === 'number' ? ratioFor(choice, preset === choice && turnedRatio).join(':')
+            : t(choice === 'original' ? 'mediaDrawer.originalRatio' : choice === 'free' ? 'mediaDrawer.freeRatio' : 'mediaDrawer.squareRatio')}
+        </button>
+      ))}
+    </div>}
+    {tool === 'rotate' && <label className="photo-editor-scale">
+      <output>{edit.angle}°</output>
+      <input type="range" min={-45} max={45} step={1} value={edit.angle} aria-label={t('mediaDrawer.angle')}
+        onPointerDown={event => {sliderStart.current = edit; event.currentTarget.setPointerCapture(event.pointerId);}}
+        onPointerUp={() => {
+          const previous = sliderStart.current;
+          sliderStart.current = undefined;
+          if (previous) setDrafts(items => items.map((item, i) => i === index && item.edit !== previous
+            ? {...item, history: [...item.history.slice(-29), previous]} : item));
+        }}
+        onPointerCancel={() => {sliderStart.current = undefined;}}
+        onDoubleClick={() => update(value => ({...value, angle: 0}))}
+        onChange={event => {const angle = event.currentTarget.valueAsNumber; update(value => ({...value, angle}), !sliderStart.current);}} />
+      <div className="photo-editor-ticks" aria-hidden="true"><span>−45°</span><span>0°</span><span>45°</span></div>
+    </label>}
+    {tool === 'mosaic' && <label className="photo-editor-scale">
+      <output>{t('mediaDrawer.brushSize')}</output>
+      <input type="range" min={3} max={24} step={1} value={Math.round(brush * 100)} aria-label={t('mediaDrawer.brushSize')}
+        onChange={event => setBrush(event.currentTarget.valueAsNumber / 100)} />
+      <div className="photo-editor-ticks" aria-hidden="true"><span>{t('photo.small')}</span><span>{t('photo.large')}</span></div>
+    </label>}
+    {tool === 'filter' && <div className="photo-editor-filters" aria-label={t('photo.filter')}>
+      {filters.map(filter => <button key={filter} type="button" aria-pressed={edit.filter === filter} onClick={() => update(value => ({...value, filter}))}>
+        <img src={uris[index]} alt="" style={{filter: photoFilters[filter]}} />
+        <span>{t(`mediaDrawer.filter.${filter}` as TranslationKey)}</span>
+      </button>)}
+    </div>}
+    <nav className="photo-editor-modes" aria-label={t('photo.edit')}>
+      {tools.map(([key, icon]) => <button type="button" key={key} aria-pressed={tool === key} onClick={() => setTool(key)}>
+        <Icon name={icon}/><span>{t(`photo.${key}` as TranslationKey)}</span>
+      </button>)}
+    </nav>
+  </div>;
+  const changeRotation = (change: (value: PhotoEdit) => PhotoEdit) => {
+    update(change);
+    setPreset('free');
+  };
+  const photoInfo = <div className="photo-editor-info">
+    <Check checked={edit.keepLocation} disabled={locked || edit.flash} onChange={value => update(edit => ({...edit, keepLocation: value}))}>
+      <span><strong>{t('photo.keepLocation')}</strong>
+        {currentMetadata?.latitude !== undefined && currentMetadata.longitude !== undefined
+          ? <small>{currentMetadata.latitude.toFixed(4)}, {currentMetadata.longitude.toFixed(4)}</small> : null}</span>
+    </Check>
+    <Check checked={edit.keepDescription} disabled={locked || edit.flash} onChange={value => update(edit => ({...edit, keepDescription: value}))}>
+      <span><strong>{t('photo.keepDescription')}</strong>{currentMetadata?.description && <small>{currentMetadata.description}</small>}</span>
+    </Check>
+    {allowFlash && <Check checked={edit.flash} disabled={locked} onChange={value => update(edit => ({...edit, flash: value}))}>
+      <span><strong>{t('photo.enableFlash')}</strong><small>{t('photo.flashHelp')}</small></span>
+    </Check>}
+    <p>{t(edit.flash ? 'photo.flashPrivacy' : 'photo.privacyHelp')}</p>
+  </div>;
+  const activeUri = changedPixels ? rendered?.edit === edit ? rendered.uri : '' : uris[index] ?? '';
+  return <MediaDrawer index={index} items={drafts.map((item, position) => ({
+      id: item.id, kind: 'image', uri: position === index ? activeUri : uris[position] ?? '', thumbnailUri: uris[position],
+    }))}
+    altPrefix={t('photo.photos')} onClose={close} onIndexChange={switchPhoto}
+    editor={{
+      adjusting, busy: Boolean(progress), adjustDisabled: locked || loadFailed, sendDisabled: !pendingCount || !uris.length || loadFailed && !draft.skipped,
+      submitLabel,
+      createShareFile: !locked && !edit.flash && ready
+        ? async () => exportPhoto(ready.image, edit, currentMetadata ?? await readPhotoMetadata(draft.file), draft.file)
+        : undefined,
+      onSend: () => void send(), onAdjust: startAdjusting, onDone: finishAdjusting, onCancel: cancelAdjusting,
+      stage: editStage, tools: toolbar, info: photoInfo,
+      headerActions: <>
+        {tool === 'rotate' && !locked && <>
+          <OverlayIconButton icon="flip" aria-label={t('photo.flipHorizontal')} onClick={() => changeRotation(value => flipPhoto(value, 'x'))} />
+          <OverlayIconButton icon="rotate_90_degrees_cw" aria-label={t('photo.turn')} onClick={() => changeRotation(rotatePhoto)} />
+        </>}
+        <OverlayIconButton icon="undo" aria-label={t('photo.undo')} disabled={!draft.history.length || locked} onClick={undo} />
+      </>,
+      notice: <>
+        {progress || error || loadFailed || draft.sent || draft.skipped ? <div className="photo-editor-notice" role={error ? 'alert' : 'status'}>
+          {progress ? `${progress.current} / ${progress.total}` : error || t(draft.skipped ? 'photo.skipped' : draft.sent ? 'photo.sent' : 'photo.decodeFailed')}
+          {loadFailed && !locked && <button type="button" onClick={skipPhoto}>{t('photo.skip')}</button>}
+        </div> : null}
+        {discard && <div ref={discardDialog} tabIndex={-1} className="photo-editor-discard" role="alertdialog" aria-modal="true" aria-label={t('photo.discard')}>
+          <div><strong>{t('photo.discard')}</strong><button type="button" onClick={onClose}>{t('photo.discardChanges')}</button><button type="button" autoFocus onClick={() => setDiscard(false)}>{t('photo.continueEdit')}</button></div>
+        </div>}
+      </>,
+    }} />;
 }

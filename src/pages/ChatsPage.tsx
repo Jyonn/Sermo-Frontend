@@ -82,6 +82,7 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
+import type { ChatPreviewImage } from "../lib/chatImageHistory";
 import { ChatImagePreview } from "../components/ChatImagePreview";
 import { PhotoEditorDrawer } from "../components/PhotoEditorDrawer";
 import { FlashImageMessage } from "../components/FlashImageMessage";
@@ -2202,6 +2203,7 @@ interface ImagePreviewState {
   uris: string[];
   metadata: Array<ImageMetadataDTO | null>;
   messageIds: Array<number | null>;
+  mixedMedia?: ChatPreviewImage[];
 }
 
 interface VideoPreviewState {
@@ -2818,7 +2820,8 @@ function LiveChatsPage({
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       void api.getMediaMetadata<VideoMetadataDTO>(videoPreview.messageId as number, controller.signal)
-        .then((metadata) => setVideoPreview((current) => current ? { ...current, metadata } : current))
+        .then((metadata) => setVideoPreview((current) => current && !controller.signal.aborted
+          && current.messageId === videoPreview.messageId ? { ...current, metadata } : current))
         .catch(() => undefined);
     }, 1200);
     return () => {
@@ -3979,6 +3982,24 @@ function LiveChatsPage({
   }, [selectedChat, selectedMessages]);
 
   const messageGroups = useMemo(() => buildMessageGroups(selectedMessages), [selectedMessages]);
+  const openConversationMedia = (uris: string[], index: number, metadata: Array<ImageMetadataDTO | null>, messageIds: Array<number | null>) => {
+    const id = messageIds[index];
+    const items: ChatPreviewImage[] = selectedMessages.flatMap(message => {
+      if (typeof message.id !== "number" || !message.payload?.uri || (message.kind !== "image" && message.kind !== "video")) return [];
+      return [{
+        uri: message.payload.uri, kind: message.kind, messageId: message.id,
+        posterUri: message.payload.thumbnail_uri, createdAt: message.createdAt,
+        metadata: message.kind === "video" ? message.payload.video_metadata : message.payload.image_metadata,
+        owner: {user_id: message.userId ?? 0, name: message.name, avatar_uri: message.avatarUri, avatar_cache_key: message.avatarCacheKey},
+      }];
+    });
+    const mediaIndex = id != null ? items.findIndex(item => item.messageId === id) : -1;
+    setImagePreview({
+      chatId: selectedChat?.id, uris, metadata, messageIds,
+      index: mediaIndex >= 0 ? mediaIndex : index,
+      mixedMedia: mediaIndex >= 0 ? items : undefined,
+    });
+  };
 
   messageGroupIndexRef.current = new Map(
     messageGroups.flatMap((group, groupIndex) => group.messages.flatMap((message) => (
@@ -7827,16 +7848,12 @@ function LiveChatsPage({
                       systemContext={{viewerId:currentUserId,peer:selectedDirectPeer,groupTitle:selectedChat?.type==='group'?selectedChat.title||t('chat.group'):undefined}}
                       enteringMessageIds={enteringMessageIds}
                       group={group}
-                      onOpenImage={(uris, index, metadata = [], messageIds = []) => {
-                        setImagePreview({
-                          chatId: selectedChat?.id,
-                          uris,
-                          index,
-                          metadata: uris.map((_uri, itemIndex) => metadata[itemIndex] ?? null),
-                          messageIds: uris.map((_uri, itemIndex) => messageIds[itemIndex] ?? null),
-                        });
+                      onOpenImage={(uris, index, metadata = [], messageIds = []) => openConversationMedia(uris, index, metadata, messageIds)}
+                      onOpenVideo={(uri, metadata, messageId) => {
+                        if (messageId && selectedMessages.some(message => message.id === messageId && message.payload?.uri)) {
+                          openConversationMedia([uri], 0, [], [messageId]);
+                        } else setVideoPreview({uri, metadata, messageId});
                       }}
-                      onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                       onOpenActions={openMessageMenu}
                       onOpenOfficialNotice={(message) => {
                         const targetChatId = Number(message.payload?.submission_chat_id);
@@ -9246,7 +9263,8 @@ function LiveChatsPage({
       />
       {imagePreview ? (
         <ChatImagePreview key={`${imagePreview.chatId}:${imagePreview.uris[0]}`} chatId={imagePreview.chatId} initialIndex={imagePreview.index}
-          images={imagePreview.uris.map((uri, index) => {
+          originalIds={imagePreview.uris.map((uri, index) => imagePreview.messageIds[index] ?? uri)}
+          images={imagePreview.mixedMedia ?? imagePreview.uris.map((uri, index) => {
             const message = selectedMessages.find((item) => item.id === imagePreview.messageIds[index]);
             return { uri, messageId: imagePreview.messageIds[index] ?? null, metadata: imagePreview.metadata[index], posterUri: message?.payload?.thumbnail_uri,
               owner: message ? { user_id: message.userId ?? 0, name: message.name, avatar_uri: message.avatarUri, avatar_cache_key: message.avatarCacheKey } : undefined, createdAt: message?.createdAt };

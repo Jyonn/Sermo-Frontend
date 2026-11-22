@@ -1,10 +1,9 @@
 import { useState } from "react";
 import type { SocialMediaDataDTO } from "../types";
-import { ImageLightbox, ImmersiveVideo } from "./ImageLightbox";
-import { SideDrawer } from "./SideDrawer";
+import { MediaLightbox, type MediaLightboxItem } from "./ImageLightbox";
 import { useI18n } from "../lib/language";
 import { api } from '../lib/api';
-import { PlatformMediaCard, PlatformVideoError, PlatformVideoSource } from "./PlatformMediaCard";
+import { PlatformMediaCard } from "./PlatformMediaCard";
 import "./SocialMediaPreview.css";
 
 const domains = ["douyinpic.com", "byteimg.com", "xhscdn.com", "xhsimg.com", "rednotecdn.com"];
@@ -54,25 +53,18 @@ export function SocialMediaPreview({ media: initialMedia, previewId, imageUrl,fi
     try{if(await refresh()){setIndex(0);setFailed(false);setRetried(false);setOpen(true)}}
     finally{setOpening(false)}
   };
-  const galleryDetails = <div className="message-image-archive social-media-archive" onClick={(event) => event.stopPropagation()}>
-    <div className="message-image-record">
-      <span className="message-image-archive-label social-media-brand"><img alt="" src={logo} />{source}</span>
-      <strong className="social-media-archive-title">{title}</strong>
-      <div className="social-media-archive-foot">
-        <span>{media.author || source}</span>
-        <a href={media.canonical_url} rel="noreferrer" target="_blank">{t("social.openSource")} {source} ↗</a>
-      </div>
-    </div>
-  </div>;
+  const items: MediaLightboxItem[] = isVideo
+    ? [{id: 'video', kind: 'video', uri: media.video_url || '', posterUri: cover, loop: true, autoPlay: true, onPlaybackError: () => {
+      if (retried) {setFailed(true); return;}
+      setRetried(true);
+      void refresh(true).then(ok => {if (!ok) setFailed(true);}).catch(() => setFailed(true));
+    }}]
+    : images.map((uri, position) => ({id: position, kind: 'image', uri, referrerPolicy: 'no-referrer'}));
   return <>
     <PlatformMediaCard fitMedia={fitMedia} author={media.author} cover={cover} kindLabel={isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`} logo={logo} opening={opening} onClick={() => void openMedia().catch(()=>setFailed(true))} playIcon={isVideo ? "play_arrow" : undefined} source={source} title={title} />
     {notice?<span role="status" className="message-link-preview-desc">{notice}</span>:null}
-    {open && !isVideo ? <ImageLightbox altPrefix={title} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={galleryDetails} uris={images} /> : null}
-    <SideDrawer floatingBack={false} fullscreen headerless historyKey={`social-${media.canonical_url}`} open={open && isVideo} onClose={() => setOpen(false)} title={title}>
-      {open && isVideo ? <div className="platform-video-shell">
-        <ImmersiveVideo drawerDismiss context={<PlatformVideoSource author={media.author} href={media.canonical_url} label={`${t("social.openSource")} ${source}`} logo={logo} source={`${source} · ${t("social.video")}`} title={title} />} loop onClose={() => setOpen(false)} onError={() => {if(retried){setFailed(true);return}setRetried(true);void refresh(true).then(ok=>{if(!ok)setFailed(true)}).catch(()=>setFailed(true))}} poster={cover} src={media.video_url || ""} />
-        {failed ? <PlatformVideoError href={media.canonical_url} label={`${t("social.openSource")} ${source}`}>{t("social.playbackUnavailable")}</PlatformVideoError> : null}
-      </div> : null}
-    </SideDrawer>
+    {open && <MediaLightbox altPrefix={title} index={index} items={items} onClose={() => setOpen(false)} onIndexChange={setIndex}
+      source={{name: source, logo, url: media.canonical_url, author: media.author}} fileNamePrefix={media.provider}
+      sharedDetail={<article className="media-drawer-article"><h2>{title}</h2>{failed && <p role="status">{t('social.playbackUnavailable')}</p>}</article>} />}
   </>;
 }

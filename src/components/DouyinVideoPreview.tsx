@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useI18n } from "../lib/language";
 import type { DouyinVideoDataDTO } from "../types";
-import { ImmersiveVideo } from "./ImageLightbox";
-import { SideDrawer } from "./SideDrawer";
+import { MediaLightbox } from "./ImageLightbox";
 import { api } from "../lib/api";
 import {naturalMediaRatio} from '../lib/squareNoteMedia';
-import { PlatformMediaCard, PlatformVideoError, PlatformVideoSource } from "./PlatformMediaCard";
+import { PlatformMediaCard } from "./PlatformMediaCard";
 
 export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
   if (!value || typeof value !== "object") return false;
@@ -25,23 +24,6 @@ export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
   } catch {
     return false;
   }
-}
-
-function DouyinDrawerPlayer({ imageUrl, onClose, onPlaybackError, playbackKey, video }: { imageUrl?: string; onClose: () => void; onPlaybackError: () => void; playbackKey: number; video: DouyinVideoDataDTO }) {
-  const { t } = useI18n();
-
-  return <div className="platform-video-shell">
-    <ImmersiveVideo
-      key={playbackKey}
-      drawerDismiss
-      context={<PlatformVideoSource author={video.author || t("douyin.creator")} href={video.canonical_url} label={t("douyin.openOriginal")} logo="/icons/douyin-logo.svg" source={t("douyin.source")} title={video.title || t("douyin.video")} />}
-      loop
-      onClose={onClose}
-      onError={onPlaybackError}
-      poster={imageUrl}
-      src={video.video_url || ""}
-    />
-  </div>;
 }
 
 export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string;fitMedia?:boolean }) {
@@ -94,9 +76,11 @@ export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false }
 
   return <>
     <PlatformMediaCard fitMedia={fitMedia} aspectRatio={naturalMediaRatio(currentVideo.width,currentVideo.height)} author={currentVideo.author} cover={currentImageUrl} kindLabel={t("social.video")} logo="/icons/douyin-logo.svg" onClick={() => void openPlayer()} opening={opening} playIcon={playable ? "play_arrow" : "open_in_new"} source={t("social.douyin")} title={currentVideo.title || t("douyin.video")} />
-    <SideDrawer floatingBack={false} fullscreen headerless historyKey={`douyin-video-${currentVideo.video_id}`} open={open} onClose={() => setOpen(false)} title={currentVideo.title || t("douyin.video")}>
-      {open && currentVideo.video_url ? <DouyinDrawerPlayer imageUrl={currentImageUrl} onClose={() => setOpen(false)} onPlaybackError={() => void handlePlaybackError()} playbackKey={playbackKey} video={currentVideo} /> : null}
-      {playbackFailed ? <PlatformVideoError href={currentVideo.canonical_url} label={t("douyin.openOriginal")}>{t("douyin.playbackUnavailable")}</PlatformVideoError> : null}
-    </SideDrawer>
+    {open && <MediaLightbox index={0} items={[{id: playbackKey, uri: currentVideo.video_url || '', kind: 'video', posterUri: currentImageUrl,
+      width: currentVideo.width, height: currentVideo.height, loop: true, autoPlay: true, onPlaybackError: () => void handlePlaybackError()}]}
+      onIndexChange={() => undefined} onClose={() => setOpen(false)} altPrefix={currentVideo.title || t('douyin.video')}
+      historyKey={`douyin-video-${currentVideo.video_id}`}
+      source={{name: t('social.douyin'), url: currentVideo.canonical_url, logo: '/icons/douyin-logo.svg', author: currentVideo.author}}
+      sharedDetail={<article className="media-drawer-article"><h2>{currentVideo.title || t('douyin.video')}</h2>{playbackFailed && <p role="status">{t('douyin.playbackUnavailable')}</p>}</article>} />}
   </>;
 }

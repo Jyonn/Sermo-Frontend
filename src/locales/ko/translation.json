@@ -2950,7 +2950,29 @@
   "photo.mosaicHelp": "가리고 싶은 부분을 문지르세요.",
   "photo.keepLocation": "촬영 위치 유지",
   "photo.keepDescription": "사진 설명 유지",
-  "photo.privacyHelp": "위치와 설명은 기본적으로 삭제됩니다. 원본에 있는 정보는 유지할 수 있습니다.",
+  "photo.privacyHelp": "사진의 위치와 설명은 있는 경우 기본으로 유지됩니다."
+,"photo.filter": "스타일"
+,"photo.sent": "전송됨"
+,"mediaDrawer.thumbnails": "썸네일"
+,"mediaDrawer.asset": "항목 {{count}}"
+,"mediaDrawer.info": "정보"
+,"mediaDrawer.adjust": "조정"
+,"mediaDrawer.seek": "재생 위치"
+,"mediaDrawer.mute": "음소거"
+,"mediaDrawer.unmute": "음소거 해제"
+,"mediaDrawer.linkCopied": "링크 복사됨"
+,"mediaDrawer.cropRatio": "자르기 비율"
+,"mediaDrawer.originalRatio": "원본 비율"
+,"mediaDrawer.freeRatio": "자유 형식"
+,"mediaDrawer.squareRatio": "정사각형"
+,"mediaDrawer.angle": "회전 각도"
+,"mediaDrawer.brushSize": "브러시 크기"
+,"mediaDrawer.filter.original": "원본"
+,"mediaDrawer.filter.vivid": "선명하게"
+,"mediaDrawer.filter.warm": "따뜻하게"
+,"mediaDrawer.filter.cool": "차갑게"
+,"mediaDrawer.filter.mono": "흑백"
+,"mediaDrawer.filter.soft": "부드럽게",
   "photo.flashPrivacy": "사라지는 사진은 내장 정보를 삭제합니다.",
   "photo.enableFlash": "사라지는 사진으로 보내기",
   "photo.flashHelp": "받는 사람마다 한 번, 3초 동안 볼 수 있습니다. 보낸 사람은 다시 보거나 전달할 수 있습니다.",

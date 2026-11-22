@@ -100,7 +100,7 @@ function SurfacePreview({entry, title, close}: {entry: OverlayInventoryEntry; ti
     ]} onChange={async next => {setOption(next);}} />
   </SettingsDialog>;
   if (entry.kind === 'modal') return <SettingsDialog open title={title} onClose={close}>{sample}</SettingsDialog>;
-  if (entry.kind === 'media') return <MediaLightbox index={mediaIndex} initialImmersive={entry.component === 'ImmersiveVideo'}
+  if (entry.kind === 'media') return <MediaLightbox index={mediaIndex}
     altPrefix={title} items={[{kind: 'image', uri: photo}, {kind: 'image', uri: '/themes/christmas-2026/village.webp'}]}
     onIndexChange={setMediaIndex} onClose={close} onJumpToMessage={close} />;
   if (entry.kind === 'popover') return <section className="atlas-feedback-preview" aria-label={title}>

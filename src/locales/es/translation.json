@@ -2950,7 +2950,29 @@
   "photo.mosaicHelp": "Pinta sobre las zonas que quieras ocultar.",
   "photo.keepLocation": "Conservar ubicación",
   "photo.keepDescription": "Conservar descripción",
-  "photo.privacyHelp": "La ubicación y la descripción se eliminan de forma predeterminada. Puedes conservar las que figuren en el original.",
+  "photo.privacyHelp": "La ubicación y la descripción se conservan si están disponibles."
+,"photo.filter": "Estilos"
+,"photo.sent": "Enviada"
+,"mediaDrawer.thumbnails": "Miniaturas"
+,"mediaDrawer.asset": "Elemento {{count}}"
+,"mediaDrawer.info": "Información"
+,"mediaDrawer.adjust": "Ajustar"
+,"mediaDrawer.seek": "Posición de reproducción"
+,"mediaDrawer.mute": "Silenciar"
+,"mediaDrawer.unmute": "Activar sonido"
+,"mediaDrawer.linkCopied": "Enlace copiado"
+,"mediaDrawer.cropRatio": "Proporción de recorte"
+,"mediaDrawer.originalRatio": "Proporción original"
+,"mediaDrawer.freeRatio": "Libre"
+,"mediaDrawer.squareRatio": "Cuadrado"
+,"mediaDrawer.angle": "Ángulo de rotación"
+,"mediaDrawer.brushSize": "Tamaño del pincel"
+,"mediaDrawer.filter.original": "Original"
+,"mediaDrawer.filter.vivid": "Vívido"
+,"mediaDrawer.filter.warm": "Cálido"
+,"mediaDrawer.filter.cool": "Frío"
+,"mediaDrawer.filter.mono": "Monocromo"
+,"mediaDrawer.filter.soft": "Suave",
   "photo.flashPrivacy": "Las fotos efímeras se envían sin metadatos integrados.",
   "photo.enableFlash": "Enviar como foto efímera",
   "photo.flashHelp": "Cada destinatario puede verla una vez durante 3 segundos. El remitente puede volver a verla y reenviarla.",

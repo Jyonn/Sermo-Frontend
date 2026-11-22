@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { mergeChatImages, readNewerChatImagePage, type ChatPreviewImage } from '../src/lib/chatImageHistory.ts';
+import { mergeChatImages, readNewerChatImagePage, readOlderChatMediaPage, type ChatPreviewImage } from '../src/lib/chatImageHistory.ts';
 import type { ChatMessageDTO } from '../src/types.ts';
 
 const image = (id: number, uri = `/image-${id}`): ChatPreviewImage => ({ uri, messageId: id });
@@ -24,12 +24,22 @@ test('forward browsing skips text-only pages and stops at the next image or hist
   const result = await readNewerChatImagePage(10, async (cursor) => {
     cursors.push(cursor);
     return cursor === 10 ? Array.from({ length: 100 }, (_, index) => ({ message_id: 11 + index, type: 0 })) as ChatMessageDTO[]
-      : [{ message_id: 111, type: 1, payload: { uri: '/next' } }] as ChatMessageDTO[];
+      : [{ message_id: 111, type: 4, payload: { uri: '/next' } }] as ChatMessageDTO[];
   }, new AbortController().signal);
   assert.deepEqual(cursors, [10, 110]);
   assert.equal(result.after, 111);
   assert.equal(result.hasMore, false);
   assert.equal(result.rows[0].payload?.uri, '/next');
+});
+
+test('older mixed pages keep the nearer cursor when photos and videos have different density', async () => {
+  const rows = (ids: number[], type: number) => ids.map(message_id => ({message_id, type})) as ChatMessageDTO[];
+  const result = await readOlderChatMediaPage(100, async type => type === 1
+    ? {items: rows([98, 95, 91], type), has_more: true}
+    : {items: rows([99, 93, 22], type), has_more: true});
+  assert.deepEqual(result.rows.map(row => row.message_id).sort((a, b) => a - b), [91, 93, 95, 98, 99]);
+  assert.equal(result.before, 91);
+  assert.equal(result.hasMore, true);
 });
 
 test('cancelled history browsing does not continue requesting pages', async () => {
@@ -46,14 +56,12 @@ test('cancelled history browsing does not continue requesting pages', async () =
 test('chat browsing uses scoped history, cancellation and stable slide identities', async () => {
   const read = (name: string) => readFile(new URL(`../src/components/${name}`, import.meta.url), 'utf8');
   const chat = await read('ChatImagePreview.tsx');
-  const lightbox = await read('ImageLightbox.tsx');
-  const plate = await read('PhotoArchivePlate.tsx');
-  assert.match(chat, /api.searchMessages\(\{ chat_id: chatId, type: 1, before:/);
+  const drawer = await read('MediaDrawer.tsx');
+  assert.match(chat, /api.searchMessages\(\{ chat_id: chatId, type, before,/);
   assert.match(chat, /api.getMessages\(\{ chat_id: chatId, after,/);
   assert.match(chat, /readNewerChatImagePage\(cursors.current.newer/);
   assert.match(chat, /controller\?\.abort\(\)/);
   assert.match(chat, /next !== inside.current/);
-  assert.match(lightbox, /key=\{item.id \?\?/);
-  assert.match(lightbox, /Math.hypot\(event.clientX - gesture.x, event.clientY - gesture.y\)/);
-  assert.match(plate, /closest\('button,a,/);
+  assert.match(drawer, /key=\{entry.id \?\?/);
+  assert.match(await read('useMediaDrawerGestures.ts'), /Math.hypot\(dx, dy\) <= 8/);
 });

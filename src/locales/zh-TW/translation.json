@@ -2970,7 +2970,29 @@
   "photo.mosaicHelp": "在想遮蔽的位置塗抹。",
   "photo.keepLocation": "保留拍攝位置",
   "photo.keepDescription": "保留照片說明",
-  "photo.privacyHelp": "預設移除位置與說明。可保留原始照片已有的資訊。",
+  "photo.privacyHelp": "預設保留原照片中的位置和說明。"
+,"photo.filter": "風格"
+,"photo.sent": "已傳送"
+,"mediaDrawer.thumbnails": "縮圖"
+,"mediaDrawer.asset": "第 {{count}} 項"
+,"mediaDrawer.info": "資訊"
+,"mediaDrawer.adjust": "調整"
+,"mediaDrawer.seek": "跳至播放位置"
+,"mediaDrawer.mute": "靜音"
+,"mediaDrawer.unmute": "取消靜音"
+,"mediaDrawer.linkCopied": "已複製連結"
+,"mediaDrawer.cropRatio": "裁剪比例"
+,"mediaDrawer.originalRatio": "原始比例"
+,"mediaDrawer.freeRatio": "自由格式"
+,"mediaDrawer.squareRatio": "正方形"
+,"mediaDrawer.angle": "旋轉角度"
+,"mediaDrawer.brushSize": "筆刷大小"
+,"mediaDrawer.filter.original": "原片"
+,"mediaDrawer.filter.vivid": "鮮明"
+,"mediaDrawer.filter.warm": "暖調"
+,"mediaDrawer.filter.cool": "冷調"
+,"mediaDrawer.filter.mono": "黑白"
+,"mediaDrawer.filter.soft": "柔和",
   "photo.flashPrivacy": "閃圖會移除照片內嵌資訊。",
   "photo.enableFlash": "以閃圖傳送",
   "photo.flashHelp": "每位收件者可查看一次，顯示 3 秒。傳送者可重複查看及轉傳。",

@@ -2950,7 +2950,29 @@
   "photo.mosaicHelp": "隠したい部分をなぞります。",
   "photo.keepLocation": "撮影場所を残す",
   "photo.keepDescription": "写真の説明を残す",
-  "photo.privacyHelp": "撮影場所と説明は既定で削除されます。元の写真にある情報は残せます。",
+  "photo.privacyHelp": "位置情報とキャプションがある場合は、既定で保持します。"
+,"photo.filter": "スタイル"
+,"photo.sent": "送信済み"
+,"mediaDrawer.thumbnails": "サムネイル"
+,"mediaDrawer.asset": "{{count}} 番目"
+,"mediaDrawer.info": "情報"
+,"mediaDrawer.adjust": "調整"
+,"mediaDrawer.seek": "再生位置"
+,"mediaDrawer.mute": "ミュート"
+,"mediaDrawer.unmute": "ミュートを解除"
+,"mediaDrawer.linkCopied": "リンクをコピーしました"
+,"mediaDrawer.cropRatio": "切り抜きの比率"
+,"mediaDrawer.originalRatio": "元の比率"
+,"mediaDrawer.freeRatio": "自由"
+,"mediaDrawer.squareRatio": "正方形"
+,"mediaDrawer.angle": "回転角度"
+,"mediaDrawer.brushSize": "ブラシのサイズ"
+,"mediaDrawer.filter.original": "オリジナル"
+,"mediaDrawer.filter.vivid": "鮮やか"
+,"mediaDrawer.filter.warm": "暖色"
+,"mediaDrawer.filter.cool": "寒色"
+,"mediaDrawer.filter.mono": "モノクロ"
+,"mediaDrawer.filter.soft": "ソフト",
   "photo.flashPrivacy": "消える写真から埋め込み情報を削除します。",
   "photo.enableFlash": "消える写真として送信",
   "photo.flashHelp": "受信者は一度だけ、3 秒間閲覧できます。送信者は繰り返し閲覧でき、転送もできます。",

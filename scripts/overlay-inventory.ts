@@ -12,7 +12,7 @@ function kindFor(component: string): OverlayInventoryEntry['kind'] | undefined {
   if (component.endsWith('Drawer')) return 'drawer';
   if (component.endsWith('Sheet') || component === 'ChatTargetPicker') return 'sheet';
   if (/(?:Dialog|Modal)$/.test(component) || ['SelectControl', 'SettingSelect', 'GestureLockOverlay'].includes(component)) return 'modal';
-  if (component.endsWith('Lightbox') || component === 'ImmersiveVideo') return 'media';
+  if (component.endsWith('Lightbox') || component === 'MediaDrawer') return 'media';
   if (/(?:Popover|Tooltip|HeadingMenu|ContextMenu)$/.test(component)) return 'popover';
   if (['Snackbar', 'InlineAlert', 'FeedbackState', 'Tour', 'AppToast'].includes(component)) return 'feedback';
   if (['ExternalAppAction', 'ExternalAppIdentity', 'OverlayIconButton', 'DrawerDismissButton', 'PageTabs', 'TabPageHeader', 'SettingRow', 'SettingDialogRow', 'SettingSwitch', 'VerificationCodeInput'].includes(component)) return 'controls';

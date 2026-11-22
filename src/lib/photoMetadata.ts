@@ -1,9 +1,18 @@
-export interface PhotoMetadata { latitude?: number; longitude?: number; description?: string }
+export interface PhotoMetadata {
+  latitude?: number;
+  longitude?: number;
+  description?: string;
+  make?: string;
+  model?: string;
+  dateTaken?: string;
+  lens?: string;
+}
 
 export async function readPhotoMetadata(file: File): Promise<PhotoMetadata> {
   try {
-    const {parse} = await import('exifr');
-    const tags = await parse(file, {gps: true, xmp: true, iptc: true});
+    const exifr = await import('exifr');
+    const parse = exifr.parse ?? exifr.default.parse;
+    const tags = await parse(await file.arrayBuffer(), {gps: true, xmp: true, iptc: true, reviveValues: false});
     const metadata: PhotoMetadata = {};
     if (Number.isFinite(tags?.latitude) && Math.abs(tags.latitude) <= 90
         && Number.isFinite(tags?.longitude) && Math.abs(tags.longitude) <= 180) {
@@ -13,21 +22,35 @@ export async function readPhotoMetadata(file: File): Promise<PhotoMetadata> {
     const description = [tags?.ImageDescription, tags?.Caption, tags?.description]
       .find(value => typeof value === 'string' && value.trim());
     if (description) metadata.description = description.trim().replaceAll('\0', '').slice(0, 1000);
+    const clean = (value: unknown) => typeof value === 'string' ? value.trim().replace(/\0/g, '').slice(0, 160) : undefined;
+    metadata.make = clean(tags?.Make);
+    metadata.model = clean(tags?.Model);
+    metadata.lens = clean(tags?.LensModel);
+    const date = clean(tags?.DateTimeOriginal ?? tags?.CreateDate ?? tags?.ModifyDate);
+    if (date && /^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}$/.test(date)) metadata.dateTaken = date;
     return metadata;
   } catch {
     return {};
   }
 }
 
-// Build a fresh TIFF block containing only the two categories the user opted in to.
+// Use selected tags and fresh offsets so removed data and stale orientation never travel with the export.
 function selectedExif(metadata: PhotoMetadata, location: boolean, description: boolean) {
-  const caption = description && metadata.description ? new TextEncoder().encode(metadata.description + '\0') : null;
+  const encode = (value: string | undefined) => value ? new TextEncoder().encode(value + '\0') : null;
+  const asciiEntries = (fields: Array<[number, string | undefined]>) => fields.flatMap(([tag, value]) => {
+    const bytes = encode(value);
+    return bytes ? [{tag, bytes}] : [];
+  });
+  const root = asciiEntries([[0x010e, description ? metadata.description : undefined], [0x010f, metadata.make], [0x0110, metadata.model]]);
+  const camera = asciiEntries([[0x9003, metadata.dateTaken], [0xa434, metadata.lens]]);
   const hasGps = location && metadata.latitude !== undefined && metadata.longitude !== undefined;
-  if (!caption && !hasGps) return null;
-  const count = Number(Boolean(caption)) + Number(hasGps);
-  const rootSize = 14 + count * 12;
-  const gpsOffset = rootSize + (caption && caption.length > 4 ? caption.length + caption.length % 2 : 0);
-  const output = new Uint8Array(gpsOffset + (hasGps ? 102 : 0));
+  const count = root.length + Number(Boolean(camera.length)) + Number(hasGps);
+  if (!count) return null;
+  const cameraOffset = 14 + count * 12;
+  const gpsOffset = cameraOffset + (camera.length ? 6 + camera.length * 12 : 0);
+  let nextData = gpsOffset + (hasGps ? 102 : 0);
+  const dataSize = [...root, ...camera].reduce((size, {bytes}) => size + (bytes.length > 4 ? bytes.length + bytes.length % 2 : 0), 0);
+  const output = new Uint8Array(nextData + dataSize);
   const view = new DataView(output.buffer);
   const u16 = (offset: number, value: number) => view.setUint16(offset, value, true);
   const u32 = (offset: number, value: number) => view.setUint32(offset, value, true);
@@ -37,12 +60,23 @@ function selectedExif(metadata: PhotoMetadata, location: boolean, description: b
   const entry = (offset: number, tag: number, type: number, amount: number, data: number) => {
     u16(offset, tag); u16(offset + 2, type); u32(offset + 4, amount); u32(offset + 8, data);
   };
-  if (caption) {
-    entry(10, 0x010e, 2, caption.length, caption.length > 4 ? rootSize : 0);
-    output.set(caption, caption.length > 4 ? rootSize : 18);
+  const writeAscii = (fields: ReturnType<typeof asciiEntries>, directory: number) => {
+    fields.forEach(({tag, bytes}, index) => {
+      const offset = directory + index * 12;
+      const inline = bytes.length <= 4;
+      entry(offset, tag, 2, bytes.length, inline ? 0 : nextData);
+      output.set(bytes, inline ? offset + 8 : nextData);
+      if (!inline) nextData += bytes.length + bytes.length % 2;
+    });
+  };
+  writeAscii(root, 10);
+  if (camera.length) {
+    entry(10 + root.length * 12, 0x8769, 4, 1, cameraOffset);
+    u16(cameraOffset, camera.length);
+    writeAscii(camera, cameraOffset + 2);
   }
   if (hasGps) {
-    entry(10 + (caption ? 12 : 0), 0x8825, 4, 1, gpsOffset);
+    entry(10 + (root.length + Number(Boolean(camera.length))) * 12, 0x8825, 4, 1, gpsOffset);
     u16(gpsOffset, 4);
     [metadata.latitude!, metadata.longitude!].forEach((coordinate, index) => {
       const offset = gpsOffset + 2 + index * 24;

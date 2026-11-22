@@ -1,12 +1,29 @@
-import type { ChatMessageDTO, ImageMetadataDTO, TinyUserDTO } from "../types";
+import type { ChatMessageDTO, ImageMetadataDTO, TinyUserDTO, VideoMetadataDTO } from "../types";
 
 export interface ChatPreviewImage {
   uri: string;
   messageId: number | null;
-  metadata?: ImageMetadataDTO | null;
+  kind?: "image" | "video";
+  metadata?: ImageMetadataDTO | VideoMetadataDTO | null;
   posterUri?: string | null;
   owner?: TinyUserDTO | null;
   createdAt?: number;
+}
+
+export const chatMediaMessageTypes = [1, 4] as const;
+export const isChatHistoryMedia = (row: ChatMessageDTO) =>
+  (row.type === chatMediaMessageTypes[0] || row.type === chatMediaMessageTypes[1]) && Boolean(row.payload?.uri);
+
+export async function readOlderChatMediaPage(
+  before: number,
+  read: (type: number) => Promise<{items: ChatMessageDTO[]; has_more: boolean}>,
+) {
+  const pages = await Promise.all(chatMediaMessageTypes.map(read));
+  // Use the nearer boundary so one busy media type cannot skip older rows of the other type.
+  const boundary = Math.max(0, ...pages.filter(page => page.has_more && page.items.length)
+    .map(page => Math.min(...page.items.map(row => row.message_id))));
+  const rows = pages.flatMap(page => page.items).filter(row => row.message_id >= boundary && row.message_id < before);
+  return {rows, before: boundary || Math.min(before, ...rows.map(row => row.message_id)), hasMore: boundary > 0 && boundary < before};
 }
 
 export async function readNewerChatImagePage(after: number, read: (cursor: number) => Promise<ChatMessageDTO[]>, signal: AbortSignal) {
@@ -19,7 +36,7 @@ export async function readNewerChatImagePage(after: number, read: (cursor: numbe
     const next = Math.max(after, ...rows.map((row) => row.message_id));
     hasMore = rows.length === 100 && next > after;
     after = next;
-  } while (hasMore && !rows.some((row) => row.type === 1 && row.payload?.uri));
+  } while (hasMore && !rows.some(isChatHistoryMedia));
   return { rows, hasMore, after };
 }
 

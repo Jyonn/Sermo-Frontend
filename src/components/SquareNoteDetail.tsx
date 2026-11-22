@@ -9,11 +9,10 @@ import {UserAvatar} from './UserAvatar';
 import {OfficialBadge} from './OfficialBadge';
 import {LinkPreviewCard} from './LinkPreviewCard';
 import {isStillfolioCollection,revalidateCollection} from './StillfolioPreview';
-import {MediaLightbox} from './ImageLightbox';
+import {MediaLightbox, type MediaLightboxItem} from './ImageLightbox';
 import {MediaMetadataPanel} from './MediaMetadataPanel';
 import {MediaWaitFeedback} from './MediaWaitFeedback';
 import {StatementVideoThumbnail} from './StatementVideoThumbnail';
-import {BottomSheet} from './BottomSheet';
 import {DrawerDismissButton, OverlayIconButton} from './OverlayIconButton';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareNoteDetail.css';
@@ -26,7 +25,7 @@ function NoteImage({uri,poster,selected,near,external,onOpen,onSize}:{uri:string
 interface Props{
   panel?:boolean;
   statement:SquareStatementDTO;discussion:ReactNode;composer:ReactNode;text:ReactNode;canInteract:boolean;
-  onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onVideo:()=>void;onLocation:()=>void;
+  onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onLocation:()=>void;
 }
 export function SquareNoteDetail(p:Props){
   const {t,language}=useI18n(),s=p.statement;
@@ -37,9 +36,23 @@ export function SquareNoteDetail(p:Props){
   const currentIndex=useRef(index);currentIndex.current=index;
   useEffect(()=>{setCollection(initial);if(!initial||!s.external_media?.preview_id)return;let live=true;void revalidateCollection(s.external_media.preview_id).then(next=>{if(live&&next?.canonical_url===initial.canonical_url)setCollection(next)}).catch(()=>undefined);return()=>{live=false}},[initial,s.external_media?.preview_id]);
   const photos=useMemo(()=>squareNotePhotos(s,collection),[s,collection]);
-  useEffect(()=>{setIndex(current=>Math.max(0,Math.min(current,photos.length-1)));setLightbox(current=>current===null?null:photos.length?Math.max(0,Math.min(current,photos.length-1)):null)},[photos.length]);
+  useEffect(()=>{setIndex(current=>Math.max(0,Math.min(current,photos.length-1)))},[photos.length]);
   useLayoutEffect(()=>{const el=track.current;if(!el)return;const align=()=>{el.scrollLeft=el.clientWidth*currentIndex.current};align();const observer=new ResizeObserver(align);observer.observe(el);return()=>observer.disconnect()},[photos.length]);
   const audio=s.media.find(item=>item.kind==='audio'),video=s.media.find(item=>item.kind==='video'),active=photos[index];
+  const owner = s.is_anonymous ? null : s.user;
+  const assets: MediaLightboxItem[] = photos.map(photo => ({
+    uri: photo.uri, kind: 'image', posterUri: photo.poster, imageMetadata: photo.metadata, owner,
+    createdAt: s.created_at, referrerPolicy: photo.external ? 'no-referrer' : undefined,
+  }));
+  if (video) assets.push({
+    id: video.media_id, uri: video.uri, kind: 'video', posterUri: video.thumbnail_uri, owner, createdAt: s.created_at,
+    width: video.metadata?.pixel_width, height: video.metadata?.pixel_height,
+    detail: video.metadata?.status === 1 ? <MediaMetadataPanel kind="video" metadata={video.metadata} owner={owner} /> : undefined,
+  });
+  const openAsset = (position: number, showInfo = false) => {
+    setInfo(showInfo);
+    setLightbox(position);
+  };
   const activeRatio=active?(imageRatios[active.uri]??naturalMediaRatio(active.metadata?.pixel_width,active.metadata?.pixel_height)??4/3):4/3;
   const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const page=(next:number)=>{const el=track.current;if(el)el.scrollTo({left:next*el.clientWidth,behavior:reduce()?'auto':'smooth'})};
@@ -48,7 +61,7 @@ export function SquareNoteDetail(p:Props){
       {photos.map((photo,i)=><NoteImage key={photo.uri} uri={photo.uri} poster={photo.poster} external={photo.external} selected={i===index} near={Math.abs(i-index)<=1} onOpen={()=>setLightbox(i)} onSize={(width,height)=>{const ratio=naturalMediaRatio(width,height);if(ratio)setImageRatios(current=>current[photo.uri]===ratio?current:{...current,[photo.uri]:ratio})}}/>)}
     </div>
     {collection?<span className="square-reader-provider"><img src={stillfolioMark} alt="StillFolio"/></span>:null}
-    <button className="square-reader-photo-info" onClick={()=>setInfo(true)} type="button"><span className="material-symbols-outlined">info</span>{t('square.photoInfo')}</button>
+    <button className="square-reader-photo-info" onClick={()=>openAsset(index,true)} type="button"><span className="material-symbols-outlined">info</span>{t('square.photoInfo')}</button>
     {photos.length>1?<div className="square-reader-pagination"><button disabled={index===0} aria-label={t('media.previousImage')} onClick={()=>page(index-1)} type="button"><span className="material-symbols-outlined">chevron_left</span></button><div className="square-reader-dots" role="group" aria-label={t('square.photo')} >{photos.map((photo,i)=><button key={photo.uri} aria-label={`${i+1} / ${photos.length}`} aria-current={i===index?'true':undefined} onClick={()=>page(i)} type="button"><i/></button>)}</div><span>{index+1} / {photos.length}</span><button disabled={index===photos.length-1} aria-label={t('media.nextImage')} onClick={()=>page(index+1)} type="button"><span className="material-symbols-outlined">chevron_right</span></button></div>:null}
   </section>:null;
   return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
@@ -60,7 +73,7 @@ export function SquareNoteDetail(p:Props){
     </header>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
       {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} fitMedia/></div>:null}
-      {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={p.onVideo}/>:null}
+      {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={()=>openAsset(photos.length)}/>:null}
       {audio?<audio className="square-reader-audio" src={audio.uri} controls preload="metadata" onPlay={event=>claimMediaPlayback(event.currentTarget)}/>:null}
       {s.chat_record?<button className="square-reader-chat-record" onClick={()=>window.dispatchEvent(new CustomEvent('sermo:forward-bundle',{detail:s.chat_record}))} type="button"><span className="material-symbols-outlined">forum</span>{t('message.forwardBundleSnapshot')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
       {s.text?<div className="square-reader-text">{p.text}</div>:null}
@@ -70,7 +83,8 @@ export function SquareNoteDetail(p:Props){
       <div ref={comments}>{p.discussion}</div>
     </div></div></div>
     <footer className="square-reader-footer"><div className="square-reader-composer">{p.composer||<span>{t('square.readOnlyHint')}</span>}</div><button className={s.liked?'is-liked':''} disabled={!p.canInteract} aria-label={`${t('square.like')} ${s.like_count}`} aria-pressed={s.liked} onClick={p.onLike} type="button"><span className="material-symbols-outlined">favorite</span><small>{s.like_count||t('square.like')}</small></button><button aria-label={t('square.comments')} onClick={()=>comments.current?.scrollIntoView({behavior:reduce()?'auto':'smooth',block:'start'})} type="button"><span className="material-symbols-outlined">chat_bubble_outline</span><small>{s.comment_count}</small></button></footer>
-    <BottomSheet open={info} onClose={()=>setInfo(false)} title={t('square.photoInfo')} bodyClassName="square-reader-info">{active?<><small>{index+1} / {photos.length}</small><MediaMetadataPanel kind="image" metadata={active.metadata} owner={s.is_anonymous?null:s.user}/>{collection?<a href={collection.canonical_url} target="_blank" rel="noreferrer">{t('social.openSource')} ↗</a>:null}</>:null}</BottomSheet>
-    {lightbox!==null&&photos.length?<MediaLightbox initialImmersive index={lightbox} items={photos.map(photo=>({uri:photo.uri,kind:'image',posterUri:photo.poster,imageMetadata:photo.metadata,owner:s.is_anonymous?null:s.user,referrerPolicy:photo.external?'no-referrer':undefined}))} onClose={()=>setLightbox(null)} onIndexChange={next=>{setLightbox(next);setIndex(next);page(next)}}/>:null}
+    {lightbox !== null && assets.length > 0 ? <MediaLightbox initialInfo={info} index={lightbox} items={assets}
+      source={collection ? {name: 'StillFolio', logo: stillfolioMark, url: collection.canonical_url} : undefined}
+      onClose={() => setLightbox(null)} onIndexChange={next => {setLightbox(next); if (next < photos.length) {setIndex(next); page(next);}}} /> : null}
   </article>;
 }
