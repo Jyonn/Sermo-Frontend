@@ -30,6 +30,7 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { InputDialog } from "../components/InputDialog";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
+import { DrawerDismissButton } from "../components/OverlayIconButton";
 import {SquareFeedHeader} from "../components/SquareFeedHeader";
 import {SquareActivityTile} from "../components/SquareActivityTile";
 import {SquareCreationSheet,type SquareCreationKind} from '../components/SquareCreationSheet';
@@ -45,7 +46,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
-import {SquareNoteDetail} from '../components/SquareNoteDetail';
+import {SquareNoteDetail,SquareNoteDetailHeader} from '../components/SquareNoteDetail';
 import {squareDetailView,squareStatementSearch} from '../lib/squareNoteMedia';
 import {SquareChannelPager} from '../components/SquareChannelPager';
 import {SquareChannelPage} from '../components/SquareChannelPage';
@@ -550,7 +551,7 @@ export default function SquarePage() {
   const noteDetailActive=routedStatementId!==null&&squareDetailView(location.search)==='note';
   const [noteMoreOpen,setNoteMoreOpen]=useState(false);
   useEffect(()=>setNoteMoreOpen(false),[routedStatementId,noteDetailActive]);
-  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; previewMessages?: ChatMessageDTO[]; firstPersonUserId?: number | null; text?: string } } | null;
+  const routeState = location.state as { squareInlineFocus?: boolean; squareStatementDrawer?: boolean; squareChatRecordDraft?: { messageIds?: number[]; previewMessages?: ChatMessageDTO[]; firstPersonUserId?: number | null; text?: string } } | null;
   const inlineRouteActive = routedStatementId !== null && !noteDetailActive && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
 
@@ -1981,7 +1982,7 @@ export default function SquarePage() {
     return <Fragment>
       <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`}>
         {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
-          <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
+          <DrawerDismissButton onClick={closeInlineStatement} />
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
@@ -1991,9 +1992,21 @@ export default function SquarePage() {
     </Fragment>;
   };
 
-  const closeNoteDetail=()=>{setReplyTarget(null);if(window.history.length>1)navigate(-1);else navigate('/app/square',{replace:true})};
-  const noteDetailContent=activeCommentStatement?<SquareNoteDetail key={activeCommentStatement.statement_id} panel={noteDesktopPanel} statement={activeCommentStatement} text={<InlineRichText text={activeCommentStatement.text} emoticons={activeCommentStatement.inline_emoticons}/>} discussion={discussionContent} composer={commentComposer} canInteract={canPublish}
-    onBack={closeNoteDetail} onProfile={()=>openUserProfile(activeCommentStatement.user)} onShare={()=>openStatementShare(activeCommentStatement)} onMore={()=>setNoteMoreOpen(true)} onLike={()=>void toggleStatementLike(activeCommentStatement)} onLocation={()=>activeCommentStatement.location&&setChatRecordLocation({location:activeCommentStatement.location,owner:activeCommentStatement.user})}/>:<div className="square-reader"><header className="square-reader-header"><button aria-label={t('common.back')} onClick={closeNoteDetail} type="button"><span className="material-symbols-outlined">arrow_back</span></button></header><FeedbackState tone={commentLoadError?'error':'loading'} title={commentLoadError||t('common.loading')} action={commentLoadError?<button className="secondary-button" onClick={()=>setCommentReload(value=>value+1)} type="button">{t('common.retry')}</button>:undefined}/></div>;
+  const closeStatementDrawer = () => {
+    setReplyTarget(null);
+    if (routeState?.squareStatementDrawer || window.history.state?.idx > 0) navigate(-1);
+    else navigate({ pathname: "/app/square", search: squareStatementSearch(location.search, "classic") }, { replace: true });
+  };
+  const noteDetailContent = activeCommentStatement ? <SquareNoteDetail key={activeCommentStatement.statement_id} panel={noteDesktopPanel} statement={activeCommentStatement}
+    text={<InlineRichText text={activeCommentStatement.text} emoticons={activeCommentStatement.inline_emoticons}/>} discussion={discussionContent} composer={commentComposer} canInteract={canPublish}
+    onBack={closeStatementDrawer} onProfile={()=>openUserProfile(activeCommentStatement.user)} onShare={()=>openStatementShare(activeCommentStatement)}
+    onMore={()=>setNoteMoreOpen(true)} onLike={()=>void toggleStatementLike(activeCommentStatement)}
+    onLocation={()=>activeCommentStatement.location&&setChatRecordLocation({location:activeCommentStatement.location,owner:activeCommentStatement.user})} />
+    : <div className={`square-reader${noteDesktopPanel ? " is-panel" : ""}`}>
+      <SquareNoteDetailHeader panel={noteDesktopPanel} onDismiss={closeStatementDrawer} />
+      <FeedbackState tone={commentLoadError ? "error" : "loading"} title={commentLoadError || t("common.loading")}
+        action={commentLoadError ? <button className="secondary-button" onClick={() => setCommentReload(value => value + 1)} type="button">{t("common.retry")}</button> : undefined} />
+    </div>;
   const squareChannels:SquareChannel[]=['activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
   const currentChannel:SquareChannel=activityTab?'activities':effectiveFeedMode;
   const handleChannelScroll=(event:ReactUIEvent<HTMLElement>)=>{
@@ -2148,11 +2161,8 @@ export default function SquarePage() {
       <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {noteDesktopPanel?noteDetailContent:inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <header className="square-desktop-detail-header">
-            <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
             <strong className="native-panel-title">{t("square.statementDetail")}</strong>
-            <div className="square-desktop-detail-actions">
-              <button aria-label={t("common.close")} className="native-panel-close" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">close</span></button>
-            </div>
+            <DrawerDismissButton onClick={closeInlineStatement} />
           </header>
           <div className="square-desktop-detail-scroll">
             <div className="native-current-statement">{desktopWorkspace ? renderFeedStatement(activeCommentStatement, true) : null}</div>
@@ -2279,7 +2289,7 @@ export default function SquarePage() {
       <SquareVoiceRecorder open={voiceSheetOpen} recording={recording} starting={recordingStarting} duration={voiceDuration} maximum={MAX_AUDIO_SECONDS} preview={voicePreview} error={voiceError}
         onRecord={()=>void startRecording()} onClose={()=>{recordingRequestRef.current++;setRecordingStarting(false);if(recording)stopRecording();setVoiceSheetOpen(false)}}
         onClear={()=>{setVoiceFile(null);setVoiceDuration(0)}} onDone={()=>{setVoiceSheetOpen(false);setComposerOpen(true)}}/>
-      <SideDrawer className="square-note-detail-drawer" historyMode="route" onClose={closeNoteDetail} open={noteDetailActive&&!desktopWorkspace} title={t('square.statementDetail')} headerless fullscreen fullViewport floatingBack={false}>
+      <SideDrawer className="square-note-detail-drawer" historyMode="route" onClose={closeStatementDrawer} open={noteDetailActive&&!desktopWorkspace} title={t('square.statementDetail')} headerless fullscreen fullViewport floatingBack={false}>
         {noteDetailContent}
       </SideDrawer>
       <ActionSheet open={noteMoreOpen&&noteDetailActive&&Boolean(activeCommentStatement)} onClose={()=>setNoteMoreOpen(false)} title={t('common.more')} compactHeader actions={activeCommentStatement?[
@@ -2287,7 +2297,7 @@ export default function SquarePage() {
         ...(activeCommentStatement.can_mute?[{key:'mute',label:t('square.muteAuthor'),icon:<span className="material-symbols-outlined">voice_over_off</span>,onSelect:()=>setMuteStatement(activeCommentStatement)}]:[]),
         ...(activeCommentStatement.can_delete?[{key:'delete',label:t('common.delete'),danger:true,icon:<span className="material-symbols-outlined">delete</span>,onSelect:()=>setDeleteStatementId(activeCommentStatement.statement_id)}]:[])
       ]:[]}/>
-      <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive && !noteDetailActive} title={t("square.statementDetail")}>
+      <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={closeStatementDrawer} open={routedStatementId !== null && !inlineRouteActive && !noteDetailActive} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">

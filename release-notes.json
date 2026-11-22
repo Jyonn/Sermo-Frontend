@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.22.12",
+  "id": "2026.11.22.13",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "媒体分享菜单",
+      "title": "发言详情返回与关闭",
       "items": [
-        "点击图片或视频的分享图标，即可在旁边选择分享、下载或转发。"
+        "发言详情统一使用手机左上角的返回按钮和桌面右上角的关闭按钮。从链接打开的详情可直接返回广场。"
       ]
     },
     "en": {
-      "title": "Media sharing menu",
+      "title": "Statement detail controls",
       "items": [
-        "Open the menu beside the share icon to share, download, or forward photos and videos."
+        "Statement details use a top-left back button on phones and a top-right close button on desktop. Closing a detail opened from a link returns to Square."
       ]
     }
   }

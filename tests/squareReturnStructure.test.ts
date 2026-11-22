@@ -21,3 +21,12 @@ test("masonry details share the desktop workspace and retain the mobile drawer",
   assert.doesNotMatch(css,/height:min\(125vw|height:min\(720px/);
   assert.match(css,/square-reader-photo>button\{position:absolute;inset:0/);
 });
+
+test("statement details use the same dismiss control while loading and after loading", () => {
+  const reader = readFileSync(new URL("../src/components/SquareNoteDetail.tsx", import.meta.url), "utf8");
+  assert.match(reader, /<DrawerDismissButton className="square-reader-dismiss" onClick=\{onDismiss\}/);
+  assert.match(reader, /\{!panel && dismiss\}[\s\S]*?\{panel && dismiss\}/);
+  assert.match(reader, /<SquareNoteDetailHeader panel=\{p.panel\} onDismiss=\{p.onBack\}/);
+  assert.match(square, /<SquareNoteDetailHeader panel=\{noteDesktopPanel\} onDismiss=\{closeStatementDrawer\}/);
+  assert.match(square, /className="square-desktop-detail-header">\s*<strong[^>]*>.*?<\/strong>\s*<DrawerDismissButton onClick=\{closeInlineStatement\}/);
+});

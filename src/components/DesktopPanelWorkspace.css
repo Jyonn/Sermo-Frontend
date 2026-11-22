@@ -194,12 +194,10 @@
     background: transparent;
     box-shadow: none;
   }
-  .native-detail-single .square-desktop-detail-header > :is(.square-desktop-detail-author, .square-desktop-detail-actions) { display: none; }
+  .native-detail-single .square-desktop-detail-header > .square-desktop-detail-author { display: none; }
 
   .desktop-panel-workspace .square-desktop-detail-header { gap: 8px; padding-inline: 12px; }
   .desktop-panel-workspace .square-desktop-detail-author { flex: 1; }
-  .desktop-panel-workspace .square-desktop-detail-actions { gap: 2px; }
-  .desktop-panel-workspace .square-desktop-detail-actions > button { width: 32px; height: 36px; }
 
   .panel-mode-split .menu-profile-heading {
     flex-wrap: wrap;

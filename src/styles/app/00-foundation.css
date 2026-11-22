@@ -2905,36 +2905,6 @@ html[data-theme="dark"] body .growth-level-detail {
     border-radius: 13px;
   }
 
-  .square-desktop-detail-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .square-desktop-detail-actions > button {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--text-muted) 17%, transparent);
-    border-radius: 14px;
-    color: var(--text-secondary);
-    background: color-mix(in srgb, var(--bg-surface) 84%, var(--brand-primary) 3%);
-    transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
-  }
-
-  .square-desktop-detail-actions > button:hover,
-  .square-desktop-detail-actions > button:focus-visible {
-    color: var(--brand-primary-press);
-    border-color: color-mix(in srgb, var(--brand-primary) 30%, transparent);
-    background: color-mix(in srgb, var(--bg-surface) 76%, var(--brand-primary) 11%);
-  }
-
-  .square-desktop-detail-actions > button:active { transform: scale(.94); }
-  .square-desktop-detail-actions > button.is-liked { color: #d65463; }
-  .square-desktop-detail-actions > button.is-liked .material-symbols-outlined { font-variation-settings: "FILL" 1; }
-
   .square-desktop-detail-scroll {
     min-height: 0;
     overflow-x: hidden;

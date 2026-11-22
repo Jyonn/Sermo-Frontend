@@ -27,6 +27,21 @@ interface Props{
   statement:SquareStatementDTO;discussion:ReactNode;composer:ReactNode;text:ReactNode;canInteract:boolean;
   onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onLocation:()=>void;
 }
+
+export function SquareNoteDetailHeader({panel, onDismiss, children}: {
+  panel?: boolean;
+  onDismiss: () => void;
+  children?: ReactNode;
+}) {
+  const {t} = useI18n();
+  const dismiss = <DrawerDismissButton className="square-reader-dismiss" onClick={onDismiss} />;
+  return <header className="square-reader-header">
+    {!panel && dismiss}
+    {children ?? <strong className="square-reader-heading">{t('square.statementDetail')}</strong>}
+    {panel && dismiss}
+  </header>;
+}
+
 export function SquareNoteDetail(p:Props){
   const {t,language}=useI18n(),s=p.statement;
   const initial=s.external_media?.status==='ready'&&isStillfolioCollection(s.external_media.provider_data)?s.external_media.provider_data:null;
@@ -65,12 +80,11 @@ export function SquareNoteDetail(p:Props){
     {photos.length>1?<div className="square-reader-pagination"><button disabled={index===0} aria-label={t('media.previousImage')} onClick={()=>page(index-1)} type="button"><span className="material-symbols-outlined">chevron_left</span></button><div className="square-reader-dots" role="group" aria-label={t('square.photo')} >{photos.map((photo,i)=><button key={photo.uri} aria-label={`${i+1} / ${photos.length}`} aria-current={i===index?'true':undefined} onClick={()=>page(i)} type="button"><i/></button>)}</div><span>{index+1} / {photos.length}</span><button disabled={index===photos.length-1} aria-label={t('media.nextImage')} onClick={()=>page(index+1)} type="button"><span className="material-symbols-outlined">chevron_right</span></button></div>:null}
   </section>:null;
   return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
-    <header className="square-reader-header">
-      <DrawerDismissButton className="square-reader-dismiss" onClick={p.onBack} />
+    <SquareNoteDetailHeader panel={p.panel} onDismiss={p.onBack}>
       <button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button>
       <OverlayIconButton icon="share" aria-label={t('square.share')} onClick={p.onShare} />
       {s.can_delete||s.can_pin||s.can_mute ? <OverlayIconButton icon="more_horiz" aria-label={t('common.more')} onClick={p.onMore} /> : null}
-    </header>
+    </SquareNoteDetailHeader>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
       {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} fitMedia/></div>:null}
       {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={()=>openAsset(photos.length)}/>:null}

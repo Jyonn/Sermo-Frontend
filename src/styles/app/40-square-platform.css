@@ -399,20 +399,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   animation: square-detail-header-in 240ms cubic-bezier(.2,.78,.2,1) both;
 }
 
-.square-inline-detail-header button {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  place-items: center;
-  border: 0;
-  border-radius: 13px;
-  color: var(--text-strong);
-  background: transparent;
-}
-
-.square-inline-detail-header button:active { background: color-mix(in srgb, var(--line-soft) 64%, transparent); }
-.square-inline-detail-header .material-symbols-outlined { font-size: 26px; }
 .square-inline-detail-header strong { overflow: hidden; font-size: 16px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 
 .square-statement-feed > .square-inline-statement.is-focused > .square-statement-card {
