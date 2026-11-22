@@ -44,6 +44,7 @@ import { signedGrowthPoints } from "../lib/growthPoints";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SelectControl, SettingDialogRow, SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
+import { PermissionQuotaDrawer } from "../components/PermissionQuotaDrawer";
 import {SettingsDialog} from '../components/SettingsDialog';
 import {SquareLayoutSettings} from '../components/SquareLayoutSettings';
 import { UserAvatar } from "../components/UserAvatar";
@@ -448,6 +449,7 @@ export default function MenuPage() {
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
+  const [permissionQuotasOpen, setPermissionQuotasOpen] = useState(false);
   const [developerDrawerOpen, setDeveloperDrawerOpen] = useState(false);
   const chatDiagnostics = useSyncExternalStore(subscribeChatLayoutDiagnostics, getChatLayoutDiagnostics, getChatLayoutDiagnostics);
   const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
@@ -2197,6 +2199,12 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="simple-row menu-link-row" onClick={() => setPermissionQuotasOpen(true)} type="button">
+              <div className="row-main">
+                <strong>{t("menu.permissionsQuotas")}</strong>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
             {Boolean(me?.official ?? session?.user.official) ? (
               <button
                 className="simple-row menu-link-row"
@@ -2844,6 +2852,9 @@ export default function MenuPage() {
           </div>
         </div>
       </SideDrawer>
+
+      <PermissionQuotaDrawer open={permissionQuotasOpen} onOpen={() => setPermissionQuotasOpen(true)}
+        onClose={() => setPermissionQuotasOpen(false)} userId={currentUserId} spaceId={session?.user.space_id} />
 
       <SideDrawer
         historyKey="account-security"

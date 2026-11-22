@@ -1,0 +1,82 @@
+.permission-quotas {
+  display:grid;
+  gap:16px;
+  min-width:0;
+  padding-bottom:12px;
+}
+.permission-quota-account {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border:1px solid var(--line-soft);
+  border-radius:14px;
+  background:var(--bg-surface);
+}
+.permission-quota-account>div { display:grid; gap:3px; min-width:0; }
+.permission-quota-account strong { font-size:16px; overflow-wrap:anywhere; }
+.permission-quota-account>div>span { color:var(--text-muted); font-size:12px; }
+.permission-quota-account>.overlay-icon-button { flex:none; }
+.permission-quotas>nav { display:flex; flex-wrap:wrap; gap:6px; }
+.permission-quotas>nav>button {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:36px;
+  padding:5px 9px;
+  border:1px solid var(--line-soft);
+  border-radius:999px;
+  color:var(--text-secondary);
+  font-size:12px;
+  font-weight:650;
+}
+.permission-quotas>nav>button>span { font-size:16px; }
+.permission-quotas>nav>button:hover,.permission-quota-details>summary:hover { background:var(--bg-surface); color:var(--text-primary); }
+.permission-quota-section { display:grid; gap:7px; min-width:0; scroll-margin-block-start:10px; }
+.permission-quota-section>h2 { display:flex; align-items:center; gap:7px; margin:0 0 3px; color:var(--text-primary); font-size:15px; }
+.permission-quota-section>h2>.material-symbols-outlined { color:var(--text-secondary); font-size:18px; }
+.permission-quota-card,.permission-quota-details {
+  display:grid;
+  gap:8px;
+  min-width:0;
+  padding:11px 12px;
+  border:1px solid var(--line-soft);
+  border-radius:12px;
+  background:var(--bg-elevated);
+}
+.permission-quota-card>header { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:5px 12px; }
+.permission-quota-card>header>h3 { margin:0; color:var(--text-primary); font-size:14px; font-weight:700; }
+.permission-quota-card>header>strong { color:var(--brand-primary); font-size:14px; font-weight:750; font-variant-numeric:tabular-nums; }
+.permission-quota-note,.permission-quota-status,.permission-quota-disabled { margin:0; color:var(--text-muted); font-size:12px; line-height:1.5; }
+.permission-quota-status { display:flex; align-items:flex-start; gap:5px; color:var(--text-secondary); }
+.permission-quota-status>.material-symbols-outlined { font-size:16px; }
+.permission-quota-disabled { padding:9px 12px; border-radius:10px; background:var(--bg-surface); }
+.permission-quota-usage { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:4px 8px; color:var(--text-muted); font-size:11px; }
+.permission-quota-usage>b { color:var(--text-secondary); font-weight:650; font-variant-numeric:tabular-nums; text-align:end; }
+.permission-quota-usage>progress {
+  grid-column:1/-1;
+  appearance:none;
+  width:100%;
+  height:5px;
+  overflow:hidden;
+  border:0;
+  border-radius:99px;
+  background:var(--line-soft);
+  accent-color:var(--brand-primary);
+}
+.permission-quota-usage>progress::-webkit-progress-bar { background:var(--line-soft); }
+.permission-quota-usage>progress::-webkit-progress-value { background:var(--brand-primary); border-radius:99px; }
+.permission-quota-usage>progress::-moz-progress-bar { background:var(--brand-primary); border-radius:99px; }
+.permission-quota-details { display:block; padding:0; }
+.permission-quota-details>summary { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:40px; padding:7px 12px; border-radius:inherit; font-size:13px; font-weight:650; cursor:pointer; list-style:none; }
+.permission-quota-details>summary::-webkit-details-marker { display:none; }
+.permission-quota-details>summary>.material-symbols-outlined { color:var(--text-muted); font-size:19px; }
+.permission-quota-details[open]>summary>.material-symbols-outlined { transform:rotate(.5turn); }
+.permission-quota-details>ul,.permission-quota-list { margin:0; padding:0; list-style:none; }
+.permission-quota-details>ul { padding-inline:12px; }
+.permission-quota-permission { display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding-block:7px; color:var(--text-primary); font-size:13px; }
+.permission-quota-details .permission-quota-permission { border-top:1px solid var(--line-soft); }
+.permission-quota-permission>span:last-child { color:var(--text-muted); font-size:12px; text-align:end; }
+.permission-quota-permission>span.is-allowed { color:var(--brand-primary); }
+.permission-quota-list>.permission-quota-permission { padding:0; }

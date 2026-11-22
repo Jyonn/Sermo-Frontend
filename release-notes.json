@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.22.16",
+  "id": "2026.11.22.17",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "更紧凑的日期选择",
+      "title": "查看权限与额度",
       "items": [
-        "科研、广场和聊天记录的日期面板减少了重复信息，并把今天、清空和完成集中在一行。"
+        "菜单新增「权限与额度」，集中查看语音通话、外部链接解析、广场发言与评论、云端资源等用量，以及媒体消息、群聊和科研权限。"
       ]
     },
     "en": {
-      "title": "More compact date pickers",
+      "title": "Permissions and quotas at a glance",
       "items": [
-        "Date pickers in Research, Square, and chat history remove repeated information and group Today, Clear, and Done in one row."
+        "Open Permissions & quotas in Menu to see voice call time, external link parsing, Square posting and comments, cloud storage, and your permissions for media messages, groups, and Research."
       ]
     }
   }

@@ -1762,6 +1762,12 @@ export const api = {
     }).then(payload => decodeCompact<UserMeDTO>(payload, "user-me"));
   },
 
+  getPersonalPermissionQuotas(signal: AbortSignal, expectedScope: string) {
+    return request<import("./permissionQuotas").PersonalPermissionQuotaSnapshot>("/users/me/permissions-quotas", {
+      auth: true, signal, expectedScope, cache: "no-store",
+    });
+  },
+
   getWechatMiniProgramBinding(signal?: AbortSignal) {
     return request<{ bound: boolean }>("/users/me/wechat-miniprogram", {
       auth: true,
