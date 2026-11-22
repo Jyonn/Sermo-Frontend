@@ -85,6 +85,7 @@ export function SquareNoteDetail(p:Props){
     <footer className="square-reader-footer"><div className="square-reader-composer">{p.composer||<span>{t('square.readOnlyHint')}</span>}</div><button className={s.liked?'is-liked':''} disabled={!p.canInteract} aria-label={`${t('square.like')} ${s.like_count}`} aria-pressed={s.liked} onClick={p.onLike} type="button"><span className="material-symbols-outlined">favorite</span><small>{s.like_count||t('square.like')}</small></button><button aria-label={t('square.comments')} onClick={()=>comments.current?.scrollIntoView({behavior:reduce()?'auto':'smooth',block:'start'})} type="button"><span className="material-symbols-outlined">chat_bubble_outline</span><small>{s.comment_count}</small></button></footer>
     {lightbox !== null && assets.length > 0 ? <MediaLightbox initialInfo={info} index={lightbox} items={assets}
       source={collection ? {name: 'StillFolio', logo: stillfolioMark, url: collection.canonical_url} : undefined}
+      onForward={() => {setLightbox(null); p.onShare();}}
       onClose={() => setLightbox(null)} onIndexChange={next => {setLightbox(next); if (next < photos.length) {setIndex(next); page(next);}}} /> : null}
   </article>;
 }

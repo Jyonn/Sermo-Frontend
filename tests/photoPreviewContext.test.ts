@@ -61,3 +61,17 @@ test('desktop preview rebinds its measurements and wheel input when the drawer m
   assert.match(gestures, /observer.observe\(stageNode\);\s*return \(\) => observer.disconnect\(\);\s*\}, \[stageNode\]\)/);
   assert.match(gestures, /stageNode.addEventListener\('wheel'[\s\S]*?stageNode.removeEventListener\('wheel'[\s\S]*?\}, \[stageNode\]\)/);
 });
+
+test('media actions stay beside the share button and forward the selected chat message', async () => {
+  const [drawer, menu, styles, gallery, chat] = await Promise.all([
+    read('components/MediaDrawer.tsx'), read('components/MediaShareMenu.tsx'), read('components/MediaDrawer.css'),
+    read('components/ChatImagePreview.tsx'), read('pages/ChatsPage.tsx'),
+  ]);
+  assert.match(drawer, /<MediaShareMenu key=\{identity\}/);
+  assert.doesNotMatch(drawer, /<ActionSheet/);
+  assert.match(menu, /aria-haspopup="menu"/);
+  assert.match(styles, /\.media-drawer-share\s*\{[^}]*position: relative/);
+  assert.match(styles, /\.media-drawer-share-menu\s*\{[^}]*bottom: calc\(100% \+ 8px\)/);
+  assert.match(gallery, /const forwardSource = active\?\.sourceMessage/);
+  assert.match(chat, /openSingleMessageForwardPicker\(mapChatMessage\(message, currentUserId\), message\)/);
+});

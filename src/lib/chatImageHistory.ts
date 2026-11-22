@@ -3,6 +3,7 @@ import type { ChatMessageDTO, ImageMetadataDTO, TinyUserDTO, VideoMetadataDTO } 
 export interface ChatPreviewImage {
   uri: string;
   messageId: number | null;
+  sourceMessage?: ChatMessageDTO;
   kind?: "image" | "video";
   metadata?: ImageMetadataDTO | VideoMetadataDTO | null;
   posterUri?: string | null;

@@ -2199,6 +2199,7 @@ interface MessageSelectionActionPrompt {
 
 interface ImagePreviewState {
   chatId?: number;
+  fromPinned?: boolean;
   index: number;
   uris: string[];
   metadata: Array<ImageMetadataDTO | null>;
@@ -2210,6 +2211,7 @@ interface VideoPreviewState {
   uri: string;
   metadata: VideoMetadataDTO | null;
   messageId: number | null;
+  fromPinned?: boolean;
 }
 
 function formatImageFileSize(fileSize?: number | null) {
@@ -3987,7 +3989,7 @@ function LiveChatsPage({
     const items: ChatPreviewImage[] = selectedMessages.flatMap(message => {
       if (typeof message.id !== "number" || !message.payload?.uri || (message.kind !== "image" && message.kind !== "video")) return [];
       return [{
-        uri: message.payload.uri, kind: message.kind, messageId: message.id,
+        uri: message.payload.uri, kind: message.kind, messageId: message.id, sourceMessage: forwardPreviewMessage(message),
         posterUri: message.payload.thumbnail_uri, createdAt: message.createdAt,
         metadata: message.kind === "video" ? message.payload.video_metadata : message.payload.image_metadata,
         owner: {user_id: message.userId ?? 0, name: message.name, avatar_uri: message.avatarUri, avatar_cache_key: message.avatarCacheKey},
@@ -6873,16 +6875,21 @@ function LiveChatsPage({
     setForwardRouteOpen(true);
   };
 
-  const openSingleMessageForwardPicker = (message: ChatMessage) => {
-    if (!canForwardMessage(message)) return;
+  const openSingleMessageForwardPicker = (message: ChatMessage, source?: ChatMessageDTO) => {
+    if (!canForwardMessage(message)) return false;
     const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
     if (fromPinnedDrawer) setPinnedDrawerOpen(false);
     setForwardSourceMessageIds([message.id as number]);
-    setForwardSourcePreviewMessages([forwardPreviewMessage(message)]);
+    setForwardSourcePreviewMessages([source ?? forwardPreviewMessage(message)]);
     setForwardTargetChatIds([]);
     setForwardMode(message.kind === "audio" && message.from !== "self" ? "bundle" : "individual");
     setForwardRouteOpen(true);
+    return true;
+  };
+
+  const forwardPreviewMedia = (message: ChatMessageDTO, close: () => void) => {
+    if (!message.is_deleted && openSingleMessageForwardPicker(mapChatMessage(message, currentUserId), message)) close();
   };
 
   const submitForwardMessages = async () => {
@@ -7613,6 +7620,8 @@ function LiveChatsPage({
     setMessageSearchOpen(true);
   };
   const videoPreviewMessage = videoPreview?.messageId ? selectedMessages.find(message => message.id === videoPreview.messageId) : undefined;
+  const pinnedVideoSource = videoPreview?.fromPinned ? pinnedMessages.find(pin => pin.message.message_id === videoPreview.messageId)?.message : undefined;
+  const searchForwardSource = messageSearchPreviewIndex === null ? undefined : messageSearchMediaResults[messageSearchPreviewIndex];
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat), call: canVoiceCall }) : [];
   const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
     preferredQuickActions.includes("locked") && pinnedLoadedScope !== `${currentUserId}:${displayedChat.id}` ||
@@ -8430,8 +8439,8 @@ function LiveChatsPage({
           initialScrollToEnd={pinnedDrawerOpen}
           messages={orderedPinnedMessages.map((pin) => pin.message)}
           onMessageAction={openPinnedMessageMenu}
-          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
-          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
+          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds, fromPinned: true })}
+          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId, fromPinned: true })}
           messageTitle={(message) => {
             const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
             return pin?.pinned_by_users.length ? t("pin.by", { names: pin.pinned_by_users.map(user => user.name).join('、') }) : undefined;
@@ -8872,6 +8881,8 @@ function LiveChatsPage({
         onApproachingEnd={() => { if (messageSearchHasMore && messageSearchState !== "loading-more") void loadMoreMessageSearchResults(); }}
         onClose={closeMessageSearchPreview}
         onIndexChange={setMessageSearchPreviewIndex}
+        onForward={searchForwardSource && !searchForwardSource.is_deleted
+          ? () => forwardPreviewMedia(searchForwardSource, () => setMessageSearchPreviewIndex(null)) : undefined}
         onJumpToMessage={() => {
           const message = messageSearchMediaResults[messageSearchPreviewIndex];
           if (message) revealMessageFromSearch(message.message_id);
@@ -9266,10 +9277,13 @@ function LiveChatsPage({
           originalIds={imagePreview.uris.map((uri, index) => imagePreview.messageIds[index] ?? uri)}
           images={imagePreview.mixedMedia ?? imagePreview.uris.map((uri, index) => {
             const message = selectedMessages.find((item) => item.id === imagePreview.messageIds[index]);
-            return { uri, messageId: imagePreview.messageIds[index] ?? null, metadata: imagePreview.metadata[index], posterUri: message?.payload?.thumbnail_uri,
+            const sourceMessage = imagePreview.fromPinned ? pinnedMessages.find(pin => pin.message.message_id === imagePreview.messageIds[index])?.message
+              : imagePreview.chatId && message && canForwardMessage(message) ? forwardPreviewMessage(message) : undefined;
+            return { uri, messageId: imagePreview.messageIds[index] ?? null, sourceMessage, metadata: imagePreview.metadata[index], posterUri: message?.payload?.thumbnail_uri,
               owner: message ? { user_id: message.userId ?? 0, name: message.name, avatar_uri: message.avatarUri, avatar_cache_key: message.avatarCacheKey } : undefined, createdAt: message?.createdAt };
           })}
           onJumpToMessage={(messageId) => { setImagePreview(null); revealMessageFromSearch(messageId); }}
+          onForwardMessage={(message) => forwardPreviewMedia(message, () => setImagePreview(null))}
           onClose={() => setImagePreview(null)} />
       ) : null}
       {videoPreview ? (
@@ -9288,6 +9302,8 @@ function LiveChatsPage({
             downloadLabel: formatImageFileSize(videoPreview.metadata?.file_size),
           }]}
           onClose={() => setVideoPreview(null)}
+          onForward={pinnedVideoSource && !pinnedVideoSource.is_deleted
+            ? () => forwardPreviewMedia(pinnedVideoSource, () => setVideoPreview(null)) : undefined}
           onJumpToMessage={videoPreview.messageId ? () => { const id = videoPreview.messageId; setVideoPreview(null); if (id) revealMessageFromSearch(id); } : undefined}
           onIndexChange={() => undefined}
         />

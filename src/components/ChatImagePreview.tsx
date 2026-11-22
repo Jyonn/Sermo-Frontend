@@ -7,13 +7,14 @@ import { MediaLightbox } from "./ImageLightbox";
 import type { ChatMessageDTO, ImageMetadataDTO, VideoMetadataDTO } from "../types";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
 
-export function ChatImagePreview({ images, initialIndex, chatId, originalIds, onClose, onJumpToMessage }: {
+export function ChatImagePreview({ images, initialIndex, chatId, originalIds, onClose, onJumpToMessage, onForwardMessage }: {
   images: ChatPreviewImage[];
   initialIndex: number;
   chatId?: number;
   originalIds?: Array<string | number>;
   onClose: () => void;
   onJumpToMessage?: (messageId: number) => void;
+  onForwardMessage?: (message: ChatMessageDTO) => void;
 }) {
   const { t } = useI18n();
   const [gallery, setGallery] = useState({ items: images, index: initialIndex });
@@ -54,7 +55,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
       }
       if (controller.signal.aborted) return;
       const incoming: ChatPreviewImage[] = rows.filter(isChatHistoryMedia).sort((a, b) => a.message_id - b.message_id).map(row => ({
-        uri: row.payload!.uri!, messageId: row.message_id, kind: row.type === 4 ? "video" : "image",
+        uri: row.payload!.uri!, messageId: row.message_id, sourceMessage: row, kind: row.type === 4 ? "video" : "image",
         metadata: row.type === 4 ? row.payload?.video_metadata : row.payload?.image_metadata,
         posterUri: row.payload?.thumbnail_uri, owner: row.user, createdAt: row.created_at,
       }));
@@ -74,6 +75,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
   };
   useEffect(() => () => { Object.values(controllers.current).forEach((controller) => controller?.abort()); }, []);
   const active = gallery.items[gallery.index];
+  const forwardSource = active?.sourceMessage;
   useEffect(() => {
     const id = active?.messageId;
     if (!id || active.metadata?.status === 2 || active.metadata?.status === 1 && active.metadata.geocoding_status !== 0) return;
@@ -101,5 +103,6 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
     hasPrevious={more.older} hasNext={more.newer} loading={pending.older || pending.newer}
     onBoundary={(direction) => void load(direction, true)}
     onJumpToMessage={active?.messageId && onJumpToMessage ? () => onJumpToMessage(active.messageId!) : undefined}
+    onForward={forwardSource && !forwardSource.is_deleted && onForwardMessage ? () => onForwardMessage(forwardSource) : undefined}
     navigationLabel={`${collectionIndex >= 0 ? collectionIndex + 1 : gallery.index + 1} / ${collectionIndex >= 0 ? collection.length : gallery.items.length}`} />;
 }

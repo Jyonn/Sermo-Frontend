@@ -61,6 +61,8 @@ export function StillfolioPreview({ collection: initialCollection, previewId }: 
       </button>
       <a className="stillfolio-card-source" href={collection.canonical_url} rel="noreferrer" target="_blank">{t("social.openSource")} ↗</a>
     </div>
-    {open && images.length ? <ImageLightbox altPrefix={title} fileNamePrefix="stillfolio" index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={<div className="stillfolio-lightbox-detail"><span>{t('apps.stillfolio')}</span><strong>{title}</strong><small>{collection.description || collection.author}</small><a href={collection.canonical_url} rel="noreferrer" target="_blank">{t("social.openSource")} ↗</a></div>} uris={images} /> : null}
+    {open && images.length ? <ImageLightbox altPrefix={title} fileNamePrefix="stillfolio" index={index} onClose={() => setOpen(false)} onIndexChange={setIndex}
+      referrerPolicy="no-referrer" forwardLink={collection.canonical_url}
+      sharedDetail={<div className="stillfolio-lightbox-detail"><span>{t('apps.stillfolio')}</span><strong>{title}</strong><small>{collection.description || collection.author}</small><a href={collection.canonical_url} rel="noreferrer" target="_blank">{t("social.openSource")} ↗</a></div>} uris={images} /> : null}
   </>;
 }

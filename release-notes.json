@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.22.11",
+  "id": "2026.11.22.12",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "桌面媒体预览操作优化",
+      "title": "媒体分享菜单",
       "items": [
-        "桌面媒体预览可用两侧按钮、方向键或触控板左右切换，信息与沉浸查看可直接点击。",
-        "照片支持滚轮或双击缩放，放大后可拖动查看。编辑裁剪范围时也可以用滚轮。"
+        "点击图片或视频的分享图标，即可在旁边选择分享、下载或转发。"
       ]
     },
     "en": {
-      "title": "Desktop media viewer controls",
+      "title": "Media sharing menu",
       "items": [
-        "Browse media with the side buttons, arrow keys, or a trackpad swipe. Open media details and immersive view from the toolbar.",
-        "Zoom photos with the mouse wheel or a double-click, then drag to pan. The mouse wheel also adjusts the crop in the photo editor."
+        "Open the menu beside the share icon to share, download, or forward photos and videos."
       ]
     }
   }

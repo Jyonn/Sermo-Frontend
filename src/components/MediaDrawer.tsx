@@ -1,5 +1,7 @@
 import {useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
+import {useAuth} from '../lib/auth';
+import {api} from '../lib/api';
 import {showToast} from '../lib/toast';
 import {claimMediaPlayback, releaseMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {useMediaSource} from '../lib/useMediaSource';
@@ -9,7 +11,6 @@ import {mediaInfoProgress, shouldCompleteSwipe, type MediaSize} from '../lib/med
 import {downloadMedia, mediaFile, saveMediaFile} from '../lib/downloadMedia';
 import {copyText} from '../lib/presentation';
 import type {ImageMetadataDTO, TinyUserDTO} from '../types';
-import {ActionSheet} from './ActionSheet';
 import {FloatingDrawerScope} from './DesktopPanelWorkspace';
 import {MediaMetadataPanel} from './MediaMetadataPanel';
 import {MediaWaitFeedback} from './MediaWaitFeedback';
@@ -18,6 +19,8 @@ import {SideDrawer} from './SideDrawer';
 import {UserAvatar} from './UserAvatar';
 import {MediaDrawerFilm} from './MediaDrawerFilm';
 import {MediaDrawerSlide} from './MediaDrawerSlide';
+import {MediaShareMenu} from './MediaShareMenu';
+import {ChatSharePicker} from './ChatSharePicker';
 import {useMediaDrawerCarousel} from './useMediaDrawerCarousel';
 import {isDesktopMediaPreview, useMediaDrawerGestures} from './useMediaDrawerGestures';
 import './MediaDrawer.css';
@@ -76,6 +79,8 @@ export interface MediaLightboxProps {
   totalCount?: number;
   onApproachingEnd?: () => void;
   onJumpToMessage?: () => void;
+  onForward?: () => void;
+  forwardLink?: string;
   onApproachingStart?: () => void;
   onBoundary?: (direction: 'older' | 'newer') => void;
   hasPrevious?: boolean;
@@ -103,16 +108,17 @@ export function MediaDrawer(props: MediaLightboxProps) {
 
 function MediaDrawerContent({
   item, index, items, altPrefix, editor, fixedFitImage, initialInfo, source: platform, sharedDetail,
-  onClose, onIndexChange, onApproachingEnd, onApproachingStart, onJumpToMessage, onBoundary,
+  onClose, onIndexChange, onApproachingEnd, onApproachingStart, onJumpToMessage, onForward, forwardLink, onBoundary,
   hasNext, hasPrevious, loading, totalCount, navigationLabel, fileNamePrefix = 'frienden', historyKey,
 }: MediaLightboxProps & {item: MediaLightboxItem}) {
   const {locale, t} = useI18n();
+  const {session} = useAuth();
   const [mode, setMode] = useState<'default' | 'immersive'>('default');
   const [info, setInfo] = useState(initialInfo || !item.uri && item.kind === 'image' && Boolean(sharedDetail));
   const [infoHeight, setInfoHeight] = useState(0);
   const [leaving, setLeaving] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [linkToForward, setLinkToForward] = useState('');
   const [failed, setFailed] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [sizes, setSizes] = useState<Record<string, MediaSize>>({});
@@ -143,6 +149,9 @@ function MediaDrawerContent({
   const canGoForward = index < items.length - 1 || Boolean(hasNext && !loading);
   const media = useMediaSource(fixedFitImage || editor ? '' : item.uri, undefined, item.kind);
   const src = fixedFitImage || editor ? item.uri : media.src;
+  const sourceLink = forwardLink ?? platform?.url;
+  const forward = onForward ?? (session && sourceLink && /^https?:\/\//i.test(sourceLink)
+    ? () => setLinkToForward(sourceLink) : undefined);
   const carousel = useMediaDrawerCarousel({index, identity, count: items.length, onIndexChange});
   const cursor = index + carousel.offset;
   const first = Math.max(0, Math.floor(cursor) - 1);
@@ -262,7 +271,6 @@ function MediaDrawerContent({
     setPlayback({...timing, playing: !node.paused, muted: node.muted});
   };
   const shareNative = async () => {
-    setShareOpen(false);
     setSharing(true);
     try {
       if (platform?.url) {
@@ -280,7 +288,6 @@ function MediaDrawerContent({
     } finally {setSharing(false);}
   };
   const download = () => {
-    setShareOpen(false);
     const saving = editor?.createShareFile ? editor.createShareFile().then(saveMediaFile) : downloadMedia(src, fileNamePrefix);
     void saving.catch(error => showToast(t(error instanceof Error && error.message === 'media_processing'
       ? 'media.downloadProcessing' : 'media.downloadFailed'), 'info'));
@@ -470,8 +477,9 @@ function MediaDrawerContent({
             {!immersive && (items.length > 1 || hasPrevious || hasNext) && <MediaDrawerFilm items={items} index={index}
               width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} disabled={interactionDisabled} go={go} />}
             {(!immersive || canZoom) && <div className="media-drawer-footer-actions" data-immersive={immersive}>
-              {!immersive && (editor ? editor.createShareFile : src || platform?.url) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
-                onClick={() => setShareOpen(true)} disabled={sharing} />}
+              {!immersive && (editor ? editor.createShareFile : src || platform?.url || forward) && <MediaShareMenu key={identity}
+                share={src || platform?.url ? () => void shareNative() : undefined} download={src ? download : undefined}
+                forward={forward} downloadLabel={item.downloadLabel} disabled={sharing || interactionDisabled} />}
               {(canZoom || editor && !immersive) && <div className="media-drawer-center-actions">
                 {canZoom && <div className="media-drawer-zoom media-drawer-desktop" role="group" aria-label={t('mediaDrawer.zoom')}>
                   <OverlayIconButton icon="remove" aria-label={t('media.zoomOut')} title={t('media.zoomOut')}
@@ -493,10 +501,8 @@ function MediaDrawerContent({
         </footer>}
         {editor?.notice}
       </section>
-      <ActionSheet open={shareOpen} title={t('square.share')} onClose={() => setShareOpen(false)} actions={[
-        ...(src || platform?.url ? [{key: 'share', label: t('square.share'), icon: icon('ios_share'), onSelect: () => void shareNative()}] : []),
-        ...(src ? [{key: 'save', label: item.downloadLabel ? `${t('common.download')} · ${item.downloadLabel}` : t('common.download'), icon: icon('download'), onSelect: download}] : []),
-      ]} />
+      {linkToForward && <ChatSharePicker open title={t('message.forwardTitle')} onClose={() => setLinkToForward('')}
+        sendToChat={(chatId, clientId) => api.sendMessage(chatId, 0, linkToForward, undefined, clientId)} />}
     </SideDrawer>
   </FloatingDrawerScope>;
 }

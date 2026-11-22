@@ -11,7 +11,7 @@ export function MediaLightbox(props: MediaLightboxProps) {
 
 export function ImageLightbox({
   index, uris, altPrefix, details = [], metadata = [], owner, sharedDetail,
-  downloadLabels = [], posterUris = [], fileNamePrefix, referrerPolicy, onClose, onIndexChange,
+  downloadLabels = [], posterUris = [], fileNamePrefix, referrerPolicy, onClose, onIndexChange, forwardLink,
 }: {
   index: number;
   uris: string[];
@@ -24,11 +24,12 @@ export function ImageLightbox({
   posterUris?: Array<string | null | undefined>;
   fileNamePrefix?: string;
   referrerPolicy?: 'no-referrer';
+  forwardLink?: string;
   onClose: () => void;
   onIndexChange: (index: number) => void;
 }) {
   return <MediaDrawer altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index}
     items={uris.map((uri, position) => ({uri, kind: 'image', posterUri: posterUris[position], imageMetadata: metadata[position],
       owner, detail: details[position], downloadLabel: downloadLabels[position], referrerPolicy}))}
-    onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
+    onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} forwardLink={forwardLink} />;
 }

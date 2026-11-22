@@ -132,9 +132,9 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
     }
   };
 
-  const requestSend = async (asset: CloudResourceDTO) => {
+  const requestSend = async (asset: CloudResourceDTO, chooseChat = false) => {
     setActionAsset(null);
-    if (currentChatId) {
+    if (currentChatId && !chooseChat) {
       await sendToChat(asset, currentChatId);
       return;
     }
@@ -333,6 +333,11 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
         }))}
         onApproachingEnd={() => { if (data?.has_more && !loadingMore) void load(tab, true); }}
         onClose={closePreview}
+        onForward={mediaItems[previewIndex] ? () => {
+          const asset = mediaItems[previewIndex];
+          closePreview();
+          void requestSend(asset, true);
+        } : undefined}
         onIndexChange={setPreviewIndex}
         totalCount={data?.total_count}
       /> : null}
