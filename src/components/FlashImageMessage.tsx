@@ -1,33 +1,31 @@
-import {useEffect, useId, useRef, useState, type CSSProperties} from 'react';
-import {createPortal} from 'react-dom';
+import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react';
 import {api, ApiError} from '../lib/api';
-import {useBodyScrollLock} from '../lib/bodyLock';
 import {useI18n} from '../lib/language';
 import {messageMediaAspect} from '../lib/messageMedia';
-import {useModalFocus} from '../lib/modalFocus';
 import {showToast} from '../lib/toast';
 import type {ChatMessagePayloadDTO} from '../types';
+import {MediaLightbox} from './ImageLightbox';
 import './FlashImageMessage.css';
 
 const VIEW_MS = 3000;
+const VIEW_SECONDS = VIEW_MS / 1000;
+const keepImageIndex = () => {};
 
 export function FlashImageMessage({id, payload, sent, groupClassName}: {
   id: number; payload?: ChatMessagePayloadDTO | null; sent: boolean; groupClassName: string;
 }) {
-  const {t} = useI18n();
+  const {locale, t} = useI18n();
   const [open, setOpen] = useState(false);
   const [viewed, setViewed] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [aspect, setAspect] = useState<number>();
   const [uri, setUri] = useState('');
-  const [remaining, setRemaining] = useState(3);
+  const [deadline, setDeadline] = useState(0);
+  const [remaining, setRemaining] = useState(VIEW_SECONDS);
   const expiresAt = (payload?.flash_expires_at ?? 0) * 1000;
   const [expired, setExpired] = useState(() => expiresAt <= Date.now());
   const url = useRef('');
   const request = useRef<AbortController>();
-  const dialog = useRef<HTMLElement>(null);
-  const title = useId();
-  const deadline = useRef(0);
   const hasViewed = viewed || payload?.flash_viewed;
   const canOpen = payload?.flash_available === true && !unavailable && (sent || !hasViewed && !expired);
   const thumbnail = (canOpen || sent) && payload?.flash_thumbnail?.match(/^[A-Za-z0-9+/=]{1,1500}$/) ? payload.flash_thumbnail : '';
@@ -37,17 +35,30 @@ export function FlashImageMessage({id, payload, sent, groupClassName}: {
     : sent && total === 1 ? t(count ? 'photo.flashRecipientViewed' : 'photo.flashRecipientPending')
     : hasViewed ? t('photo.flashViewed') : t(canOpen ? 'photo.flashOpen' : 'photo.flashExpired');
 
-  function close() {
+  const close = useCallback(() => {
     request.current?.abort();
     request.current = undefined;
     if (url.current) URL.revokeObjectURL(url.current);
     url.current = '';
+    setDeadline(0);
     setUri('');
     setOpen(false);
-  }
+  }, []);
 
-  useBodyScrollLock(open);
-  useModalFocus(dialog, open, close);
+  const startCountdown = useCallback(() => {
+    if (document.hidden) {
+      close();
+      return;
+    }
+    const end = performance.now() + VIEW_MS;
+    setDeadline(current => current || end);
+  }, [close]);
+
+  const handleImageError = useCallback(() => {
+    close();
+    showToast(t('photo.flashFailed'), 'info');
+  }, [close, t]);
+
   useEffect(() => () => {
     request.current?.abort();
     if (url.current) URL.revokeObjectURL(url.current);
@@ -71,40 +82,35 @@ export function FlashImageMessage({id, payload, sent, groupClassName}: {
       document.removeEventListener('visibilitychange', visibility);
       window.removeEventListener('pagehide', close);
     };
-  }, [open]);
+  }, [close, open]);
 
   useEffect(() => {
-    if (!uri) return;
+    if (!deadline) return;
     const tick = () => {
-      const ms = deadline.current - performance.now();
+      const ms = deadline - performance.now();
       if (ms <= 0) close();
       else setRemaining(Math.ceil(ms / 1000));
     };
-    const stop = window.setTimeout(close, Math.max(0, deadline.current - performance.now()));
+    const stop = window.setTimeout(close, Math.max(0, deadline - performance.now()));
     const interval = window.setInterval(tick, 100);
     return () => {clearTimeout(stop); clearInterval(interval);};
-  }, [uri]);
+  }, [close, deadline]);
 
   const reveal = async () => {
     if (!canOpen || request.current) return;
     const controller = new AbortController();
     request.current = controller;
     setOpen(true);
-    setRemaining(3);
+    setRemaining(VIEW_SECONDS);
     try {
       const blob = await api.revealFlashImage(id, controller.signal, payload?.flash_position);
       if (controller.signal.aborted) return;
       if (!sent) setViewed(true);
-      url.current = URL.createObjectURL(blob);
-      const picture = new Image();
-      picture.src = url.current;
-      await picture.decode();
-      if (controller.signal.aborted) return;
       if (document.hidden) {
         close();
         return;
       }
-      deadline.current = performance.now() + VIEW_MS;
+      url.current = URL.createObjectURL(blob);
       setUri(url.current);
     } catch (error) {
       if (controller.signal.aborted) return;
@@ -126,16 +132,25 @@ export function FlashImageMessage({id, payload, sent, groupClassName}: {
         <small>{status}</small>
       </span>
     </button>
-    {open && createPortal(<div className="dialog-backdrop flash-view-backdrop" onClick={event => {event.stopPropagation(); close();}}>
-      <section className="flash-view" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={title} onClick={event => event.stopPropagation()}>
-        <h2 id={title} className="drawer-control-label">{t('photo.flash')}</h2>
-        <button type="button" className="flash-view-close" aria-label={t('common.close')} onClick={close}><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
-        {uri ? <>
-          <img src={uri} alt={t('photo.flash')} draggable={false} onContextMenu={event => event.preventDefault()}/>
-          <div className="flash-view-count" role="status"><span className="material-symbols-outlined" aria-hidden="true">bolt</span>{remaining}s</div>
-          <div className="flash-view-progress" aria-hidden="true"/>
-        </> : <p role="status">{t('common.loading')}</p>}
-      </section>
-    </div>, document.body)}
+    {open && <MediaLightbox
+      altPrefix={t('photo.flash')}
+      index={0}
+      items={[{id, kind: 'image', uri}]}
+      onIndexChange={keepImageIndex}
+      onClose={close}
+      fixedFitImage={{
+        onReady: startCountdown,
+        onError: handleImageError,
+        overlay: deadline ? <div className="flash-view-timer" role="timer"
+          aria-label={new Intl.NumberFormat(locale, {style: 'unit', unit: 'second', unitDisplay: 'long'}).format(remaining)}
+          style={{'--flash-view-duration': `${VIEW_MS}ms`} as CSSProperties}>
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="17" />
+            <circle className="flash-view-timer-arc" cx="20" cy="20" r="17" pathLength="100" />
+          </svg>
+          <span aria-hidden="true">{remaining}</span>
+        </div> : null,
+      }}
+    />}
   </>;
 }

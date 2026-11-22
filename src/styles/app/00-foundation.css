@@ -6410,6 +6410,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   cursor: grabbing;
 }
 
+.immersive-image-stage.is-fixed-fit { cursor: default; }
+.immersive-image-stage.is-fixed-fit .immersive-image-canvas {
+  pointer-events: auto;
+  -webkit-touch-callout: none;
+}
+
 .immersive-video-stage {
   position: absolute;
   inset: 0;

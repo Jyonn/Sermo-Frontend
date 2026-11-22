@@ -41,8 +41,15 @@ export interface MediaLightboxItem {
   referrerPolicy?: "no-referrer";
 }
 
+interface FixedFitImage {
+  overlay?: ReactNode;
+  onReady: () => void;
+  onError: () => void;
+}
+
 interface MediaLightboxProps {
   initialImmersive?: boolean;
+  fixedFitImage?: FixedFitImage;
   index: number;
   items: MediaLightboxItem[];
   altPrefix?: string;
@@ -97,7 +104,7 @@ interface ImageTransform {
   scale: number;
 }
 
-function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: string; src: string; poster?: string | null; onClose: () => void; referrerPolicy?: "no-referrer" }) {
+function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy, fixedFit }: { alt: string; src: string; poster?: string | null; onClose: () => void; referrerPolicy?: "no-referrer"; fixedFit?: FixedFitImage }) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -117,8 +124,9 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   const [transform, setTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1 });
   const [mode, setMode] = useState<ImageViewMode>("default");
   const [controlsVisible, setControlsVisible] = useState(false);
-  const source = useMediaSource(src);
-  const phase = source.phase;
+  const isFixedFit = Boolean(fixedFit);
+  const source = useMediaSource(isFixedFit ? "" : src);
+  const imageSrc = isFixedFit ? src : source.src;
 
   const scales = (() => {
     if (!naturalSize.width || !naturalSize.height || !viewportSize.width || !viewportSize.height) {
@@ -139,6 +147,14 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   })();
 
   const clampScale = (scale: number) => Math.max(scales.minimum, Math.min(scales.maximum, scale));
+  const imageTransform = fixedFit ? { x: 0, y: 0, scale: clampScale(scales.fit) } : transform;
+  const imageReady = Boolean(imageSrc && naturalSize.width && naturalSize.height && viewportSize.width && viewportSize.height);
+  const phase = isFixedFit ? (imageReady ? "idle" : "loading") : source.phase;
+  const onImageReady = fixedFit?.onReady;
+
+  useEffect(() => {
+    if (imageReady) onImageReady?.();
+  }, [imageReady, onImageReady]);
 
   const commitTransform = (next: ImageTransform) => {
     const stageWidth = viewportSize.width;
@@ -198,10 +214,10 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   }, []);
 
   useLayoutEffect(() => {
-    if (!naturalSize.width || !viewportSize.width) return;
+    if (isFixedFit || !naturalSize.width || !viewportSize.width) return;
     setMode("default");
     commitTransform({ x: 0, y: 0, scale: scales.minimum });
-  }, [naturalSize.width, naturalSize.height, viewportSize.width, viewportSize.height]);
+  }, [isFixedFit, naturalSize.width, naturalSize.height, viewportSize.width, viewportSize.height]);
 
   useLayoutEffect(() => {
     setControlsVisible(false);
@@ -280,13 +296,16 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   };
 
   return <div
-    className="immersive-image-stage"
-    onClick={(event) => event.stopPropagation()}
-    onPointerCancel={endGesture}
-    onPointerDown={beginGesture}
-    onPointerMove={moveGesture}
-    onPointerUp={endGesture}
-    onWheel={(event) => {
+    className={`immersive-image-stage${fixedFit ? " is-fixed-fit" : ""}`}
+    onClick={(event) => {
+      event.stopPropagation();
+      if (fixedFit && event.target === event.currentTarget) onClose();
+    }}
+    onPointerCancel={fixedFit ? undefined : endGesture}
+    onPointerDown={fixedFit ? undefined : beginGesture}
+    onPointerMove={fixedFit ? undefined : moveGesture}
+    onPointerUp={fixedFit ? undefined : endGesture}
+    onWheel={fixedFit ? undefined : (event) => {
       event.preventDefault();
       setMode("custom");
       if (event.ctrlKey || event.metaKey) {
@@ -303,24 +322,29 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
     role="presentation"
   >
     {poster && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={poster} /> : null}
-    <img
+    {src ? <img
       alt={alt}
       className={`immersive-image-canvas${phase === "error" ? " is-failed" : ""}`}
       draggable={false}
-      key={source.src}
+      key={imageSrc}
       referrerPolicy={referrerPolicy}
-      onLoad={(event) => { setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); source.ready(); }}
-      onError={source.fail}
+      onLoad={(event) => {
+        setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight });
+        if (!isFixedFit) source.ready();
+      }}
+      onError={fixedFit?.onError ?? source.fail}
+      onContextMenu={fixedFit ? (event) => event.preventDefault() : undefined}
       ref={imageRef}
-      src={source.src}
+      src={imageSrc}
       style={{
         height: naturalSize.height ? `${naturalSize.height}px` : "auto",
-        transform: `translate3d(calc(-50% + ${transform.x}px), calc(-50% + ${transform.y}px), 0) scale(${transform.scale})`,
+        transform: `translate3d(calc(-50% + ${imageTransform.x}px), calc(-50% + ${imageTransform.y}px), 0) scale(${imageTransform.scale})`,
+        visibility: fixedFit && !imageReady ? "hidden" : undefined,
         width: naturalSize.width ? `${naturalSize.width}px` : "auto",
       }}
-    />
-    <MediaWaitFeedback phase={phase} onRetry={source.retry} />
-    <div
+    /> : null}
+    <MediaWaitFeedback phase={phase} onRetry={fixedFit ? undefined : source.retry} />
+    {fixedFit ? fixedFit.overlay : <div
       className={`immersive-image-actionbar${controlsVisible ? " is-visible" : ""}`}
       onClick={(event) => event.stopPropagation()}
       onPointerCancel={(event) => event.stopPropagation()}
@@ -350,7 +374,7 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
       <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
       </button>
-    </div>
+    </div>}
   </div>;
 }
 
@@ -626,6 +650,7 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
 
 export function MediaLightbox({
   initialImmersive = false,
+  fixedFitImage,
   index,
   items,
   altPrefix,
@@ -653,7 +678,8 @@ export function MediaLightbox({
   const gestureRef = useRef<{ moved: boolean; x: number; y: number } | null>(null);
   const approachingEndRef = useRef(onApproachingEnd);
   const approachingStartRef = useRef(onApproachingStart);
-  const [immersive, setImmersive] = useState(initialImmersive);
+  const [immersiveRequested, setImmersive] = useState(initialImmersive);
+  const immersive = immersiveRequested || Boolean(fixedFitImage);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<'processing'|'failed'|null>(null);
   const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({});
@@ -733,7 +759,7 @@ export function MediaLightbox({
                     ? <ImmersiveVideo onClose={close} poster={item.posterUri} src={item.uri} />
                     : <ArchiveVideoPlayer active={itemIndex === index} poster={item.posterUri} src={item.uri} />
                   : immersive && itemIndex === index
-                    ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} poster={item.posterUri} referrerPolicy={item.referrerPolicy} src={item.uri} />
+                    ? <ImmersiveImage alt={fixedFitImage ? resolvedAltPrefix : `${resolvedAltPrefix} ${itemIndex + 1}`} fixedFit={fixedFitImage} onClose={close} poster={item.posterUri} referrerPolicy={item.referrerPolicy} src={item.uri} />
                     : <PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} />}
               </div>
               {!immersive ? <div>{item.detail ?? null}</div> : null}

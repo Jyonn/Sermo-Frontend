@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.22.2",
+  "id": "2026.11.22.3",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "广场分享和图片布局",
+      "title": "闪图预览优化",
       "items": [
-        "广场会复用已加载的音乐信息和一滴分享摘要，来回切换时更快显示。",
-        "广场发言的多栏图片采用与单图相同的单张宽度上限。"
+        "闪图按原比例完整显示，右上角的环形倒计时提示剩余时间。"
       ]
     },
     "en": {
-      "title": "Square shares and photo layouts",
+      "title": "Flash photo preview",
       "items": [
-        "Square reuses music details and Drop share previews when you switch views.",
-        "Photos in two- and three-column grids use the same per-photo width limit as a single photo."
+        "Flash photos fit the screen at their original aspect ratio, with a circular countdown in the top corner."
       ]
     }
   }

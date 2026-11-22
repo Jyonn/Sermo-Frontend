@@ -28,25 +28,46 @@
 .flash-image-message::after { content: ""; position: absolute; inset: 0; z-index: -1; background: #0b120e70; }
 .flash-image-label .material-symbols-outlined { color: #ffdd80; font-size: 25px; }
 .flash-image-label small { color: #f4e8cb; font-size: 11px; }
-.dialog-backdrop.flash-view-backdrop { background: #0a0f0df5; padding: 0; }
-.flash-view { position: relative; display: grid; place-items: center; width: 100%; height: 100%; color: #f6f3e7; }
-.flash-view > img { width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-touch-callout: none; }
-.flash-view-close, .flash-view-count {
+
+.flash-view-timer {
   position: absolute;
-  top: max(14px, env(safe-area-inset-top));
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: calc(env(safe-area-inset-right) + 12px);
+  z-index: 3;
   display: grid;
   place-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid #ffffff33;
-  border-radius: 999px;
-  background: #111b16ed;
-  color: #fff5d7;
-  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ffffff29;
+  border-radius: 50%;
+  background: #111416d9;
+  color: #fff8e8;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  pointer-events: none;
 }
-.flash-view-close { right: max(14px, env(safe-area-inset-right)); min-width: 44px; }
-.flash-view-count { left: max(14px, env(safe-area-inset-left)); display: flex; gap: 5px; font-variant-numeric: tabular-nums; }
-.flash-view-count .material-symbols-outlined { color: #ffdd80; }
-.flash-view-progress { position: absolute; bottom: env(safe-area-inset-bottom); inset-inline: 0; height: 3px; background: #f8d977; transform-origin: left; animation: flash-view-progress 3s linear forwards; }
-@keyframes flash-view-progress { to { transform: scaleX(0); } }
-@media (prefers-reduced-motion: reduce) { .flash-view-progress { animation: none; } }
+.flash-view-timer svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #ffffff35;
+  stroke-width: 2;
+  transform: rotate(-90deg);
+}
+.flash-view-timer .flash-view-timer-arc {
+  stroke: #ffdd80;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  animation: flash-view-timer-drain var(--flash-view-duration) linear forwards;
+}
+@keyframes flash-view-timer-drain {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 100; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flash-view-timer .flash-view-timer-arc { animation: none; }
+}
