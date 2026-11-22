@@ -1,20 +1,21 @@
-.flash-image-message {
-  position: relative;
+.message-media-frame.image-button.flash-image-message {
   isolation: isolate;
   display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 5px;
-  min-block-size: 132px;
-  inline-size: min(58vw, 228px);
-  overflow: hidden;
-  padding: 14px;
-  border: 1px solid #ffffff30;
-  border-radius: 15px;
+  place-items: center;
+  min-inline-size: 96px;
+  min-block-size: 84px;
   background: #1c2823;
   color: #f8f1d6;
 }
-.flash-image-message:disabled { cursor: default; }
+.flash-image-message[aria-disabled="true"] { cursor: default; }
+.flash-image-label {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 6px;
+  text-align: center;
+  line-height: 1.2;
+}
 .flash-image-message img {
   position: absolute;
   inset: -10px;
@@ -25,8 +26,8 @@
   filter: blur(13px);
 }
 .flash-image-message::after { content: ""; position: absolute; inset: 0; z-index: -1; background: #0b120e70; }
-.flash-image-message .material-symbols-outlined { color: #ffdd80; font-size: 28px; }
-.flash-image-message small { color: #f4e8cb; font-size: 11px; }
+.flash-image-label .material-symbols-outlined { color: #ffdd80; font-size: 25px; }
+.flash-image-label small { color: #f4e8cb; font-size: 11px; }
 .dialog-backdrop.flash-view-backdrop { background: #0a0f0df5; padding: 0; }
 .flash-view { position: relative; display: grid; place-items: center; width: 100%; height: 100%; color: #f6f3e7; }
 .flash-view > img { width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-touch-callout: none; }

@@ -1164,6 +1164,12 @@ export interface ChatMessagePayloadDTO {
   flash_thumbnail?: string | null;
   flash_available?: boolean;
   flash_expires_at?: number;
+  flash_sender?: boolean;
+  flash_viewed?: boolean;
+  flash_viewed_count?: number;
+  flash_recipient_count?: number;
+  flash_message_id?: number;
+  flash_position?: number;
   profile_user_id?: number;
   profile?: TinyUserDTO & {signature?:string} | null;
   project_id?: number;
@@ -1232,6 +1238,7 @@ export interface ChatMessagePayloadDTO {
   pixel_height?: number | null;
   unavailable?: boolean;
   bundle_id?: number;
+  delivery_message_id?: number | null;
   title?: string;
   summary?: string;
   item_count?: number;

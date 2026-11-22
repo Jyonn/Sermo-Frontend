@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.21.2",
-  "publishedAt": "2026-11-21",
+  "id": "2026.11.22.1",
+  "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "发送前编辑照片",
+      "title": "闪图查看与消息转发",
       "items": [
-        "选图后可裁剪、旋转翻转、涂马赛克和选择保留哪些信息，多图可逐张切换。",
-        "闪图每位收件人可看一次，展示 3 秒，不可转发。头像裁剪支持双指缩放。"
+        "闪图与图片气泡样式一致。发送者可重复查看，也能看到收件人查看状态。",
+        "你发送的闪图和语音可逐条或合并转发到聊天。"
       ]
     },
     "en": {
-      "title": "Edit photos before sending",
+      "title": "Flash photo receipts and forwarding",
       "items": [
-        "Crop, rotate, flip, pixelate and choose which photo information to keep. Swipe between selected photos to edit each one.",
-        "Recipients can view a flash photo once for 3 seconds. Flash photos cannot be forwarded. Pinch to zoom when cropping avatars."
+        "Flash photos now use the photo bubble style. Senders can reopen them and see how many recipients have viewed them.",
+        "Forward your own flash photos and voice messages individually or in chat history bundles."
       ]
     }
   }

@@ -1315,7 +1315,8 @@ function renderMessageContent(
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
   }
   if (message.kind === "flash_image" && typeof message.id === "number") {
-    return <FlashImageMessage id={message.id} payload={message.payload} sent={message.from === "self"}/>;
+    return <FlashImageMessage id={message.payload?.flash_message_id ?? message.id} payload={message.payload}
+      sent={message.payload?.flash_sender ?? message.from === "self"} groupClassName={groupClassName}/>;
   }
   if (message.kind === "sticker") {
     if (!message.payload?.uri || message.payload.unavailable) {
@@ -1522,6 +1523,12 @@ function renderMessageContent(
   );
 }
 
+function flashRenderSignature(payload?: ChatMessagePayloadDTO | null) {
+  return [payload?.flash_available, payload?.flash_viewed, payload?.flash_sender, payload?.flash_expires_at,
+    payload?.flash_viewed_count, payload?.flash_recipient_count, payload?.flash_thumbnail,
+    payload?.flash_message_id, payload?.flash_position];
+}
+
 function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[]) {
   const entering = group.messages.filter((message) => enteringMessageIds.includes(message.clientId)).map((message) => message.clientId);
   return JSON.stringify({
@@ -1538,6 +1545,9 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
       text: message.text,
       uri: message.payload?.uri,
       thumbnailUri: message.payload?.thumbnail_uri,
+      flash: message.kind === "flash_image" ? flashRenderSignature(message.payload)
+        : message.kind === "forward_bundle" ? message.payload?.items?.filter(item => item.type === MESSAGE_TYPE_FLASH_IMAGE)
+          .map(item => flashRenderSignature(item.payload)) : undefined,
       voiceCall: message.kind === 'voice_call' ? {
         state: message.payload?.state,
         reason: message.payload?.reason,
@@ -1656,7 +1666,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
-            isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
+            isMediaMessageKind(message.kind) || message.kind === "location" || message.kind === "flash_image" ? "is-media" : "",
             message.kind === "audio" ? "is-audio" : "",
             message.kind === 'voice_call' ? 'is-voice-call' : '',
             message.kind === "location" ? "is-location" : "",
@@ -2730,16 +2740,18 @@ function LiveChatsPage({
   const [forwardMode, setForwardMode] = useState<"individual" | "bundle">("bundle");
   const [forwardSourceMessageIds, setForwardSourceMessageIds] = useState<number[]>([]);
   const [forwardSourcePreviewMessages, setForwardSourcePreviewMessages] = useState<ChatMessageDTO[]>([]);
-  const forwardContainsAudio = forwardSourcePreviewMessages.some((message) => message.type === MESSAGE_TYPE_AUDIO);
+  const forwardContainsFlash = forwardSourcePreviewMessages.some((message) => message.type === MESSAGE_TYPE_FLASH_IMAGE);
   const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
   const [forwardSending, setForwardSending] = useState(false);
   const [forwardBundlePreview, setForwardBundlePreview] = useState<ChatMessagePayloadDTO | null>(null);
 
   useEffect(() => {
-    const bundleSegment = drawerPathFromSearch(location.search).find((item) => /^forward-bundle-\d+$/.test(item));
+    const bundleSegment = drawerPathFromSearch(location.search).find((item) => /^forward-bundle-\d+(?:-\d+)?$/.test(item));
     if (!bundleSegment) return;
-    const bundleId = Number(bundleSegment.replace("forward-bundle-", ""));
-    const message = Object.values(messages).flat().find((item) => item.payload?.bundle_id === bundleId);
+    const [bundleId, deliveryId] = bundleSegment.slice("forward-bundle-".length).split("-").map(Number);
+    const message = Object.values(messages).flat().find((item) =>
+      item.payload?.bundle_id === bundleId && (!deliveryId || item.id === deliveryId)
+    );
     if (message?.payload) setForwardBundlePreview(message.payload);
   }, [location.search, messages]);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
@@ -2899,6 +2911,9 @@ function LiveChatsPage({
   const [mobileMentionPosition, setMobileMentionPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 260 });
   const visualViewportBaselineRef = useRef(0);
   const currentUserId = session?.user.user_id ?? 0;
+  const forwardRequiresBundle = forwardSourcePreviewMessages.some(
+    (message) => message.type === MESSAGE_TYPE_AUDIO && message.user.user_id !== currentUserId,
+  );
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
   const frequentEmojis = emojiUsage.slice(0, 8).map((item) => item.emoji);
   const visibleEmojis =
@@ -6695,7 +6710,8 @@ function LiveChatsPage({
   });
 
   const canForwardMessage = (message: ChatMessage) => (
-    typeof message.id === "number" && message.type !== MESSAGE_TYPE_FLASH_IMAGE
+    typeof message.id === "number" && message.id > 0
+    && (message.type !== MESSAGE_TYPE_FLASH_IMAGE || message.from === "self")
     && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle", "voice_call"].includes(message.kind)
   );
 
@@ -6831,7 +6847,7 @@ function LiveChatsPage({
     setForwardSourceMessageIds(eligibleIds);
     setForwardSourcePreviewMessages(eligibleMessages.map(forwardPreviewMessage));
     setForwardTargetChatIds([]);
-    setForwardMode(eligibleIds.length > 1 || eligibleMessages.some((message) => message.kind === "audio") ? "bundle" : "individual");
+    setForwardMode(eligibleIds.length > 1 || eligibleMessages.some((message) => message.kind === "audio" && message.from !== "self") ? "bundle" : "individual");
     setForwardRouteOpen(true);
   };
 
@@ -6843,13 +6859,13 @@ function LiveChatsPage({
     setForwardSourceMessageIds([message.id as number]);
     setForwardSourcePreviewMessages([forwardPreviewMessage(message)]);
     setForwardTargetChatIds([]);
-    setForwardMode(message.kind === "audio" ? "bundle" : "individual");
+    setForwardMode(message.kind === "audio" && message.from !== "self" ? "bundle" : "individual");
     setForwardRouteOpen(true);
   };
 
   const submitForwardMessages = async () => {
     if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
-    if (forwardContainsAudio && forwardMode === "individual") {
+    if (forwardRequiresBundle && forwardMode === "individual") {
       showToast(t("message.forwardAudioBundleOnly"), "error");
       return;
     }
@@ -6878,7 +6894,7 @@ function LiveChatsPage({
   };
 
   const composeForwardBundleForSquare = () => {
-    if (!forwardSourceMessageIds.length || forwardSending) return;
+    if (!forwardSourceMessageIds.length || forwardSending || forwardContainsFlash) return;
     const messageIds = [...forwardSourceMessageIds];
     setForwardRouteOpen(false);
     setForwardPickerOpen(false);
@@ -8271,7 +8287,7 @@ function LiveChatsPage({
         description={t("message.forwardSourceCount", { count: forwardSourceMessageIds.length })}
       >
         <div className="forward-route-switch" role="group" aria-label={t("message.forwardMode")}>
-          {Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? <button onClick={composeForwardBundleForSquare} type="button">
+          {!forwardContainsFlash && Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? <button onClick={composeForwardBundleForSquare} type="button">
             <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
             <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
             <span className="forward-route-enter material-symbols-outlined" aria-hidden="true">arrow_forward</span>
@@ -8318,11 +8334,11 @@ function LiveChatsPage({
               className={forwardMode === "individual" ? "is-active" : ""}
               onClick={() => setForwardMode("individual")}
               aria-pressed={forwardMode === "individual"}
-              disabled={forwardContainsAudio}
+              disabled={forwardRequiresBundle}
               type="button"
             >
               <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">view_agenda</span>
-              <span><strong>{t("message.forwardIndividual")}</strong><small>{t(forwardContainsAudio ? "message.forwardAudioBundleOnly" : "message.forwardIndividualHint")}</small></span>
+              <span><strong>{t("message.forwardIndividual")}</strong><small>{t(forwardRequiresBundle ? "message.forwardAudioBundleOnly" : "message.forwardIndividualHint")}</small></span>
               <span className="forward-route-check material-symbols-outlined" aria-hidden="true">check_circle</span>
             </button>
             <button
@@ -8363,7 +8379,7 @@ function LiveChatsPage({
             />
           );
         })()}
-        historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
+        historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}${forwardBundlePreview?.delivery_message_id ? `-${forwardBundlePreview.delivery_message_id}` : ""}`}
         onClose={() => setForwardBundlePreview(null)}
       >
           <ChatPreview

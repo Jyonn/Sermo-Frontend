@@ -1404,9 +1404,9 @@ export const api = {
     });
   },
 
-  revealFlashImage(messageId: number, signal: AbortSignal) {
+  revealFlashImage(messageId: number, signal: AbortSignal, position?: number) {
     return request<Blob>("/messages/flash-image/reveal", {
-      method: "POST", query: {message_id: messageId}, auth: true, signal, responseFormat: "image", cache: "no-store",
+      method: "POST", query: {message_id: messageId, position}, auth: true, signal, responseFormat: "image", cache: "no-store",
     });
   },
 
