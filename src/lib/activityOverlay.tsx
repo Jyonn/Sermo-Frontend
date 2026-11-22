@@ -4,6 +4,7 @@ import {useAuth} from './auth';
 import {useI18n} from './language';
 import {activityKeyFromSearch,activityOverlaySearch} from './activityOverlayRoute';
 import {SideDrawer} from '../components/SideDrawer';
+import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ActivityLoadingState} from '../components/ActivityLoadingState';
 import {activityDrawerClassName} from './activityTheme';
 const Experience=lazy(()=>import('../components/ActivityExperience').then(module=>({default:module.ActivityExperience})));
@@ -29,5 +30,12 @@ export function ActivityOverlayProvider({children}:{children:ReactNode}) {
     if(location.state?.activityOverlay)navigate(-1);
     else navigate({pathname:location.pathname,search:activityOverlaySearch(location.search,null),hash:location.hash},{replace:true});
   };
-  return <ActivityOverlayContext.Provider value={open}><ActivityPageReadyContext.Provider value={setReadyPath}>{children}{session&&key&&readyPath===location.pathname?<Suspense fallback={<SideDrawer open className={activityDrawerClassName(key)} contentUnderToolbar historyMode="route" onClose={close} title={t('activity.title')}><ActivityLoadingState/></SideDrawer>}><Experience key={`${session.user.user_id}:${key}`} activityKey={key} onClose={close}/></Suspense>:null}</ActivityPageReadyContext.Provider></ActivityOverlayContext.Provider>;
+  return <ActivityOverlayContext.Provider value={open}><ActivityPageReadyContext.Provider value={setReadyPath}>
+    {children}
+    {session && key && readyPath === location.pathname ? <FloatingDrawerScope standalone>
+      <Suspense fallback={<SideDrawer open trapFocus className={activityDrawerClassName(key)} contentUnderToolbar historyMode="route" onClose={close} title={t('activity.title')}><ActivityLoadingState /></SideDrawer>}>
+        <Experience key={`${session.user.user_id}:${key}`} activityKey={key} onClose={close} />
+      </Suspense>
+    </FloatingDrawerScope> : null}
+  </ActivityPageReadyContext.Provider></ActivityOverlayContext.Provider>;
 }

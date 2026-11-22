@@ -2204,7 +2204,7 @@ export default function SquarePage() {
           {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
-      <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless fullscreen fullViewport floatingBack={false}>
+      <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless floatingBack={false}>
         <SquareComposerEditor text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video} voice={voiceFile&&voicePreview?{uri:voicePreview,duration:voiceDuration}:null} external={externalMedia}
           onRemovePhoto={removePhoto} onRemoveVideo={()=>{if(video)URL.revokeObjectURL(video.preview);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
           onAdd={openCreationMenu} onBack={()=>setComposerOpen(false)} onPublish={()=>void publish()} audienceLabel={anonymousStatement?t("square.publishAnonymously"):visibility==="friends"?t("square.friendsOnly"):t("square.audiencePublic")} onAudience={()=>setVisibilitySheetOpen(true)}

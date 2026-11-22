@@ -7,6 +7,19 @@
   --overlay-control-size: 42px;
 }
 .side-drawer.has-floating-toolbar { grid-template-rows: minmax(0,1fr); --drawer-toolbar-space: calc(76px + env(safe-area-inset-top)); }
+.drawer-floating-back {
+  position: absolute;
+  top: var(--drawer-control-top);
+  left: var(--drawer-control-start);
+  z-index: 30;
+}
+.drawer-floating-accessory {
+  position: absolute;
+  top: var(--drawer-control-top);
+  right: var(--drawer-control-end);
+  z-index: 30;
+  max-width: calc(100% - 88px);
+}
 .drawer-floating-toolbar { position: absolute; z-index: 30; inset: var(--drawer-control-top) var(--drawer-control-end) auto var(--drawer-control-start); display: flex; align-items: center; gap: var(--drawer-control-gap); min-height: var(--overlay-control-size); background: transparent; pointer-events: none; }
 .drawer-floating-toolbar > * { pointer-events: auto; }
 .drawer-floating-identity { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }

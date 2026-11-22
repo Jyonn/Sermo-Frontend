@@ -4,6 +4,7 @@ import {SquareVoicePreview} from './SquareVoicePreview';
 import './SquareComposerEditor.css';
 import type {LinkPreviewDTO} from '../types';
 import {LinkPreviewCard} from './LinkPreviewCard';
+import {DrawerDismissButton} from './OverlayIconButton';
 interface Props{
   text:string;onText:(text:string)=>void;limit:number;photos:Array<{id:string;preview:string}>;video:{preview:string;duration:number}|null;voice:{uri:string;duration:number}|null;external:LinkPreviewDTO|null;
   onRemovePhoto:(id:string)=>void;onRemoveVideo:()=>void;onRemoveVoice:()=>void;onRemoveExternal:()=>void;onAdd:()=>void;onBack:()=>void;onPublish:()=>void;
@@ -14,7 +15,7 @@ export function SquareComposerEditor(p:Props){
   useLayoutEffect(()=>{const node=writing.current;if(node){node.style.height='auto';node.style.height=`${Math.max(200,node.scrollHeight)}px`}},[p.text]);
   const remove=(onClick:()=>void)=><button className="square-editor-remove" disabled={p.publishing} aria-label={t('common.remove')} onClick={onClick} type="button"><span className="material-symbols-outlined">close</span></button>;
   return <section className="square-editor">
-    <header className="square-editor-header"><button aria-label={t('common.back')} disabled={p.publishing} onClick={p.onBack} type="button"><span className="material-symbols-outlined">arrow_back</span></button><span>{t('square.composeTitle')}</span><small>{p.text.length}/{p.limit}</small></header>
+    <header className="square-editor-header"><DrawerDismissButton className="square-editor-dismiss" disabled={p.publishing} onClick={p.onBack} /><span>{t('square.composeTitle')}</span><small>{p.text.length}/{p.limit}</small></header>
     <main className="square-editor-body">
       {p.error?<div className="square-inline-error" role="alert">{p.error}</div>:null}
       <div className="square-editor-media">

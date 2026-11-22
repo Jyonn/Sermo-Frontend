@@ -250,6 +250,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
       <SideDrawer
         className={activityDrawerClassName(activityKey,theme)}
         contentUnderToolbar
+        trapFocus
         headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t("square.share")} onClick={() => openActivityShare(activeActivity)} /> : null}
         historyMode="route"
         onClose={onClose}
@@ -316,7 +317,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
           }} type="button" />)}
         </div>
       </BottomSheet>
-      <SideDrawer historyMode="route" className={activityDrawerClassName(activityKey,theme)} contentUnderToolbar headerAction={<OverlayIconButton icon="share" aria-label={t('square.share')} onClick={() => { void api.getActivity('permanent-vip-founding-100').then(openActivityShare).catch(cause=>showToast(cause instanceof Error?cause.message:t('square.shareLoadFailed'),'error')); }} />} onClose={onClose} open={activityKey==='permanent-vip-founding-100'} title={t("vip.campaignTitle")}>
+      <SideDrawer historyMode="route" className={activityDrawerClassName(activityKey,theme)} contentUnderToolbar trapFocus headerAction={<OverlayIconButton icon="share" aria-label={t('square.share')} onClick={() => { void api.getActivity('permanent-vip-founding-100').then(openActivityShare).catch(cause=>showToast(cause instanceof Error?cause.message:t('square.shareLoadFailed'),'error')); }} />} onClose={onClose} open={activityKey==='permanent-vip-founding-100'} title={t("vip.campaignTitle")}>
         {vipCampaign ? <div className={`vip-campaign-panel${vipCampaign.claimed_by_user ? " is-claimed" : ""}`}>
           <section className="vip-campaign-hero">
             <span>FOUNDING 100</span>

@@ -5,6 +5,7 @@ import {AlertDialog} from '../components/AlertDialog';
 import {AsyncErrorDialog} from '../components/AsyncErrorDialog';
 import {BottomSheet} from '../components/BottomSheet';
 import {ConfirmDialog} from '../components/ConfirmDialog';
+import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ExternalAppAction, ExternalAppActions, ExternalAppIdentity} from '../components/ExternalAppPanel';
 import {FeedbackState} from '../components/FeedbackState';
 import {InlineAlert} from '../components/InlineAlert';
@@ -15,6 +16,8 @@ import {SelectControl, SettingGroup, SettingRow, SettingSwitch} from '../compone
 import {SettingsDialog} from '../components/SettingsDialog';
 import {SideDrawer} from '../components/SideDrawer';
 import {Snackbar} from '../components/Snackbar';
+import {SquareComposerEditor} from '../components/SquareComposerEditor';
+import {activityDrawerClassName} from '../lib/activityTheme';
 import {DROP_ICON} from '../lib/dropPicker';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {overlayAudiences, overlayKinds, type OverlayInventoryEntry} from '../lib/overlayInventory';
@@ -31,6 +34,10 @@ const externalApps = {
   chronelle: {logo: chronelleIcon, name: 'chronelle.title', description: 'apps.chronelleSummary', open: 'apps.openChronelle', manage: 'apps.chronelleDisplay'},
 } satisfies Record<string, {logo: string; name: TranslationKey; description: TranslationKey; open: TranslationKey; manage: TranslationKey}>;
 const icons = {drawer: 'side_navigation', sheet: 'bottom_panel_open', modal: 'dialogs', media: 'photo_library', popover: 'more_horiz', feedback: 'info', controls: 'tune'};
+const appFor = (entry: OverlayInventoryEntry) => {
+  const key = entry.historyKey === 'chronelle' ? 'chronelle' : entry.component;
+  return Object.prototype.hasOwnProperty.call(externalApps, key) ? externalApps[key as keyof typeof externalApps] : undefined;
+};
 
 function SurfacePreview({entry, title, close}: {entry: OverlayInventoryEntry; title: string; close: () => void}) {
   const {t} = useI18n();
@@ -39,8 +46,7 @@ function SurfacePreview({entry, title, close}: {entry: OverlayInventoryEntry; ti
   const [mediaIndex, setMediaIndex] = useState(0);
   const [enabled, setEnabled] = useState(true);
   const hint = t('patterns.localOnly');
-  const appKey = entry.historyKey === 'chronelle' ? 'chronelle' : entry.component;
-  const app = Object.prototype.hasOwnProperty.call(externalApps, appKey) ? externalApps[appKey as keyof typeof externalApps] : undefined;
+  const app = appFor(entry);
   const sample = <div className="atlas-preview-content">
     <p>{hint}</p>
     <label className="atlas-preview-field">
@@ -53,21 +59,31 @@ function SurfacePreview({entry, title, close}: {entry: OverlayInventoryEntry; ti
     </div>
   </div>;
   if (entry.kind === 'drawer') {
+    const isComposer = entry.historyKey === 'square-compose';
+    const isActivity = /\/(?:ActivityExperience|activityOverlay)\.tsx:/.test(entry.source);
     const cover = entry.headerless || entry.contentUnderToolbar;
     const share = cover && !app ? <OverlayIconButton icon="share" aria-label={t('references.share')} onClick={close} /> : undefined;
-    return <SideDrawer open title={title} showTitle={entry.showTitle} headerless={entry.headerless}
+    const drawer = <SideDrawer open title={title} showTitle={entry.showTitle} headerless={entry.headerless}
       fullscreen={entry.fullscreen} contentUnderToolbar={entry.contentUnderToolbar} historyMode="route" onClose={close} trapFocus
-      floatingAccessory={entry.headerless ? share : undefined} headerAction={entry.contentUnderToolbar ? share : undefined}>
-      {app ? <div className="external-app-panel">
+      className={isComposer ? 'square-compose-side-drawer' : isActivity ? activityDrawerClassName('explorer-2026') : undefined}
+      floatingBack={!isComposer} floatingAccessory={entry.headerless && !isComposer ? share : undefined}
+      headerAction={entry.contentUnderToolbar ? share : undefined}>
+      {isComposer ? <SquareComposerEditor text={value} onText={setValue} limit={140} photos={[]} video={null} voice={null} external={null}
+        onRemovePhoto={close} onRemoveVideo={close} onRemoveVoice={close} onRemoveExternal={close} onAdd={close}
+        onBack={close} onPublish={close} onAudience={close} onLocation={close}
+        audienceLabel={t('square.audiencePublic')} locationLabel={t('square.location')} publishing={false} publishable={Boolean(value.trim())}
+        progress={0} />
+      : app ? <div className="external-app-panel">
         <ExternalAppIdentity logo={app.logo} title={t(app.name)} description={t(app.description)} connection="connected" />
         <ExternalAppActions>
           <ExternalAppAction icon="open_in_new" label={t(app.open)} onClick={close} />
-          <ExternalAppAction icon={appKey === 'chronelle' ? 'calendar_month' : 'link_off'} label={t(app.manage)} onClick={close} />
+          <ExternalAppAction icon={entry.historyKey === 'chronelle' ? 'calendar_month' : 'link_off'} label={t(app.manage)} onClick={close} />
         </ExternalAppActions>
       </div> : cover
         ? <div className="atlas-preview-cover"><img alt="" src={photo}/><div><h2>{title}</h2><p>{hint}</p></div></div>
         : entry.showTitle ? sample : <><h2 className="atlas-preview-heading">{title}</h2>{sample}</>}
     </SideDrawer>;
+    return entry.fullscreen ? drawer : <FloatingDrawerScope standalone>{drawer}</FloatingDrawerScope>;
   }
   if (entry.component === 'ActionSheet') return <ActionSheet open title={title} onClose={close} actions={[
     {key: 'open', label: t('patterns.preview'), icon: <span className="material-symbols-outlined">open_in_new</span>, onSelect: close},
@@ -134,6 +150,8 @@ export default function ComponentAtlasPage() {
   }, [theme, tone]);
 
   const titleFor = (entry: OverlayInventoryEntry) => {
+    const app = appFor(entry);
+    if (app) return t(app.name);
     const translated = entry.titleKey ? t(entry.titleKey as TranslationKey) : '';
     return entry.title || (translated !== entry.titleKey && translated) || entry.historyKey || entry.component;
   };

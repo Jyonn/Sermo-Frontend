@@ -29,10 +29,20 @@ test("desktop container keeps scroll unlocked, uses a transparent dismiss layer 
   assert.match(source, /<DrawerDismissButton className="drawer-surface-dismiss"/);
   const drawerCss = readFileSync(new URL("../src/components/SideDrawer.css", import.meta.url), "utf8");
   assert.match(drawerCss, /@media\(min-width:720px\)[\s\S]+\.drawer-floating-back \{ left: auto; right: var\(--drawer-control-end\); \}/);
+  assert.doesNotMatch(readFileSync(new URL("../src/styles/app/70-square-composer.css", import.meta.url), "utf8"), /\.drawer-floating-back\s*\{/);
   assert.match(source, /desktopPanel && panels\?\.floating && panels.topId === drawerId/);
   const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");
   assert.match(css, /background: transparent/);
   assert.match(css, /transition: grid-template-columns/);
+});
+
+test("the Square composer and route-backed activities use desktop drawer hosts", () => {
+  const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
+  const composer = square.match(/<SideDrawer className="square-compose-side-drawer"[^\n]+/)?.[0];
+  assert.ok(composer);
+  assert.doesNotMatch(composer, /fullscreen|fullViewport/);
+  const activity = readFileSync(new URL("../src/lib/activityOverlay.tsx", import.meta.url), "utf8");
+  assert.match(activity, /<FloatingDrawerScope standalone>[\s\S]*<Experience/);
 });
 
 test("two panels respect phone minimum, fixed detail width and original primary maximum", () => {

@@ -1087,20 +1087,6 @@ html[data-theme="dark"] .chat-item.is-submission-item {
   min-height: 0;
   overflow-y: auto;
 }
-.drawer-floating-back {
-  position: absolute;
-  top: var(--drawer-control-top);
-  left: var(--drawer-control-start);
-  z-index: 30;
-}
-.drawer-floating-accessory {
-  position: absolute;
-  top: var(--drawer-control-top);
-  right: var(--drawer-control-end);
-  z-index: 30;
-  max-width: calc(100% - 88px);
-}
-
 .profile-audience-switch {
   display: flex;
   align-items: center;

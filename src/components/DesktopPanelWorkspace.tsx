@@ -25,8 +25,10 @@ interface PanelContext {
   unregister: (id: string) => void;
 }
 const DesktopPanels = createContext<PanelContext | null>(null);
-export function FloatingDrawerScope({ children }: { children: ReactNode }) {
+export function FloatingDrawerScope({ children, standalone = false }: { children: ReactNode; standalone?: boolean }) {
   const parent = useContext(DesktopPanels);
+  const desktop = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
+  const enabled = standalone ? desktop : Boolean(parent?.enabled);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [layers, setLayers] = useState<DesktopPanelLayer[]>([]);
   const register = useCallback((layer: DesktopPanelLayer) => setLayers(current => {
@@ -35,9 +37,9 @@ export function FloatingDrawerScope({ children }: { children: ReactNode }) {
   }), []);
   const unregister = useCallback((id: string) => setLayers(current => current.some(item => item.id === id) ? current.filter(item => item.id !== id) : current), []);
   const top = topDesktopPanel(layers);
-  return <DesktopPanels.Provider value={parent ? { ...parent, host, topId: top?.id, single: false, floating: true, detached: true, register, unregister } : null}>
+  return <DesktopPanels.Provider value={parent || standalone ? { enabled, surfaceClassName: parent?.surfaceClassName, host, topId: top?.id, single: false, floating: true, detached: true, register, unregister } : null}>
     {children}
-    {typeof document !== "undefined" ? createPortal(<div className={`desktop-panel-slot detached-drawer-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!parent?.enabled || !top} />, document.body) : null}
+    {typeof document !== "undefined" ? createPortal(<div className={`desktop-panel-slot detached-drawer-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!enabled || !top} />, document.body) : null}
   </DesktopPanels.Provider>;
 }
 

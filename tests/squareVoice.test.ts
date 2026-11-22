@@ -32,7 +32,11 @@ test('recording and permission loading do not expose the previous recording',()=
   assert.match(render({starting:true,preview:'blob:old'}),/disabled=""/);
 });
 test('composer attaches one playable card instead of a thumbnail plus native bar',()=>{
-  const editor=load('SquareComposerEditor',{'./SquareVoicePreview':player});
+  const editor=load('SquareComposerEditor',{
+    './SquareVoicePreview':player,
+    './OverlayIconButton':load('OverlayIconButton'),
+    './LinkPreviewCard':{LinkPreviewCard:()=>null},
+  });
   const html=renderToStaticMarkup(createElement(editor.SquareComposerEditor,{text:'',photos:[],video:null,voice:{uri:'blob:voice',duration:10},external:null,limit:140,publishing:false,publishable:true,progress:0,onRemoveVoice(){}}));
   assert.equal((html.match(/<audio/g)??[]).length,1);
   assert.doesNotMatch(html,/controls=|is-audio|square-editor-audio/);

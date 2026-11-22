@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.22.4",
+  "id": "2026.11.22.5",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "界面样式统一",
+      "title": "桌面 Drawer 布局优化",
       "items": [
-        "抽屉、常用弹窗和图片预览使用统一的圆形操作按钮。",
-        "一滴、小兜、时序和留幅采用一致的连接状态和操作列表。",
-        "新增组件样式总览，可按用户角色和组件类型预览。"
+        "个人名片的关闭按钮移到右上角，与分享按钮对齐。",
+        "发表发言和活动在桌面端以保留边距的 Drawer 打开。"
       ]
     },
     "en": {
-      "title": "More consistent controls",
+      "title": "Desktop drawer layout",
       "items": [
-        "Drawers, common dialogs, and photo previews use matching circular controls.",
-        "Drop, Pocklo, Chronelle, and StillFolio share the same connection and action layout.",
-        "The component gallery shows previews by audience and component type."
+        "Profile cards place the close button alongside Share in the top-right corner.",
+        "The Square composer and activities open in inset drawers on desktop."
       ]
     }
   }
