@@ -29,3 +29,13 @@ test("statement details use the same dismiss control while loading and after loa
   assert.match(reader, /<SquareNoteDetailHeader panel=\{p.panel\} onDismiss=\{p.onBack\}/);
   assert.match(square, /<SquareNoteDetailHeader panel=\{noteDesktopPanel\} onDismiss=\{closeStatementDrawer\}/);
 });
+
+test("masonry and list details share comment markup without reader style overrides", () => {
+  const reader = readFileSync(new URL("../src/components/SquareNoteDetail.tsx", import.meta.url), "utf8");
+  const readerCss = readFileSync(new URL("../src/components/SquareNoteDetail.css", import.meta.url), "utf8");
+  assert.match(square, /const discussionContent = \(\s*<SquareDiscussion/);
+  assert.match(square, /className="square-inline-discussion">\{discussionContent\}/);
+  assert.match(square, /discussion=\{discussionContent\}/);
+  assert.match(reader, /<\/div><div ref=\{comments\}>\{p\.discussion\}/);
+  assert.doesNotMatch(readerCss, /\.square-reader\s+(?:button|\.square-discussion-section)[\s:{]/);
+});

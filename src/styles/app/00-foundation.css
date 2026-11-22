@@ -2913,7 +2913,6 @@ html[data-theme="dark"] body .growth-level-detail {
     scrollbar-gutter: stable;
   }
 
-  .square-desktop-detail-card .square-discussion-section { padding: 22px 22px 28px; }
   .square-desktop-detail-card > .square-comment-composer {
     position: relative;
     inset: auto;

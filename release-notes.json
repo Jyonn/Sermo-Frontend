@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.22.13",
+  "id": "2026.11.22.14",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "发言详情返回与关闭",
+      "title": "统一广场评论区",
       "items": [
-        "发言详情统一使用手机左上角的返回按钮和桌面右上角的关闭按钮。从链接打开的详情可直接返回广场。"
+        "瀑布流和列表的发言详情共用评论区，排序、回复和点赞的字号及间距保持一致。"
       ]
     },
     "en": {
-      "title": "Statement detail controls",
+      "title": "Consistent Square comments",
       "items": [
-        "Statement details use a top-left back button on phones and a top-right close button on desktop. Closing a detail opened from a link returns to Square."
+        "Masonry and list statement details share the same comment section, with consistent typography and spacing for sorting, replies, and likes."
       ]
     }
   }

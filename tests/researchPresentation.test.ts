@@ -23,7 +23,7 @@ test('calendar consent is global and explicit, and empty views reuse the same co
   assert.match(calendar,/<ChronellePermissionsDrawer/);
   assert.match(calendar,/<ChronellePluginDialog/);
   assert.match(source('components/ChronellePermissionsDrawer.tsx'),/api.saveChronellePermissions\(policy\)/);
-  assert.match(source('pages/SquarePage.tsx'),/<QuietState icon="forum" title=\{t\("square.noComments"\)\}/);
+  assert.match(source('components/SquareDiscussion.tsx'),/<QuietState icon="forum" title=\{t\("square.noComments"\)\}/);
   assert.match(source('components/SquareExperience.css'),/grid-template-columns:minmax\(0,1fr\) 24px minmax\(0,1fr\)/);
 });
 
@@ -119,7 +119,8 @@ test('research preserves its root panel while nested drawers float, and shares S
   assert.doesNotMatch(source('components/ResearchWorkspace.tsx'),/<PageTabs/);
   assert.match(source('components/ResearchComments.tsx'),/<CommentThread/);
   assert.match(source('components/ResearchComments.tsx'),/<CommentComposer/);
-  assert.match(source('pages/SquarePage.tsx'),/<CommentThread/);
+  assert.match(source('pages/SquarePage.tsx'),/<SquareDiscussion/);
+  assert.match(source('components/SquareDiscussion.tsx'),/<CommentThread/);
   assert.match(source('pages/SquarePage.tsx'),/<CommentComposer/);
   assert.match(source('components/ResearchProjectDetails.tsx'),/\['active','archived'\]/);
 });

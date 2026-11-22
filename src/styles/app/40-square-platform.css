@@ -180,7 +180,7 @@
 .square-comment-composer input:focus{ border-color: color-mix(in srgb, var(--brand-primary) 50%, var(--line-soft));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand-primary) 42%,transparent)}
 .square-comment-composer>button{border-radius:50%;box-shadow:0 5px 14px color-mix(in srgb,var(--brand-primary) 22%,transparent);transition:opacity 150ms ease,transform 150ms ease}
 .square-comment-composer>button:not(:disabled):active{transform:scale(.9)}
-@media(max-width: 719px){.square-comment-composer{width:calc(100% - 20px);margin:8px 10px max(8px,env(safe-area-inset-bottom))}.square-statement-detail-stage>.square-statement-card{padding:17px 18px 22px;border-radius:0}.square-discussion-section{padding:18px 18px 24px}}
+@media(max-width: 719px){.square-comment-composer{width:calc(100% - 20px);margin:8px 10px max(8px,env(safe-area-inset-bottom))}.square-statement-detail-stage>.square-statement-card{padding:17px 18px 22px;border-radius:0}.square-discussion-section{padding:18px 16px 24px}}
 
 /* Statement collection v2: one visual language from feed card to detail drawer. */
 .square-statement-detail-drawer.side-drawer {
@@ -458,7 +458,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 
 .square-inline-discussion .square-discussion-section {
   min-height: 180px;
-  padding-inline: 4px;
 }
 
 .square-inline-comment-dock {
@@ -614,7 +613,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 
   .square-inline-discussion .square-discussion-section {
     min-height: 100%;
-    padding-inline: 16px;
   }
 
   .square-inline-comment-dock .square-comment-composer {

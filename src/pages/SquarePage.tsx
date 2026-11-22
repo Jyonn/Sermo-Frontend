@@ -5,7 +5,7 @@ import {filterSquareRemoved,reconcileSquareItems} from '../lib/squareSync';
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
-import { CommentThread } from "../components/CommentThread";
+import { SquareDiscussion } from "../components/SquareDiscussion";
 import { CommentComposer } from "../components/CommentComposer";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
@@ -1892,21 +1892,29 @@ export default function SquarePage() {
   };
 
   const discussionContent = (
-    <section className="square-discussion-section">
-      <div className="square-comments-heading">
-        <div><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
-        {comments.length ? <div className="square-comments-sort" role="group" aria-label={t("square.commentSortLabel")}><button className={commentSort === "hot" ? "is-active" : ""} onClick={() => setCommentSort("hot")} type="button">{t("square.commentsHot")}</button><button className={commentSort === "latest" ? "is-active" : ""} onClick={() => setCommentSort("latest")} type="button">{t("square.commentsLatest")}</button></div> : null}
-      </div>
-      {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
-      {commentLoadError?<FeedbackState tone="error" title={commentLoadError} action={<button className="secondary-button" onClick={()=>setCommentReload(value=>value+1)} type="button">{t('common.retry')}</button>}/>:null}
-      {!commentsLoading && !comments.length && !commentLoadError ? <QuietState icon="forum" title={t("square.noComments")} description={canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}/> : null}
-      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread renderContent={(comment, onReply) => <CommentContent comment={comment} onOpenProfile={openUserProfile} onReply={onReply}/>} canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
-      {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
+    <SquareDiscussion
+      canInteract={canPublish}
+      comments={comments}
+      count={activeCommentStatement?.comment_count ?? 0}
+      error={commentLoadError}
+      expandedCommentId={expandedCommentId}
+      hasMore={commentsHasMore}
+      loading={commentsLoading}
+      sort={commentSort}
+      onSortChange={setCommentSort}
+      onRetry={() => setCommentReload((value) => value + 1)}
+      onLoadMore={() => {
         if (commentStatementId === null) return;
         setCommentsLoading(true);
         void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30, sort: commentSort }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
-      }} type="button">{t("square.loadMoreComments")}</button> : null}
-    </section>
+      }}
+      onDelete={setDeleteCommentTarget}
+      onLike={(comment) => void toggleCommentLike(comment)}
+      onOpenProfile={openUserProfile}
+      onReply={beginCommentReply}
+      onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)}
+      renderContent={(comment, onReply) => <CommentContent comment={comment} onOpenProfile={openUserProfile} onReply={onReply} />}
+    />
   );
 
   const commentComposer = canPublish ? <CommentComposer anonymous={anonymousComment} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }} formRef={commentComposerRef}>
