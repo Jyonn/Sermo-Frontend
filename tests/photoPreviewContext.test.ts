@@ -24,7 +24,11 @@ test('video previews reuse the photo shell and toolbar without the retired secon
   assert.match(preview, /releaseMediaPlayback\(node\); node.pause\(\)/);
   assert.match(preview, /video.current.currentTime = event.currentTarget.valueAsNumber/);
   assert.match(styles, /\.media-drawer-stage\.is-free-drag \.media-drawer-slide\[data-active="false"\]\s*\{\s*visibility: hidden/);
-  assert.match(preview, /style=\{\{opacity: infoPull, transform: `translate3d\(0, \$\{\(1 - infoPull\) \* 100\}%/);
+  assert.match(preview, /!immersive && <><input type="range"/);
+  assert.match(preview, /<MediaDrawerSlide key=\{mediaKey\(entry, position\)\}[\s\S]*?info=\{infoContent\}/);
+  const slide = await read('components/MediaDrawerSlide.tsx');
+  assert.match(slide, /data-scrollable=\{opened && overflow\}/);
+  assert.match(slide, /minHeight: overflow \? bounds.height/);
 });
 test('chat and search previews share sender identity, sending time and message navigation', async () => {
   const chat = await read('components/ChatImagePreview.tsx');

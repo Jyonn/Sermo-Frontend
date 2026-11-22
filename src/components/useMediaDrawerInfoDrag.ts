@@ -1,37 +1,42 @@
 import {useEffect, useRef, useState, type RefObject} from 'react';
 import {lockSwipeAxis, shouldCompleteSwipe, swipeVelocity, type SwipeSample} from '../lib/mediaDrawerGeometry';
 
-export function useMediaDrawerInfoDrag(panel: RefObject<HTMLElement>, open: boolean, height: number, onClose: () => void) {
+export function useMediaDrawerInfoDrag(viewport: RefObject<HTMLElement>, open: boolean, height: number, onClose: () => void) {
   const [distance, setDistance] = useState<number>();
   const options = useRef({height, onClose});
   options.current = {height, onClose};
 
   useEffect(() => {
-    const node = panel.current;
+    const node = viewport.current;
     if (!open || !node) {
       setDistance(undefined);
       return;
     }
-    let drag: {id: number; start: SwipeSample; samples: SwipeSample[]; active: boolean} | undefined;
+    let drag: {id: number; start: SwipeSample; startScroll: number; samples: SwipeSample[]; mode?: 'close' | 'scroll'} | undefined;
     let suppressClick = false;
     const start = (id: number, point: SwipeSample, target: EventTarget | null) => {
       suppressClick = false;
       if (drag || (target instanceof Element && target.closest('input,textarea,select'))) return;
-      drag = {id, start: point, samples: [point], active: false};
+      drag = {id, start: point, startScroll: node.scrollTop, samples: [point]};
     };
     const move = (id: number, point: SwipeSample, event: Event, capture?: () => void) => {
       if (!drag || drag.id !== id) return;
       const offset = point.y - drag.start.y;
-      if (!drag.active) {
+      if (!drag.mode) {
         const dx = point.x - drag.start.x;
         const axis = event.type === 'touchmove' && offset >= 3 && offset > Math.abs(dx) ? 'free' : lockSwipeAxis(dx, offset);
         if (!axis) return;
-        if (axis !== 'free' || offset < 0 || !event.cancelable) {drag = undefined; return;}
-        if (node.scrollTop > 1) {drag.start = point; drag.samples = [point]; return;}
-        drag.active = true;
+        if (axis !== 'free' || !event.cancelable) {drag = undefined; return;}
+        const canClose = offset > 0 && drag.startScroll <= 1;
+        if (!canClose && (!capture || node.scrollHeight <= node.clientHeight)) {drag = undefined; return;}
+        drag.mode = canClose ? 'close' : 'scroll';
         capture?.();
       }
       if (event.cancelable) event.preventDefault();
+      if (drag.mode === 'scroll') {
+        node.scrollTop = drag.startScroll - offset;
+        return;
+      }
       drag.samples = [...drag.samples.filter(sample => point.time - sample.time <= 100), point];
       setDistance(Math.max(0, offset));
     };
@@ -39,10 +44,10 @@ export function useMediaDrawerInfoDrag(panel: RefObject<HTMLElement>, open: bool
       if (!drag || drag.id !== id) return;
       const released = drag;
       drag = undefined;
-      if (!released.active) return;
+      if (!released.mode) return;
       suppressClick = true;
       setDistance(undefined);
-      if (!point) return;
+      if (!point || released.mode !== 'close') return;
       const offset = point.y - released.start.y;
       const extent = Math.min(160, Math.max(72, options.current.height * .7));
       if (offset >= 18 && shouldCompleteSwipe(offset, extent, swipeVelocity(released.samples, point, 'y'))) {
@@ -60,7 +65,7 @@ export function useMediaDrawerInfoDrag(panel: RefObject<HTMLElement>, open: bool
       if (event.pointerType !== 'touch') finish(event.pointerId, event.type === 'pointerup' ? pointerAt(event) : undefined);
     };
     const pointerLeave = (event: PointerEvent) => {
-      if (event.pointerType !== 'touch' && !drag?.active) finish(event.pointerId);
+      if (event.pointerType !== 'touch' && !drag?.mode) finish(event.pointerId);
     };
     // A non-passive touch listener lets the panel take a downward gesture at its
     // scroll boundary without taking over ordinary upward scrolling.
@@ -109,7 +114,7 @@ export function useMediaDrawerInfoDrag(panel: RefObject<HTMLElement>, open: bool
       node.removeEventListener('touchcancel', touchEnd);
       node.removeEventListener('click', click, true);
     };
-  }, [open, panel]);
+  }, [open, viewport]);
 
   return open ? distance : undefined;
 }

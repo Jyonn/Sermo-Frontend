@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.9",
+  "id": "2026.11.22.10",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
       "title": "媒体预览操作优化",
       "items": [
-        "拍摄信息随拖动渐显，向下收起后可继续浏览，再下滑才退出。",
-        "缩略条更容易拖动，已加载的缩略图可复用。点击顶部发送者信息可跳回原消息。"
+        "上滑时照片随信息面板展开自动调整尺寸，长内容可以继续上滑查看，向下拉可收起信息。",
+        "打开信息后也能横滑切换照片及其详情。视频在沉浸模式下隐藏进度条。"
       ]
     },
     "en": {
       "title": "Media viewer refinements",
       "items": [
-        "Photo details fade in as you drag. Swipe down to collapse the details, then swipe again to close the viewer.",
-        "The thumbnail strip is easier to scrub and reuses loaded thumbnails. Tap the sender at the top to jump to the original message."
+        "Photos resize as you reveal their details. Swipe up further to read longer details, or pull down to collapse them.",
+        "Swipe sideways to browse photos and their details. Video hides the seek bar in immersive mode."
       ]
     }
   }

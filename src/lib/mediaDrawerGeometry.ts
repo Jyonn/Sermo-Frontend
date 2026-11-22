@@ -13,6 +13,15 @@ export function fitMedia(stage: MediaSize, image: MediaSize) {
   return {width: image.width * fit, height: image.height * fit, maximum: Math.max(1, 16 / fit)};
 }
 
+export function fitMediaForInfo(stage: MediaSize, fitted: MediaSize, contentHeight: number) {
+  const panelHeight = Math.min(contentHeight, stage.height / 2);
+  const photoHeight = stage.height - panelHeight;
+  const scale = fitted.width && fitted.height
+    ? Math.max(stage.width / fitted.width, photoHeight / fitted.height)
+    : 1;
+  return {panelHeight, scale, y: (stage.height - fitted.height * scale) / 2 - panelHeight};
+}
+
 export function constrainMediaTransform(transform: MediaTransform, fitted: ReturnType<typeof fitMedia>, stage: MediaSize) {
   const scale = Math.min(fitted.maximum, Math.max(.5, transform.scale));
   const x = Math.max(0, (fitted.width * scale - stage.width) / 2);

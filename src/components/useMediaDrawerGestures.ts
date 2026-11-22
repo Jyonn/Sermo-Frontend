@@ -11,9 +11,10 @@ const midpoint = (a: Point, b: Point) => ({x: (a.x + b.x) / 2, y: (a.y + b.y) / 
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 
 export function useMediaDrawerGestures({
-  size, mediaKey, mode, disabled, onMode, onFreeRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
+  size, mediaKey, mode, disabled, infoOpen, onMode, onFreeRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
 }: {
   size: MediaSize; mediaKey: string; mode: 'default' | 'immersive'; disabled: boolean;
+  infoOpen: boolean;
   onMode: (mode: 'default' | 'immersive') => void;
   onFreeRelease: (offset: Point, velocity: number) => void;
   onSwipeStart: () => number;
@@ -50,7 +51,7 @@ export function useMediaDrawerGestures({
     setFreeDrag(undefined);
     reset();
     return () => window.clearTimeout(wheelTimer.current);
-  }, [mediaKey, disabled]);
+  }, [mediaKey, disabled, infoOpen]);
 
   const zoom = (next: MediaTransform) => setCurrent(constrainMediaTransform(next, fitted, bounds));
   const position = (x: number, y: number) => {
@@ -68,13 +69,14 @@ export function useMediaDrawerGestures({
     onMode('default');
   };
   const down = (event: PointerEvent<HTMLDivElement>) => {
-    if (disabled || event.button !== 0 || (event.target as HTMLElement).closest('button,a,input')) return;
+    if (disabled || event.button !== 0 || infoOpen && pointers.current.size
+      || (event.target as HTMLElement).closest('button,a,input,textarea,select')) return;
     const point = position(event.clientX, event.clientY);
     pointers.current.set(event.pointerId, point);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (!infoOpen) event.currentTarget.setPointerCapture(event.pointerId);
     if (pointers.current.size === 1) {
       origin.current = {point, transform: current.current, samples: [{...point, time: event.timeStamp}], startOffset: 0};
-      setDragging(true);
+      if (!infoOpen) setDragging(true);
     } else if (pointers.current.size === 2) {
       if (origin.current?.axis === 'horizontal') onSwipeMove(0);
       setFreeDrag(undefined);
@@ -101,6 +103,14 @@ export function useMediaDrawerGestures({
     const dy = point.y - start.point.y;
     const axis = lockSwipeAxis(dx, dy, start.axis);
     if (!axis) return;
+    if (infoOpen && axis === 'free') {
+      start.axis = axis;
+      return;
+    }
+    if (!start.axis && infoOpen) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setDragging(true);
+    }
     if (!start.axis && start.transform.scale <= 1.003) {
       start.startOffset = onSwipeStart();
       if (axis === 'free' && start.startOffset) onSwipeMove(0);
@@ -133,16 +143,17 @@ export function useMediaDrawerGestures({
     const axis = lockSwipeAxis(dx, dy, start.axis);
     const end = {...point, time: event.timeStamp};
     if (!axis) {
+      if (infoOpen && !(event.target as HTMLElement).closest('.media-drawer-slide-photo')) return;
       reset();
       onMode(mode === 'default' ? 'immersive' : 'default');
     } else if (start.transform.scale <= 1.003 && axis === 'horizontal') {
       onSwipeEnd(dx - start.startOffset * (bounds.width + mediaSlideGap), swipeVelocity(start.samples, end, 'x'));
-    } else if (start.transform.scale <= 1.003) {
+    } else if (!infoOpen && start.transform.scale <= 1.003) {
       onFreeRelease({x: dx, y: dy}, swipeVelocity(start.samples, end, 'y'));
     }
   };
   const wheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (disabled || !fitted.width || !(event.ctrlKey || event.metaKey)) return;
+    if (disabled || infoOpen || !fitted.width || !(event.ctrlKey || event.metaKey)) return;
     const point = position(event.clientX, event.clientY);
     const next = current.current.scale * Math.exp(-event.deltaY * .007);
     if (next > 1.003 && mode === 'default') onMode('immersive');
@@ -152,12 +163,14 @@ export function useMediaDrawerGestures({
   };
   useLayoutEffect(() => {
     const node = stage.current;
-    if (!node || disabled) return;
+    if (!node || disabled || infoOpen) return;
     const prevent = (event: globalThis.WheelEvent) => {if (event.ctrlKey || event.metaKey) event.preventDefault();};
     node.addEventListener('wheel', prevent, {passive: false});
     return () => node.removeEventListener('wheel', prevent);
-  }, [disabled]);
+  }, [disabled, infoOpen]);
 
   return {stage, bounds, fitted, transform: constrainMediaTransform(transform, fitted, bounds), dragging, freeDrag, reset,
-    events: {onPointerDown: down, onPointerMove: move, onPointerUp: release, onPointerCancel: release, onLostPointerCapture: release, onWheel: wheel}};
+    events: {onPointerDown: down, onPointerMove: move, onPointerUp: release, onPointerCancel: release,
+      onPointerLeave: (event: PointerEvent<HTMLDivElement>) => {if (infoOpen && origin.current?.axis !== 'horizontal') release(event);},
+      onLostPointerCapture: release, onWheel: wheel}};
 }

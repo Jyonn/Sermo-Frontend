@@ -49,7 +49,8 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
   const [brush, setBrush] = useState(.09);
   const [surface, setSurface] = useState({width: 1, height: 1});
   const [loaded, setLoaded] = useState<{index: number; image: HTMLImageElement; layers: ReturnType<typeof photoLayers>}>();
-  const [metadata, setMetadata] = useState<{index: number; data: PhotoMetadata}>();
+  const [metadata, setMetadata] = useState(() => new Map<File, PhotoMetadata>());
+  const metadataRequests = useRef(new WeakMap<File, Promise<PhotoMetadata>>());
   const [loadFailed, setLoadFailed] = useState(false);
   const [progress, setProgress] = useState<{current: number; total: number}>();
   const [error, setError] = useState('');
@@ -68,7 +69,7 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
   const draft = drafts[index];
   const {edit} = draft;
   const ready = loaded?.index === index ? loaded : undefined;
-  const currentMetadata = metadata?.index === index ? metadata.data : undefined;
+  const currentMetadata = metadata.get(draft.file);
   const dirty = drafts.some(item => !item.sent && !item.skipped && item.history.length > 0);
   useModalFocus(discardDialog, discard, () => setDiscard(false));
 
@@ -93,9 +94,28 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
     void decodePhoto(uris[index]).then(image => {
       if (current) setLoaded({index, image, layers: photoLayers(image, 1280)});
     }).catch(() => {if (current) setLoadFailed(true);});
-    void readPhotoMetadata(draft.file).then(data => {if (current) setMetadata({index, data});});
     return () => {current = false;};
-  }, [uris, index, draft.file]);
+  }, [uris, index]);
+
+  useEffect(() => {
+    let current = true;
+    const loadNearbyMetadata = async () => {
+      for (const position of [index, index - 1, index + 1]) {
+        const file = files[position];
+        if (!file) continue;
+        let request = metadataRequests.current.get(file);
+        if (!request) {
+          request = readPhotoMetadata(file);
+          metadataRequests.current.set(file, request);
+        }
+        const data = await request;
+        if (!current) return;
+        setMetadata(values => values.has(file) ? values : new Map(values).set(file, data));
+      }
+    };
+    void loadNearbyMetadata();
+    return () => {current = false;};
+  }, [files, index]);
 
   const changedPixels = Boolean(edit.turns || edit.angle || edit.flipX || edit.flipY || edit.filter !== 'original'
     || edit.strokes.length || edit.crop.width !== 1 || edit.crop.height !== 1);
@@ -374,20 +394,26 @@ export function PhotoEditorDrawer({files, onClose, onComplete, onSend, allowFlas
     update(change);
     setPreset('free');
   };
-  const photoInfo = <div className="photo-editor-info">
-    <Check checked={edit.keepLocation} disabled={locked || edit.flash} onChange={value => update(edit => ({...edit, keepLocation: value}))}>
-      <span><strong>{t('photo.keepLocation')}</strong>
-        {currentMetadata?.latitude !== undefined && currentMetadata.longitude !== undefined
-          ? <small>{currentMetadata.latitude.toFixed(4)}, {currentMetadata.longitude.toFixed(4)}</small> : null}</span>
-    </Check>
-    <Check checked={edit.keepDescription} disabled={locked || edit.flash} onChange={value => update(edit => ({...edit, keepDescription: value}))}>
-      <span><strong>{t('photo.keepDescription')}</strong>{currentMetadata?.description && <small>{currentMetadata.description}</small>}</span>
-    </Check>
-    {allowFlash && <Check checked={edit.flash} disabled={locked} onChange={value => update(edit => ({...edit, flash: value}))}>
-      <span><strong>{t('photo.enableFlash')}</strong><small>{t('photo.flashHelp')}</small></span>
-    </Check>}
-    <p>{t(edit.flash ? 'photo.flashPrivacy' : 'photo.privacyHelp')}</p>
-  </div>;
+  const photoInfo = (position: number) => {
+    const item = drafts[position];
+    const {edit} = item;
+    const disabled = Boolean(progress) || item.sent || item.skipped;
+    const details = metadata.get(item.file);
+    return <div className="photo-editor-info">
+      <Check checked={edit.keepLocation} disabled={disabled || edit.flash} onChange={value => update(edit => ({...edit, keepLocation: value}))}>
+        <span><strong>{t('photo.keepLocation')}</strong>
+          {details?.latitude !== undefined && details.longitude !== undefined
+            ? <small>{details.latitude.toFixed(4)}, {details.longitude.toFixed(4)}</small> : null}</span>
+      </Check>
+      <Check checked={edit.keepDescription} disabled={disabled || edit.flash} onChange={value => update(edit => ({...edit, keepDescription: value}))}>
+        <span><strong>{t('photo.keepDescription')}</strong>{details?.description && <small>{details.description}</small>}</span>
+      </Check>
+      {allowFlash && <Check checked={edit.flash} disabled={disabled} onChange={value => update(edit => ({...edit, flash: value}))}>
+        <span><strong>{t('photo.enableFlash')}</strong><small>{t('photo.flashHelp')}</small></span>
+      </Check>}
+      <p>{t(edit.flash ? 'photo.flashPrivacy' : 'photo.privacyHelp')}</p>
+    </div>;
+  };
   const activeUri = changedPixels ? rendered?.edit === edit ? rendered.uri : '' : uris[index] ?? '';
   return <MediaDrawer index={index} items={drafts.map((item, position) => ({
       id: item.id, kind: 'image', uri: position === index ? activeUri : uris[position] ?? '', thumbnailUri: uris[position],

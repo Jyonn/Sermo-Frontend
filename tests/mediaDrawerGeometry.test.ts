@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {constrainMediaTransform, filmTiles, fitMedia, lockSwipeAxis, mediaInfoProgress, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
+import {constrainMediaTransform, filmTiles, fitMedia, fitMediaForInfo, lockSwipeAxis, mediaInfoProgress, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
 
 test('media fits both stage dimensions and zoom tops out at sixteen times native size', () => {
   const stage = {width: 390, height: 844}, original = {width: 1600, height: 4300};
@@ -40,6 +40,24 @@ test('dragging the information panel down reverses the same progress used to ope
   assert.equal(mediaInfoProgress(true, 0, 300), 1);
   assert.equal(mediaInfoProgress(true, 600, 300), 0);
   assert.equal(mediaInfoProgress(false, -600, 300), 1);
+});
+
+test('long info initially uses half the stage and a landscape photo grows to fill the space above it', () => {
+  const stage = {width: 400, height: 800};
+  const fitted = fitMedia(stage, {width: 1600, height: 900});
+  const info = fitMediaForInfo(stage, fitted, 650);
+  assert.equal(info.panelHeight, 400);
+  assert.equal(fitted.height * info.scale, 400);
+  assert.equal(info.y, -200);
+});
+
+test('short info uses its own height and a tall photo remains bottom aligned', () => {
+  const stage = {width: 400, height: 800};
+  const fitted = fitMedia(stage, {width: 600, height: 1600});
+  const info = fitMediaForInfo(stage, fitted, 200);
+  assert.equal(info.panelHeight, 200);
+  assert.equal(fitted.width * info.scale, stage.width);
+  assert.equal(stage.height / 2 + info.y + fitted.height * info.scale / 2, 600);
 });
 
 test('film widths and outside gaps trade places while the shared gap stays large', () => {
