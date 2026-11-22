@@ -14,3 +14,44 @@ export function constrainMediaTransform(transform: MediaTransform, fitted: Retur
   const y = Math.max(0, (fitted.height * scale - stage.height) / 2);
   return {scale, x: x ? Math.max(-x, Math.min(x, transform.x)) : 0, y: y ? Math.max(-y, Math.min(y, transform.y)) : 0};
 }
+
+export type SwipeAxis = 'horizontal' | 'free';
+export interface SwipeSample {x: number; y: number; time: number}
+
+export function lockSwipeAxis(x: number, y: number, previous?: SwipeAxis): SwipeAxis | undefined {
+  if (previous || Math.hypot(x, y) <= 8) return previous;
+  return Math.abs(x) >= Math.abs(y) ? 'horizontal' : 'free';
+}
+
+export function swipeVelocity(samples: SwipeSample[], end: SwipeSample, axis: 'x' | 'y') {
+  const start = samples.find(sample => end.time - sample.time <= 100);
+  return start ? (end[axis] - start[axis]) / Math.max(16, end.time - start.time) : 0;
+}
+
+export function shouldCompleteSwipe(distance: number, extent: number, velocity: number) {
+  return Math.abs(distance) >= extent / 2
+    || Math.abs(distance) >= 16 && Math.sign(velocity) === Math.sign(distance) && Math.abs(velocity) >= .45;
+}
+
+export const filmHeight = 36;
+const filmPortraitWidth = filmHeight * .75;
+const filmSmallGap = 3;
+const filmLargeGap = 10;
+export const filmPitch = (filmHeight + filmPortraitWidth) / 2 + filmLargeGap;
+
+export function filmTiles(cursor: number, first: number, last: number) {
+  const origin = Math.floor(cursor);
+  const selection = (index: number) => Math.max(0, 1 - Math.abs(index - cursor));
+  const width = (index: number) => filmPortraitWidth + (filmHeight - filmPortraitWidth) * selection(index);
+  const pitch = (left: number) => (width(left) + width(left + 1)) / 2 + filmSmallGap
+    + (filmLargeGap - filmSmallGap) * Math.min(1, selection(left) + selection(left + 1));
+  let center = (origin - cursor) * pitch(origin);
+  for (let i = origin - 1; i >= first; i--) center -= pitch(i);
+  for (let i = origin; i < first; i++) center += pitch(i);
+  return Array.from({length: Math.max(0, last - first + 1)}, (_, offset) => {
+    const index = first + offset;
+    const tile = {index, center, width: width(index)};
+    center += pitch(index);
+    return tile;
+  });
+}

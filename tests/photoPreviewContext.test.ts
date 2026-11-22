@@ -18,11 +18,13 @@ test('video previews reuse the photo shell and toolbar without the retired secon
   const preview = await read('components/MediaDrawer.tsx');
   const styles = await read('components/MediaDrawer.css');
   assert.match(preview, /videoItem && src && <div className="media-drawer-transport"/);
-  assert.match(preview, /!immersive && !hideFilm && filmStrip/);
+  assert.match(preview, /!immersive && \(items.length > 1 \|\| hasPrevious \|\| hasNext\) && <MediaDrawerFilm/);
+  assert.doesNotMatch(preview, /hideFilm/);
   assert.doesNotMatch(preview, /message-image-preview-toolbar/);
   assert.match(preview, /releaseMediaPlayback\(node\); node.pause\(\)/);
   assert.match(preview, /video.current.currentTime = event.currentTarget.valueAsNumber/);
-  assert.match(styles, /\.has-media-info \.media-drawer-canvas\s*\{\s*inset: auto 0 0;\s*width: 100%;/);
+  assert.match(styles, /\.media-drawer-stage\.is-free-drag \.media-drawer-slide\[data-active="false"\]\s*\{\s*visibility: hidden/);
+  assert.match(preview, /style=\{\{transform: `translate3d\(0, \$\{\(1 - infoPull\) \* 100\}%/);
 });
 test('chat and search previews share sender identity, sending time and message navigation', async () => {
   const chat = await read('components/ChatImagePreview.tsx');
@@ -35,5 +37,5 @@ test('chat and search previews share sender identity, sending time and message n
   assert.match(page, /owner: message.user,\s*createdAt: message.created_at/);
   assert.match(page, /onJumpToMessage=\{\(messageId\) => \{ setImagePreview\(null\); revealMessageFromSearch/);
   assert.match(preview, /media-drawer-avatar/);
-  assert.match(preview, /dateTime=\{date\.toISOString\(\)\}/);
+  assert.match(preview, /dateTime=\{sentAt.date.toISOString\(\)\}/);
 });

@@ -1,8 +1,11 @@
-import {useEffect, useLayoutEffect, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
 import {showToast} from '../lib/toast';
 import {claimMediaPlayback, releaseMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {useMediaSource} from '../lib/useMediaSource';
+import {mediaSourceCandidates} from '../lib/messageMedia';
+import {resolveStableResourceUri} from '../lib/stableResource';
+import {shouldCompleteSwipe} from '../lib/mediaDrawerGeometry';
 import {downloadMedia, mediaFile, saveMediaFile} from '../lib/downloadMedia';
 import {copyText} from '../lib/presentation';
 import type {ImageMetadataDTO, TinyUserDTO} from '../types';
@@ -13,6 +16,8 @@ import {MediaWaitFeedback} from './MediaWaitFeedback';
 import {DrawerDismissButton, OverlayIconButton} from './OverlayIconButton';
 import {SideDrawer} from './SideDrawer';
 import {UserAvatar} from './UserAvatar';
+import {MediaDrawerFilm} from './MediaDrawerFilm';
+import {useMediaDrawerCarousel} from './useMediaDrawerCarousel';
 import {useMediaDrawerGestures} from './useMediaDrawerGestures';
 import './MediaDrawer.css';
 
@@ -80,6 +85,7 @@ export interface MediaLightboxProps {
 }
 
 const icon = (name: string) => <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
+const mediaKey = (item: MediaLightboxItem, index: number) => String(item.id ?? `${index}:${item.uri}`);
 const closedVideo = {current: 0, duration: 0, playing: false, muted: false};
 const timeCode = (time: number) => {
   const seconds = Number.isFinite(time) ? Math.max(0, Math.floor(time)) : 0;
@@ -89,8 +95,9 @@ const timeCode = (time: number) => {
 };
 
 export function MediaDrawer(props: MediaLightboxProps) {
-  const item = props.items[props.index] ?? props.items[0];
-  return item ? <MediaDrawerContent {...props} item={item}/> : null;
+  const index = Math.min(props.items.length - 1, Math.max(0, props.index));
+  const item = props.items[index];
+  return item ? <MediaDrawerContent {...props} index={index} item={item}/> : null;
 }
 
 function MediaDrawerContent({
@@ -100,8 +107,9 @@ function MediaDrawerContent({
 }: MediaLightboxProps & {item: MediaLightboxItem}) {
   const {locale, t} = useI18n();
   const [mode, setMode] = useState<'default' | 'immersive'>('default');
-  const [hideFilm, setHideFilm] = useState(false);
   const [info, setInfo] = useState(initialInfo || !item.uri && item.kind === 'image' && Boolean(sharedDetail));
+  const [infoHeight, setInfoHeight] = useState(0);
+  const [leaving, setLeaving] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -110,7 +118,9 @@ function MediaDrawerContent({
   const [playback, setPlayback] = useState(closedVideo);
   const video = useRef<HTMLVideoElement>(null);
   const image = useRef<HTMLImageElement>(null);
-  const film = useRef<HTMLDivElement>(null);
+  const infoPanel = useRef<HTMLElement>(null);
+  const dismissTimer = useRef<number>();
+  const closeRequestRef = useRef<(() => void) | null>(null);
   const filePosition = useRef({time: 0, playing: false});
   const videoIdentity = useRef<string>();
   const attemptedVideo = useRef(false);
@@ -118,38 +128,73 @@ function MediaDrawerContent({
   const flashReady = useRef(false);
   const callback = useRef({onApproachingStart, onApproachingEnd});
   callback.current = {onApproachingStart, onApproachingEnd};
-  const identity = String(item.id ?? `${index}:${item.uri}`);
+  const identity = mediaKey(item, index);
   const videoItem = item.kind === 'video';
   const adjusting = editor?.adjusting === true;
   const immersive = mode === 'immersive' && !adjusting && !fixedFitImage;
-  const interactionDisabled = adjusting || Boolean(fixedFitImage || editor?.busy);
+  const interactionDisabled = adjusting || leaving || Boolean(fixedFitImage || editor?.busy);
   const statusText = videoItem ? t('media.video') : t('media.imagePreview');
   const title = altPrefix || statusText;
   const infoContent = editor?.info ?? <>{item.imageMetadata || initialInfo && item.kind === 'image' ? <MediaMetadataPanel kind="image" metadata={item.imageMetadata} owner={item.owner} /> : null}
     {item.detail}{sharedDetail}</>;
   const hasInfo = Boolean(editor || initialInfo || item.imageMetadata?.status === 1 || item.detail || sharedDetail || platform?.url);
-  const infoOpen = info && hasInfo && !immersive && !adjusting && !fixedFitImage;
+  const canShowInfo = hasInfo && !adjusting && !fixedFitImage;
+  const infoOpen = info && canShowInfo && !immersive;
   const media = useMediaSource(fixedFitImage || editor ? '' : item.uri, undefined, item.kind);
   const src = fixedFitImage || editor ? item.uri : media.src;
+  const carousel = useMediaDrawerCarousel({index, identity, count: items.length, onIndexChange});
+  const cursor = index + carousel.offset;
+  const first = Math.max(0, Math.floor(cursor) - 1);
+  const last = Math.min(items.length - 1, Math.ceil(cursor) + 1);
+  const activeInWindow = index >= first && index <= last;
   const go = (direction: -1 | 1) => {
-    if (interactionDisabled || loading && (index + direction < 0 || index + direction >= items.length)) return;
+    if (interactionDisabled) return;
     const next = index + direction;
-    if (items[next]) onIndexChange(next);
-    else if (direction < 0 ? hasPrevious : hasNext) onBoundary?.(direction < 0 ? 'older' : 'newer');
+    if (items[next]) carousel.settle(direction);
+    else {
+      carousel.settle(0);
+      if (!loading && (direction < 0 ? hasPrevious : hasNext)) onBoundary?.(direction < 0 ? 'older' : 'newer');
+    }
   };
-  const toggleInfo = (open: boolean) => {if (hasInfo) setInfo(open);};
-  const changeMode = (next: typeof mode, reason: 'zoom' | 'tap') => {
+  const changeMode = (next: typeof mode) => {
     setMode(next);
-    if (next === 'default') setHideFilm(reason === 'tap');
+    if (next === 'immersive') setInfo(false);
+  };
+  const swipeDismiss = () => {
+    if (editor || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {closeRequestRef.current?.(); return;}
+    setLeaving(true);
+    dismissTimer.current = window.setTimeout(() => closeRequestRef.current?.(), 210);
   };
   const gestures = useMediaDrawerGestures({
-    mediaKey: identity, size: dimensions, mode, disabled: interactionDisabled || !src,
-    onMode: changeMode, onStep: go, onInfo: toggleInfo,
+    mediaKey: identity, size: dimensions, mode, disabled: interactionDisabled || !src && !item.posterUri,
+    onMode: changeMode, onSwipeStart: carousel.stop,
+    onSwipeMove: offset => carousel.drag(Math.min(1, Math.max(-1, offset))),
+    onSwipeEnd: (distance, speed, cancelled) => {
+      if (!cancelled && shouldCompleteSwipe(distance, gestures.bounds.width, speed)) go(distance < 0 ? 1 : -1);
+      else carousel.settle(0);
+    },
+    onFreeRelease: ({y}, speed) => {
+      const threshold = Math.min(190, Math.max(92, gestures.bounds.height * .3));
+      if (Math.abs(y) < 24 || !shouldCompleteSwipe(y, threshold, speed)) return;
+      if (y > 0) swipeDismiss();
+      if (y < 0 && canShowInfo) {setMode('default'); setInfo(true);}
+    },
   });
 
   useLayoutEffect(() => {
+    const node = infoPanel.current;
+    if (!node) return;
+    const resize = () => setInfoHeight(node.getBoundingClientRect().height);
+    const observer = new ResizeObserver(resize);
+    resize();
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [canShowInfo]);
+  useLayoutEffect(() => {if (infoPanel.current) infoPanel.current.inert = !infoOpen;}, [canShowInfo, infoOpen]);
+  useEffect(() => () => window.clearTimeout(dismissTimer.current), []);
+
+  useLayoutEffect(() => {
     if (videoIdentity.current !== identity) {
-      setHideFilm(false);
       filePosition.current = {time: 0, playing: Boolean(item.autoPlay)};
       setPlayback(current => ({...closedVideo, muted: current.muted}));
       videoIdentity.current = identity;
@@ -162,7 +207,7 @@ function MediaDrawerContent({
     flashReady.current = false;
     const node = image.current;
     if (node?.complete && node.naturalWidth) setDimensions({width: node.naturalWidth, height: node.naturalHeight});
-  }, [identity, src]);
+  }, [identity, src, activeInWindow]);
 
   useEffect(() => {
     if (!fixedFitImage || !src || !gestures.fitted.width || flashReady.current || !image.current?.naturalWidth) return;
@@ -174,14 +219,10 @@ function MediaDrawerContent({
     if (items.length - index < 5) callback.current.onApproachingEnd?.();
   }, [index, items.length]);
   useEffect(() => {
-    const selected = film.current?.querySelector<HTMLElement>('[aria-current="true"]');
-    if (selected && film.current) film.current.scrollLeft = selected.offsetLeft + selected.offsetWidth / 2 - film.current.clientWidth / 2;
-  }, [index, immersive, adjusting, infoOpen, hideFilm, items.length]);
-  useEffect(() => {
     const node = video.current;
     if (!node) return;
     return () => {releaseMediaPlayback(node); node.pause();};
-  }, [videoItem, src]);
+  }, [videoItem, src, activeInWindow]);
 
   const dismiss = () => {
     if (editor?.busy) return;
@@ -240,31 +281,31 @@ function MediaDrawerContent({
     void saving.catch(error => showToast(t(error instanceof Error && error.message === 'media_processing'
       ? 'media.downloadProcessing' : 'media.downloadFailed'), 'info'));
   };
-  const date = item.createdAt ? new Date(item.createdAt * 1000) : null;
+  const sentAt = useMemo(() => {
+    const date = item.createdAt ? new Date(item.createdAt * 1000) : null;
+    if (!date || !Number.isFinite(date.getTime())) return null;
+    return {date, label: new Intl.DateTimeFormat(locale, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}).format(date)};
+  }, [item.createdAt, locale]);
   const dimmed = immersive || adjusting;
   const loadingPhase = fixedFitImage || editor
     ? (gestures.fitted.width || adjusting ? 'idle' : 'loading')
     : media.phase;
-  const scaleStyle = {width: gestures.fitted.width || '100%', height: gestures.fitted.height || '100%',
-    transform: `translate3d(calc(-50% + ${gestures.transform.x}px), calc(-50% + ${gestures.transform.y}px), 0) scale(${gestures.transform.scale})`};
-  const filmStrip = items.length > 1 || hasPrevious || hasNext ? <div className="media-drawer-film" ref={film} aria-label={t('mediaDrawer.thumbnails')}>
-    {hasPrevious && <OverlayIconButton icon="chevron_left" aria-label={t('media.previousImage')} onClick={() => go(-1)} disabled={loading} />}
-    {items.map((entry, position) => {
-      const thumb = entry.thumbnailUri || entry.posterUri || (entry.kind === 'image' && Math.abs(position - index) <= 6 ? entry.uri : '');
-      return <button type="button" key={entry.id ?? `${position}:${entry.uri}`} aria-current={index === position ? 'true' : undefined}
-        aria-label={t('mediaDrawer.asset', {count: position + 1})} disabled={editor?.busy} onClick={() => onIndexChange(position)}>
-        {thumb ? <img src={thumb} alt="" loading="lazy" referrerPolicy={entry.referrerPolicy} /> : icon(entry.kind === 'video' ? 'movie' : 'photo')}
-        {thumb && entry.kind === 'video' && <span className="media-drawer-film-video">{icon('play_arrow')}</span>}
-      </button>;
-    })}
-    {hasNext && <OverlayIconButton icon="chevron_right" aria-label={t('media.nextImage')} onClick={() => go(1)} disabled={loading} />}
-  </div> : null;
+  const {bounds, fitted, freeDrag, transform} = gestures;
+  const infoPull = canShowInfo && !leaving
+    ? Math.min(1, Math.max(0, Number(infoOpen) - (freeDrag?.y ?? 0) / Math.max(1, infoHeight))) : 0;
+  const wideScale = fitted.width ? bounds.width / fitted.width : 1;
+  const wideY = (bounds.height - fitted.height * wideScale) / 2 - infoHeight;
+  const offsetX = (freeDrag?.x ?? 0) + (infoOpen ? 0 : transform.x);
+  const offsetY = leaving ? bounds.height : (infoOpen ? wideY : transform.y) + (freeDrag?.y ?? 0);
+  const scale = infoOpen && !freeDrag ? wideScale : transform.scale + (wideScale - transform.scale) * infoPull;
+  const scaleStyle = {width: fitted.width || '100%', height: fitted.height || '100%',
+    transform: `translate3d(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px), 0) scale(${scale})`};
 
   return <FloatingDrawerScope standalone>
     <SideDrawer open fullscreen headerless floatingBack={false} trapFocus historyMode={historyKey ? 'stack' : 'route'} historyKey={historyKey}
-      backdropClassName="media-drawer-backdrop"
+      backdropClassName="media-drawer-backdrop" closeRequestRef={closeRequestRef}
       className={`media-drawer${dimmed ? ' is-dark-media' : ''}`} title={title} onClose={dismiss}>
-      <section className={`media-drawer-layout${infoOpen ? ' has-media-info' : ''}${adjusting ? ' is-adjusting' : ''}${immersive ? ' is-immersive-media' : ''}${fixedFitImage ? ' is-flash-media' : ''}`}
+      <section className={`media-drawer-layout${infoOpen ? ' has-media-info' : ''}${adjusting ? ' is-adjusting' : ''}${immersive ? ' is-immersive-media' : ''}${fixedFitImage ? ' is-flash-media' : ''}${leaving ? ' is-leaving-media' : ''}`}
         onKeyDown={event => {
           if ((event.target as HTMLElement).closest('input,textarea,select,button,a') || interactionDisabled) return;
           if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -274,52 +315,64 @@ function MediaDrawerContent({
             event.preventDefault();
             gestures.reset();
             setInfo(false);
-            changeMode(immersive ? 'default' : 'immersive', 'tap');
+            changeMode(immersive ? 'default' : 'immersive');
           }
         }}>
-        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}`} tabIndex={interactionDisabled ? undefined : 0}
+        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`} tabIndex={interactionDisabled ? undefined : 0}
           aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.stage} {...gestures.events}>
-          {adjusting ? editor.stage : <>
-            {videoItem && src ? <video key={src} ref={video} className="media-drawer-canvas" style={infoOpen ? undefined : scaleStyle} src={src}
-              poster={item.posterUri ?? undefined} playsInline preload={item.deferPlayback ? 'none' : 'metadata'} loop={item.loop} muted={playback.muted}
-              onLoadedMetadata={event => {
-                const node = event.currentTarget;
-                setDimensions({width: node.videoWidth, height: node.videoHeight});
-                if (filePosition.current.time && Number.isFinite(node.duration)) node.currentTime = Math.min(node.duration, filePosition.current.time);
-                if (filePosition.current.playing) void node.play().catch(() => undefined);
-                updatePlayback(node);
-              }}
-              onCanPlay={() => {setWaiting(false); media.ready();}}
-              onWaiting={event => {if (!event.currentTarget.paused) setWaiting(true);}}
-              onPlaying={() => setWaiting(false)}
-              onTimeUpdate={event => updatePlayback(event.currentTarget)}
-              onDurationChange={event => {
-                const duration = event.currentTarget.duration;
-                if (Number.isFinite(duration)) setPlayback(value => ({...value, duration}));
-              }}
-              onPlay={event => {claimMediaPlayback(event.currentTarget); updatePlayback(event.currentTarget);}}
-              onPause={event => {setWaiting(false); releaseMediaPlayback(event.currentTarget); updatePlayback(event.currentTarget);}}
-              onEnded={event => updatePlayback(event.currentTarget)}
-              onError={videoError} /> : null}
-            {!videoItem && src ? <img key={src} ref={image} className="media-drawer-canvas" style={infoOpen ? undefined : scaleStyle} src={src}
-              alt={title} draggable={false} referrerPolicy={item.referrerPolicy}
-              onContextMenu={fixedFitImage ? event => event.preventDefault() : undefined}
-              onLoad={event => {
-                setDimensions({width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight});
-                if (!fixedFitImage && !editor) media.ready();
-              }}
-              onError={fixedFitImage?.onError ?? (editor ? () => setFailed(true) : media.fail)} /> : null}
-            {videoItem && !src && item.posterUri ? <img className="media-drawer-poster" alt="" src={item.posterUri} referrerPolicy={item.referrerPolicy} /> : null}
-            {src && (!item.deferPlayback || attemptedVideo.current) && <MediaWaitFeedback phase={failed ? 'error' : waiting ? 'buffering' : loadingPhase}
-              onRetry={fixedFitImage || editor || item.onPlaybackError ? undefined : media.retry} />}
-            {fixedFitImage && !src && <MediaWaitFeedback phase="loading" />}
-            {videoItem && !playback.playing && (src && !failed || item.onPlayRequest) && <OverlayIconButton icon="play_arrow"
-              className="media-drawer-play" aria-label={t('media.play')} onClick={play} />}
-          </>}
+          {adjusting ? editor.stage : items.slice(first, last + 1).map((entry, visibleIndex) => {
+            const position = first + visibleIndex;
+            const active = position === index;
+            if (fixedFitImage && !active) return null;
+            const entryImage = entry.kind === 'image';
+            const imageSrc = active ? src : editor ? entry.uri : mediaSourceCandidates(resolveStableResourceUri(entry.uri) ?? entry.uri).primary;
+            return <div key={mediaKey(entry, position)} className="media-drawer-slide" data-active={active} aria-hidden={!active}
+              style={{transform: `translate3d(${(position - cursor) * 100}%, 0, 0)`}}>
+              {active && videoItem && src ? <video key={src} ref={video} className="media-drawer-canvas" style={scaleStyle} src={src}
+                poster={item.posterUri ?? undefined} playsInline preload={item.deferPlayback ? 'none' : 'metadata'} loop={item.loop} muted={playback.muted}
+                onLoadedMetadata={event => {
+                  const node = event.currentTarget;
+                  setDimensions({width: node.videoWidth, height: node.videoHeight});
+                  if (filePosition.current.time && Number.isFinite(node.duration)) node.currentTime = Math.min(node.duration, filePosition.current.time);
+                  if (filePosition.current.playing) void node.play().catch(() => undefined);
+                  updatePlayback(node);
+                }}
+                onCanPlay={() => {setWaiting(false); media.ready();}}
+                onWaiting={event => {if (!event.currentTarget.paused) setWaiting(true);}}
+                onPlaying={() => setWaiting(false)}
+                onTimeUpdate={event => updatePlayback(event.currentTarget)}
+                onDurationChange={event => {
+                  const duration = event.currentTarget.duration;
+                  if (Number.isFinite(duration)) setPlayback(value => ({...value, duration}));
+                }}
+                onPlay={event => {claimMediaPlayback(event.currentTarget); updatePlayback(event.currentTarget);}}
+                onPause={event => {setWaiting(false); releaseMediaPlayback(event.currentTarget); updatePlayback(event.currentTarget);}}
+                onEnded={event => updatePlayback(event.currentTarget)}
+                onError={videoError} /> : null}
+              {entryImage && imageSrc ? <img ref={active ? image : undefined} className="media-drawer-canvas" style={active ? scaleStyle : undefined} src={imageSrc}
+                alt={active ? title : ''} draggable={false} referrerPolicy={entry.referrerPolicy}
+                onContextMenu={active && fixedFitImage ? event => event.preventDefault() : undefined}
+                onLoad={active ? event => {
+                  setDimensions({width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight});
+                  if (!fixedFitImage && !editor) media.ready();
+                } : undefined}
+                onError={active ? fixedFitImage?.onError ?? (editor ? () => setFailed(true) : media.fail) : undefined} /> : null}
+              {!entryImage && (!active || !src) && entry.posterUri ? <img className="media-drawer-canvas" alt="" src={entry.posterUri}
+                draggable={false} referrerPolicy={entry.referrerPolicy} style={active ? scaleStyle : undefined}
+                onLoad={active ? event => setDimensions({width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight}) : undefined} /> : null}
+              {active && <>
+                {src && (!item.deferPlayback || attemptedVideo.current) && <MediaWaitFeedback phase={failed ? 'error' : waiting ? 'buffering' : loadingPhase}
+                  onRetry={fixedFitImage || editor || item.onPlaybackError ? undefined : media.retry} />}
+                {fixedFitImage && !src && <MediaWaitFeedback phase="loading" />}
+                {videoItem && !playback.playing && (src && !failed || item.onPlayRequest) && <OverlayIconButton icon="play_arrow"
+                  className="media-drawer-play" aria-label={t('media.play')} onClick={play} />}
+              </>}
+            </div>;
+          })}
         </div>
 
         <header className="media-drawer-top" aria-label={adjusting ? t('photo.edit') : undefined}>
-          <DrawerDismissButton className="media-drawer-dismiss" disabled={editor?.busy} onClick={dismiss} />
+          <DrawerDismissButton className="media-drawer-dismiss" disabled={editor?.busy || leaving} onClick={() => closeRequestRef.current?.()} />
           {adjusting && <div className="media-drawer-editor-actions">{editor.headerActions}</div>}
           {!immersive && !adjusting && <div className="media-drawer-identity">
             {!adjusting && item.owner && <UserAvatar className="media-drawer-avatar" name={item.owner.name}
@@ -327,9 +380,8 @@ function MediaDrawerContent({
             {!adjusting && !item.owner && platform?.logo && <img className="media-drawer-avatar" src={platform.logo} alt="" />}
             <div>
               <strong>{item.owner?.name || platform?.author || platform?.name || title}</strong>
-              {!adjusting && date && Number.isFinite(date.getTime()) ? <time dateTime={date.toISOString()}>
-                {new Intl.DateTimeFormat(locale, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}).format(date)}
-              </time> : !fixedFitImage && !adjusting && (items.length > 1 || totalCount) ? <small>{navigationLabel ?? `${index + 1} / ${totalCount ?? items.length}`}</small> : null}
+              {sentAt ? <time dateTime={sentAt.date.toISOString()}>{sentAt.label}</time>
+                : !fixedFitImage && (items.length > 1 || totalCount) ? <small>{navigationLabel ?? `${index + 1} / ${totalCount ?? items.length}`}</small> : null}
             </div>
           </div>}
           <div className="media-drawer-top-actions">
@@ -341,7 +393,9 @@ function MediaDrawerContent({
           </div>
         </header>
 
-        {infoOpen ? <section className="media-drawer-info" aria-label={t('mediaDrawer.info')}>
+        {canShowInfo ? <section className={`media-drawer-info${freeDrag ? ' is-tracking-info' : ''}`} ref={infoPanel}
+          aria-label={t('mediaDrawer.info')} aria-hidden={!infoOpen} data-open={infoOpen}
+          style={{transform: `translate3d(0, ${(1 - infoPull) * 100}%, 0)`}}>
           <button className="media-drawer-handle" type="button" onClick={() => setInfo(false)} aria-label={t('common.close')}><span/></button>
           {platform?.url ? <a className="media-drawer-source" href={platform.url} target="_blank" rel="noreferrer">
             {platform.logo && <img src={platform.logo} alt="" />}{platform.name}{icon('north_east')}
@@ -349,7 +403,7 @@ function MediaDrawerContent({
           {infoContent}
         </section> : null}
 
-        {!fixedFitImage && !infoOpen && <footer className="media-drawer-bottom">
+        {!fixedFitImage && !infoOpen && <footer className="media-drawer-bottom" style={{opacity: leaving ? 0 : 1 - infoPull}}>
           {adjusting ? editor.tools : <>
             {videoItem && src && <div className="media-drawer-transport">
               <OverlayIconButton icon={playback.playing ? 'pause' : 'play_arrow'} aria-label={t(playback.playing ? 'media.pause' : 'media.play')} onClick={play} />
@@ -360,7 +414,8 @@ function MediaDrawerContent({
               <OverlayIconButton icon={playback.muted ? 'volume_off' : 'volume_up'} aria-label={t(playback.muted ? 'mediaDrawer.unmute' : 'mediaDrawer.mute')}
                 onClick={() => {if (video.current) {video.current.muted = !video.current.muted; updatePlayback(video.current);}}} />
             </div>}
-            {!immersive && !hideFilm && filmStrip}
+            {!immersive && (items.length > 1 || hasPrevious || hasNext) && <MediaDrawerFilm items={items} index={index}
+              width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} go={go} />}
             {!immersive && <div className="media-drawer-footer-actions">
               {(editor ? editor.createShareFile : src || platform?.url || onJumpToMessage) && <OverlayIconButton icon="ios_share" aria-label={t('square.share')}
                 onClick={() => setShareOpen(true)} disabled={sharing} />}

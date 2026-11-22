@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, type CSSProperties, type MutableRefObject, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
@@ -25,6 +25,7 @@ interface SideDrawerProps {
   actionBusy?: boolean;
   onAction?: () => void;
   onClose: () => void;
+  closeRequestRef?: MutableRefObject<(() => void) | null>;
   children: ReactNode;
   historyKey?: string;
   historyMode?: "stack" | "route";
@@ -70,6 +71,7 @@ export function SideDrawer({
   actionBusy = false,
   onAction,
   onClose,
+  closeRequestRef,
   children,
   historyKey,
   historyMode = "stack",
@@ -158,6 +160,12 @@ export function SideDrawer({
     }
     onCloseRef.current();
   }, [drawerId, historyMode, routeIndex, routePath, routeRequested]);
+
+  useLayoutEffect(() => {
+    if (!visible || !closeRequestRef) return;
+    closeRequestRef.current = requestClose;
+    return () => { closeRequestRef.current = null; };
+  }, [closeRequestRef, requestClose, visible]);
 
   useEffect(() => {
     if (!routeRequested) return;

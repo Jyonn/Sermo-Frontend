@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.22.7",
+  "id": "2026.11.22.8",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "聊天输入框排列修复",
+      "title": "更流畅的照片和视频浏览",
       "items": [
-        "修复网络较慢时「更多操作」的图标错位，图标现在随实际宽度排列为每行 4 至 8 列。",
-        "将聊天输入框中的留幅入口缩短为「留幅」。"
+        "照片与视频随手势滑动，缩略图跟随切换，退出沉浸模式后会恢复显示。",
+        "上滑照片可展开拍摄信息，下滑可退出预览。"
       ]
     },
     "en": {
-      "title": "Chat composer layout fix",
+      "title": "Smoother photo and video browsing",
       "items": [
-        "More actions stays aligned on slow connections and uses four to eight columns depending on the available width.",
-        "The StillFolio shortcut now uses the short app name."
+        "Photos, videos, and thumbnails move together. The thumbnail strip returns when you leave immersive view.",
+        "Swipe up for capture details or down to close the viewer."
       ]
     }
   }
