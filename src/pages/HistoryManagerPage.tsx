@@ -7,7 +7,7 @@ import { showToast } from '../lib/toast';
 import { historyDay, historyDayRange, historyTimeMinutes, historyTypeOptions, rangeSelection, selectionInRectangle, type HistoryFilters } from '../lib/historyManagement';
 import type { HistoryManagementPageDTO, ManagedMessageDTO } from '../types';
 import { CompactMessageContent } from '../components/CompactMessageContent';
-import {DatePickerField} from '../components/DatePickerField';
+import { HistoryDateRange, HistoryTimeRange } from '../components/HistoryFilterRanges';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { DrawerDismissButton, OverlayIconButton } from '../components/OverlayIconButton';
 import './HistoryManagerPage.css';
@@ -21,8 +21,10 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
   const scope = `${session?.user.space_id}:${session?.user.user_id}:${id}`;
   const scopeRef = useRef(scope); scopeRef.current = scope;
   const [keyword, setKeyword] = useState(''), [types, setTypes] = useState<string[]>([]);
-  const [from, setFrom] = useState(''), [to, setTo] = useState(''), [onlyRetained, setOnlyRetained] = useState(false);
-  const [dailyFrom, setDailyFrom] = useState(''), [dailyTo, setDailyTo] = useState('');
+  const [dates, setDates] = useState({ from: '', to: '' }), [onlyRetained, setOnlyRetained] = useState(false);
+  const [times, setTimes] = useState({ from: '', to: '' });
+  const { from, to } = dates;
+  const { from: dailyFrom, to: dailyTo } = times;
   const [page, setPage] = useState<HistoryManagementPageDTO | null>(null), [rows, setRows] = useState<ManagedMessageDTO[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set()), [loading, setLoading] = useState(true), [moreLoading, setMoreLoading] = useState(false);
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [version, setVersion] = useState(0);
@@ -155,11 +157,12 @@ export default function HistoryManagerPage({ chatId: embeddedChatId, onClose, on
       <OverlayIconButton icon="refresh" className="history-refresh" disabled={busy || loading}
         onClick={() => setVersion(value => value + 1)} aria-label={t('historyManager.refresh')} />
     </header>
-    <section className="history-manager-tools" aria-label={t('historyManager.filters')}><fieldset disabled={busy}>
-      <div className="history-filter-line"><label className="history-search">{symbol('search')}<input type="search" value={keyword} onChange={event => setKeyword(event.target.value)} placeholder={t('messageSearch.placeholder')} aria-label={t('messageSearch.placeholder')} /></label>
-        <div className="history-date-range"><DatePickerField label={t('historyManager.from')} value={from} onChange={setFrom}/><span aria-hidden="true">—</span><DatePickerField label={t('historyManager.to')} value={to} min={from} onChange={setTo}/></div>
+    <section className="history-manager-tools" aria-label={t('historyManager.filters')}><fieldset className="history-filters" disabled={busy}>
+      <label className="history-search">{symbol('search')}<input type="search" value={keyword} onChange={event => setKeyword(event.target.value)} placeholder={t('messageSearch.placeholder')} aria-label={t('messageSearch.placeholder')} /></label>
+      <div className="history-filter-ranges">
+        <HistoryDateRange value={dates} onChange={setDates} />
+        <HistoryTimeRange value={times} onChange={setTimes} />
       </div>
-      <div className="history-daily-range"><span>{t('historyManager.daily')}</span><input type="time" step="60" aria-label={t('historyManager.timeFrom')} value={dailyFrom} onChange={event => setDailyFrom(event.target.value)} /><span aria-hidden="true">—</span><input type="time" step="60" aria-label={t('historyManager.timeTo')} value={dailyTo} onChange={event => setDailyTo(event.target.value)} /><button type="button" aria-pressed={!dailyFrom && !dailyTo} onClick={() => { setDailyFrom(''); setDailyTo(''); }}>{t('historyManager.allDay')}</button><button type="button" aria-pressed={dailyFrom === '10:00' && dailyTo === '18:00'} onClick={() => { setDailyFrom('10:00'); setDailyTo('18:00'); }}>10:00–18:00</button><small>{t('historyManager.timeHint')}{dailyFrom && dailyTo && dailyFrom > dailyTo ? ` · ${t('historyManager.overnight')}` : ''}</small></div>
       <div className="history-types"><button type="button" aria-pressed={!types.length} onClick={() => setTypes([])}>{t('messageSearch.all')}</button>{historyTypeOptions.map(option => <button type="button" key={option.types} aria-pressed={types.includes(option.types)} onClick={() => setTypes(current => current.includes(option.types) ? current.filter(type => type !== option.types) : [...current, option.types])}>{symbol(option.icon)}{t(option.key)}</button>)}<button type="button" className="history-retained-filter" aria-pressed={onlyRetained} onClick={() => setOnlyRetained(value => !value)}>{symbol('keep')}{t('historyManager.retainedOnly')}</button></div>
     </fieldset></section>
     <div className="history-manager-summary"><span aria-live="polite">{loading ? t('common.loading') : t('historyManager.summary', { count: page?.total_count ?? 0, retained: page?.retained_count ?? 0 })}</span><button disabled={busy || loading || !page?.total_count} type="button" onClick={() => void previewDelete([])}>{symbol('delete_sweep')}{t('historyManager.cleanFiltered')}</button></div>

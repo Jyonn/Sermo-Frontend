@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.22.14",
+  "id": "2026.11.22.15",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "统一广场评论区",
+      "title": "聊天记录日期与时段筛选",
       "items": [
-        "瀑布流和列表的发言详情共用评论区，排序、回复和点赞的字号及间距保持一致。"
+        "聊天记录管理现在清晰展示日期范围和每日时段，可选择全天或精确到分钟的起止时间。"
       ]
     },
     "en": {
-      "title": "Consistent Square comments",
+      "title": "Chat history date and time filters",
       "items": [
-        "Masonry and list statement details share the same comment section, with consistent typography and spacing for sorting, replies, and likes."
+        "Chat history management shows your date range and daily hours at a glance. Filter by whole days or choose start and end times to the minute."
       ]
     }
   }
