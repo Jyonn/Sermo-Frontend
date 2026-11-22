@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.22.15",
+  "id": "2026.11.22.16",
   "publishedAt": "2026-11-22",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录日期与时段筛选",
+      "title": "更紧凑的日期选择",
       "items": [
-        "聊天记录管理现在清晰展示日期范围和每日时段，可选择全天或精确到分钟的起止时间。"
+        "科研、广场和聊天记录的日期面板减少了重复信息，并把今天、清空和完成集中在一行。"
       ]
     },
     "en": {
-      "title": "Chat history date and time filters",
+      "title": "More compact date pickers",
       "items": [
-        "Chat history management shows your date range and daily hours at a glance. Filter by whole days or choose start and end times to the minute."
+        "Date pickers in Research, Square, and chat history remove repeated information and group Today, Clear, and Done in one row."
       ]
     }
   }

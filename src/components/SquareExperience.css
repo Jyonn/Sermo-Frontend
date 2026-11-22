@@ -48,11 +48,10 @@ html[data-theme="dark"] .square-search-field input { color-scheme:dark; }
 .square-date-result:first-of-type{grid-column:1;grid-row:1}
 .square-date-result:last-of-type{grid-column:3;grid-row:1}
 .square-date-arrow { grid-column:2;grid-row:1;align-self:center;justify-self:center;font-size:21px;color:var(--text-muted);pointer-events:none; }
-.square-date-step { display:grid;gap:20px; }
-.square-date-selected { margin:0;text-align:center;color:var(--text-secondary);font-size:15px; }
+.square-search-modal.is-date-step { width:min(100%,420px);padding:16px 20px; }
+.square-search-modal.is-date-step>header { margin-bottom:8px; }
 @media(max-width:380px) { .square-search-modal { padding:20px; }.square-search-range { gap:24px; }.square-date-result small { font-size:10px; } }
 @media(max-height:520px) {
   .square-search-modal { padding:16px 24px; }
   .square-search-modal>header { margin-bottom:12px; }
-  .square-date-step { gap:10px; }
 }

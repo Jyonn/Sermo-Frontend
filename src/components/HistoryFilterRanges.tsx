@@ -38,14 +38,11 @@ export function HistoryDateRange({ value, onChange }: RangeProps) {
     <BottomSheet
       open={side !== null}
       title={t(side === 'from' ? 'square.dateFrom' : 'square.dateTo')}
-      className="selection-sheet"
+      className="selection-sheet calendar-date-sheet"
       onClose={() => setSide(null)}
-      footer={<footer className="history-range-sheet-actions">
-        <button className="ghost-button" type="button" onClick={() => finish('')}>{t('common.clear')}</button>
-        <button className="button" type="button" onClick={() => finish(draft)}>{t('common.done')}</button>
-      </footer>}
     >
-      <CalendarDatePicker value={draft} onChange={setDraft} min={side === 'to' ? value.from : undefined} max={side === 'from' ? value.to : undefined} />
+      <CalendarDatePicker value={draft} onChange={setDraft} min={side === 'to' ? value.from : undefined} max={side === 'from' ? value.to : undefined}
+        onClear={() => finish('')} onDone={() => finish(draft)} />
     </BottomSheet>
   </div>;
 }

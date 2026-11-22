@@ -12,19 +12,18 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
   open: boolean; keyword: string; from: string; to: string;
   onClose: () => void; onApply: (keyword: string, from: string, to: string) => void; onClear: () => void;
 }) {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const root = useRef<HTMLElement>(null);
   const [draft, setDraft] = useState({ keyword, from, to });
   const [error, setError] = useState(false);
   const [editing, setEditing] = useState<"from" | "to" | null>(null);
   const [date, setDate] = useState("");
   useEffect(() => {
-    if (editing) root.current?.querySelector<HTMLElement>('.calendar-date-months')?.focus();
+    if (editing) root.current?.querySelector<HTMLElement>('.calendar-date-grid button[tabindex="0"]')?.focus({ preventScroll: true });
   }, [editing]);
   useEffect(() => { if (open) { setDraft({ keyword, from, to }); setError(false); setEditing(null); } }, [open, keyword, from, to]);
   useBodyScrollLock(open);
   useModalFocus(root, open, () => editing ? setEditing(null) : onClose());
-  const format = (value: string, full = false) => new Intl.DateTimeFormat(language, full ? { year: "numeric", month: "long", day: "numeric", weekday: "short" } : { month: "short", day: "numeric" }).format(new Date(`${value}T12:00:00`));
   useEffect(() => {
     if (!open) return;
     const frame = requestAnimationFrame(() => root.current?.querySelector("input")?.focus());
@@ -32,18 +31,19 @@ export function SquareSearchDialog({ open, keyword, from, to, onClose, onApply, 
   }, [open]);
   if (!open) return null;
   return createPortal(<div className="dialog-backdrop square-search-modal-backdrop" role="presentation" onClick={onClose}>
-    <section className="square-search-modal" ref={root} tabIndex={-1} role="dialog" aria-modal="true" aria-label={t("square.search")} onClick={(event) => event.stopPropagation()}>
+    <section className={`square-search-modal${editing ? " is-date-step" : ""}`} ref={root} tabIndex={-1} role="dialog" aria-modal="true" aria-label={t(editing ? editing === "from" ? "square.dateFrom" : "square.dateTo" : "square.search")} onClick={(event) => event.stopPropagation()}>
       <header><h2>{t(editing ? editing === "from" ? "square.dateFrom" : "square.dateTo" : "square.search")}</h2><OverlayIconButton icon={editing ? "arrow_back" : "close"} aria-label={t(editing ? "common.back" : "common.close")} onClick={() => editing ? setEditing(null) : onClose()} /></header>
-      {editing ? <div className="square-date-step">
-        <p className="square-date-selected">{format(date, true)}</p>
-        <CalendarDatePicker value={date} onChange={(value) => { setDate(value); setError(false); }} />
-        {error ? <p role="alert">{t("square.dateRangeInvalid")}</p> : null}
-        <footer><button type="button" className="ghost-button" onClick={() => { setDraft({ ...draft, [editing]: "" }); setEditing(null); setError(false); }}>{t('common.clear')}</button><button type="button" className="button" onClick={() => {
+      {editing ? <CalendarDatePicker
+        value={date}
+        onChange={(value) => { setDate(value); setError(false); }}
+        error={error ? t("square.dateRangeInvalid") : undefined}
+        onClear={() => { setDraft({ ...draft, [editing]: "" }); setEditing(null); setError(false); }}
+        onDone={() => {
           const next = { ...draft, [editing]: date };
           if (next.from && next.to && next.from > next.to) { setError(true); return; }
           setDraft(next); setEditing(null); setError(false);
-        }}>{t("common.done")}</button></footer>
-      </div> : <form onInput={() => setError(false)} onSubmit={(event) => {
+        }}
+      /> : <form onInput={() => setError(false)} onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const start = String(data.get("date_from") || ""), end = String(data.get("date_to") || "");

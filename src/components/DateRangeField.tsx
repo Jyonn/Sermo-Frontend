@@ -45,17 +45,18 @@ export function DateRangeField({value,onChange}:{value?:ResearchDateRange;onChan
       setSide(key); setDraft(range[key] || range.from); setError(false);
     }}/>
     <input type="hidden" name="start" value={range.from}/><input type="hidden" name="end" value={range.to}/>
-    <BottomSheet open={side !== null} className="selection-sheet" title={t(side === 'from' ? 'research.start' : 'research.end')} onClose={() => setSide(null)}>
-      <div className="research-date-editor"><CalendarDatePicker value={draft} onChange={value => { setDraft(value); setError(false); }}/>
-        {error && <p className="research-error" role="alert">{t('square.dateRangeInvalid')}</p>}
-        <footer>
-          <button type="button" className="button" onClick={() => {
-            if (!side) return;
-            const next = { ...range, [side]: draft };
-            if (next.to && next.to < next.from) { setError(true); return; }
-            setRange(next); setSide(null);
-          }}>{t('common.done')}</button></footer>
-      </div>
+    <BottomSheet open={side !== null} className="selection-sheet calendar-date-sheet" title={t(side === 'from' ? 'research.start' : 'research.end')} onClose={() => setSide(null)}>
+      <CalendarDatePicker
+        value={draft}
+        onChange={value => { setDraft(value); setError(false); }}
+        error={error ? t('square.dateRangeInvalid') : undefined}
+        onDone={() => {
+          if (!side) return;
+          const next = { ...range, [side]: draft };
+          if (next.to && next.to < next.from) { setError(true); return; }
+          setRange(next); setSide(null);
+        }}
+      />
     </BottomSheet>
   </div>;
 }
