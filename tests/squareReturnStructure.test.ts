@@ -28,5 +28,4 @@ test("statement details use the same dismiss control while loading and after loa
   assert.match(reader, /\{!panel && dismiss\}[\s\S]*?\{panel && dismiss\}/);
   assert.match(reader, /<SquareNoteDetailHeader panel=\{p.panel\} onDismiss=\{p.onBack\}/);
   assert.match(square, /<SquareNoteDetailHeader panel=\{noteDesktopPanel\} onDismiss=\{closeStatementDrawer\}/);
-  assert.match(square, /className="square-desktop-detail-header">\s*<strong[^>]*>.*?<\/strong>\s*<DrawerDismissButton onClick=\{closeInlineStatement\}/);
 });

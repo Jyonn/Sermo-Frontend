@@ -68,7 +68,7 @@ test("all four tabs use the same tablet boundary and native details retain compl
   assert.match(square, /min-width: 720px/);
   assert.match(square, /className="native-current-statement">\{desktopWorkspace \? renderFeedStatement\(activeCommentStatement, true\) : null\}/);
   assert.match(workspace, /conversationPanelLayout\(available,/);
-  assert.match(square, /className="native-panel-close" onClick=\{closeInlineStatement\}/);
+  assert.match(square, /className="square-desktop-detail-header">\s*<strong[^>]*>.*?<\/strong>\s*<DrawerDismissButton onClick=\{closeInlineStatement\}/);
 });
 
 test("Square keeps readable cards and adapts actions to the panel rather than the viewport", () => {
