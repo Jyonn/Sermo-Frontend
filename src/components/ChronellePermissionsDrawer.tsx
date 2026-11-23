@@ -2,10 +2,10 @@ import {useEffect,useState} from 'react';
 import {api} from '../lib/api';
 import {useI18n,type TranslationKey} from '../lib/language';
 import {showToast} from '../lib/toast';
-import {changeCalendarPermission,permissionMode,visibilityRank,type CalendarAudience,type CalendarPermissions,type CalendarVisibility,type ChronellePermissionsSetup} from '../lib/chronellePermissions';
+import {changeCalendarPermission,defaultCalendarDetailFields,permissionMode,visibilityRank,type CalendarAudience,type CalendarPermissions,type CalendarVisibility,type ChronellePermissionsSetup} from '../lib/chronellePermissions';
 import {SideDrawer} from './SideDrawer';
 import {DrawerTabs} from './DrawerTabs';
-import {SettingGroup,SettingRow,SettingSelect} from './SettingRow';
+import {SettingGroup,SettingRow,SettingSelect,SettingSwitch} from './SettingRow';
 import {ContentLoader,QuietState} from './BoundaryState';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FloatingDrawerScope} from './DesktopPanelWorkspace';
@@ -16,9 +16,10 @@ export function ChronellePermissionsDrawer({open,onClose,onChange,onRebind}:{ope
   const tr=(key:string)=>t(('chronelle.permissions.'+key) as TranslationKey);
   const [tier,setTier]=useState<CalendarAudience>('strangers');
   const [setup,setSetup]=useState<ChronellePermissionsSetup|null>(null),[policy,setPolicy]=useState<CalendarPermissions|null>(null);
+  const [fields,setFields]=useState(defaultCalendarDetailFields);
   const [loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[retry,setRetry]=useState(0),[unlink,setUnlink]=useState(false);
   useEffect(()=>{if(!open)return;const controller=new AbortController();setLoading(true);setError('');setSetup(null);setPolicy(null);
-    api.chronellePermissions(controller.signal).then(value=>{if(!controller.signal.aborted){setSetup(value);setPolicy(value.audiences??null);}}).catch(()=>{if(!controller.signal.aborted)setError(tr('loadFailed'));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
+    api.chronellePermissions(controller.signal).then(value=>{if(!controller.signal.aborted){setSetup(value);setPolicy(value.audiences??null);setFields(value.detail_fields??defaultCalendarDetailFields);}}).catch(()=>{if(!controller.signal.aborted)setError(tr('loadFailed'));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
     return()=>controller.abort();
   },[open,retry]);
   const modeOptions=(id?:number)=>{
@@ -26,7 +27,7 @@ export function ChronellePermissionsDrawer({open,onClose,onChange,onRebind}:{ope
     return (['hidden','busy','detail'] as CalendarVisibility[]).filter(mode=>visibilityRank[mode]>=minimum).map(mode=>({value:mode as CalendarVisibility|'inherit',label:tr(mode)}));
   };
   async function save(){if(!policy||busy)return;setBusy(true);setError('');try{
-    const result=await api.saveChronellePermissions(policy);
+    const result=await api.saveChronellePermissions(policy, fields);
     window.dispatchEvent(new Event('chronelle:permissions-saved'));
     if(result.rebind_required){showToast(tr('rebindRequired'));onRebind();}else{showToast(tr('saved'));onChange?.();onClose();}
   }catch{setError(tr('saveFailed'));}finally{setBusy(false);}}
@@ -44,6 +45,16 @@ export function ChronellePermissionsDrawer({open,onClose,onChange,onRebind}:{ope
           return <SettingSelect key={group.id} label={group.name} disabled={busy} value={policy[tier].overrides[String(group.id)]??'inherit'} options={options} onChange={value=>setPolicy(changeCalendarPermission(policy,tier,value,group.id))}/>;
         })}</SettingGroup>:<QuietState icon="calendar_month" title={tr('noGroups')}/>}
         <p className="chronelle-permissions-hint">{tr('detailHint')}</p>
+        <h3>{tr('sharedFields')}</h3>
+        <SettingGroup>
+          {(['location','description'] as const).map(key => {
+            const label = tr(key);
+            return <SettingRow key={key} title={label} trailing={
+              <SettingSwitch label={label} checked={fields[key]} disabled={busy} onChange={checked=>setFields(current=>({...current,[key]:checked}))}/>
+            }/>;
+          })}
+        </SettingGroup>
+        <p className="chronelle-permissions-hint">{tr('sharedFieldsHint')}</p>
         <button type="button" className="button" disabled={busy} onClick={()=>void save()}>{busy?t('common.processing'):t('research.save')}</button>
         <SettingGroup><SettingRow title={tr('unbind')} tone="danger" disabled={busy} onClick={()=>setUnlink(true)}/></SettingGroup>
       </>:<QuietState icon="calendar_month" title={error||tr('unavailable')} action={<><button className="ghost-button" onClick={()=>setRetry(value=>value+1)}>{t('common.retry')}</button><button className="button" onClick={onRebind}>{t('chronelle.bind')}</button></>}/>}

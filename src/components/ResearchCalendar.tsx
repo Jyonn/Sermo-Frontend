@@ -6,6 +6,7 @@ import type { ResearchProject } from '../lib/research';
 import type { CalendarDisplays, CalendarSetup, ResearchMeeting } from '../lib/researchCalendar';
 import { localInput, type CalendarRange } from '../lib/chronelleBridge';
 import { CalendarFrame } from './ChronelleFrame';
+import { ResearchFilteredAgenda } from './ResearchFilteredAgenda';
 import { ChronellePluginDialog } from './ChronellePluginDialog';
 import { SideDrawer } from './SideDrawer';
 import { SettingSelect } from './SettingRow';
@@ -73,7 +74,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   }, [setup, selectionKey, project.id]);
 
   useEffect(() => {
-    if (!displays || range) return;
+    if (!displays?.renew_after || range) return;
     const timer = window.setTimeout(() => setTick(n => n + 1), displays.renew_after * 1000);
     return () => window.clearTimeout(timer);
   }, [displays,range]);
@@ -96,7 +97,8 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
       <button type="button" className="ghost-button" disabled={loading} onClick={()=>setMemberPicker(true)}><span className="material-symbols-outlined" aria-hidden="true">group_add</span>{t('research.selectMembers')}</button>
     </div>}
     {loading ? <p className="research-muted" role="status">{t('common.loading')}</p> : !active ? <QuietState icon="calendar_month" title={onboarding&&setup?.status==='binding_required'?t('research.connectCalendar'):errorText(setup?.status || 'chronelle_unavailable')} description={tr('bindingHint')} action={setup?.status !== 'integration_not_configured' ? <button className="button" onClick={() => setConsent(true)}>{tr('bind')}</button> : undefined}/>
-    : !selected.length ? <QuietState icon="event_available" title={tr('choose')} description={tr('intro')}/> : displays?.displays.length ? <CalendarFrame
+    : !selected.length ? <QuietState icon="event_available" title={tr('choose')} description={tr('intro')}/> : displays?.filtered ? <ResearchFilteredAgenda projectId={project.id} members={selected}
+      onRange={value=>{setResume(null);setRange(value);}} /> : displays?.displays.length ? <CalendarFrame
       url={displays.displays[0].url} tokens={displays.displays.map(d => d.token)} date={new Date().toLocaleDateString('en-CA')}
       onRange={value=>{setResume(null);setRange(value);}} onRenew={() => setTick(n => n + 1)} /> : null}
     </>}

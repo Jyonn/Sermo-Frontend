@@ -22,7 +22,7 @@ test('calendar consent is global and explicit, and empty views reuse the same co
   const calendar=source('components/ResearchCalendar.tsx');
   assert.match(calendar,/<ChronellePermissionsDrawer/);
   assert.match(calendar,/<ChronellePluginDialog/);
-  assert.match(source('components/ChronellePermissionsDrawer.tsx'),/api.saveChronellePermissions\(policy\)/);
+  assert.match(source('components/ChronellePermissionsDrawer.tsx'),/api.saveChronellePermissions\(policy, fields\)/);
   assert.match(source('components/SquareDiscussion.tsx'),/<QuietState icon="forum" title=\{t\("square.noComments"\)\}/);
   assert.match(source('components/SquareExperience.css'),/grid-template-columns:minmax\(0,1fr\) 24px minmax\(0,1fr\)/);
 });

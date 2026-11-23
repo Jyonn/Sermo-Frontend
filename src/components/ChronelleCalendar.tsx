@@ -18,7 +18,12 @@ export function ChronelleCalendar({ ownerId, previewAudience }: { ownerId: numbe
   const scrollTimer = useRef<number | undefined>(undefined);
   const [hidden,setHidden] = useState(false);
   const [known,setKnown] = useState(true);
-  useEffect(()=>{const refresh=()=>{setHidden(false);setReload(value=>value+1);};window.addEventListener('chronelle:bound',refresh);return()=>window.removeEventListener('chronelle:bound',refresh);},[]);
+  useEffect(()=>{
+    const refresh=()=>{setHidden(false);setEvents([]);setLoadedKey(null);setReload(value=>value+1);};
+    window.addEventListener('chronelle:bound',refresh);
+    window.addEventListener('chronelle:permissions-saved',refresh);
+    return()=>{window.removeEventListener('chronelle:bound',refresh);window.removeEventListener('chronelle:permissions-saved',refresh);};
+  },[]);
   const keyboardFocus = useRef(false);
   useLayoutEffect(() => {
     const element = viewport.current;
@@ -147,7 +152,7 @@ export function ChronelleCalendar({ ownerId, previewAudience }: { ownerId: numbe
       {displayState === "ready" && known ? <div className="chronelle-availability">
         <CalendarAvailabilityBar events={events} day={selectedDay} upcoming />
       </div> : null}
-      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
+      {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t(known?"chronelle.noEvents":"chronelle.limitedVisibility")}</p> : <ol>{items.map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}{event.description ? <small className="chronelle-event-notes">{event.description}</small> : null}</div></li>)}</ol>}
     </div>
   </section>;
 }

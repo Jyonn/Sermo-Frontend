@@ -568,7 +568,7 @@ export const api = {
     });
   },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
-  saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences}});},
+  saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions, detail_fields?:import('./chronellePermissions').CalendarDetailFields) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences,detail_fields}});},
   getOAuthMetadata(query: Record<string, string>) {
     return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
   },

@@ -6,6 +6,7 @@ export interface AgendaEvent {
   locked: boolean;
   title: string;
   location: string;
+  description?: string;
 }
 
 export function agendaRelevantEvent(events: AgendaEvent[], now: Date) {
@@ -127,6 +128,7 @@ export function normalizeAgenda(value: unknown): AgendaEvent[] {
     id: String(row.id), start: row.start, end: row.end, all_day: Boolean(row.all_day), locked: Boolean(row.locked),
     title: !row.locked && typeof row.title === "string" ? row.title : "",
     location: !row.locked && typeof row.location === "string" ? row.location : "",
+    ...(!row.locked && typeof row.description === "string" && row.description ? {description:row.description} : {}),
   })).sort((a, b) => agendaDate(a.start).getTime() - agendaDate(b.start).getTime());
 }
 
