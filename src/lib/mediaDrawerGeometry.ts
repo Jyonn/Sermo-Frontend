@@ -29,6 +29,14 @@ export function constrainMediaTransform(transform: MediaTransform, fitted: Retur
   return {scale, x: x ? Math.max(-x, Math.min(x, transform.x)) : 0, y: y ? Math.max(-y, Math.min(y, transform.y)) : 0};
 }
 
+export function mediaWheelInput(event: Pick<WheelEvent, 'ctrlKey' | 'metaKey' | 'shiftKey' | 'deltaMode' | 'deltaX' | 'deltaY'>, height: number) {
+  const dx = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX;
+  const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
+  const action = event.ctrlKey || event.metaKey ? 'zoom'
+    : event.shiftKey || Math.abs(dx) > Math.abs(event.deltaY) ? 'browse' : 'pan';
+  return {action, x: dx * factor, y: event.deltaY * factor} as const;
+}
+
 export type SwipeAxis = 'horizontal' | 'free';
 export interface SwipeSample {x: number; y: number; time: number}
 

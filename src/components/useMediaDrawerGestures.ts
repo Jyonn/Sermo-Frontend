@@ -1,11 +1,13 @@
 import {useCallback, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent} from 'react';
 import {
-  constrainMediaTransform, fitMedia, fittedMediaTransform, lockSwipeAxis, mediaSlideGap, swipeVelocity,
+  constrainMediaTransform, fitMedia, fittedMediaTransform, lockSwipeAxis, mediaSlideGap, mediaWheelInput, swipeVelocity,
   type MediaSize, type MediaTransform, type SwipeAxis, type SwipeSample,
 } from '../lib/mediaDrawerGeometry';
 
 type Point = {x: number; y: number};
 type Pinch = {center: Point; distance: number; transform: MediaTransform};
+type NativePinchEvent = Event & {scale: number; clientX?: number; clientY?: number};
+type WheelScroll = {action?: 'browse' | 'pan'; distance: number; browsed: boolean; timer?: number};
 type Drag = {point: Point; transform: MediaTransform; axis?: SwipeAxis; samples: SwipeSample[]; startOffset: number; desktopMouse: boolean};
 const midpoint = (a: Point, b: Point) => ({x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -36,13 +38,17 @@ export function useMediaDrawerGestures({
   const [transform, setTransform] = useState(fittedMediaTransform);
   const [dragging, setDragging] = useState(false);
   const [freeDrag, setFreeDrag] = useState<Point>();
+  const [wheelOffset, setWheelOffset] = useState(0);
+  const [wheelPanning, setWheelPanning] = useState(false);
   const current = useRef(transform);
   const pointers = useRef(new Map<number, Point>());
   const origin = useRef<Drag>();
   const pinch = useRef<Pinch>();
   const wheelTimer = useRef<number>();
-  const wheelBrowse = useRef({distance: 0, used: false, timer: 0});
+  const wheelScroll = useRef<WheelScroll>({distance: 0, browsed: false});
+  const nativePinch = useRef<{anchor: Point; transform: MediaTransform}>();
   const wheelHandler = useRef<(event: WheelEvent) => void>(() => undefined);
+  const gestureHandler = useRef<(event: Event) => void>(() => undefined);
   const fitted = fitMedia(bounds, size);
   const setCurrent = (value: MediaTransform) => {current.current = value; setTransform(value);};
   const reset = () => setCurrent(fittedMediaTransform);
@@ -61,6 +67,14 @@ export function useMediaDrawerGestures({
   useLayoutEffect(() => {
     pointers.current.clear();
     origin.current = pinch.current = undefined;
+    nativePinch.current = undefined;
+    // Keep a completed horizontal wheel gesture consumed across a page change.
+    if (wheelScroll.current.action !== 'browse') {
+      window.clearTimeout(wheelScroll.current.timer);
+      wheelScroll.current = {distance: 0, browsed: false};
+    }
+    setWheelOffset(0);
+    setWheelPanning(false);
     setDragging(false);
     setFreeDrag(undefined);
     reset();
@@ -78,6 +92,7 @@ export function useMediaDrawerGestures({
     zoom({scale: next, x: to.x - (from.x - start.x) * ratio, y: to.y - (from.y - start.y) * ratio});
   };
   const fit = () => {
+    setWheelOffset(0);
     reset();
     onMode('default');
   };
@@ -93,6 +108,7 @@ export function useMediaDrawerGestures({
   const down = (event: PointerEvent<HTMLDivElement>) => {
     if (disabled || event.button !== 0 || infoOpen && pointers.current.size
       || (event.target as HTMLElement).closest('button,a,input,textarea,select')) return;
+    if (wheelScroll.current.action === 'pan') finishWheelScroll();
     const point = position(event.clientX, event.clientY);
     const desktopMouse = event.pointerType === 'mouse' && isDesktopMediaPreview();
     pointers.current.set(event.pointerId, point);
@@ -182,50 +198,101 @@ export function useMediaDrawerGestures({
     else if (mode === 'immersive') fit();
     else onMode('immersive');
   };
+  const finishWheelScroll = () => {
+    window.clearTimeout(wheelScroll.current.timer);
+    wheelScroll.current = {distance: 0, browsed: false};
+    setWheelPanning(false);
+    setWheelOffset(0);
+  };
   wheelHandler.current = event => {
-    if (disabled || pointers.current.size || (event.target as Element).closest('input,textarea,select,[contenteditable]')) return;
-    const desktop = isDesktopMediaPreview();
-    const modified = event.ctrlKey || event.metaKey;
-    const dx = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX;
-    const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? bounds.height : 1;
-    const horizontal = event.shiftKey || Math.abs(dx) > Math.abs(event.deltaY);
-    const browse = wheelBrowse.current;
-    if (desktop && canBrowse && !modified && (horizontal || browse.distance)) {
+    if (disabled || pointers.current.size || !(event.target instanceof Element)
+      || event.target.closest('input,textarea,select,[contenteditable]')) return;
+    const input = mediaWheelInput(event, bounds.height);
+    if (input.action === 'zoom') {
+      if (infoOpen || !desktopImageZoom || !fitted.width || !input.y) return;
       event.preventDefault();
-      window.clearTimeout(browse.timer);
-      if (horizontal && !browse.used) {
-        browse.distance += dx * factor;
-        if (Math.abs(browse.distance) >= 40) {
-          browse.used = true;
-          onBrowse(browse.distance > 0 ? 1 : -1);
-        }
-      }
-      browse.timer = window.setTimeout(() => {browse.distance = 0; browse.used = false;}, 150);
+      if (nativePinch.current) return;
+      if (wheelScroll.current.action) finishWheelScroll();
+      const point = position(event.clientX, event.clientY);
+      const delta = Math.max(-110, Math.min(110, input.y));
+      const next = current.current.scale * Math.exp(-delta * .007);
+      if (next > 1.003 && mode === 'default') onMode('immersive');
+      zoomAt(current.current, point, point, next);
+      window.clearTimeout(wheelTimer.current);
+      wheelTimer.current = window.setTimeout(settle, 110);
       return;
     }
-    if (infoOpen || !fitted.width || !modified && (!desktop || !desktopImageZoom || horizontal)) return;
+    if (!isDesktopMediaPreview() || nativePinch.current || !input.x && !input.y) return;
+    const scroll = wheelScroll.current;
+    const action = scroll.action ?? input.action;
+    if (action === 'browse' ? !canBrowse : infoOpen || !desktopImageZoom || !fitted.width) return;
     event.preventDefault();
-    const point = position(event.clientX, event.clientY);
-    const delta = Math.max(-110, Math.min(110, event.deltaY * factor));
-    const next = current.current.scale * Math.exp(-delta * (modified ? .007 : .0025));
-    if (!modified && next <= 1.003) {fit(); return;}
-    if (next > 1.003 && mode === 'default') onMode('immersive');
-    zoomAt(current.current, point, point, next);
-    window.clearTimeout(wheelTimer.current);
-    wheelTimer.current = window.setTimeout(settle, 110);
+    scroll.action = action;
+    window.clearTimeout(scroll.timer);
+    scroll.timer = window.setTimeout(finishWheelScroll, 150);
+    if (action === 'browse') {
+      if (input.action !== 'browse' || scroll.browsed) return;
+      scroll.distance += input.x;
+      if (Math.abs(scroll.distance) >= 40) {
+        scroll.browsed = true;
+        onBrowse(scroll.distance > 0 ? 1 : -1);
+      }
+      return;
+    }
+    if (!input.y) return;
+    setWheelPanning(true);
+    const transform = current.current;
+    if (transform.scale > 1.003) {
+      zoom({...transform, y: transform.y - input.y});
+    } else {
+      const limit = Math.min(100, bounds.height * .14);
+      scroll.distance = Math.max(-limit, Math.min(limit, scroll.distance - input.y));
+      setWheelOffset(scroll.distance);
+    }
+  };
+  gestureHandler.current = event => {
+    if (event.type === 'gestureend') {
+      if (nativePinch.current) {
+        event.preventDefault();
+        nativePinch.current = undefined;
+        settle();
+      }
+      return;
+    }
+    if (disabled || infoOpen || !desktopImageZoom || !fitted.width || pointers.current.size || !isDesktopMediaPreview()) return;
+    const {scale, clientX, clientY} = event as NativePinchEvent;
+    if (event.type === 'gesturestart') {
+      event.preventDefault();
+      finishWheelScroll();
+      window.clearTimeout(wheelTimer.current);
+      const anchor = clientX === undefined || clientY === undefined ? center : position(clientX, clientY);
+      nativePinch.current = {anchor, transform: current.current};
+    } else if (nativePinch.current && Number.isFinite(scale) && scale > 0) {
+      event.preventDefault();
+      const {anchor, transform} = nativePinch.current;
+      const next = transform.scale * scale;
+      if (next > 1.003 && mode === 'default') onMode('immersive');
+      zoomAt(transform, anchor, anchor, next);
+    }
   };
   useLayoutEffect(() => {
     if (!stageNode) return;
     const handle = (event: WheelEvent) => wheelHandler.current(event);
+    const gesture = (event: Event) => gestureHandler.current(event);
+    const gestureTypes = ['gesturestart', 'gesturechange', 'gestureend'];
     stageNode.addEventListener('wheel', handle, {passive: false});
+    for (const type of gestureTypes) stageNode.addEventListener(type, gesture, {passive: false});
     return () => {
       stageNode.removeEventListener('wheel', handle);
-      window.clearTimeout(wheelBrowse.current.timer);
-      wheelBrowse.current = {distance: 0, used: false, timer: 0};
+      for (const type of gestureTypes) stageNode.removeEventListener(type, gesture);
+      window.clearTimeout(wheelScroll.current.timer);
+      wheelScroll.current = {distance: 0, browsed: false};
     };
   }, [stageNode]);
 
-  return {stage, stageNode, bindStage, bounds, fitted, transform: constrainMediaTransform(transform, fitted, bounds), dragging, freeDrag, fit, stepZoom,
+  const displayed = constrainMediaTransform(transform, fitted, bounds);
+  return {stage, stageNode, bindStage, bounds, fitted, transform: {...displayed, y: displayed.y + wheelOffset},
+    dragging: dragging || wheelPanning, freeDrag, fit, stepZoom,
     events: {onPointerDown: down, onPointerMove: move, onPointerUp: release, onPointerCancel: release,
       onPointerLeave: (event: PointerEvent<HTMLDivElement>) => {
         if ((infoOpen || origin.current?.desktopMouse) && origin.current?.axis !== 'horizontal') release(event);

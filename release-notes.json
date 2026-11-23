@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.23.1",
+  "id": "2026.11.23.2",
   "publishedAt": "2026-11-23",
   "locales": {
     "zh-CN": {
-      "title": "日程地点与备注权限",
+      "title": "桌面图片预览手势",
       "items": [
-        "在「时序 · Chronelle」的日程权限中，可以分别决定是否向他人公开地点和备注。"
+        "桌面预览中，触控板双指上下滑动可拖动图片，捏合手势用于缩放。"
       ]
     },
     "en": {
-      "title": "Calendar location and notes privacy",
+      "title": "Desktop image preview gestures",
       "items": [
-        "Choose separately whether to share event locations and notes in your Chronelle calendar permissions."
+        "In desktop previews, scroll vertically with two fingers to pan the image and pinch to zoom."
       ]
     }
   }

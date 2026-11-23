@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {constrainMediaTransform, filmTiles, fitMedia, fitMediaForInfo, lockSwipeAxis, mediaInfoProgress, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
+import {constrainMediaTransform, filmTiles, fitMedia, fitMediaForInfo, lockSwipeAxis, mediaInfoProgress, mediaWheelInput, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
+
+test('desktop wheel input separates vertical panning, horizontal paging, and pinch zoom', () => {
+  const wheel = {ctrlKey: false, metaKey: false, shiftKey: false, deltaMode: 0, deltaX: 3, deltaY: 27};
+  assert.deepEqual(mediaWheelInput(wheel, 800), {action: 'pan', x: 3, y: 27});
+  assert.equal(mediaWheelInput({...wheel, ctrlKey: true}, 800).action, 'zoom');
+  assert.equal(mediaWheelInput({...wheel, metaKey: true}, 800).action, 'zoom');
+  assert.equal(mediaWheelInput({...wheel, deltaX: 50}, 800).action, 'browse');
+  assert.deepEqual(mediaWheelInput({...wheel, shiftKey: true, deltaMode: 1, deltaX: 0, deltaY: 2}, 800),
+    {action: 'browse', x: 32, y: 32});
+});
 
 test('media fits both stage dimensions and zoom tops out at sixteen times native size', () => {
   const stage = {width: 390, height: 844}, original = {width: 1600, height: 4300};
