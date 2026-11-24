@@ -5,7 +5,7 @@ import { unreadIndicator } from '../src/lib/unreadIndicator.ts';
 import { availableSquareQuota } from '../src/lib/squareQuota.ts';
 import { legacySquareDateRange } from '../src/lib/squareSearch.ts';
 import { squareFeedCacheKey } from '../src/lib/squareFeedCache.ts';
-import { squareBadgeUpdate } from '../src/lib/squareNotifications.ts';
+import { announceSquareStatus, SQUARE_NOTIFICATIONS_UPDATED_EVENT, squareBadgeUpdate } from '../src/lib/squareNotifications.ts';
 
 test('unread numbers take precedence over fresh dots and never expose invalid counts', () => {
   assert.equal(unreadIndicator(0), null);
@@ -38,4 +38,42 @@ test('notification-only updates preserve fresh content and stale polls cannot ov
   assert.match(nav, /started === revision/);
   assert.match(nav, /revision\+\+/);
   assert.match(nav, /<UnreadIndicator count=\{squareUnread\} fresh=\{squareHasFreshContent\}/);
+});
+
+test('square status keeps the two feed dots and activity keys independent', () => {
+  const eventTarget = new EventTarget();
+  const priorWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: eventTarget });
+  const updates: unknown[] = [];
+  eventTarget.addEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, (event) => {
+    updates.push((event as CustomEvent).detail);
+  });
+  try {
+    const status = {
+      notification_unread: 0,
+      explore_unread: true,
+      friends_unread: false,
+      activity_claimable: true,
+      claimable_activity_keys: ['record-shop'],
+    };
+    announceSquareStatus(status, true);
+    announceSquareStatus({ ...status, activity_claimable: false, claimable_activity_keys: [] }, false);
+    assert.deepEqual(updates, [
+      {
+        unreadCount: 0,
+        hasFreshContent: true,
+        claimableActivityKeys: ['record-shop'],
+        feedFresh: { all: true, friends: false },
+      },
+      {
+        unreadCount: 0,
+        hasFreshContent: false,
+        claimableActivityKeys: [],
+        feedFresh: { all: false, friends: false },
+      },
+    ]);
+  } finally {
+    if (priorWindow) Object.defineProperty(globalThis, 'window', priorWindow);
+    else Reflect.deleteProperty(globalThis, 'window');
+  }
 });

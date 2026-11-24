@@ -152,6 +152,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
       const campaign = await api.claimPermanentVip();
       setVipCampaign(campaign);
       patchSessionUser({ is_permanent_vip: true });
+      window.dispatchEvent(new CustomEvent("frienden:activity-updated"));
       showToast(t("vip.claimed", { slot: campaign.slot }), "success");
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("vip.claimFailed"), "error");

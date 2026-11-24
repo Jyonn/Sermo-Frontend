@@ -953,6 +953,7 @@
   "nav.developer": "Development",
   "square.unreadCount": "{{count}} unread notifications",
   "square.freshContent": "New posts or activities",
+  "square.newContent": "New content",
   "square.keyword": "Keyword",
   "square.dateRange": "Date range",
   "square.distantPast": "Any start date",

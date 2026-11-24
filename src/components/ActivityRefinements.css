@@ -68,8 +68,6 @@
 .square-vip-banner-title { width: 54%; }
 .square-starry-night-title { width: 48%; }
 .square-starry-night-title > strong { display: block; margin-top: 6px; }
-.square-activity-banner .square-activity-attention-tag { top: 12px; right: 12px; }
-.square-activity-banner:has(.square-activity-attention-tag) .square-campaign-arrow { top: auto; bottom: 24px; }
 .vip-activity-drawer .vip-campaign-panel { padding: calc(86px + env(safe-area-inset-top)) 24px 28px; }
 .vip-activity-drawer .vip-campaign-hero { display: grid; gap: 20px; min-height: 280px; padding: 28px; border-radius: 20px; }
 .vip-activity-drawer .vip-campaign-hero .campaign-title-art { width: min(340px,100%); height: auto; }

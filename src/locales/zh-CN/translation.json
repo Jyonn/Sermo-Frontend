@@ -951,6 +951,7 @@
   "nav.developer": "开发",
   "square.unreadCount": "{{count}} 条未读消息",
   "square.freshContent": "有新发言或活动",
+  "square.newContent": "有新内容",
   "square.keyword": "关键词",
   "square.dateRange": "日期范围",
   "square.distantPast": "不限开始日期",

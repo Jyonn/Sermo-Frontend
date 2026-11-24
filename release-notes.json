@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.24.1",
+  "id": "2026.11.24.2",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺",
+      "title": "广场新内容提示",
       "items": [
-        "分享或听完周杰伦、王力宏、陶喆、林俊杰的歌曲，赢取歌手气泡，收藏可试听的专辑封面。",
-        "空间管理员可在活动管理中领取，活动从领取日起持续 30 天。"
+        "探索、好友、活动标签分别提示新内容。新活动和有待领取奖励的活动卡片也会显示红点。",
+        "回声唱片铺换上了黑胶唱片主题横幅，活动卡片上可查看当前积分。"
       ]
     },
     "en": {
-      "title": "Echo Record Shop",
+      "title": "See What’s New in Square",
       "items": [
-        "Share or finish listening to songs by Jay Chou, Wang Leehom, David Tao, or JJ Lin to unlock artist bubbles and collect playable album covers.",
-        "Space admins can claim the event in Activity Management. It runs for 30 days from the time it is claimed."
+        "Explore, Friends, and Activities now have separate unread dots. Activity cards also show a dot for new events and unclaimed rewards.",
+        "Echo Record Shop has a new vinyl-themed banner that shows your points at a glance."
       ]
     }
   }

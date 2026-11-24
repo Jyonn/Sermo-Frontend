@@ -10,6 +10,7 @@
 .square-feed-header .square-workspace-tab-group>button.is-active{color:var(--text-primary);background:none;box-shadow:none;font-weight:750}
 .square-feed-header .square-workspace-tab-group>button::after{content:"";position:absolute;bottom:5px;left:calc(50% - 11px);width:22px;height:3px;border-radius:3px;background:var(--brand-primary);transform:scaleX(0);transition:transform .18s ease}
 .square-feed-header .square-workspace-tab-group>button.is-active::after{transform:scaleX(1)}
+.square-feed-header .square-fresh-dot{position:absolute;top:9px;inset-inline-end:1px;width:7px;height:7px;border-radius:50%;background:#e94154}
 .square-feed-header .square-header-tool{width:40px;height:40px;border:0;background:none;box-shadow:none}
 .square-feed-publish{display:grid;place-items:center;width:34px;height:34px;padding:6px;border:0;border-radius:9px;color:var(--text-on-brand,#fff);background:var(--brand-primary);cursor:pointer}
 .square-feed-publish svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}

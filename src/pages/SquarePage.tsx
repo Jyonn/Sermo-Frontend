@@ -71,7 +71,8 @@ import {
 } from "../lib/squareFeedCache";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { purgeCachedMedia } from "../lib/mediaCache";
-import { announceSquareUnread } from "../lib/squareNotifications";
+import { announceSquareStatus, announceSquareUnread, SQUARE_NOTIFICATIONS_UPDATED_EVENT, type SquareBadgeStatus } from "../lib/squareNotifications";
+import { isPageActive } from "../lib/pageActivity";
 import { animateSquareDetail, prepareDetailImages, type DetailMotionNodes } from "../lib/squareDetailMotion";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
@@ -652,7 +653,8 @@ export default function SquarePage() {
   const [notificationHistoryAvailable, setNotificationHistoryAvailable] = useState(true);
   const [notificationHistoryLoading, setNotificationHistoryLoading] = useState(false);
   const [feedFresh, setFeedFresh] = useState({ all: false, friends: false });
-  const [claimableActivityKeys, setClaimableActivityKeys] = useState<string[]>([]);
+  const [claimableActivityKeys, setClaimableActivityKeys] = useState<string[] | null>(null);
+  const [feedReload, setFeedReload] = useState(0);
   const [quotaOpen, setQuotaOpen] = useState(false);
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
@@ -772,21 +774,25 @@ export default function SquarePage() {
     writeTabCache(cacheScope, "square:vip-campaign", vipCampaign);
   }, [cacheScope, vipCampaign]);
 
-  const applySquareStatus = (status: SquareStatusDTO) => {
-    notificationUnreadRef.current = status.notification_unread;
-    setNotificationUnread(status.notification_unread);
-    setFeedFresh({ all: status.explore_unread, friends: status.friends_unread });
-    setClaimableActivityKeys(status.claimable_activity_keys);
-    announceSquareUnread(status.notification_unread, {
-      hasFreshContent: status.explore_unread || status.friends_unread || status.activity_claimable,
-      claimableActivityKeys: status.claimable_activity_keys,
-    });
-  };
+  const applySquareStatus = (status: SquareStatusDTO) => announceSquareStatus(status, features.squareExploreEnabled);
+
+  useEffect(() => {
+    const update = (event: Event) => {
+      const detail = (event as CustomEvent<Partial<SquareBadgeStatus>>).detail;
+      if (!detail?.feedFresh) return;
+      setFeedFresh(detail.feedFresh);
+      setClaimableActivityKeys(detail.claimableActivityKeys ?? []);
+      notificationUnreadRef.current = detail.unreadCount ?? 0;
+      setNotificationUnread(notificationUnreadRef.current);
+    };
+    window.addEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, update);
+    return () => window.removeEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, update);
+  }, [cacheScope]);
   useEffect(()=>{
-    const refresh=()=>{void api.getActiveActivities().then(setActivities).catch(()=>undefined);void api.getSquareStatus().then(applySquareStatus).catch(()=>undefined);};
+    const refresh=()=>{void api.getActiveActivities().then(setActivities).catch(()=>undefined);void api.getUserMe().then(me=>setVipCampaign(me.permanent_vip_campaign??null)).catch(()=>undefined);void api.getSquareStatus().then(applySquareStatus).catch(()=>undefined);};
     window.addEventListener('frienden:activity-updated',refresh);
     return()=>window.removeEventListener('frienden:activity-updated',refresh);
-  },[cacheScope]);
+  },[cacheScope,features.squareExploreEnabled]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -795,16 +801,19 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [session?.user.space_id, session?.user.user_id]);
 
+  const activityAttention = (activity: ActivityCampaignDTO) => {
+    const pending = claimableActivityKeys?.includes(activity.key) ?? activity.newly_claimed;
+    return pending ? t(activity.newly_claimed ? "activity.new" : "activity.pendingClaim") : undefined;
+  };
+  const vipAttention = claimableActivityKeys?.includes("vip:founding-100") ? t("activity.pendingClaim") : undefined;
+  const activitiesFresh = (claimableActivityKeys?.length ?? 0) > 0 || activities.some(activity => Boolean(activityAttention(activity)));
+  const activityAttentionSignature = claimableActivityKeys?.join("|");
   useEffect(() => {
+    if (!activityTab) return;
     const controller = new AbortController();
-    void api.getSquareStatus(controller.signal).then(applySquareStatus).catch(() => undefined);
+    void loadActivities(controller.signal);
     return () => controller.abort();
-  }, [session?.user.space_id, session?.user.user_id]);
-
-  useEffect(() => {
-    if (activityTab || hasFeedFilters || (feedMode !== "all" && feedMode !== "friends")) return;
-    void api.markSquareFeedRead(feedMode).then(applySquareStatus).catch(() => undefined);
-  }, [activityTab, feedMode, hasFeedFilters, session?.user.space_id, session?.user.user_id]);
+  }, [activityTab, activityAttentionSignature, cacheScope]);
 
   const spiderManActivity = activities.find((activity) => activity.theme === "spider-man-4") ?? null;
   const starryNightActivity = activities.find((activity) => activity.theme === "starry-night") ?? null;
@@ -1031,6 +1040,10 @@ export default function SquarePage() {
   }, [activityTab, activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
 
   useEffect(() => {
+    if (activityTab) {
+      setSyncing(false);
+      return;
+    }
     const cacheKey = activeFeedCacheKey;
     const normalizedCached = normalizeSquareFeedSnapshot(
       readTabCache<SquareStatementDTO[] | SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, cacheKey)?.data,
@@ -1039,7 +1052,7 @@ export default function SquarePage() {
     setSyncing(true);
     const controller = new AbortController();
     void api.getSquareStatements({ date: selectedFeedDate ?? undefined, date_from: selectedFeedFrom ?? undefined, date_to: selectedFeedTo ?? undefined, keyword: selectedFeedKeyword || undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
-      if (activeFeedCacheKeyRef.current !== cacheKey) return;
+      if (controller.signal.aborted || activeFeedCacheKeyRef.current !== cacheKey) return;
       const refreshed = mergeSquareFeedRefresh(filterSquareRemoved(cacheScope,cached?.items ?? []), rows);
       const nextHasMore = refreshed.connected && cached
         ? cached.hasMore || rows.length === SQUARE_FEED_PAGE_SIZE
@@ -1058,18 +1071,26 @@ export default function SquarePage() {
         queueFeedScrollRestore(cacheKey, 0);
       }
       setError("");
+      if (
+        !hasFeedFilters && routedStatementId === null && isPageActive()
+        && (effectiveFeedMode === "all" || effectiveFeedMode === "friends")
+      ) {
+        void api.markSquareFeedRead(effectiveFeedMode, controller.signal).then((status) => {
+          if (!controller.signal.aborted) applySquareStatus(status);
+        }).catch(() => undefined);
+      }
     }).catch((cause) => {
       if (!controller.signal.aborted && activeFeedCacheKeyRef.current === cacheKey) {
         setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
       }
     }).finally(() => {
-      if (activeFeedCacheKeyRef.current === cacheKey) {
+      if (!controller.signal.aborted && activeFeedCacheKeyRef.current === cacheKey) {
         setLoading(false);
         setSyncing(false);
       }
     });
     return () => controller.abort();
-  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedFrom, selectedFeedTo, selectedFeedKeyword, t]);
+  }, [activeFeedCacheKey, activityTab, cacheScope, effectiveFeedMode, features.squareExploreEnabled, feedReload, hasFeedFilters, profileFeedUserId, routedStatementId, selectedFeedDate, selectedFeedFrom, selectedFeedTo, selectedFeedKeyword, t]);
 
   useEffect(() => {
     if (loading || statementsFeedKey !== activeFeedCacheKey) return;
@@ -1162,10 +1183,7 @@ export default function SquarePage() {
       if (!result.unread_count) return;
       notificationUnreadRef.current = 0;
       setNotificationUnread(0);
-      announceSquareUnread(0, {
-        hasFreshContent: feedFresh.all || feedFresh.friends || claimableActivityKeys.length > 0,
-        claimableActivityKeys,
-      });
+      announceSquareUnread(0);
       void api.markSquareNotificationsRead();
     }).catch(() => undefined);
   };
@@ -2017,6 +2035,18 @@ export default function SquarePage() {
     </div>;
   const squareChannels:SquareChannel[]=['activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
   const currentChannel:SquareChannel=activityTab?'activities':effectiveFeedMode;
+  const selectFeedTab = (channel: SquareChannel) => {
+    selectSquareChannel(channel === "activities");
+    if (channel === "activities") return;
+    setFeedMode(channel);
+    if (channel === currentChannel && (channel === "all" || channel === "friends") && feedFresh[channel] && !hasFeedFilters) {
+      setFeedReload((current) => current + 1);
+    }
+  };
+  const freshLabel = (label: string, fresh: boolean) => fresh ? `${label} · ${t("square.newContent")}` : undefined;
+  const activityTabLabel = t("square.activitiesTab");
+  const exploreTabLabel = t("square.feedAll");
+  const friendsTabLabel = t("square.feedFriends");
   const handleChannelScroll=(event:ReactUIEvent<HTMLElement>)=>{
     if (inlineStatementId !== null || workspaceDetailActive || inlineStatementExpanded) return;
     const top=event.currentTarget.scrollTop;
@@ -2034,15 +2064,15 @@ export default function SquarePage() {
         <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="navigation" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
           <div className="square-workspace-tabs is-square" role="tablist">
             <div className="square-workspace-tab-group is-square-channels">
-              <button aria-selected={activityTab} className={activityTab?"is-active":""} onClick={()=>selectSquareChannel(true)} role="tab" type="button">{t("square.activitiesTab")}{claimableActivityKeys.length?<span className="square-fresh-dot" aria-label={t("activity.pendingClaim")}/>:null}</button>
-              {features.squareExploreEnabled ? <button aria-selected={!activityTab && feedMode === "all"} className={!activityTab && feedMode === "all" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("all"); }} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && (activityTab || feedMode !== "all") ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button> : null}
-              <button aria-selected={!activityTab && feedMode === "friends"} className={!activityTab && feedMode === "friends" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("friends"); }} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && (activityTab || feedMode !== "friends") ? <span className="square-fresh-dot" aria-label={t("square.freshContent")} /> : null}</button>
+              <button aria-label={freshLabel(activityTabLabel, activitiesFresh)} aria-selected={activityTab} className={activityTab?"is-active":""} onClick={() => selectFeedTab("activities")} role="tab" type="button">{activityTabLabel}{activitiesFresh ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button>
+              {features.squareExploreEnabled ? <button aria-label={freshLabel(exploreTabLabel, feedFresh.all)} aria-selected={!activityTab && feedMode === "all"} className={!activityTab && feedMode === "all" ? "is-active" : ""} onClick={() => selectFeedTab("all")} role="tab" type="button">{exploreTabLabel}{feedFresh.all ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button> : null}
+              <button aria-label={freshLabel(friendsTabLabel, feedFresh.friends)} aria-selected={!activityTab && feedMode === "friends"} className={!activityTab && feedMode === "friends" ? "is-active" : ""} onClick={() => selectFeedTab("friends")} role="tab" type="button">{friendsTabLabel}{feedFresh.friends ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button>
               <button aria-selected={!activityTab && feedMode === "mine"} className={!activityTab && feedMode === "mine" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("mine"); }} role="tab" type="button">{t("square.feedMine")}</button>
               {profileFeedUserId ? <span className={`square-feed-user-tab${!activityTab && feedMode === "user" ? " is-active" : ""}`}><button aria-selected={!activityTab && feedMode === "user"} onClick={() => { selectSquareChannel(false); setFeedMode("user"); }} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode(current=>current==='user'?'friends':current); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
           </div>
         </SquareFeedHeader>
-        <SquareChannelPager channels={squareChannels} current={currentChannel} onSelect={channel=>{selectSquareChannel(channel==='activities');if(channel!=='activities')setFeedMode(channel)}} enabled={routedStatementId===null&&!inlineStatementExpanded}>
+        <SquareChannelPager channels={squareChannels} current={currentChannel} onSelect={selectFeedTab} enabled={routedStatementId===null&&!inlineStatementExpanded}>
         {squareChannels.map((channel,index)=>{
           const pageCacheKey=channel==='activities'?'square:activities-feed':squareFeedCacheKey(channel,profileFeedUserId,selectedFeedDate,selectedFeedKeyword,selectedFeedFrom,selectedFeedTo);
           const active=channel===currentChannel;
@@ -2054,15 +2084,16 @@ export default function SquarePage() {
               const visibleStatements=statements.filter(statement=>hasFeedFilters||feedMode!=='all'||statement.statement_id!==pinnedStatement?.statement_id);
               return <div className="square-workspace-surface is-square">
           {view.mode==='activities' && activityBannerCount ? <div className="square-activity-carousel square-activity-hub"><section className="square-activity-rail" aria-label={t("activity.active")}>
-            {bgmActivity ? <SquareActivityTile activity={bgmActivity}><BgmBanner activity={bgmActivity} onClick={() => openActivity(bgmActivity.key)} /></SquareActivityTile> : null}
-            {explorerActivity ? <SquareActivityTile activity={explorerActivity}><ExplorerBanner activity={explorerActivity} onClick={() => openActivity(explorerActivity.key)} /></SquareActivityTile> : null}
+            {bgmActivity ? <SquareActivityTile activity={bgmActivity} attention={activityAttention(bgmActivity)}><BgmBanner activity={bgmActivity} onClick={() => openActivity(bgmActivity.key)} /></SquareActivityTile> : null}
+            {explorerActivity ? <SquareActivityTile activity={explorerActivity} attention={activityAttention(explorerActivity)}><ExplorerBanner activity={explorerActivity} onClick={() => openActivity(explorerActivity.key)} /></SquareActivityTile> : null}
             {regularActivities.map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
-              if (activity.presentation || activity.theme !== "baxian") return <SquareActivityTile key={activity.key} activity={activity}><ActivityCampaignCard activity={activity} title={title} eyebrow={t("message.activityEyebrow")} hint={isChineseLanguage(language) ? activity.summary : activity.summary_en || activity.summary} className="square-activity-banner" onClick={() => openActivity(activity.key)} /></SquareActivityTile>;
+              const recordShop = activity.record_shop;
+              const progress = recordShop ? { value: recordShop.points, max: recordShop.thresholds[1], label: t("recordShop.points") } : undefined;
+              if (activity.presentation || activity.theme !== "baxian") return <SquareActivityTile key={activity.key} activity={activity} attention={activityAttention(activity)}><ActivityCampaignCard activity={activity} title={title} eyebrow={t("message.activityEyebrow")} hint={isChineseLanguage(language) ? activity.summary : activity.summary_en || activity.summary} className="square-activity-banner" progress={progress} onClick={() => openActivity(activity.key)} /></SquareActivityTile>;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
-              return <SquareActivityTile key={activity.key} activity={activity}><button className="square-activity-banner" onClick={() => openActivity(activity.key)} type="button">
-                {activity.newly_claimed || claimableActivityKeys.includes(activity.key) ? <span className="square-activity-attention-tag">{activity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
+              return <SquareActivityTile key={activity.key} activity={activity} attention={activityAttention(activity)}><button className="square-activity-banner" onClick={() => openActivity(activity.key)} type="button">
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-baxian-banner-shade" />
                 <img alt="" aria-hidden="true" className="square-baxian-banner-title" src={baxianActivityTitle} />
@@ -2073,8 +2104,7 @@ export default function SquarePage() {
                 <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
               </button></SquareActivityTile>;
             })}
-            {showVipCampaign && vipCampaign ? <SquareActivityTile activity={{participation:vipCampaign.participation}}><button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => openActivity('permanent-vip-founding-100')} type="button">
-              {claimableActivityKeys.includes("vip:founding-100") ? <span className="square-activity-attention-tag">{t("activity.pendingClaim")}</span> : null}
+            {showVipCampaign && vipCampaign ? <SquareActivityTile activity={{participation:vipCampaign.participation}} attention={vipAttention}><button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => openActivity('permanent-vip-founding-100')} type="button">
               <span className="square-vip-banner-index">FRIENDEN · FOUNDING 100</span>
               <strong className="square-vip-banner-title"><ActivityTitle activity={{key:'permanent-vip-founding-100',theme:'permanent-vip'}} title={t('vip.campaignTitle')}/></strong>
               <span className="square-vip-banner-number">{String(vipCampaign.slot ?? Math.max(1, 100 - vipCampaign.remaining)).padStart(3, "0")}</span>
@@ -2082,8 +2112,7 @@ export default function SquarePage() {
               <span className="square-vip-banner-reward"><i /><span><small>{t("vip.bannerOwnership")}</small><strong>{t("vip.bannerRewards")}</strong></span></span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button></SquareActivityTile> : null}
-            {spiderManActivity ? <SquareActivityTile activity={spiderManActivity}><button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man" onClick={() => openActivity(spiderManActivity.key)} type="button">
-              {spiderManActivity.newly_claimed || claimableActivityKeys.includes(spiderManActivity.key) ? <span className="square-activity-attention-tag">{spiderManActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
+            {spiderManActivity ? <SquareActivityTile activity={spiderManActivity} attention={activityAttention(spiderManActivity)}><button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man" onClick={() => openActivity(spiderManActivity.key)} type="button">
               <img alt="" aria-hidden="true" className="square-spider-man-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-live"><i />{t("admin.activityStatus.active")}</span>
               <strong className="square-spider-man-title"><ActivityTitle activity={spiderManActivity} title={t('activity.friendly.title')}/></strong>
@@ -2095,8 +2124,7 @@ export default function SquarePage() {
               ]).map((reward) => <span key={reward.key}><b>{reward.threshold}</b> {reward.resource_type === "frame" ? t("activity.friendly.bannerFrame") : t("activity.friendly.bannerProfile")}</span>)}</span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button></SquareActivityTile> : null}
-            {starryNightActivity ? <SquareActivityTile activity={starryNightActivity}><button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => openActivity(starryNightActivity.key)} type="button">
-              {starryNightActivity.newly_claimed || claimableActivityKeys.includes(starryNightActivity.key) ? <span className="square-activity-attention-tag">{starryNightActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
+            {starryNightActivity ? <SquareActivityTile activity={starryNightActivity} attention={activityAttention(starryNightActivity)}><button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => openActivity(starryNightActivity.key)} type="button">
               <img alt="" aria-hidden="true" src={starryNightBanner} />
               <span className="square-starry-night-rarity">{t("growth.rarity.legendary")} · COLLECTION</span>
               <span className="square-starry-night-orbit" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i className={index < (starryNightActivity.starry_night?.streak_days ?? 0) ? "is-lit" : ""} key={index}>★</i>)}</span>

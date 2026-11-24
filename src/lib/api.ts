@@ -1189,8 +1189,8 @@ export const api = {
     return request<SquareStatusDTO>("/square/status", { auth: true, signal });
   },
 
-  markSquareFeedRead(scope: "all" | "friends") {
-    return request<SquareStatusDTO>("/square/status", { method: "POST", auth: true, body: { scope } });
+  markSquareFeedRead(scope: "all" | "friends", signal?: AbortSignal) {
+    return request<SquareStatusDTO>("/square/status", { method: "POST", auth: true, body: { scope }, signal });
   },
 
   getActiveActivities(signal?: AbortSignal) {

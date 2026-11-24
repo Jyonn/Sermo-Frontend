@@ -4,7 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
-import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
+import { announceSquareStatus, SQUARE_NOTIFICATIONS_UPDATED_EVENT, type SquareBadgeStatus } from "../lib/squareNotifications";
 import { UnreadIndicator } from "./UnreadIndicator";
 import {UpdateAvailableDot} from './UpdateAvailableDot';
 import {useCallShortcutDiscovery} from '../lib/callShortcutDiscovery';
@@ -190,14 +190,11 @@ export function AppBottomNav() {
     let revision = 0;
     const sync = () => { const started = revision; void api.getSquareStatus().then((result) => {
       if (!cancelled && started === revision) {
-        setSquareUnread(result.notification_unread);
-        setSquareHasFreshContent(result.explore_unread || result.friends_unread || result.activity_claimable);
+        announceSquareStatus(result, features.squareExploreEnabled);
       }
     }).catch(() => undefined); };
-    sync();
-    const timer = window.setInterval(sync, 15_000);
     const handleUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{ unreadCount: number; hasFreshContent?: boolean }>).detail;
+      const detail = (event as CustomEvent<Partial<SquareBadgeStatus> & { unreadCount: number }>).detail;
       if (detail && !cancelled) {
         revision++;
         setSquareUnread(Math.max(0, detail.unreadCount));
@@ -205,12 +202,14 @@ export function AppBottomNav() {
       }
     };
     window.addEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
+    sync();
+    const timer = window.setInterval(sync, 15_000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
       window.removeEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
     };
-  }, [pageActive, sessionAccessToken, sessionUserId]);
+  }, [effectivePathname, features.squareExploreEnabled, pageActive, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!session || !features.ready) return;
