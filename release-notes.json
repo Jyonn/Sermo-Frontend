@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.25.1",
+  "id": "2026.11.25.2",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺 · 女声篇",
+      "title": "回声唱片铺更新专辑目录",
       "items": [
-        "蔡依林、孙燕姿、萧亚轩和梁静茹加入典藏气泡，带来新的人像、描线动效与专辑唱片。",
-        "在聊天气泡的典藏分类中预览四位歌手。空间管理员可领取回声唱片铺女声篇，开启 30 天活动。"
+        "两期奖池均改为收录八位歌手的正式录音室专辑，并重新划分金、铂、钻、曜。",
+        "已有的聊天唱片和空间首解奖章仍可查看。"
       ]
     },
     "en": {
-      "title": "Echo Record Shop · Women in Mandopop",
+      "title": "Echo Record Shop album update",
       "items": [
-        "Jolin Tsai, Stefanie Sun, Elva Hsiao, and Fish Leong bring new portraits, animated line art, and album discs to collectible chat bubbles.",
-        "Preview all four in chat personalization. Space administrators can claim the new edition to start a 30-day event."
+        "Both editions now feature studio albums from all eight artists, with updated Gold, Platinum, Diamond, and Obsidian tiers.",
+        "Previously shared chat discs and space-first medals are still available."
       ]
     }
   }

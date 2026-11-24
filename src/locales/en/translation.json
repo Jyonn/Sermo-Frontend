@@ -3932,7 +3932,7 @@
   ,"recordShop.listenRule": "Earn 6 points for finishing a featured artist’s full track or 3 for finishing a preview up to 30 seconds long. For other artists, earn 4 or 2 points respectively."
   ,"recordShop.dedupeRule": "Sharing and listening each count once per artist and track title across providers."
   ,"recordShop.selectionRule": "Choose an artist bubble at 30 points and another at 60."
-  ,"recordShop.discoveryRule": "Your first discovery of an album decoration triggers a reveal. The space account announces the first Diamond or Obsidian discovery in Square."
+  ,"recordShop.discoveryRule": "Chat bubbles can reveal the artist's studio albums. Your first discovery of each album triggers a reveal. The space account announces the first Diamond or Obsidian discovery in Square."
   ,"recordShop.bubbleTitle": "{{artist}} bubble"
   ,"recordShop.bubblePreviewFirst": "What are you listening to today?"
   ,"recordShop.bubblePreviewNext": "This one’s worth hearing in full."

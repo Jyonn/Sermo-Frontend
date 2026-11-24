@@ -69,7 +69,7 @@ export const recordShopPreviews: Record<RecordShopDecoration["artist"], RecordSh
     portrait: appearanceAsset("/assets/activity/record-shop/preview-stefanie-portrait.webp"),
     album: {
       id: "stefanie-990152978",
-      name: "孙燕姿同名专辑",
+      name: "孙燕姿",
       title: "天黑黑",
       tier: "gold",
       cover: appearanceAsset("/assets/activity/record-shop/preview-stefanie-album.webp"),

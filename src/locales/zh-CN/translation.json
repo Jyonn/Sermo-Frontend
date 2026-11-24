@@ -3930,7 +3930,7 @@
   ,"recordShop.listenRule": "活动歌手的歌曲听完整首加 6 分，听完 30 秒及以内的试听加 3 分。其他歌手分别加 4 分和 2 分。"
   ,"recordShop.dedupeRule": "分享和听歌各计一次，按歌手和歌名跨平台去重。"
   ,"recordShop.selectionRule": "累计 30 分和 60 分时，各可自选一款歌手气泡。"
-  ,"recordShop.discoveryRule": "你首次发现专辑元素时会收到收藏动画。空间首次发现钻或曜级专辑元素时，管理员会在广场祝贺。"
+  ,"recordShop.discoveryRule": "气泡随机展示歌手的正式录音室专辑。你首次发现一张专辑时会收到收藏动画。空间首次发现钻或曜级专辑时，管理员会在广场祝贺。"
   ,"recordShop.bubbleTitle": "{{artist}}气泡"
   ,"recordShop.bubblePreviewFirst": "今天听什么？"
   ,"recordShop.bubblePreviewNext": "这首值得听完。"
