@@ -8,11 +8,16 @@ import {usePlaybackWait} from './MediaWaitFeedback';
 import type {RecordShopAlbum as Album,RecordShopDecoration} from '../types';
 import './RecordShop.css';
 
-function RecordShopDisc({cover}:{cover:string}) {
-  return <span className="record-shop-disc" aria-hidden="true"><img src={cover} alt="" loading="lazy" draggable={false} /></span>;
+function RecordShopDisc({cover,playing=false}:{cover:string;playing?:boolean}) {
+  const disc=useRef<HTMLSpanElement>(null);
+  useEffect(()=>{
+    const spin=disc.current?.getAnimations?.().find(animation=>'animationName' in animation&&animation.animationName==='record-shop-disc-spin');
+    spin?.updatePlaybackRate(playing?4:1);
+  },[playing]);
+  return <span ref={disc} className="record-shop-disc" aria-hidden="true"><img src={cover} alt="" loading="lazy" draggable={false} /></span>;
 }
 
-function RecordShopClip({album,uri,cover,interactive=true}:{album:Album;uri:string;cover?:string;interactive?:boolean}) {
+function RecordShopClip({album,uri,cover,interactive=true,onPlayingChange}:{album:Album;uri:string;cover?:string;interactive?:boolean;onPlayingChange?:(playing:boolean)=>void}) {
   const {t}=useI18n();
   const audio=useRef<HTMLAudioElement>(null);
   const attempt=useRef(0);
@@ -23,6 +28,8 @@ function RecordShopClip({album,uri,cover,interactive=true}:{album:Album;uri:stri
   const failed=wait.phase==='error';
   const waiting=wait.phase==='loading'||wait.phase==='buffering';
   const label=t(failed?'common.retry':playing||waiting?'music.pause':'recordShop.listen');
+
+  useEffect(()=>{onPlayingChange?.(playing&&!waiting);},[onPlayingChange,playing,waiting]);
 
   useEffect(()=>{
     const node=audio.current;
@@ -71,7 +78,7 @@ function RecordShopClip({album,uri,cover,interactive=true}:{album:Album;uri:stri
 
   if(cover)return <>
     <button type="button" className={`record-shop-message-cover tier-${album.tier}`} aria-label={`${label} · ${album.name}`} title={`${label} · ${album.name}`} disabled={!interactive} aria-pressed={playing} onPointerDown={event=>event.stopPropagation()} onClick={toggle}>
-      <RecordShopDisc cover={cover}/>
+      <RecordShopDisc cover={cover} playing={playing&&!waiting}/>
       <span className={`record-shop-disc-state${waiting||failed?' is-visible':''}`}>{statusIcon}</span>
     </button>
     {playback}
@@ -93,6 +100,7 @@ function RecordShopClip({album,uri,cover,interactive=true}:{album:Album;uri:stri
 export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onClose:()=>void;discovery?:boolean}) {
   const {t}=useI18n();
   const dialog=useRef<HTMLDialogElement>(null);
+  const [playing,setPlaying]=useState(false);
   useEffect(()=>{dialog.current?.showModal();},[]);
   const cover=safeActivityImage(album.cover);
   const clip=safeActivityImage(album.clip);
@@ -101,12 +109,12 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
       <form method="dialog"><button className="record-shop-close" type="submit" aria-label={t('common.close')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></form>
       <div className="record-shop-album-visual">
         {discovery?<div className="record-shop-waves" aria-hidden="true"><i/><i/><i/></div>:null}
-        {cover?<RecordShopDisc cover={cover}/>:null}
+        {cover?<RecordShopDisc cover={cover} playing={playing}/>:null}
       </div>
       <p>{discovery?t('recordShop.first'):t(`recordShop.tier.${album.tier}`)}</p>
       <h2>{album.name}</h2>
       <span>{album.title}</span>
-      {clip?<RecordShopClip key={clip} album={album} uri={clip}/>:<small>{t('recordShop.clipUnavailable')}</small>}
+      {clip?<RecordShopClip key={clip} album={album} uri={clip} onPlayingChange={setPlaying}/>:<small>{t('recordShop.clipUnavailable')}</small>}
     </div>
   </dialog>,document.body);
 }
