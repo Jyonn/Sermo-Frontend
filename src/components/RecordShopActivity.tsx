@@ -30,12 +30,14 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
 }) {
   const { t, language } = useI18n();
   const [pending, setPending] = useState("");
-  const [catalogSinger, setCatalogSinger] = useState<Singer>("jay");
+  const [selectedSinger, setCatalogSinger] = useState<Singer | null>(null);
   const [tier, setTier] = useState<Album["tier"]>("gold");
   const [album, setAlbum] = useState<Album | null>(null);
   const info = activity.record_shop;
-  if (!info) return null;
+  const roster = singers.filter(singer => Boolean(info?.portraits[singer]));
+  if (!info || !roster.length) return null;
 
+  const catalogSinger = selectedSinger && roster.includes(selectedSinger) ? selectedSinger : roster[0];
   const artwork = activityPresentation(activity).artwork_url;
   const summary = language.startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
   const catalog = info.albums[catalogSinger] ?? [];
@@ -63,7 +65,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
   };
 
   return (
-    <section className="record-shop-activity">
+    <section className="record-shop-activity" data-edition={activity.key === "record-shop-women" ? "women" : undefined}>
       <header className="record-shop-hero">
         {artwork ? <img src={artwork} alt="" decoding="async" /> : null}
         <div className="record-shop-hero-copy">
@@ -92,7 +94,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
             <section className="record-shop-shelf">
               <h3>{t("menu.chatBubble")}</h3>
               <div className="record-shop-singers">
-                {singers.map(singer => {
+                {roster.map(singer => {
                   const portrait = safeActivityImage(info.portraits[singer]);
                   const status = singerStatus(info, singer);
                   return (
@@ -130,7 +132,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                 label={t("menu.chatBubble")}
                 value={catalogSinger}
                 onChange={selectSinger}
-                items={singers.map(singer => {
+                items={roster.map(singer => {
                   const label = t(`recordShop.singer.${singer}`);
                   const portrait = safeActivityImage(info.portraits[singer]);
                   return {
@@ -152,7 +154,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                     className="record-shop-reward-action"
                     type="button"
                     aria-busy={pending === catalogSinger}
-                    disabled={!activity.active || Boolean(pending) || catalogStatus === "locked" || catalogStatus === "equipped"}
+                    disabled={(!activity.active && catalogStatus === "choose") || Boolean(pending) || catalogStatus === "locked" || catalogStatus === "equipped"}
                     onClick={() => void choose(catalogSinger)}
                   >
                     <span aria-hidden="true" className="material-symbols-outlined">{statusIcons[catalogStatus]}</span>

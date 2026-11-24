@@ -3019,5 +3019,9 @@
   "photo.sendFailed": "無法傳送這張照片，請重試。",
   "photo.discard": "要捨棄這些編輯嗎？",
   "photo.discardChanges": "捨棄編輯",
-  "photo.continueEdit": "繼續編輯"
+  "photo.continueEdit": "繼續編輯",
+  "recordShop.singer.jolin": "蔡依林",
+  "recordShop.singer.stefanie": "孫燕姿",
+  "recordShop.singer.elva": "蕭亞軒",
+  "recordShop.singer.fish": "梁靜茹"
 }

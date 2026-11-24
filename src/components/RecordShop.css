@@ -40,6 +40,45 @@
   --record-bubble-art:
     radial-gradient(ellipse at 80% 100%,transparent 0 57%,var(--record-detail) 58% 60%,transparent 62% 69%,var(--record-detail) 70% 72%,transparent 74%) right bottom/72px 26px no-repeat;
 }
+[data-record-shop-artist="jolin"] {
+  --record-bubble-paper:#fae4e7;
+  --record-bubble-tone:#762643;
+  --record-bubble-rim:#cd7e8e;
+  --record-bubble-ink:#592039;
+  --record-detail:#ffd5c9;
+  --record-bubble-art:radial-gradient(circle at 50% 100%,transparent 57%,var(--record-detail) 62% 66%,transparent 71%) bottom right/13px 6px repeat-x;
+}
+[data-record-shop-artist="stefanie"] {
+  --record-bubble-paper:#e2efed;
+  --record-bubble-tone:#225260;
+  --record-bubble-rim:#73a9aa;
+  --record-bubble-ink:#244b55;
+  --record-detail:#cbf4dd;
+  --record-bubble-art:
+    radial-gradient(ellipse at 85% 76%,transparent 38%,var(--record-detail) 40% 42%,transparent 44% 61%,var(--record-detail) 63% 64%,transparent 67%) right bottom/65px 34px no-repeat,
+    radial-gradient(circle,var(--record-detail) 0 .55px,transparent 1px) right bottom/5px 5px;
+}
+[data-record-shop-artist="elva"] {
+  --record-bubble-paper:#eee7f9;
+  --record-bubble-tone:#403358;
+  --record-bubble-rim:#a48cc1;
+  --record-bubble-ink:#413253;
+  --record-detail:#e8d7ff;
+  --record-bubble-art:
+    repeating-linear-gradient(90deg,var(--record-detail) 0 3px,transparent 3px 7px) right bottom 5px/100% 1px no-repeat,
+    repeating-linear-gradient(125deg,transparent 0 11px,var(--record-detail) 11px 12px,transparent 12px 21px);
+}
+[data-record-shop-artist="fish"] {
+  --record-bubble-paper:#f4edd0;
+  --record-bubble-tone:#4b5030;
+  --record-bubble-rim:#a5a16a;
+  --record-bubble-ink:#403d25;
+  --record-detail:#f5e4aa;
+  --record-bubble-art:
+    linear-gradient(var(--record-detail),var(--record-detail)) top 4px right/17px 1px no-repeat,
+    linear-gradient(var(--record-detail),var(--record-detail)) top 4px right/1px 12px no-repeat,
+    repeating-linear-gradient(90deg,transparent 0 5px,var(--record-detail) 5px 8px,transparent 8px 12px) right bottom 4px/100% 3px no-repeat;
+}
 [data-record-shop-artist] > .message-bubble.record-shop-text-bubble {
   background:radial-gradient(ellipse at bottom right,color-mix(in srgb,var(--record-bubble-rim) 25%,transparent),transparent 74%),var(--record-bubble-paper);
   color:var(--record-bubble-ink);

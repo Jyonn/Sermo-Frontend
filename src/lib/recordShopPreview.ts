@@ -1,7 +1,7 @@
 import type { RecordShopDecoration } from "../types";
 import { appearanceAsset } from "./appearanceAsset";
 
-export const recordShopArtists = ["jay", "leehom", "david", "jj"] as const;
+export const recordShopArtists = ["jay", "leehom", "david", "jj", "jolin", "stefanie", "elva", "fish"] as const;
 
 export const recordShopPreviews: Record<RecordShopDecoration["artist"], RecordShopDecoration> = {
   jay: {
@@ -50,6 +50,54 @@ export const recordShopPreviews: Record<RecordShopDecoration["artist"], RecordSh
       tier: "gold",
       cover: appearanceAsset("/assets/activity/record-shop/preview-jj-album.jpg"),
       clip: "https://api.sermo.jyonn.space/resources/assets/437/display/fa91f08e1a9dfe4f12a1dd447832f09301ce2264803d030ab769cea465468d5c",
+    },
+  },
+  jolin: {
+    artist: "jolin",
+    portrait: appearanceAsset("/assets/activity/record-shop/preview-jolin-portrait.webp"),
+    album: {
+      id: "jolin-1446276817",
+      name: "Ugly Beauty",
+      title: "怪美的",
+      tier: "gold",
+      cover: appearanceAsset("/assets/activity/record-shop/preview-jolin-album.webp"),
+      clip: "https://api.sermo.jyonn.space/resources/assets/537/display/6326f88edf5d54cf3a4e1068200144318671a163ff8d1902d8d2c8f4553d68f4",
+    },
+  },
+  stefanie: {
+    artist: "stefanie",
+    portrait: appearanceAsset("/assets/activity/record-shop/preview-stefanie-portrait.webp"),
+    album: {
+      id: "stefanie-990152978",
+      name: "孙燕姿同名专辑",
+      title: "天黑黑",
+      tier: "gold",
+      cover: appearanceAsset("/assets/activity/record-shop/preview-stefanie-album.webp"),
+      clip: "https://api.sermo.jyonn.space/resources/assets/596/display/e031a5cbfe442174057976477e1bed457cf4070b86a70ad621dd83f5ef146826",
+    },
+  },
+  elva: {
+    artist: "elva",
+    portrait: appearanceAsset("/assets/activity/record-shop/preview-elva-portrait.webp"),
+    album: {
+      id: "elva-905208168",
+      name: "萧亚轩",
+      title: "最熟悉的陌生人",
+      tier: "gold",
+      cover: appearanceAsset("/assets/activity/record-shop/preview-elva-album.webp"),
+      clip: "https://api.sermo.jyonn.space/resources/assets/635/display/c79894698447175bfc69ae75e34bea352c26a8649ff11879017119c2a54890a7",
+    },
+  },
+  fish: {
+    artist: "fish",
+    portrait: appearanceAsset("/assets/activity/record-shop/preview-fish-portrait.webp"),
+    album: {
+      id: "fish-1692291088",
+      name: "勇气",
+      title: "勇气",
+      tier: "gold",
+      cover: appearanceAsset("/assets/activity/record-shop/preview-fish-album.webp"),
+      clip: "https://api.sermo.jyonn.space/resources/assets/672/display/fad5a7d8011703ac1c1af1f84cbed0c8074a9f8715ffac7f59e6dcf81a1774cd",
     },
   },
 };

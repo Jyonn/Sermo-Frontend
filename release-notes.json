@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.24.11",
-  "publishedAt": "2026-11-24",
+  "id": "2026.11.25.1",
+  "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺的空间奖章",
+      "title": "回声唱片铺 · 女声篇",
       "items": [
-        "钻、曜专辑有各自的全屏首解动效，可从专辑详情直接预览。",
-        "广场新增奖章页，展示本空间每张钻、曜唱片的首位解锁成员和时间。"
+        "蔡依林、孙燕姿、萧亚轩和梁静茹加入典藏气泡，带来新的人像、描线动效与专辑唱片。",
+        "在聊天气泡的典藏分类中预览四位歌手。空间管理员可领取回声唱片铺女声篇，开启 30 天活动。"
       ]
     },
     "en": {
-      "title": "Echo Record Shop Medals",
+      "title": "Echo Record Shop · Women in Mandopop",
       "items": [
-        "Preview the distinct fullscreen Diamond and Obsidian discovery animations from album details.",
-        "Open Medals in Square to see who first discovered each rare record in your space and when."
+        "Jolin Tsai, Stefanie Sun, Elva Hsiao, and Fish Leong bring new portraits, animated line art, and album discs to collectible chat bubbles.",
+        "Preview all four in chat personalization. Space administrators can claim the new edition to start a 30-day event."
       ]
     }
   }

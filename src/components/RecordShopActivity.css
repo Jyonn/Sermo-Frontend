@@ -53,6 +53,33 @@ html[data-theme="dark"] .record-shop-activity {
   --record-rust: #e4a17b;
 }
 
+.record-shop-activity[data-edition="women"] {
+  --record-floor: #f0e1db;
+  --record-paper: #fff2e9;
+  --record-ink: #49262e;
+  --record-mute: #74515a;
+  --record-seam: #c59b9c;
+  --record-rust: #9f3f57;
+}
+
+html[data-theme="dark"] .record-shop-activity[data-edition="women"] {
+  --record-floor: #291a25;
+  --record-paper: #3d2632;
+  --record-ink: #fce8da;
+  --record-mute: #dfb6bd;
+  --record-seam: #9a6676;
+  --record-rust: #f0a5ad;
+}
+
+.record-shop-activity[data-edition="women"] .record-shop-hero > img {
+  object-position: 66% 56%;
+}
+
+.record-shop-activity[data-edition="women"] .record-shop-hero::after {
+  background: linear-gradient(90deg, #2a1328e8, #2a132879 44%, transparent 80%),
+    linear-gradient(0deg, #2a1328d0, transparent 34%);
+}
+
 .record-shop-hero {
   position: relative;
   isolation: isolate;

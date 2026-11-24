@@ -1013,7 +1013,7 @@ export interface RecordShopAlbum {
 }
 
 export interface RecordShopDecoration {
-  artist:'jay'|'leehom'|'david'|'jj';
+  artist:'jay'|'leehom'|'david'|'jj'|'jolin'|'stefanie'|'elva'|'fish';
   portrait:string;
   album?:RecordShopAlbum;
   first?:boolean;

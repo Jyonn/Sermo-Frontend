@@ -3,6 +3,7 @@ import type {MusicProviderDataDTO} from '../types';
 
 export type MusicSource = {surface:'chat'|'square';source_id:number};
 const eligibleProviders = new Set<string>(['netease_music','qq_music','pocklo_music']);
+const recordShopEditions = ['record-shop', 'record-shop-women'] as const;
 
 class PlaybackReceipt {
   private readonly ready;
@@ -10,8 +11,11 @@ class PlaybackReceipt {
   private reported = false;
   private stopped = false;
 
-  constructor(private key:string, source:MusicSource, music:MusicProviderDataDTO) {
-    this.ready = api.recordShopStart(key,{...source,provider:music.provider,song_id:music.song_id}).catch(()=>null);
+  constructor(source:MusicSource, music:MusicProviderDataDTO) {
+    this.ready = recordShopEditions.map(async key => ({
+      key,
+      credentials: await api.recordShopStart(key,{...source,provider:music.provider,song_id:music.song_id}).catch(()=>null),
+    }));
   }
 
   collect(element:HTMLAudioElement) {
@@ -39,15 +43,17 @@ class PlaybackReceipt {
     const played=this.ranges;
     if(played.length===0 || played.length>64) return;
     this.reported=true;
-    const credentials=await this.ready;
-    if(!credentials?.receipt) return;
-    const outcome=await api.recordShopFinish(this.key,{receipt:credentials.receipt,duration_ms,played,ended:true}).catch(()=>null);
-    if(outcome?.points) window.dispatchEvent(new CustomEvent('frienden:activity-updated'));
+    const outcomes = await Promise.all(this.ready.map(async request => {
+      const {key, credentials} = await request;
+      if (!credentials?.receipt) return null;
+      return api.recordShopFinish(key,{receipt:credentials.receipt,duration_ms,played,ended:true}).catch(()=>null);
+    }));
+    if(outcomes.some(outcome => outcome?.points)) window.dispatchEvent(new CustomEvent('frienden:activity-updated'));
   }
 
   stop() { this.stopped=true; }
 }
 
 export function startRecordShopPlayback(source:MusicSource|undefined,music:MusicProviderDataDTO) {
-  return source && eligibleProviders.has(music.provider) ? new PlaybackReceipt('record-shop',source,music) : null;
+  return source && eligibleProviders.has(music.provider) ? new PlaybackReceipt(source,music) : null;
 }

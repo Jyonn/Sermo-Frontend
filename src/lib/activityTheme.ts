@@ -7,6 +7,7 @@ const themes:Record<string,string>={
   'starry-night-five-evenings-2026':'starry-night',
   'permanent-vip-founding-100':'permanent-vip',
   'record-shop':'record-shop',
+  'record-shop-women':'record-shop',
 };
 /** Choose the initial surface before the campaign request completes. */
 export function activityThemeForKey(key?:string) {return key?themes[key]??'':'';}
