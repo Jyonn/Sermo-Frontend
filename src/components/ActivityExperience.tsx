@@ -248,6 +248,8 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     }
   };
 
+  const drawerTitle = activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title");
+
  return <>
       <SideDrawer
         className={activityDrawerClassName(activityKey,theme)}
@@ -257,9 +259,18 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         historyMode="route"
         onClose={onClose}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
-        title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")}
+        title={drawerTitle}
+        titleLeading={theme === "record-shop" && activeActivity ? (
+          <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
+        ) : undefined}
       >
-        {activeActivity?.record_shop ? <RecordShopActivity activity={activeActivity} onUpdate={patchActivity}/> : activeActivity?.theme === "explorer" ? <ExplorerActivity activity={activeActivity} onUpdate={patchActivity} onPublish={() => { if (features.squareFreePostEnabled) { publish(); } else if (features.submissionEnabled) navigate("/app/submissions/new"); else showToast(t("explorer.featureUnavailable"), "error"); }} /> : activeActivity?.theme === "number_duel" ? <NumberDuelActivity activity={activeActivity} /> : activeActivity?.theme === "bgm" ? <BgmActivity activity={activeActivity} onUpdate={patchActivity} onTask={(kind) => { if(kind === "publish") publish(); else if(features.squareEnabled) navigate("/app/square"); else showToast(t("explorer.featureUnavailable"),"info"); }} /> : activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity && theme==='baxian' ? <div className="activity-detail">
+        {activeActivity?.record_shop ? (
+          <RecordShopActivity
+            activity={activeActivity}
+            dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}
+            onUpdate={patchActivity}
+          />
+        ) : activeActivity?.theme === "explorer" ? <ExplorerActivity activity={activeActivity} onUpdate={patchActivity} onPublish={() => { if (features.squareFreePostEnabled) { publish(); } else if (features.submissionEnabled) navigate("/app/submissions/new"); else showToast(t("explorer.featureUnavailable"), "error"); }} /> : activeActivity?.theme === "number_duel" ? <NumberDuelActivity activity={activeActivity} /> : activeActivity?.theme === "bgm" ? <BgmActivity activity={activeActivity} onUpdate={patchActivity} onTask={(kind) => { if(kind === "publish") publish(); else if(features.squareEnabled) navigate("/app/square"); else showToast(t("explorer.featureUnavailable"),"info"); }} /> : activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity && theme==='baxian' ? <div className="activity-detail">
           <div className="activity-body-wordmark"><ActivityTitle activity={activeActivity} title={activeActivity.title}/></div>
           <div className="activity-detail-masthead">
             <div className="activity-detail-index">

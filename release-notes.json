@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.24.8",
+  "id": "2026.11.24.9",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "唱片铺的动态纹样",
+      "title": "回声唱片铺的店内陈列",
       "items": [
-        "四款歌手气泡加入逐笔绘制的动态纹样：扑克牌飞返、棒球击出后回落、老车绕行星轨、咖啡香气升起。",
-        "聊天气泡「典藏」与活动奖池均可预览新动效。"
+        "活动详情换上唱机主视觉、票根式积分进度和四款歌手封套。",
+        "奖池的气泡预览和专辑列表也统一为唱片铺的风格。"
       ]
     },
     "en": {
-      "title": "Animated Record Shop Bubbles",
+      "title": "Inside the Echo Record Shop",
       "items": [
-        "Four artist bubbles now draw animated card tricks, a baseball hit and return, a vintage car on a space orbit, and curls of coffee steam.",
-        "Preview the animations in Legendary Chat Bubbles or the activity rewards."
+        "The activity drawer now opens on a turntable scene, with a points ticket and four artist sleeves.",
+        "The rewards sheet brings bubble previews and the album catalog into the same visual style."
       ]
     }
   }
