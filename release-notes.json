@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.24.2",
+  "id": "2026.11.24.3",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "广场新内容提示",
+      "title": "广场红点与唱片铺新规则",
       "items": [
         "探索、好友、活动标签分别提示新内容。新活动和有待领取奖励的活动卡片也会显示红点。",
-        "回声唱片铺换上了黑胶唱片主题横幅，活动卡片上可查看当前积分。"
+        "回声唱片铺换上了黑胶唱片横幅。分享歌曲不限歌手，听完歌曲可按歌手和播放版本获得积分。",
+        "奖池可预览歌手气泡及其专辑元素。"
       ]
     },
     "en": {
-      "title": "See What’s New in Square",
+      "title": "Square Badges and Record Shop Rules",
       "items": [
         "Explore, Friends, and Activities now have separate unread dots. Activity cards also show a dot for new events and unclaimed rewards.",
-        "Echo Record Shop has a new vinyl-themed banner that shows your points at a glance."
+        "Echo Record Shop has a new vinyl-themed banner. Share music by any artist, or earn points for finishing full tracks and previews.",
+        "Preview artist bubbles and their album decorations in the prize pool."
       ]
     }
   }

@@ -6,7 +6,7 @@ import {safeActivityImage} from '../lib/activityPresentation';
 import type {ActivityCampaignDTO,RecordShopAlbum as Album} from '../types';
 import {ActivityDetails} from './ActivityDetails';
 import {ActivityTitle} from './ActivityCampaignCard';
-import {RecordShopAlbum} from './RecordShopAlbum';
+import {RecordShopAlbum,RecordShopDecorationView} from './RecordShopAlbum';
 
 const singers=['jay','leehom','david','jj'] as const;
 
@@ -18,6 +18,9 @@ export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaig
   const info=activity.record_shop;
   if(!info)return null;
   const title=language.startsWith('zh')?activity.title:(activity.title_en||activity.title);
+  const catalog=info.albums[catalogSinger]??[];
+  const catalogArtist=t(`recordShop.singer.${catalogSinger}`);
+  const decoration={artist:catalogSinger,portrait:info.portraits[catalogSinger],album:catalog[0]};
   const choose=async(singer:string)=>{
     if(pending)return;
     setPending(singer);
@@ -42,9 +45,24 @@ export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaig
         <small>{t(`recordShop.${status}`)}</small>
       </button>;
     })}</div>
-    <ActivityDetails rules={<ul className="record-shop-rules">{(['shareRule','listenRule','selectionRule','discoveryRule'] as const).map(rule=><li key={rule}>{t(`recordShop.${rule}`)}</li>)}</ul>} rewards={<div className="record-shop-catalog">
+    <ActivityDetails rules={<ul className="record-shop-rules">{(['shareRule','listenRule','dedupeRule','selectionRule','discoveryRule'] as const).map(rule=><li key={rule}>{t(`recordShop.${rule}`)}</li>)}</ul>} rewards={<div className="record-shop-catalog">
       <div className="record-shop-catalog-tabs">{singers.map(singer=><button key={singer} type="button" aria-pressed={catalogSinger===singer} onClick={()=>setCatalogSinger(singer)}>{t(`recordShop.singer.${singer}`)}</button>)}</div>
-      {(info.albums[catalogSinger]??[]).map(row=><button className="record-shop-catalog-entry" type="button" key={row.id} onClick={()=>setAlbum(row)}>
+      <article className="record-shop-reward" key={catalogSinger}>
+        <h3>{t('recordShop.bubbleTitle',{artist:catalogArtist})}</h3>
+        <div className="record-shop-reward-preview">
+          <div className="message-bubble-shell has-record-shop-decoration record-shop-reward-bubble">
+            <RecordShopDecorationView decoration={decoration} first />
+            {t('recordShop.bubblePreviewFirst')}
+          </div>
+          {catalog.length ? <div className="message-bubble-shell has-record-shop-decoration record-shop-reward-bubble">
+            <RecordShopDecorationView decoration={decoration} first={false} />
+            {t('recordShop.bubblePreviewNext')}
+          </div> : null}
+        </div>
+        <p>{t('recordShop.bubbleElementsHint')}</p>
+      </article>
+      {catalog.length ? <h4 className="record-shop-elements-title">{t('recordShop.albumElements')}</h4> : null}
+      {catalog.map(row=><button className="record-shop-catalog-entry" type="button" key={row.id} onClick={()=>setAlbum(row)}>
         <img src={safeActivityImage(row.cover)} loading="lazy" alt=""/><span><b>{row.name}</b><small>{row.title}</small></span>
         <small>{t(`recordShop.tier.${row.tier}`)}</small>
       </button>)}

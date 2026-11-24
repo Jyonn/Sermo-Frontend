@@ -25,6 +25,28 @@
 .record-shop-catalog-tabs { display: flex; flex-wrap: wrap; gap: 7px; padding-bottom: 10px; }
 .record-shop-catalog-tabs button { padding: 5px 10px; border-radius: 999px; border: 1px solid currentColor; }
 .record-shop-catalog-tabs [aria-pressed=true] { background: var(--surface-elevated, #a4644640); }
+.record-shop-reward {
+  display:grid;
+  gap:12px;
+  padding:16px;
+  border:1px solid var(--line-soft);
+  border-radius:16px;
+  background:var(--bg-elevated);
+}
+.record-shop-reward h3, .record-shop-reward p { margin:0; }
+.record-shop-reward h3 { font-size:17px; }
+.record-shop-reward p { font-size:13px; color:var(--text-muted); }
+.record-shop-reward-preview { display:grid; justify-items:start; gap:10px; padding:16px 0 2px 28px; }
+.record-shop-reward-bubble {
+  max-width:100%;
+  padding:9px 13px 9px 22px;
+  border:1px solid var(--line-soft);
+  border-radius:15px;
+  background:var(--surface);
+  color:var(--text-primary);
+  font-size:14px;
+}
+.record-shop-elements-title { margin:14px 0 4px; font-size:14px; }
 .record-shop-catalog-entry { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: inherit; padding: 7px 0; text-align: start; }
 .record-shop-catalog-entry span { display: grid; gap: 3px; }
 .record-shop-catalog-entry img, .record-shop-message-cover img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
