@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.23.2",
-  "publishedAt": "2026-11-23",
+  "id": "2026.11.24.1",
+  "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "桌面图片预览手势",
+      "title": "回声唱片铺",
       "items": [
-        "桌面预览中，触控板双指上下滑动可拖动图片，捏合手势用于缩放。"
+        "分享或听完周杰伦、王力宏、陶喆、林俊杰的歌曲，赢取歌手气泡，收藏可试听的专辑封面。",
+        "空间管理员可在活动管理中领取，活动从领取日起持续 30 天。"
       ]
     },
     "en": {
-      "title": "Desktop image preview gestures",
+      "title": "Echo Record Shop",
       "items": [
-        "In desktop previews, scroll vertically with two fingers to pan the image and pinch to zoom."
+        "Share or finish listening to songs by Jay Chou, Wang Leehom, David Tao, or JJ Lin to unlock artist bubbles and collect playable album covers.",
+        "Space admins can claim the event in Activity Management. It runs for 30 days from the time it is claimed."
       ]
     }
   }
