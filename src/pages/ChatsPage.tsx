@@ -1066,6 +1066,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   const pointerStartRef = useRef<{ index: number; x: number; y: number } | null>(null);
   const suppressClickRef = useRef<number | null>(null);
   const visibleMessages = messages.slice(0, 18);
+  const decoration = messages[0]?.recordShop;
   const columns = messages.length === 2 || messages.length === 4 ? 2 : 3;
   const fullUris = messages.map((message) => {
     const uri = message.localPreviewUri ?? message.payload?.uri ?? "";
@@ -1102,7 +1103,8 @@ const MessageImageGallery = memo(function MessageImageGallery({
 
   return (
     <div className={`message-bubble-wrap ${from} is-sent ${isEntering ? "is-entering" : ""}`}>
-      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}`}>
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}`} data-record-shop-artist={decoration?.artist}>
+        {decoration ? <RecordShopDecorationView decoration={decoration} interactive={!selectionMode} /> : null}
         <div
           className={`message-image-gallery message-media-frame ${groupClassName}`}
           style={{ "--message-gallery-columns": columns } as CSSProperties}
@@ -1177,10 +1179,10 @@ const MessageImageGallery = memo(function MessageImageGallery({
               );
             })}
           </div>
-          {isFirst ? <NikoBubbleRunner /> : null}
-          {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
-          <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
-          {isLast ? <FufuBubbleRunner /> : null}
+          {!decoration && isFirst ? <NikoBubbleRunner /> : null}
+          {!decoration && isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
+          {!decoration ? <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} /> : null}
+          {!decoration && isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
     </div>
@@ -1547,6 +1549,7 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
       kind: message.kind,
       status: message.status,
       text: message.text,
+      recordShop: message.recordShop,
       uri: message.payload?.uri,
       thumbnailUri: message.payload?.thumbnail_uri,
       flash: message.kind === "flash_image" ? flashRenderSignature(message.payload)
@@ -1598,6 +1601,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   messageTitle,
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
+  const hasLinkPreview = Boolean(extractFirstMessageUrl(message.payload?.text ?? message.text));
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -1657,8 +1661,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
       } : undefined}
     >
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
-      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}${message.recordShop?' has-record-shop-decoration':''}`}>
-        {message.recordShop?<RecordShopDecorationView decoration={message.recordShop} first={isFirst}/>:null}
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`} data-record-shop-artist={message.recordShop?.artist}>
+        {message.recordShop ? <RecordShopDecorationView decoration={message.recordShop} interactive={!selectionMode} /> : null}
         {showRetry ? (
           <button aria-label={i18n.t(message.kind === "text" ? "chat.editFailedText" : "message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">{message.kind === "text" ? "edit" : "refresh"}</span>
@@ -1681,12 +1685,13 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             message.kind === "activity" ? "is-activity" : "",
             message.kind === "forward_bundle" ? "is-forward-bundle" : "",
             message.kind === "sticker" ? "is-sticker" : "",
-            extractFirstMessageUrl(message.payload?.text ?? message.text) ? "is-link-preview" : "",
+            hasLinkPreview ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",
             canOpenActions ? "message-bubble-actionable" : "",
             message.replyTo ? "has-reply" : "",
+            message.recordShop && message.kind === "text" && !hasLinkPreview ? "record-shop-text-bubble" : "",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -1926,6 +1931,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   ) : null;
   const selectableGroupMessages = group.messages.filter((message) => !["system", "official_notice", "submission_invite"].includes(message.kind));
   const groupSelected = selectableGroupMessages.length > 0 && selectableGroupMessages.every((message) => selectedClientIds.includes(message.clientId));
+  const presentationStyle = group.messages[0]?.recordShop ? "default" : visibleBubbleStyle(group.chatBubbleStyle);
 
   return (
     <div className={group.submissionCurrent
@@ -1939,7 +1945,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
         </header>
       ) : null}
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
+      <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${presentationStyle}`}>
         {selectionMode && groupAvatar ? (
           <button
             aria-label={i18n.t("message.selectMergedGroup", { name: group.from === "self" ? selfAvatarName ?? group.name : group.name })}

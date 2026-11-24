@@ -36,26 +36,78 @@
 .record-shop-reward h3, .record-shop-reward p { margin:0; }
 .record-shop-reward h3 { font-size:17px; }
 .record-shop-reward p { font-size:13px; color:var(--text-muted); }
-.record-shop-reward-preview { display:grid; justify-items:start; gap:10px; padding:16px 0 2px 28px; }
-.record-shop-reward-bubble {
-  max-width:100%;
-  padding:9px 13px 9px 22px;
-  border:1px solid var(--line-soft);
-  border-radius:15px;
-  background:var(--surface);
-  color:var(--text-primary);
-  font-size:14px;
-}
+.record-shop-reward-preview { display:grid; justify-items:end; gap:5px; padding:2px 8px 8px 32px; }
+.record-shop-reward-preview .message-bubble { font-size:14px; }
+.record-shop-reward-preview .record-shop-portrait { width:60px; height:60px; }
+.record-shop-reward-preview > .message-bubble-shell:has(> .record-shop-portrait) { margin-top:44px; }
 .record-shop-elements-title { margin:14px 0 4px; font-size:14px; }
 .record-shop-catalog-entry { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: inherit; padding: 7px 0; text-align: start; }
 .record-shop-catalog-entry span { display: grid; gap: 3px; }
 .record-shop-catalog-entry img, .record-shop-message-cover img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
 .record-shop-rules { display: grid; gap: 12px; padding-inline-start: 20px; }
-.message-bubble-shell.has-record-shop-decoration { position: relative; }
-.record-shop-message-cover, .record-shop-portrait { position: absolute; z-index: 2; inset: -12px auto auto -16px; width: 32px; height: 32px; }
-.message-bubble-shell.other .record-shop-message-cover, .message-bubble-shell.other .record-shop-portrait { inset-inline: auto -16px; }
-.record-shop-message-cover { padding: 1px; border-radius: 7px; border: 1px solid var(--record-tier); background: #2d1e1b; }
-.record-shop-portrait { object-fit: contain; width: 45px; height: 45px; translate: 0 -10px; pointer-events: none; }
+.message-bubble-shell[data-record-shop-artist] { position:relative; }
+[data-record-shop-artist="jay"] { --record-bubble-paper:#dce8e5; --record-bubble-tone:#233a57; --record-bubble-rim:#7c9cb4; }
+[data-record-shop-artist="leehom"] { --record-bubble-paper:#f6e5ca; --record-bubble-tone:#672d33; --record-bubble-rim:#bd8a58; }
+[data-record-shop-artist="david"] { --record-bubble-paper:#efdec0; --record-bubble-tone:#292e48; --record-bubble-rim:#b99065; }
+[data-record-shop-artist="jj"] { --record-bubble-paper:#dcecef; --record-bubble-tone:#254d5a; --record-bubble-rim:#80acb5; }
+[data-record-shop-artist] > .message-bubble.record-shop-text-bubble {
+  background:linear-gradient(140deg,#ffffff32,transparent 68%),var(--record-bubble-paper);
+  color:#252424;
+  border:1px solid var(--record-bubble-rim);
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--record-bubble-rim) 32%,transparent),0 2px 6px #18171720;
+}
+[data-record-shop-artist].self > .message-bubble.record-shop-text-bubble,
+html[data-theme="dark"] [data-record-shop-artist].other > .message-bubble.record-shop-text-bubble {
+  background:linear-gradient(145deg,#ffffff0e,#00000024),var(--record-bubble-tone);
+  color:#fff4e4;
+}
+.message-bubble-shell:has(> .record-shop-portrait) { margin-top:30px; }
+.record-shop-portrait {
+  position:absolute;
+  z-index:3;
+  left:4px;
+  bottom:calc(100% - 6px);
+  width:46px;
+  height:46px;
+  object-fit:contain;
+  object-position:bottom center;
+  pointer-events:none;
+  filter:drop-shadow(0 2px 2px #110f1340);
+}
+.message-bubble-shell.other .record-shop-portrait { left:auto; right:4px; }
+.record-shop-message-cover {
+  position:absolute;
+  z-index:4;
+  top:50%;
+  left:-23px;
+  translate:0 -50%;
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:24px;
+  padding:0;
+  border:1px solid var(--record-tier);
+  border-radius:999px;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--record-tier) 38%,#392b31),#251e25);
+  box-shadow:0 1px 6px #17121855;
+  cursor:pointer;
+}
+.message-bubble-shell.other .record-shop-message-cover { left:auto; right:-23px; }
+.record-shop-message-cover:disabled { pointer-events:none; }
+.record-shop-disc {
+  position:relative;
+  display:block;
+  width:19px;
+  aspect-ratio:1;
+  overflow:hidden;
+  border:1px solid #fff7eba8;
+  border-radius:50%;
+  background:conic-gradient(#a9bdce,#fdf2ce,#9b90ab,#c9e5e4,#a9bdce);
+  animation:record-shop-disc-spin 16s linear infinite;
+}
+.record-shop-disc img { display:block; width:100%; height:100%; object-fit:cover; }
+.record-shop-disc::before { content:""; position:absolute; inset:0; background:conic-gradient(from 27deg,transparent 8%,#edf5ff70 20%,transparent 32%,transparent 55%,#ffe3c971 68%,transparent 79%); }
+.record-shop-disc::after { content:""; position:absolute; inset:39%; border-radius:50%; border:1px solid #f9ece3b8; background:#30262c; }
 .record-shop-album { --record-tier: #efd39f; position: fixed; inset: 0; box-sizing: border-box; width: min(410px, 94vw); max-height: 90dvh; padding: 0; margin: auto; border: 0; border-radius: 20px; color: #f9edda; background: transparent; }
 .record-shop-album::backdrop { background: #160e0dc8; }
 .record-shop-album.is-discovery { width: 100vw; max-width: none; height: 100dvh; max-height: none; }
@@ -68,7 +120,7 @@
 .record-shop-album-panel form { position: absolute; inset: 9px 9px auto auto; z-index: 1; }
 .record-shop-close { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1px solid #fff6e45e; color: inherit; background: #43342d; }
 .record-shop-album-visual { position: relative; display: grid; place-items: center; width: min(165px, 52vw); aspect-ratio: 1; margin-bottom: 11px; }
-.record-shop-album-visual img { width: 100%; height: 100%; border-radius: 10px; border: 1px solid var(--record-tier); object-fit: cover; box-shadow: 0 9px 36px #0a070680; }
+.record-shop-album-visual .record-shop-disc { width:100%; box-shadow:0 9px 36px #0a070680; }
 .record-shop-album audio { width: 100%; }
 :is(.record-shop-album,.record-shop-message-cover).tier-gold { --record-tier: #efd39f; }
 :is(.record-shop-album,.record-shop-message-cover).tier-platinum { --record-tier: #cfc8ec; }
@@ -81,10 +133,11 @@
 .tier-gold .record-shop-waves i:nth-child(n+2), .tier-platinum .record-shop-waves i:nth-child(3) { display: none; }
 .tier-diamond .record-shop-waves i { border-radius: 16%; rotate: 45deg; }
 .tier-obsidian .record-shop-waves i { border-style: dashed; box-shadow: 0 0 30px var(--record-tier); }
-.record-shop-album.is-discovery .record-shop-album-visual img { animation: record-shop-arrive .72s cubic-bezier(.17,1,.32,1) both; }
+.record-shop-album.is-discovery .record-shop-album-visual { animation: record-shop-arrive .72s cubic-bezier(.17,1,.32,1) both; }
+@keyframes record-shop-disc-spin { to { transform:rotate(1turn); } }
 @keyframes record-shop-wave { 0% { opacity: 0; scale: .36; } 28% { opacity: .95; } 100% { opacity: 0; scale: 1.23; } }
 @keyframes record-shop-arrive { from { opacity: 0; transform: translateY(24px) rotate(-14deg) scale(.76); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .record-shop-waves, .record-shop-portrait { display: none; }
-  .record-shop-album.is-discovery .record-shop-album-visual img { animation: none; }
+  .record-shop-waves { display:none; }
+  .record-shop-disc, .record-shop-album.is-discovery .record-shop-album-visual { animation:none; }
 }

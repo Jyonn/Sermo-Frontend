@@ -6,6 +6,10 @@ import {claimMediaPlayback,releaseMediaPlayback} from '../lib/mediaPlaybackFocus
 import type {RecordShopAlbum as Album,RecordShopDecoration} from '../types';
 import './RecordShop.css';
 
+function RecordShopDisc({cover}:{cover:string}) {
+  return <span className="record-shop-disc" aria-hidden="true"><img src={cover} alt="" loading="lazy" draggable={false} /></span>;
+}
+
 export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onClose:()=>void;discovery?:boolean}) {
   const {t}=useI18n();
   const dialog=useRef<HTMLDialogElement>(null);
@@ -22,7 +26,7 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
       <form method="dialog"><button className="record-shop-close" type="submit" aria-label={t('common.close')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></form>
       <div className="record-shop-album-visual">
         {discovery?<div className="record-shop-waves" aria-hidden="true"><i/><i/><i/></div>:null}
-        {cover?<img src={cover} alt=""/>:null}
+        {cover?<RecordShopDisc cover={cover}/>:null}
       </div>
       <p>{discovery?t('recordShop.first'):t(`recordShop.tier.${album.tier}`)}</p>
       <h2>{album.name}</h2>
@@ -34,19 +38,19 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
   </dialog>,document.body);
 }
 
-export function RecordShopDecorationView({decoration,first}:{decoration:RecordShopDecoration;first:boolean}) {
+export function RecordShopDecorationView({decoration,interactive=true}:{decoration:RecordShopDecoration;interactive?:boolean}) {
   const {t}=useI18n();
   const [active,setActive]=useState(false);
-  const album=first?undefined:decoration.album;
+  const album=decoration.album;
   const cover=safeActivityImage(album?.cover);
   const portrait=safeActivityImage(decoration.portrait);
   if(album&&cover)return <>
-    <button type="button" className={`record-shop-message-cover tier-${album.tier}`} aria-label={album.name} onPointerDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();setActive(true);}}>
-      <img src={cover} loading="lazy" alt=""/>
+    <button type="button" className={`record-shop-message-cover tier-${album.tier}`} aria-label={album.name} title={album.name} disabled={!interactive} onPointerDown={event=>event.stopPropagation()} onClick={event=>{event.stopPropagation();setActive(true);}}>
+      <RecordShopDisc cover={cover}/>
     </button>
     {active?<RecordShopAlbum album={album} onClose={()=>setActive(false)}/>:null}
   </>;
-  return portrait?<img className="record-shop-portrait" src={portrait} alt={t(`recordShop.singer.${decoration.artist}`)} loading="lazy"/>:null;
+  return portrait?<img className="record-shop-portrait" src={portrait} alt={t(`recordShop.singer.${decoration.artist}`)} loading="lazy" decoding="async" draggable={false}/>:null;
 }
 
 export function RecordShopDiscoveries() {

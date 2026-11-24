@@ -20,7 +20,7 @@ export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaig
   const title=language.startsWith('zh')?activity.title:(activity.title_en||activity.title);
   const catalog=info.albums[catalogSinger]??[];
   const catalogArtist=t(`recordShop.singer.${catalogSinger}`);
-  const decoration={artist:catalogSinger,portrait:info.portraits[catalogSinger],album:catalog[0]};
+  const decoration={artist:catalogSinger,portrait:info.portraits[catalogSinger]};
   const choose=async(singer:string)=>{
     if(pending)return;
     setPending(singer);
@@ -50,13 +50,13 @@ export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaig
       <article className="record-shop-reward" key={catalogSinger}>
         <h3>{t('recordShop.bubbleTitle',{artist:catalogArtist})}</h3>
         <div className="record-shop-reward-preview">
-          <div className="message-bubble-shell has-record-shop-decoration record-shop-reward-bubble">
-            <RecordShopDecorationView decoration={decoration} first />
-            {t('recordShop.bubblePreviewFirst')}
+          <div className="message-bubble-shell self group-start" data-record-shop-artist={catalogSinger}>
+            <RecordShopDecorationView decoration={decoration} />
+            <div className="message-bubble self group-start record-shop-text-bubble">{t('recordShop.bubblePreviewFirst')}</div>
           </div>
-          {catalog.length ? <div className="message-bubble-shell has-record-shop-decoration record-shop-reward-bubble">
-            <RecordShopDecorationView decoration={decoration} first={false} />
-            {t('recordShop.bubblePreviewNext')}
+          {catalog.length ? <div className="message-bubble-shell self" data-record-shop-artist={catalogSinger}>
+            <RecordShopDecorationView decoration={{...decoration,album:catalog[0]}} />
+            <div className="message-bubble self group-end record-shop-text-bubble">{t('recordShop.bubblePreviewNext')}</div>
           </div> : null}
         </div>
         <p>{t('recordShop.bubbleElementsHint')}</p>
