@@ -6,12 +6,22 @@ import { activityPresentation, safeActivityImage } from "../lib/activityPresenta
 import { recordShopArtists as singers } from "../lib/recordShopPreview";
 import type { ActivityCampaignDTO, RecordShopAlbum as Album } from "../types";
 import { ActivityDetails } from "./ActivityDetails";
-import { RecordShopAlbum, RecordShopDecorationView } from "./RecordShopAlbum";
+import { DrawerTabs } from "./DrawerTabs";
+import { RecordShopAlbum, RecordShopAlbumFace, RecordShopDecorationView, RecordShopTierMark } from "./RecordShopAlbum";
 import { RecordShopBubbleArt } from "./RecordShopBubbleArt";
 import "./RecordShopActivity.css";
 
 const rules = ["shareRule", "listenRule", "dedupeRule", "selectionRule", "discoveryRule"] as const;
 const statusIcons = { equipped: "check", equip: "radio_button_unchecked", choose: "add", locked: "lock" };
+const tiers = ["gold", "platinum", "diamond", "obsidian"] as const;
+type Singer = (typeof singers)[number];
+type ShopInfo = NonNullable<ActivityCampaignDTO["record_shop"]>;
+
+function singerStatus(info: ShopInfo, singer: Singer) {
+  if (info.equipped === singer) return "equipped";
+  if (info.singers.includes(singer)) return "equip";
+  return info.choices ? "choose" : "locked";
+}
 
 export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
   activity: ActivityCampaignDTO;
@@ -20,7 +30,8 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
 }) {
   const { t, language } = useI18n();
   const [pending, setPending] = useState("");
-  const [catalogSinger, setCatalogSinger] = useState<(typeof singers)[number]>("jay");
+  const [catalogSinger, setCatalogSinger] = useState<Singer>("jay");
+  const [tier, setTier] = useState<Album["tier"]>("gold");
   const [album, setAlbum] = useState<Album | null>(null);
   const info = activity.record_shop;
   if (!info) return null;
@@ -28,11 +39,18 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
   const artwork = activityPresentation(activity).artwork_url;
   const summary = language.startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
   const catalog = info.albums[catalogSinger] ?? [];
+  const displayedAlbums = catalog.filter(item => item.tier === tier);
   const catalogArtist = t(`recordShop.singer.${catalogSinger}`);
+  const catalogStatus = singerStatus(info, catalogSinger);
   const decoration = { artist: catalogSinger, portrait: info.portraits[catalogSinger] };
   const [firstChoice, secondChoice] = info.thresholds;
   const target = Math.max(1, secondChoice);
-  const choose = async (singer: string) => {
+  const selectSinger = (singer: Singer) => {
+    if (singer === catalogSinger) return;
+    setCatalogSinger(singer);
+    setTier(tiers.find(value => info.albums[singer]?.some(item => item.tier === value)) ?? "gold");
+  };
+  const choose = async (singer: Singer) => {
     if (pending) return;
     setPending(singer);
     try {
@@ -69,48 +87,78 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
             <span>{t("recordShop.secondChoice", { points: secondChoice })}</span>
           </div>
         </section>
-        <section className="record-shop-shelf">
-          <h3>{t("menu.chatBubble")}</h3>
-          <div className="record-shop-singers">
-            {singers.map(singer => {
-              const portrait = safeActivityImage(info.portraits[singer]);
-              const status = info.equipped === singer ? "equipped" : info.singers.includes(singer) ? "equip" : info.choices ? "choose" : "locked";
-              return (
-                <button
-                  aria-busy={pending === singer}
-                  aria-pressed={status === "equipped"}
-                  data-record-shop-artist={singer}
-                  disabled={!activity.active || Boolean(pending) || status === "locked" || status === "equipped"}
-                  key={singer}
-                  onClick={() => void choose(singer)}
-                  type="button"
-                >
-                  {portrait ? <img src={portrait} alt="" decoding="async" /> : null}
-                  <span className="record-shop-sleeve-label">
-                    <strong>{t(`recordShop.singer.${singer}`)}</strong>
-                    <small>
-                      <span aria-hidden="true" className="material-symbols-outlined">{statusIcons[status]}</span>
-                      {pending === singer ? t("common.processing") : t(`recordShop.${status}`)}
-                    </small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
         <ActivityDetails
+          overview={openRewards => (
+            <section className="record-shop-shelf">
+              <h3>{t("menu.chatBubble")}</h3>
+              <div className="record-shop-singers">
+                {singers.map(singer => {
+                  const portrait = safeActivityImage(info.portraits[singer]);
+                  const status = singerStatus(info, singer);
+                  return (
+                    <button
+                      aria-haspopup="dialog"
+                      data-equipped={status === "equipped"}
+                      data-record-shop-artist={singer}
+                      key={singer}
+                      onClick={() => {
+                        selectSinger(singer);
+                        openRewards();
+                      }}
+                      type="button"
+                    >
+                      {portrait ? <img src={portrait} alt="" decoding="async" /> : null}
+                      <span className="record-shop-sleeve-label">
+                        <strong>{t(`recordShop.singer.${singer}`)}</strong>
+                        <small>
+                          <span aria-hidden="true" className="material-symbols-outlined">{statusIcons[status]}</span>
+                          {t(`recordShop.${status}`)}
+                        </small>
+                      </span>
+                      <span aria-hidden="true" className="record-shop-sleeve-open material-symbols-outlined">arrow_outward</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
           rules={<ol className="record-shop-rules">{rules.map(rule => <li key={rule}>{t(`recordShop.${rule}`)}</li>)}</ol>}
           rewards={(
             <div className="record-shop-catalog">
-              <div className="record-shop-catalog-tabs">
-                {singers.map(singer => (
-                  <button key={singer} type="button" aria-pressed={catalogSinger === singer} onClick={() => setCatalogSinger(singer)}>
-                    {t(`recordShop.singer.${singer}`)}
-                  </button>
-                ))}
-              </div>
+              <DrawerTabs
+                className="record-shop-catalog-artists"
+                label={t("menu.chatBubble")}
+                value={catalogSinger}
+                onChange={selectSinger}
+                items={singers.map(singer => {
+                  const label = t(`recordShop.singer.${singer}`);
+                  const portrait = safeActivityImage(info.portraits[singer]);
+                  return {
+                    value: singer,
+                    label,
+                    content: (
+                      <span className="record-shop-catalog-sleeve" data-record-shop-artist={singer}>
+                        {portrait ? <img src={portrait} alt="" decoding="async" /> : null}
+                        <strong>{label}</strong>
+                      </span>
+                    ),
+                  };
+                })}
+              />
               <article className="record-shop-reward" data-record-shop-artist={catalogSinger} key={catalogSinger}>
-                <h3>{t("recordShop.bubbleTitle", { artist: catalogArtist })}</h3>
+                <header>
+                  <h3>{t("recordShop.bubbleTitle", { artist: catalogArtist })}</h3>
+                  <button
+                    className="record-shop-reward-action"
+                    type="button"
+                    aria-busy={pending === catalogSinger}
+                    disabled={!activity.active || Boolean(pending) || catalogStatus === "locked" || catalogStatus === "equipped"}
+                    onClick={() => void choose(catalogSinger)}
+                  >
+                    <span aria-hidden="true" className="material-symbols-outlined">{statusIcons[catalogStatus]}</span>
+                    {pending === catalogSinger ? t("common.processing") : t(`recordShop.${catalogStatus}`)}
+                  </button>
+                </header>
                 <div className="record-shop-reward-preview">
                   <div className="message-bubble-shell self group-start" data-record-shop-artist={catalogSinger}>
                     <RecordShopDecorationView decoration={decoration} />
@@ -129,17 +177,30 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                     </div>
                   ) : null}
                 </div>
-                <p>{t("recordShop.bubbleElementsHint")}</p>
               </article>
-              {catalog.length ? <h4 className="record-shop-elements-title">{t("recordShop.albumElements")}</h4> : null}
-              {catalog.map(row => (
-                <button className="record-shop-catalog-entry" type="button" key={row.id} onClick={() => setAlbum(row)}>
-                  <img src={safeActivityImage(row.cover)} loading="lazy" alt="" />
-                  <span><b>{row.name}</b><small>{row.title}</small></span>
-                  <small className="record-shop-catalog-tier" data-tier={row.tier}>{t(`recordShop.tier.${row.tier}`)}</small>
-                  <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-                </button>
-              ))}
+              <section className="record-shop-albums">
+                <h4>{t("recordShop.albumElements")}</h4>
+                <DrawerTabs
+                  className="record-shop-catalog-tiers"
+                  label={t("recordShop.albumElements")}
+                  value={tier}
+                  onChange={setTier}
+                  items={tiers.map(value => {
+                    const label = t(`recordShop.tier.${value}`);
+                    return { value, label, content: <><RecordShopTierMark tier={value} /><span>{label}</span></> };
+                  })}
+                />
+                <div className="record-shop-album-grid" role="tabpanel" aria-label={t(`recordShop.tier.${tier}`)}>
+                  {displayedAlbums.map(row => (
+                    <button className="record-shop-catalog-entry" type="button" key={row.id} onClick={() => setAlbum(row)}>
+                      <RecordShopAlbumFace album={row} />
+                      <b>{row.name}</b>
+                      {row.title !== row.name ? <small>{row.title}</small> : null}
+                    </button>
+                  ))}
+                  {displayedAlbums.length === 0 ? <p className="record-shop-catalog-empty">{t("resources.noResults")}</p> : null}
+                </div>
+              </section>
             </div>
           )}
         />

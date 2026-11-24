@@ -4,17 +4,33 @@ import {useI18n} from '../lib/language';
 import {safeActivityImage} from '../lib/activityPresentation';
 import {claimMediaPlayback,releaseMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {musicTime} from '../lib/musicLyrics';
+import {useModalFocus} from '../lib/modalFocus';
 import {usePlaybackWait} from './MediaWaitFeedback';
 import type {RecordShopAlbum as Album,RecordShopDecoration} from '../types';
 import './RecordShop.css';
 
-function RecordShopDisc({cover,playing=false}:{cover:string;playing?:boolean}) {
+export function RecordShopTierMark({tier,label}:{tier:Album['tier'];label?:string}) {
+  return <span className={`record-shop-tier-mark tier-${tier}`} role={label?'img':undefined} aria-label={label} aria-hidden={label?undefined:true}/>;
+}
+
+function RecordShopDisc({cover,playing=false,animated=true}:{cover?:string;playing?:boolean;animated?:boolean}) {
   const disc=useRef<HTMLSpanElement>(null);
   useEffect(()=>{
     const spin=disc.current?.getAnimations?.().find(animation=>'animationName' in animation&&animation.animationName==='record-shop-disc-spin');
     spin?.updatePlaybackRate(playing?4:1);
   },[playing]);
-  return <span ref={disc} className="record-shop-disc" aria-hidden="true"><img src={cover} alt="" loading="lazy" draggable={false} /></span>;
+  return <span ref={disc} className={`record-shop-disc${animated?'':' is-still'}`} aria-hidden="true">
+    {cover?<img src={cover} alt="" loading="lazy" draggable={false} />:null}
+  </span>;
+}
+
+export function RecordShopAlbumFace({album,animated=false,playing=false,tierLabel}:{
+  album:Album;animated?:boolean;playing?:boolean;tierLabel?:string;
+}) {
+  return <span className={`record-shop-album-face tier-${album.tier}`}>
+    <RecordShopDisc cover={safeActivityImage(album.cover)} playing={playing} animated={animated}/>
+    <RecordShopTierMark tier={album.tier} label={tierLabel}/>
+  </span>;
 }
 
 function RecordShopClip({album,uri,cover,interactive=true,onPlayingChange}:{album:Album;uri:string;cover?:string;interactive?:boolean;onPlayingChange?:(playing:boolean)=>void}) {
@@ -101,17 +117,17 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
   const {t}=useI18n();
   const dialog=useRef<HTMLDialogElement>(null);
   const [playing,setPlaying]=useState(false);
+  useModalFocus(dialog,true,()=>dialog.current?.close(),{manageLayer:false});
   useEffect(()=>{dialog.current?.showModal();},[]);
-  const cover=safeActivityImage(album.cover);
   const clip=safeActivityImage(album.clip);
   return createPortal(<dialog ref={dialog} className={`record-shop-album tier-${album.tier}${discovery?' is-discovery':''}`} onClose={onClose} onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}} aria-label={album.name}>
     <div className="record-shop-album-panel">
       <form method="dialog"><button className="record-shop-close" type="submit" aria-label={t('common.close')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></form>
       <div className="record-shop-album-visual">
         {discovery?<div className="record-shop-waves" aria-hidden="true"><i/><i/><i/></div>:null}
-        {cover?<RecordShopDisc cover={cover} playing={playing}/>:null}
+        <RecordShopAlbumFace album={album} animated playing={playing} tierLabel={t(`recordShop.tier.${album.tier}`)}/>
       </div>
-      <p>{discovery?t('recordShop.first'):t(`recordShop.tier.${album.tier}`)}</p>
+      {discovery?<p>{t('recordShop.first')}</p>:null}
       <h2>{album.name}</h2>
       <span>{album.title}</span>
       {clip?<RecordShopClip key={clip} album={album} uri={clip} onPlayingChange={setPlaying}/>:<small>{t('recordShop.clipUnavailable')}</small>}

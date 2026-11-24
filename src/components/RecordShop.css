@@ -180,6 +180,7 @@ button.record-shop-message-cover {
   animation:record-shop-disc-spin 64s linear infinite;
 }
 .record-shop-disc img { display:block; width:100%; height:100%; object-fit:cover; }
+.record-shop-disc.is-still { animation: none; }
 .record-shop-disc::before { content:""; position:absolute; inset:0; background:conic-gradient(from 27deg,transparent 8%,#edf5ff70 20%,transparent 32%,transparent 55%,#ffe3c971 68%,transparent 79%); }
 .record-shop-disc::after { content:""; position:absolute; inset:39%; border-radius:50%; border:1px solid #f9ece3b8; background:#30262c; }
 .record-shop-message-cover .record-shop-disc {
@@ -216,7 +217,7 @@ button.record-shop-message-cover {
 .record-shop-album-panel form { position: absolute; inset: 9px 9px auto auto; z-index: 1; }
 .record-shop-close { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1px solid #fff6e45e; color: inherit; background: #43342d; }
 .record-shop-album-visual { position: relative; display: grid; place-items: center; width: min(165px, 52vw); aspect-ratio: 1; margin-bottom: 11px; }
-.record-shop-album-visual .record-shop-disc { width:100%; box-shadow:0 9px 36px #0a070680; }
+.record-shop-album-visual .record-shop-album-face { width:100%; box-shadow:0 9px 36px #0a070680; }
 .record-shop-clip {
   display:grid;
   grid-template-columns:auto minmax(0,1fr);
@@ -255,10 +256,127 @@ button.record-shop-message-cover {
 .record-shop-clip-track input::-webkit-slider-thumb { appearance:none; width:11px; height:11px; border-radius:50%; background:var(--record-tier); }
 .record-shop-clip-track input::-moz-range-thumb { width:11px; height:11px; border:0; border-radius:50%; background:var(--record-tier); }
 .record-shop-clip-times { display:flex; justify-content:space-between; }
-:is(.record-shop-album,.record-shop-message-cover).tier-gold { --record-tier: #efd39f; }
-:is(.record-shop-album,.record-shop-message-cover).tier-platinum { --record-tier: #cfc8ec; }
-:is(.record-shop-album,.record-shop-message-cover).tier-diamond { --record-tier: #95deed; }
-:is(.record-shop-album,.record-shop-message-cover).tier-obsidian { --record-tier: #e093ee; }
+:is(.record-shop-album,.record-shop-message-cover,.record-shop-album-face).tier-gold { --record-tier: #efd39f; }
+:is(.record-shop-album,.record-shop-message-cover,.record-shop-album-face).tier-platinum { --record-tier: #cfc8ec; }
+:is(.record-shop-album,.record-shop-message-cover,.record-shop-album-face).tier-diamond { --record-tier: #95deed; }
+:is(.record-shop-album,.record-shop-message-cover,.record-shop-album-face).tier-obsidian { --record-tier: #e093ee; }
+
+.record-shop-album-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(142px, 100%);
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--record-tier) 60%, #4e3b35);
+  border-radius: 50%;
+  background: var(--record-foil);
+  box-shadow: 0 4px 9px #21171629;
+  isolation: isolate;
+}
+
+.record-shop-album-face::before {
+  position: absolute;
+  inset: 4%;
+  z-index: -1;
+  border: 1px solid #fffaeb9e;
+  border-radius: 50%;
+  content: "";
+}
+
+.record-shop-album-face .record-shop-disc {
+  width: 83%;
+  box-sizing: border-box;
+  border-color: color-mix(in srgb, var(--record-tier) 68%, #2e231f);
+  box-shadow: 0 0 0 1px #21161960;
+}
+
+.record-shop-album-face .record-shop-disc::after { inset: 44%; }
+.record-shop-album-face > .record-shop-tier-mark {
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 23%;
+  filter: drop-shadow(0 2px 2px #2116198c);
+}
+
+:is(.record-shop-album-face,.record-shop-tier-mark).tier-gold {
+  --record-foil: conic-gradient(from -24deg, #e6b65f, #fbedd1 15%, #bd8739 31%, #e8c17d 59%, #fff0c2 77%, #b1813f 91%, #e6b65f);
+}
+:is(.record-shop-album-face,.record-shop-tier-mark).tier-platinum {
+  --record-foil: conic-gradient(from 20deg, #a3a5bb, #faf3ff 30%, #a9a7c1 32%, #d8d9e9 53%, #898caa 70%, #f1ebf8 86%, #a3a5bb);
+}
+:is(.record-shop-album-face,.record-shop-tier-mark).tier-diamond {
+  --record-foil: repeating-conic-gradient(from 15deg, #e6faff 0deg 16deg, #91c8dc 16deg 34deg, #b7eeee 34deg 52deg, #5087a5 52deg 60deg);
+}
+:is(.record-shop-album-face,.record-shop-tier-mark).tier-obsidian {
+  --record-foil: conic-gradient(from -30deg, #241a37, #81518c 18%, #f3cdff 27%, #30213f 37%, #191120 62%, #c581da 89%, #241a37);
+}
+
+.record-shop-album-face.tier-platinum::before {
+  box-shadow: 0 0 0 1px #50486545, inset 0 0 0 1px #45405b50;
+}
+.record-shop-album-face.tier-obsidian::before {
+  border-color: #f7ccf4ba;
+  box-shadow: 0 0 6px #f7ccf480;
+}
+
+.record-shop-tier-mark {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 23px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--record-foil);
+  vertical-align: middle;
+}
+
+.record-shop-tier-mark::before,
+.record-shop-tier-mark::after { position: absolute; content: ""; }
+.record-shop-tier-mark.tier-gold::before {
+  inset: 16%;
+  border: 1px solid #70430f9c;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #ffedaa90;
+}
+.record-shop-tier-mark.tier-gold::after {
+  inset: 34%;
+  border: 1px solid #6c461a9c;
+  border-radius: 2px;
+  rotate: 45deg;
+}
+
+.record-shop-tier-mark.tier-platinum {
+  border-radius: 0;
+  clip-path: polygon(24% 4%, 76% 4%, 96% 24%, 96% 76%, 76% 96%, 24% 96%, 4% 76%, 4% 24%);
+}
+.record-shop-tier-mark.tier-platinum::before {
+  inset: 27% 21%;
+  background: repeating-linear-gradient(0deg, #544c70ad 0 1px, transparent 1px 4px);
+  rotate: -45deg;
+}
+
+.record-shop-tier-mark.tier-diamond {
+  border-radius: 0;
+  clip-path: polygon(23% 13%, 77% 13%, 100% 43%, 50% 95%, 0 43%);
+}
+.record-shop-tier-mark.tier-diamond::before {
+  inset: 13% 0 5%;
+  clip-path: polygon(22% 0, 50% 28%, 76% 0, 66% 37%, 100% 37%, 50% 100%, 0 37%, 34% 37%);
+  background: #e3faffad;
+}
+
+.record-shop-tier-mark.tier-obsidian::before {
+  inset: 14%;
+  border: 1px solid #f5cdf1cc;
+  border-radius: 50%;
+  background: #2f1b44;
+}
+.record-shop-tier-mark.tier-obsidian::after {
+  inset: 24%;
+  background: #ffe4ff;
+  clip-path: polygon(50% 0, 63% 36%, 100% 50%, 63% 64%, 50% 100%, 37% 64%, 0 50%, 37% 36%);
+}
 .record-shop-waves { position: absolute; pointer-events: none; inset: -42%; z-index: -1; }
 .record-shop-waves i { position: absolute; inset: 4%; border: 1px solid var(--record-tier); border-radius: 50%; animation: record-shop-wave 1.35s ease-out both; }
 .record-shop-waves i:nth-child(2) { inset: 12%; animation-delay: .10s; }

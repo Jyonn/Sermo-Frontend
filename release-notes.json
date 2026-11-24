@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.24.9",
+  "id": "2026.11.24.10",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺的店内陈列",
+      "title": "回声唱片铺的专辑收藏",
       "items": [
-        "活动详情换上唱机主视觉、票根式积分进度和四款歌手封套。",
-        "奖池的气泡预览和专辑列表也统一为唱片铺的风格。"
+        "奖池按金、铂、钻、曜分栏，圆形光盘每行两张，各有对应的盘缘和徽记。",
+        "点击活动人物封套进入对应的奖励，查看气泡、浏览专辑或装备已解锁的气泡。"
       ]
     },
     "en": {
-      "title": "Inside the Echo Record Shop",
+      "title": "Album Collecting at Echo Record Shop",
       "items": [
-        "The activity drawer now opens on a turntable scene, with a points ticket and four artist sleeves.",
-        "The rewards sheet brings bubble previews and the album catalog into the same visual style."
+        "Browse two columns of album discs across Gold, Platinum, Diamond and Obsidian tabs with distinct rims and emblems.",
+        "Open an artist sleeve to preview the bubble, browse albums, or equip an unlocked bubble."
       ]
     }
   }
