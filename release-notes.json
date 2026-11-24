@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.24.4",
+  "id": "2026.11.24.5",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "广场红点与唱片铺新规则",
+      "title": "唱片铺气泡与试听",
       "items": [
-        "探索、好友、活动标签分别提示新内容。新活动和有待领取奖励的活动卡片也会显示红点。",
-        "回声唱片铺换上了黑胶唱片横幅。分享歌曲不限歌手，听完歌曲可按歌手和播放版本获得积分。",
-        "歌手气泡使用动态人像，专辑元素以缓慢旋转的光盘显示在气泡内侧。奖池可预览实际样式。"
+        "四款歌手气泡各有专属纹样，人物贴近气泡边缘。",
+        "点气泡侧边的光盘即可试听。奖池专辑使用带进度条的新播放器。"
       ]
     },
     "en": {
-      "title": "Square Badges and Record Shop Rules",
+      "title": "Record Shop Bubbles and Clips",
       "items": [
-        "Explore, Friends, and Activities now have separate unread dots. Activity cards also show a dot for new events and unclaimed rewards.",
-        "Echo Record Shop has a new vinyl-themed banner. Share music by any artist, or earn points for finishing full tracks and previews.",
-        "Artist bubbles feature animated portraits, with slowly spinning album discs on their inward edges. Preview both in the prize pool."
+        "Each artist bubble has its own texture, with the portrait tucked against the bubble edge.",
+        "Tap a disc beside a bubble to hear its clip. Album details have a new player with a seek bar."
       ]
     }
   }
