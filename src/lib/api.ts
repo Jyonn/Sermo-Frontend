@@ -1189,6 +1189,10 @@ export const api = {
     return request<SquareStatusDTO>("/square/status", { auth: true, signal });
   },
 
+  getSquareMedals(signal?: AbortSignal) {
+    return request<import("../types").SquareMedalDTO[]>("/square/medals", { auth: true, signal });
+  },
+
   markSquareFeedRead(scope: "all" | "friends", signal?: AbortSignal) {
     return request<SquareStatusDTO>("/square/status", { method: "POST", auth: true, body: { scope }, signal });
   },

@@ -35,6 +35,12 @@
 .square-feed-header .square-header-square-tools{display:flex;align-items:center;gap:0}
 .square-feed-header :is(.square-header-tool,.square-feed-publish){width:32px;height:40px;padding:5px;color:var(--text-secondary)}
 .square-feed-header :is(.square-header-tool,.square-feed-publish) svg{width:22px;height:22px;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width: 600px) {
+  .square-feed-header { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 4px; }
+  .square-feed-header-channels { mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent); }
+  .square-feed-header .square-workspace-tab-group { gap: 4px; padding-inline: 4cqw; }
+  .square-feed-header .square-workspace-tab-group > button { padding-inline: 5px; }
+}
 @media(max-width:359px){.square-feed-header{padding-inline:8px}.square-feed-header :is(.square-header-tool,.square-feed-publish){width:28px}.square-feed-header .square-workspace-tab-group>button{padding-inline:3px}}
 @media(max-width:900px){.square-feed-header{min-height:calc(60px + env(safe-area-inset-top));padding-top:calc(6px + env(safe-area-inset-top));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}}
 @media(max-width:359px){.square-feed-header{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}}

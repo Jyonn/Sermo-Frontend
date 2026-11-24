@@ -8,6 +8,7 @@ import {useModalFocus} from '../lib/modalFocus';
 import {usePlaybackWait} from './MediaWaitFeedback';
 import type {RecordShopAlbum as Album,RecordShopDecoration} from '../types';
 import './RecordShop.css';
+import './RecordShopReveal.css';
 
 export function RecordShopTierMark({tier,label}:{tier:Album['tier'];label?:string}) {
   return <span className={`record-shop-tier-mark tier-${tier}`} role={label?'img':undefined} aria-label={label} aria-hidden={label?undefined:true}/>;
@@ -116,12 +117,41 @@ function RecordShopClip({album,uri,cover,interactive=true,onPlayingChange}:{albu
 export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onClose:()=>void;discovery?:boolean}) {
   const {t}=useI18n();
   const dialog=useRef<HTMLDialogElement>(null);
+  const previewTrigger=useRef<HTMLButtonElement>(null);
+  const revealClose=useRef<HTMLButtonElement>(null);
   const [playing,setPlaying]=useState(false);
-  useModalFocus(dialog,true,()=>dialog.current?.close(),{manageLayer:false});
+  const [preview,setPreview]=useState(false);
+  const rare=album.tier==='diamond'||album.tier==='obsidian';
+  const reveal=rare&&(discovery||preview);
+  const revealLabel=t(preview?'recordShop.previewReveal':'recordShop.first');
+  const dismiss=()=>{
+    if(preview){
+      setPreview(false);
+      requestAnimationFrame(()=>previewTrigger.current?.focus());
+    }else dialog.current?.close();
+  };
+  useModalFocus(dialog,true,dismiss,{manageLayer:false});
   useEffect(()=>{dialog.current?.showModal();},[]);
+  useEffect(()=>{if(preview)revealClose.current?.focus();},[preview]);
   const clip=safeActivityImage(album.clip);
-  return createPortal(<dialog ref={dialog} className={`record-shop-album tier-${album.tier}${discovery?' is-discovery':''}`} onClose={onClose} onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}} aria-label={album.name}>
-    <div className="record-shop-album-panel">
+  const playback=clip?<RecordShopClip key={clip} album={album} uri={clip} onPlayingChange={setPlaying}/>:<small>{t('recordShop.clipUnavailable')}</small>;
+  return createPortal(<dialog ref={dialog} className={`record-shop-album tier-${album.tier}${discovery||preview?' is-discovery':''}${reveal?' is-rare-reveal':''}`} onClose={onClose} onClick={event=>{if(event.target===event.currentTarget)dismiss();}} aria-label={reveal?`${revealLabel} · ${album.name}`:album.name}>
+    {reveal?<div className="record-shop-reveal">
+      <button className="record-shop-close record-shop-reveal-close" type="button" ref={revealClose} onClick={dismiss} aria-label={t('common.close')}>
+        <span className="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+      <div className="record-shop-reveal-stage">
+        <div className="record-shop-reveal-orbits" aria-hidden="true"><i/><i/><i/></div>
+        <div className="record-shop-reveal-rays" aria-hidden="true"><i/><i/><i/><i/><i/><i/></div>
+        <RecordShopAlbumFace album={album} animated playing={playing} tierLabel={t(`recordShop.tier.${album.tier}`)}/>
+      </div>
+      <div className="record-shop-reveal-caption">
+        <p><RecordShopTierMark tier={album.tier}/>{revealLabel}</p>
+        <h2>{album.name}</h2>
+        {album.title!==album.name?<span>{album.title}</span>:null}
+        {!preview?<div className="record-shop-reveal-player">{playback}</div>:null}
+      </div>
+    </div>:<div className="record-shop-album-panel">
       <form method="dialog"><button className="record-shop-close" type="submit" aria-label={t('common.close')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></form>
       <div className="record-shop-album-visual">
         {discovery?<div className="record-shop-waves" aria-hidden="true"><i/><i/><i/></div>:null}
@@ -130,8 +160,14 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
       {discovery?<p>{t('recordShop.first')}</p>:null}
       <h2>{album.name}</h2>
       <span>{album.title}</span>
-      {clip?<RecordShopClip key={clip} album={album} uri={clip} onPlayingChange={setPlaying}/>:<small>{t('recordShop.clipUnavailable')}</small>}
-    </div>
+      {playback}
+      {rare&&!discovery?<button className="record-shop-preview-reveal" ref={previewTrigger} type="button" onClick={()=>{
+        setPlaying(false);
+        setPreview(true);
+      }}>
+        <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>{t('recordShop.previewReveal')}
+      </button>:null}
+    </div>}
   </dialog>,document.body);
 }
 

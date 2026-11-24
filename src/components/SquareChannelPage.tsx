@@ -41,7 +41,7 @@ export function SquareChannelPage({mode,label,cacheKey,scope,active,preload,acti
     const top=scrollPositions.current.get(cacheKey);if(top!==undefined)writeTabCache(scope,`${cacheKey}:scroll`,top);
   },[scope,cacheKey]);
   useEffect(()=>{
-    if(mode==='activities'||active||!preload||checked.current.has(cacheKey))return;
+    if(mode==='activities'||mode==='medals'||active||!preload||checked.current.has(cacheKey))return;
     const controller=new AbortController();
     void api.getSquareStatements({...params,limit:20},controller.signal).then(rows=>{
       if(controller.signal.aborted)return;

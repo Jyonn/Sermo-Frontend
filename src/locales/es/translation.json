@@ -1,4 +1,8 @@
 {
+  "square.medalsTab": "Medallas",
+  "square.medalsRecordShop": "Echo Record Shop · Primeros hallazgos",
+  "square.medalsEmpty": "Todavía no hay primeros hallazgos de discos Diamante u Obsidiana",
+  "recordShop.previewReveal": "Ver efecto de desbloqueo",
   "atlas.title": "Galería de componentes",
   "atlas.intro": "Explora por rol y tipo de componente. Las vistas previas usan datos de ejemplo. Las pantallas personalizadas muestran su contenedor y sus controles.",
   "atlas.audiences": "Roles",

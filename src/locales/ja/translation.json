@@ -1,4 +1,8 @@
 {
+  "square.medalsTab": "メダル",
+  "square.medalsRecordShop": "エコーレコード店・スペース初獲得",
+  "square.medalsEmpty": "ダイヤモンドまたはオブシディアンの初獲得記録はまだありません",
+  "recordShop.previewReveal": "獲得演出をプレビュー",
   "atlas.title": "コンポーネントスタイル一覧",
   "atlas.intro": "利用者の権限とコンポーネントの種類で絞り込めます。プレビューにはサンプルデータを使用し、専用画面はコンテナと操作部を表示します。",
   "atlas.audiences": "利用者の権限",

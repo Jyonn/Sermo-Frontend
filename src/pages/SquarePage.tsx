@@ -6,6 +6,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { SquareDiscussion } from "../components/SquareDiscussion";
+import { SquareMedals } from "../components/SquareMedals";
 import { CommentComposer } from "../components/CommentComposer";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
@@ -464,10 +465,9 @@ export default function SquarePage() {
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
-  const [activityTab,setActivityTab]=useState(false);
-  const selectSquareChannel=(activity:boolean)=>{
-    setActivityTab(activity);
-  };
+  const [specialChannel, setSpecialChannel] = useState<"medals" | "activities" | null>(null);
+  const activityTab = specialChannel === "activities";
+  const isFeedTab = specialChannel === null;
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
   const previousProfileFeedUserId=useRef<number|null>(null);
@@ -1029,7 +1029,7 @@ export default function SquarePage() {
   useEffect(() => {
     const sentinel = squareLoadMoreRef.current;
     const root = squareFeedScrollRef.current;
-    if (activityTab || !sentinel || !root || !hasMore || loading || loadingMore || !statements.length) return;
+    if (!isFeedTab || !sentinel || !root || !hasMore || loading || loadingMore || !statements.length) return;
     const observer = new IntersectionObserver((entries) => {
       if (!entries[0]?.isIntersecting) return;
       setLoadingMore(true);
@@ -1037,10 +1037,10 @@ export default function SquarePage() {
     }, { root, rootMargin: "600px 0px" });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [activityTab, activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
+  }, [isFeedTab, activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
 
   useEffect(() => {
-    if (activityTab) {
+    if (!isFeedTab) {
       setSyncing(false);
       return;
     }
@@ -1090,7 +1090,7 @@ export default function SquarePage() {
       }
     });
     return () => controller.abort();
-  }, [activeFeedCacheKey, activityTab, cacheScope, effectiveFeedMode, features.squareExploreEnabled, feedReload, hasFeedFilters, profileFeedUserId, routedStatementId, selectedFeedDate, selectedFeedFrom, selectedFeedTo, selectedFeedKeyword, t]);
+  }, [activeFeedCacheKey, isFeedTab, cacheScope, effectiveFeedMode, features.squareExploreEnabled, feedReload, hasFeedFilters, profileFeedUserId, routedStatementId, selectedFeedDate, selectedFeedFrom, selectedFeedTo, selectedFeedKeyword, t]);
 
   useEffect(() => {
     if (loading || statementsFeedKey !== activeFeedCacheKey) return;
@@ -1106,7 +1106,7 @@ export default function SquarePage() {
     previousProfileFeedUserId.current=profileFeedUserId;
     if (profileFeedUserId) {
       setFeedMode("user");
-      selectSquareChannel(false);
+      setSpecialChannel(null);
       setProfileDrawerUserId(null);
     } else {
       setFeedMode(current=>current==='user'?'friends':current);
@@ -2033,11 +2033,14 @@ export default function SquarePage() {
       <FeedbackState tone={commentLoadError ? "error" : "loading"} title={commentLoadError || t("common.loading")}
         action={commentLoadError ? <button className="secondary-button" onClick={() => setCommentReload(value => value + 1)} type="button">{t("common.retry")}</button> : undefined} />
     </div>;
-  const squareChannels:SquareChannel[]=['activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
-  const currentChannel:SquareChannel=activityTab?'activities':effectiveFeedMode;
+  const squareChannels:SquareChannel[]=['medals','activities',...(features.squareExploreEnabled?['all' as const]:[]),'friends','mine',...(profileFeedUserId?['user' as const]:[])];
+  const currentChannel:SquareChannel = specialChannel ?? effectiveFeedMode;
   const selectFeedTab = (channel: SquareChannel) => {
-    selectSquareChannel(channel === "activities");
-    if (channel === "activities") return;
+    if (channel === "medals" || channel === "activities") {
+      setSpecialChannel(channel);
+      return;
+    }
+    setSpecialChannel(null);
     setFeedMode(channel);
     if (channel === currentChannel && (channel === "all" || channel === "friends") && feedFresh[channel] && !hasFeedFilters) {
       setFeedReload((current) => current + 1);
@@ -2045,13 +2048,14 @@ export default function SquarePage() {
   };
   const freshLabel = (label: string, fresh: boolean) => fresh ? `${label} · ${t("square.newContent")}` : undefined;
   const activityTabLabel = t("square.activitiesTab");
+  const medalsTabLabel = t("square.medalsTab");
   const exploreTabLabel = t("square.feedAll");
   const friendsTabLabel = t("square.feedFriends");
   const handleChannelScroll=(event:ReactUIEvent<HTMLElement>)=>{
     if (inlineStatementId !== null || workspaceDetailActive || inlineStatementExpanded) return;
     const top=event.currentTarget.scrollTop;
     setFeedScrollTopVisible(top>320);
-    if(activityTab||pendingFeedScrollRestoreRef.current?.key===activeFeedCacheKey)return;
+    if(!isFeedTab||pendingFeedScrollRestoreRef.current?.key===activeFeedCacheKey)return;
     feedScrollPositionsRef.current.set(activeFeedCacheKey,top);
   };
 
@@ -2061,24 +2065,26 @@ export default function SquarePage() {
       <main
         className="list-screen square-feed-screen is-square-workspace is-channel-pager"
       >
-        <SquareFeedHeader activeKey={activityTab?"activities":feedMode==="user"?`user:${profileFeedUserId}`:feedMode} syncing={syncing} search={<SquareHeaderTools variant="navigation" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {selectSquareChannel(false);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
+        <SquareFeedHeader activeKey={currentChannel === "user" ? `user:${profileFeedUserId}` : currentChannel} syncing={syncing} search={<SquareHeaderTools variant="navigation" searchOpen={feedSearchOpen} filtered={hasFeedFilters} unread={notificationUnread} onSearch={() => {setSpecialChannel(null);setFeedSearchOpen(true)}} onQuota={openQuota} onNotifications={openNotificationDrawer}/>} publish={features.squareFreePostEnabled?openCreationMenu:undefined}>
           <div className="square-workspace-tabs is-square" role="tablist">
             <div className="square-workspace-tab-group is-square-channels">
+              <button aria-selected={specialChannel === "medals"} className={specialChannel === "medals" ? "is-active" : ""} onClick={() => selectFeedTab("medals")} role="tab" type="button">{medalsTabLabel}</button>
               <button aria-label={freshLabel(activityTabLabel, activitiesFresh)} aria-selected={activityTab} className={activityTab?"is-active":""} onClick={() => selectFeedTab("activities")} role="tab" type="button">{activityTabLabel}{activitiesFresh ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button>
-              {features.squareExploreEnabled ? <button aria-label={freshLabel(exploreTabLabel, feedFresh.all)} aria-selected={!activityTab && feedMode === "all"} className={!activityTab && feedMode === "all" ? "is-active" : ""} onClick={() => selectFeedTab("all")} role="tab" type="button">{exploreTabLabel}{feedFresh.all ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button> : null}
-              <button aria-label={freshLabel(friendsTabLabel, feedFresh.friends)} aria-selected={!activityTab && feedMode === "friends"} className={!activityTab && feedMode === "friends" ? "is-active" : ""} onClick={() => selectFeedTab("friends")} role="tab" type="button">{friendsTabLabel}{feedFresh.friends ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button>
-              <button aria-selected={!activityTab && feedMode === "mine"} className={!activityTab && feedMode === "mine" ? "is-active" : ""} onClick={() => { selectSquareChannel(false); setFeedMode("mine"); }} role="tab" type="button">{t("square.feedMine")}</button>
-              {profileFeedUserId ? <span className={`square-feed-user-tab${!activityTab && feedMode === "user" ? " is-active" : ""}`}><button aria-selected={!activityTab && feedMode === "user"} onClick={() => { selectSquareChannel(false); setFeedMode("user"); }} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode(current=>current==='user'?'friends':current); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
+              {features.squareExploreEnabled ? <button aria-label={freshLabel(exploreTabLabel, feedFresh.all)} aria-selected={isFeedTab && feedMode === "all"} className={isFeedTab && feedMode === "all" ? "is-active" : ""} onClick={() => selectFeedTab("all")} role="tab" type="button">{exploreTabLabel}{feedFresh.all ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button> : null}
+              <button aria-label={freshLabel(friendsTabLabel, feedFresh.friends)} aria-selected={isFeedTab && feedMode === "friends"} className={isFeedTab && feedMode === "friends" ? "is-active" : ""} onClick={() => selectFeedTab("friends")} role="tab" type="button">{friendsTabLabel}{feedFresh.friends ? <span className="square-fresh-dot" aria-hidden="true" /> : null}</button>
+              <button aria-selected={isFeedTab && feedMode === "mine"} className={isFeedTab && feedMode === "mine" ? "is-active" : ""} onClick={() => { setSpecialChannel(null); setFeedMode("mine"); }} role="tab" type="button">{t("square.feedMine")}</button>
+              {profileFeedUserId ? <span className={`square-feed-user-tab${isFeedTab && feedMode === "user" ? " is-active" : ""}`}><button aria-selected={isFeedTab && feedMode === "user"} onClick={() => { setSpecialChannel(null); setFeedMode("user"); }} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode(current=>current==='user'?'friends':current); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
           </div>
         </SquareFeedHeader>
         <SquareChannelPager channels={squareChannels} current={currentChannel} onSelect={selectFeedTab} enabled={routedStatementId===null&&!inlineStatementExpanded}>
         {squareChannels.map((channel,index)=>{
-          const pageCacheKey=channel==='activities'?'square:activities-feed':squareFeedCacheKey(channel,profileFeedUserId,selectedFeedDate,selectedFeedKeyword,selectedFeedFrom,selectedFeedTo);
+          const isStatementChannel = channel !== "medals" && channel !== "activities";
+          const pageCacheKey=isStatementChannel ? squareFeedCacheKey(channel,profileFeedUserId,selectedFeedDate,selectedFeedKeyword,selectedFeedFrom,selectedFeedTo) : `square:${channel}-feed`;
           const active=channel===currentChannel;
-          return <SquareChannelPage key={`${cacheScope}:${channel}:${channel==='user'?profileFeedUserId:''}`} mode={channel} label={channel==='user'?profileFeedUserName:t(channel==='activities'?'square.activitiesTab':channel==='all'?'square.feedAll':channel==='friends'?'square.feedFriends':'square.feedMine')} cacheKey={pageCacheKey} scope={cacheScope} active={active} preload={Math.abs(index-squareChannels.indexOf(currentChannel))<=1} activeRoot={squareFeedScrollRef}
-            activeState={active&&channel!=='activities'&&statementsFeedKey===pageCacheKey?{items:statements,loading,loadingMore,hasMore,error}:null} settled={!syncing&&!loading} rememberScroll={inlineStatementId===null&&!workspaceDetailActive&&!inlineStatementExpanded}
-            params={{date:selectedFeedDate??undefined,date_from:selectedFeedFrom??undefined,date_to:selectedFeedTo??undefined,keyword:selectedFeedKeyword||undefined,scope:channel==='user'||channel==='activities'?'all':channel,user_id:channel==='user'?profileFeedUserId??undefined:undefined}} onScroll={handleChannelScroll}>
+          return <SquareChannelPage key={`${cacheScope}:${channel}:${channel==='user'?profileFeedUserId:''}`} mode={channel} label={channel==='user'?profileFeedUserName:channel === 'medals' ? medalsTabLabel : channel === 'activities' ? activityTabLabel : channel === 'all' ? exploreTabLabel : channel === 'friends' ? friendsTabLabel : t('square.feedMine')} cacheKey={pageCacheKey} scope={cacheScope} active={active} preload={Math.abs(index-squareChannels.indexOf(currentChannel))<=1} activeRoot={squareFeedScrollRef}
+            activeState={active&&isStatementChannel&&statementsFeedKey===pageCacheKey?{items:statements,loading,loadingMore,hasMore,error}:null} settled={!syncing&&!loading} rememberScroll={inlineStatementId===null&&!workspaceDetailActive&&!inlineStatementExpanded}
+            params={{date:selectedFeedDate??undefined,date_from:selectedFeedFrom??undefined,date_to:selectedFeedTo??undefined,keyword:selectedFeedKeyword||undefined,scope:channel==='friends'||channel==='mine'?channel:'all',user_id:channel==='user'?profileFeedUserId??undefined:undefined}} onScroll={handleChannelScroll}>
             {view=>{
               const {items:statements,loading,loadingMore,hasMore,error,layout:squareFeedLayout,mode:feedMode,scrollRef}=view;
               const visibleStatements=statements.filter(statement=>hasFeedFilters||feedMode!=='all'||statement.statement_id!==pinnedStatement?.statement_id);
@@ -2135,7 +2141,8 @@ export default function SquarePage() {
             </button></SquareActivityTile> : null}
           </section></div> : null}
           {view.mode==='activities' && !activityBannerCount ? <FeedbackState tone={activitiesLoading?"loading":activitiesError?"error":"empty"} title={t(activitiesLoading?"common.loading":activitiesError?"square.activitiesLoadFailed":"square.activitiesEmpty")} action={activitiesError?<button className="secondary-button" onClick={()=>void loadActivities()} type="button">{t("common.retry")}</button>:undefined}/> : null}
-        {view.mode!=='activities'?<div className="square-feed-column">
+          {view.mode === "medals" ? <SquareMedals active={view.active} onProfile={openUserProfile} /> : null}
+        {view.mode!=='activities'&&view.mode!=='medals'?<div className="square-feed-column">
           {hasFeedFilters ? <div className="square-date-context">
             <span className="material-symbols-outlined" aria-hidden="true">filter_alt</span>
             <span><small>{t("square.filtered")}</small><strong>{[selectedFeedKeyword, selectedFeedFrom || selectedFeedTo ? `${selectedFeedFrom || t("square.anyDate")} → ${selectedFeedTo || t("square.anyDate")}` : selectedFeedDateLabel].filter(Boolean).join(" · ")}</strong></span>
@@ -2182,7 +2189,7 @@ export default function SquarePage() {
           ariaLabel={t("square.backToTop")}
           className="square-feed-scroll-top"
           onClick={() => {
-            if(!activityTab){
+            if(isFeedTab){
               pendingFeedScrollRestoreRef.current = null;
               feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
               writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
@@ -2372,7 +2379,7 @@ export default function SquarePage() {
               navigate(`/app/chats/${chatId}`);
             }}
             onSyncingChange={setProfileSyncing}
-            onOpenStatements={user=>{setProfileDrawerUserId(null);selectSquareChannel(false);if(user.user_id===currentUser?.user_id){setFeedMode('mine');navigate('/app/square');return}setFeedMode('user');const params=new URLSearchParams({user_id:String(user.user_id),user_name:user.name});navigate(`/app/square?${params.toString()}`)}}
+            onOpenStatements={user=>{setProfileDrawerUserId(null);setSpecialChannel(null);if(user.user_id===currentUser?.user_id){setFeedMode('mine');navigate('/app/square');return}setFeedMode('user');const params=new URLSearchParams({user_id:String(user.user_id),user_name:user.name});navigate(`/app/square?${params.toString()}`)}}
             userId={profileDrawerUserId}
           />
         ) : null}

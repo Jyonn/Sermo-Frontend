@@ -1,0 +1,226 @@
+.record-shop-preview-reveal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--record-tier) 42%, #42322e);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--record-tier) 10%, #2b201f);
+  color: var(--record-tier);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.record-shop-preview-reveal .material-symbols-outlined { font-size: 17px; }
+
+.record-shop-album.is-rare-reveal {
+  --reveal-ink: #e9faff;
+  --reveal-line: #b1e8ff;
+  --reveal-shadow: #12202c;
+  margin: 0;
+  height: 100%;
+  border-radius: 0;
+  color: var(--reveal-ink);
+  background: radial-gradient(ellipse at center, var(--reveal-shadow) 3%, #151b29b2 38%, #11111952 72%, #1713172b);
+}
+.record-shop-album.is-rare-reveal.tier-obsidian {
+  --reveal-ink: #fff1ff;
+  --reveal-line: #efc4ff;
+  --reveal-shadow: #24142e;
+  background: radial-gradient(ellipse at center, #24142ef7 12%, #241631c2 39%, #1a12285d 72%, #150d192a);
+}
+.record-shop-album.is-rare-reveal::backdrop { backdrop-filter: blur(7px); }
+
+.record-shop-reveal {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  justify-items: center;
+  width: 100%;
+  min-height: 100%;
+  padding: max(56px, calc(40px + env(safe-area-inset-top))) 14px max(24px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+}
+.record-shop-reveal-close {
+  position: absolute;
+  z-index: 2;
+  inset: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) auto auto;
+  width: 42px;
+  height: 42px;
+  background: color-mix(in srgb, var(--reveal-shadow) 90%, var(--reveal-line));
+  cursor: pointer;
+}
+.record-shop-reveal-close:focus:not(:focus-visible) { outline: 0; }
+
+.record-shop-reveal-stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: min(88vmin, 580px);
+  aspect-ratio: 1.34;
+}
+.record-shop-reveal-stage::before {
+  position: absolute;
+  z-index: -2;
+  inset: -12%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--reveal-line) 27%, transparent), transparent 62%);
+  content: "";
+  animation: record-shop-reveal-halo .95s cubic-bezier(.16, 1, .3, 1) both;
+}
+.record-shop-reveal-stage .record-shop-album-face {
+  width: clamp(105px, 37vmin, 246px);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--reveal-line) 30%, transparent), 0 12px 36px #0a0616b0;
+  animation: record-shop-reveal-disc .82s cubic-bezier(.16, 1, .3, 1) both;
+}
+.record-shop-reveal-orbits, .record-shop-reveal-rays {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+.record-shop-reveal-orbits i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  border: 1px solid color-mix(in srgb, var(--reveal-line) 64%, transparent);
+  animation: record-shop-reveal-orbit 1.1s cubic-bezier(.16, 1, .3, 1) var(--orbit-delay, .06s) both;
+}
+.tier-diamond .record-shop-reveal-orbits i {
+  width: 55%;
+  aspect-ratio: 1;
+  rotate: 45deg;
+  border-radius: 9%;
+  box-shadow: inset 0 0 17px #86cfff32, 0 0 14px #ade4ff28;
+}
+.tier-diamond .record-shop-reveal-orbits i:nth-child(2) {
+  width: 66%;
+  border-color: #b7eaff48;
+  --orbit-delay: .17s;
+}
+.tier-diamond .record-shop-reveal-orbits i:nth-child(3) {
+  width: 75%;
+  rotate: 30deg;
+  border-color: #d2f2ff24;
+  --orbit-delay: .28s;
+}
+.tier-obsidian .record-shop-reveal-orbits i {
+  width: 82%;
+  height: 51%;
+  rotate: -19deg;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #e5a9ff45;
+}
+.tier-obsidian .record-shop-reveal-orbits i:nth-child(2) {
+  width: 86%;
+  height: 52%;
+  rotate: 26deg;
+  border-color: #edbcff80;
+  --orbit-delay: .13s;
+}
+.tier-obsidian .record-shop-reveal-orbits i:nth-child(3) {
+  width: 74%;
+  height: auto;
+  aspect-ratio: 1;
+  border-color: #cf93ff57;
+  --orbit-delay: .24s;
+}
+
+.record-shop-reveal-rays i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  height: 2px;
+  transform-origin: left;
+  transform: rotate(var(--ray-angle)) scaleX(.92);
+  background: linear-gradient(90deg, transparent 51%, var(--reveal-line) 85%, transparent 100%);
+  animation: record-shop-reveal-ray 1.05s cubic-bezier(.16, 1, .3, 1) .17s both;
+}
+.record-shop-reveal-rays i:nth-child(1) { --ray-angle: -82deg; }
+.record-shop-reveal-rays i:nth-child(2) { --ray-angle: -38deg; }
+.record-shop-reveal-rays i:nth-child(3) { --ray-angle: 19deg; }
+.record-shop-reveal-rays i:nth-child(4) { --ray-angle: 73deg; }
+.record-shop-reveal-rays i:nth-child(5) { --ray-angle: 147deg; }
+.record-shop-reveal-rays i:nth-child(6) { --ray-angle: 193deg; }
+.tier-obsidian .record-shop-reveal-rays i {
+  height: 4px;
+  clip-path: polygon(0 38%, 69% 41%, 85% 0, 100% 50%, 85% 100%, 69% 59%, 0 62%);
+  animation-delay: .26s;
+}
+
+.record-shop-reveal-caption {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  width: min(100%, 336px);
+  padding: 8px 12px 0;
+  text-shadow: 0 2px 5px var(--reveal-shadow), 0 0 12px var(--reveal-shadow);
+  animation: record-shop-reveal-caption .62s cubic-bezier(.16, 1, .3, 1) .2s both;
+}
+.record-shop-reveal-caption p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--reveal-line) 45%, transparent);
+  border-radius: 99px;
+  background: var(--reveal-shadow);
+  font-size: 12px;
+}
+.record-shop-reveal-caption p .record-shop-tier-mark { width: 18px; }
+.record-shop-reveal-caption h2 {
+  margin: 0;
+  font: 700 clamp(25px, 6vmin, 39px)/1.14 Georgia, "Songti SC", STSong, serif;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.record-shop-reveal-caption > span { font-size: 14px; }
+.record-shop-reveal-player {
+  width: 100%;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--reveal-line) 33%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--reveal-shadow) 91%, transparent);
+}
+.record-shop-reveal-player .record-shop-clip { margin: 0; padding: 3px 0; border: 0; }
+
+@keyframes record-shop-reveal-disc {
+  from { opacity: 0; transform: translateY(20px) scale(.75); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes record-shop-reveal-orbit {
+  from { opacity: 0; scale: .57; }
+  to { opacity: .9; scale: 1; }
+}
+@keyframes record-shop-reveal-ray {
+  0% { opacity: 0; transform: rotate(var(--ray-angle)) scaleX(.4); }
+  36% { opacity: 1; }
+  100% { opacity: .55; transform: rotate(var(--ray-angle)) scaleX(.92); }
+}
+@keyframes record-shop-reveal-halo {
+  from { opacity: .16; transform: scale(.65); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes record-shop-reveal-caption {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .record-shop-reveal-stage::before,
+  .record-shop-reveal-stage .record-shop-album-face,
+  .record-shop-reveal-orbits i,
+  .record-shop-reveal-rays i,
+  .record-shop-reveal-caption { animation: none; }
+}

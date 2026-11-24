@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.24.10",
+  "id": "2026.11.24.11",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺的专辑收藏",
+      "title": "回声唱片铺的空间奖章",
       "items": [
-        "奖池按金、铂、钻、曜分栏，圆形光盘每行两张，各有对应的盘缘和徽记。",
-        "点击活动人物封套进入对应的奖励，查看气泡、浏览专辑或装备已解锁的气泡。"
+        "钻、曜专辑有各自的全屏首解动效，可从专辑详情直接预览。",
+        "广场新增奖章页，展示本空间每张钻、曜唱片的首位解锁成员和时间。"
       ]
     },
     "en": {
-      "title": "Album Collecting at Echo Record Shop",
+      "title": "Echo Record Shop Medals",
       "items": [
-        "Browse two columns of album discs across Gold, Platinum, Diamond and Obsidian tabs with distinct rims and emblems.",
-        "Open an artist sleeve to preview the bubble, browse albums, or equip an unlocked bubble."
+        "Preview the distinct fullscreen Diamond and Obsidian discovery animations from album details.",
+        "Open Medals in Square to see who first discovered each rare record in your space and when."
       ]
     }
   }

@@ -1,4 +1,8 @@
 {
+  "square.medalsTab": "獎章",
+  "square.medalsRecordShop": "回聲唱片鋪 · 空間首解",
+  "square.medalsEmpty": "還沒有鑽級或曜級唱片首解紀錄",
+  "recordShop.previewReveal": "預覽解鎖效果",
   "atlas.title": "元件樣式總覽",
   "atlas.intro": "依使用角色與元件類型瀏覽。預覽採用範例資料，專用頁面可查看對應的容器與控制項。",
   "atlas.audiences": "使用角色",

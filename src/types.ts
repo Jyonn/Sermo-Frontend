@@ -1019,6 +1019,13 @@ export interface RecordShopDecoration {
   first?:boolean;
 }
 
+export interface SquareMedalDTO {
+  album: Omit<RecordShopAlbum, "clip" | "tier"> & { tier: "diamond" | "obsidian" };
+  artist: RecordShopDecoration["artist"];
+  user: TinyUserDTO;
+  discovered_at: number;
+}
+
 export interface ActivityCampaignDTO {
   record_shop?: {points:number;thresholds:[number,number];singers:string[];equipped:string;choices:number;portraits:Record<string,string>;albums:Record<string,RecordShopAlbum[]>};
   participation?:{count:number;users:Array<{user_id:number;name:string;avatar_uri?:string}>}|null;
