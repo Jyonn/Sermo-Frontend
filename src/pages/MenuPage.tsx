@@ -94,6 +94,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { AnnualRecap } from "../components/AnnualRecap";
 import { recordShopArtists, recordShopPreviews } from "../lib/recordShopPreview";
 import { RecordShopBubbleArt } from "../components/RecordShopBubbleArt";
+import { recordShopPortraitPoster } from "../components/RecordShopPortrait";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import '../components/WebPushSettings.css';
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, QQIdentityDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
@@ -2787,7 +2788,7 @@ export default function MenuPage() {
                             <span className="message-bubble self record-shop-text-bubble">
                               <RecordShopBubbleArt artist={artist} />
                             </span>
-                            <img alt="" src={recordShopPreviews[artist].portrait} loading="lazy" />
+                            <img alt="" src={recordShopPortraitPoster(artist, recordShopPreviews[artist].portrait)} loading="lazy" />
                           </i>
                           <div className="chat-personalization-card-copy"><strong>{t("recordShop.bubbleTitle", { artist: name })}</strong><small>{t("menu.activityUnlock")}</small></div>
                         </button>

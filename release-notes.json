@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.25.2",
+  "id": "2026.11.25.3",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺更新专辑目录",
+      "title": "回声唱片铺女声篇动态人像",
       "items": [
-        "两期奖池均改为收录八位歌手的正式录音室专辑，并重新划分金、铂、钻、曜。",
-        "已有的聊天唱片和空间首解奖章仍可查看。"
+        "蔡依林、孙燕姿、萧亚轩和梁静茹的典藏半身像换成逐帧动画，可在聊天和奖池预览里查看。"
       ]
     },
     "en": {
-      "title": "Echo Record Shop album update",
+      "title": "Animated portraits for Echo Record Shop",
       "items": [
-        "Both editions now feature studio albums from all eight artists, with updated Gold, Platinum, Diamond, and Obsidian tiers.",
-        "Previously shared chat discs and space-first medals are still available."
+        "Jolin Tsai, Stefanie Sun, Elva Hsiao, and Fish Leong have new frame-by-frame portraits in chat bubbles and the reward preview."
       ]
     }
   }

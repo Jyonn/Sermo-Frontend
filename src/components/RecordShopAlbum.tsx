@@ -6,6 +6,7 @@ import {claimMediaPlayback,releaseMediaPlayback} from '../lib/mediaPlaybackFocus
 import {musicTime} from '../lib/musicLyrics';
 import {useModalFocus} from '../lib/modalFocus';
 import {usePlaybackWait} from './MediaWaitFeedback';
+import {RecordShopPortrait} from './RecordShopPortrait';
 import type {RecordShopAlbum as Album,RecordShopDecoration} from '../types';
 import './RecordShop.css';
 import './RecordShopReveal.css';
@@ -176,11 +177,10 @@ export function RecordShopDecorationView({decoration,interactive=true}:{decorati
   const album=decoration.album;
   const cover=safeActivityImage(album?.cover);
   const clip=safeActivityImage(album?.clip);
-  const portrait=safeActivityImage(decoration.portrait);
   if(album&&cover)return clip
     ? <RecordShopClip key={clip} album={album} uri={clip} cover={cover} interactive={interactive}/>
     : <span className={`record-shop-message-cover tier-${album.tier}`} role="img" aria-label={`${album.name} · ${t('recordShop.clipUnavailable')}`}><RecordShopDisc cover={cover}/></span>;
-  return portrait?<img className="record-shop-portrait" src={portrait} alt={t(`recordShop.singer.${decoration.artist}`)} loading="lazy" decoding="async" draggable={false}/>:null;
+  return <RecordShopPortrait artist={decoration.artist} uri={decoration.portrait} alt={t(`recordShop.singer.${decoration.artist}`)} />;
 }
 
 export function RecordShopDiscoveries() {

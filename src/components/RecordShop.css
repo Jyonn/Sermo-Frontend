@@ -185,6 +185,13 @@ html[data-theme="dark"] [data-record-shop-artist].other > .message-bubble.record
   filter:drop-shadow(0 2px 2px #110f1340);
 }
 .message-bubble-shell.other .record-shop-portrait { left:auto; right:4px; }
+picture.record-shop-portrait > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
 .record-shop-message-cover {
   position:absolute;
   z-index:4;

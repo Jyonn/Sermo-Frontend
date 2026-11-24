@@ -2,13 +2,14 @@ import { useState, type CSSProperties } from "react";
 import { useI18n } from "../lib/language";
 import { api } from "../lib/api";
 import { showToast } from "../lib/toast";
-import { activityPresentation, safeActivityImage } from "../lib/activityPresentation";
+import { activityPresentation } from "../lib/activityPresentation";
 import { recordShopArtists as singers } from "../lib/recordShopPreview";
 import type { ActivityCampaignDTO, RecordShopAlbum as Album } from "../types";
 import { ActivityDetails } from "./ActivityDetails";
 import { DrawerTabs } from "./DrawerTabs";
 import { RecordShopAlbum, RecordShopAlbumFace, RecordShopDecorationView, RecordShopTierMark } from "./RecordShopAlbum";
 import { RecordShopBubbleArt } from "./RecordShopBubbleArt";
+import { recordShopPortraitPoster } from "./RecordShopPortrait";
 import "./RecordShopActivity.css";
 
 const rules = ["shareRule", "listenRule", "dedupeRule", "selectionRule", "discoveryRule"] as const;
@@ -95,7 +96,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
               <h3>{t("menu.chatBubble")}</h3>
               <div className="record-shop-singers">
                 {roster.map(singer => {
-                  const portrait = safeActivityImage(info.portraits[singer]);
+                  const portrait = recordShopPortraitPoster(singer, info.portraits[singer]);
                   const status = singerStatus(info, singer);
                   return (
                     <button
@@ -134,7 +135,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                 onChange={selectSinger}
                 items={roster.map(singer => {
                   const label = t(`recordShop.singer.${singer}`);
-                  const portrait = safeActivityImage(info.portraits[singer]);
+                  const portrait = recordShopPortraitPoster(singer, info.portraits[singer]);
                   return {
                     value: singer,
                     label,
