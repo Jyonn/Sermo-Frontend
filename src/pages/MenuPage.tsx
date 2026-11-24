@@ -92,6 +92,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { AnnualRecap } from "../components/AnnualRecap";
+import { recordShopArtists, recordShopPreviews } from "../lib/recordShopPreview";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import '../components/WebPushSettings.css';
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, QQIdentityDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
@@ -525,7 +526,8 @@ export default function MenuPage() {
   const [chatPreviewDemoOpen, setChatPreviewDemoOpen] = useState(false);
   const [chatPreviewDemoKind, setChatPreviewDemoKind] = useState<ChatPreviewDemoKind>("text");
   const [chatBackgroundRarity, setChatBackgroundRarity] = useState<ChatPersonalizationRarity>("common");
-  const [chatBubbleRarity, setChatBubbleRarity] = useState<ChatPersonalizationRarity>("common");
+  const [chatBubbleRarity, setChatBubbleRarity] = useState<GrowthRewardDTO["rarity"]>("common");
+  const [recordShopPreviewArtist, setRecordShopPreviewArtist] = useState<(typeof recordShopArtists)[number] | null>(null);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
@@ -701,7 +703,7 @@ export default function MenuPage() {
     backgroundCatalog.some(([assetKey]) => rewardRarity("background", assetKey) === rarity),
   );
   const bubbleRarityTabs = personalizationRarityOrder.filter((rarity) =>
-    bubbleCatalog.some(([assetKey]) => rewardRarity("bubble", assetKey) === rarity),
+    rarity === "legendary" || bubbleCatalog.some(([assetKey]) => rewardRarity("bubble", assetKey) === rarity),
   );
   const visibleBackgroundCatalog = chatBackgroundRarity === "custom"
     ? []
@@ -715,6 +717,9 @@ export default function MenuPage() {
   const bubbleStageKey = visibleBubbleCatalog.some(([assetKey]) => assetKey === personalizationDraft.chat_bubble_style)
     ? personalizationDraft.chat_bubble_style
     : visibleBubbleCatalog[0]?.[0];
+  const recordShopStage = chatBubbleRarity === "legendary" && (recordShopPreviewArtist || !bubbleStageKey)
+    ? recordShopPreviews[recordShopPreviewArtist ?? recordShopArtists[0]]
+    : undefined;
   const bubbleUnlockLabel = (style: ChatBubbleStyle) => {
     if (style === "vip") return t("menu.permanentVipOnly");
     if (activityBubbleStyles.has(style)) return t("menu.activityUnlock");
@@ -846,6 +851,7 @@ export default function MenuPage() {
     setChatBackgroundDraft(currentBackground);
     setChatBackgroundRarity(currentBackground === "custom" ? "custom" : rewardRarity("background", currentBackground));
     setChatBubbleRarity(rewardRarity("bubble", currentBubble));
+    setRecordShopPreviewArtist(null);
     setPersonalizationDraft({
       chat_bubble_style: currentBubble,
       avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
@@ -887,6 +893,7 @@ export default function MenuPage() {
     chatBackgroundRarity,
     chatBubbleRarity,
     chatPersonalizationPanel,
+    recordShopStage,
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
@@ -1669,7 +1676,7 @@ export default function MenuPage() {
   const saveChatPagePersonalization = async () => {
     if (!me || personalizationSaving || chatBackgroundSaving) return;
     const backgroundChanged = chatBackgroundDraft !== (me.chat_background_theme ?? "default");
-    const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
+    const bubbleChanged = !recordShopStage && personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     if (!backgroundChanged && !bubbleChanged) return;
     if (backgroundChanged && chatBackgroundDraft !== "custom" && !canUseBackgroundStyle(chatBackgroundDraft)) {
       showToast(t("background.levelRequired", { level: rewardLevel("background", chatBackgroundDraft) }), "error");
@@ -2633,7 +2640,7 @@ export default function MenuPage() {
         actionBusy={chatBackgroundSaving || personalizationSaving}
         actionDisabled={
           chatBackgroundDraft === (me?.chat_background_theme ?? "default")
-          && personalizationDraft.chat_bubble_style === (me?.chat_bubble_style ?? "default")
+          && (Boolean(recordShopStage) || personalizationDraft.chat_bubble_style === (me?.chat_bubble_style ?? "default"))
         }
         actionLabel={t("common.save")}
         className="chat-personalization-drawer"
@@ -2688,6 +2695,7 @@ export default function MenuPage() {
                 backgroundTheme: chatBackgroundDraft,
                 backgroundUri: chatBackgroundDraft === "custom" ? me?.chat_background_uri : undefined,
                 bubbleStyle: visibleBubbleStyle(personalizationDraft.chat_bubble_style),
+                recordShop: recordShopStage,
                 demo: { kind: chatPreviewDemoKind },
                 selfOnly: true,
               }} />
@@ -2756,22 +2764,46 @@ export default function MenuPage() {
                 <>
                   <div className="chat-personalization-rarity-tabs" role="tablist" aria-label={t("menu.chatBubble")}>
                     {bubbleRarityTabs.map((rarity) => (
-                      <button aria-selected={chatBubbleRarity === rarity} className={`rarity-${rarity}${chatBubbleRarity === rarity ? " is-active" : ""}`} key={rarity} onClick={() => setChatBubbleRarity(rarity)} role="tab" type="button">
+                      <button aria-selected={chatBubbleRarity === rarity} className={`rarity-${rarity}${chatBubbleRarity === rarity ? " is-active" : ""}`} key={rarity} onClick={() => { setChatBubbleRarity(rarity); setRecordShopPreviewArtist(null); }} role="tab" type="button">
                         <span>{t(`growth.rarity.${rarity}` as TranslationKey)}</span>
                       </button>
                     ))}
                   </div>
                   <div className="chat-personalization-card-track field-chat_bubble_style" ref={chatBubbleTrackRef}>
+                    {chatBubbleRarity === "legendary" ? recordShopArtists.map((artist) => {
+                      const name = t(`recordShop.singer.${artist}`);
+                      const focused = recordShopStage?.artist === artist;
+                      return (
+                        <button
+                          aria-pressed={focused}
+                          className={`chat-personalization-card personalization-option record-shop-option rarity-legendary is-preview-only${focused ? " is-stage-focus" : ""}`}
+                          disabled={personalizationSaving}
+                          key={artist}
+                          onClick={() => setRecordShopPreviewArtist(artist)}
+                          type="button"
+                        >
+                          <i aria-hidden="true" className="record-shop-option-swatch self" data-record-shop-artist={artist}>
+                            <span className="message-bubble self record-shop-text-bubble" />
+                            <img alt="" src={recordShopPreviews[artist].portrait} loading="lazy" />
+                          </i>
+                          <div className="chat-personalization-card-copy"><strong>{t("recordShop.bubbleTitle", { artist: name })}</strong><small>{t("menu.activityUnlock")}</small></div>
+                        </button>
+                      );
+                    }) : null}
                     {visibleBubbleCatalog.map(([value, label]) => {
                       const style = value as ChatBubbleStyle;
                       const owned = canUseBubbleStyle(style);
+                      const selected = !recordShopStage && personalizationDraft.chat_bubble_style === value;
                       return (
                         <button
-                          aria-pressed={personalizationDraft.chat_bubble_style === value}
-                          className={`chat-personalization-card personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${bubbleStageKey === value ? " is-stage-focus" : ""}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
+                          aria-pressed={selected}
+                          className={`chat-personalization-card personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${!recordShopStage && bubbleStageKey === value ? " is-stage-focus" : ""}${selected ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
                           disabled={personalizationSaving}
                           key={value}
-                          onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: style }))}
+                          onClick={() => {
+                            setRecordShopPreviewArtist(null);
+                            setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: style }));
+                          }}
                           type="button"
                         >
                           <i aria-hidden="true"><span /></i>

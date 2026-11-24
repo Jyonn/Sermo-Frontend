@@ -3,12 +3,11 @@ import {useI18n} from '../lib/language';
 import {api} from '../lib/api';
 import {showToast} from '../lib/toast';
 import {safeActivityImage} from '../lib/activityPresentation';
+import {recordShopArtists as singers} from '../lib/recordShopPreview';
 import type {ActivityCampaignDTO,RecordShopAlbum as Album} from '../types';
 import {ActivityDetails} from './ActivityDetails';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {RecordShopAlbum,RecordShopDecorationView} from './RecordShopAlbum';
-
-const singers=['jay','leehom','david','jj'] as const;
 
 export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaignDTO;onUpdate:(value:ActivityCampaignDTO)=>void}) {
   const {t,language}=useI18n();

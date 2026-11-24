@@ -45,49 +45,49 @@
 .record-shop-rules { display: grid; gap: 12px; padding-inline-start: 20px; }
 .message-bubble-shell[data-record-shop-artist] { position:relative; }
 [data-record-shop-artist="jay"] {
-  --record-bubble-paper:#e3e9e7;
-  --record-bubble-tone:#192c45;
-  --record-bubble-rim:#7796b4;
-  --record-detail:#bbcde3;
+  --record-bubble-paper:#f0e4ed;
+  --record-bubble-tone:#422738;
+  --record-bubble-rim:#ab809a;
+  --record-bubble-ink:#3f2436;
+  --record-detail:#e7c6df;
   --record-bubble-art:
-    repeating-linear-gradient(90deg,transparent 0 5px,var(--record-detail) 5px 7px,transparent 7px 12px) right 8px bottom 0/54px 9px no-repeat,
-    repeating-linear-gradient(90deg,var(--record-detail) 0 1px,transparent 1px 6px) right 8px bottom 0/54px 14px no-repeat,
-    repeating-radial-gradient(ellipse at 95% 90%,transparent 0 6px,var(--record-detail) 7px 8px,transparent 9px 13px);
+    repeating-linear-gradient(45deg,transparent 0 7px,var(--record-detail) 7px 8px,transparent 8px 14px),
+    repeating-linear-gradient(-45deg,transparent 0 7px,var(--record-detail) 7px 8px,transparent 8px 14px);
 }
 [data-record-shop-artist="leehom"] {
-  --record-bubble-paper:#f6e5ca;
-  --record-bubble-tone:#602d34;
-  --record-bubble-rim:#c2905e;
-  --record-detail:#edb76f;
+  --record-bubble-paper:#f3e2cc;
+  --record-bubble-tone:#664230;
+  --record-bubble-rim:#b6885d;
+  --record-bubble-ink:#4b3021;
+  --record-detail:#f5d4a2;
   --record-bubble-art:
-    radial-gradient(circle at 76% 24%,var(--record-detail) 0 3px,transparent 4px),
-    radial-gradient(circle at 91% 77%,transparent 0 12px,var(--record-detail) 12.5px 13px,transparent 14px),
-    repeating-linear-gradient(153deg,transparent 0 5px,var(--record-detail) 5.5px 6px,transparent 7px 9px);
+    repeating-linear-gradient(90deg,var(--record-detail) 0 3px,transparent 3px 7px) right bottom 3px/100% 1px no-repeat,
+    repeating-linear-gradient(90deg,var(--record-detail) 0 3px,transparent 3px 7px) right bottom 7px/100% 1px no-repeat,
+    radial-gradient(circle,var(--record-detail) 0 .5px,transparent 1px) right bottom/5px 5px;
 }
 [data-record-shop-artist="david"] {
-  --record-bubble-paper:#efe0c3;
-  --record-bubble-tone:#2b2944;
-  --record-bubble-rim:#bf926a;
-  --record-detail:#ecab6d;
+  --record-bubble-paper:#e0e9db;
+  --record-bubble-tone:#294538;
+  --record-bubble-rim:#829d78;
+  --record-bubble-ink:#243b30;
+  --record-detail:#e4c98d;
   --record-bubble-art:
-    repeating-linear-gradient(90deg,var(--record-detail) 0 4px,transparent 4px 8px) right 6px bottom 0/46px 4px no-repeat,
-    repeating-linear-gradient(90deg,transparent 0 7px,var(--record-detail) 7px 8px) right 9px center/43px 70% no-repeat,
-    linear-gradient(var(--record-detail),var(--record-detail)) right 17px top 39%/13px 3px no-repeat,
-    linear-gradient(var(--record-detail),var(--record-detail)) right 0 top 58%/13px 3px no-repeat;
+    linear-gradient(143deg,transparent 47%,var(--record-detail) 49% 52%,transparent 54%) right 12px bottom 0/21px 16px no-repeat,
+    repeating-conic-gradient(from 240deg at 57% 79%,transparent 0 12deg,var(--record-detail) 12deg 14deg,transparent 14deg 18deg) right bottom/60px 28px no-repeat;
+  --record-bubble-mask:radial-gradient(circle at calc(100% - 26px) calc(100% - 6px),transparent 17px,#000 17.5px 26px,transparent 26.5px);
 }
 [data-record-shop-artist="jj"] {
-  --record-bubble-paper:#dcecef;
-  --record-bubble-tone:#204555;
-  --record-bubble-rim:#86bac3;
-  --record-detail:#b7e5e6;
+  --record-bubble-paper:#e8ecf5;
+  --record-bubble-tone:#354466;
+  --record-bubble-rim:#8199c3;
+  --record-bubble-ink:#253450;
+  --record-detail:#dbe7fc;
   --record-bubble-art:
-    radial-gradient(circle at 73% 16%,var(--record-detail) 0 1.5px,transparent 2.5px),
-    radial-gradient(circle at 90% 76%,var(--record-detail) 0 2px,transparent 3px),
-    radial-gradient(ellipse at 100% 81%,transparent 0 25%,var(--record-detail) 26% 27%,transparent 29% 53%,var(--record-detail) 54% 55%,transparent 57%);
+    radial-gradient(ellipse at 80% 100%,transparent 0 57%,var(--record-detail) 58% 60%,transparent 62% 69%,var(--record-detail) 70% 72%,transparent 74%) right bottom/72px 26px no-repeat;
 }
 [data-record-shop-artist] > .message-bubble.record-shop-text-bubble {
   background:radial-gradient(ellipse at bottom right,color-mix(in srgb,var(--record-bubble-rim) 25%,transparent),transparent 74%),var(--record-bubble-paper);
-  color:#252424;
+  color:var(--record-bubble-ink);
   border:1px solid var(--record-bubble-rim);
   box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--record-bubble-rim) 32%,transparent),0 2px 6px #18171720;
 }
@@ -99,16 +99,91 @@
   width:min(49%,73px);
   border-radius:inherit;
   background:var(--record-bubble-art);
-  mask-image:linear-gradient(90deg,transparent,#000 93%);
+  mask-image:var(--record-bubble-mask,linear-gradient(90deg,transparent,#000 93%));
   opacity:.29;
   pointer-events:none;
 }
 [data-record-shop-artist].other > .record-shop-text-bubble::before { inset-inline:3px auto; transform:scaleX(-1); }
-html:not([data-theme="dark"]) [data-record-shop-artist].other > .record-shop-text-bubble::before { filter:brightness(.64); }
+[data-record-shop-artist] > .record-shop-text-bubble::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:auto 6px 5px auto;
+  color:var(--record-detail);
+  opacity:.47;
+  pointer-events:none;
+}
+[data-record-shop-artist].other > .record-shop-text-bubble::after { inset-inline:6px auto; }
+[data-record-shop-artist="jay"] > .record-shop-text-bubble::after {
+  content:"♠" / "";
+  display:grid;
+  place-items:center;
+  width:13px;
+  height:17px;
+  border:1px solid currentColor;
+  border-radius:2px;
+  background:color-mix(in srgb,var(--record-bubble-tone) 52%,transparent);
+  box-shadow:2px 2px 0 color-mix(in srgb,currentColor 30%,transparent);
+  font:12px/1 Georgia,serif;
+  rotate:13deg;
+}
+[data-record-shop-artist="leehom"] > .record-shop-text-bubble::after {
+  width:17px;
+  height:17px;
+  border:1px solid currentColor;
+  border-radius:50%;
+  background:
+    radial-gradient(ellipse at -28% 50%,transparent 50%,currentColor 52% 55%,transparent 58%),
+    radial-gradient(ellipse at 128% 50%,transparent 50%,currentColor 52% 55%,transparent 58%);
+  rotate:-19deg;
+}
+[data-record-shop-artist="david"] > .record-shop-text-bubble::after {
+  width:22px;
+  height:9px;
+  background:
+    radial-gradient(circle at 21% 50%,transparent 0 1.5px,currentColor 2px 4px,transparent 4.5px),
+    linear-gradient(currentColor,currentColor) right 1px center/15px 2px no-repeat,
+    linear-gradient(currentColor,currentColor) right 3px bottom 1px/2px 4px no-repeat,
+    linear-gradient(currentColor,currentColor) right 7px bottom 1px/2px 4px no-repeat;
+  rotate:-23deg;
+}
+[data-record-shop-artist="jj"] > .record-shop-text-bubble::after {
+  width:23px;
+  height:15px;
+  background:
+    radial-gradient(ellipse at 63% 50%,transparent 0 44%,currentColor 47% 61%,transparent 64%) right 1px top 2px/8px 7px no-repeat,
+    radial-gradient(ellipse at top,currentColor 0 68%,transparent 73%) left 2px top 2px/15px 13px no-repeat,
+    linear-gradient(currentColor,currentColor) left bottom/20px 1px no-repeat;
+}
+html:not([data-theme="dark"]) [data-record-shop-artist].other > .record-shop-text-bubble {
+  --record-detail:color-mix(in srgb,var(--record-bubble-tone) 72%,var(--record-bubble-rim));
+}
 [data-record-shop-artist].self > .message-bubble.record-shop-text-bubble,
 html[data-theme="dark"] [data-record-shop-artist].other > .message-bubble.record-shop-text-bubble {
   background:radial-gradient(ellipse at right bottom,color-mix(in srgb,var(--record-bubble-rim) 20%,transparent),transparent 74%),linear-gradient(145deg,#ffffff0e,#00000024),var(--record-bubble-tone);
   color:#fff4e4;
+}
+.record-shop-option > .record-shop-option-swatch {
+  background:color-mix(in srgb,var(--record-bubble-rim) 17%,var(--bg-panel));
+}
+.chat-personalization-card.personalization-option.record-shop-option.is-stage-focus {
+  opacity:1;
+  border-color:color-mix(in srgb,var(--rarity-color,var(--brand-primary)) 58%,var(--line-soft));
+}
+.record-shop-option-swatch .record-shop-text-bubble { padding:0; }
+.record-shop-option-swatch img {
+  position:absolute;
+  z-index:1;
+  bottom:8px;
+  left:20%;
+  width:37px;
+  height:42px;
+  object-fit:contain;
+  object-position:bottom;
+}
+.chat-conversation-preview .message-scroll button.record-shop-message-cover:not(:disabled) {
+  pointer-events:auto;
+  touch-action:manipulation;
 }
 .message-bubble-shell:has(> .record-shop-portrait) { margin-top:calc(var(--record-portrait-size,46px) - 20px); }
 .record-shop-portrait {

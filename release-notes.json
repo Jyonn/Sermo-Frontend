@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.24.6",
+  "id": "2026.11.24.7",
   "publishedAt": "2026-11-24",
   "locales": {
     "zh-CN": {
-      "title": "唱片铺气泡与试听",
+      "title": "唱片铺的生活纹样",
       "items": [
-        "四款歌手气泡各有专属纹样，人物贴近气泡边缘。",
-        "点气泡侧边的光盘直接试听。光盘贴着气泡边缘，播放时加速旋转。",
-        "98 张专辑的试听片段延长至约 16 秒，专辑详情新增可拖动的播放进度条。"
+        "四款歌手气泡换上各自的配色与生活纹样，灵感来自扑克魔术、棒球、老车和手冲咖啡。",
+        "在个性化的聊天气泡「典藏」分类中，可以预览四款气泡并试听侧边光盘。"
       ]
     },
     "en": {
-      "title": "Record Shop Bubbles and Clips",
+      "title": "Everyday Details for Record Shop Bubbles",
       "items": [
-        "Each artist bubble has its own texture, with the portrait tucked against the bubble edge.",
-        "Tap a disc at the bubble edge to listen. The disc spins faster during playback.",
-        "All 98 album excerpts now run for about 16 seconds. Album details have a new player with a seek bar."
+        "The four artist bubbles have new colors and motifs inspired by card magic, baseball, vintage cars, and pour-over coffee.",
+        "Preview all four designs and play their album clips in the Legendary category of Chat Bubble personalization."
       ]
     }
   }

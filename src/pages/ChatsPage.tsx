@@ -9602,6 +9602,7 @@ export interface ChatsPagePreviewConfig {
   avatarName: string;
   avatarUri?: string;
   bubbleStyle: ChatBubbleStyle;
+  recordShop?: ChatMessage["recordShop"];
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string;
   dialogue?: Array<{
@@ -9764,6 +9765,9 @@ function previewMessagesForDemo(
       ? CHAT_PREVIEW_MIXED_KINDS[(mixedOffset + offset) % CHAT_PREVIEW_MIXED_KINDS.length]
       : kind;
     const message = previewMessage(currentKind === "gallery" ? "image" : currentKind, from, index, config);
+    if (config.recordShop) {
+      message.recordShop = offset === 0 ? { ...config.recordShop, album: undefined } : config.recordShop;
+    }
     if (currentKind === "text" && count > 1) {
       const text = i18n.t(`menu.previewMergedText${Math.min(offset + 1, 3)}` as TranslationKey);
       messages.push({ ...message, text, payload: { kind: "text", text } });
@@ -9829,7 +9833,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
         aria-label={t("menu.chatBubble")}
         className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`}
         onClickCapture={(event) => {
-          if ((event.target as HTMLElement).closest(".message-audio-transcribe")) return;
+          if ((event.target as HTMLElement).closest(".message-audio-transcribe, .record-shop-message-cover")) return;
           event.preventDefault();
           event.stopPropagation();
         }}
