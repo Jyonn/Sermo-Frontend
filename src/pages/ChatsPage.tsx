@@ -6,6 +6,7 @@ import { CompactMessageContent } from "../components/CompactMessageContent";
 import { useChristmasBackgroundOverride } from '../lib/personalTheme';
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {RecordShopDecorationView} from '../components/RecordShopAlbum';
+import { RecordShopBubbleArt } from "../components/RecordShopBubbleArt";
 import {
   memo,
   lazy,
@@ -1602,6 +1603,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
   const hasLinkPreview = Boolean(extractFirstMessageUrl(message.payload?.text ?? message.text));
+  const recordShopArtist = message.kind === "text" && !hasLinkPreview ? message.recordShop?.artist : undefined;
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -1691,7 +1693,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             isLast ? "group-end" : "",
             canOpenActions ? "message-bubble-actionable" : "",
             message.replyTo ? "has-reply" : "",
-            message.recordShop && message.kind === "text" && !hasLinkPreview ? "record-shop-text-bubble" : "",
+            recordShopArtist ? "record-shop-text-bubble" : "",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -1722,6 +1724,9 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
+          {recordShopArtist ? (
+            <RecordShopBubbleArt key={recordShopArtist} artist={recordShopArtist} animateOnView={isFirst || isEntering} />
+          ) : null}
           {message.replyTo ? (
             <button
               className="message-reply-preview"

@@ -8,6 +8,7 @@ import type {ActivityCampaignDTO,RecordShopAlbum as Album} from '../types';
 import {ActivityDetails} from './ActivityDetails';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {RecordShopAlbum,RecordShopDecorationView} from './RecordShopAlbum';
+import { RecordShopBubbleArt } from "./RecordShopBubbleArt";
 
 export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaignDTO;onUpdate:(value:ActivityCampaignDTO)=>void}) {
   const {t,language}=useI18n();
@@ -51,11 +52,17 @@ export function RecordShopActivity({activity,onUpdate}:{activity:ActivityCampaig
         <div className="record-shop-reward-preview">
           <div className="message-bubble-shell self group-start" data-record-shop-artist={catalogSinger}>
             <RecordShopDecorationView decoration={decoration} />
-            <div className="message-bubble self group-start record-shop-text-bubble">{t('recordShop.bubblePreviewFirst')}</div>
+            <div className="message-bubble self group-start record-shop-text-bubble">
+              <RecordShopBubbleArt artist={catalogSinger} animateOnView />
+              {t('recordShop.bubblePreviewFirst')}
+            </div>
           </div>
           {catalog.length ? <div className="message-bubble-shell self" data-record-shop-artist={catalogSinger}>
             <RecordShopDecorationView decoration={{...decoration,album:catalog[0]}} />
-            <div className="message-bubble self group-end record-shop-text-bubble">{t('recordShop.bubblePreviewNext')}</div>
+            <div className="message-bubble self group-end record-shop-text-bubble">
+              <RecordShopBubbleArt artist={catalogSinger} />
+              {t('recordShop.bubblePreviewNext')}
+            </div>
           </div> : null}
         </div>
         <p>{t('recordShop.bubbleElementsHint')}</p>

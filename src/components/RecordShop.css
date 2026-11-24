@@ -72,9 +72,9 @@
   --record-bubble-ink:#243b30;
   --record-detail:#e4c98d;
   --record-bubble-art:
-    linear-gradient(143deg,transparent 47%,var(--record-detail) 49% 52%,transparent 54%) right 12px bottom 0/21px 16px no-repeat,
-    repeating-conic-gradient(from 240deg at 57% 79%,transparent 0 12deg,var(--record-detail) 12deg 14deg,transparent 14deg 18deg) right bottom/60px 28px no-repeat;
-  --record-bubble-mask:radial-gradient(circle at calc(100% - 26px) calc(100% - 6px),transparent 17px,#000 17.5px 26px,transparent 26.5px);
+    radial-gradient(circle,var(--record-detail) 0 .7px,transparent 1.2px) 68% 22%/5px 5px no-repeat,
+    radial-gradient(circle,var(--record-detail) 0 1px,transparent 1.5px) 94% 36%/6px 6px no-repeat,
+    radial-gradient(ellipse at 66% 126%,transparent 61%,var(--record-detail) 62% 64%,transparent 65%) right bottom/69px 31px no-repeat;
 }
 [data-record-shop-artist="jj"] {
   --record-bubble-paper:#e8ecf5;
@@ -99,61 +99,53 @@
   width:min(49%,73px);
   border-radius:inherit;
   background:var(--record-bubble-art);
-  mask-image:var(--record-bubble-mask,linear-gradient(90deg,transparent,#000 93%));
+  mask-image:linear-gradient(90deg,transparent,#000 93%);
   opacity:.29;
   pointer-events:none;
 }
 [data-record-shop-artist].other > .record-shop-text-bubble::before { inset-inline:3px auto; transform:scaleX(-1); }
-[data-record-shop-artist] > .record-shop-text-bubble::after {
-  content:"";
-  position:absolute;
-  z-index:-1;
-  inset:auto 6px 5px auto;
-  color:var(--record-detail);
-  opacity:.47;
-  pointer-events:none;
+.record-shop-bubble-art {
+  position: absolute;
+  z-index: -1;
+  inset: auto 3px 1px auto;
+  width: min(112px, 76%);
+  height: min(44px, calc(100% - 3px));
+  pointer-events: none;
+  fill: none;
+  stroke: var(--record-detail);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-[data-record-shop-artist].other > .record-shop-text-bubble::after { inset-inline:6px auto; }
-[data-record-shop-artist="jay"] > .record-shop-text-bubble::after {
-  content:"♠" / "";
-  display:grid;
-  place-items:center;
-  width:13px;
-  height:17px;
-  border:1px solid currentColor;
-  border-radius:2px;
-  background:color-mix(in srgb,var(--record-bubble-tone) 52%,transparent);
-  box-shadow:2px 2px 0 color-mix(in srgb,currentColor 30%,transparent);
-  font:12px/1 Georgia,serif;
-  rotate:13deg;
+[data-record-shop-artist].other > .record-shop-text-bubble .record-shop-bubble-art {
+  left: 3px;
+  right: auto;
+  transform: scaleX(-1);
 }
-[data-record-shop-artist="leehom"] > .record-shop-text-bubble::after {
-  width:17px;
-  height:17px;
-  border:1px solid currentColor;
-  border-radius:50%;
-  background:
-    radial-gradient(ellipse at -28% 50%,transparent 50%,currentColor 52% 55%,transparent 58%),
-    radial-gradient(ellipse at 128% 50%,transparent 50%,currentColor 52% 55%,transparent 58%);
-  rotate:-19deg;
+.record-shop-art-mark { opacity: .48; }
+.record-shop-art-stroke {
+  opacity: 0;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
 }
-[data-record-shop-artist="david"] > .record-shop-text-bubble::after {
-  width:22px;
-  height:9px;
-  background:
-    radial-gradient(circle at 21% 50%,transparent 0 1.5px,currentColor 2px 4px,transparent 4.5px),
-    linear-gradient(currentColor,currentColor) right 1px center/15px 2px no-repeat,
-    linear-gradient(currentColor,currentColor) right 3px bottom 1px/2px 4px no-repeat,
-    linear-gradient(currentColor,currentColor) right 7px bottom 1px/2px 4px no-repeat;
-  rotate:-23deg;
+@media (prefers-reduced-motion: no-preference) {
+  [data-record-shop-artist]:not([data-record-shop-artist="jj"]) .record-shop-bubble-art.is-revealed .record-shop-art-mark {
+    animation: record-shop-resting-mark 1.8s ease-in-out;
+  }
+  .record-shop-art-stroke {
+    animation: record-shop-draw var(--record-stroke-duration) linear var(--record-stroke-delay) both;
+  }
 }
-[data-record-shop-artist="jj"] > .record-shop-text-bubble::after {
-  width:23px;
-  height:15px;
-  background:
-    radial-gradient(ellipse at 63% 50%,transparent 0 44%,currentColor 47% 61%,transparent 64%) right 1px top 2px/8px 7px no-repeat,
-    radial-gradient(ellipse at top,currentColor 0 68%,transparent 73%) left 2px top 2px/15px 13px no-repeat,
-    linear-gradient(currentColor,currentColor) left bottom/20px 1px no-repeat;
+@keyframes record-shop-resting-mark {
+  0%, 100% { opacity: .48; }
+  16%, 78% { opacity: 0; }
+}
+@keyframes record-shop-draw {
+  0% { stroke-dashoffset: 1; opacity: 0; }
+  12% { opacity: .65; }
+  48% { stroke-dashoffset: 0; opacity: .65; }
+  63% { stroke-dashoffset: 0; opacity: .50; }
+  100% { stroke-dashoffset: -1; opacity: 0; }
 }
 html:not([data-theme="dark"]) [data-record-shop-artist].other > .record-shop-text-bubble {
   --record-detail:color-mix(in srgb,var(--record-bubble-tone) 72%,var(--record-bubble-rim));
