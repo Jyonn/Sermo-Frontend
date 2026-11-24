@@ -347,7 +347,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
       {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
       {statement.external_media ? (
         <div className="square-external-media" onClick={(event) => event.stopPropagation()}>
-          <LinkPreviewCard preview={statement.external_media} />
+          <LinkPreviewCard preview={statement.external_media} statementId={statement.statement_id} />
         </div>
       ) : null}
       {statement.chat_record?.items?.length ? (

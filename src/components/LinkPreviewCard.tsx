@@ -24,10 +24,12 @@ import {isSocialUrl,SocialLinkPreview} from './SocialLinkPreview';
 function hostname(url:string){try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}}
 
 /** One link lifecycle and provider dispatcher for chat, shares, composers and feeds. */
-export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messageId,fitMedia=false,presentation='card'}:{preview?:LinkPreviewDTO|null;url?:string;messageId?:number|string;fitMedia?:boolean;presentation?:'card'|'cover'}){
+export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messageId,statementId,fitMedia=false,presentation='card'}:{preview?:LinkPreviewDTO|null;url?:string;messageId?:number|string;statementId?:number;fitMedia?:boolean;presentation?:'card'|'cover'}){
   const {t}=useI18n(),active=usePageActive();
   const [resolved,setResolved]=useState(preview??null),root=useRef<HTMLAnchorElement>(null),[visible,setVisible]=useState(false);
   const currentUrl=resolved?.url||preview?.url||url;
+  const musicSource=typeof messageId==='number'?{surface:'chat' as const,source_id:messageId}:
+    statementId!==undefined?{surface:'square' as const,source_id:statementId}:undefined;
   const drop=dropShareUrl(url)||dropShareUrl(currentUrl),monifa=monifaShareUrl(url)||monifaShareUrl(currentUrl);
   useEffect(()=>setResolved(preview??null),[preview]);
   useEffect(()=>{if(!root.current)return;const observer=new IntersectionObserver(([entry])=>setVisible(entry.isIntersecting),{rootMargin:'160px'});observer.observe(root.current);return()=>observer.disconnect()},[resolved?.status]);
@@ -46,9 +48,9 @@ export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messa
     if(isSocialUrl(currentUrl))return <SocialLinkPreview preview={resolved} url={currentUrl} fitMedia={fitMedia}/>;
     const data=resolved?.provider_data;
     if(resolved?.status==='ready'){
-      if(presentation==='cover'&&isMusicData(data))return <SquareMusicCover music={data} uri={data.cover_url||resolved.image_url||null}/>;
-      if(isPockloSong(data))return <PockloSongCard reference={data}/>;
-      if(isMusicData(data))return <MusicPreview music={data}/>;
+      if(presentation==='cover'&&isMusicData(data))return <SquareMusicCover music={data} uri={data.cover_url||resolved.image_url||null} source={musicSource}/>;
+      if(isPockloSong(data))return <PockloSongCard reference={data} source={musicSource}/>;
+      if(isMusicData(data))return <MusicPreview music={data} source={musicSource}/>;
       if(isDouyinVideoData(data))return <DouyinVideoPreview previewId={resolved.preview_id} video={data} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
       if(isSocialMediaData(data))return <SocialMediaPreview media={data} previewId={resolved.preview_id} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
       if(isStillfolioCollection(data))return <StillfolioPreview collection={data} previewId={resolved.preview_id}/>;

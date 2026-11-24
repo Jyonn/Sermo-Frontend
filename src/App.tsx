@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation,useParams } from "react-router-dom";
 import {ActivityOverlayProvider} from './lib/activityOverlay';
+import {RecordShopDiscoveries} from './components/RecordShopAlbum';
 import {FeatureUnavailablePage} from './components/FeatureUnavailablePage';
 import {useI18n} from './lib/language';
 import {availableAppHome} from './lib/availableAppHome';
@@ -152,6 +153,7 @@ export default function App() {
 
   return (
     <ActivityOverlayProvider>
+      <RecordShopDiscoveries/>
       {ready&&session&&<ChronelleBindingGate key={session.user.user_id} userId={session.user.user_id}/>}
       {ready&&session&&birthdayActive&&<BirthdayExperience/>}
       <RouteResourceBoundary>

@@ -1003,7 +1003,24 @@ export interface ActivityMilestoneDTO {
   reward_label: string;
 }
 
+export interface RecordShopAlbum {
+  id:string;
+  name:string;
+  title:string;
+  tier:'gold'|'platinum'|'diamond'|'obsidian';
+  cover:string;
+  clip?:string;
+}
+
+export interface RecordShopDecoration {
+  artist:'jay'|'leehom'|'david'|'jj';
+  portrait:string;
+  album?:RecordShopAlbum;
+  first?:boolean;
+}
+
 export interface ActivityCampaignDTO {
+  record_shop?: {points:number;thresholds:[number,number];singers:string[];equipped:string;choices:number;portraits:Record<string,string>;albums:Record<string,RecordShopAlbum[]>};
   participation?:{count:number;users:Array<{user_id:number;name:string;avatar_uri?:string}>}|null;
   explorer?: {
     year: number;
@@ -1398,6 +1415,7 @@ export interface FriendInvitePreviewDTO {
 
 export interface ChatMessageDTO {
   message_id: number;
+  record_shop?: RecordShopDecoration;
   client_message_id?: string | null;
   user: TinyUserDTO;
   type: number;
@@ -1583,6 +1601,7 @@ export interface AuthSession {
 
 export interface ChatMessage {
   id: number | string;
+  recordShop?: RecordShopDecoration;
   clientId: string;
   userId?: number;
   from: "self" | "other";

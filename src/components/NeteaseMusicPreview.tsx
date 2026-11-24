@@ -6,9 +6,11 @@ import type { MusicProviderDataDTO } from "../types";
 import {MusicPlayerDrawer} from './MusicPlayerDrawer';
 import {isPockloSong,songPresentation} from '../lib/pockloSong';
 import {useSongMetadata} from '../lib/pockloSongResource';
+import type {MusicSource} from '../lib/recordShopPlayback';
 
 interface NeteaseMusicPreviewProps {
   music: MusicProviderDataDTO;
+  source?: MusicSource;
 }
 
 export function isMusicData(value: unknown): value is MusicProviderDataDTO {
@@ -23,7 +25,7 @@ export function isMusicData(value: unknown): value is MusicProviderDataDTO {
     && Array.isArray(candidate.artists);
 }
 
-export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
+export function MusicPreview({ music: supplied, source }: NeteaseMusicPreviewProps) {
   const { t } = useI18n();
   const player = useMusicPlayer();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,8 +41,8 @@ export function MusicPreview({ music: supplied }: NeteaseMusicPreviewProps) {
   const audioUnavailable = music.provider==='pocklo_music'?(active&&(player.songError===404||player.songError===410)):!music.audio_url || (active && player.unavailable);
   const artists = music.artists.join(" / ") || (music.provider==='pocklo_music'?t('pocklo.unknownArtist'):'');
 
-  const togglePlayback = () => { if (active) player.toggle(); else player.play(music); };
-  const seek = (value: number) => { if (!active) player.play(music); player.seek(value); };
+  const togglePlayback = () => player.play(music,source);
+  const seek = (value: number) => { if (!active) player.play(music,source); player.seek(value); };
 
   const cover = music.cover_url&&failedCover!==music.cover_url ? <img alt="" src={music.cover_url} onError={()=>setFailedCover(music.cover_url)} /> : <span className="material-symbols-outlined">music_note</span>;
 

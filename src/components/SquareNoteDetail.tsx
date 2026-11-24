@@ -86,7 +86,7 @@ export function SquareNoteDetail(p:Props){
       {s.can_delete||s.can_pin||s.can_mute ? <OverlayIconButton icon="more_horiz" aria-label={t('common.more')} onClick={p.onMore} /> : null}
     </SquareNoteDetailHeader>
     <div className="square-reader-scroll"><div className="square-reader-layout">{photoStage}<div className="square-reader-reading">
-      {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} fitMedia/></div>:null}
+      {!photos.length&&s.external_media?<div className="square-reader-external"><LinkPreviewCard preview={s.external_media} statementId={s.statement_id} fitMedia/></div>:null}
       {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={()=>openAsset(photos.length)}/>:null}
       {audio?<audio className="square-reader-audio" src={audio.uri} controls preload="metadata" onPlay={event=>claimMediaPlayback(event.currentTarget)}/>:null}
       {s.chat_record?<button className="square-reader-chat-record" onClick={()=>window.dispatchEvent(new CustomEvent('sermo:forward-bundle',{detail:s.chat_record}))} type="button"><span className="material-symbols-outlined">forum</span>{t('message.forwardBundleSnapshot')}<span className="material-symbols-outlined">chevron_right</span></button>:null}

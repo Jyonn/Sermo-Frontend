@@ -8,6 +8,7 @@ import { usePlaybackWait } from "../components/MediaWaitFeedback";
 import {SongSession,isPockloSong,songLyrics,songPresentation} from './pockloSong';
 import {fetchSong,useSongMetadata} from './pockloSongResource';
 import {musicLyrics} from './musicLyrics';
+import {startRecordShopPlayback,type MusicSource} from './recordShopPlayback';
 
 type Player = {
   music: MusicProviderDataDTO | null;
@@ -17,7 +18,7 @@ type Player = {
   unavailable: boolean;
   loading: boolean;
   songError: number;
-  play: (music: MusicProviderDataDTO) => void;
+  play: (music: MusicProviderDataDTO, source?:MusicSource) => void;
   toggle: () => void;
   seek: (time: number) => void;
   close: () => void;
@@ -43,6 +44,7 @@ export function useMusicPlayer() {
 export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const { t } = useI18n();
   const audio = useRef<HTMLAudioElement>(null);
+  const credit=useRef<ReturnType<typeof startRecordShopPlayback>>(null);
   const pendingPlay = useRef(false);
   const [music, setMusic] = useState<MusicProviderDataDTO | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -147,10 +149,16 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     }
     else audio.current.pause();
   };
-  const play = (next: MusicProviderDataDTO) => {
-    if (sameMusic(music, next)) { toggle(); return; }
+  const play = (next: MusicProviderDataDTO, source?:MusicSource) => {
+    if (sameMusic(music, next)) {
+      if (!credit.current && (audio.current?.currentTime ?? 0) === 0) credit.current=startRecordShopPlayback(source,next);
+      toggle();
+      return;
+    }
+    credit.current?.stop();
     audio.current?.pause();
     songSession.current?.stop();setSongError(0);
+    credit.current=startRecordShopPlayback(source,next);
     setTime(0);
     setDuration((next.duration_ms || 0) / 1000);
     setUnavailable(false);
@@ -167,7 +175,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     audio.current.currentTime = next;
     setTime(next);
   };
-  const close = () => { songSession.current?.stop();setSongError(0);audio.current?.pause(); playbackWait.ready(); setMusic(null); setTime(0); setDrawerOpen(false); };
+  const close = () => { credit.current?.stop();credit.current=null;songSession.current?.stop();setSongError(0);audio.current?.pause(); playbackWait.ready(); setMusic(null); setTime(0); setDrawerOpen(false); };
   const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
   const brand = music ? musicBrand(music.provider) : null;
 
@@ -175,10 +183,10 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     {children}
     <audio ref={audio} src={music?.provider==='pocklo_music'?undefined:music?.audio_url || undefined} crossOrigin={music?.provider==='pocklo_music'?'anonymous':undefined} preload={music?.provider==='pocklo_music'?'metadata':'none'}
       onPlay={event => {claimMediaPlayback(event.currentTarget);setUnavailable(false)}} onPlaying={() => { setPlaying(true); playbackWait.ready(); }}
-      onPause={() => { setPlaying(false); playbackWait.stop(); }} onWaiting={playbackWait.waiting} onStalled={playbackWait.waiting}
-      onEnded={() => { setPlaying(false); playbackWait.ready(); }} onError={() => { setPlaying(false);if(isPockloSong(currentMusic.current)){songSession.current?.mediaError();return}playbackWait.fail(); setUnavailable(true); }}
+      onPause={event => { credit.current?.collect(event.currentTarget);setPlaying(false); playbackWait.stop(); }} onWaiting={playbackWait.waiting} onStalled={playbackWait.waiting}
+      onEnded={event => { void credit.current?.complete(event.currentTarget);setPlaying(false); playbackWait.ready(); }} onError={() => { setPlaying(false);if(isPockloSong(currentMusic.current)){songSession.current?.mediaError();return}playbackWait.fail(); setUnavailable(true); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
-      onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
+      onTimeUpdate={(event) => {credit.current?.collect(event.currentTarget);setTime(event.currentTarget.currentTime);}} />
     {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={brand?.name} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg`, "--netease-red": brand?.color } as CSSProperties}
       onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}
       onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}

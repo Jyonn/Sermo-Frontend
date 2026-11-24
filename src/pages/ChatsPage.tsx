@@ -5,6 +5,7 @@ import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
 import { useChristmasBackgroundOverride } from '../lib/personalTheme';
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
+import {RecordShopDecorationView} from '../components/RecordShopAlbum';
 import {
   memo,
   lazy,
@@ -1014,6 +1015,7 @@ function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (["system", "official_notice", "submission_invite"].includes(current.kind) || ["system", "official_notice", "submission_invite"].includes(neighbor.kind)) return false;
   if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
   if (visibleBubbleStyle(current.chatBubbleStyle) !== visibleBubbleStyle(neighbor.chatBubbleStyle)) return false;
+  if (current.recordShop?.artist !== neighbor.recordShop?.artist) return false;
   if (current.from === "self") return true;
   if (current.userId !== undefined && neighbor.userId !== undefined) return current.userId === neighbor.userId;
   return current.name === neighbor.name && current.avatarUri === neighbor.avatarUri;
@@ -1501,7 +1503,7 @@ function renderMessageContent(
   if(['profile','research_task','research_comment','research_reply'].includes(message.kind)&&message.payload)return <SharedReferenceMessage payload={message.payload}/>;
 
   const text = message.payload?.text ?? message.text;
-  const prefix = groupClassName.split(" ").includes("group-start")
+  const prefix = !message.recordShop && groupClassName.split(" ").includes("group-start")
     ? <ExplorerAiExpression messageKey={message.clientId} bubbleStyle={bubbleStyle ?? message.chatBubbleStyle} />
     : null;
   const linkPreview = message.payload?.link_preview;
@@ -1655,7 +1657,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
       } : undefined}
     >
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
-      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`}>
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}${message.recordShop?' has-record-shop-decoration':''}`}>
+        {message.recordShop?<RecordShopDecorationView decoration={message.recordShop} first={isFirst}/>:null}
         {showRetry ? (
           <button aria-label={i18n.t(message.kind === "text" ? "chat.editFailedText" : "message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">{message.kind === "text" ? "edit" : "refresh"}</span>
@@ -1730,10 +1733,10 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
-          {isFirst ? <NikoBubbleRunner /> : null}
-          {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
-          <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} />
-          {isLast ? <FufuBubbleRunner /> : null}
+          {!message.recordShop&&isFirst ? <NikoBubbleRunner /> : null}
+          {!message.recordShop&&isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
+          {!message.recordShop ? <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} /> : null}
+          {!message.recordShop&&isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
     </div>

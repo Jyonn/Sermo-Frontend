@@ -59,6 +59,7 @@ export function mapChatMessageDTO(
     : message.payload?.text || message.content;
   return {
     id: message.message_id,
+    recordShop: message.record_shop,
     clientId: message.client_message_id || `server:${message.message_id}`,
     ...mapChatMessageSender(message, currentUserId),
     type: message.type,

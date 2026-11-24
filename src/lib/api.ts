@@ -1201,6 +1201,18 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
+  recordShopStart(key: string, body: {surface:'chat'|'square';source_id:number;provider:string;song_id:number|string}) {
+    return request<{receipt:string|null}>(`/activities/${key}/record-shop/listen-start`, { auth:true, method:'POST', body });
+  },
+
+  recordShopFinish(key: string, body: {receipt:string;duration_ms:number;played:number[][];ended:true}) {
+    return request<{points:number}>(`/activities/${key}/record-shop/listen-finish`, { auth:true, method:'POST', body });
+  },
+
+  recordShopSinger(key:string, singer:string) {
+    return request<NonNullable<ActivityCampaignDTO['record_shop']>>(`/activities/${key}/record-shop/singer`, { auth:true, method:'POST', body:{singer} });
+  },
+
   claimExplorerReward(key: string, tier: number) {
     return request<ActivityCampaignDTO>(`/activities/${key}/explorer/rewards/${tier}/claim`, { method: "POST", auth: true });
   },
@@ -1392,6 +1404,11 @@ export const api = {
       expectedScope,
       query: { chat_id },
       body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, resource_id: resource_id ?? null, live_transcript_receipt },
+    }).then(message=>{
+      if(message.record_shop?.first && message.record_shop.album && typeof window!=='undefined') {
+        window.dispatchEvent(new CustomEvent('frienden:record-shop-discovery',{detail:{messageId:message.message_id,album:message.record_shop.album}}));
+      }
+      return message;
     });
   },
 
