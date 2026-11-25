@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.5",
+  "id": "2026.11.25.6",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "账号身份徽记更新",
+      "title": "年末来信",
       "items": [
-        "官方和运营账号改用简洁的图标徽记。"
+        "翻开新版年度来信，查看每月聊天记录、常聊会话和广场互动。"
       ]
     },
     "en": {
-      "title": "Account badge update",
+      "title": "Your year-end letter",
       "items": [
-        "Official accounts and space operators now use compact icon badges."
+        "Open the redesigned annual letter to see your monthly chat activity, favorite conversation, and Square interactions."
       ]
     }
   }

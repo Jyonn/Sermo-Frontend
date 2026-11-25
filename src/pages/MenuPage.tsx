@@ -2163,7 +2163,7 @@ export default function MenuPage() {
               <strong>{t("recap.title")}</strong>
               <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
             </button>
-            {annualRecapOpen && <AnnualRecap key={session.user.user_id} name={session.user.name} onClose={() => setAnnualRecapOpen(false)} />}
+            {annualRecapOpen && <AnnualRecap key={session.user.user_id} name={session.user.name} spaceName={space?.name} onClose={() => setAnnualRecapOpen(false)} />}
           </>
         )}
         <div className="menu-profile-card">

@@ -1,52 +1,408 @@
 .annual-recap {
+  --recap-paper: #f5eddf;
+  --recap-ink: #273b31;
+  --recap-muted: #5c6454;
+  --recap-rule: #d2c6b2;
+  --recap-pressed: #e8dfd0;
+  --recap-accent: #8d392d;
+  --recap-button: #8d392d;
+  --recap-on-button: #fff2dc;
+  --recap-serif: "Songti SC", "STSong", "Noto Serif SC", "Noto Serif CJK SC", "Yu Mincho", Georgia, serif;
   position: fixed;
   inset: 0;
   z-index: 1250;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  justify-items: center;
-  align-items: center;
-  gap: 20px;
+  place-items: safe center;
   overflow: auto;
-  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
-  background: radial-gradient(ellipse at 50% 28%, #533b36, #2d231f 80%);
-  color: #fbecda;
+  overscroll-behavior: contain;
+  color: var(--recap-ink);
+  background: #101f1c;
 }
-.annual-recap-header, .annual-recap-footer {
-  width: min(100%, 620px);
+
+html[data-theme="dark"] .annual-recap {
+  --recap-paper: #202c27;
+  --recap-ink: #f0e5ce;
+  --recap-muted: #c3c4af;
+  --recap-rule: #596258;
+  --recap-pressed: #2d3a32;
+  --recap-accent: #f0b29d;
+  --recap-button: #eeba9d;
+  --recap-on-button: #3a231b;
+  background: #101813;
+}
+
+.annual-recap-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  min-height: 100%;
+  background: var(--recap-paper);
+}
+
+.annual-recap-art {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
+  min-height: clamp(105px, 19svh, 185px);
+  padding: 60px 24px 14px;
+  background: #17322e url("/activity/year-end-letter/envelope.webp") center 48% / cover no-repeat;
+  color: #f1dcb2;
 }
-.annual-recap button {
+
+.annual-recap-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#102723a3, transparent 60%, #1027237d);
+  pointer-events: none;
+}
+
+.annual-recap-frame[data-chapter="cover"] .annual-recap-art,
+.annual-recap-frame[data-chapter="closing"] .annual-recap-art {
+  min-height: clamp(190px, 37svh, 378px);
+}
+
+.annual-recap-art-brand,
+.annual-recap-art-year {
+  position: relative;
+  font-family: Georgia, serif;
+}
+
+.annual-recap-art-brand {
+  font-size: 14px;
+  letter-spacing: .07em;
+}
+
+.annual-recap-art-year {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 24px;
+  letter-spacing: .085em;
+}
+
+.annual-recap-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 max(23px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(23px, env(safe-area-inset-left));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--recap-rule) 33%, transparent), transparent 17%),
+    var(--recap-paper);
+}
+
+.annual-recap-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.annual-recap-header > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.annual-recap-header > span .material-symbols-outlined { font-size: 17px; }
+.annual-recap button .material-symbols-outlined { font-size: 18px; }
+.annual-recap button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+.annual-recap-close,
+.annual-recap-primary,
+.annual-recap-previous {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
-  min-width: 44px;
-  padding-inline: 14px;
-  color: inherit;
-  background: #ffffff12;
-  border: 1px solid #ffffff36;
+  border: 1px solid transparent;
   border-radius: 999px;
   font: inherit;
+  cursor: pointer;
 }
-.annual-recap button:disabled { opacity: .42; }
-.annual-recap button:focus-visible { outline: 2px solid #f2b981; outline-offset: 3px; }
+
+.annual-recap-close {
+  width: 44px;
+  padding: 0;
+  border-color: #efdbb967;
+  color: #f7e7c8;
+  background: #122b27a8;
+}
+
+.annual-recap-back, .annual-recap-x { display: inline-grid; place-items: center; }
+.annual-recap-x { display: none; }
+
 .annual-recap-paper {
-  width: min(100%, 620px);
-  min-height: min(45vh, 360px);
   display: grid;
   align-content: center;
   gap: 18px;
-  box-sizing: border-box;
-  padding: clamp(25px, 7vw, 66px);
-  color: #472a23;
-  background: repeating-linear-gradient(#f8ead6 0 29px, #e8d8c3 30px, #f8ead6 31px);
-  border: 1px solid #e0c8ac;
-  border-radius: 3px 18px 5px 8px;
-  box-shadow: 0 18px 55px #1c100b77;
+  flex: 1;
+  min-width: 0;
+  padding-block: 28px;
+  touch-action: pan-y pinch-zoom;
+  animation: annual-recap-turn 350ms cubic-bezier(.22, 1, .36, 1) both;
 }
-.annual-recap-paper h1, .annual-recap-paper p { margin: 0; }
-.annual-recap-paper h1 { font: 600 clamp(27px, 6vw, 49px)/1.18 "Songti SC", Georgia, serif; }
-.annual-recap-paper p { font-size: clamp(15px, 3vw, 19px); line-height: 1.7; }
-.annual-recap-number { font: 500 clamp(44px, 10vw, 82px)/1 Georgia, serif; color: #963f3a; }
-.annual-recap-sticker { width: 112px; height: 112px; object-fit: contain; }
+
+@keyframes annual-recap-turn {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.annual-recap-kicker {
+  color: var(--recap-accent);
+  font-weight: 650;
+  font-size: 13px;
+  letter-spacing: .09em;
+  overflow-wrap: anywhere;
+}
+
+.annual-recap-paper :is(h1, p, dl, figure) { margin: 0; }
+
+.annual-recap-paper h1 {
+  font: 650 clamp(27px, 6.65vw, 42px)/1.15 var(--recap-serif);
+  text-wrap: balance;
+}
+
+.annual-recap-paper p:not(.annual-recap-kicker) {
+  color: var(--recap-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.annual-recap-paper p.annual-recap-letter:not(.annual-recap-kicker) {
+  max-width: min(22em, 100%);
+  font-family: var(--recap-serif);
+  font-size: clamp(16px, 3.8vw, 19px);
+}
+
+.annual-recap-frame[data-chapter="cover"] h1,
+.annual-recap-frame[data-chapter="closing"] h1 {
+  font-size: clamp(42px, 11.8vw, 78px);
+  letter-spacing: -.03em;
+  text-wrap: initial;
+}
+
+.annual-recap-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(72px, 100%), 1fr));
+  gap: 9px;
+}
+
+.annual-recap-totals > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 11px 0 5px;
+  border-block-start: 1px solid var(--recap-rule);
+}
+
+.annual-recap-totals dt {
+  color: var(--recap-muted);
+  font-size: clamp(11px, 2.9vw, 13px);
+  line-height: 1.4;
+}
+
+.annual-recap-totals dd {
+  margin: 0;
+  font: 600 clamp(19px, 5.25vw, 36px)/1.08 Georgia, serif;
+  letter-spacing: -.04em;
+  overflow-wrap: anywhere;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.annual-recap-totals > div:first-child dd { color: var(--recap-accent); }
+
+.annual-recap-chart {
+  display: grid;
+  gap: 9px;
+}
+
+.annual-recap-chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 3px 12px;
+  color: var(--recap-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.annual-recap-chart figcaption span { color: var(--recap-accent); }
+
+.annual-recap-chart ol {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(3px, 1.6vw, 9px);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.annual-recap-chart li { min-width: 0; }
+
+.annual-recap-chart-month {
+  display: grid;
+  width: 100%;
+  padding: 0;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+  color: var(--recap-muted);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 10px;
+}
+
+.annual-recap-chart-track {
+  display: flex;
+  align-items: flex-end;
+  height: clamp(47px, 10svh, 105px);
+  border-bottom: 1px solid var(--recap-rule);
+}
+
+.annual-recap-chart-track > span {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: color-mix(in srgb, var(--recap-ink) 61%, var(--recap-paper));
+}
+
+.annual-recap-chart-month[aria-pressed="true"] { color: var(--recap-accent); font-weight: 750; }
+.annual-recap-chart-month[aria-pressed="true"] .annual-recap-chart-track > span { background: var(--recap-accent); }
+
+.annual-recap-favorite {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 13px;
+  row-gap: 5px;
+  align-items: center;
+  border-block: 1px solid var(--recap-rule);
+  padding-block: 14px;
+}
+
+.annual-recap-favorite .material-symbols-outlined {
+  grid-row: span 2;
+  color: var(--recap-accent);
+  font-size: 26px;
+}
+
+.annual-recap-favorite strong { font-size: 19px; overflow-wrap: anywhere; }
+.annual-recap-favorite > span:last-child { color: var(--recap-muted); font-size: 13px; }
+
+.annual-recap-postcard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-block: 1px solid var(--recap-rule);
+  padding-block: 12px;
+}
+
+.annual-recap-postcard img {
+  flex: none;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.annual-recap-footer { display: grid; gap: 11px; }
+
+.annual-recap-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+  color: var(--recap-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.annual-recap-meta > :first-child { overflow-wrap: anywhere; }
+.annual-recap-meta > :last-child { white-space: nowrap; }
+
+.annual-recap-progress {
+  display: flex;
+  gap: 6px;
+}
+
+.annual-recap-progress span {
+  flex: 1;
+  height: 3px;
+  background: var(--recap-rule);
+  border-radius: 2px;
+}
+
+.annual-recap-progress [data-progress="past"] { background: var(--recap-muted); }
+.annual-recap-progress [data-progress="current"] { background: var(--recap-accent); }
+
+.annual-recap-controls { display: flex; gap: 12px; justify-content: space-between; }
+.annual-recap-primary, .annual-recap-previous { padding-inline: 15px; font-size: 13px; font-weight: 650; }
+.annual-recap-primary { color: var(--recap-on-button); background: var(--recap-button); }
+.annual-recap-previous { color: var(--recap-ink); background: transparent; }
+.annual-recap-previous:disabled { visibility: hidden; }
+.annual-recap-status { justify-items: start; }
+
+@media (max-width: 719px) {
+  .annual-recap-header {
+    position: absolute;
+    z-index: 1;
+    top: max(9px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+    color: #f3e3c1;
+    flex-direction: row-reverse;
+  }
+
+  .annual-recap-sheet { position: static; }
+  .annual-recap-header > span > .material-symbols-outlined { display: none; }
+  .annual-recap-frame:not([data-chapter="cover"], [data-chapter="closing"]) .annual-recap-paper {
+    align-content: start;
+    padding-top: clamp(28px, 8svh, 70px);
+  }
+}
+
+@media (min-width: 720px) {
+  .annual-recap { padding: 23px max(23px, env(safe-area-inset-right)) 23px max(23px, env(safe-area-inset-left)); }
+
+  .annual-recap-frame {
+    grid-template-columns: 4fr 5fr;
+    grid-template-rows: 1fr;
+    width: min(100%, 1060px);
+    min-height: min(600px, calc(100svh - 46px));
+    overflow: hidden;
+    border: 1px solid #e7d7b74f;
+    border-radius: 8px;
+    box-shadow: 0 20px 56px #0005;
+  }
+
+  .annual-recap-art {
+    align-items: end;
+    padding: 25px 28px;
+    border-inline-end: 1px solid #e7d7b747;
+  }
+
+  .annual-recap-art-year { font-size: 34px; }
+  .annual-recap-sheet { padding: 16px clamp(26px, 4vw, 54px) 22px; }
+  .annual-recap-header { justify-content: space-between; min-height: 44px; color: var(--recap-muted); }
+  .annual-recap-close { border-color: var(--recap-rule); color: var(--recap-ink); background: transparent; }
+  .annual-recap-back { display: none; }
+  .annual-recap-x { display: inline-grid; }
+  .annual-recap-paper { padding-block: 32px; }
+  .annual-recap-controls { gap: 16px; }
+}
+
+@media (hover: hover) {
+  .annual-recap-primary:hover { filter: brightness(1.12); }
+  .annual-recap-previous:hover:not(:disabled),
+  .annual-recap-close:hover { box-shadow: inset 0 0 0 1px currentColor; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annual-recap-paper { animation: none; }
+}
