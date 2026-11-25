@@ -13,21 +13,21 @@ import { recordShopPortraitPoster } from "./RecordShopPortrait";
 import "./RecordShopActivity.css";
 
 const rules = ["shareRule", "listenRule", "dedupeRule", "selectionRule", "discoveryRule"] as const;
-const statusIcons = { equipped: "check", equip: "radio_button_unchecked", choose: "add", locked: "lock" };
+const statusIcons = { claimed: "check", claim: "add", locked: "lock" };
 const tiers = ["gold", "platinum", "diamond", "obsidian"] as const;
 type Singer = (typeof singers)[number];
 type ShopInfo = NonNullable<ActivityCampaignDTO["record_shop"]>;
 
 function singerStatus(info: ShopInfo, singer: Singer) {
-  if (info.equipped === singer) return "equipped";
-  if (info.singers.includes(singer)) return "equip";
-  return info.choices ? "choose" : "locked";
+  if (info.singers.includes(singer)) return "claimed";
+  return info.choices ? "claim" : "locked";
 }
 
-export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
+export function RecordShopActivity({ activity, dateLabel, onUpdate, onConfigure }: {
   activity: ActivityCampaignDTO;
   dateLabel: string;
   onUpdate: (value: ActivityCampaignDTO) => void;
+  onConfigure: () => void;
 }) {
   const { t, language } = useI18n();
   const [pending, setPending] = useState("");
@@ -53,11 +53,12 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
     setCatalogSinger(singer);
     setTier(tiers.find(value => info.albums[singer]?.some(item => item.tier === value)) ?? "gold");
   };
-  const choose = async (singer: Singer) => {
-    if (pending) return;
+  const claim = async (singer: Singer) => {
+    if (pending || !activity.active || singerStatus(info, singer) !== "claim") return;
     setPending(singer);
     try {
-      onUpdate({ ...activity, record_shop: await api.recordShopSinger(activity.key, singer) });
+      onUpdate({ ...activity, record_shop: await api.claimRecordShopSinger(activity.key, singer) });
+      showToast(t("recordShop.claimed"));
     } catch (error) {
       showToast(error instanceof Error ? error.message : t("common.retry"), "error");
     } finally {
@@ -101,7 +102,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                   return (
                     <button
                       aria-haspopup="dialog"
-                      data-equipped={status === "equipped"}
+                      data-claimed={status === "claimed"}
                       data-record-shop-artist={singer}
                       key={singer}
                       onClick={() => {
@@ -155,13 +156,17 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate }: {
                     className="record-shop-reward-action"
                     type="button"
                     aria-busy={pending === catalogSinger}
-                    disabled={(!activity.active && catalogStatus === "choose") || Boolean(pending) || catalogStatus === "locked" || catalogStatus === "equipped"}
-                    onClick={() => void choose(catalogSinger)}
+                    disabled={!activity.active || Boolean(pending) || catalogStatus !== "claim"}
+                    onClick={() => void claim(catalogSinger)}
                   >
                     <span aria-hidden="true" className="material-symbols-outlined">{statusIcons[catalogStatus]}</span>
                     {pending === catalogSinger ? t("common.processing") : t(`recordShop.${catalogStatus}`)}
                   </button>
                 </header>
+                {catalogStatus === "claimed" && <button className="record-shop-configure" type="button" onClick={onConfigure}>
+                  {t("recordShop.configure")}
+                  <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </button>}
                 <div className="record-shop-reward-preview">
                   <div className="message-bubble-shell self group-start" data-record-shop-artist={catalogSinger}>
                     <RecordShopDecorationView decoration={decoration} />

@@ -257,6 +257,7 @@ export interface UserMeDTO extends UserDTO {
   is_permanent_vip?: boolean;
   permanent_vip_campaign?: PermanentVipCampaignDTO;
   resource_inventory?: UserResourceInventoryDTO[];
+  record_shop_bubbles?: { claimed: RecordShopDecoration["artist"][]; equipped: RecordShopDecoration["artist"] | "" };
   growth?: UserGrowthDTO;
   plaza_greeting?: string;
   name_changed_at?: number | null;
@@ -296,6 +297,7 @@ export interface PersonalizationDTO {
   avatar_frame_style: AvatarFrameStyle;
   show_self_avatar: boolean;
   profile_card_theme?: ProfileCardTheme;
+  record_shop_singer?: RecordShopDecoration["artist"] | "";
 }
 
 export interface PermanentVipCampaignDTO {

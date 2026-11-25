@@ -1213,8 +1213,8 @@ export const api = {
     return request<{points:number}>(`/activities/${key}/record-shop/listen-finish`, { auth:true, method:'POST', body });
   },
 
-  recordShopSinger(key:string, singer:string) {
-    return request<NonNullable<ActivityCampaignDTO['record_shop']>>(`/activities/${key}/record-shop/singer`, { auth:true, method:'POST', body:{singer} });
+  claimRecordShopSinger(key:string, singer:string) {
+    return request<NonNullable<ActivityCampaignDTO['record_shop']>>(`/activities/${key}/record-shop/claim`, { auth:true, method:'POST', body:{singer} });
   },
 
   claimExplorerReward(key: string, tier: number) {

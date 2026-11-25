@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.11",
+  "id": "2026.11.25.12",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "四款歌手动态头像框",
+      "title": "回声唱片铺气泡领取优化",
       "items": [
-        "薛之谦、方大同、邓紫棋和陈奕迅的动态头像框，分别在 LV14、LV15、LV17 和 LV18 自动解锁。"
+        "男女声两期活动领取歌手气泡后，可在聊天气泡设置中选择使用。"
       ]
     },
     "en": {
-      "title": "Four animated singer avatar frames",
+      "title": "Record Shop bubble claims",
       "items": [
-        "Animated avatar frames for Joker Xue, Khalil Fong, G.E.M. and Eason Chan unlock automatically at levels 14, 15, 17 and 18."
+        "Claim artist bubbles from either Record Shop edition, then choose which to use in chat bubble settings."
       ]
     }
   }

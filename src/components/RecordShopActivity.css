@@ -304,9 +304,9 @@ html[data-theme="dark"] .record-shop-activity[data-edition="women"] {
   line-height: 1.2;
 }
 .record-shop-sleeve-label .material-symbols-outlined { font-size: 13px; }
-.record-shop-singers button[data-equipped="true"] { border-color: #e1b47d; }
-.record-shop-singers button[data-equipped="true"] .record-shop-sleeve-label { background: #f2d9b0; color: #38251d; }
-.record-shop-singers button[data-equipped="true"] small { color: #67402c; }
+.record-shop-singers button[data-claimed="true"] { border-color: #e1b47d; }
+.record-shop-singers button[data-claimed="true"] .record-shop-sleeve-label { background: #f2d9b0; color: #38251d; }
+.record-shop-singers button[data-claimed="true"] small { color: #67402c; }
 .record-shop-sleeve-open {
   position: absolute;
   inset: 8px 8px auto auto;
@@ -439,6 +439,19 @@ html[data-theme="dark"] .record-shop-activity[data-edition="women"] {
   cursor: default;
 }
 .record-shop-reward-action .material-symbols-outlined { font-size: 15px; }
+.record-shop-configure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+.record-shop-configure .material-symbols-outlined { font-size: 16px; }
 .record-shop-reward-preview {
   --record-portrait-size: 54px;
   display: grid;
