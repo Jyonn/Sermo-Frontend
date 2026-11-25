@@ -44,50 +44,27 @@
   .music-profile-portraits > img { animation: none; }
 }
 
-.music-profile-wordmark {
-  position: absolute;
-  top: 9%;
-  left: 50%;
-  max-width: 58%;
-  translate: -50% 0;
-  color: var(--music-letter);
-  text-shadow: var(--music-letter-shadow);
-  font-size: clamp(.78rem, 4cqi, 1.36rem);
-  font-weight: 800;
-  letter-spacing: .13em;
-  line-height: 1.25;
-  text-align: center;
-}
-
 .music-profile-accusefive {
   --music-bg: #23374d;
   --music-shade: #101c2cbd;
-  --music-letter: #f3d5ac;
-  --music-letter-shadow: 0 1px 5px #16202c;
   --music-seam: #b8765f;
   --music-duration: 3s;
 }
 .music-profile-landlords-cat {
   --music-bg: #d1c9a5;
   --music-shade: #faf1d7b5;
-  --music-letter: #314735;
-  --music-letter-shadow: 0 1px 4px #fbf0d3;
   --music-seam: #8c9a67;
   --music-duration: 3.8s;
 }
 .music-profile-she {
   --music-bg: #b7a39f;
   --music-shade: #f8e9d4b0;
-  --music-letter: #52283f;
-  --music-letter-shadow: 0 1px 4px #f7eadd;
   --music-seam: #d79d9d;
   --music-duration: 3.2s;
 }
 .music-profile-mayday {
   --music-bg: #12264c;
   --music-shade: #091528c4;
-  --music-letter: #e0eaff;
-  --music-letter-shadow: 0 1px 5px #112548;
   --music-seam: #77a2df;
   --music-duration: 2.5s;
 }

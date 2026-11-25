@@ -40,7 +40,6 @@
   --singer-frame-metal:
     repeating-linear-gradient(127deg, transparent 0 5px, #24373433 5px 6px),
     conic-gradient(from 35deg, #a9c4b1, #e9efe7, #7b9c87 36%, #304944 58%, #d8ded7 80%, #a9c4b1);
-  --singer-frame-duration: 2.55s;
 }
 .singer-frame-khalil-fong {
   --singer-frame-edge: #62513b;
@@ -48,7 +47,6 @@
   --singer-frame-metal:
     repeating-linear-gradient(6deg, #fff0ba33 0 1px, transparent 1px 4px, #62402c38 4px 5px),
     conic-gradient(from 55deg, #af7a4a, #e9bb76 23%, #788565 43%, #a4683b 63%, #e9be89 82%, #af7a4a);
-  --singer-frame-duration: 3.15s;
 }
 .singer-frame-gem {
   --singer-frame-edge: #58222c;
@@ -56,7 +54,6 @@
   --singer-frame-metal:
     repeating-conic-gradient(from 9deg, #fff5c844 0 3deg, transparent 3deg 18deg, #68183244 18deg 23deg),
     conic-gradient(from 27deg, #8a2847, #faaf63 19%, #970f39 39%, #df574f 63%, #f9ce81 78%, #8a2847);
-  --singer-frame-duration: 2.7s;
 }
 .singer-frame-eason-chan {
   --singer-frame-edge: #253e45;
@@ -64,14 +61,14 @@
   --singer-frame-metal:
     repeating-conic-gradient(from 45deg, #fff0bf45 0 2deg, transparent 2deg 16deg, #18292655 16deg 20deg),
     conic-gradient(from 24deg, #999a76, #edcd83 19%, #435d60 33%, #214149 57%, #d1aa66 79%, #999a76);
-  --singer-frame-duration: 3s;
 }
 
 .singer-avatar-ornament {
   position: absolute;
-  z-index: 2;
-  inset: -15% -8% auto auto;
+  z-index: 3;
+  inset: auto 0 2%;
   width: 56%;
+  margin-inline: auto;
   aspect-ratio: 1;
   display: block;
   overflow: hidden;
@@ -90,13 +87,27 @@
 .singer-avatar-ornament.is-still > img { width: 100%; }
 
 @media (prefers-reduced-motion: no-preference) {
+  .singer-avatar-ornament:not(.is-still) { opacity: 0; }
+
+  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] {
+    animation: singer-avatar-greeting 10s ease-in-out infinite;
+  }
+
   .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] > img {
-    animation: singer-avatar-performance var(--singer-frame-duration) steps(6, jump-none);
+    animation: singer-avatar-performance 10s steps(5, end) infinite;
   }
 }
-@keyframes singer-avatar-performance {
-  to { transform: translateX(-83.333333%); }
+
+@keyframes singer-avatar-greeting {
+  0%, 25%, 100% { opacity: 0; transform: translateY(72%); }
+  4%, 22% { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes singer-avatar-performance {
+  0%, 4% { transform: translateX(0); }
+  19%, 100% { transform: translateX(-83.333333%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .singer-avatar-ornament > img { width: 100%; }
 }

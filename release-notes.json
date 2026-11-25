@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.25.12",
+  "id": "2026.11.25.13",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺气泡领取优化",
+      "title": "歌手头像框与乐队名片优化",
       "items": [
-        "男女声两期活动领取歌手气泡后，可在聊天气泡设置中选择使用。"
+        "歌手人物每十秒从头像框底部中央探出一次。",
+        "四款乐队个人名片移除了封面上的乐队名称。"
       ]
     },
     "en": {
-      "title": "Record Shop bubble claims",
+      "title": "Animated avatar frames and band profile covers",
       "items": [
-        "Claim artist bubbles from either Record Shop edition, then choose which to use in chat bubble settings."
+        "Singers peek up from the bottom center of their avatar frames every ten seconds.",
+        "Removed the overlaid band names from all four band profile covers."
       ]
     }
   }

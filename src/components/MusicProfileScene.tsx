@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useI18n } from "../lib/language";
 import { musicProfileAsset, type MusicProfileCardTheme } from "../lib/musicProfileCards";
 import { usePageActive } from "../lib/pageActivity";
 import "./MusicProfileScene.css";
 
 export function MusicProfileScene({ theme, still = false }: { theme: MusicProfileCardTheme; still?: boolean }) {
-  const { t } = useI18n();
   const host = useRef<HTMLSpanElement>(null);
   const [inView, setInView] = useState(false);
   const [ready, setReady] = useState(false);
@@ -30,7 +28,6 @@ export function MusicProfileScene({ theme, still = false }: { theme: MusicProfil
       <span className="music-profile-portraits">
         <img src={musicProfileAsset(theme, "frames")} onLoad={() => setReady(true)} loading="lazy" decoding="async" alt="" />
       </span>
-      <span className="music-profile-wordmark">{t(`menu.profileCardTheme.${theme}`)}</span>
     </span>
   );
 }

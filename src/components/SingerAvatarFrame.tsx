@@ -16,11 +16,14 @@ export function SingerAvatarFrame({ style, animate }: { style: SingerAvatarFrame
   useEffect(() => {
     const target = ornament.current;
     if (!target || !animate || !pageActive) return;
-    if (typeof IntersectionObserver === "undefined") return;
-    ornamentObserver ??= new IntersectionObserver(entries => {
-      entries.forEach(entry => entry.target.toggleAttribute("data-in-view", entry.isIntersecting));
-    });
-    ornamentObserver.observe(target);
+    if (typeof IntersectionObserver === "undefined") {
+      target.setAttribute("data-in-view", "");
+    } else {
+      ornamentObserver ??= new IntersectionObserver(entries => {
+        entries.forEach(entry => entry.target.toggleAttribute("data-in-view", entry.isIntersecting));
+      });
+      ornamentObserver.observe(target);
+    }
     return () => {
       ornamentObserver?.unobserve(target);
       target.removeAttribute("data-in-view");
