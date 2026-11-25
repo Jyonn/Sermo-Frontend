@@ -2726,6 +2726,16 @@ function LiveChatsPage({
   const [desktopComposerTool, setDesktopComposerTool] = useState<"voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [photoEditor, setPhotoEditor] = useState<{files: File[]; others: File[]; chatId: number; scope: string} | null>(null);
+  const [flashPermission, setFlashPermission] = useState<boolean>(false);
+  useEffect(() => {
+    if (!photoEditor) return;
+    const request = new AbortController();
+    const key = "chat.message.flash_image";
+    void api.getCapability(key, photoEditor.scope, request.signal).then((result) => {
+      if (!request.signal.aborted) setFlashPermission(result.capabilities[key]?.allowed === true);
+    }).catch(() => {});
+    return () => request.abort();
+  }, [photoEditor]);
   const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
@@ -6238,6 +6248,7 @@ function LiveChatsPage({
     if (!images.length) return false;
     if (!session || !selectedChat || selectedChat.id <= 0 || photoEditor) return true;
     if (!requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return true;
+    setFlashPermission(false);
     setComposerMoreOpen(false);
     setPhotoEditor({
       files: images,
@@ -9266,7 +9277,7 @@ function LiveChatsPage({
       />
       <CloudFilePickerSheet onClose={() => setCloudFilePickerOpen(false)} onSelect={sendCloudFileMessage} open={cloudFilePickerOpen} />
       {photoEditor && photoEditor.chatId === selectedChat?.id && photoEditor.scope === `${session?.user.space_id}:${session?.user.user_id}` ? (
-        <PhotoEditorDrawer files={photoEditor.files} onSend={sendEditedPhoto} onClose={() => setPhotoEditor(null)}
+        <PhotoEditorDrawer files={photoEditor.files} allowFlash={flashPermission} onSend={sendEditedPhoto} onClose={() => setPhotoEditor(null)}
           onComplete={() => {
             setPhotoEditor(null);
             if (photoEditor.others.length) openUploadCandidate(photoEditor.others, "drop");

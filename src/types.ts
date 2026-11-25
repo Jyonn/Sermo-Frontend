@@ -477,12 +477,15 @@ export type PolicyExpression =
   | { field: string; op: string; value: boolean | number | string | Array<boolean | number | string> };
 
 export interface CapabilityPolicyDTO {
+  enabled?: boolean;
   requirement: PolicyExpression;
   denial: PolicyExpression;
   limits: Record<string, number>;
   version: number;
   updated_at: number;
 }
+
+export type CapabilityDraftDTO = Pick<CapabilityPolicyDTO, "enabled" | "requirement" | "denial" | "limits">;
 
 export interface CapabilityNodeDTO {
   key: string;
@@ -502,6 +505,31 @@ export interface CapabilityNodeDTO {
 export interface CapabilityCatalogDTO {
   catalog: CapabilityNodeDTO[];
   fields?: string[];
+  space_context?: CapabilitySpaceContext;
+}
+
+export interface CapabilitySpaceContext {
+  chat_enabled: boolean;
+  square_enabled: boolean;
+  square_free_post_enabled: boolean;
+  square_explore_enabled: boolean;
+  unverified_group_policy: 0 | 1 | 2;
+}
+
+export type CapabilityPreviewOptions = Partial<CapabilitySpaceContext> & {
+  space_verification?: "email" | "phone" | "identity";
+  has_password?: boolean;
+  official?: boolean;
+  qr_invite?: boolean;
+  wechat_miniprogram?: boolean;
+  flash_forward?: boolean;
+};
+
+export interface CapabilityRestrictionDTO {
+  key: string;
+  source: "default" | "platform" | "space" | "module";
+  reason?: string;
+  expression?: PolicyExpression;
 }
 
 export interface CapabilitySimulationRowDTO {
@@ -509,6 +537,9 @@ export interface CapabilitySimulationRowDTO {
   verification: "none" | "email" | "phone" | "dual";
   permanent_vip: boolean;
   allowed: boolean;
+  failed?: CapabilityRestrictionDTO[];
+  denied_by?: CapabilityRestrictionDTO[];
+  limits?: { daily?: number; weekly?: number };
 }
 
 export interface CapabilitySimulationDTO {

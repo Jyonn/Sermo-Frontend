@@ -1,22 +1,22 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { showToast } from "../lib/toast";
-import { isChineseLanguage } from "../lib/i18n";
+import { isChineseLanguage, type TranslationKey } from "../lib/i18n";
 import { FeedbackState } from "./FeedbackState";
-import { SelectControl } from './SettingRow';
-import type { CapabilityCatalogDTO, CapabilityNodeDTO, CapabilityPolicyDTO, CapabilitySimulationRowDTO, PolicyExpression } from "../types";
+import { SelectControl, SettingSwitch } from "./SettingRow";
+import { GroupParticipationSelect, PermissionEffectiveMatrix } from "./PermissionEffectiveMatrix";
+import type { CapabilityCatalogDTO, CapabilityDraftDTO, CapabilityNodeDTO, CapabilityPreviewOptions, CapabilityRestrictionDTO, CapabilitySimulationRowDTO, CapabilitySpaceContext, PolicyExpression } from "../types";
 import "../styles/permission-workspace.css";
 
 type Scope = "platform" | "space";
-type Draft = Pick<CapabilityPolicyDTO, "requirement" | "denial" | "limits">;
-type SpaceVerificationPreview = "email" | "phone" | "identity";
+type Draft = CapabilityDraftDTO;
 type Atom = Extract<PolicyExpression, { field: string }>;
 type CapabilityEntry = CapabilityNodeDTO & { depth: number };
 
-const EMPTY_DRAFT: Draft = { requirement: {}, denial: {}, limits: {} };
-const FIELD_META: Record<string, { label: string; kind: "number" | "boolean"; min?: number; max?: number }> = {
+const EMPTY_DRAFT: Draft = { enabled: true, requirement: {}, denial: {}, limits: {} };
+const FIELD_META: Record<string, { label: TranslationKey; kind: "number" | "boolean"; min?: number; max?: number }> = {
   growth_level: { label: "permission.field.growthLevel", kind: "number", min: 1, max: 18 },
   has_password: { label: "permission.field.hasPassword", kind: "boolean" },
   verified: { label: "permission.field.verified", kind: "boolean" },
@@ -28,10 +28,12 @@ const FIELD_META: Record<string, { label: string; kind: "number" | "boolean"; mi
   chat_enabled: { label: "permission.field.chatEnabled", kind: "boolean" },
   square_enabled: { label: "permission.field.squareEnabled", kind: "boolean" },
   square_explore_enabled: { label: "permission.field.squareExploreEnabled", kind: "boolean" },
+  square_free_post_enabled: { label: "permission.field.squareFreePostEnabled", kind: "boolean" },
   space_phone_verified: { label: "permission.field.spacePhoneVerified", kind: "boolean" },
   space_identity_verified: { label: "permission.field.spaceIdentityVerified", kind: "boolean" },
   unverified_group_policy: { label: "permission.field.unverifiedGroupPolicy", kind: "number", min: 0, max: 2 },
   qr_invite: { label: "permission.field.qrInvite", kind: "boolean" },
+  wechat_miniprogram: { label: "permission.field.wechatMiniprogram", kind: "boolean" },
 };
 
 function isAtom(value: PolicyExpression): value is Atom {
@@ -73,8 +75,8 @@ function hasExpression(expression: PolicyExpression | undefined) {
 
 function formatExpression(expression: PolicyExpression, t: TFunction): string {
   if (!hasExpression(expression)) return t("permission.noCondition");
-  if ("all" in expression) return expression.all.map((item) => formatExpression(item, t)).join(` ${t("permission.logic.and")} `);
-  if ("any" in expression) return expression.any.map((item) => formatExpression(item, t)).join(` ${t("permission.logic.or")} `);
+  if ("all" in expression) return expression.all.map((item) => "any" in item ? `(${formatExpression(item, t)})` : formatExpression(item, t)).join(` ${t("permission.logic.and")} `);
+  if ("any" in expression) return expression.any.map((item) => "all" in item ? `(${formatExpression(item, t)})` : formatExpression(item, t)).join(` ${t("permission.logic.or")} `);
   if ("not" in expression) return `${t("permission.logic.not")} (${formatExpression(expression.not, t)})`;
   if (!isAtom(expression)) return t("permission.noCondition");
   const meta = FIELD_META[expression.field];
@@ -97,7 +99,50 @@ function capabilityChain(entries: CapabilityEntry[], selected: CapabilityEntry) 
   return result;
 }
 
+function supportsSimpleEditor(expression: PolicyExpression) {
+  if (!hasExpression(expression)) return true;
+  const values = "all" in expression ? expression.all : "any" in expression ? expression.any : [expression];
+  return values.every((item) => {
+    const atom = "not" in item ? item.not : item;
+    if (!isAtom(atom) || !FIELD_META[atom.field]) return false;
+    return FIELD_META[atom.field].kind === "boolean" ? atom.op === "eq" && typeof atom.value === "boolean"
+      : ["gte", "gt", "eq", "lte", "lt"].includes(atom.op) && typeof atom.value === "number";
+  });
+}
+
+function isPolicyExpression(input: unknown, depth = 0): input is PolicyExpression {
+  if (!input || typeof input !== "object" || Array.isArray(input) || depth > 8) return false;
+  const item = input as Record<string, unknown>;
+  const keys = Object.keys(item);
+  if (!keys.length) return true;
+  if (keys.length === 1) {
+    if ("not" in item) return isPolicyExpression(item.not, depth + 1);
+    const children = item.all ?? item.any;
+    return Array.isArray(children) && children.length > 0 && children.every((child) => isPolicyExpression(child, depth + 1));
+  }
+  if (keys.length !== 3 || typeof item.field !== "string" || !FIELD_META[item.field] || typeof item.op !== "string" || !("value" in item)) return false;
+  return ["eq", "neq", "gte", "gt", "lte", "lt", "in", "not_in", "exists"].includes(item.op);
+}
+
+function AdvancedExpression({ value, onChange, t }: { value: PolicyExpression; onChange: (value: PolicyExpression) => void; t: TFunction }) {
+  const [source, setSource] = useState(() => JSON.stringify(value, null, 2));
+  const [error, setError] = useState(false);
+  return <details className="permission-advanced-expression">
+    <summary>{formatExpression(value, t)}</summary>
+    <textarea aria-label={t("permission.expressionSource")} value={source} onChange={(event) => { setSource(event.target.value); setError(false); }} />
+    <button className="ghost-button" type="button" onClick={() => {
+      try {
+        const next = JSON.parse(source);
+        if (!isPolicyExpression(next)) throw new Error();
+        onChange(next);
+      } catch { setError(true); }
+    }}>{t("permission.applyExpression")}</button>
+    {error && <p role="alert">{t("permission.invalidExpression")}</p>}
+  </details>;
+}
+
 function RuleEditor({ value, onChange, t }: { value: PolicyExpression; onChange: (value: PolicyExpression) => void; t: TFunction }) {
+  if (!supportsSimpleEditor(value)) return <AdvancedExpression key={JSON.stringify(value)} value={value} onChange={onChange} t={t} />;
   const model = expressionRows(value);
   const updateRows = (rows: typeof model.rows, mode = model.mode) => onChange(rowsExpression(mode, rows));
   return <div className="permission-rule-editor">
@@ -130,19 +175,34 @@ function flatten(nodes: CapabilityNodeDTO[], depth = 0): Array<CapabilityNodeDTO
 
 function InheritedPolicySummary({ entries, language, scope, selected, t }: { entries: CapabilityEntry[]; language: string; scope: Scope; selected: CapabilityEntry; t: TFunction }) {
   const chain = capabilityChain(entries, selected);
-  const rows: Array<{ key: string; source: "platform" | "space"; title: string; type: "allow" | "deny"; expression: PolicyExpression }> = [];
+  const rows: Array<{ key: string; source: "platform" | "space" | "default"; title: string; label: string }> = [];
   chain.forEach((entry) => {
     const title = isChineseLanguage(language) ? entry.title : entry.title_en;
-    if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.requirement)) rows.push({ key: `${entry.key}:platform:allow`, source: "platform", title, type: "allow", expression: entry.platform_policy.requirement });
-    if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.denial)) rows.push({ key: `${entry.key}:platform:deny`, source: "platform", title, type: "deny", expression: entry.platform_policy.denial });
-    if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.requirement)) rows.push({ key: `${entry.key}:space:allow`, source: "space", title, type: "allow", expression: entry.space_policy.requirement });
-    if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.denial)) rows.push({ key: `${entry.key}:space:deny`, source: "space", title, type: "deny", expression: entry.space_policy.denial });
+    if (hasExpression(entry.requirement)) rows.push({
+      key: `${entry.key}:default`, source: "default", title,
+      label: `${t("permission.allowIf")} · ${formatExpression(entry.requirement, t)}`,
+    });
+    const inherited = [
+      { source: "platform" as const, policy: scope === "space" || entry.key !== selected.key ? entry.platform_policy : null },
+      { source: "space" as const, policy: scope === "space" && entry.key !== selected.key ? entry.space_policy : null },
+    ];
+    for (const { source, policy } of inherited) {
+      if (!policy) continue;
+      const key = `${entry.key}:${source}`;
+      if (policy.enabled === false) rows.push({ key: key + ":closed", source, title, label: t("permission.closed") });
+      if (hasExpression(policy.requirement) && JSON.stringify(policy.requirement) !== JSON.stringify(entry.requirement)) rows.push({
+        key: key + ":allow", source, title, label: `${t("permission.allowIf")} · ${formatExpression(policy.requirement, t)}`,
+      });
+      if (hasExpression(policy.denial)) rows.push({
+        key: key + ":deny", source, title, label: `${t("permission.denyIf")} · ${formatExpression(policy.denial, t)}`,
+      });
+    }
   });
   if (!rows.length) return <p className="permission-no-inherited">{t("permission.noInheritedRules")}</p>;
   return <details className="permission-inherited-summary">
     <summary><span>{t("permission.inheritedCount", { count: rows.length })}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></summary>
     <p className="permission-inherited-hint">{t("permission.inheritedRulesHint")}</p>
-    {rows.length ? <div>{rows.map((row) => <article className={row.type === "deny" ? "is-denial" : ""} key={row.key}><span>{t(row.source === "platform" ? "permission.source.platform" : "permission.source.space")}</span><p><strong>{row.title}</strong><small>{row.type === "deny" ? t("permission.denyIf") : t("permission.allowIf")} · {formatExpression(row.expression, t)}</small></p></article>)}</div> : <p className="permission-no-inherited"><span className="material-symbols-outlined">check_circle</span>{t("permission.noInheritedRules")}</p>}
+    <div>{rows.map((row) => <article key={row.key}><span>{t(`permission.source.${row.source}`)}</span><p><strong>{row.title}</strong><small>{row.label}</small></p></article>)}</div>
   </details>;
 }
 
@@ -150,49 +210,115 @@ function policyFor(node: CapabilityNodeDTO, scope: Scope) {
   return scope === "platform" ? node.platform_policy : node.space_policy;
 }
 
-export function PermissionWorkspace({ scope }: { scope: Scope }) {
+const spaceModulesKey = "space-modules";
+const flashKey = "chat.message.flash_image";
+type GroupMode = CapabilitySpaceContext["unverified_group_policy"];
+
+function policyDraft(node: CapabilityNodeDTO, scope: Scope): Draft {
+  const saved = policyFor(node, scope);
+  return saved ? { enabled: saved.enabled !== false, requirement: saved.requirement, denial: saved.denial, limits: saved.limits } : EMPTY_DRAFT;
+}
+
+export function PermissionWorkspace({ scope, initialCapability, spaceModules }: {
+  scope: Scope;
+  initialCapability?: string;
+  spaceModules?: ReactNode;
+}) {
   const { i18n, t } = useTranslation();
   const language = i18n.resolvedLanguage ?? "en";
   const [catalog, setCatalog] = useState<CapabilityCatalogDTO | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [selectedKey, setSelectedKey] = useState("");
+  const [selectedKey, setSelectedKey] = useState(initialCapability ?? (spaceModules ? spaceModulesKey : ""));
   const [query, setQuery] = useState("");
-  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [simulation, setSimulation] = useState<CapabilitySimulationRowDTO[]>([]);
-  const [vipPreview, setVipPreview] = useState(false);
-  const [spaceVerificationPreview, setSpaceVerificationPreview] = useState<SpaceVerificationPreview>("email");
+  const [previewOptions, setPreviewOptions] = useState<CapabilityPreviewOptions>({ space_verification: "phone" });
+  const [previewPending, setPreviewPending] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
+  const [previewRetry, setPreviewRetry] = useState(0);
+  const [pendingGroup, setPendingGroup] = useState<GroupMode | null>(null);
   const [busy, setBusy] = useState(false);
   const [choosingCapability, setChoosingCapability] = useState(false);
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(() => new Set(["menu", "contacts", "square", "chat.message.send"]));
   const capabilityPicker = useRef<HTMLButtonElement>(null);
   const editorPanel = useRef<HTMLElement>(null);
   const capabilityDirectoryId = useId();
+
   const chooseCapability = (key: string) => {
+    if (key !== selectedKey) setSimulation([]);
     setSelectedKey(key);
     setChoosingCapability(false);
     if (capabilityPicker.current?.getClientRects().length) capabilityPicker.current.focus();
   };
   useLayoutEffect(() => { editorPanel.current?.scrollTo({ top: 0 }); }, [selectedKey]);
-  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    if (initialCapability) setSelectedKey(initialCapability);
+  }, [initialCapability]);
 
-  const load = async () => {
-    const result = scope === "platform" ? await api.getPlatformPermissions() : await api.getSpacePermissions();
+  const load = async (signal?: AbortSignal) => {
+    const result = scope === "platform" ? await api.getPlatformPermissions(signal) : await api.getSpacePermissions(signal);
+    if (signal?.aborted) return;
     setCatalog(result);
     const first = flatten(result.catalog).find((item) => scope === "platform" || item.space_configurable);
     setSelectedKey((current) => current || first?.key || "");
   };
-  const retryLoad = () => {
+  const retryLoad = (signal?: AbortSignal) => {
     setLoadError(null);
-    void load().catch((cause) => setLoadError(cause instanceof Error ? cause.message : t("permission.loadFailed")));
+    void load(signal).catch((cause) => {
+      if (!signal?.aborted) setLoadError(cause instanceof Error ? cause.message : t("permission.loadFailed"));
+    });
   };
-  useEffect(() => { retryLoad(); }, [scope]);
+  useEffect(() => {
+    const controller = new AbortController();
+    retryLoad(controller.signal);
+    return () => controller.abort();
+  }, [scope]);
+
   const entries = useMemo(() => flatten(catalog?.catalog ?? []), [catalog]);
   const selected = entries.find((entry) => entry.key === selectedKey) ?? null;
+  const showingModules = selectedKey === spaceModulesKey && !!spaceModules;
+  const savedDraft = useMemo(() => selected ? policyDraft(selected, scope) : EMPTY_DRAFT, [selected, scope]);
+  const draft = drafts[selectedKey] ?? savedDraft;
+  const savedGroup = catalog?.space_context?.unverified_group_policy;
+  const groupMode = pendingGroup ?? savedGroup ?? 2;
+  const dirty = JSON.stringify(draft) !== JSON.stringify(savedDraft);
+  const changeDraft = (change: Partial<Draft>) => {
+    setDrafts((current) => ({ ...current, [selectedKey]: { ...(current[selectedKey] ?? savedDraft), ...change } }));
+  };
+  const clearDraft = (key: string) => {
+    setDrafts((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
+  const updatePreviewOptions = (next: CapabilityPreviewOptions) => {
+    setPreviewOptions(next);
+  };
+
   useEffect(() => {
     if (!selected) return;
-    const policy = policyFor(selected, scope);
-    setDraft(policy ? { requirement: policy.requirement, denial: policy.denial, limits: policy.limits } : EMPTY_DRAFT);
+    const controller = new AbortController();
+    const options = scope === "space" ? { ...previewOptions, unverified_group_policy: groupMode } : previewOptions;
     setSimulation([]);
-  }, [scope, selectedKey, catalog]);
+    setPreviewPending(true);
+    setPreviewError(false);
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = scope === "platform"
+          ? await api.simulatePlatformPermission(selected.key, draft, options, controller.signal)
+          : await api.simulateSpacePermission(selected.key, draft, options, controller.signal);
+        if (!controller.signal.aborted) setSimulation(result.rows);
+      } catch {
+        if (!controller.signal.aborted) setPreviewError(true);
+      } finally {
+        if (!controller.signal.aborted) setPreviewPending(false);
+      }
+    }, 160);
+    return () => { controller.abort(); window.clearTimeout(timer); };
+  }, [scope, selected, draft, previewOptions, groupMode, previewRetry]);
+
   const availableEntries = useMemo(
     () => entries.filter((entry) => scope === "platform" || entry.space_configurable),
     [entries, scope],
@@ -201,8 +327,8 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
   const queryValue = query.trim().toLowerCase();
   const visibleEntries = useMemo(() => {
     const includedKeys = new Set<string>();
+    const byKey = new Map(entries.map((entry) => [entry.key, entry]));
     if (queryValue) {
-      const byKey = new Map(entries.map((entry) => [entry.key, entry]));
       availableEntries.forEach((entry) => {
         if (!`${entry.title} ${entry.title_en} ${entry.key}`.toLowerCase().includes(queryValue)) return;
         let current: CapabilityEntry | undefined = entry;
@@ -211,13 +337,9 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
           current = current.parent ? byKey.get(current.parent) : undefined;
         }
       });
-    } else {
-      availableEntries.forEach((entry) => includedKeys.add(entry.key));
     }
-    const byKey = new Map(entries.map((entry) => [entry.key, entry]));
     return availableEntries.filter((entry) => {
-      if (!includedKeys.has(entry.key)) return false;
-      if (queryValue) return true;
+      if (queryValue) return includedKeys.has(entry.key);
       let parentKey = entry.parent;
       while (parentKey) {
         if (collapsedKeys.has(parentKey)) return false;
@@ -226,98 +348,159 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
       return true;
     });
   }, [availableEntries, availableKeys, collapsedKeys, entries, queryValue]);
-  const branchKeys = useMemo(() => {
-    const values = new Set<string>();
-    availableEntries.forEach((entry) => {
-      if (entry.parent && availableKeys.has(entry.parent)) values.add(entry.parent);
-    });
-    return values;
-  }, [availableEntries, availableKeys]);
-
+  const branchKeys = useMemo(() => new Set(availableEntries.flatMap((entry) => entry.parent ? [entry.parent] : [])), [availableEntries]);
   const toggleBranch = (entry: CapabilityEntry) => {
-    const collapsing = !collapsedKeys.has(entry.key);
     setCollapsedKeys((current) => {
       const next = new Set(current);
       if (next.has(entry.key)) next.delete(entry.key);
       else next.add(entry.key);
       return next;
     });
-    if (!collapsing || selectedKey === entry.key) return;
-    let current = entries.find((item) => item.key === selectedKey);
-    while (current?.parent) {
-      if (current.parent === entry.key) {
-        setSelectedKey(entry.key);
-        break;
-      }
-      current = entries.find((item) => item.key === current?.parent);
-    }
   };
 
-  const save = async () => {
-    if (!selected) return;
+  const writePolicy = async (reset: boolean) => {
+    if (!selected || busy) return;
+    const key = selected.key;
     setBusy(true);
     try {
-      if (scope === "platform") await api.savePlatformPermission(selected.key, draft);
-      else await api.saveSpacePermission(selected.key, draft);
+      if (reset) {
+        if (scope === "platform") await api.resetPlatformPermission(key);
+        else await api.resetSpacePermission(key);
+      } else {
+        if (scope === "platform") await api.savePlatformPermission(key, draft);
+        else await api.saveSpacePermission(key, draft);
+      }
       await load();
+      clearDraft(key);
+      showToast(t(reset ? scope === "platform" ? "permission.removeDone" : "permission.resetDone" : "permission.saved"), "success");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t(reset ? "permission.resetFailed" : "permission.saveFailed"), "error");
+    } finally { setBusy(false); }
+  };
+  const saveGroup = async () => {
+    if (scope !== "space" || pendingGroup === null || busy) return;
+    setBusy(true);
+    try {
+      const { unverified_group_policy } = await api.saveUnverifiedGroupPolicy(pendingGroup);
+      setCatalog((current) => current?.space_context ? { ...current, space_context: { ...current.space_context, unverified_group_policy } } : current);
+      setPendingGroup(null);
       showToast(t("permission.saved"), "success");
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("permission.saveFailed"), "error");
     } finally { setBusy(false); }
   };
-  const reset = async () => {
-    if (!selected) return;
-    setBusy(true);
-    try {
-      if (scope === "platform") await api.resetPlatformPermission(selected.key);
-      else await api.resetSpacePermission(selected.key);
-      await load();
-      showToast(t(scope === "platform" ? "permission.removeDone" : "permission.resetDone"), "success");
-    } catch (cause) {
-      showToast(cause instanceof Error ? cause.message : t("permission.resetFailed"), "error");
-    } finally { setBusy(false); }
+  const reasonText = (reason: CapabilityRestrictionDTO) => {
+    const node = entries.find((entry) => entry.key === reason.key);
+    const label = node ? isChineseLanguage(language) ? node.title : node.title_en : reason.key;
+    const source = t(`permission.source.${reason.source}`);
+    if (reason.source === "module") {
+      const moduleLabels: Record<string, TranslationKey> = {
+        chat_enabled: "nav.chats",
+        square_enabled: "nav.square",
+        square_free_post_enabled: "admin.squareFreePost",
+        square_explore_enabled: "square.feedAll",
+      };
+      const module = moduleLabels[reason.reason ?? ""];
+      return `${source} · ${module ? t(module) : label} · ${t("permission.closed")}`;
+    }
+    const builtInGroupRule = reason.source === "default" && (reason.key === "chat.group.join" || reason.key === "chat.group.send");
+    const detail = builtInGroupRule ? t(reason.key === "chat.group.join" ? "permission.groupJoinDenied" : "permission.groupSendDenied")
+      : reason.expression ? formatExpression(reason.expression, t) : t(reason.reason === "disabled" ? "permission.closed" : "permission.denyIf");
+    return `${source} · ${label} · ${detail}`;
   };
-  const preview = async () => {
-    if (!selected) return;
-    setBusy(true);
-    try {
-      const result = scope === "platform"
-        ? await api.simulatePlatformPermission(selected.key, draft, spaceVerificationPreview)
-        : await api.simulateSpacePermission(selected.key, draft);
-      setSimulation(result.rows);
-    } catch (cause) {
-      showToast(cause instanceof Error ? cause.message : t("permission.previewFailed"), "error");
-    } finally { setBusy(false); }
-  };
+  const groups = ["chat.group", "chat.group.join", "chat.group.send"];
+  const showGroupPreset = scope === "space" && savedGroup !== undefined && groups.includes(selectedKey);
+  const offersQuotaLimits = ["square", "square.statement", "square.statement.publish"].includes(selectedKey);
+  const closedBy = simulation[0]?.denied_by?.filter((reason) => reason.source === "module" ||
+    (reason.reason === "disabled" && (reason.source !== scope || reason.key !== selectedKey))) ?? [];
+  const subTitle = showingModules ? t("permission.spaceModules") : selected ? isChineseLanguage(language) ? selected.title : selected.title_en : t("permission.chooseCapability");
+  const path = selected ? capabilityChain(entries, selected).slice(0, -1).map((entry) => isChineseLanguage(language) ? entry.title : entry.title_en).join(" / ") : "";
 
   return <section className="permission-workspace">
     <aside className={`permission-tree-panel ${choosingCapability ? "is-choosing" : ""}`}>
-      <button ref={capabilityPicker} className="permission-capability-picker" aria-controls={capabilityDirectoryId} aria-expanded={choosingCapability} onClick={() => setChoosingCapability((value) => !value)} type="button"><span aria-hidden="true" className="material-symbols-outlined">account_tree</span><span>{t("permission.chooseCapability")}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></button>
-      <div className="permission-tree-content" id={capabilityDirectoryId} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setChoosingCapability(false); capabilityPicker.current?.focus(); } }}>
-      <label className="permission-search"><span className="material-symbols-outlined">search</span><input aria-label={t("permission.search")} onChange={(event) => setQuery(event.target.value)} placeholder={t("permission.search")} value={query} /></label>
-      <div className="permission-tree">{visibleEntries.map((entry) => {
-        const hasOverride = Boolean(policyFor(entry, scope));
-        const hasChildren = branchKeys.has(entry.key);
-        const collapsed = !queryValue && collapsedKeys.has(entry.key);
-        const title = isChineseLanguage(language) ? entry.title : entry.title_en;
-        return <div className={`permission-tree-row ${selectedKey === entry.key ? "is-selected" : ""} ${hasOverride ? "has-override" : ""}`} key={entry.key} style={{ "--permission-depth": entry.depth } as CSSProperties}>
-          {hasChildren ? <button disabled={busy} aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
-          <button aria-pressed={selectedKey === entry.key} disabled={busy} className="permission-tree-select" onClick={() => chooseCapability(entry.key)} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>
-        </div>;
-      })}{!visibleEntries.length ? <div className="permission-tree-empty"><span className="material-symbols-outlined">search_off</span><small>{t("permission.noSearchResults")}</small></div> : null}</div>
+      <button ref={capabilityPicker} className="permission-capability-picker" aria-controls={capabilityDirectoryId} aria-expanded={choosingCapability}
+        onClick={() => setChoosingCapability((value) => !value)} type="button"><span aria-hidden="true" className="material-symbols-outlined">account_tree</span><span>{subTitle}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></button>
+      <div className="permission-tree-content" id={capabilityDirectoryId} onKeyDown={(event) => {
+        if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setChoosingCapability(false); capabilityPicker.current?.focus(); }
+      }}>
+        <label className="permission-search"><span className="material-symbols-outlined" aria-hidden="true">search</span><input aria-label={t("permission.search")} onChange={(event) => setQuery(event.target.value)} placeholder={t("permission.search")} value={query} /></label>
+        {!queryValue && <div className="permission-shortcuts">
+          {spaceModules && <button type="button" aria-current={showingModules ? "page" : undefined} onClick={() => chooseCapability(spaceModulesKey)}><span aria-hidden="true" className="material-symbols-outlined">tune</span>{t("permission.spaceModules")}</button>}
+          {scope === "space" && availableKeys.has("chat.group.join") && <button type="button" onClick={() => chooseCapability("chat.group.join")}><span aria-hidden="true" className="material-symbols-outlined">group_add</span>{t("permission.groupParticipation")}</button>}
+        </div>}
+        <div className="permission-tree">{visibleEntries.map((entry) => {
+          const policy = policyFor(entry, scope);
+          const hasChildren = branchKeys.has(entry.key);
+          const collapsed = !queryValue && collapsedKeys.has(entry.key);
+          const title = isChineseLanguage(language) ? entry.title : entry.title_en;
+          return <div className={`permission-tree-row ${selectedKey === entry.key ? "is-selected" : ""}`} key={entry.key} style={{ "--permission-depth": entry.depth } as CSSProperties}>
+            {hasChildren ? <button aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span aria-hidden="true" className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
+            <button aria-current={selectedKey === entry.key ? "page" : undefined} className="permission-tree-select" onClick={() => chooseCapability(entry.key)} type="button"><span aria-hidden="true" className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong></span>{policy?.enabled === false ? <span className="permission-tree-off material-symbols-outlined" title={t("permission.closed")}>block</span> : policy || drafts[entry.key] ? <i /> : null}</button>
+          </div>;
+        })}{queryValue && !visibleEntries.length && <div className="permission-tree-empty"><small>{t("permission.noSearchResults")}</small></div>}</div>
       </div>
     </aside>
-    <main className="permission-editor-panel" ref={editorPanel}>{selected ? <>
-      <header className="permission-editor-header"><span className="permission-editor-icon"><span className="material-symbols-outlined">{selected.icon}</span></span><span><small>{selected.key}</small><h2>{isChineseLanguage(language) ? selected.title : selected.title_en}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
-      <p className="permission-scope-note">{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</p>
-      <InheritedPolicySummary key={selected.key} entries={entries} language={language} scope={scope} selected={selected} t={t} />
-      <section className="permission-editor-section"><div><h3>{t("permission.allowWhen")}</h3><p>{t("permission.allowWhenHint")}</p></div><RuleEditor onChange={(requirement) => setDraft((current) => ({ ...current, requirement }))} t={t} value={draft.requirement} /></section>
-      <section className="permission-editor-section is-denial"><div><h3>{t("permission.denyWhen")}</h3><p>{t("permission.denyWhenHint")}</p></div><RuleEditor onChange={(denial) => setDraft((current) => ({ ...current, denial }))} t={t} value={draft.denial} /></section>
-      <section className="permission-editor-section"><div><h3>{t("permission.usageLimits")}</h3><p>{t("permission.usageLimitsHint")}</p></div><div className="permission-limit-editor">
-        <div className="permission-limit-presets">{["daily", "weekly"].map((key) => <button disabled={key in draft.limits} key={key} onClick={() => setDraft((current) => ({ ...current, limits: { ...current.limits, [key]: 1 } }))} type="button"><span className="material-symbols-outlined">add</span>{t(key === "daily" ? "permission.dailyLimit" : "permission.weeklyLimit")}</button>)}</div>
-        {Object.entries(draft.limits).length ? <div className="permission-limit-list">{Object.entries(draft.limits).map(([key, value]) => <label key={key}><span>{key === "daily" || key === "weekly" ? t(key === "daily" ? "permission.dailyLimit" : "permission.weeklyLimit") : key}</span><input min="0" onChange={(event) => setDraft((current) => ({ ...current, limits: { ...current.limits, [key]: Number(event.target.value) } }))} type="number" value={value} /><button onClick={() => setDraft((current) => ({ ...current, limits: Object.fromEntries(Object.entries(current.limits).filter(([itemKey]) => itemKey !== key)) }))} type="button"><span className="material-symbols-outlined">close</span></button></label>)}</div> : <div className="permission-empty-rules"><span className="material-symbols-outlined">speed</span><span><strong>{t("permission.productDefaultLimits")}</strong><small>{t("permission.productDefaultLimitsHint")}</small></span></div>}
-      </div></section>
-      <section className="permission-matrix-section"><header><span><h3>{t("permission.audiencePreview")}</h3><p>{t("permission.audiencePreviewHint")}</p></span><div className="permission-preview-actions">{scope === "platform" ? <div className="permission-space-preview"><small>{t("permission.spaceState")}</small><div>{(["email", "phone", "identity"] as const).map((value) => <button className={spaceVerificationPreview === value ? "is-active" : ""} key={value} onClick={() => { setSpaceVerificationPreview(value); setSimulation([]); }} type="button">{t(`permission.spaceVerification.${value}`)}</button>)}</div></div> : null}<button className={vipPreview ? "is-active" : ""} onClick={() => setVipPreview((value) => !value)} type="button">VIP</button><button disabled={busy} onClick={() => void preview()} type="button"><span className="material-symbols-outlined">play_arrow</span>{t("permission.runPreview")}</button></div></header>{simulation.length ? <div className="permission-matrix"><div className="permission-matrix-head"><span>LV</span>{(["none", "email", "phone", "dual"] as const).map((value) => <span key={value}>{t(`permission.verification.${value}`)}</span>)}</div>{Array.from({ length: 18 }, (_, index) => index + 1).map((level) => <div className="permission-matrix-row" key={level}><strong>{level}</strong>{(["none", "email", "phone", "dual"] as const).map((verification) => { const row = simulation.find((item) => item.growth_level === level && item.verification === verification && item.permanent_vip === vipPreview); return <span className={row?.allowed ? "is-allowed" : "is-denied"} key={verification}><span className="material-symbols-outlined">{row?.allowed ? "check" : "close"}</span></span>; })}</div>)}</div> : <p className="permission-preview-note">{t("permission.previewNoChanges")}</p>}</section>
-    </> : loadError ? <FeedbackState tone="error" title={t("permission.loadFailed")} description={loadError} action={<button className="ghost-button" onClick={retryLoad} type="button">{t("common.retry")}</button>} /> : catalog ? <FeedbackState tone="empty" icon="account_tree" title={t("permission.noSearchResults")} /> : <div className="permission-workspace-loading"><i /><span>{t("permission.loading")}</span></div>}</main>
+    <section className="permission-editor-panel" ref={editorPanel}>{showingModules ? <>
+      <header className="permission-editor-header permission-modules-header"><span className="permission-editor-icon material-symbols-outlined" aria-hidden="true">tune</span><span><h2>{subTitle}</h2></span></header>
+      <div className="permission-modules-body">{spaceModules}</div>
+    </> : selected ? <>
+      <header className="permission-editor-header">
+        <span className="permission-editor-icon"><span aria-hidden="true" className="material-symbols-outlined">{selected.icon}</span></span>
+        <span>{path && <small>{path}</small>}<h2>{subTitle}</h2></span>
+        <div>
+          {dirty && <button type="button" disabled={busy} onClick={() => clearDraft(selected.key)}>{t("permission.discardDraft")}</button>}
+          <button className="is-primary" disabled={busy || !dirty || previewError || previewPending} onClick={() => void writePolicy(false)} type="button">{busy ? t("common.saving") : t("common.save")}</button>
+        </div>
+      </header>
+      <div className="permission-editor-content">
+        <div className="permission-availability">
+          <div><strong>{t("permission.availability")}</strong><p>{t(scope === "platform" ? "permission.platformAvailabilityHint" : "permission.spaceAvailabilityHint")}</p>
+            {!!closedBy.length && <ul className="permission-closure-notice">{closedBy.map((reason) =>
+              <li key={`${reason.source}:${reason.key}:${reason.reason}`}>{reasonText(reason)}</li>)}</ul>}
+          </div>
+          <span>{t(draft.enabled !== false ? "permission.availableByPolicy" : "permission.closed")}</span>
+          <SettingSwitch label={t("permission.availability")} checked={draft.enabled !== false} disabled={busy} onChange={(enabled) => changeDraft({ enabled })} />
+        </div>
+        {selectedKey === flashKey && <p className="permission-scope-note">{t("permission.flashPolicyHint")}</p>}
+        {showGroupPreset && <section className="permission-group-preset">
+          <div><h3>{t("permission.groupParticipation")}</h3><p>{t(groupMode === 0 ? "permission.groupRestrictedHint" : `admin.unverifiedPolicy${groupMode}Hint`)}</p></div>
+          <div className="permission-group-controls">
+            <GroupParticipationSelect value={groupMode} onChange={setPendingGroup} disabled={busy} />
+            <button className="ghost-button" disabled={busy || pendingGroup === null || groupMode === savedGroup} onClick={() => void saveGroup()} type="button">{t("permission.saveParticipation")}</button>
+          </div>
+          <div className="permission-group-links">
+            <button type="button" aria-current={selectedKey === "chat.group.join" ? "page" : undefined} onClick={() => chooseCapability("chat.group.join")}>{t("admin.receiveGroupInvite")}</button>
+            <button type="button" aria-current={selectedKey === "chat.group.send" ? "page" : undefined} onClick={() => chooseCapability("chat.group.send")}>{t("admin.sendGroupMessage")}</button>
+          </div>
+        </section>}
+        <PermissionEffectiveMatrix key={selected.key} rows={simulation} options={previewOptions} onOptions={updatePreviewOptions}
+          platform={scope === "platform"} pending={previewPending} error={previewError} onRetry={() => setPreviewRetry((value) => value + 1)}
+          flash={selected.key === flashKey} reasonText={reasonText} />
+        <details className="permission-member-conditions">
+          <summary>{t("permission.memberConditions")}</summary>
+          <p className="permission-scope-note">{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</p>
+          <InheritedPolicySummary key={selected.key} entries={entries} language={language} scope={scope} selected={selected} t={t} />
+          <fieldset disabled={busy} className="permission-condition-fields">
+            <section className="permission-editor-section"><div><h3>{t("permission.allowWhen")}</h3><p>{t("permission.allowWhenHint")}</p></div><RuleEditor onChange={(requirement) => changeDraft({ requirement })} t={t} value={draft.requirement} /></section>
+            <section className="permission-editor-section is-denial"><div><h3>{t("permission.denyWhen")}</h3><p>{t("permission.denyWhenHint")}</p></div><RuleEditor onChange={(denial) => changeDraft({ denial })} t={t} value={draft.denial} /></section>
+            {offersQuotaLimits && <section className="permission-editor-section"><div><h3>{t("permission.postingLimits")}</h3><p>{t("permission.usageLimitsHint")}</p></div>
+              <div className="permission-limit-list">{(["daily", "weekly"] as const).map((period) => <label key={period}>
+                <span>{t(period === "daily" ? "permission.dailyLimit" : "permission.weeklyLimit")}</span>
+                <input type="number" min={0} step={1} placeholder="—" value={draft.limits[period] ?? ""} onChange={(event) => {
+                  const value = event.target.value;
+                  const limits = { ...draft.limits };
+                  if (value === "") delete limits[period];
+                  else if (Number.isInteger(Number(value)) && Number(value) >= 0) limits[period] = Number(value);
+                  changeDraft({ limits });
+                }} />
+              </label>)}</div>
+            </section>}
+          </fieldset>
+          {policyFor(selected, scope) && <button className="ghost-button permission-reset-policy" disabled={busy} onClick={() => void writePolicy(true)} type="button">
+            {t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}
+          </button>}
+        </details>
+      </div>
+    </> : loadError ? <FeedbackState tone="error" title={t("permission.loadFailed")} description={loadError} action={<button className="ghost-button" onClick={() => retryLoad()} type="button">{t("common.retry")}</button>} /> : catalog ? <FeedbackState tone="empty" icon="account_tree" title={t("permission.noSearchResults")} /> : <div className="permission-workspace-loading"><i /><span>{t("permission.loading")}</span></div>}</section>
   </section>;
 }

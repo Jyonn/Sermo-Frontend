@@ -84,7 +84,8 @@ export default function SpaceAdminDashboardPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<MemberFilter>("all");
   const [searchParams, setSearchParams] = useSearchParams();
-  const requestedTab = managementSection(searchParams.get("section"), spaceManagementSections, "members");
+  const sectionQuery = searchParams.get("section");
+  const requestedTab = managementSection(sectionQuery, spaceManagementSections, "members");
   const setActiveTab = (section: AdminTab) => setSearchParams((current) => { const next = new URLSearchParams(current); next.set("section", section); return next; });
   const [selectedMember, setSelectedMember] = useState<AdminMemberDTO | null>(null);
   const [squareStatements, setSquareStatements] = useState<SquareStatementDTO[]>([]);
@@ -103,7 +104,6 @@ export default function SpaceAdminDashboardPage() {
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
-  const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
   const [activities, setActivities] = useState<AdminActivityDTO[]>([]);
   const [activitiesState, setActivitiesState] = useState<AppViewState>("idle");
   const [activityFilter, setActivityFilter] = useState<"all" | AdminActivityDTO["status"]>("all");
@@ -172,7 +172,9 @@ export default function SpaceAdminDashboardPage() {
 
   const currentSpace = dashboard?.space ?? session?.space ?? null;
   const communityEnabled = currentSpace?.group_square_enabled === true;
-  const activeTab = (requestedTab === "square" || requestedTab === "mutes") && currentSpace && !communityEnabled ? "features" : requestedTab;
+  const communityUnavailable = (requestedTab === "square" || requestedTab === "mutes") && currentSpace && !communityEnabled;
+  const activeTab = communityUnavailable ? "permissions" : requestedTab;
+  const permissionEntry = sectionQuery === "access" ? "chat.group.join" : sectionQuery === "features" || communityUnavailable ? "space-modules" : undefined;
   const entryHref = useMemo(() => (currentSpace ? buildJoinHrefForCurrentHost(currentSpace.slug) : ""), [currentSpace]);
   const group = (id: string, icon: string) => ({ id, icon, label: t(`management.group.${id}` as TranslationKey) });
   const people = group("people", "group");
@@ -190,10 +192,8 @@ export default function SpaceAdminDashboardPage() {
     { id: "activities", icon: "local_activity", label: t("admin.activityManagement"), group: operations },
     { id: "official", icon: "campaign", label: t("admin.officialAccount"), group: operations },
     { id: "basics", icon: "settings", label: t("admin.basicSettings"), group: configuration },
-    { id: "features", icon: "tune", label: t("admin.featureAccess"), group: configuration },
     { id: "levels", icon: "badge", label: t("admin.spaceLevels"), group: configuration },
     { id: "verification", icon: "verified_user", label: t("admin.spaceVerification"), group: configuration },
-    { id: "access", icon: "shield", label: t("admin.unverifiedAccess"), group: access },
     { id: "permissions", icon: "account_tree", label: t("admin.permissionMatrix"), group: access },
   ];
   const formatRelativeTime = (value: number) => {
@@ -324,7 +324,6 @@ export default function SpaceAdminDashboardPage() {
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
     setSettingsOauthDeveloperEnabled(dashboard.space.oauth_developer_enabled === true);
-    setSettingsUnverifiedGroupPolicy(dashboard.space.unverified_group_policy ?? 2);
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
     setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : defaultLevelNames);
   }, [dashboard?.space, defaultLevelNames]);
@@ -453,16 +452,16 @@ export default function SpaceAdminDashboardPage() {
     }
   };
 
-  const saveSettings = async () => {
+  const saveSettings = async (section: SpaceManagementSection | "features" = activeTab) => {
     if (!currentSpace) return;
-    if (activeTab === "features" && settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) {
+    if (section === "features" && settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) {
       setError(t("admin.squareModesRequired"));
       return;
     }
     setSettingsSaving(true);
     setError(null);
     try {
-      const payload = await api.updateAdminSettings(managementSettingsForSection<Parameters<typeof api.updateAdminSettings>[0]>(activeTab, {
+      const payload = await api.updateAdminSettings(managementSettingsForSection<Parameters<typeof api.updateAdminSettings>[0]>(section, {
         name: currentSpace.name,
         group_square_enabled: currentSpace.group_square_enabled ? 1 : 0,
         chat_enabled: currentSpace.chat_enabled !== false ? 1 : 0,
@@ -473,7 +472,6 @@ export default function SpaceAdminDashboardPage() {
         square_explore_enabled: currentSpace.square_explore_enabled !== false ? 1 : 0,
         qq_binding_enabled: currentSpace.qq_binding_enabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: currentSpace.oauth_developer_enabled ? 1 : 0 } : {}),
-        unverified_group_policy: currentSpace.unverified_group_policy ?? 2,
         member_limit: currentSpace.member_limit ?? null,
         level_names: currentSpace.level_names?.length === 18 ? currentSpace.level_names : defaultLevelNames,
       }, {
@@ -490,7 +488,6 @@ export default function SpaceAdminDashboardPage() {
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
         ...(currentSpace.oauth_developer_granted ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
-        unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
       }));
@@ -840,6 +837,30 @@ export default function SpaceAdminDashboardPage() {
     );
   };
 
+  const moduleSettings = <section className="management-form-page">
+        <div className="admin-policy-drawer">
+          <p className="management-note">{t("admin.featureAccessHint")}</p>
+          <section className="management-settings-group"><h2>{t("management.chatSettings")}</h2><SettingGroup>
+            <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) setSettingsSpaceGroupEnabled(false); }} />} />
+            <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
+          </SettingGroup></section>
+          <section className="management-settings-group"><h2>{t("management.squareSettings")}</h2><SettingGroup>
+            <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (settingsSquareEnabled) setSettingsSubmissionEnabled(false); if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
+            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
+            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
+            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
+          </SettingGroup></section>
+          <section className="management-settings-group"><h2>{t("management.extraSettings")}</h2><SettingGroup>
+            <SettingRow title={t("research.title")} description={t("research.featureHint")} trailing={<SettingSwitch checked={settingsResearchEnabled} label={t("research.title")} onChange={setSettingsResearchEnabled}/>} />
+            {currentSpace?.annual_recap_granted && <SettingRow title={t("recap.title")} description={t("recap.adminHint")} trailing={<SettingSwitch checked={settingsAnnualRecap} label={t("recap.title")} onChange={setSettingsAnnualRecap}/>} />}
+            {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
+            {currentSpace?.oauth_developer_granted ? <SettingRow title={t("management.devCapability")} description={t("management.devCapabilityHint")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("management.devCapability")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
+          </SettingGroup></section>
+          <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
+        </div>
+            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings("features")} />
+          </section>;
+
   return (
     <ManagementWorkspace
       avatar={<SpaceAvatar className="management-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />}
@@ -898,7 +919,7 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
 
           {activeTab === "permissions" ? <section className="admin-tab-page admin-permissions-tab">
-            <PermissionWorkspace scope="space" />
+            <PermissionWorkspace scope="space" initialCapability={permissionEntry} spaceModules={moduleSettings} />
           </section> : null}
 
           {activeTab === "official" && currentSpace ? <section className="management-form-page">
@@ -972,48 +993,6 @@ export default function SpaceAdminDashboardPage() {
           {squareMutesState === "error" && <FeedbackState tone="error" title={t("admin.muteLoadFailed")} action={retryManagement} />}
           {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState tone="empty" icon="verified_user" title={t("admin.noSquareMutes")} /> : null}
         </div>
-          </section> : null}
-
-          {activeTab === "features" ? <section className="management-form-page">
-        <div className="admin-policy-drawer">
-          <p className="management-note">{t("admin.featureAccessHint")}</p>
-          <section className="management-settings-group"><h2>{t("management.chatSettings")}</h2><SettingGroup>
-            <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) setSettingsSpaceGroupEnabled(false); }} />} />
-            <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
-          </SettingGroup></section>
-          <section className="management-settings-group"><h2>{t("management.squareSettings")}</h2><SettingGroup>
-            <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (settingsSquareEnabled) setSettingsSubmissionEnabled(false); if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
-            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
-            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
-            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
-          </SettingGroup></section>
-          <section className="management-settings-group"><h2>{t("management.extraSettings")}</h2><SettingGroup>
-            <SettingRow title={t("research.title")} description={t("research.featureHint")} trailing={<SettingSwitch checked={settingsResearchEnabled} label={t("research.title")} onChange={setSettingsResearchEnabled}/>} />
-            {currentSpace?.annual_recap_granted && <SettingRow title={t("recap.title")} description={t("recap.adminHint")} trailing={<SettingSwitch checked={settingsAnnualRecap} label={t("recap.title")} onChange={setSettingsAnnualRecap}/>} />}
-            {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
-            {currentSpace?.oauth_developer_granted ? <SettingRow title={t("management.devCapability")} description={t("management.devCapabilityHint")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("management.devCapability")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
-          </SettingGroup></section>
-          <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
-        </div>
-            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings()} />
-          </section> : null}
-
-          {activeTab === "access" ? <section className="management-form-page">
-        <div className="admin-policy-drawer">
-          <p className="management-note">{t("admin.unverifiedAccessHint")}</p>
-          <div className="admin-policy-options">
-            {([2, 1, 0] as const).map((policy) => <button aria-pressed={settingsUnverifiedGroupPolicy === policy} className={settingsUnverifiedGroupPolicy === policy ? "is-selected" : ""} key={policy} onClick={() => setSettingsUnverifiedGroupPolicy(policy)} type="button"><span className="admin-policy-radio" /><span><strong>{t(`admin.unverifiedPolicy${policy}` as TranslationKey)}</strong><small>{t(`admin.unverifiedPolicy${policy}Hint` as TranslationKey)}</small></span></button>)}
-          </div>
-          <section className="admin-permission-matrix">
-            <header><span>{t("admin.capability")}</span><span>{t("admin.currentResult")}</span></header>
-            <div><span>{t("admin.browseSquare")}</span><strong>{t("common.enabled")}</strong></div>
-            <div><span>{t("admin.publishAndInteract")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
-            <div><span>{t("admin.receiveGroupInvite")}</span><strong>{settingsUnverifiedGroupPolicy >= 1 ? t("common.enabled") : t("common.disabled")}</strong></div>
-            <div><span>{t("admin.sendGroupMessage")}</span><strong>{settingsUnverifiedGroupPolicy >= 2 ? t("common.enabled") : t("common.disabled")}</strong></div>
-            <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
-          </section>
-        </div>
-            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings()} />
           </section> : null}
 
           {activeTab === "basics" ? <section className="management-form-page">

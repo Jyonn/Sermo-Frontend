@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.7",
+  "id": "2026.11.25.8",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "管理面板更新",
+      "title": "权限矩阵更新",
       "items": [
-        "优化空间管理和超级管理员面板的导航、列表筛选与设置操作。"
+        "管理员可在权限矩阵查看限制来源、设置未认证成员的群聊权限，并独立管理闪图功能。"
       ]
     },
     "en": {
-      "title": "Management console update",
+      "title": "Permission matrix update",
       "items": [
-        "Updated navigation, filters, and settings in the space and platform administration consoles."
+        "Administrators can see why access is restricted, configure group access before verification, and manage flash photos separately."
       ]
     }
   }

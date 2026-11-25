@@ -703,7 +703,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; research_enabled?:0|1; qixi_theme_enabled?:0|1; christmas_theme_enabled?:0|1; annual_recap_enabled?:0|1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; space_group_enabled: 0 | 1; square_free_post_enabled: 0 | 1; submission_enabled: 0 | 1; research_enabled?:0|1; qixi_theme_enabled?:0|1; christmas_theme_enabled?:0|1; annual_recap_enabled?:0|1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; oauth_developer_enabled?: 0 | 1; unverified_group_policy?: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,
@@ -2277,7 +2277,7 @@ export const api = {
   getPlatformPermissions(signal?: AbortSignal) {
     return request<import("../types").CapabilityCatalogDTO>("/platform-admin/permissions", { platformAdminAuth: true, signal });
   },
-  savePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+  savePlatformPermission(capabilityKey: string, policy: import("../types").CapabilityDraftDTO) {
     return request<import("../types").CapabilityPolicyDTO>(`/platform-admin/permissions/${capabilityKey}`, {
       method: "POST", platformAdminAuth: true, body: policy,
     });
@@ -2285,15 +2285,15 @@ export const api = {
   resetPlatformPermission(capabilityKey: string) {
     return request<Record<string, never>>(`/platform-admin/permissions/${capabilityKey}`, { method: "DELETE", platformAdminAuth: true });
   },
-  simulatePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">, spaceVerification: "email" | "phone" | "identity") {
+  simulatePlatformPermission(capabilityKey: string, policy: import("../types").CapabilityDraftDTO, context: import("../types").CapabilityPreviewOptions, signal?: AbortSignal) {
     return request<import("../types").CapabilitySimulationDTO>("/platform-admin/permissions/simulate", {
-      method: "POST", platformAdminAuth: true, body: { capability_key: capabilityKey, policy, space_verification: spaceVerification },
+      method: "POST", platformAdminAuth: true, body: { capability_key: capabilityKey, policy, ...context }, signal,
     });
   },
   getSpacePermissions(signal?: AbortSignal) {
     return request<import("../types").CapabilityCatalogDTO>("/spaces/admin/permissions", { adminAuth: true, signal });
   },
-  saveSpacePermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+  saveSpacePermission(capabilityKey: string, policy: import("../types").CapabilityDraftDTO) {
     return request<import("../types").CapabilityPolicyDTO>(`/spaces/admin/permissions/${capabilityKey}`, {
       method: "POST", adminAuth: true, body: policy,
     });
@@ -2301,9 +2301,19 @@ export const api = {
   resetSpacePermission(capabilityKey: string) {
     return request<Record<string, never>>(`/spaces/admin/permissions/${capabilityKey}`, { method: "DELETE", adminAuth: true });
   },
-  simulateSpacePermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+  simulateSpacePermission(capabilityKey: string, policy: import("../types").CapabilityDraftDTO, context: import("../types").CapabilityPreviewOptions, signal?: AbortSignal) {
     return request<import("../types").CapabilitySimulationDTO>("/spaces/admin/permissions/simulate", {
-      method: "POST", adminAuth: true, body: { capability_key: capabilityKey, policy },
+      method: "POST", adminAuth: true, body: { capability_key: capabilityKey, policy, ...context }, signal,
+    });
+  },
+  saveUnverifiedGroupPolicy(mode: 0 | 1 | 2) {
+    return request<{ unverified_group_policy: 0 | 1 | 2 }>("/spaces/admin/permissions/group-participation", {
+      method: "POST", adminAuth: true, body: { unverified_group_policy: mode },
+    });
+  },
+  getCapability(key: string, expectedScope: string, signal?: AbortSignal) {
+    return request<{ capabilities: Record<string, { allowed: boolean }> }>("/capabilities/me", {
+      auth: true, query: { keys: key }, expectedScope, cache: "no-store", signal,
     });
   },
 };

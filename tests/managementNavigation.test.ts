@@ -7,6 +7,8 @@ test("management destinations support deep links, safe fallbacks and the former 
   for (const section of spaceManagementSections) assert.equal(managementSection(section, spaceManagementSections, "members"), section);
   for (const section of platformManagementSections) assert.equal(managementSection(section, platformManagementSections, "overview"), section);
   assert.equal(managementSection("menu", spaceManagementSections, "members"), "basics");
+  assert.equal(managementSection("features", spaceManagementSections, "members"), "permissions");
+  assert.equal(managementSection("access", spaceManagementSections, "members"), "permissions");
   assert.equal(managementSection("emailReview", spaceManagementSections, "members"), "members");
   assert.equal(managementSection("unknown", platformManagementSections, "overview"), "overview");
   assert.equal(managementSection(null, platformManagementSections, "overview"), "overview");
@@ -40,7 +42,7 @@ test("saving one settings page cannot publish another page's unsaved switches or
   assert.deepEqual(managementSettingsForSection("basics", saved, draft), { ...saved, name: "Draft", member_limit: 50 });
   assert.deepEqual(managementSettingsForSection("levels", saved, draft), { ...saved, level_names: ["B"] });
   assert.deepEqual(managementSettingsForSection("features", saved, draft), { ...saved, chat_enabled: 0, group_square_enabled: 0, oauth_developer_enabled: 1 });
-  assert.deepEqual(managementSettingsForSection("access", saved, draft), { ...saved, unverified_group_policy: 2 });
+  assert.deepEqual(managementSettingsForSection("permissions", saved, draft), saved);
   assert.deepEqual(managementSettingsForSection("members", saved, draft), saved);
   assert.equal(saved.name, "Original");
   assert.equal(draft.name, "Draft");

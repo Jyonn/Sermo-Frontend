@@ -49,6 +49,7 @@ test("member and settings pages use one compact toolbar and direct fields rather
   assert.match(basics, /<h2>\{t\("management.profileSettings"\)\}<\/h2>/);
   assert.match(basics, /aria-describedby="admin-space-capacity-hint"/);
   assert.match(permission, /setChoosingCapability\(false\)/);
+  assert.match(permission, /showGroupPreset && <section className="permission-group-preset">/);
   assert.match(permission, /editorPanel.current\?\.scrollTo\(\{ top: 0 \}\)/);
   assert.match(permission, /event.key === "Escape"/);
   assert.match(permission, /loadError \? <FeedbackState tone="error"/);
