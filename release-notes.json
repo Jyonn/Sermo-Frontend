@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.6",
+  "id": "2026.11.25.7",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "年末来信",
+      "title": "管理面板更新",
       "items": [
-        "翻开新版年度来信，查看每月聊天记录、常聊会话和广场互动。"
+        "优化空间管理和超级管理员面板的导航、列表筛选与设置操作。"
       ]
     },
     "en": {
-      "title": "Your year-end letter",
+      "title": "Management console update",
       "items": [
-        "Open the redesigned annual letter to see your monthly chat activity, favorite conversation, and Square interactions."
+        "Updated navigation, filters, and settings in the space and platform administration consoles."
       ]
     }
   }

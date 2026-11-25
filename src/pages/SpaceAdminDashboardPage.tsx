@@ -2,7 +2,7 @@ import { type ChangeEvent, type FormEvent, useDeferredValue, useEffect, useMemo,
 import { useSearchParams } from "react-router-dom";
 import { managementSection, managementSettingsForSection, spaceManagementSections, type SpaceManagementSection } from "../lib/managementNavigation";
 import { PageTabs } from "../components/PageTabs";
-import { ManagementWorkspace } from "../components/ManagementWorkspace";
+import { ManagementFilter, ManagementSaveBar, ManagementSearch, ManagementToolbar, ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatMuteControls } from "../components/ChatMuteControls";
@@ -89,6 +89,7 @@ export default function SpaceAdminDashboardPage() {
   const [selectedMember, setSelectedMember] = useState<AdminMemberDTO | null>(null);
   const [squareStatements, setSquareStatements] = useState<SquareStatementDTO[]>([]);
   const [squareState, setSquareState] = useState<AppViewState>("idle");
+  const [squareRefresh, setSquareRefresh] = useState(0);
   const [copied, setCopied] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
@@ -105,6 +106,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
   const [activities, setActivities] = useState<AdminActivityDTO[]>([]);
   const [activitiesState, setActivitiesState] = useState<AppViewState>("idle");
+  const [activityFilter, setActivityFilter] = useState<"all" | AdminActivityDTO["status"]>("all");
   const [activityClaimingKey, setActivityClaimingKey] = useState<string | null>(null);
   const [squareMutes, setSquareMutes] = useState<SquareMuteDTO[]>([]);
   const [squareMutesState, setSquareMutesState] = useState<AppViewState>("idle");
@@ -164,6 +166,9 @@ export default function SpaceAdminDashboardPage() {
   const [refreshTick, setRefreshTick] = useState(0);
   const deferredQuery = useDeferredValue(query);
   const operators = dashboard?.operators ?? [];
+  const shownActivities = activities.filter((activity) => activityFilter === "all" || activity.status === activityFilter);
+  const refreshManagement = () => setRefreshTick((value) => value + 1);
+  const retryManagement = <button className="ghost-button" onClick={refreshManagement} type="button">{t("common.retry")}</button>;
 
   const currentSpace = dashboard?.space ?? session?.space ?? null;
   const communityEnabled = currentSpace?.group_square_enabled === true;
@@ -200,18 +205,18 @@ export default function SpaceAdminDashboardPage() {
     return new Date(value * 1000).toLocaleDateString(getActiveLocale(), { month: "short", day: "numeric" });
   };
 
-  const setOperator = async (user: AdminMemberDTO, enabled: boolean) => {
+  const setOperator = async (userId: number, enabled: boolean) => {
     try {
-      setOperatorBusyUserId(user.user_id);
+      setOperatorBusyUserId(userId);
       if (enabled) {
-        const operator = await api.addSpaceOperator(user.user_id);
-        setDashboard((current) => current ? { ...current, operators: [...current.operators.filter((item) => item.user.user_id !== user.user_id), operator] } : current);
+        const operator = await api.addSpaceOperator(userId);
+        setDashboard((current) => current ? { ...current, operators: [...current.operators.filter((item) => item.user.user_id !== userId), operator] } : current);
       } else {
-        await api.removeSpaceOperator(user.user_id);
-        setDashboard((current) => current ? { ...current, operators: current.operators.filter((item) => item.user.user_id !== user.user_id) } : current);
+        await api.removeSpaceOperator(userId);
+        setDashboard((current) => current ? { ...current, operators: current.operators.filter((item) => item.user.user_id !== userId) } : current);
       }
-      setMembers((current) => current.map((item) => item.user_id === user.user_id ? { ...item, operator: enabled } : item));
-      setSelectedMember((current) => current?.user_id === user.user_id ? { ...current, operator: enabled } : current);
+      setMembers((current) => current.map((item) => item.user_id === userId ? { ...item, operator: enabled } : item));
+      setSelectedMember((current) => current?.user_id === userId ? { ...current, operator: enabled } : current);
       showToast(t(enabled ? "admin.operatorAdded" : "admin.operatorRemoved"));
     } catch (cause) {
       showToast(cause instanceof ApiError ? cause.message : t("admin.operatorUpdateFailed"), "error");
@@ -325,6 +330,7 @@ export default function SpaceAdminDashboardPage() {
   }, [dashboard?.space, defaultLevelNames]);
 
   useEffect(() => {
+    if (activeTab !== "members") return;
     const controller = new AbortController();
     setMemberState("loading");
     setError(null);
@@ -340,6 +346,7 @@ export default function SpaceAdminDashboardPage() {
         controller.signal
       )
       .then((memberRows) => {
+        if (controller.signal.aborted) return;
         setMembers(memberRows);
         setMemberState("ready");
       })
@@ -351,13 +358,14 @@ export default function SpaceAdminDashboardPage() {
       });
 
     return () => controller.abort();
-  }, [deferredQuery, filter, refreshTick]);
+  }, [activeTab, deferredQuery, filter, refreshTick]);
 
   useEffect(() => {
-    if (activeTab !== "square" || !settingsSquareEnabled || squareState === "ready") return;
+    if (activeTab !== "square" || !communityEnabled) return;
     const controller = new AbortController();
     setSquareState("loading");
     api.getAdminSquareStatements({ limit: 30 }, controller.signal).then((rows) => {
+      if (controller.signal.aborted) return;
       setSquareStatements(rows);
       setSquareState("ready");
     }).catch((apiError) => {
@@ -366,13 +374,14 @@ export default function SpaceAdminDashboardPage() {
       showToast(apiError instanceof ApiError ? apiError.message : t("admin.dashboardLoadFailed"), "error");
     });
     return () => controller.abort();
-  }, [activeTab, settingsSquareEnabled, squareState, t]);
+  }, [activeTab, communityEnabled, squareRefresh, t]);
 
   useEffect(() => {
     if (activeTab !== "mutes") return;
     const controller = new AbortController();
     setSquareMutesState("loading");
     api.getAdminSquareMutes(controller.signal).then((rows) => {
+      if (controller.signal.aborted) return;
       setSquareMutes(rows);
       setSquareMutesState("ready");
     }).catch((apiError) => {
@@ -381,7 +390,7 @@ export default function SpaceAdminDashboardPage() {
       showToast(apiError instanceof ApiError ? apiError.message : t("admin.muteLoadFailed"), "error");
     });
     return () => controller.abort();
-  }, [activeTab, t]);
+  }, [activeTab, refreshTick, t]);
 
   const editSquareMute = (mute: SquareMuteDTO) => {
     setMuteEditTarget(mute);
@@ -847,14 +856,14 @@ export default function SpaceAdminDashboardPage() {
 
           {activeTab === "members" ? <section className="admin-tab-page admin-members-tab">
             <div className="admin-members-toolbar">
-              <label className="admin-member-search"><span aria-hidden="true" className="material-symbols-outlined">search</span><input aria-label={t("admin.searchMembers")} placeholder={t("admin.searchMembers")} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+              <ManagementSearch label={t("admin.searchMembers")} query={query} onChange={setQuery} />
               <PageTabs label={t("management.memberFilter")} value={filter} onChange={setFilter} items={[
                 { value: "all", label: `${t("common.all")} · ${dashboard?.stats.members_count ?? 0}` },
                 { value: "online", label: `${t("presence.online")} · ${dashboard?.stats.online_count ?? 0}` },
               ]} />
             </div>
-            <div aria-hidden="true" className="admin-member-columns"><span>{t("management.memberName")}</span><span>{t("admin.friends")}</span><span>{t("admin.statements")}</span><span>{t("management.memberStatus")}</span><span /></div>
-            <div className="admin-member-list">
+            {members.length > 0 && <div aria-hidden="true" className="admin-member-columns"><span>{t("management.memberName")}</span><span>{t("admin.friends")}</span><span>{t("admin.statements")}</span><span>{t("management.memberStatus")}</span><span /></div>}
+            <div className="admin-member-list" aria-busy={memberState === "loading"}>
               {members.map((user) => <button className="admin-member-row" key={user.user_id} onClick={() => setSelectedMember(user)} type="button">
                 <span className="admin-member-avatar-wrap"><UserAvatar className="admin-member-avatar" name={user.name} uri={user.avatar_uri} />{user.is_alive && !user.is_deleted ? <i /> : null}</span>
                 <span className="admin-member-main"><span><strong>{user.name}</strong><b>LV.{user.growth_level ?? 1}</b>{user.verified ? <em>{t("admin.verified")}</em> : null}</span><small>{user.is_deleted ? t("admin.historicalResidual") : `${user.friend_count ?? 0} ${t("admin.friends")} · ${user.statement_count ?? 0} ${t("admin.statements")}`}</small></span>
@@ -864,20 +873,28 @@ export default function SpaceAdminDashboardPage() {
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>)}
               {!members.length && memberState === "ready" ? <FeedbackState tone="empty" icon={query.trim() ? "search_off" : "group"} title={t(query.trim() || filter === "online" ? "management.noMatchingMembers" : "admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
+              {!members.length && memberState === "loading" && <FeedbackState tone="loading" title={t("common.loading")} />}
+              {memberState === "error" && <FeedbackState tone="error" title={t("admin.membersLoadFailed")} action={retryManagement} />}
             </div>
           </section> : null}
 
           {activeTab === "square" ? <section className="admin-tab-page admin-square-tab">
-            <div className="admin-square-intro"><span><strong>{t("admin.squareManagement")}</strong><small>{t("admin.squareManagementHint")}</small></span><button onClick={() => setSquareState("idle")} type="button"><span className="material-symbols-outlined">refresh</span></button></div>
-            <div className="admin-square-feed">
+            <ManagementToolbar description={t("admin.squareManagementHint")}>
+              <button className="ghost-button" disabled={squareState === "loading"} onClick={() => setSquareRefresh((value) => value + 1)} type="button">
+                <span aria-hidden="true" className="material-symbols-outlined">refresh</span>{t("management.refresh")}
+              </button>
+            </ManagementToolbar>
+            <div className="admin-square-feed" aria-busy={squareState === "loading"}>
               {squareStatements.map((statement) => <article className="admin-statement" key={statement.statement_id}>
                 <header><UserAvatar className="admin-statement-avatar" name={statement.user.name} uri={statement.user.avatar_uri} /><span><strong>{statement.user.name}</strong><small>{formatRelativeTime(statement.created_at)}</small></span><b>{statement.visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</b></header>
                 {statement.text ? <p>{statement.text}</p> : null}
-                {statement.media.length ? <div className="admin-statement-media">{statement.media.slice(0, 3).map((media) => media.kind === "image" ? <img alt="" key={media.media_id} src={media.thumbnail_uri || media.uri} /> : <span key={media.media_id}><span className="material-symbols-outlined">{media.kind === "video" ? "videocam" : "mic"}</span>{media.kind === "video" ? t("media.video") : t("media.audio")}</span>)}</div> : null}
+                {statement.media.length ? <div className="admin-statement-media">{statement.media.slice(0, 3).map((media) => media.kind === "image" ? <img alt="" key={media.media_id} loading="lazy" src={media.thumbnail_uri || media.uri} /> : <span key={media.media_id}><span className="material-symbols-outlined">{media.kind === "video" ? "videocam" : "mic"}</span>{media.kind === "video" ? t("media.video") : t("media.audio")}</span>)}</div> : null}
                 <footer><span>{statement.like_count} {t("square.like")}</span><span>{statement.comment_count} {t("square.comments")}</span></footer>
               </article>)}
-              {!squareStatements.length && squareState === "ready" ? <FeedbackState tone="empty" icon="forum" title={t("square.empty")} /> : null}
             </div>
+            {!squareStatements.length && squareState === "ready" && <FeedbackState tone="empty" icon="forum" title={t("square.empty")} />}
+            {!squareStatements.length && squareState === "loading" && <FeedbackState tone="loading" title={t("common.loading")} />}
+            {squareState === "error" && <FeedbackState tone="error" title={t("admin.dashboardLoadFailed")} />}
           </section> : null}
 
           {activeTab === "permissions" ? <section className="admin-tab-page admin-permissions-tab">
@@ -885,16 +902,41 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
 
           {activeTab === "official" && currentSpace ? <section className="management-form-page">
-            <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
+            <div className="management-space-identity">
+              <SpaceAvatar className="management-space-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} />
+              <span><strong>{currentSpace.official_user?.name || currentSpace.name}</strong><small>{t("admin.officialAccount")}</small></span>
+            </div>
+            <div className="admin-menu-list">
+              <button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span aria-hidden="true" className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{dashboard && t("admin.broadcastDescription", { count: dashboard.stats.members_count })}</small></span><span aria-hidden="true" className="material-symbols-outlined">chevron_right</span></button>
+              <button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span aria-hidden="true" className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong></span><span aria-hidden="true" className="material-symbols-outlined">chevron_right</span></button>
+            </div>
           </section> : null}
           {activeTab === "operators" ? <section className="management-form-page">
-        <div className="admin-operator-list"><section className="admin-policy-intro"><strong>{t("admin.operatorCount", { count: operators.length })}</strong><p>{t("admin.operatorHint")}</p></section>{operators.map((operator) => <article className="admin-operator-card" key={operator.operator_id}><UserAvatar className="mini-avatar" name={operator.user.name} uri={operator.user.avatar_uri} /><span><strong>{operator.user.name}</strong><small>{t("profile.operator")}</small></span><button disabled={operatorBusyUserId === operator.user.user_id} onClick={() => { const member = members.find((item) => item.user_id === operator.user.user_id); if (member) void setOperator(member, false); }} type="button">{t("admin.removeOperator")}</button></article>)}</div>
+            <ManagementToolbar description={t("admin.operatorHint")}>
+              {dashboard && <strong className="management-count">{t("admin.operatorCount", { count: operators.length })}</strong>}
+              <button className="ghost-button" onClick={() => setActiveTab("members")} type="button">{t("management.memberDirectory")}</button>
+            </ManagementToolbar>
+            <div className="admin-operator-list">
+              {operators.map((operator) => <article className="admin-operator-card" key={operator.operator_id}>
+                <UserAvatar className="mini-avatar" name={operator.user.name} uri={operator.user.avatar_uri} />
+                <span><strong>{operator.user.name}</strong><small>{t("profile.operator")}</small></span>
+                <button disabled={operatorBusyUserId !== null} onClick={() => void setOperator(operator.user.user_id, false)} type="button">{t("admin.removeOperator")}</button>
+              </article>)}
+            </div>
+            {dashboardState === "ready" && !operators.length && <FeedbackState tone="empty" icon="shield_person" title={t("management.noOperators")} description={t("management.assignFromMembers")} />}
+            {dashboardState === "loading" && <FeedbackState tone="loading" title={t("common.loading")} />}
+            {dashboardState === "error" && <FeedbackState tone="error" title={t("admin.dashboardLoadFailed")} action={retryManagement} />}
           </section> : null}
 
-          {activeTab === "activities" ? <section className="management-form-page">
+          {activeTab === "activities" ? <section className="admin-tab-page">
+        <ManagementToolbar description={t("admin.activityArrangementHint")}>
+          <ManagementFilter label={t("management.activityStatusFilter")} value={activityFilter} options={[
+            { value: "all", label: t("common.all") },
+            ...(["active", "unclaimed", "ended"] as const).map((value) => ({ value, label: t(`admin.activityStatus.${value}`) })),
+          ]} onChange={(value) => setActivityFilter(value as typeof activityFilter)} />
+        </ManagementToolbar>
         <div className="admin-activity-list">
-          <section className="admin-policy-intro"><strong>{t("admin.activityArrangementTitle")}</strong><p>{t("admin.activityArrangementHint")}</p></section>
-          {activities.map((activity) => {
+          {shownActivities.map((activity) => {
             const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
             const localizedTitle = getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title;
             const localizedSummary = getActiveLocale().startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
@@ -910,45 +952,50 @@ export default function SpaceAdminDashboardPage() {
               {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
             </article>;
           })}
-          {activitiesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
-          {activitiesState === "error" ? <FeedbackState tone="error" title={t("admin.activityLoadFailed")} /> : null}
         </div>
+        {activitiesState === "loading" && <FeedbackState tone="loading" title={t("common.loading")} />}
+        {activitiesState === "error" && <FeedbackState tone="error" title={t("admin.activityLoadFailed")} action={retryManagement} />}
+        {activitiesState === "ready" && !shownActivities.length && <FeedbackState tone="empty" icon="event_busy" title={t("management.noMatchingActivities")} />}
           </section> : null}
 
           {activeTab === "mutes" ? <section className="management-form-page">
+        <ManagementToolbar description={t("admin.noSquareMutesHint")}>
+          <button className="ghost-button" disabled={squareMutesState === "loading"} onClick={refreshManagement} type="button">{t("management.refresh")}</button>
+        </ManagementToolbar>
         <div className="admin-square-mute-list">
           {squareMutes.map((mute) => <article className="admin-square-mute-card" key={mute.mute_id}>
             <header><UserAvatar className="admin-square-mute-avatar" name={mute.user.name} uri={mute.user.avatar_uri} /><span><strong>{mute.user.name}</strong><small>{mute.permanent ? t("admin.mutePermanent") : t("admin.muteUntil", { time: new Date((mute.muted_until ?? 0) * 1000).toLocaleString(getActiveLocale()) })}</small>{mute.created_by ? <small>{t("admin.muteCreatedBy", { name: mute.created_by.name })}</small> : null}</span></header>
             <p>{mute.reason}</p>
-            <footer><span>{mute.created_by ? t("admin.mutedBy", { name: mute.created_by.name }) : ""}</span><div><button onClick={() => editSquareMute(mute)} type="button">{t("admin.adjustMute")}</button><button className="is-danger" onClick={() => setUnmuteTarget(mute)} type="button">{t("admin.unmute")}</button></div></footer>
+            <footer><div><button onClick={() => editSquareMute(mute)} type="button">{t("admin.adjustMute")}</button><button className="is-danger" onClick={() => setUnmuteTarget(mute)} type="button">{t("admin.unmute")}</button></div></footer>
           </article>)}
           {squareMutesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
-          {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState tone="empty" icon="verified_user" description={t("admin.noSquareMutesHint")} title={t("admin.noSquareMutes")} /> : null}
+          {squareMutesState === "error" && <FeedbackState tone="error" title={t("admin.muteLoadFailed")} action={retryManagement} />}
+          {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState tone="empty" icon="verified_user" title={t("admin.noSquareMutes")} /> : null}
         </div>
           </section> : null}
 
           {activeTab === "features" ? <section className="management-form-page">
         <div className="admin-policy-drawer">
           <p className="management-note">{t("admin.featureAccessHint")}</p>
-          <SettingGroup>
+          <section className="management-settings-group"><h2>{t("management.chatSettings")}</h2><SettingGroup>
             <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) setSettingsSpaceGroupEnabled(false); }} />} />
             <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
-          </SettingGroup>
-          <SettingGroup>
+          </SettingGroup></section>
+          <section className="management-settings-group"><h2>{t("management.squareSettings")}</h2><SettingGroup>
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (settingsSquareEnabled) setSettingsSubmissionEnabled(false); if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || (settingsSquareFreePostEnabled && !settingsSubmissionEnabled)} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
+            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
+          </SettingGroup></section>
+          <section className="management-settings-group"><h2>{t("management.extraSettings")}</h2><SettingGroup>
             <SettingRow title={t("research.title")} description={t("research.featureHint")} trailing={<SettingSwitch checked={settingsResearchEnabled} label={t("research.title")} onChange={setSettingsResearchEnabled}/>} />
             {currentSpace?.annual_recap_granted && <SettingRow title={t("recap.title")} description={t("recap.adminHint")} trailing={<SettingSwitch checked={settingsAnnualRecap} label={t("recap.title")} onChange={setSettingsAnnualRecap}/>} />}
-            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
-          </SettingGroup>
-          {(currentSpace?.qq_binding_granted || currentSpace?.oauth_developer_granted) ? <SettingGroup>
             {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
             {currentSpace?.oauth_developer_granted ? <SettingRow title={t("management.devCapability")} description={t("management.devCapabilityHint")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("management.devCapability")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
-          </SettingGroup> : null}
+          </SettingGroup></section>
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>
-            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.processing") : t("common.save")}</button></footer>
+            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings()} />
           </section> : null}
 
           {activeTab === "access" ? <section className="management-form-page">
@@ -966,7 +1013,7 @@ export default function SpaceAdminDashboardPage() {
             <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
           </section>
         </div>
-            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings()} />
           </section> : null}
 
           {activeTab === "basics" ? <section className="management-form-page">
@@ -975,23 +1022,24 @@ export default function SpaceAdminDashboardPage() {
               <span><strong>{currentSpace?.name}</strong><a href={entryHref}>{PUBLIC_HOST}/{currentSpace?.slug}</a></span>
               <button aria-label={t("admin.copyMemberEntry")} title={t("admin.copyMemberEntry")} onClick={() => void copyEntryLink()} type="button"><span aria-hidden="true" className="material-symbols-outlined">content_copy</span></button>
             </div>
-            <SettingGroup>
+            <section className="management-settings-group"><h2>{t("management.appearanceSettings")}</h2><SettingGroup>
               <SettingRow title={t('admin.spaceTheme')} description={t(currentSpace?.qixi_theme_granted || currentSpace?.christmas_theme_granted ? 'admin.spaceThemeHint' : 'admin.spaceThemeLocked')} trailing={<SelectControl label={t('admin.spaceTheme')} value={settingsSiteTheme} disabled={settingsSaving || !(currentSpace?.qixi_theme_granted || currentSpace?.christmas_theme_granted)} options={[
                 { value: 'default', label: t('admin.defaultTheme') },
                 ...(currentSpace?.qixi_theme_granted ? [{ value: 'qixi-2026', label: t('admin.qixiTheme') }] : []),
                 ...(currentSpace?.christmas_theme_granted ? [{ value: 'christmas-2026', label: t('admin.christmasTheme') }] : []),
               ]} onChange={(value) => setSettingsSiteTheme(value === 'qixi-2026' || value === 'christmas-2026' ? value : 'default')} />} />
-            </SettingGroup>
-            <div className="management-setting-fields">
+            </SettingGroup></section>
+            <section className="management-settings-group"><h2>{t("management.profileSettings")}</h2><div className="management-setting-fields">
               <div className="management-field"><label htmlFor="admin-space-name">{t("admin.spaceName")}</label><input id="admin-space-name" className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div>
               <div className="management-field"><div><label htmlFor="admin-space-capacity">{t("admin.memberLimit")}</label><small id="admin-space-capacity-hint">{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div><input id="admin-space-capacity" aria-describedby="admin-space-capacity-hint" className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /></div>
-            </div>
-            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+            </div></section>
+            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready" || !settingsName.trim()} onSave={() => void saveSettings()} />
           </section> : null}
 
           {activeTab === "levels" ? <section className="management-form-page">
+            <p className="management-note">{t("management.levelNamesHint")}</p>
             <div className="management-level-fields">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input aria-label={`Lv.${index + 1}`} className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div>
-            <footer className="management-form-actions"><button className="button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">{settingsSaving ? t("common.saving") : t("common.save")}</button></footer>
+            <ManagementSaveBar busy={settingsSaving} disabled={dashboardState !== "ready"} onSave={() => void saveSettings()} />
           </section> : null}
 
           {activeTab === "verification" ? <section className="management-form-page">
@@ -1023,7 +1071,7 @@ export default function SpaceAdminDashboardPage() {
           <section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section>
           <section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section>
           {!selectedMember.is_deleted ? <section className="admin-member-detail-section admin-member-chat-mute"><h3>{t("admin.globalChatMute")}</h3><p>{t("admin.globalChatMuteHint")}</p><ChatMuteControls busy={globalChatMuteBusy} mute={selectedMember.chat_mute} onMute={(duration) => void setGlobalChatMute(duration)} onUnmute={() => void removeGlobalChatMute()} /></section> : null}
-          <button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button>
+          <button className="ghost-button" disabled={operatorBusyUserId !== null || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember.user_id, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button>
           <button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button>
         </div> : null}
       </SideDrawer>

@@ -1,7 +1,11 @@
 /* One navigation model for space governance and platform operations. */
 .management-workspace,
 .management-workspace.platform-console {
-  --management-rail: 224px;
+  --management-rail: 228px;
+  --management-header-height: 80px;
+  --management-gutter: clamp(18px, 3.1vw, 46px);
+  --management-line: var(--line-soft);
+  --management-tint: color-mix(in srgb, var(--brand-accent) 9%, var(--bg-elevated));
   --management-subnav-height: 0px;
   --pa-ink: var(--text-primary);
   --pa-muted: var(--text-muted);
@@ -9,25 +13,25 @@
   position: relative;
   display: grid;
   grid-template-columns: var(--management-rail) minmax(0, 1fr);
-  grid-template-rows: 88px minmax(0, 1fr);
+  grid-template-rows: var(--management-header-height) minmax(0, 1fr);
   width: 100%;
   height: 100dvh;
   padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   min-height: 0;
   overflow: hidden;
   color: var(--text-primary);
-  background: radial-gradient(ellipse at 85% 0, color-mix(in srgb, var(--brand-primary) 8%, transparent), transparent 45%), var(--bg-canvas);
+  background: var(--bg-canvas);
 }
 .management-brand {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-  padding: 18px;
+  padding: 16px 20px;
   border-right: 1px solid var(--line-soft);
   background: var(--bg-elevated);
 }
-.management-workspace.has-section-tabs { --management-subnav-height: 49px; }
+.management-workspace.has-section-tabs { --management-subnav-height: 46px; }
 .management-brand > :first-child { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; object-fit: contain; }
 .management-brand > span { display: grid; gap: 5px; min-width: 0; }
 .management-brand small { color: var(--text-muted); font-size: 10px; letter-spacing: .04em; }
@@ -37,10 +41,10 @@
   grid-row: 2;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-height: 0;
   overflow: auto;
-  padding: 12px 14px max(20px, env(safe-area-inset-bottom));
+  padding: 14px 14px max(20px, env(safe-area-inset-bottom));
   border-right: 1px solid var(--line-soft);
   background: var(--bg-elevated);
   overscroll-behavior: contain;
@@ -55,7 +59,7 @@
   min-height: 46px;
   padding: 10px 14px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 9px;
   color: var(--text-secondary);
   background: transparent;
   font: inherit;
@@ -65,33 +69,37 @@
   white-space: nowrap;
 }
 .management-nav > button:hover { background: color-mix(in srgb, var(--brand-primary) 6%, transparent); }
-.management-nav > button[aria-current="page"] { color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 13%, transparent); }
+.management-nav > button[data-current] { color: var(--brand-accent); background: var(--management-tint); }
 .management-nav .material-symbols-outlined { font-size: 22px; }
 .management-nav b { margin-left: auto; padding: 2px 5px; border-radius: 6px; color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 15%, transparent); font-size: 10px; }
-.management-content { grid-column: 2; grid-row: 1 / -1; display: grid; grid-template-rows: 88px auto minmax(0, 1fr); min-width: 0; min-height: 0; }
-.management-section-tabs { min-width: 0; padding-inline: clamp(18px, 3vw, 40px); border-bottom: 1px solid var(--line-soft); background: var(--bg-elevated); }
+.management-content { grid-column: 2; grid-row: 1 / -1; display: grid; grid-template-rows: var(--management-header-height) auto minmax(0, 1fr); min-width: 0; min-height: 0; }
+.management-section-tabs { display: flex; align-items: stretch; gap: 20px; min-width: 0; overflow-x: auto; padding-inline: var(--management-gutter); border-bottom: 1px solid var(--management-line); background: var(--bg-elevated); scrollbar-width: none; }
 .management-section-tabs[hidden] { display: none; }
-.management-section-tabs .app-page-tabs { max-width: 1280px; margin-inline: auto; }
-.management-section-tabs .app-page-tabs-items { gap: 28px; }
-.management-section-tabs .app-page-tabs-items button { min-height: 48px; }
-.management-form-page { display: grid; gap: 24px; width: 100%; max-width: 800px; margin-inline: auto; }
-.management-form-actions { position: sticky; bottom: -1px; display: flex; justify-content: flex-end; padding: 16px 0; background: var(--bg-canvas); }
+.management-nav-pages { display: none; }
+.management-section-tabs button, .management-nav-pages button { display: flex; flex: 0 0 auto; align-items: center; gap: 7px; min-height: 44px; padding: 0; border-bottom: 2px solid transparent; color: var(--text-secondary); font-size: 13px; font-weight: 650; white-space: nowrap; }
+.management-section-tabs button[aria-current], .management-nav-pages button[aria-current] { color: var(--brand-accent); font-weight: 800; }
+.management-section-tabs button[aria-current] { border-bottom-color: var(--brand-accent); }
+.management-section-tabs button > .material-symbols-outlined, .management-nav-pages button > .material-symbols-outlined { font-size: 17px; }
+.management-section-tabs b { color: var(--brand-accent); font-size: 10px; }
+.management-form-page { display: grid; gap: 20px; width: 100%; max-width: 880px; }
+.management-form-actions { position: sticky; z-index: 2; bottom: 0; display: flex; justify-content: flex-end; padding: 12px 0; border-top: 1px solid var(--management-line); background: var(--bg-canvas); }
 .management-form-actions button { min-width: 112px; }
 .management-form-page .admin-policy-drawer { padding: 0; }
 .management-report-content { margin: 0; padding: 16px; border-radius: 14px; color: var(--text-secondary); background: var(--bg-canvas); font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .management-workspace .admin-menu-section { margin: 0; }
 .management-workspace .admin-menu-profile { margin-bottom: 24px; }
-.management-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px clamp(18px, 3vw, 40px); border-bottom: 1px solid var(--line-soft); }
+.management-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px var(--management-gutter); border-bottom: 1px solid var(--management-line); background: var(--bg-elevated); }
 .management-page-header > div:first-child { min-width: 0; display: grid; gap: 4px; }
-.management-page-header small { color: var(--text-muted); font-size: 10px; letter-spacing: .06em; }
-.management-page-header h1 { margin: 0; font-family: var(--font-heading); font-size: 24px; line-height: 1.2; }
+.management-page-header small { color: var(--text-muted); font-size: 11px; }
+.management-mobile-space { display: none; }
+.management-page-header h1 { margin: 0; overflow: hidden; font-family: var(--font-heading); font-size: clamp(20px, 2.2vw, 28px); line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .management-header-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
 .management-header-actions > button, .management-language-control { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line-soft); border-radius: 12px; color: var(--text-secondary); background: var(--bg-elevated); }
 .management-header-actions > button > span, .management-language-control > span { font-size: 19px; }
 .management-language-control { position: relative; }
 .management-language-control select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .management-language-control:focus-within { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
-.management-body { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px clamp(18px, 3vw, 40px) max(28px, env(safe-area-inset-bottom)); scrollbar-gutter: stable; }
+.management-body { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 22px var(--management-gutter) max(26px, env(safe-area-inset-bottom)); scrollbar-gutter: stable; }
 .management-body.is-fill { overflow: hidden; padding: 0; }
 .management-workspace .admin-app-content,
 .management-workspace .platform-main { width: 100%; max-width: 1280px; min-height: 0; margin: 0 auto; padding: 0; }
@@ -102,8 +110,6 @@
 .management-workspace .platform-header { display: none; }
 .management-workspace .platform-section-title { flex-wrap: wrap; }
 .management-workspace .platform-search { flex: 1 1 200px; max-width: 340px; width: auto; }
-.management-workspace .platform-hero { min-height: 200px; }
-.management-workspace .platform-hero > .material-symbols-outlined { flex: 0 0 auto; font-family: "Material Symbols Outlined"; letter-spacing: normal; }
 .management-workspace .material-symbols-outlined { font-family: "Material Symbols Outlined"; font-weight: normal; font-style: normal; letter-spacing: normal; text-transform: none; }
 .management-workspace .platform-metrics { margin-block: 18px; }
 .management-workspace .platform-space-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
@@ -141,7 +147,19 @@
 .management-detail .platform-data-grid > span { padding: 12px; }
 .management-detail .platform-data-grid > span:nth-child(n) { border-color: var(--line-soft); }
 @media (min-width: 720px) {
-  .management-workspace > .desktop-panel-slot { position: absolute; top: calc(88px + var(--management-subnav-height)); bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+  .management-page-header { grid-row: 1; }
+  .management-section-tabs { grid-row: 2; }
+  .management-body { grid-row: 3; }
+  .management-workspace > .desktop-panel-slot { position: absolute; top: calc(var(--management-header-height) + var(--management-subnav-height)); bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+}
+@media (min-width: 1180px) {
+  .management-workspace.has-section-tabs { --management-subnav-height: 0px; }
+  .management-section-tabs { display: none; }
+  .management-nav-pages { display: grid; gap: 2px; margin: 2px 0 8px 15px; padding-inline-start: 8px; border-inline-start: 1px solid var(--management-line); }
+  .management-nav-pages button { min-height: 37px; padding: 0 8px; border: 0; border-radius: 7px; text-align: start; }
+  .management-nav-pages button:hover, .management-nav-pages button[aria-current] { background: var(--management-tint); }
+  .management-nav-pages button > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; }
+  .management-nav-pages button > b { margin-inline-start: auto; }
 }
 @media (min-width: 720px) and (max-width: 1179px) {
   .management-workspace, .management-workspace.platform-console { --management-rail: 88px; }
@@ -153,15 +171,17 @@
   .management-nav-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 }
 @media (max-width: 719px) {
-  .management-workspace, .management-workspace.platform-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr); padding-top: env(safe-area-inset-top); }
+  .management-workspace, .management-workspace.platform-console { --management-gutter: 14px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr); padding-top: env(safe-area-inset-top); }
   .management-brand { display: none; }
   .management-content { display: contents; }
   .management-page-header { grid-row: 1; padding: 14px 16px; min-height: 72px; }
   .management-page-header h1 { font-size: 21px; }
+  .management-page-header small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .management-workspace:not(.platform-console) .management-mobile-space { display: inline; }
   .management-header-actions { gap: 7px; }
   .management-header-actions .platform-secure-pill { display: none; }
   .management-nav { grid-row: 2; flex-direction: row; gap: 6px; padding: 7px 12px; border-right: 0; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; }
-  .management-nav > button { min-height: 40px; padding: 8px 12px; gap: 6px; font-size: 12px; }
+  .management-nav > button { min-height: 44px; padding: 8px 12px; gap: 6px; font-size: 12px; }
   .management-nav .material-symbols-outlined { font-size: 19px; }
   .management-section-tabs { grid-row: 3; padding-inline: 16px; }
   .management-body { grid-row: 4; padding: 16px 14px max(22px, env(safe-area-inset-bottom)); }
@@ -170,14 +190,11 @@
   .management-workspace .platform-metric { min-height: 110px; padding: 13px 9px; }
   .management-workspace .platform-metric strong { font-size: clamp(21px, 6vw, 27px); }
   .management-workspace .platform-panel { padding: 16px; }
-  .management-workspace .platform-hero { min-height: 180px; }
-  .management-workspace .platform-hero h2 { font-size: clamp(25px, 7vw, 34px); }
 }
 @media (min-width: 720px) and (max-height: 560px) {
-  .management-workspace, .management-workspace.platform-console { grid-template-rows: 64px minmax(0, 1fr); }
-  .management-content { grid-template-rows: 64px auto minmax(0, 1fr); }
+  .management-workspace, .management-workspace.platform-console { --management-header-height: 64px; }
   .management-brand { padding-block: 10px; }
   .management-page-header { padding-block: 8px; }
   .management-body { padding-top: 16px; }
-  .management-workspace > .desktop-panel-slot { top: calc(72px + var(--management-subnav-height)); bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
+  .management-workspace > .desktop-panel-slot { bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
 }

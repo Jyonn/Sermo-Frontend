@@ -3,6 +3,7 @@ import {api} from '../lib/api';
 import {useI18n} from '../lib/language';
 import type {ManagedResourceDTO,ResourceCollectionDTO} from '../types';
 import {InputDialog} from './InputDialog';
+import {PageTabs} from './PageTabs';
 import {StickerPackReviews} from './StickerPackReviews';
 import {RESOURCE_CATEGORIES,resourcesInCategory,type ResourceCategory} from '../lib/resourceCategories';
 import './ResourceWorkspace.css';
@@ -12,13 +13,15 @@ export function ResourceWorkspace() {
   const {t,language}=useI18n();
   const [collections,setCollections]=useState<ResourceCollectionDTO[]>([]);
   const [selected,setSelected]=useState('');
-  const [category,setCategory]=useState<ResourceCategory>('activity'),[reviews,setReviews]=useState(false);
+  const [selectedCategory,setCategory]=useState<ResourceCategory|null>(null);
+  const [page,setPage]=useState<'library'|'reviews'>('library');
   const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState('');
   const [draft,setDraft]=useState(empty),[creating,setCreating]=useState(false),[query,setQuery]=useState('');
   const [edit,setEdit]=useState<ManagedResourceDTO|null>(null);
   const [editTitle,setEditTitle]=useState('');
   useEffect(()=>setEditTitle(edit?.title??''),[edit]);
   const upload=useRef<HTMLInputElement>(null);
+  const category=selectedCategory??(collections.some(row=>row.category==='activity')?'activity':collections[0]?.category??'activity');
   const visible=resourcesInCategory(collections,category);
   const collection=visible.find(row=>row.slug===selected)??visible[0];
   const load=async()=>{setLoading(true);try{const rows=await api.getPlatformResources();setCollections(rows);setSelected(value=>rows.some(row=>row.slug===value)?value:rows[0]?.slug??'');setError('')}catch(cause){setError(cause instanceof Error?cause.message:t('resources.loadFailed'))}finally{setLoading(false)}};
@@ -34,8 +37,14 @@ export function ResourceWorkspace() {
     }
   });
   return <section className="resource-workspace" aria-busy={busy||loading}>
-    <header className="resource-toolbar"><div><p>{t('resources.library')}</p><h2>{t('management.resources')}</h2></div><button type="button" aria-pressed={reviews} onClick={()=>setReviews(value=>!value)}><span className="material-symbols-outlined">fact_check</span>{t('sticker.review.title')}</button><button type="button" aria-label={t('resources.refresh')} disabled={busy||loading} onClick={()=>void load()}><span className="material-symbols-outlined">refresh</span></button><button className="platform-primary" type="button" disabled={busy} onClick={()=>{setDraft({...empty,category});setCreating(value=>!value)}}><span className="material-symbols-outlined">add</span>{t('resources.newCollection')}</button></header>
-    {reviews?<div className="resource-review-panel"><StickerPackReviews/><p>{t('resources.reviewHint')}</p></div>:null}
+    <PageTabs label={t('management.resources')} value={page} onChange={setPage} items={[
+      {value:'library',label:t('resources.library')}, {value:'reviews',label:t('sticker.review.title')},
+    ]} />
+    {page==='reviews' ? <div className="resource-review-panel"><p>{t('resources.reviewHint')}</p><StickerPackReviews/></div> : <>
+    <header className="resource-toolbar">
+      <button type="button" disabled={busy||loading} onClick={()=>void load()}><span aria-hidden="true" className="material-symbols-outlined">refresh</span>{t('resources.refresh')}</button>
+      <button className="platform-primary" type="button" disabled={busy} onClick={()=>{setDraft({...empty,category});setCreating(value=>!value)}}><span aria-hidden="true" className="material-symbols-outlined">add</span>{t('resources.newCollection')}</button>
+    </header>
     {error?<p className="error" role="alert">{error}</p>:null}
     {creating?<form className="resource-create" onSubmit={create}>
       <label>{t('resources.identifier')}<input required pattern="[a-z0-9][a-z0-9_-]{0,63}" value={draft.slug} onChange={e=>setDraft({...draft,slug:e.target.value})}/></label>
@@ -56,6 +65,7 @@ export function ResourceWorkspace() {
     </>:!loading?<div className="platform-empty"><strong>{t('resources.noCollections')}</strong></div>:<p role="status">{t('common.loading')}</p>}
     {collection?<footer className="resource-storage-path"><span className="material-symbols-outlined">cloud_done</span><span>frienden/assets/{collection.directory??collection.slug}</span></footer>:null}
     </div></div>
+    </>}
     <InputDialog open={Boolean(edit)} title={t('resources.rename')} value={editTitle} onChange={setEditTitle} maxLength={80} busy={busy} confirmDisabled={!editTitle.trim()} onClose={()=>{setEdit(null);setEditTitle('')}} onConfirm={()=>{if(edit)void run(()=>api.savePlatformResource(edit.resource_id,{title:editTitle.trim()})).then(ok=>{if(ok){setEdit(null);setEditTitle('')}})}}/>
   </section>;
 }
