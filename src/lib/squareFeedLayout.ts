@@ -25,14 +25,18 @@ export function squareCover(statement:SquareStatementDTO){
 export function textCoverStyle(id:number,text:string){
   return {theme:Math.abs(id)%4,ratio:text.length>100?.75:text.length>35?.85:1,font:text.length>100?'small':text.length>35?'medium':'large'};
 }
+export function squareNoteEstimate(item:SquareStatementDTO,width:number){
+  if(item.record_shop_announcement)return width<=245?310:250;
+  const cover=squareCover(item);
+  return width/(cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio)+90;
+}
 export function arrangeSquareColumns(items:SquareStatementDTO[],width:number){
   const count=width>=1100?4:width>=720?3:2;
   const columns:SquareStatementDTO[][]=Array.from({length:count},()=>[]),heights=Array(count).fill(0);
   const cardWidth=(Math.max(280,width)-(count-1)*14)/count;
   for(const item of items){
-    const cover=squareCover(item),ratio=cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio;
     const column=heights.indexOf(Math.min(...heights));
-    columns[column].push(item);heights[column]+=cardWidth/ratio+106;
+    columns[column].push(item);heights[column]+=squareNoteEstimate(item,cardWidth)+16;
   }
   return columns;
 }

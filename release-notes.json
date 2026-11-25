@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.25.13",
+  "id": "2026.11.25.14",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "歌手头像框与乐队名片优化",
+      "title": "广场唱片首解卡片",
       "items": [
-        "歌手人物每十秒从头像框底部中央探出一次。",
-        "四款乐队个人名片移除了封面上的乐队名称。"
+        "空间官方发布的钻、曜唱片首解卡片会展示解锁者、专辑和时间，点击即可重看全屏解锁动效。"
       ]
     },
     "en": {
-      "title": "Animated avatar frames and band profile covers",
+      "title": "First-discovery album cards in Square",
       "items": [
-        "Singers peek up from the bottom center of their avatar frames every ten seconds.",
-        "Removed the overlaid band names from all four band profile covers."
+        "Official Diamond and Obsidian discovery cards show who unlocked the album and when. Tap to replay the full-screen reveal."
       ]
     }
   }

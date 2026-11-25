@@ -115,7 +115,9 @@ function RecordShopClip({album,uri,cover,interactive=true,onPlayingChange}:{albu
   </div>;
 }
 
-export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onClose:()=>void;discovery?:boolean}) {
+export function RecordShopAlbum({album,onClose,discovery=false,spaceDiscovery}:{
+  album:Album;onClose:()=>void;discovery?:boolean;spaceDiscovery?:{winner:string;time:string};
+}) {
   const {t}=useI18n();
   const dialog=useRef<HTMLDialogElement>(null);
   const previewTrigger=useRef<HTMLButtonElement>(null);
@@ -123,8 +125,8 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
   const [playing,setPlaying]=useState(false);
   const [preview,setPreview]=useState(false);
   const rare=album.tier==='diamond'||album.tier==='obsidian';
-  const reveal=rare&&(discovery||preview);
-  const revealLabel=t(preview?'recordShop.previewReveal':'recordShop.first');
+  const reveal=rare&&(discovery||preview||Boolean(spaceDiscovery));
+  const revealLabel=t(spaceDiscovery?'recordShop.spaceFirst':preview?'recordShop.previewReveal':'recordShop.first');
   const dismiss=()=>{
     if(preview){
       setPreview(false);
@@ -136,7 +138,7 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
   useEffect(()=>{if(preview)revealClose.current?.focus();},[preview]);
   const clip=safeActivityImage(album.clip);
   const playback=clip?<RecordShopClip key={clip} album={album} uri={clip} onPlayingChange={setPlaying}/>:<small>{t('recordShop.clipUnavailable')}</small>;
-  return createPortal(<dialog ref={dialog} className={`record-shop-album tier-${album.tier}${discovery||preview?' is-discovery':''}${reveal?' is-rare-reveal':''}`} onClose={onClose} onClick={event=>{if(event.target===event.currentTarget)dismiss();}} aria-label={reveal?`${revealLabel} · ${album.name}`:album.name}>
+  return createPortal(<dialog ref={dialog} className={`record-shop-album tier-${album.tier}${discovery||reveal?' is-discovery':''}${reveal?' is-rare-reveal':''}`} onClose={onClose} onClick={event=>{event.stopPropagation();if(event.target===event.currentTarget)dismiss();}} onKeyDown={event=>event.stopPropagation()} aria-label={reveal?`${revealLabel} · ${album.name}`:album.name}>
     {reveal?<div className="record-shop-reveal">
       <button className="record-shop-close record-shop-reveal-close" type="button" ref={revealClose} onClick={dismiss} aria-label={t('common.close')}>
         <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -150,7 +152,7 @@ export function RecordShopAlbum({album,onClose,discovery=false}:{album:Album;onC
         <p><RecordShopTierMark tier={album.tier}/>{revealLabel}</p>
         <h2>{album.name}</h2>
         {album.title!==album.name?<span>{album.title}</span>:null}
-        {!preview?<div className="record-shop-reveal-player">{playback}</div>:null}
+        {spaceDiscovery?<span className="record-shop-reveal-winner">{t('recordShop.spaceFirstBy', spaceDiscovery)}</span>:!preview?<div className="record-shop-reveal-player">{playback}</div>:null}
       </div>
     </div>:<div className="record-shop-album-panel">
       <form method="dialog"><button className="record-shop-close" type="submit" aria-label={t('common.close')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></form>

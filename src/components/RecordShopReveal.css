@@ -59,6 +59,8 @@
 }
 .record-shop-reveal-close:focus:not(:focus-visible) { outline: 0; }
 
+.record-shop-reveal-winner { overflow-wrap: anywhere; }
+
 .record-shop-reveal-stage {
   position: relative;
   isolation: isolate;

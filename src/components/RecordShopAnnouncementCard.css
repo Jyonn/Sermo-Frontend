@@ -1,0 +1,91 @@
+.record-shop-announcement {
+  --announcement-accent: #a8ddf7;
+  --announcement-ground: #142336;
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.record-shop-announcement[data-tier="obsidian"] {
+  --announcement-accent: #e9b7fa;
+  --announcement-ground: #271733;
+}
+
+.record-shop-announcement .record-shop-announcement-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(70px, 104px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(10px, 3cqi, 22px);
+  width: 100%;
+  padding: clamp(12px, 4cqi, 22px);
+  border: 1px solid color-mix(in srgb, var(--announcement-accent) 45%, var(--announcement-ground));
+  border-radius: 14px;
+  background:
+    repeating-radial-gradient(circle at 12% 50%, transparent 0 11px, #ffffff0b 12px 13px, transparent 14px 21px),
+    radial-gradient(ellipse at 12% 50%, color-mix(in srgb, var(--announcement-accent) 26%, var(--announcement-ground)), transparent 72%),
+    var(--announcement-ground);
+  color: #fff7ff;
+  text-align: start;
+  cursor: pointer;
+}
+
+.record-shop-announcement .record-shop-announcement-card:is(:hover, :focus-visible) {
+  border-color: var(--announcement-accent);
+}
+
+.record-shop-announcement-disc {
+  display: grid;
+  place-items: center;
+}
+
+.record-shop-announcement-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.record-shop-announcement-label { color: var(--announcement-accent); font-size: .75rem; font-weight: 700; }
+.record-shop-announcement-title { font-size: clamp(1.05rem, 4cqi, 1.4rem); line-height: 1.25; }
+.record-shop-announcement-artist,
+.record-shop-announcement time { color: #e1deeb; font-size: .75rem; }
+.record-shop-announcement time { font-variant-numeric: tabular-nums; }
+
+.record-shop-announcement-winner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 4px;
+  font-size: .82rem;
+}
+
+.record-shop-announcement-avatar { width: 20px; height: 20px; flex: 0 0 20px; font-size: .62rem; }
+
+.record-shop-announcement-replay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--announcement-accent) 40%, transparent);
+  border-radius: 999px;
+  color: var(--announcement-accent);
+  font-size: .75rem;
+}
+
+.record-shop-announcement-replay .material-symbols-outlined { font-size: 1.15rem; }
+
+.square-note .record-shop-announcement .record-shop-announcement-card { border-radius: 0; }
+.square-note .record-shop-announcement-card:focus-visible { outline-offset: -3px; }
+
+@container (max-width: 340px) {
+  .record-shop-announcement .record-shop-announcement-card { grid-template-columns: minmax(54px, 76px) minmax(0, 1fr); }
+  .record-shop-announcement-replay { grid-column: 2; justify-self: start; padding: 3px 7px; }
+}
+
+@container (max-width: 245px) {
+  .record-shop-announcement .record-shop-announcement-card { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  .record-shop-announcement-disc { width: min(72%, 112px); justify-self: center; }
+  .record-shop-announcement-replay { grid-column: 1; }
+}
