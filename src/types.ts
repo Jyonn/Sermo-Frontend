@@ -1,4 +1,5 @@
 import type { MusicProfileCardTheme } from "./lib/musicProfileCards";
+import type { SingerAvatarFrameStyle } from "./lib/singerAvatarFrames";
 
 export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
@@ -288,7 +289,7 @@ export interface UserResourceInventoryDTO {
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing" | "explorer-ai";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "frienden-night" | "frienden-garden" | "starry-night" | "noir-film" | "explorer-duality" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "spider-web" | "explorer-conan";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "spider-web" | "explorer-conan" | SingerAvatarFrameStyle;
 export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city" | "explorer-romance" | MusicProfileCardTheme;
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;

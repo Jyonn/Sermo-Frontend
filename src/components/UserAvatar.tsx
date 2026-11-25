@@ -7,6 +7,8 @@ import type { AvatarFrameStyle } from "../types";
 import "./ExplorerPersonalization.css";
 import {usePublicBirthday} from '../lib/publicBirthday';
 import './BirthdayAvatar.css';
+import { isSingerAvatarFrame } from "../lib/singerAvatarFrames";
+import { SingerAvatarFrame } from "./SingerAvatarFrame";
 
 interface GroupAvatarMember {
   name: string;
@@ -22,6 +24,7 @@ interface UserAvatarProps {
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
   frame?: AvatarFrameStyle;
+  animateFrame?: boolean;
   surface?: "person" | "space";
 }
 
@@ -109,7 +112,7 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ userId, name, uri, cacheKey, className, groupMembers, frame, surface = "person" }: UserAvatarProps) {
+export function UserAvatar({ userId, name, uri, cacheKey, className, groupMembers, frame, animateFrame = true, surface = "person" }: UserAvatarProps) {
   const birthday = usePublicBirthday(userId);
   const cachedFrame = useSyncExternalStore(subscribeAvatarFrames, () => cachedAvatarFrame(userId), () => undefined);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
@@ -121,12 +124,13 @@ export function UserAvatar({ userId, name, uri, cacheKey, className, groupMember
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
   const canShowImage = Boolean(source) && !failed;
   const resolvedFrame = frame ?? cachedFrame ?? "none";
-  const normalizedFrame = supportedAvatarFrames.has(resolvedFrame) ? resolvedFrame : "none";
+  const singerFrame = !canShowGroup && surface === "person" && isSingerAvatarFrame(resolvedFrame) ? resolvedFrame : null;
+  const normalizedFrame = singerFrame ?? (supportedAvatarFrames.has(resolvedFrame) ? resolvedFrame : "none");
   const hasFrame = normalizedFrame !== "none";
   const frameArt = useFrameArt(normalizedFrame);
 
   return (
-    <div className={`${className} user-avatar avatar-surface-${surface}${canShowImage ? " avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
+    <div className={`${className} user-avatar avatar-surface-${surface}${canShowImage ? " avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}${singerFrame ? ` has-singer-frame singer-frame-${singerFrame}` : ""}`}>
       <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${normalizedFrame}` : ""}`} style={avatarFrameArt[normalizedFrame] ? { '--avatar-frame-art': frameArt ? `url("${frameArt}")` : 'none' } as CSSProperties : undefined}>
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
@@ -154,6 +158,7 @@ export function UserAvatar({ userId, name, uri, cacheKey, className, groupMember
         {normalizedFrame === 'explorer-conan' && frameArt ? <svg aria-hidden="true" className="avatar-frame-conan-art" viewBox="17 23 607 577" preserveAspectRatio="none" focusable="false"><image href={frameArt} width="640" height="640" /></svg> : null}
         {hasFrame ? <span aria-hidden="true" className="avatar-frame-ornament"><i /><i /><i /><i /></span> : null}
       </span>
+      {singerFrame && <SingerAvatarFrame key={singerFrame} style={singerFrame} animate={animateFrame} />}
       {birthday && !canShowGroup && surface === 'person' ? <svg className="birthday-avatar-crown" aria-hidden="true" viewBox="0 0 64 32" fill="none"><path d="m15 25 12-22 20 24" fill="#eee3cc" stroke="#ae9570"/><path d="m22 12 12 7m-16 1 24 5" stroke="#b8847c" strokeWidth="4"/><circle cx="27" cy="4" r="4" fill="#e9c281"/><path d="m49 8 0 12m-6-9 12 6m-12 0 12-6" stroke="#b4cbd1" strokeWidth="1.5"/><path d="M12 27q19-5 38 2" stroke="#faf2e1" strokeWidth="5" strokeLinecap="round"/></svg> : null}
     </div>
   );

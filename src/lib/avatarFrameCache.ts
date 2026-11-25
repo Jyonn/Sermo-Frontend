@@ -1,10 +1,11 @@
 import type { AvatarFrameStyle } from '../types';
-import {rememberPublicBirthday} from './publicBirthday';
+import {singerAvatarFrameStyles} from './singerAvatarFrames.ts';
+import {rememberPublicBirthday} from './publicBirthday.ts';
 
 const KEY = 'sermo:user-avatar-frames:v1';
 const MAX_ENTRIES = 1200;
 const MAX_AGE = 30 * 24 * 60 * 60 * 1000;
-const styles = new Set<AvatarFrameStyle>(['none','orbit','aurora','polaroid','papercut','mechanical','niko-run','fufu-wave','spider-web','explorer-conan']);
+const styles = new Set<AvatarFrameStyle>(['none','orbit','aurora','polaroid','papercut','mechanical','niko-run','fufu-wave','spider-web','explorer-conan', ...singerAvatarFrameStyles]);
 type Entry = { frame: AvatarFrameStyle; at: number };
 let entries: Map<number, Entry> | undefined;
 const listeners = new Set<() => void>();

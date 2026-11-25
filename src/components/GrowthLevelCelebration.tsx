@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, GrowthRewardDTO, PersonalizationDTO, UserGrowthDTO } from "../types";
 import { isMusicProfileCard } from "../lib/musicProfileCards";
+import { growthRewardTitle } from "../lib/growthRewardTitle";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
@@ -40,7 +41,7 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
       </div>
       <div className="growth-reveal-card-copy">
         <span>{t(`growth.rewardCategory.${reward.category}` as TranslationKey)}</span>
-        <strong>{reward.category === "profile" && isMusicProfileCard(reward.asset_key) ? t(`menu.profileCardTheme.${reward.asset_key}`) : reward.title}</strong>
+        <strong>{growthRewardTitle(reward, t)}</strong>
       </div>
       <div className="growth-reward-tags">
         {reward.vip_access === "level_or_vip" ? <b>VIP · {t("growth.earlyAccess")}</b> : null}
@@ -63,10 +64,11 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
 }
 
 function RewardTrackItem({ active, onClick, reward }: { active: boolean; onClick: () => void; reward: GrowthRewardDTO }) {
+  const { t } = useI18n();
   return (
     <button aria-pressed={active} className={`growth-earned-chip rarity-${reward.rarity}${active ? " is-active" : ""}`} onClick={onClick} type="button">
       <RewardThumbnail reward={reward} />
-      <span><i aria-hidden="true">{active ? "▶" : "✓"}</i><strong>{reward.title}</strong></span>
+      <span><i aria-hidden="true">{active ? "▶" : "✓"}</i><strong>{growthRewardTitle(reward, t)}</strong></span>
     </button>
   );
 }
@@ -212,7 +214,7 @@ export function GrowthLevelCelebration() {
         };
         patchSessionUser(await api.setPersonalization(payload));
       }
-      showToast(t("growth.appliedReward", { reward: currentReward.title }));
+      showToast(t("growth.appliedReward", { reward: growthRewardTitle(currentReward, t) }));
     } catch {
       showToast(t("growth.applyRewardFailed"), "error");
     } finally {

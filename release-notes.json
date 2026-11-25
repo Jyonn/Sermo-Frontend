@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.10",
+  "id": "2026.11.25.11",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "四款动态音乐名片",
+      "title": "四款歌手动态头像框",
       "items": [
-        "告五人、房东的猫、S.H.E 和五月天的动态名片，分别在 LV13、LV14、LV15、LV16 自动解锁。"
+        "薛之谦、方大同、邓紫棋和陈奕迅的动态头像框，分别在 LV14、LV15、LV17 和 LV18 自动解锁。"
       ]
     },
     "en": {
-      "title": "Four animated music profile cards",
+      "title": "Four animated singer avatar frames",
       "items": [
-        "Animated profile cards for Accusefive, The Landlord’s Cat, S.H.E and Mayday unlock automatically at levels 13, 14, 15 and 16."
+        "Animated avatar frames for Joker Xue, Khalil Fong, G.E.M. and Eason Chan unlock automatically at levels 14, 15, 17 and 18."
       ]
     }
   }

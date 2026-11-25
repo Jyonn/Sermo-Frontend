@@ -58,6 +58,7 @@ import type { ActivityCampaignDTO } from "../types";
 import { UserProfileCard } from "../components/UserProfileCard";
 import { MusicProfileScene } from "../components/MusicProfileScene";
 import { isMusicProfileCard, musicProfileCards } from "../lib/musicProfileCards";
+import { isSingerAvatarFrame, singerAvatarFrames, singerAvatarFrameStyles } from "../lib/singerAvatarFrames";
 import type { ProfileCardTheme } from "../types";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
@@ -175,6 +176,7 @@ const personalizationOptions = {
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
     ["spider-web", "menu.frameSpiderWeb"],
     ["explorer-conan", "explorer.reward.1"],
+    ...singerAvatarFrameStyles.map(theme => [theme, `menu.singerFrame.${theme}`] as const),
   ],
 } as const;
 
@@ -656,8 +658,9 @@ export default function MenuPage() {
   const rewardFor = (category: "background" | "bubble" | "frame", assetKey: string) =>
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
-    rewardFor(category, assetKey)?.level ?? 1;
+    category === "frame" && isSingerAvatarFrame(assetKey) ? singerAvatarFrames[assetKey].level : rewardFor(category, assetKey)?.level ?? 1;
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string): GrowthRewardDTO["rarity"] => {
+    if (category === "frame" && isSingerAvatarFrame(assetKey)) return singerAvatarFrames[assetKey].rarity;
     if (category === "background" && assetKey === "starry-night") return "legendary";
     if (category === "background" && assetKey === "explorer-duality") return "epic";
     if (category === "frame" && assetKey === "explorer-conan") return "uncommon";
@@ -686,7 +689,7 @@ export default function MenuPage() {
         style,
       );
   const canUseAvatarFrame = (frame: PersonalizationDTO["avatar_frame_style"]) =>
-    ownsInventoryResource(
+    isSingerAvatarFrame(frame) ? growthLevel >= singerAvatarFrames[frame].level : ownsInventoryResource(
       "frame",
       frame,
     );
@@ -2843,7 +2846,8 @@ export default function MenuPage() {
 
       <SideDrawer
         actionBusy={personalizationSaving}
-        actionDisabled={personalizationDraft.avatar_frame_style === visibleAvatarFrame(me?.avatar_frame_style)}
+        actionDisabled={personalizationDraft.avatar_frame_style === visibleAvatarFrame(me?.avatar_frame_style)
+          || (isSingerAvatarFrame(personalizationDraft.avatar_frame_style) && !canUseAvatarFrame(personalizationDraft.avatar_frame_style))}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("frame")}
         historyKey="avatar-frames"
@@ -2885,6 +2889,7 @@ export default function MenuPage() {
                       <i aria-hidden="true">
                         <UserAvatar
                           className="mini-avatar personalization-option-avatar"
+                          animateFrame={false}
                           frame={value as PersonalizationDTO["avatar_frame_style"]}
                           name={session?.user.name ?? t("brand.user")}
                           uri={me?.avatar_uri ?? session?.user.avatar_uri}

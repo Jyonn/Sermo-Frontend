@@ -23,6 +23,15 @@ test('frame settings survive reload, isolate users, and accept removal without d
   const reloaded = await import('../src/lib/avatarFrameCache.ts?reload');
   assert.equal(reloaded.cachedAvatarFrame(1), 'none');
   assert.equal(reloaded.cachedAvatarFrame(2), 'spider-web');
+  for (const [index, style] of ['joker-xue', 'khalil-fong', 'gem', 'eason-chan'].entries()) {
+    reloaded.rememberAvatarFrames({ user_id: 20 + index, avatar_frame_style: style });
+  }
+  await Promise.resolve();
+  const singerFrames = await import('../src/lib/avatarFrameCache.ts?singer-frames');
+  assert.equal(singerFrames.cachedAvatarFrame(20), 'joker-xue');
+  assert.equal(singerFrames.cachedAvatarFrame(21), 'khalil-fong');
+  assert.equal(singerFrames.cachedAvatarFrame(22), 'gem');
+  assert.equal(singerFrames.cachedAvatarFrame(23), 'eason-chan');
   unsubscribe();
   Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('Storage blocked'); } });
   const blocked = await import('../src/lib/avatarFrameCache.ts?blocked');

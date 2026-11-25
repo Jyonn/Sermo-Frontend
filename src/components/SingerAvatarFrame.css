@@ -1,0 +1,102 @@
+.user-avatar.has-avatar-frame.has-singer-frame {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: var(--singer-frame-metal);
+}
+
+.has-singer-frame .avatar-frame-ornament {
+  box-shadow: inset 0 0 0 1px var(--singer-frame-edge);
+}
+
+.user-avatar.has-singer-frame .avatar-frame-ornament > i:first-child {
+  display: block;
+  position: absolute;
+  inset: 3%;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 1px solid var(--singer-frame-inlay);
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+}
+
+.user-avatar.has-singer-frame .avatar-frame-ornament::after {
+  content: "";
+  position: absolute;
+  left: 9%;
+  bottom: 2%;
+  width: 26%;
+  height: 7%;
+  border-radius: 999px;
+  background: var(--singer-frame-inlay);
+  box-shadow: 0 0 0 1px var(--singer-frame-edge);
+}
+
+.singer-frame-joker-xue {
+  --singer-frame-edge: #39484b;
+  --singer-frame-inlay: #dcf2e4;
+  --singer-frame-metal:
+    repeating-linear-gradient(127deg, transparent 0 5px, #24373433 5px 6px),
+    conic-gradient(from 35deg, #a9c4b1, #e9efe7, #7b9c87 36%, #304944 58%, #d8ded7 80%, #a9c4b1);
+  --singer-frame-duration: 2.55s;
+}
+.singer-frame-khalil-fong {
+  --singer-frame-edge: #62513b;
+  --singer-frame-inlay: #f8dfad;
+  --singer-frame-metal:
+    repeating-linear-gradient(6deg, #fff0ba33 0 1px, transparent 1px 4px, #62402c38 4px 5px),
+    conic-gradient(from 55deg, #af7a4a, #e9bb76 23%, #788565 43%, #a4683b 63%, #e9be89 82%, #af7a4a);
+  --singer-frame-duration: 3.15s;
+}
+.singer-frame-gem {
+  --singer-frame-edge: #58222c;
+  --singer-frame-inlay: #ffd78e;
+  --singer-frame-metal:
+    repeating-conic-gradient(from 9deg, #fff5c844 0 3deg, transparent 3deg 18deg, #68183244 18deg 23deg),
+    conic-gradient(from 27deg, #8a2847, #faaf63 19%, #970f39 39%, #df574f 63%, #f9ce81 78%, #8a2847);
+  --singer-frame-duration: 2.7s;
+}
+.singer-frame-eason-chan {
+  --singer-frame-edge: #253e45;
+  --singer-frame-inlay: #f6db9c;
+  --singer-frame-metal:
+    repeating-conic-gradient(from 45deg, #fff0bf45 0 2deg, transparent 2deg 16deg, #18292655 16deg 20deg),
+    conic-gradient(from 24deg, #999a76, #edcd83 19%, #435d60 33%, #214149 57%, #d1aa66 79%, #999a76);
+  --singer-frame-duration: 3s;
+}
+
+.singer-avatar-ornament {
+  position: absolute;
+  z-index: 2;
+  inset: -15% -8% auto auto;
+  width: 56%;
+  aspect-ratio: 1;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.singer-avatar-ornament > img {
+  display: block;
+  width: 600%;
+  height: 100%;
+  max-width: none;
+  opacity: 0;
+}
+
+.singer-avatar-ornament.is-loaded > img { opacity: 1; }
+.singer-avatar-ornament.is-still > img { width: 100%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] > img {
+    animation: singer-avatar-performance var(--singer-frame-duration) steps(6, jump-none);
+  }
+}
+@keyframes singer-avatar-performance {
+  to { transform: translateX(-83.333333%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .singer-avatar-ornament > img { width: 100%; }
+}
