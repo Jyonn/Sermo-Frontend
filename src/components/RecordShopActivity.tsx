@@ -92,6 +92,8 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate, onConfigure 
           </div>
         </section>
         <ActivityDetails
+          rulesLabel={t("recordShop.howToPlay")}
+          rewardsLabel={t("recordShop.bubbleRewards")}
           overview={openRewards => (
             <section className="record-shop-shelf">
               <h3>{t("menu.chatBubble")}</h3>

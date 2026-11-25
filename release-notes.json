@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.16",
+  "id": "2026.11.25.17",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "广场唱片首解卡片",
+      "title": "回声唱片铺文案更新",
       "items": [
-        "缩小广场的钻、曜唱片首解卡片，解锁信息简化为日期。"
+        "用更好懂的话说明怎么玩、怎么领气泡，以及谁最先找到了唱片。"
       ]
     },
     "en": {
-      "title": "First-discovery album cards in Square",
+      "title": "Clearer wording in Echo Record Shop",
       "items": [
-        "Diamond and Obsidian discovery cards are more compact and show the unlock date."
+        "Easier-to-read instructions explain how to play, how to claim bubbles, and who found a record first."
       ]
     }
   }

@@ -101,12 +101,15 @@
   "management.noSpaceMembers": "该空间暂无成员",
   "management.deliveryUnknownTime": "尚未尝试",
   "square.medalsTab": "奖章",
-  "square.medalsRecordShop": "回声唱片铺 · 空间首解",
-  "square.medalsEmpty": "还没有钻级或曜级唱片首解记录",
-  "recordShop.previewReveal": "预览解锁效果",
-  "recordShop.spaceFirst": "空间首解",
-  "recordShop.spaceFirstBy": "由 {{winner}} 于 {{time}} 解锁",
-  "recordShop.replayReveal": "重看解锁",
+  "square.medalsRecordShop": "回声唱片铺 · 谁先找到了唱片",
+  "square.medalsEmpty": "这里还没人找到钻级或曜级唱片",
+  "recordShop.previewReveal": "看看庆祝动画",
+  "recordShop.spaceFirst": "空间里第一次出现",
+  "recordShop.spaceFirstBy": "{{winner}}在{{time}}找到了这张唱片",
+  "recordShop.replayReveal": "再看一次庆祝动画",
+  "recordShop.howToPlay": "怎么玩",
+  "recordShop.bubbleRewards": "看看歌手气泡",
+  "recordShop.claimAtShop": "在唱片铺领取",
   "references.share": "分享到聊天",
   "references.profile": "个人名片",
   "references.research_task": "科研任务",
@@ -4032,9 +4035,9 @@
   ,"activity.spaceRewardClaimed": "全空间八仙气泡已领取"
   ,"activity.spaceRewardClaimFailed": "全空间奖励暂时未能领取"
   ,"activity.rules": "规则"
-  ,"recordShop.points": "活动积分"
-  ,"recordShop.firstChoice": "{{points}} 分 · 第一位"
-  ,"recordShop.secondChoice": "{{points}} 分 · 第二位"
+  ,"recordShop.points": "我的积分"
+  ,"recordShop.firstChoice": "{{points}} 分领第一个气泡"
+  ,"recordShop.secondChoice": "{{points}} 分领第二个气泡"
   ,"recordShop.singer.jay": "周杰伦"
   ,"recordShop.singer.leehom": "王力宏"
   ,"recordShop.singer.david": "陶喆"
@@ -4046,24 +4049,24 @@
   ,"recordShop.claim": "领取气泡"
   ,"recordShop.claimed": "已领取"
   ,"recordShop.inUse": "使用中"
-  ,"recordShop.configure": "前往聊天气泡设置"
-  ,"recordShop.locked": "未解锁"
+  ,"recordShop.configure": "去换聊天气泡"
+  ,"recordShop.locked": "还不能领"
   ,"recordShop.listen": "试听"
-  ,"recordShop.clipUnavailable": "片段暂不可用"
-  ,"recordShop.first": "首次收藏"
+  ,"recordShop.clipUnavailable": "暂时听不了这段"
+  ,"recordShop.first": "你找到了一张新唱片"
   ,"recordShop.tier.gold": "金"
   ,"recordShop.tier.platinum": "铂"
   ,"recordShop.tier.diamond": "钻"
   ,"recordShop.tier.obsidian": "曜"
-  ,"recordShop.shareRule": "活动为期 30 天。分享网易云音乐、QQ 音乐或小兜的歌曲均可计分，聊天加 5 分，广场加 10 分。"
-  ,"recordShop.listenRule": "活动歌手的歌曲听完整首加 6 分，听完 30 秒及以内的试听加 3 分。其他歌手分别加 4 分和 2 分。"
-  ,"recordShop.dedupeRule": "分享和听歌各计一次，按歌手和歌名跨平台去重。"
-  ,"recordShop.selectionRule": "累计 30 分和 60 分时，各可领取一款歌手气泡。领取后，在菜单 → 个性化 → 聊天页 → 聊天气泡中选择使用。"
-  ,"recordShop.discoveryRule": "气泡随机展示歌手的正式录音室专辑。你首次发现一张专辑时会收到收藏动画。空间首次发现钻或曜级专辑时，管理员会在广场祝贺。"
+  ,"recordShop.shareRule": "活动持续 30 天。分享网易云音乐、QQ 音乐或小兜的歌，发到聊天得 5 分，发到广场得 10 分。"
+  ,"recordShop.listenRule": "活动歌手的歌，听完整首得 6 分，听完不超过 30 秒的试听得 3 分。其他歌手的歌，听完整首得 4 分，听完这样的试听得 2 分。"
+  ,"recordShop.dedupeRule": "同一位歌手的同一首歌，分享和听完各算一次。换个平台也只算一次。"
+  ,"recordShop.selectionRule": "攒到 30 分时可以挑一个歌手气泡，攒到 60 分时还能再挑一个。领到后，可以在菜单 → 个性化 → 聊天页 → 聊天气泡里换上。"
+  ,"recordShop.discoveryRule": "聊天时，你的歌手气泡旁可能随机出现这位歌手的正式专辑。你第一次找到某张唱片时，会看到庆祝动画。如果你是空间里第一个找到某张钻级或曜级唱片的人，空间官方账号会在广场向你道喜。"
   ,"recordShop.bubbleTitle": "{{artist}}气泡"
   ,"recordShop.bubblePreviewFirst": "今天听什么？"
   ,"recordShop.bubblePreviewNext": "这首值得听完。"
-  ,"recordShop.albumElements": "气泡附带的专辑元素"
+  ,"recordShop.albumElements": "气泡旁可能出现的唱片"
   ,"activity.prizePool": "奖池"
   ,"activity.coBranding": "友间与八仙联名活动"
   ,"activity.baxian": "八仙"

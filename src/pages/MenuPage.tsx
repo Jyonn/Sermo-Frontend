@@ -1720,7 +1720,7 @@ export default function MenuPage() {
       return;
     }
     if (recordShopSelectionLocked) {
-      showToast(t("menu.activityUnlock"), "error");
+      showToast(t("recordShop.claimAtShop"), "error");
       return;
     }
     if (bubbleChanged && !recordShopPreviewArtist && personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
@@ -2836,7 +2836,7 @@ export default function MenuPage() {
                             </span>
                             <img alt="" src={recordShopPortraitPoster(artist, recordShopPreviews[artist].portrait)} loading="lazy" />
                           </i>
-                          <div className="chat-personalization-card-copy"><strong>{t("recordShop.bubbleTitle", { artist: name })}</strong><small>{t(!owned ? "menu.activityUnlock" : artist === savedRecordShopSinger ? "recordShop.inUse" : "recordShop.claimed")}</small></div>
+                          <div className="chat-personalization-card-copy"><strong>{t("recordShop.bubbleTitle", { artist: name })}</strong><small>{t(!owned ? "recordShop.claimAtShop" : artist === savedRecordShopSinger ? "recordShop.inUse" : "recordShop.claimed")}</small></div>
                         </button>
                       );
                     }) : null}
