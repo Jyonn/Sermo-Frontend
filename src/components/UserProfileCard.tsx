@@ -1,6 +1,5 @@
 import { GrowthLevelBadge } from "./GrowthLevelBadge";
-import { OfficialBadge } from "./OfficialBadge";
-import { OperatorBadge } from "./OperatorBadge";
+import { AccountRoleBadge } from "./AccountRoleBadge";
 import { PlainAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
 import { useI18n } from "../lib/language";
@@ -71,8 +70,8 @@ export function UserProfileCard({
         <div className="user-profile-copy">
           <div className="user-profile-name-row">
             <h2>{name}</h2>
-            {official ? <OfficialBadge /> : null}
-            {operator ? <OperatorBadge /> : null}
+            {official ? <AccountRoleBadge kind="official" /> : null}
+            {operator ? <AccountRoleBadge kind="operator" /> : null}
           </div>
           <p className={isOnline ? "is-online" : ""}>{presence}</p>
         </div>

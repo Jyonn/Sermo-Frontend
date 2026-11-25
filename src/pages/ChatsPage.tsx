@@ -81,8 +81,7 @@ import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { FriendenLivingWallpaper } from "../components/FriendenLivingWallpaper";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
-import { OfficialBadge } from "../components/OfficialBadge";
-import { OperatorBadge } from "../components/OperatorBadge";
+import { AccountRoleBadge } from "../components/AccountRoleBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
 import type { ChatPreviewImage } from "../lib/chatImageHistory";
 import { ChatImagePreview } from "../components/ChatImagePreview";
@@ -7497,7 +7496,11 @@ function LiveChatsPage({
         {chat.unread ? <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name"><span><BirthdayNameMark userId={chat.type === 'direct' && !chat.submission ? chat.detail.members.find(member => !member.isSelf)?.userId : undefined}/>{chat.title}</span>{!chat.submission && chat.official ? <OfficialBadge /> : null}{!chat.submission && chat.operator ? <OperatorBadge /> : null}</p>
+        <p className="chat-name">
+          <span><BirthdayNameMark userId={chat.type === 'direct' && !chat.submission ? chat.detail.members.find(member => !member.isSelf)?.userId : undefined}/>{chat.title}</span>
+          {!chat.submission && chat.official ? <AccountRoleBadge kind="official" /> : null}
+          {!chat.submission && chat.operator ? <AccountRoleBadge kind="operator" /> : null}
+        </p>
         <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.submission && counterpartNames ? `${counterpartNames} · ` : ""}{chat.preview}</span></div>
       </div>
       <div className="chat-meta">

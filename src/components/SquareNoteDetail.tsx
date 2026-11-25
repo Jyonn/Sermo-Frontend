@@ -6,7 +6,7 @@ import {squareNotePhotos,naturalMediaRatio} from '../lib/squareNoteMedia';
 import {useMediaSource} from '../lib/useMediaSource';
 import {claimMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {UserAvatar} from './UserAvatar';
-import {OfficialBadge} from './OfficialBadge';
+import {AccountRoleBadge} from './AccountRoleBadge';
 import {LinkPreviewCard} from './LinkPreviewCard';
 import {isStillfolioCollection,revalidateCollection} from './StillfolioPreview';
 import {MediaLightbox, type MediaLightboxItem} from './ImageLightbox';
@@ -81,7 +81,11 @@ export function SquareNoteDetail(p:Props){
   </section>:null;
   return <article className={`square-reader${p.panel?' is-panel':''}${photos.length?' has-gallery':''}`}>
     <SquareNoteDetailHeader panel={p.panel} onDismiss={p.onBack}>
-      <button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">{s.is_anonymous?<span className="material-symbols-outlined">person</span>:<UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style}/>}<strong>{s.is_anonymous?t('square.anonymousUser'):s.user.name}</strong>{!s.is_anonymous&&s.user.official?<OfficialBadge/>:null}</button>
+      <button className="square-reader-author" disabled={s.is_anonymous} onClick={p.onProfile} type="button">
+        {s.is_anonymous ? <span className="material-symbols-outlined">person</span> : <UserAvatar className="square-reader-avatar" name={s.user.name} uri={s.user.avatar_uri} frame={s.user.avatar_frame_style} />}
+        <strong>{s.is_anonymous ? t('square.anonymousUser') : s.user.name}</strong>
+        {!s.is_anonymous && s.user.official ? <AccountRoleBadge kind="official" /> : null}
+      </button>
       <OverlayIconButton icon="share" aria-label={t('square.share')} onClick={p.onShare} />
       {s.can_delete||s.can_pin||s.can_mute ? <OverlayIconButton icon="more_horiz" aria-label={t('common.more')} onClick={p.onMore} /> : null}
     </SquareNoteDetailHeader>

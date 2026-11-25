@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.4",
+  "id": "2026.11.25.5",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "VIP 通话额度调整",
+      "title": "账号身份徽记更新",
       "items": [
-        "VIP 每周通话额度调整为 5 分钟，私聊和群聊共用，按北京时间每周一零点重置。"
+        "官方和运营账号改用简洁的图标徽记。"
       ]
     },
     "en": {
-      "title": "VIP call allowance update",
+      "title": "Account badge update",
       "items": [
-        "VIP members now have 5 minutes of call time per week, shared across direct and group calls. The allowance resets each Monday at midnight Beijing time."
+        "Official accounts and space operators now use compact icon badges."
       ]
     }
   }

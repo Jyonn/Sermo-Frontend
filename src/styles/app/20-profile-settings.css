@@ -96,11 +96,6 @@
   gap: 8px;
 }
 
-.user-profile-name-row .official-badge {
-  align-self: center;
-  width: max-content;
-}
-
 .user-profile-status-badges {
   display: flex;
   min-width: 0;

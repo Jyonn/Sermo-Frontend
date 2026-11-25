@@ -1072,9 +1072,7 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 .submission-primary-action { color: var(--brand-primary-press); }
 
 .submission-member-roles { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 3px; }
-.submission-member-roles > span:not(.official-badge):not(.operator-badge) { color: var(--text-muted); font-size: 9px; line-height: 1.2; }
-.submission-member-roles .official-badge,
-.submission-member-roles .operator-badge { transform: scale(.78); transform-origin: center top; }
+.submission-member-roles > span:not(.account-role-badge) { color: var(--text-muted); font-size: 9px; line-height: 1.2; }
 
 /* Profile drawers are immersive: no topbar, only a quiet glass back control. */
 .side-drawer.is-headerless {
