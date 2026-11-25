@@ -5,7 +5,7 @@
   --sleeve-accent: #356975;
   --sleeve-art: #e2e9e5;
   container-type: inline-size;
-  width: min(100%, 680px);
+  width: min(100%, 510px);
   min-width: 0;
 }
 
@@ -31,11 +31,11 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   --sleeve-line: color-mix(in srgb, var(--sleeve-accent) 30%, transparent);
   position: relative;
   display: grid;
-  grid-template-columns: minmax(108px, 158px) minmax(0, 1fr);
+  grid-template-columns: clamp(75px, 21cqi, 106px) minmax(0, 1fr);
   align-items: center;
-  gap: clamp(15px, 4cqi, 32px);
+  gap: clamp(11px, 3cqi, 18px);
   width: 100%;
-  padding: 20px 44px 20px 20px;
+  padding: clamp(11px, 3cqi, 15px);
   border: 1px solid var(--sleeve-line);
   border-radius: 12px;
   background: var(--sleeve-paper);
@@ -54,32 +54,33 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   isolation: isolate;
   width: 100%;
   aspect-ratio: 5 / 4;
-  border-radius: 4px;
-  background: var(--sleeve-art);
+  background: radial-gradient(ellipse at 58% 49%, var(--sleeve-art), transparent 72%);
 }
 
 .record-shop-announcement-artwork .record-shop-album-face {
   position: absolute;
-  inset: 13% 7% auto auto;
-  width: 59%;
-  box-shadow: 0 2px 5px #15161935;
+  inset: 8% 1% auto auto;
+  width: 67%;
+  box-shadow: none;
 }
+
+.record-shop-announcement-artwork .record-shop-album-face > .record-shop-tier-mark { display: none; }
 
 .record-shop-announcement-artwork > img {
   position: absolute;
-  inset: 11% auto auto 7%;
-  width: 62%;
+  inset: 7% auto auto 2%;
+  width: 69%;
   aspect-ratio: 1;
   border-radius: 2px;
   object-fit: cover;
-  box-shadow: 1px 2px 7px #14161945;
+  box-shadow: 1px 2px 5px #14161945;
 }
 
 .record-shop-announcement-copy {
   display: grid;
   justify-items: start;
   min-width: 0;
-  gap: 3px;
+  gap: 2px;
   overflow-wrap: anywhere;
 }
 
@@ -87,54 +88,54 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  padding-inline-end: 20px;
   color: var(--sleeve-accent);
   font-size: .72rem;
   font-weight: 750;
   letter-spacing: .025em;
 }
 
-.record-shop-announcement-label .record-shop-tier-mark { width: 15px; }
-.record-shop-announcement-title { font-size: clamp(1.1rem, 4cqi, 1.5rem); line-height: 1.18; }
-.record-shop-announcement-artist { color: var(--sleeve-muted); font-size: .8rem; }
+.record-shop-announcement-label .record-shop-tier-mark { width: 13px; }
+.record-shop-announcement-title { font-size: clamp(1rem, 4cqi, 1.3rem); line-height: 1.2; }
+.record-shop-announcement-artist { color: var(--sleeve-muted); font-size: .76rem; }
 
 .record-shop-announcement-winner {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
   width: 100%;
-  margin-top: 7px;
-  padding-top: 8px;
+  margin-top: 5px;
+  padding-top: 6px;
   border-top: 1px solid var(--sleeve-line);
 }
 
-.record-shop-announcement-avatar { width: 23px; height: 23px; font-size: .62rem; }
+.record-shop-announcement-avatar { width: 19px; height: 19px; font-size: .59rem; }
 
 .record-shop-announcement-credit {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px 9px;
-  font-size: .78rem;
+  gap: 1px 8px;
+  min-width: 0;
+  font-size: .75rem;
 }
 
 .record-shop-announcement-credit time {
   color: var(--sleeve-muted);
-  font-size: .72rem;
+  font-size: .69rem;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .record-shop-announcement-replay {
   position: absolute;
-  inset: 13px 13px auto auto;
+  inset: 9px 9px auto auto;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--sleeve-line);
-  border-radius: 50%;
-  background: var(--sleeve-paper);
+  width: 20px;
+  height: 20px;
   color: var(--sleeve-accent);
   font-size: 16px;
   line-height: 1;
@@ -146,24 +147,14 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
 }
 .square-note .record-shop-announcement-card:focus-visible { outline-offset: -3px; }
 
-@container (max-width: 340px) {
-  .record-shop-announcement .record-shop-announcement-card {
-    grid-template-columns: minmax(76px, 102px) minmax(0, 1fr);
-    gap: 12px;
-    padding: 12px 36px 12px 12px;
-  }
-  .record-shop-announcement-replay { inset: 8px 8px auto auto; width: 23px; height: 23px; font-size: 14px; }
-}
-
 @container (max-width: 245px) {
   .record-shop-announcement .record-shop-announcement-card {
     grid-template-columns: minmax(0, 1fr);
-    gap: 11px;
-    padding: 9px 10px 11px;
+    gap: 7px;
+    padding: 9px 10px 10px;
   }
-  .record-shop-announcement-artwork { aspect-ratio: 1.45; }
-  .record-shop-announcement-artwork .record-shop-album-face { inset: 13% 11% auto auto; width: 50%; }
-  .record-shop-announcement-artwork > img { inset: 12% auto auto 11%; width: 52%; }
-  .record-shop-announcement-replay { inset: 13px 14px auto auto; }
-  .record-shop-announcement-credit { display: grid; }
+  .record-shop-announcement-artwork { width: min(100%, 150px); aspect-ratio: 1.7; }
+  .record-shop-announcement-artwork .record-shop-album-face { inset: 4% 15% auto auto; width: 52%; }
+  .record-shop-announcement-artwork > img { inset: 3% auto auto 0; width: 54%; }
+  .record-shop-announcement-label { padding-inline-end: 0; }
 }

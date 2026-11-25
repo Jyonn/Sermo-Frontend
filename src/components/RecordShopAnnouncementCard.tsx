@@ -14,8 +14,8 @@ export function RecordShopAnnouncementCard({ announcement }: { announcement: Squ
   const { album, artist, user, discovered_at } = announcement;
   const cover = safeActivityImage(album.cover);
   const date = new Date(discovered_at * 1000);
-  const time = date.toLocaleString(localeForLanguage(language), {
-    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  const dateLabel = date.toLocaleDateString(localeForLanguage(language), {
+    month: "short", day: "numeric", year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
   });
 
   return (
@@ -39,13 +39,13 @@ export function RecordShopAnnouncementCard({ announcement }: { announcement: Squ
             <span aria-hidden="true"><PlainAvatar name={user.name} uri={user.avatar_uri} cacheKey={user.avatar_cache_key} className="record-shop-announcement-avatar" /></span>
             <span className="record-shop-announcement-credit">
               <strong>{user.name}</strong>
-              <time dateTime={date.toISOString()}>{time}</time>
+              <time dateTime={date.toISOString()}>{dateLabel}</time>
             </span>
           </span>
         </span>
         <span className="record-shop-announcement-replay" aria-hidden="true">↗</span>
       </button>
-      {open ? <RecordShopAlbum album={album} spaceDiscovery={{ winner: user.name, time }} onClose={() => setOpen(false)} /> : null}
+      {open ? <RecordShopAlbum album={album} spaceDiscovery={{ winner: user.name, time: dateLabel }} onClose={() => setOpen(false)} /> : null}
     </div>
   );
 }

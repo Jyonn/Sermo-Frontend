@@ -1994,7 +1994,7 @@ export default function SquarePage() {
       }).format(new Date(`${selectedFeedDate}T00:00:00+08:00`));
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
-    if (statement.record_shop_announcement) return 280;
+    if (statement.record_shop_announcement) return 220;
     if (statement.chat_record) return 380;
     if (statement.external_media?.provider_data && "provider" in statement.external_media.provider_data) {
       return ["douyin_video", "douyin_gallery", "xiaohongshu_video", "xiaohongshu_gallery"].includes(String(statement.external_media.provider_data.provider)) ? 450 : 310;

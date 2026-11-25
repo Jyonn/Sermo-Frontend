@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.15",
+  "id": "2026.11.25.16",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
       "title": "广场唱片首解卡片",
       "items": [
-        "钻、曜唱片首解发言采用唱片封套样式，显示专辑、解锁者和时间，点击可重看全屏动效。"
+        "缩小广场的钻、曜唱片首解卡片，解锁信息简化为日期。"
       ]
     },
     "en": {
       "title": "First-discovery album cards in Square",
       "items": [
-        "Diamond and Obsidian discovery cards use a record-sleeve design and show who unlocked the album and when. Tap to replay the full-screen reveal."
+        "Diamond and Obsidian discovery cards are more compact and show the unlock date."
       ]
     }
   }
