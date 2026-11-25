@@ -44,7 +44,9 @@ test("member and settings pages use one compact toolbar and direct fields rather
   const basics = source.slice(source.indexOf('{activeTab === "basics"'), source.indexOf('{activeTab === "verification"'));
   assert.match(basics, /className="management-setting-fields"/);
   assert.match(basics, /className="management-level-fields"/);
-  assert.doesNotMatch(basics, /admin-policy-card|admin-policy-drawer|<h[1-6]/);
+  assert.doesNotMatch(basics, /admin-policy-card|admin-policy-drawer/);
+  assert.match(basics, /<h2>\{t\("management.appearanceSettings"\)\}<\/h2>/);
+  assert.match(basics, /<h2>\{t\("management.profileSettings"\)\}<\/h2>/);
   assert.match(basics, /aria-describedby="admin-space-capacity-hint"/);
   assert.match(permission, /setChoosingCapability\(false\)/);
   assert.match(permission, /editorPanel.current\?\.scrollTo\(\{ top: 0 \}\)/);

@@ -15,9 +15,12 @@ test("both administration scopes share one responsive navigation and retain thei
   assert.match(read("pages/PlatformAdminPage.tsx"), /session \? <PlatformAdminConsole \/> : <PlatformAdminLogin \/>/);
   const component = read("components/ManagementWorkspace.tsx");
   assert.match(component, /scrollIntoView\(\{ block: "nearest", inline: "nearest" \}\)/);
-  assert.match(component, /aria-current=\{item.group.id === activeItem\?\.group.id \? "page" : undefined\}/);
+  assert.match(component, /aria-current=\{current \? "true" : undefined\}/);
   assert.match(component, /lastDestination.current\[item.group.id\] \?\? item.id/);
-  assert.match(component, /<PageTabs label=\{activeItem\?\.group.label/);
+  assert.match(component, /<nav aria-label=\{activeItem\?\.group.label \?\? title\} className="management-section-tabs"/);
+  assert.match(component, /aria-current=\{active \? "page" : undefined\}/);
+  assert.match(component, /<h1 id="management-page-title">\{activeItem\?\.label\}/);
+  assert.match(component, /ResizeObserver\(reveal\)/);
   assert.match(component, /surfaceClassName="management-detail"/);
   assert.match(component, /onClick=\{onLogout\}/);
 });

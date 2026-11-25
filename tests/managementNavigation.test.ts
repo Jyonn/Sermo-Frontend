@@ -23,8 +23,9 @@ test("space tasks are inline destinations, only contextual operations remain dra
 
 test("platform separates delivery history from message inspection and preserves scoped workspaces", () => {
   const source = readFileSync(new URL("../src/pages/PlatformAdminPage.tsx", import.meta.url), "utf8");
-  assert.match(source, /section === "emailReview" \? <EmailReviewPanel/);
-  assert.doesNotMatch(source, /section === "emails" \?[^\n]*<EmailReviewPanel/);
+  assert.match(source, /section === "emailReview" && <EmailReviewPanel/);
+  assert.match(source, /if \(section !== "emailReview"\) return;\s+void refreshEmailReview\(\);/);
+  assert.doesNotMatch(source, /section === "emails" &&[^\n]*<EmailReviewPanel/);
   assert.match(source, /<PermissionWorkspace scope="platform"/);
   assert.match(source, /<OAuthApplicationWorkspace platform/);
   assert.match(source, /next.set\("section", value\)/);
