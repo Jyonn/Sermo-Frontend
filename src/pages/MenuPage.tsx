@@ -56,6 +56,9 @@ import { ActionSheet } from "../components/ActionSheet";
 import { AlertDialog } from "../components/AlertDialog";
 import type { ActivityCampaignDTO } from "../types";
 import { UserProfileCard } from "../components/UserProfileCard";
+import { MusicProfileScene } from "../components/MusicProfileScene";
+import { isMusicProfileCard, musicProfileCards } from "../lib/musicProfileCards";
+import type { ProfileCardTheme } from "../types";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
@@ -639,6 +642,17 @@ export default function MenuPage() {
   ) => me?.resource_inventory?.some(
     (item) => item.resource_type === resourceType && item.resource_key === resourceKey,
   ) ?? false;
+  const currentProfileTheme = me?.profile_card_theme ?? "default";
+  const profileThemeLock = (theme?: ProfileCardTheme) => {
+    if (isMusicProfileCard(theme)) {
+      const { level } = musicProfileCards[theme];
+      return growthLevel < level && !ownsInventoryResource("profile", theme) ? t("menu.levelUnlock", { level }) : null;
+    }
+    if (theme === "level-12" && growthLevel < 12) return t("menu.levelUnlock", { level: 12 });
+    if (theme === "vip" && !permanentVip) return t("menu.permanentVipOnly");
+    if ((theme === "spider-city" || theme === "explorer-romance") && !ownsInventoryResource("profile", theme)) return t("menu.activityUnlock");
+    return null;
+  };
   const rewardFor = (category: "background" | "bubble" | "frame", assetKey: string) =>
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
@@ -1780,12 +1794,9 @@ export default function MenuPage() {
       showToast(t("menu.levelUnlock", { level }), "error");
       return;
     }
-    if (profileCardChanged && personalizationDraft.profile_card_theme === "level-12" && growthLevel < 12) {
-      showToast(t("menu.levelUnlock", { level: 12 }), "error");
-      return;
-    }
-    if (profileCardChanged && personalizationDraft.profile_card_theme === "vip" && !permanentVip) {
-      showToast(t("menu.permanentVipOnly"), "error");
+    const profileLock = profileCardChanged && profileThemeLock(personalizationDraft.profile_card_theme);
+    if (profileLock) {
+      showToast(profileLock, "error");
       return;
     }
     setPersonalizationSaving(true);
@@ -2579,7 +2590,9 @@ export default function MenuPage() {
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           <button className="personalization-background-entry personalization-feature-entry profile-card-entry" onClick={() => setProfileCardDrawerOpen(true)} type="button">
-            <span className={`profile-card-entry-swatch theme-${me?.profile_card_theme ?? "default"}`}><i /><b /></span>
+            <span className={`profile-card-entry-swatch theme-${currentProfileTheme}`}>
+              {isMusicProfileCard(currentProfileTheme) ? <MusicProfileScene theme={currentProfileTheme} still /> : <><i /><b /></>}
+            </span>
             <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
@@ -2597,7 +2610,7 @@ export default function MenuPage() {
 
       <SideDrawer
         actionBusy={personalizationSaving}
-        actionDisabled={personalizationDraft.profile_card_theme === (me?.profile_card_theme ?? "default")}
+        actionDisabled={personalizationDraft.profile_card_theme === currentProfileTheme || Boolean(profileThemeLock(personalizationDraft.profile_card_theme))}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("profile-card")}
         historyKey="profile-card"
@@ -2626,12 +2639,15 @@ export default function MenuPage() {
             </div>
           </div>
           <div className="profile-card-theme-list">
-            {(["default", "level-12", "vip", "spider-city", "explorer-romance"] as const).map((theme) => {
-              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : theme === "spider-city" || theme === "explorer-romance" ? !ownsInventoryResource("profile", theme) : false;
-              return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${locked ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
-                <span><i /><b /></span>
-                <strong>{t(`menu.profileCardTheme.${theme}` as TranslationKey)}</strong>
-                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : theme === "spider-city" || theme === "explorer-romance" ? "menu.activityUnlock" : "menu.levelUnlock", theme === "level-12" ? { level: 12 } : undefined) : t(theme === "explorer-romance" ? "growth.rarity.legendary" : theme === "level-12" ? "growth.rarity.rare" : theme === "vip" || theme === "spider-city" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
+            {(["default", "level-12", "vip", "spider-city", "explorer-romance", ...Object.keys(musicProfileCards)] as ProfileCardTheme[]).map((theme) => {
+              const lock = profileThemeLock(theme);
+              const music = isMusicProfileCard(theme) ? musicProfileCards[theme] : null;
+              const rarity = music?.rarity ?? (theme === "explorer-romance" ? "legendary" : theme === "level-12" ? "rare" : theme === "vip" || theme === "spider-city" ? "epic" : "common");
+              const rarityText = t(`growth.rarity.${rarity}`);
+              return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${lock ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
+                <span>{isMusicProfileCard(theme) ? <MusicProfileScene theme={theme} still /> : <><i /><b /></>}</span>
+                <strong>{t(`menu.profileCardTheme.${theme}`)}</strong>
+                <small>{music && lock ? `${rarityText} · ${lock}` : lock ?? rarityText}</small>
               </button>;
             })}
           </div>

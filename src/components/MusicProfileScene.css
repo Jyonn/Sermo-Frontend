@@ -1,0 +1,147 @@
+.music-profile-scene {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  background: var(--music-cover, none) center 52% / cover no-repeat var(--music-bg);
+}
+
+.music-profile-scene:not(.is-still)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 -1px 0 var(--music-seam);
+  background: linear-gradient(to bottom, var(--music-shade), transparent 48%);
+  z-index: -1;
+}
+
+.music-profile-portraits {
+  position: absolute;
+  inset: auto min(3%, 16px) 0 auto;
+  width: min(72%, 310px);
+  width: min(72%, 240cqh);
+  aspect-ratio: 5 / 2;
+  overflow: hidden;
+}
+
+.music-profile-portraits > img {
+  display: block;
+  width: 600%;
+  height: 100%;
+  max-width: none;
+  animation: music-profile-performance var(--music-duration, 2.8s) steps(6, jump-none) infinite paused;
+}
+
+.music-profile-scene.is-playing .music-profile-portraits > img { animation-play-state: running; }
+@keyframes music-profile-performance {
+  to { transform: translateX(-83.333333%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-profile-portraits > img { animation: none; }
+}
+
+.music-profile-wordmark {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  max-width: 58%;
+  translate: -50% 0;
+  color: var(--music-letter);
+  text-shadow: var(--music-letter-shadow);
+  font-size: clamp(.78rem, 4cqi, 1.36rem);
+  font-weight: 800;
+  letter-spacing: .13em;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.music-profile-accusefive {
+  --music-bg: #23374d;
+  --music-shade: #101c2cbd;
+  --music-letter: #f3d5ac;
+  --music-letter-shadow: 0 1px 5px #16202c;
+  --music-seam: #b8765f;
+  --music-duration: 3s;
+}
+.music-profile-landlords-cat {
+  --music-bg: #d1c9a5;
+  --music-shade: #faf1d7b5;
+  --music-letter: #314735;
+  --music-letter-shadow: 0 1px 4px #fbf0d3;
+  --music-seam: #8c9a67;
+  --music-duration: 3.8s;
+}
+.music-profile-she {
+  --music-bg: #b7a39f;
+  --music-shade: #f8e9d4b0;
+  --music-letter: #52283f;
+  --music-letter-shadow: 0 1px 4px #f7eadd;
+  --music-seam: #d79d9d;
+  --music-duration: 3.2s;
+}
+.music-profile-mayday {
+  --music-bg: #12264c;
+  --music-shade: #091528c4;
+  --music-letter: #e0eaff;
+  --music-letter-shadow: 0 1px 5px #112548;
+  --music-seam: #77a2df;
+  --music-duration: 2.5s;
+}
+
+.user-profile-panel.profile-theme-accusefive {
+  --music-page-light: #f0efe9;
+  --music-ink-light: #26394b;
+  --music-page-dark: #192331;
+  --music-ink-dark: #f1e0cd;
+  --music-accent: #9f4639;
+}
+.user-profile-panel.profile-theme-landlords-cat {
+  --music-page-light: #f3f0df;
+  --music-ink-light: #314535;
+  --music-page-dark: #222c24;
+  --music-ink-dark: #e8e8cd;
+  --music-accent: #537144;
+}
+.user-profile-panel.profile-theme-she {
+  --music-page-light: #f7eeeb;
+  --music-ink-light: #503443;
+  --music-page-dark: #2b222b;
+  --music-ink-dark: #f5e4e9;
+  --music-accent: #a84c70;
+}
+.user-profile-panel.profile-theme-mayday {
+  --music-page-light: #e9eff7;
+  --music-ink-light: #223b5b;
+  --music-page-dark: #141f33;
+  --music-ink-dark: #e0ebfc;
+  --music-accent: #3564a8;
+}
+
+.user-profile-panel:has(.music-profile-scene) {
+  --profile-page: var(--music-page-light);
+  --profile-ink: var(--music-ink-light);
+  --profile-deep: var(--profile-ink);
+  --profile-muted: color-mix(in srgb, var(--profile-ink) 76%, var(--profile-page));
+  --profile-line: color-mix(in srgb, var(--profile-ink) 19%, transparent);
+  --profile-card: color-mix(in srgb, var(--profile-page) 68%, #faf8f0);
+  --profile-card-soft: color-mix(in srgb, var(--profile-page) 89%, var(--music-accent));
+  --profile-action: var(--music-accent);
+  color: var(--profile-ink);
+  background: var(--profile-page);
+}
+html[data-theme="dark"] .user-profile-panel:has(.music-profile-scene) {
+  --profile-page: var(--music-page-dark);
+  --profile-ink: var(--music-ink-dark);
+  --profile-card: color-mix(in srgb, var(--profile-page) 91%, var(--profile-ink));
+  --profile-action: color-mix(in srgb, var(--music-accent) 47%, var(--profile-ink));
+}
+.user-profile-panel:has(.music-profile-scene) .user-profile-social-card { background: transparent; }
+
+.profile-card-entry-swatch > .music-profile-scene,
+.profile-card-theme-option .music-profile-scene { border-radius: inherit; }
+.profile-card-entry-swatch:has(.music-profile-scene)::before,
+.profile-card-theme-option > span:has(.music-profile-scene)::before { display: none; }

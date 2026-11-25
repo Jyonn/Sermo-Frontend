@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, GrowthRewardDTO, PersonalizationDTO, UserGrowthDTO } from "../types";
+import { isMusicProfileCard } from "../lib/musicProfileCards";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
@@ -39,7 +40,7 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
       </div>
       <div className="growth-reveal-card-copy">
         <span>{t(`growth.rewardCategory.${reward.category}` as TranslationKey)}</span>
-        <strong>{reward.title}</strong>
+        <strong>{reward.category === "profile" && isMusicProfileCard(reward.asset_key) ? t(`menu.profileCardTheme.${reward.asset_key}`) : reward.title}</strong>
       </div>
       <div className="growth-reward-tags">
         {reward.vip_access === "level_or_vip" ? <b>VIP · {t("growth.earlyAccess")}</b> : null}
@@ -192,7 +193,7 @@ export function GrowthLevelCelebration() {
     }
   };
 
-  const canApplyReward = currentReward?.implementation_status !== "planned" && ["background", "bubble", "frame"].includes(currentReward?.category ?? "");
+  const canApplyReward = currentReward?.implementation_status !== "planned" && ["background", "bubble", "frame", "profile"].includes(currentReward?.category ?? "");
 
   const applyCurrentReward = async () => {
     if (!currentReward?.asset_key || !canApplyReward || applyingReward || !session) return;
@@ -206,6 +207,8 @@ export function GrowthLevelCelebration() {
           chat_bubble_style: currentReward.category === "bubble" ? currentReward.asset_key as ChatBubbleStyle : session.user.chat_bubble_style ?? "default",
           avatar_frame_style: currentReward.category === "frame" ? currentReward.asset_key as AvatarFrameStyle : session.user.avatar_frame_style ?? "none",
           show_self_avatar: Boolean(session.user.show_self_avatar),
+          ...(currentReward.category === "profile" && isMusicProfileCard(currentReward.asset_key)
+            ? { profile_card_theme: currentReward.asset_key } : {}),
         };
         patchSessionUser(await api.setPersonalization(payload));
       }

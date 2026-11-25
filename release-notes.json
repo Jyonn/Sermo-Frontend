@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.9",
+  "id": "2026.11.25.10",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "一滴日记卡片更新",
+      "title": "四款动态音乐名片",
       "items": [
-        "聊天和广场的一滴日记卡片改用更紧凑的摘录排版，保留日期、分享倒计时与正文入口。"
+        "告五人、房东的猫、S.H.E 和五月天的动态名片，分别在 LV13、LV14、LV15、LV16 自动解锁。"
       ]
     },
     "en": {
-      "title": "Refreshed Drop diary cards",
+      "title": "Four animated music profile cards",
       "items": [
-        "Drop diary cards in chat and Square now use a compact excerpt layout with the date, expiry countdown, and access to the full entry."
+        "Animated profile cards for Accusefive, The Landlord’s Cat, S.H.E and Mayday unlock automatically at levels 13, 14, 15 and 16."
       ]
     }
   }

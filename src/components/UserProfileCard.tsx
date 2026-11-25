@@ -7,6 +7,8 @@ import "./FounderMedals.css";
 import { GrowthHonor } from "./GrowthHonor";
 import { ExplorerProfileScene } from "./ExplorerProfileScene";
 import { AnnualMedal } from "./AnnualMedal";
+import { MusicProfileScene } from "./MusicProfileScene";
+import { isMusicProfileCard } from "../lib/musicProfileCards";
 
 interface UserProfileCardProps {
   profileTheme?: UserDTO["profile_card_theme"];
@@ -50,7 +52,10 @@ export function UserProfileCard({
   const { t } = useI18n();
   return (
     <section className="user-profile-social-card">
-      <div className="user-profile-cover" aria-hidden="true">{profileTheme === "explorer-romance" ? <ExplorerProfileScene /> : null}</div>
+      <div className="user-profile-cover" aria-hidden="true">
+        {profileTheme === "explorer-romance" ? <ExplorerProfileScene /> : null}
+        {isMusicProfileCard(profileTheme) ? <MusicProfileScene key={profileTheme} theme={profileTheme} /> : null}
+      </div>
       <div className="user-profile-identity">
         <button
           aria-disabled={!onAvatarClick}

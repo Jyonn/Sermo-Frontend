@@ -1,3 +1,5 @@
+import type { MusicProfileCardTheme } from "./lib/musicProfileCards";
+
 export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
@@ -192,7 +194,7 @@ export interface FeatureDiscoveryStatusDTO {
 export interface GrowthRewardDTO {
   id: string;
   level: number;
-  category: "capability" | "background" | "bubble" | "frame" | "identity";
+  category: "capability" | "background" | "bubble" | "frame" | "identity" | "profile";
   title: string;
   title_key?: string;
   description_key?: string;
@@ -287,7 +289,7 @@ export interface UserResourceInventoryDTO {
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing" | "explorer-ai";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "frienden-night" | "frienden-garden" | "starry-night" | "noir-film" | "explorer-duality" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "spider-web" | "explorer-conan";
-export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city" | "explorer-romance";
+export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city" | "explorer-romance" | MusicProfileCardTheme;
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
