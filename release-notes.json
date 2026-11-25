@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.3",
+  "id": "2026.11.25.4",
   "publishedAt": "2026-11-25",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺女声篇动态人像",
+      "title": "VIP 通话额度调整",
       "items": [
-        "蔡依林、孙燕姿、萧亚轩和梁静茹的典藏半身像换成逐帧动画，可在聊天和奖池预览里查看。"
+        "VIP 每周通话额度调整为 5 分钟，私聊和群聊共用，按北京时间每周一零点重置。"
       ]
     },
     "en": {
-      "title": "Animated portraits for Echo Record Shop",
+      "title": "VIP call allowance update",
       "items": [
-        "Jolin Tsai, Stefanie Sun, Elva Hsiao, and Fish Leong have new frame-by-frame portraits in chat bubbles and the reward preview."
+        "VIP members now have 5 minutes of call time per week, shared across direct and group calls. The allowance resets each Monday at midnight Beijing time."
       ]
     }
   }

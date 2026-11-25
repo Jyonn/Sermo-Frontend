@@ -90,7 +90,7 @@ function ChatQuotas({ chat }: { chat: PersonalPermissionQuotaSnapshot['chat'] })
       status={voice.reason ? reasonLabel(voice.reason) : undefined}
       note={voice.usage ? t('permissionsQuotas.voiceScope') : undefined}>
       {voice.usage ? <>
-        <UsageBar label={t('permissionsQuotas.weeklyAllocated')} used={voice.limit - voice.usage.remaining} limit={voice.limit} format={duration} />
+        <UsageBar label={t('permissionsQuotas.weeklyAllocated')} used={voice.usage.used + voice.usage.reserved} limit={voice.limit} format={duration} />
         {voice.usage.reserved > 0 ? <p className="permission-quota-note">{t('permissionsQuotas.reserved', { duration: duration(voice.usage.reserved) })}</p> : null}
         <p className="permission-quota-note">{t('permissionsQuotas.resetAt', { time: beijingTime(voice.reset_at) })}</p>
       </> : null}
