@@ -1,29 +1,39 @@
-import {defaultDateRange} from '../lib/calendarDate';
-import { useState } from 'react';
-import { InputDialog } from './InputDialog';
-import { ConfirmDialog } from './ConfirmDialog';
-import { DateRangeField, type ResearchDateRange } from './DateRangeField';
-import { MarkdownEditorDialog } from './MarkdownEditorDialog';
-import { useI18n } from '../lib/language';
+import { useState } from "react";
+import { useI18n } from "../lib/language";
+import { researchToday } from "../lib/researchWorkbench";
+import { DateRangeField } from "./DateRangeField";
+import { MarkdownInput } from "./ResearchMarkdownInput";
+import { SideDrawer } from "./SideDrawer";
 
-export type ResearchDraft = {title:string;start:string;end:string|null;description:string};
+export type ResearchDraft = { title: string; start: string; end: string | null; description: string };
 
-export function ResearchCreateFlow({busy,error,onClose,onCreate}:{
-  busy:boolean;error:string;onClose:()=>void;onCreate:(draft:ResearchDraft)=>Promise<boolean>;
+export function ResearchCreateFlow({ busy, error, onClose, onCreate }: {
+  busy: boolean; error: string; onClose: () => void; onCreate: (draft: ResearchDraft) => Promise<boolean>;
 }) {
-  const {t}=useI18n();
-  const [step,setStep]=useState<'name'|'dates'|'description'>('name');
-  const [title,setTitle]=useState(''),[description,setDescription]=useState('');
-  const [range,setRange]=useState<ResearchDateRange>(defaultDateRange);
-  async function create(description=''){
-    if(busy||!title.trim())return;
-    await onCreate({title:title.trim(),start:range.from,end:range.to||null,description});
-  }
-  return <>
-    <InputDialog open={step==='name'} title={t('research.create')} description={t('research.createNameHint')} value={title} maxLength={50} placeholder={t('research.name')} onChange={setTitle} onClose={onClose} confirmDisabled={!title.trim()} confirmLabel={t('common.next')} onConfirm={()=>{if(title.trim())setStep('dates');}}/>
-    <ConfirmDialog open={step==='dates'} title={t('research.createDates')} description={title} cancelLabel={t('common.back')} confirmLabel={t('common.next')} onClose={()=>setStep('name')} onConfirm={()=>setStep('description')}>
-      <div className="research-create-dates"><DateRangeField value={range} onChange={setRange}/></div>
-    </ConfirmDialog>
-    {step==='description'&&<MarkdownEditorDialog title={t('research.description')} initialValue={description} onChange={setDescription} summary={`${title} · ${range.from} — ${range.to||t('calendarDate.unset')}`} busy={busy} error={error} confirmLabel={t('research.create')} skipLabel={t('research.skipDescription')} onClose={()=>setStep('dates')} onSave={value=>void create(value)} onSkip={()=>void create()}/>}
-  </>;
+  const { t } = useI18n();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [range, setRange] = useState(() => ({ from: researchToday(), to: "" }));
+
+  return <SideDrawer open className="research-workflow-drawer" historyKey="research-create-project" title={t("research.create")}
+    onClose={() => { if (!busy) onClose(); }}>
+    <form className="research-form research-task-editor" onSubmit={event => {
+      event.preventDefault();
+      if (!title.trim() || busy) return;
+      void onCreate({ title: title.trim(), start: range.from, end: range.to || null, description });
+    }}>
+      <label>{t("research.name")}
+        <input name="title" value={title} onChange={event => setTitle(event.target.value)} required maxLength={50} disabled={busy} />
+      </label>
+      <DateRangeField value={range} onChange={setRange} />
+      <section className="research-task-editor-section">
+        <h3>{t("researchWorkbench.optionalDescription")}</h3>
+      <MarkdownInput value={description} onChange={setDescription} rows={4} mobileImmersive={false} />
+      </section>
+      {error && <p className="research-form-error" role="alert">{error}</p>}
+      <footer className="research-task-editor-footer">
+        <button className="button" type="submit" disabled={busy || !title.trim()}>{t(busy ? "common.processing" : "research.create")}</button>
+      </footer>
+    </form>
+  </SideDrawer>;
 }

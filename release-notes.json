@@ -1,17 +1,21 @@
 {
-  "id": "2026.11.26.4",
+  "id": "2026.11.26.5",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "语音转写排版调整",
+      "title": "科研课题工作台",
       "items": [
-        "语音转写气泡随文字长度收紧，最长与语音条同宽，超出后自然折行。"
+        "导师可以布置任务、查看本期汇报提交情况，并从待办直接处理反馈和报销。",
+        "学生可以查看自己的任务期限，从待办提交汇报，或者回到上次未写完的草稿。",
+        "课题可直接创建。任务详情集中展示要求、资料和进展讨论。"
       ]
     },
     "en": {
-      "title": "Easier-to-read voice transcripts",
+      "title": "Research workspaces",
       "items": [
-        "Transcript bubbles fit their text and wrap when they reach the width of the voice message."
+        "Mentors can assign work, see who has submitted the current report, and open feedback and reimbursement requests from their to-do list.",
+        "Students can see their deadlines, submit reports from their to-do list, and resume unfinished drafts.",
+        "Create a project in one step and find instructions, files, and discussions on each task."
       ]
     }
   }

@@ -10,7 +10,7 @@ import { SettingGroup, SettingRow } from "./SettingRow";
 import "./ResearchInvitationCard.css";
 
 export function researchInvitationDestination(invitation: SubmissionInviteDTO) {
-  return invitation.project ? `/app/research?project=${invitation.project.id}&onboarding=1` : null;
+  return invitation.project ? `/app/research?project=${invitation.project.id}` : null;
 }
 
 export function researchInvitationPreview(invitation?: SubmissionInviteDTO | null) {

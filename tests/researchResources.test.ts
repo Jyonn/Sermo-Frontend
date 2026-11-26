@@ -28,15 +28,14 @@ test('resource metadata formats files and links safely',()=>{
   assert.equal(resourceHost('invalid'),'');
   assert.equal(resourceFileLabel('Report.pdf'),'PDF');
 });
-test('project library remains available without task resource entries',()=>{
+test('project and task materials share the resource browser',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
   const overview=readFileSync(new URL('../src/components/ResearchWorkspace.tsx',import.meta.url),'utf8');
   const chat=readFileSync(new URL('../src/components/ResearchChat.tsx',import.meta.url),'utf8');
-  assert.match(page,/<ResearchResources key=\{project.id\} projectId=\{project.id\}/);
-  assert.doesNotMatch(page,/ResearchResourceSummary|taskId=\{resourceScope\}/);
-  assert.match(overview,/research-team-bar/);
+  assert.match(page,/<ResearchResources[\s\S]+projectId=\{current.id\} taskId=\{resourceTarget.taskId\}/);
+  assert.match(page,/setResourceTarget\(\{ taskId: task.id \}\)/);
+  assert.match(overview,/<MemberAvatarStack/);
   assert.doesNotMatch(overview,/ResearchResourceSummary/);
   assert.match(chat,/research-chat-project-section/);
   assert.match(chat,/if \(onProjectDetails\) onProjectDetails\(\)/);
-  assert.match(page,/busy=\{busy\} onClose=\{\(\)=>\{setConfirm\(null\)/);
 });

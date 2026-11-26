@@ -16,14 +16,18 @@ export function ResearchMemberGrid({ members, onMember, onAdd, onRemove }: { mem
   </div>;
 }
 
-export function ResearchAssigneesField({ members, initial=[] }: { members: ResearchMember[]; initial?:number[] }) {
+export function ResearchAssigneesField({ members, selected, onChange, disabled }: {
+  members: ResearchMember[]; selected: number[]; onChange: (ids: number[]) => void; disabled?: boolean;
+}) {
   const { t } = useI18n();
-  const [selected, setSelected] = useState<number[]>(initial);
   const [open, setOpen] = useState(false);
+  const people = members.filter(member => selected.includes(member.id));
   return <div className="research-assignees-field">
-    <button className="research-assignees-trigger" type="button" onClick={() => setOpen(true)}><span><strong>{t('research.assignees')}</strong><small>{selected.length ? members.filter(member => selected.includes(member.id)).map(member => member.name).join(' · ') : t('research.selectMembers')}</small></span><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
-    {selected.length > 0 && <div className="research-assignee-avatars">{members.filter(member => selected.includes(member.id)).map(member => <UserAvatar key={member.id} className="mini-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style}/>)}</div>}
-    {selected.map(id => <input type="hidden" name="member" value={id} key={id}/>)}
-    {open && <MemberPickerSheet title={t('research.assignees')} members={members.map(member => ({ ...member, description: member.owner ? t('research.owner') : undefined }))} initial={selected} onClose={() => setOpen(false)} onApply={setSelected}/>}
+    <button className="research-assignees-trigger" type="button" disabled={disabled} onClick={() => setOpen(true)}>
+      <span><strong>{t('research.assignees')}</strong><small>{people.length ? people.map(member => member.name).join(' · ') : t('research.selectMembers')}</small></span>
+      <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+    </button>
+    {open && <MemberPickerSheet title={t('research.assignees')} members={members.map(member => ({ ...member, description: member.owner ? t('research.owner') : undefined }))}
+      initial={selected} onClose={() => setOpen(false)} onApply={onChange}/>}
   </div>;
 }

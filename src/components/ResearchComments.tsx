@@ -1,113 +1,224 @@
-import {matchesResearchDiscussion,researchDiscussionDay} from '../lib/researchDiscussion';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {SelectControl} from './SettingRow';
-import { CommentThread } from './CommentThread';
-import { CommentComposer } from './CommentComposer';
-import { Markdown } from './ResearchMarkdown';
-import { MarkdownInput } from './ResearchMarkdownInput';
-import { MarkdownEditorDialog } from './MarkdownEditorDialog';
-import { useMobileMarkdownMode } from '../lib/useMobileMarkdownEditor';
-import { QuietState } from './BoundaryState';
-import { UserAvatar } from './UserAvatar';
-import { UserProfilePanel } from './UserProfilePanel';
-import { SideDrawer } from './SideDrawer';
-import {ReferenceShareButton} from './ReferenceShareButton';
-import { useI18n, type TranslationKey } from '../lib/language';
-import type { ResearchProject, ResearchTask } from '../lib/research';
-import type { SquareStatementCommentDTO, TinyUserDTO } from '../types';
-import './ResearchComments.css';
-import {ResearchAwardForm} from './ResearchAwardForm';
-import type {ResearchMutation} from './ResearchWorkflow';
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { matchesResearchDiscussion, researchDiscussionDay } from "../lib/researchDiscussion";
+import { useResearchDraft } from "../lib/researchDraft";
+import { researchDate, researchExcerpt } from "../lib/researchWorkbench";
+import { useI18n, type TranslationKey } from "../lib/language";
+import type { ResearchMember, ResearchProgress, ResearchProject, ResearchTask } from "../lib/research";
+import type { SquareStatementCommentDTO, TinyUserDTO } from "../types";
+import { CommentThread } from "./CommentThread";
+import { Markdown } from "./ResearchMarkdown";
+import { MarkdownInput } from "./ResearchMarkdownInput";
+import { QuietState } from "./BoundaryState";
+import { ReferenceShareButton } from "./ReferenceShareButton";
+import { ResearchAwardForm } from "./ResearchAwardForm";
+import { SelectControl, SettingRow, SettingSwitch } from "./SettingRow";
+import { SideDrawer } from "./SideDrawer";
+import { UserProfilePanel } from "./UserProfilePanel";
+import type { ResearchMutation } from "./ResearchWorkflow";
+import "./ResearchComments.css";
 
-export function ResearchComments({project,task,userId,scope,writable,busy,send,children,mutate,focusProgressId}:{
-  project:ResearchProject;task:ResearchTask;userId:number;scope:string;writable:boolean;busy:boolean;
-  send:(body:string,replyTo?:string,responseTo?:number)=>Promise<boolean>;
-  mutate:ResearchMutation;
-  children?:ReactNode;focusProgressId?:string;
+type Send = (body: string, replyTo?: string, responseTo?: number) => Promise<boolean>;
+
+export function ResearchComments({ project, task, userId, scope, writable, busy, send, children, mutate, focusProgressId, error }: {
+  project: ResearchProject; task: ResearchTask; userId: number; scope: string; writable: boolean; busy: boolean;
+  send: Send; mutate: ResearchMutation; children?: ReactNode; focusProgressId?: string; error?: string;
 }) {
-  const {t,language}=useI18n();
-  const [selectedDay,setSelectedDay]=useState('all');
-  const [body,setBody]=useState(''),[reply,setReply]=useState<string|null>(null);
-  const [editing,setEditing]=useState(false),[sendError,setSendError]=useState('');
-  const mobile=useMobileMarkdownMode();
-  const [requiresAnswer,setRequiresAnswer]=useState(false),[answerTarget,setAnswerTarget]=useState('');
-  const [awarding,setAwarding]=useState<{userId:number;sourceId:string;awardId?:string}|null>(null);
-  const isMentor=project.members.some(m=>m.id===userId&&m.owner);
-  const targets=project.members.filter(m=>m.id!==userId&&(isMentor?!m.owner:m.owner));
-  const draftBeforeEdit=useRef('');
-  const [expanded,setExpanded]=useState<number|null>(null),[profile,setProfile]=useState<TinyUserDTO|null>(null);
-  const commentIds=useRef(new Map<string,number>());
-  for(const item of task.progress)if(!commentIds.current.has(item.id))commentIds.current.set(item.id,commentIds.current.size+1);
-  const commentId=(id:string)=>commentIds.current.get(id)!;
-  const record=(id:number)=>task.progress.find(item=>commentId(item.id)===id)!;
-  const editor=useRef<HTMLDivElement>(null);
-  useEffect(()=>{if(editing&&!mobile)editor.current?.querySelector('textarea')?.focus({preventScroll:true});},[editing,mobile]);
-  useEffect(()=>{
-    if(!editing||mobile)return;
-    let frame=0;
-    const inside=(target:EventTarget|null)=>target instanceof Element&&(editor.current?.contains(target)||Boolean(target.closest('.v3-heading-menu,.v3-table-picker')));
-    const collapse=()=>{if(!busy)setEditing(false);};
-    const pointer=(event:PointerEvent)=>{if(!inside(event.target))collapse();};
-    const blur=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{if(!inside(document.activeElement))collapse();});};
-    document.addEventListener('pointerdown',pointer);editor.current?.addEventListener('focusout',blur);window.addEventListener('blur',collapse);
-    const root=editor.current;
-    return()=>{cancelAnimationFrame(frame);document.removeEventListener('pointerdown',pointer);root?.removeEventListener('focusout',blur);window.removeEventListener('blur',collapse);};
-  },[editing,mobile,busy]);
-  const user=(id:number):TinyUserDTO=>{
-    const member=project.members.find(item=>item.id===id);
-    return {user_id:id,name:member?.name||String(id),avatar_uri:member?.avatar_uri,avatar_cache_key:member?.avatar_cache_key,avatar_frame_style:member?.avatar_frame_style};
-  };
-  const items=[...task.progress].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
-  const dayOf=researchDiscussionDay;
-  const memberFilter=scope==='all'?null:scope==='mine'?userId:Number(scope);
-  const matches=(entry:ResearchTask['progress'][number])=>matchesResearchDiscussion(entry,selectedDay,memberFilter);
-  const days=[...new Set(items.map(item=>dayOf(item.created_at)))].sort().reverse();
-  const byId=new Map(items.map(item=>[item.id,item]));
-  const rootOf=(id:string)=>{
-    let current=byId.get(id);const visited=new Set<string>();
-    while(current?.reply_to&&!visited.has(current.id)&&byId.has(current.reply_to)){visited.add(current.id);current=byId.get(current.reply_to);}
-    return current?.id||id;
-  };
-  useEffect(()=>{if(!focusProgressId||!byId.has(focusProgressId))return;setSelectedDay('all');setExpanded(commentId(rootOf(focusProgressId)));const frame=requestAnimationFrame(()=>document.getElementById('research-progress-'+focusProgressId)?.scrollIntoView({block:'center',behavior:'smooth'}));return()=>cancelAnimationFrame(frame);},[focusProgressId,task.id,expanded]);
-  useEffect(()=>{setSelectedDay('all');const response=task.progress.find(p=>p.reply_to);if(response)setExpanded(commentId(rootOf(response.id)));},[task.id]);
-  const dto=(item:ResearchTask['progress'][number]):SquareStatementCommentDTO=>({
-    comment_id:commentId(item.id),statement_id:0,user:user(item.user_id),text:item.body,
-    created_at:Date.parse(item.created_at)/1000,like_count:0,reply_count:0,liked:false,can_delete:false,
-    parent_id:item.reply_to?commentId(rootOf(item.id)):null,
-    reply_to_user:item.reply_to?user(byId.get(item.reply_to)?.user_id||item.user_id):null,
-  });
-  const comments=items.filter(item=>!item.reply_to||!byId.has(item.reply_to)).map(item=>{
-    const replies=items.filter(entry=>entry.id!==item.id&&rootOf(entry.id)===item.id&&matches(entry));
-    return {...dto(item),replies:replies.sort((a,b)=>Date.parse(a.created_at)-Date.parse(b.created_at)).map(dto),reply_count:replies.length};
-  }).filter(comment=>matches(record(comment.comment_id))||comment.replies.length>0);
-  const target=reply?byId.get(reply):undefined;
-  const me=user(userId);
-  function beginEditing(){draftBeforeEdit.current=body;setSendError('');setEditing(true);}
-  function cancelEditing(){setBody(draftBeforeEdit.current);setEditing(false);setSendError('');}
-  async function submit(value:string){
-    if(busy||!value.trim())return;
-    setSendError('');
-    if(await send(value,reply||undefined,requiresAnswer?Number(answerTarget||targets[0]?.id):undefined)){setBody('');setExpanded(reply?commentId(rootOf(reply)):expanded);setReply(null);setEditing(false);setRequiresAnswer(false);}
-    else setSendError(t('research.failed'));
+  const { t, language } = useI18n();
+  const [day, setDay] = useState("all");
+  const [editor, setEditor] = useState<{ replyTo?: string } | null>(null);
+  const [profile, setProfile] = useState<TinyUserDTO | null>(null);
+  const [award, setAward] = useState<{ userId: number; sourceId: string; awardId?: string } | null>(null);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const commentIds = useRef(new Map<string, number>());
+  const owner = project.members.some(member => member.id === userId && member.owner);
+  const items = [...task.progress].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  const byId = new Map(items.map(entry => [entry.id, entry]));
+  const members = new Map(project.members.map(member => [member.id, member]));
+  const dayChoices = [...new Set(items.map(entry => researchDiscussionDay(entry.created_at)))].sort().reverse();
+  const selectedDay = dayChoices.includes(day) ? day : "all";
+  const belongs = (entry: ResearchProgress) => matchesResearchDiscussion(entry, selectedDay, scope === "all" ? null : Number(scope));
+
+  const roots = new Map<string, string>();
+  function rootOf(entry: ResearchProgress) {
+    let current = entry;
+    const visited = new Set<string>();
+    while (current.reply_to && !visited.has(current.id)) {
+      const known = roots.get(current.id);
+      if (known) return known;
+      const parent = byId.get(current.reply_to);
+      if (!parent) break;
+      visited.add(current.id);
+      current = parent;
+    }
+    return current.id;
   }
-  return <section className={`research-task-comments${editing&&!mobile?' is-composing':''}`}>
+
+  const byCommentId = new Map<number, ResearchProgress>();
+  const replies = new Map<string, ResearchProgress[]>();
+  for (const entry of items) {
+    if (!commentIds.current.has(entry.id)) commentIds.current.set(entry.id, commentIds.current.size + 1);
+    byCommentId.set(commentIds.current.get(entry.id)!, entry);
+    const root = rootOf(entry);
+    roots.set(entry.id, root);
+    if (root === entry.id || !belongs(entry)) continue;
+    const bucket = replies.get(root) ?? [];
+    bucket.push(entry);
+    replies.set(root, bucket);
+  }
+  const rootEntries = items.filter(entry => roots.get(entry.id) === entry.id && (belongs(entry) || replies.has(entry.id)));
+  const person = (id: number): TinyUserDTO => {
+    const member = members.get(id);
+    return { user_id: id, name: member?.name || String(id), avatar_uri: member?.avatar_uri,
+      avatar_cache_key: member?.avatar_cache_key, avatar_frame_style: member?.avatar_frame_style };
+  };
+  const dto = (entry: ResearchProgress): SquareStatementCommentDTO => {
+    const root = roots.get(entry.id) ?? entry.id;
+    const parent = entry.reply_to ? byId.get(entry.reply_to) : undefined;
+    return { comment_id: commentIds.current.get(entry.id)!, statement_id: 0, user: person(entry.user_id), text: entry.body,
+      created_at: Date.parse(entry.created_at) / 1000, like_count: 0, reply_count: 0, liked: false, can_delete: false,
+      parent_id: root !== entry.id ? commentIds.current.get(root) : null, reply_to_user: parent ? person(parent.user_id) : null };
+  };
+
+  const focusedRoot = focusProgressId ? commentIds.current.get(roots.get(focusProgressId) || "") : undefined;
+  useEffect(() => {
+    if (!focusProgressId || !focusedRoot) return;
+    setDay("all");
+    setExpanded(focusedRoot);
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => document.getElementById(`research-progress-${focusProgressId}`)?.scrollIntoView({
+        block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      }));
+    });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [focusProgressId, focusedRoot]);
+
+  const target = editor?.replyTo ? byId.get(editor.replyTo) : undefined;
+  const targets = project.members.filter(member => member.id !== userId && (owner ? !member.owner : member.owner));
+  const bonuses = project.workflow?.comment_awards ?? [];
+  const commentShare = (entry: SquareStatementCommentDTO) => {
+    const progress = byCommentId.get(entry.comment_id)!;
+    return <ReferenceShareButton className="research-comment-share" reference={{
+      kind: progress.reply_to ? "research_reply" : "research_comment", project_id: project.id, task_id: task.id, progress_id: progress.id,
+    }} />;
+  };
+
+  return <section className="research-task-comments">
     <div className="research-comments-scroll">
       {children}
-      <nav className="research-discussion-dates" aria-label={t('researchFlow.discussionDate')}><button type="button" aria-pressed={selectedDay==='all'} onClick={()=>setSelectedDay('all')}>{t('research.all')}</button>{days.map(day=><button type="button" key={day} aria-pressed={selectedDay===day} onClick={()=>setSelectedDay(day)}><strong>{new Intl.DateTimeFormat(language,{month:'short',day:'numeric'}).format(new Date(day+'T12:00:00'))}</strong><small>{new Intl.DateTimeFormat(language,{weekday:'short'}).format(new Date(day+'T12:00:00'))}</small></button>)}</nav>
-      <div className="square-comment-list">{comments.map(comment=><CommentThread key={record(comment.comment_id).id} comment={comment} canInteract={writable} authorAccessory={entry=><>{(project.workflow?.comment_awards||[]).some(award=>award.source_id===record(entry.comment_id).id)?<span className="research-bonus-tag">BONUS</span>:null}<ReferenceShareButton className="research-comment-share" reference={{kind:record(entry.comment_id).reply_to?'research_reply':'research_comment',project_id:project.id,task_id:task.id,progress_id:record(entry.comment_id).id}}/></>} expanded={expanded===comment.comment_id} onToggleReplies={id=>setExpanded(current=>current===id?null:id)} onDelete={()=>{}} onOpenProfile={setProfile} onReply={entry=>{setReply(record(entry.comment_id).id);const candidate=entry.user.user_id===userId?byId.get(rootOf(record(entry.comment_id).id))?.user_id:entry.user.user_id;setAnswerTarget(String(targets.find(m=>m.id===candidate)?.id||targets[0]?.id||''));setExpanded(entry.parent_id||entry.comment_id);beginEditing();}} renderContent={(entry,onReply)=>{const item=record(entry.comment_id);const bonuses=(project.workflow?.comment_awards||[]).filter(award=>award.source_id===item.id);return <div id={'research-progress-'+item.id} className={`research-comment-anchor${focusProgressId===item.id?' is-highlighted':''}${item.report_kind?' is-report':''}`}><div className="research-flow-metadata">{!matches(item)&&<small>{t('researchFlow.replyContext')}</small>}{item.report_kind&&<><strong>{t(`researchFlow.${item.report_kind}` as TranslationKey)}</strong><small>{item.period_start}</small>{item.report_kind==='daily'&&<small>{t('researchFlow.aiTime')} {(item.ai_slots||0)/2}h · {t('researchFlow.thinkingTime')} {(item.thinking_slots||0)/2}h</small>}{item.waive_reward&&<small>{t('researchFlow.waived')}</small>}</>}{item.response_to&&<><strong className={`research-answer-status ${item.resolved_at?'is-resolved':'is-pending'}`}>{t(item.resolved_at?'researchFlow.answered':'researchFlow.response')} · {user(item.response_to).name}</strong></>}{isMentor&&writable&&item.user_id!==userId&&<button type="button" className="research-comment-action" disabled={busy} onClick={event=>{event.stopPropagation();setAwarding({userId:item.user_id,sourceId:item.id,awardId:bonuses[0]?.id});}}>{t(bonuses.length?'researchFlow.editBonus':'researchFlow.award')}</button>}</div><div onClick={onReply}><Markdown body={entry.text}/></div>{bonuses.length>0&&<div className="research-comment-bonuses"><div>{bonuses.map(bonus=><div key={bonus.id}><strong>+{bonus.amount} {project.workflow?.reward_types.find(r=>r.id===bonus.reward_type)?.name||t(`researchFlow.${bonus.reward_type}` as TranslationKey)}</strong><span>{bonus.reason}</span>{isMentor&&writable&&<button type="button" className="research-comment-action" onClick={event=>{event.stopPropagation();setAwarding({userId:item.user_id,sourceId:item.id,awardId:bonus.id});}}>{t('researchFlow.edit')}</button>}</div>)}</div></div>}</div>;}}/>)}</div>
-      {!comments.length&&<QuietState icon="forum" title={t('research.noProgress')} description={t('research.progressEmptyHint')}/>}
-    </div>
-    {writable&&<CommentComposer onSubmit={event=>{event.preventDefault();void submit(body);}}>
-      <UserAvatar className="square-comment-avatar" name={me.name} uri={me.avatar_uri} cacheKey={me.avatar_cache_key} frame={me.avatar_frame_style}/>
-      <div className="square-comment-composer-main" ref={editor}>
-        {target&&<div className="research-reply-context"><span className="material-symbols-outlined" aria-hidden="true">reply</span><span><strong>{user(target.user_id).name}</strong><small>{target.body}</small></span><button type="button" onClick={()=>setReply(null)} aria-label={t('common.cancel')}><span className="material-symbols-outlined" aria-hidden="true">close</span></button></div>}
-        {editing&&!mobile?<><MarkdownInput value={body} onChange={setBody} rows={3}/><div className="research-comment-send"><button className="ghost-button" type="button" onClick={cancelEditing} disabled={busy}>{t('common.cancel')}</button><button className="square-comment-send" type="submit" disabled={busy||!body.trim()} aria-label={t('square.sendComment')}><span className="material-symbols-outlined">arrow_upward</span></button></div></>:<div className="research-progress-compose-row"><button type="button" className="research-progress-trigger" disabled={busy} onClick={beginEditing}><span>{body||t('research.md.mdPlaceholder')}</span><span className="material-symbols-outlined" aria-hidden="true">edit_note</span></button><button className="square-comment-send" type="submit" disabled={busy||!body.trim()} aria-label={t('square.sendComment')}><span className="material-symbols-outlined">arrow_upward</span></button></div>}
-        <div className="research-response-options"><button type="button" className={requiresAnswer?'is-selected':''} aria-pressed={requiresAnswer} disabled={busy||!targets.length} onClick={()=>{if(!requiresAnswer){const candidate=target?.user_id===userId&&reply?byId.get(rootOf(reply))?.user_id:target?.user_id;setAnswerTarget(String(targets.find(m=>m.id===candidate)?.id||targets[0]?.id||''));}setRequiresAnswer(value=>!value);}}><span className="material-symbols-outlined" aria-hidden="true">flag</span>{t('researchFlow.needsAnswer')}</button>{requiresAnswer&&<SelectControl compact label={t('researchFlow.answerTarget')} value={answerTarget||String(targets[0]?.id||'')} onChange={setAnswerTarget} options={targets.map(m=>({value:String(m.id),label:m.name}))} disabled={busy}/>}</div>
-        {sendError&&!(editing&&mobile)&&<p className="research-comment-error" role="alert">{sendError}</p>}
+      {dayChoices.length > 1 && <div className="research-discussion-filter">
+        <SelectControl compact label={t("researchFlow.discussionDate")} value={selectedDay} onChange={setDay} options={[
+          { value: "all", label: t("researchWorkbench.allDates") },
+          ...dayChoices.map(value => ({ value, label: researchDate(value, language) })),
+        ]} />
+      </div>}
+      <div className="square-comment-list">
+        {rootEntries.map(entry => {
+          const root = dto(entry);
+          const thread = [...(replies.get(entry.id) ?? [])].reverse().map(dto);
+          return <CommentThread key={entry.id} comment={{ ...root, replies: thread, reply_count: thread.length }}
+            canInteract={writable} authorAccessory={commentShare} expanded={expanded === root.comment_id}
+            onToggleReplies={id => setExpanded(previous => previous === id ? null : id)} onDelete={() => {}}
+            onOpenProfile={setProfile} onReply={comment => {
+              const source = byCommentId.get(comment.comment_id);
+              if (!source) return;
+              setExpanded(root.comment_id);
+              setEditor({ replyTo: source.id });
+            }}
+            renderContent={comment => {
+              const item = byCommentId.get(comment.comment_id)!;
+              const awards = bonuses.filter(bonus => bonus.source_id === item.id);
+              return <div id={`research-progress-${item.id}`}
+                className={`research-comment-anchor${focusProgressId === item.id ? " is-highlighted" : ""}${item.report_kind ? " is-report" : ""}`}>
+                <div className="research-flow-metadata">
+                  {!belongs(item) && <small>{t("researchFlow.replyContext")}</small>}
+                  {item.report_kind && <>
+                    <strong>{t(`researchFlow.${item.report_kind}`)}</strong>
+                    {item.period_start && <small>{researchDate(item.period_start, language)}</small>}
+                    {item.report_kind === "daily" && Boolean(item.ai_slots || item.thinking_slots) &&
+                      <small>{t("researchFlow.aiTime")} {(item.ai_slots || 0) / 2}h · {t("researchFlow.thinkingTime")} {(item.thinking_slots || 0) / 2}h</small>}
+                    {item.waive_reward && <small>{t("researchFlow.waived")}</small>}
+                  </>}
+                  {item.response_to && <strong className={`research-answer-status ${item.resolved_at ? "is-resolved" : "is-pending"}`}>
+                    {t(item.resolved_at ? "researchFlow.answered" : "researchFlow.response")} · {person(item.response_to).name}
+                  </strong>}
+                </div>
+                <Markdown body={comment.text} />
+                {(awards.length > 0 || owner && writable && item.user_id !== userId) && <div className="research-note-awards">
+                  {awards.map(bonus => <small key={bonus.id}>+{bonus.amount} {project.workflow?.reward_types.find(reward => reward.id === bonus.reward_type)?.name ||
+                    t(`researchFlow.${bonus.reward_type}` as TranslationKey)} · {bonus.reason}</small>)}
+                  {owner && writable && item.user_id !== userId && <button type="button" className="research-inline-action" disabled={busy}
+                    onClick={() => setAward({ userId: item.user_id, sourceId: item.id, awardId: awards[0]?.id })}>
+                    {t(awards.length ? "researchFlow.editBonus" : "researchFlow.award")}
+                  </button>}
+                </div>}
+              </div>;
+            }} />;
+        })}
       </div>
-    </CommentComposer>}
-    {writable&&editing&&mobile&&<MarkdownEditorDialog title={t('research.progress')} initialValue={body} onChange={setBody} busy={busy} error={sendError} confirmLabel={t('square.sendComment')} onClose={cancelEditing} onSave={value=>void submit(value)}/>}
-    <SideDrawer className="research-workflow-drawer" open={!!awarding} historyKey="research-comment-award" title={t('researchFlow.award')} onClose={()=>{if(!busy)setAwarding(null);}}>{awarding&&<ResearchAwardForm key={awarding.awardId||awarding.sourceId} award={project.workflow?.comment_awards?.find(item=>item.id===awarding.awardId)} project={project} userId={awarding.userId} sourceId={awarding.sourceId} busy={busy} mutate={mutate} onDone={()=>setAwarding(null)}/>}</SideDrawer>
-    <SideDrawer headerless historyKey="research-comment-profile" open={!!profile} onClose={()=>setProfile(null)} title={t('profile.details')}>{profile&&<UserProfilePanel userId={profile.user_id} initialUser={profile}/>}</SideDrawer>
+      {!rootEntries.length && <QuietState icon="forum"
+        title={t(task.progress.length ? "researchWorkbench.noMatchingUpdate" : "research.noProgress")}
+        description={task.progress.length ? undefined : t("researchWorkbench.firstUpdateHint")} />}
+    </div>
+
+    {writable && <div className="research-compose-dock">
+      <button type="button" className="button" disabled={busy} onClick={() => setEditor({})}>
+        <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>{t("researchWorkbench.writeUpdate")}
+      </button>
+    </div>}
+    <SideDrawer className="research-workflow-drawer" historyKey="research-write-update" open={Boolean(editor) && writable}
+      title={t(target ? "researchWorkbench.replyAction" : "researchWorkbench.writeUpdate")} onClose={() => { if (!busy) setEditor(null); }}>
+      {editor && <ResearchNoteEditor key={editor.replyTo || "update"} draftKey={`note:${userId}:${project.id}:${task.id}:${editor.replyTo || ""}`}
+        task={task} target={target} targetName={target ? person(target.user_id).name : undefined} targets={targets}
+        owner={owner} busy={busy} error={error} onSend={async (body, recipient) => {
+          const ok = await send(body, editor.replyTo, recipient);
+          if (ok) {
+            if (target) setExpanded(commentIds.current.get(roots.get(target.id) ?? target.id) ?? null);
+            setEditor(null);
+          }
+          return ok;
+        }} />}
+    </SideDrawer>
+    <SideDrawer className="research-workflow-drawer" open={Boolean(award)} historyKey="research-comment-award"
+      title={t("researchFlow.award")} onClose={() => { if (!busy) setAward(null); }}>
+      {award && <ResearchAwardForm key={award.awardId || award.sourceId} award={bonuses.find(item => item.id === award.awardId)}
+        project={project} userId={award.userId} sourceId={award.sourceId} busy={busy} mutate={mutate} onDone={() => setAward(null)} />}
+    </SideDrawer>
+    <SideDrawer headerless historyKey="research-comment-profile" open={Boolean(profile)} onClose={() => setProfile(null)} title={t("profile.details")}>
+      {profile && <UserProfilePanel userId={profile.user_id} initialUser={profile} />}
+    </SideDrawer>
   </section>;
+}
+
+function ResearchNoteEditor({ draftKey, task, target, targetName, targets, owner, busy, error, onSend }: {
+  draftKey: string; task: ResearchTask; target?: ResearchProgress; targetName?: string; targets: ResearchMember[];
+  owner: boolean; busy: boolean; error?: string; onSend: (body: string, recipient?: number) => Promise<boolean>;
+}) {
+  const { t } = useI18n();
+  const [body, setBody] = useResearchDraft(draftKey);
+  const [request, setRequest] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [recipient, setRecipient] = useState(() => String(targets.find(member => member.id === target?.user_id)?.id || targets[0]?.id || ""));
+  const recipientId = targets.some(member => member.id === Number(recipient)) ? Number(recipient) : targets[0]?.id;
+  return <form className="research-form research-note-form" onSubmit={async event => {
+    event.preventDefault();
+    if (busy || !body.trim()) return;
+    setFailed(false);
+    const ok = await onSend(body, request ? recipientId : undefined);
+    if (ok) setBody("");
+    else setFailed(true);
+  }}>
+    <div className="research-report-context"><strong>{task.title}</strong></div>
+    {target && <blockquote className="research-note-context"><strong>{targetName}</strong><small>{researchExcerpt(target)}</small></blockquote>}
+    <MarkdownInput value={body} onChange={setBody} rows={7} required mobileImmersive={false} />
+    {targets.length > 0 && <SettingRow title={t(owner ? "researchFlow.needsAnswer" : "researchFlow.askMentor")} trailing={
+      <SettingSwitch label={t(owner ? "researchFlow.needsAnswer" : "researchFlow.askMentor")} checked={request} onChange={setRequest} disabled={busy} />
+    } />}
+    {request && targets.length > 1 && <SelectControl label={t("researchFlow.answerTarget")} value={String(recipientId ?? "")}
+      onChange={setRecipient} options={targets.map(member => ({ value: String(member.id), label: member.name }))} disabled={busy} />}
+    {failed && <p role="alert" className="research-form-error">{error || t("research.failed")}</p>}
+    <footer className="research-task-editor-footer">
+      <button className="button" disabled={busy || !body.trim()} type="submit">{t(busy ? "common.processing" : target ? "researchWorkbench.publishReply" : "researchWorkbench.publishUpdate")}</button>
+    </footer>
+  </form>;
 }

@@ -21,13 +21,13 @@ test('research renders the selected project directly and keeps management in a f
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
   assert.doesNotMatch(page,/historyKey="research-project"|workspaceSelected=/);
   assert.match(page,/<ResearchProjectHeader/);
-  assert.match(page,/onBack=\{\(\)=>setBrowsing\(true\)\}/);
+  assert.match(page,/onBack=\{\(\) => setBrowsing\(true\)\}/);
   assert.doesNotMatch(page,/secondary=\{id&&list.length/);
-  assert.match(page,/historyKey="research-manage"/);
+  assert.match(page,/historyKey="research-members"/);
   assert.match(page,/localStorage.setItem\(memoryKey/);
   assert.doesNotMatch(page,/<p className="research-muted">\{t\('research.shared'\)\}/);
   const comments=readFileSync(new URL('../src/components/ResearchComments.tsx',import.meta.url),'utf8');
-  assert.ok(comments.indexOf('research-comments-scroll')<comments.indexOf('{writable&&<CommentComposer'));
+  assert.ok(comments.indexOf('research-comments-scroll')<comments.indexOf('research-compose-dock'));
   const item=readFileSync(new URL('../src/components/ResearchTaskItem.tsx',import.meta.url),'utf8');
   assert.doesNotMatch(item,/research-task-excerpt/);
 });

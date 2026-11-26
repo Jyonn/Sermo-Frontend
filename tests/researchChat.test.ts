@@ -45,9 +45,9 @@ test("research cards retain project context and emit the shared invitation event
   assert.equal(events.at(-1)?.detail, invitation);
 });
 
-test("research previews and onboarding routes exclude ordinary submission invitations", () => {
+test("research previews and workspace routes exclude ordinary submission invitations", () => {
   assert.equal(researchInvitationPreview(invitation), "research.invitation");
-  assert.equal(researchInvitationDestination(invitation), "/app/research?project=7&onboarding=1");
+  assert.equal(researchInvitationDestination(invitation), "/app/research?project=7");
   const ordinary = { ...invitation, project: undefined };
   assert.equal(researchInvitationPreview(ordinary), null);
   assert.equal(researchInvitationPreview(null), null);

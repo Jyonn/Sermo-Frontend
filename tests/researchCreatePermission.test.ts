@@ -17,9 +17,11 @@ test('the server capability result and required level remain authoritative',()=>
   assert.equal(researchCreateRestriction(account(10,true,4))?.key,'research.createDenied');
   assert.equal(researchCreateRestriction({verified:true}),null);
 });
-test('all creation entry points use the shared preflight and submit failures toast too',()=>{
+test('creation uses the capability preflight and shows errors in the open form',()=>{
   const page=readFileSync(new URL('../src/pages/ResearchPage.tsx',import.meta.url),'utf8');
-  assert.equal((page.match(/startCreate\(\)}/g)||[]).length,5);
-  assert.equal((page.match(/setPanel\('create'\)/g)||[]).length,1);
-  assert.match(page,/setError\(message\);showToast\(message,'error',4000\)/);
+  assert.match(page,/<ResearchHome[^>]+create=\{\(\) => void startCreate\(\)\}/);
+  assert.match(page,/label=\{t\("research.create"\)\} onClick=\{\(\) => void startCreate\(\)\}/);
+  assert.match(page,/researchCreateRestriction\(me\)[\s\S]+showPanel\("create"\)/);
+  assert.match(page,/setError\(message\)/);
+  assert.match(page,/<ResearchCreateFlow busy=\{busy\} error=\{error\}/);
 });

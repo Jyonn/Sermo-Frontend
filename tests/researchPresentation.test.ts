@@ -4,12 +4,12 @@ import { readFileSync } from 'node:fs';
 
 const source = (file: string) => readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
 
-test('research project panels preserve a real embedded conversation and onboarding', () => {
+test('research project panels preserve a real embedded conversation and calendar consent return', () => {
   const page=source('pages/ResearchPage.tsx');
   assert.match(page,/research-direct-workspace/);
   assert.match(page,/historyKey="research-chat"/);
   assert.match(page,/<EmbeddedChats embeddedChat=/);
-  assert.match(page,/setOnboarding\(true\)/);
+  assert.match(page,/useState\(Boolean\(returning\)\)/);
   assert.match(page,/pending_invitee_ids\?\.includes/);
   const chats=source('pages/ChatsPage.tsx');
   assert.match(chats,/embedded=\{!!embeddedChat\}/);
@@ -61,29 +61,25 @@ test('research uses framed avatars and one member picker rather than initial pla
   }
   const people = source('components/ResearchPeople.tsx');
   assert.match(people, /chat-detail-member-grid/);
-  assert.match(people, /name="member" value=\{id\}/);
+  assert.match(people, /onApply=\{onChange\}/);
   const overview=source('components/ResearchWorkspace.tsx');
-  assert.match(overview, /research-member-stack/);
   assert.match(overview, /<MemberAvatarStack/);
   assert.match(source('components/MemberAvatarStack.tsx'), /<PlainAvatar/);
 });
 
-test('project creation is progressive and description remains editable Markdown', () => {
+test('project creation uses one form and description remains editable Markdown', () => {
   const flow=source('components/ResearchCreateFlow.tsx');
-  assert.match(flow, /<InputDialog open=\{step==='name'\}/);
+  assert.match(flow, /<SideDrawer/);
   assert.match(flow, /<DateRangeField value=\{range\} onChange=\{setRange\}/);
-  assert.match(flow, /setStep\('description'\)/);
-  assert.match(flow, /onSkip=\{\(\)=>void create\(\)\}/);
-  assert.match(flow, /end:range.to\|\|null/);
+  assert.match(flow, /<MarkdownInput value=\{description\}/);
+  assert.match(flow, /end: range.to \|\| null/);
   assert.match(source('components/ResearchWorkspace.tsx'), /<Markdown body=\{project.description\}/);
-  assert.match(source('pages/ResearchPage.tsx'), /action:'settings',description:value/);
+  assert.match(source('pages/ResearchPage.tsx'), /action: "settings", description/);
   assert.match(source('components/ResearchProjectDetails.tsx'), /chat-detail-member-grid|<ResearchMemberGrid/);
 });
 
-test('description editing and creation share an edge-to-edge modal, not a drawer', () => {
-  assert.match(source('components/ResearchCreateFlow.tsx'), /<MarkdownEditorDialog/);
-  assert.match(source('pages/ResearchPage.tsx'), /panel==='description'.*<MarkdownEditorDialog/);
-  assert.doesNotMatch(source('components/ResearchCreateFlow.tsx'), /SideDrawer/);
+test('description editing keeps the dedicated Markdown modal', () => {
+  assert.match(source('pages/ResearchPage.tsx'), /panel === "description".*<MarkdownEditorDialog/);
   const dialog=source('components/MarkdownEditorDialog.tsx');
   assert.match(dialog, /role="dialog" aria-modal="true"/);
   assert.match(dialog, /useModalFocus\(root,!mobile/);
@@ -104,13 +100,13 @@ test('Markdown tools are single-line, uniform and use a floating heading menu', 
   assert.match(css, /flex:0 0 36px/);
   assert.match(source('components/ResearchPeople.tsx'), /chat-detail-member-avatar-add chat-detail-member-avatar-remove/);
   assert.match(source('pages/ResearchPage.tsx'), /<HeaderIconButton/);
-  assert.match(source('pages/ResearchPage.tsx'), /<ResearchTaskItem/);
+  assert.match(source('components/ResearchTaskBrowser.tsx'), /<ResearchTaskItem/);
 });
 
 test('research preserves its root panel while nested drawers float, and shares Square comments', () => {
   const page=source('pages/ResearchPage.tsx');
   assert.match(page,/<div className="research-project-surface">/);
-  assert.match(page,/<FloatingDrawerScope>[\s\S]*<SideDrawer historyKey="research-chat"/);
+  assert.match(page,/<FloatingDrawerScope>[\s\S]*<SideDrawer[^>]*historyKey="research-chat"/);
   const panels=source('components/DesktopPanelWorkspace.tsx');
   assert.match(panels,/createPortal\(<div className=\{.*detached-drawer-slot/);
   assert.match(panels,/document.body\) : null/);
@@ -118,7 +114,7 @@ test('research preserves its root panel while nested drawers float, and shares S
   assert.doesNotMatch(page,/taskFilter|<DrawerTabs/);
   assert.doesNotMatch(source('components/ResearchWorkspace.tsx'),/<PageTabs/);
   assert.match(source('components/ResearchComments.tsx'),/<CommentThread/);
-  assert.match(source('components/ResearchComments.tsx'),/<CommentComposer/);
+  assert.match(source('components/ResearchComments.tsx'),/<ResearchNoteEditor/);
   assert.match(source('pages/SquarePage.tsx'),/<SquareDiscussion/);
   assert.match(source('components/SquareDiscussion.tsx'),/<CommentThread/);
   assert.match(source('pages/SquarePage.tsx'),/<CommentComposer/);
