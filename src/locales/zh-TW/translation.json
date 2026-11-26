@@ -63,7 +63,7 @@
   "recordShop.listenRule": "活動歌手的歌，聽完整首得 6 分，聽完不超過 30 秒的試聽得 3 分。其他歌手的歌，聽完整首得 4 分，聽完這樣的試聽得 2 分。",
   "recordShop.dedupeRule": "同一位歌手的同一首歌，分享和聽完各算一次。換個平台也只算一次。",
   "recordShop.selectionRule": "攢到 30 分時可以挑一個歌手氣泡，攢到 60 分時還能再挑一個。領到後，可以在選單 → 個性化 → 聊天頁 → 聊天氣泡裡換上。",
-  "recordShop.discoveryRule": "聊天時，你的歌手氣泡旁可能隨機出現這位歌手的正式專輯。你第一次找到某張唱片時，會看到慶祝動畫。如果你是空間裡第一個找到某張鑽級或曜級唱片的人，空間官方帳號會在廣場向你道喜。",
+  "recordShop.discoveryRule": "聊天時，你的歌手氣泡旁可能隨機出現這位歌手的正式專輯。你第一次找到某張唱片時，會看到慶祝動畫。如果你是空間裡第一個找到某張鑽級或曜級唱片的人，大家可以在廣場的「獎章」裡看到你的唱片。",
   "recordShop.bubbleTitle": "{{artist}}氣泡",
   "recordShop.bubblePreviewFirst": "今天聽什麼？",
   "recordShop.bubblePreviewNext": "這首值得聽完。",

@@ -1,4 +1,4 @@
-.record-shop-announcement {
+.record-shop-medal {
   --sleeve-paper: #f5f1e7;
   --sleeve-ink: #26332f;
   --sleeve-muted: #52645f;
@@ -9,12 +9,12 @@
   min-width: 0;
 }
 
-.record-shop-announcement[data-tier="obsidian"] {
+.record-shop-medal[data-tier="obsidian"] {
   --sleeve-art: #e9dfe6;
   --sleeve-accent: #754961;
 }
 
-html[data-theme="dark"] .record-shop-announcement {
+html[data-theme="dark"] .record-shop-medal {
   --sleeve-paper: #202725;
   --sleeve-ink: #f0ede1;
   --sleeve-muted: #c3cec4;
@@ -22,12 +22,12 @@ html[data-theme="dark"] .record-shop-announcement {
   --sleeve-art: #2a3940;
 }
 
-html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
+html[data-theme="dark"] .record-shop-medal[data-tier="obsidian"] {
   --sleeve-accent: #e3bad2;
   --sleeve-art: #3d303c;
 }
 
-.record-shop-announcement .record-shop-announcement-card {
+.record-shop-medal .record-shop-medal-card {
   --sleeve-line: color-mix(in srgb, var(--sleeve-accent) 30%, transparent);
   position: relative;
   display: grid;
@@ -41,14 +41,13 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   background: var(--sleeve-paper);
   color: var(--sleeve-ink);
   text-align: start;
-  cursor: pointer;
 }
 
-.record-shop-announcement .record-shop-announcement-card:is(:hover, :focus-visible) {
+.record-shop-medal-card:is(:hover, :focus-within) {
   border-color: var(--sleeve-accent);
 }
 
-.record-shop-announcement-artwork {
+.record-shop-medal-artwork {
   position: relative;
   display: block;
   isolation: isolate;
@@ -57,16 +56,16 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   background: radial-gradient(ellipse at 58% 49%, var(--sleeve-art), transparent 72%);
 }
 
-.record-shop-announcement-artwork .record-shop-album-face {
+.record-shop-medal-artwork .record-shop-album-face {
   position: absolute;
   inset: 8% 1% auto auto;
   width: 67%;
   box-shadow: none;
 }
 
-.record-shop-announcement-artwork .record-shop-album-face > .record-shop-tier-mark { display: none; }
+.record-shop-medal-artwork .record-shop-album-face > .record-shop-tier-mark { display: none; }
 
-.record-shop-announcement-artwork > img {
+.record-shop-medal-artwork > img {
   position: absolute;
   inset: 7% auto auto 2%;
   width: 69%;
@@ -76,7 +75,7 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   box-shadow: 1px 2px 5px #14161945;
 }
 
-.record-shop-announcement-copy {
+.record-shop-medal-copy {
   display: grid;
   justify-items: start;
   min-width: 0;
@@ -84,7 +83,7 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   overflow-wrap: anywhere;
 }
 
-.record-shop-announcement-label {
+.record-shop-medal-label {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -96,65 +95,84 @@ html[data-theme="dark"] .record-shop-announcement[data-tier="obsidian"] {
   letter-spacing: .025em;
 }
 
-.record-shop-announcement-label .record-shop-tier-mark { width: 13px; }
-.record-shop-announcement-title { font-size: clamp(1rem, 4cqi, 1.3rem); line-height: 1.2; }
-.record-shop-announcement-artist { color: var(--sleeve-muted); font-size: .76rem; }
+.record-shop-medal-label .record-shop-tier-mark { width: 13px; }
+.record-shop-medal-title { font-size: clamp(1rem, 4cqi, 1.3rem); line-height: 1.2; }
+.record-shop-medal-artist { color: var(--sleeve-muted); font-size: .76rem; }
 
-.record-shop-announcement-winner {
+.record-shop-medal-credit {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 1px 8px;
   min-width: 0;
   width: 100%;
   margin-top: 5px;
-  padding-top: 6px;
+  padding-top: 4px;
   border-top: 1px solid var(--sleeve-line);
-}
-
-.record-shop-announcement-avatar { width: 19px; height: 19px; font-size: .59rem; }
-
-.record-shop-announcement-credit {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 1px 8px;
-  min-width: 0;
   font-size: .75rem;
 }
 
-.record-shop-announcement-credit time {
+.record-shop-medal-winner {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+.record-shop-medal-winner:hover { color: var(--sleeve-accent); }
+.record-shop-medal-winner strong { overflow-wrap: anywhere; }
+.record-shop-medal-avatar { width: 19px; height: 19px; font-size: .59rem; }
+
+.record-shop-medal-credit time {
   color: var(--sleeve-muted);
   font-size: .69rem;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-.record-shop-announcement-replay {
+.record-shop-medal-replay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: var(--sleeve-accent);
+  cursor: pointer;
+}
+
+.record-shop-medal-replay span {
   position: absolute;
   inset: 9px 9px auto auto;
   display: grid;
   place-items: center;
   width: 20px;
   height: 20px;
-  color: var(--sleeve-accent);
   font-size: 16px;
   line-height: 1;
 }
 
-.square-note .record-shop-announcement .record-shop-announcement-card {
-  border-width: 0 0 1px;
-  border-radius: 0;
-}
-.square-note .record-shop-announcement-card:focus-visible { outline-offset: -3px; }
-
 @container (max-width: 245px) {
-  .record-shop-announcement .record-shop-announcement-card {
+  .record-shop-medal .record-shop-medal-card {
     grid-template-columns: minmax(0, 1fr);
     gap: 7px;
     padding: 9px 10px 10px;
   }
-  .record-shop-announcement-artwork { width: min(100%, 150px); aspect-ratio: 1.7; }
-  .record-shop-announcement-artwork .record-shop-album-face { inset: 4% 15% auto auto; width: 52%; }
-  .record-shop-announcement-artwork > img { inset: 3% auto auto 0; width: 54%; }
-  .record-shop-announcement-label { padding-inline-end: 0; }
+  .record-shop-medal-artwork { width: min(100%, 150px); aspect-ratio: 1.7; }
+  .record-shop-medal-artwork .record-shop-album-face { inset: 4% 15% auto auto; width: 52%; }
+  .record-shop-medal-artwork > img { inset: 3% auto auto 0; width: 54%; }
+  .record-shop-medal-label { padding-inline-end: 0; }
 }

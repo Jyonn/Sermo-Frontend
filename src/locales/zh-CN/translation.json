@@ -4062,7 +4062,7 @@
   ,"recordShop.listenRule": "活动歌手的歌，听完整首得 6 分，听完不超过 30 秒的试听得 3 分。其他歌手的歌，听完整首得 4 分，听完这样的试听得 2 分。"
   ,"recordShop.dedupeRule": "同一位歌手的同一首歌，分享和听完各算一次。换个平台也只算一次。"
   ,"recordShop.selectionRule": "攒到 30 分时可以挑一个歌手气泡，攒到 60 分时还能再挑一个。领到后，可以在菜单 → 个性化 → 聊天页 → 聊天气泡里换上。"
-  ,"recordShop.discoveryRule": "聊天时，你的歌手气泡旁可能随机出现这位歌手的正式专辑。你第一次找到某张唱片时，会看到庆祝动画。如果你是空间里第一个找到某张钻级或曜级唱片的人，空间官方账号会在广场向你道喜。"
+  ,"recordShop.discoveryRule": "聊天时，你的歌手气泡旁可能随机出现这位歌手的正式专辑。你第一次找到某张唱片时，会看到庆祝动画。如果你是空间里第一个找到某张钻级或曜级唱片的人，大家可以在广场的「奖章」里看到你的唱片。"
   ,"recordShop.bubbleTitle": "{{artist}}气泡"
   ,"recordShop.bubblePreviewFirst": "今天听什么？"
   ,"recordShop.bubblePreviewNext": "这首值得听完。"

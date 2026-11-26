@@ -48,7 +48,6 @@ import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import {SquareMasonryFeed} from '../components/SquareMasonryFeed';
 import {SquareNoteDetail,SquareNoteDetailHeader} from '../components/SquareNoteDetail';
 import {squareDetailView,squareStatementSearch} from '../lib/squareNoteMedia';
-import { RecordShopAnnouncementCard } from "../components/RecordShopAnnouncementCard";
 import {SquareChannelPager} from '../components/SquareChannelPager';
 import {SquareChannelPage} from '../components/SquareChannelPage';
 import type {SquareChannel} from '../lib/squareSwipe';
@@ -346,7 +345,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         </div>
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
-      {statement.record_shop_announcement ? <RecordShopAnnouncementCard announcement={statement.record_shop_announcement} /> : statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
+      {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
       {statement.external_media ? (
         <div className="square-external-media" onClick={(event) => event.stopPropagation()}>
           <LinkPreviewCard preview={statement.external_media} statementId={statement.statement_id} />
@@ -1994,7 +1993,6 @@ export default function SquarePage() {
       }).format(new Date(`${selectedFeedDate}T00:00:00+08:00`));
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
-    if (statement.record_shop_announcement) return 220;
     if (statement.chat_record) return 380;
     if (statement.external_media?.provider_data && "provider" in statement.external_media.provider_data) {
       return ["douyin_video", "douyin_gallery", "xiaohongshu_video", "xiaohongshu_gallery"].includes(String(statement.external_media.provider_data.provider)) ? 450 : 310;

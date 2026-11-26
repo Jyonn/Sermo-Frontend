@@ -26,7 +26,6 @@ export function textCoverStyle(id:number,text:string){
   return {theme:Math.abs(id)%4,ratio:text.length>100?.75:text.length>35?.85:1,font:text.length>100?'small':text.length>35?'medium':'large'};
 }
 export function squareNoteEstimate(item:SquareStatementDTO,width:number){
-  if(item.record_shop_announcement)return width<=245?275:225;
   const cover=squareCover(item);
   return width/(cover.uri?cover.ratio:textCoverStyle(item.statement_id,item.text).ratio)+90;
 }

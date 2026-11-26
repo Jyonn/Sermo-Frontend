@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.25.17",
-  "publishedAt": "2026-11-25",
+  "id": "2026.11.26.1",
+  "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "回声唱片铺文案更新",
+      "title": "唱片卡片搬到奖章",
       "items": [
-        "用更好懂的话说明怎么玩、怎么领气泡，以及谁最先找到了唱片。"
+        "在广场的「奖章」里查看谁最先找到了钻级或曜级唱片，点开卡片即可再看庆祝动画。"
       ]
     },
     "en": {
-      "title": "Clearer wording in Echo Record Shop",
+      "title": "Record cards move to Medals",
       "items": [
-        "Easier-to-read instructions explain how to play, how to claim bubbles, and who found a record first."
+        "See who found each Diamond or Obsidian record first in Square → Medals. Open a record card to watch the celebration again."
       ]
     }
   }

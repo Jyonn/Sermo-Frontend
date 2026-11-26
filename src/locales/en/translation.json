@@ -4064,7 +4064,7 @@
   ,"recordShop.listenRule": "For artists in the event, finish a full song for 6 points or a preview of up to 30 seconds for 3. For everyone else, you get 4 points for a full song or 2 for a preview."
   ,"recordShop.dedupeRule": "You can earn points for sharing a song once and finishing it once. The same song by the same artist counts only once for each, even on a different music service."
   ,"recordShop.selectionRule": "Pick your first artist bubble at 30 points and another at 60. Once you’ve claimed one, go to Menu → Personalization → Chat page → Chat bubbles to use it."
-  ,"recordShop.discoveryRule": "One of the artist’s studio albums can pop up beside your chat bubble. You’ll see a celebration the first time you find each record. If you find a Diamond or Obsidian record before anyone else in your space, the official account will congratulate you in Square."
+  ,"recordShop.discoveryRule": "One of the artist’s studio albums can pop up beside your chat bubble. You’ll see a celebration the first time you find each record. If you find a Diamond or Obsidian record before anyone else in your space, everyone can see it in Square → Medals."
   ,"recordShop.bubbleTitle": "{{artist}} bubble"
   ,"recordShop.bubblePreviewFirst": "What are you listening to today?"
   ,"recordShop.bubblePreviewNext": "This one’s worth hearing in full."

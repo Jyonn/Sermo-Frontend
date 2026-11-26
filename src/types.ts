@@ -927,7 +927,6 @@ export interface SquareStatementDTO {
   media: SquareStatementMediaDTO[];
   external_media?: LinkPreviewDTO | null;
   chat_record?: ChatMessagePayloadDTO | null;
-  record_shop_announcement?: SquareMedalDTO;
   comment_count: number;
   like_count: number;
   liked: boolean;

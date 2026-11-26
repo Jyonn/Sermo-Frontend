@@ -8,7 +8,6 @@ import {claimMediaPlayback} from '../lib/mediaPlaybackFocus';
 import {UserAvatar} from './UserAvatar';
 import {AccountRoleBadge} from './AccountRoleBadge';
 import {LinkPreviewCard} from './LinkPreviewCard';
-import {RecordShopAnnouncementCard} from './RecordShopAnnouncementCard';
 import {isStillfolioCollection,revalidateCollection} from './StillfolioPreview';
 import {MediaLightbox, type MediaLightboxItem} from './ImageLightbox';
 import {MediaMetadataPanel} from './MediaMetadataPanel';
@@ -95,7 +94,7 @@ export function SquareNoteDetail(p:Props){
       {video?<StatementVideoThumbnail className="square-reader-video" eager fitMedia aspectRatio={naturalMediaRatio(video.metadata?.pixel_width,video.metadata?.pixel_height)} thumbnailUri={video.thumbnail_uri} durationSeconds={video.duration_seconds} onClick={()=>openAsset(photos.length)}/>:null}
       {audio?<audio className="square-reader-audio" src={audio.uri} controls preload="metadata" onPlay={event=>claimMediaPlayback(event.currentTarget)}/>:null}
       {s.chat_record?<button className="square-reader-chat-record" onClick={()=>window.dispatchEvent(new CustomEvent('sermo:forward-bundle',{detail:s.chat_record}))} type="button"><span className="material-symbols-outlined">forum</span>{t('message.forwardBundleSnapshot')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
-      {s.record_shop_announcement?<RecordShopAnnouncementCard announcement={s.record_shop_announcement}/>:s.text?<div className="square-reader-text">{p.text}</div>:null}
+      {s.text?<div className="square-reader-text">{p.text}</div>:null}
       {collection?.title?<a className="square-reader-source" href={collection.canonical_url} target="_blank" rel="noreferrer">{collection.title}<span className="material-symbols-outlined">arrow_outward</span></a>:null}
       {s.location?<button className="square-reader-location" onClick={p.onLocation} type="button"><span className="material-symbols-outlined">location_on</span>{s.location.address||t('square.location')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
       <div className="square-reader-meta"><time dateTime={new Date(s.created_at*1000).toISOString()}>{formatSquareTime(s.created_at,language,t('time.yesterday'))}</time><span>{s.is_anonymous?t('square.publishAnonymously'):s.visibility==='friends'?t('square.friendsOnly'):t('square.audiencePublic')}</span></div>
