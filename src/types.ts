@@ -71,7 +71,25 @@ export interface UserDTO extends TinyUserDTO {
   phone_verified_at: number | null;
 }
 
+export type SpaceJoinMode = "open" | "invite" | "approval";
+export type SpaceJoinStatus = "pending" | "approved" | "rejected" | "joined";
+export interface SpaceJoinReceipt {
+  name: string;
+  status: SpaceJoinStatus;
+  created_at: number;
+}
+export interface SpaceJoinApplication extends SpaceJoinReceipt {
+  id: number;
+  note: string;
+  reviewed_at: number | null;
+}
+export interface SpaceAdmissionSettings {
+  mode: SpaceJoinMode;
+  invite_code: string | null;
+}
+
 export interface SpaceDTO {
+  join_mode?: SpaceJoinMode;
   site_theme?: 'default' | 'qixi-2026' | 'christmas-2026';
   qixi_theme_granted?: boolean;
   christmas_theme_granted?: boolean;
@@ -931,10 +949,19 @@ export interface SquareStatementDTO {
   like_count: number;
   liked: boolean;
   can_delete: boolean;
+  can_edit?: boolean;
+  edit_revision?: number;
+  edited_at?: number | null;
   can_pin?: boolean;
   can_mute?: boolean;
   is_pinned?: boolean;
   created_at: number;
+}
+
+export interface SquareStatementRevision {
+  revision: number;
+  text: string;
+  published_at: number;
 }
 
 export interface SquareCalendarDTO {

@@ -12,10 +12,11 @@ import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
 import { getBrowserJoinLanguage, useI18n } from "../lib/language";
 import { buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
-import type { JoinResponseDTO, SpaceDTO } from "../types";
+import type { JoinResponseDTO, SpaceDTO, SpaceJoinReceipt } from "../types";
 import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
 import { isOAuthLoginPending, completeOAuthLogin, readOAuthRequest, oauthReturnForAccount } from "../lib/oauthPending";
+import "./SpaceAdmission.css";
 
 const MAX_NICKNAME_LENGTH = 8;
 
@@ -69,6 +70,19 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
   const [pendingNewUserName, setPendingNewUserName] = useState<string | null>(null);
+  const [application, setApplication] = useState<SpaceJoinReceipt | null>(null);
+  const [applicationLoading, setApplicationLoading] = useState(false);
+  const [applicationError, setApplicationError] = useState("");
+  const [admissionError, setAdmissionError] = useState("");
+  const [joinCode, setJoinCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [applicationNote, setApplicationNote] = useState("");
+  const receiptRef = useRef<{ slug: string; value: string } | null>(null);
+  const receiptKey = `frienden:space-join-receipt:${slug}`;
+  const joinMode = space?.join_mode ?? "open";
+  const approvedForName = application?.status === "approved" && application.name.toLowerCase() === pendingNewUserName?.toLowerCase();
+  const requestingApproval = joinMode === "approval" && !approvedForName;
+  const waitingForApplication = requestingApproval && (application?.status === "pending" || application?.status === "approved");
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryStep, setRecoveryStep] = useState<"channels" | "code" | "password">("channels");
   const [recoveryChannels, setRecoveryChannels] = useState<Array<{ channel: number; type: "email" | "sms"; masked: string }>>([]);
@@ -129,6 +143,76 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
 
     return () => controller.abort();
   }, [slug]);
+
+  useEffect(() => {
+    receiptRef.current = null;
+    setApplication(null);
+    setApplicationError("");
+    setApplicationLoading(false);
+    setPendingNewUserName(null);
+    setAdmissionError("");
+    setNewPassword("");
+    setJoinCode("");
+    setApplicationNote("");
+    let receipt: string | null = null;
+    try { receipt = localStorage.getItem(receiptKey); }
+    catch { /* This browser may limit persistent storage. */ }
+    if (!receipt || !slug) return;
+    receiptRef.current = { slug, value: receipt };
+    const controller = new AbortController();
+    void refreshApplication(false, controller.signal);
+    return () => controller.abort();
+  }, [slug, receiptKey]);
+
+  function clearReceipt() {
+    receiptRef.current = null;
+    try { localStorage.removeItem(receiptKey); }
+    catch { /* Receipt can still be cleared in memory. */ }
+  }
+
+  async function refreshApplication(showError = true, signal?: AbortSignal) {
+    const receipt = receiptRef.current;
+    if (!receipt || receipt.slug !== slug) return;
+    setApplicationError("");
+    setApplicationLoading(true);
+    try {
+      const next = await api.getSpaceJoinApplication(slug, receipt.value, signal);
+      if (!signal?.aborted && receiptRef.current === receipt) {
+        setApplication(next.status === "joined" ? null : next);
+        if (next.status === "joined") clearReceipt();
+      }
+    } catch (e) {
+      if (showError && !signal?.aborted && receiptRef.current === receipt) {
+        setApplicationError(e instanceof Error ? e.message : t("join.failed"));
+      }
+    } finally {
+      if (!signal?.aborted) setApplicationLoading(false);
+    }
+  }
+
+  async function requestApproval(name: string) {
+    if (submitState === "submitting" || waitingForApplication) return;
+    setAdmissionError("");
+    setSubmitState("submitting");
+    let receipt = receiptRef.current;
+    if (!receipt || receipt.slug !== slug || application?.status === "rejected") {
+      const value = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
+      receipt = { slug, value };
+      receiptRef.current = receipt;
+      try { localStorage.setItem(receiptKey, value); }
+      catch { /* Keep the receipt available in the current page. */ }
+    }
+    try {
+      const next = await api.applyToSpace({ slug, name, note: applicationNote.trim(), receipt: receipt.value });
+      if (alive.current && receiptRef.current === receipt) {
+        setApplication(next);
+        setPendingNewUserName(null);
+        setApplicationNote("");
+      }
+    } catch (error) {
+      if (alive.current && receiptRef.current === receipt) setAdmissionError(error instanceof Error ? error.message : t("join.failed"));
+    } finally { setSubmitState("idle"); }
+  }
 
   const closeRecovery = () => {
     if (recoveryBusy) return;
@@ -230,17 +314,21 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
     if (submitState === "submitting") return;
     setSubmitError(null);
     setPasswordHint(null);
+    setAdmissionError("");
     setSubmitState("submitting");
     try {
       const payload = await api.joinSpace({
         slug,
         name,
-        password: password.trim() || undefined,
+        password: (newUserIntent === "create" && joinMode !== "open" ? newPassword : password).trim() || undefined,
         language: getBrowserJoinLanguage(),
         new_user_intent: newUserIntent,
+        invite_code: newUserIntent === "create" && joinMode === "invite" ? joinCode.trim() : undefined,
+        join_receipt: newUserIntent === "create" && approvedForName ? receiptRef.current?.value : undefined,
       });
       if (!alive.current) return;
       setPendingNewUserName(null);
+      if (newUserIntent === "create" && approvedForName) clearReceipt();
       if (onJoined) { onJoined(payload); return; }
       completeOAuthLogin();
       loginFromJoin(payload);
@@ -261,6 +349,22 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
       if (error instanceof ApiError && error.identifier === "USER@NEW_USER_CONFIRMATION_REQUIRED") {
         setPendingNewUserName(name);
         return;
+      }
+      if (newUserIntent === "create" && error instanceof ApiError) {
+        if (error.identifier === "SPACE@JOIN_INVITE_REQUIRED") {
+          setSpace(previous => previous && { ...previous, join_mode: "invite" });
+          setAdmissionError(t("admission.invalidCode"));
+          return;
+        }
+        if (error.identifier === "SPACE@JOIN_APPROVAL_REQUIRED") {
+          setSpace(previous => previous && { ...previous, join_mode: "approval" });
+          setAdmissionError(t("admission.approvalNeeded"));
+          return;
+        }
+        if (joinMode !== "open" && error.identifier !== "USER@NEW_USER_NAME_TAKEN") {
+          setAdmissionError(error.message);
+          return;
+        }
       }
       setPendingNewUserName(null);
       if (isPasswordRequiredJoinError(error)) {
@@ -377,6 +481,20 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
                 </div>
               ) : null}
 
+              {joinMode !== "open" && <p className="join-admission-hint">{t(joinMode === "invite" ? "admission.inviteHint" : "admission.approvalHint")}</p>}
+              {joinMode === "approval" && application && <section className="join-application-status">
+                <div>
+                  <strong>{t(`admission.status.${application.status}`)} · {application.name}</strong>
+                  {application.status === "pending" && <small>{t("admission.receiptHint")}</small>}
+                  {applicationError && <p role="alert">{applicationError}</p>}
+                </div>
+                {application.status === "approved" ? <button type="button" className="ghost-button" disabled={submitState === "submitting"}
+                  onClick={() => { setAdmissionError(""); setPendingNewUserName(application.name); }}>{t("admission.completeJoin")}</button>
+                  : <button type="button" className="ghost-button" disabled={applicationLoading} onClick={() => void refreshApplication()}>
+                    {t(applicationLoading ? "common.loading" : "management.refresh")}
+                  </button>}
+              </section>}
+
               <div>
                 <label className="field-label">{t("join.nickname")}</label>
                 <input
@@ -442,13 +560,34 @@ export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, o
       <ConfirmDialog
         busy={submitState === "submitting"}
         cancelLabel={t("join.editNickname")}
-        confirmLabel={t("join.confirmNewNicknameAction")}
-        description={t("join.confirmNewNicknameHint", { name: pendingNewUserName ?? "", space: space?.name || displaySlug(slug) })}
-        onClose={() => { if (submitState !== "submitting") setPendingNewUserName(null); }}
-        onConfirm={() => { if (pendingNewUserName) void attemptJoin(pendingNewUserName, "create"); }}
+        confirmLabel={t(requestingApproval ? "admission.apply" : joinMode === "open" ? "join.confirmNewNicknameAction" : "admission.completeJoin")}
+        confirmDisabled={waitingForApplication || (joinMode !== "open" && !requestingApproval && (newPassword.trim().length < 6 || (joinMode === "invite" && !joinCode.trim())))}
+        description={requestingApproval ? t("admission.applyAs", { name: pendingNewUserName || "" })
+          : t("join.confirmNewNicknameHint", { name: pendingNewUserName ?? "", space: space?.name || displaySlug(slug) })}
+        onClose={() => { if (submitState !== "submitting") { setPendingNewUserName(null); setAdmissionError(""); setNewPassword(""); setJoinCode(""); } }}
+        onConfirm={() => {
+          if (!pendingNewUserName) return;
+          if (requestingApproval) void requestApproval(pendingNewUserName);
+          else void attemptJoin(pendingNewUserName, "create");
+        }}
         open={Boolean(pendingNewUserName)}
-        title={t("join.confirmNewNickname")}
-      />
+        title={t(requestingApproval ? "admission.apply" : "join.confirmNewNickname")}
+      >
+        {joinMode !== "open" && <div className="join-admission-fields">
+          {waitingForApplication ? <p>{t("admission.existingApplication")}</p> : requestingApproval
+            ? <label>{t("admission.note")}<textarea className="input" maxLength={240} value={applicationNote}
+              onChange={event => setApplicationNote(event.target.value)} disabled={submitState === "submitting"} /></label>
+            : <>
+              {joinMode === "invite" && <label>{t("admission.code")}<input className="input mono" value={joinCode}
+                autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={32} disabled={submitState === "submitting"}
+                onChange={event => setJoinCode(event.target.value)} /></label>}
+              <label>{t("admission.newPassword")}<input className="input" type="password" autoComplete="new-password" value={newPassword}
+                onChange={event => setNewPassword(event.target.value)} disabled={submitState === "submitting"} /></label>
+              <small>{t("admission.passwordHint")}</small>
+            </>}
+          {admissionError && <p className="join-admission-error" role="alert">{admissionError}</p>}
+        </div>}
+      </ConfirmDialog>
       <BottomSheet open={recoveryOpen} onClose={closeRecovery} title={t("recovery.title")}>
         <div className="password-recovery">
           {recoveryBusy && recoveryStep === "channels" && !recoveryChannels.length ? (

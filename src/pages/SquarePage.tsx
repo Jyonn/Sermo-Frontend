@@ -35,6 +35,7 @@ import {SquareFeedHeader} from "../components/SquareFeedHeader";
 import {SquareActivityTile} from "../components/SquareActivityTile";
 import {SquareCreationSheet,type SquareCreationKind} from '../components/SquareCreationSheet';
 import {SquareComposerEditor} from '../components/SquareComposerEditor';
+import { SquareEditedLabel, SquareStatementEditor, SquareStatementHistory } from "../components/SquareStatementEdits";
 import {SquareVoiceRecorder} from '../components/SquareVoiceRecorder';
 import {ActionSheet} from '../components/ActionSheet';
 import { SquareHeaderTools } from "../components/SquareHeaderTools";
@@ -273,7 +274,7 @@ function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
   return chat.title || shareChatPeer(chat, currentUserId)?.name || "FRIENDEN";
 }
 
-function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, preserveFeedLayout = false, onDelete, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
+function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, preserveFeedLayout = false, onDelete, onEdit, onHistory, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   cardRef?: (node: HTMLElement | null) => void;
@@ -282,6 +283,8 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   chatBackgroundTheme?: ChatBackgroundTheme;
   chatBackgroundUri?: string;
   onDelete: () => void;
+  onEdit: () => void;
+  onHistory: () => void;
   onLike: () => void;
   onMute: () => void;
   onOpen: () => void;
@@ -341,7 +344,9 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
             {!statement.is_anonymous && statement.user.official ? <AccountRoleBadge kind="official" /> : null}
             {!statement.is_anonymous && statement.user.operator ? <AccountRoleBadge kind="operator" /> : null}
           </div>
-          <span>{formatSquareTime(statement.created_at,language,t('time.yesterday'))}</span>
+          <span className="square-post-time">{formatSquareTime(statement.created_at,language,t('time.yesterday'))}
+            {!!statement.edited_at && <SquareEditedLabel onHistory={onHistory} />}
+          </span>
         </div>
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
@@ -405,6 +410,9 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
       </footer>
       {menuPosition && typeof document !== "undefined" ? createPortal(
         <div className="square-statement-dropdown" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
+          {statement.can_edit && <button onClick={() => { setMenuPosition(null); onEdit(); }} type="button">
+            <span className="material-symbols-outlined">edit</span><span>{t("square.editStatement")}</span>
+          </button>}
           {statement.can_pin ? <button onClick={() => { setMenuPosition(null); onPin(); }} type="button"><span className="material-symbols-outlined">keep</span><span>{statement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</span></button> : null}
           {statement.can_mute ? <button onClick={() => { setMenuPosition(null); onMute(); }} type="button"><span className="material-symbols-outlined">voice_over_off</span><span>{t("square.muteAuthor")}</span></button> : null}
           {statement.can_delete ? <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
@@ -635,6 +643,8 @@ export default function SquarePage() {
   const commentComposerRef = useRef<HTMLFormElement | null>(null);
   const [pendingCommentSticker, setPendingCommentSticker] = useState<StickerAssetDTO | null>(null);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
+  const [editingStatement, setEditingStatement] = useState<SquareStatementDTO | null>(null);
+  const [statementHistoryId, setStatementHistoryId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
   const [muteStatement, setMuteStatement] = useState<SquareStatementDTO | null>(null);
   const [muteDuration, setMuteDuration] = useState<"1d" | "3d" | "7d" | "30d" | "permanent">("1d");
@@ -2011,7 +2021,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : panelActive ? (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); } : undefined} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(statement, "image", index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementMedia(statement, "video")} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : panelActive ? (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); } : undefined} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onEdit={() => setEditingStatement(statement)} onHistory={() => setStatementHistoryId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(statement, "image", index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementMedia(statement, "video")} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2023,6 +2033,7 @@ export default function SquarePage() {
     else navigate({ pathname: "/app/square", search: squareStatementSearch(location.search, "classic") }, { replace: true });
   };
   const noteDetailContent = activeCommentStatement ? <SquareNoteDetail key={activeCommentStatement.statement_id} panel={noteDesktopPanel} statement={activeCommentStatement}
+    onHistory={() => setStatementHistoryId(activeCommentStatement.statement_id)}
     text={<InlineRichText text={activeCommentStatement.text} emoticons={activeCommentStatement.inline_emoticons}/>} discussion={discussionContent} composer={commentComposer} canInteract={canPublish}
     onBack={closeStatementDrawer} onProfile={()=>openUserProfile(activeCommentStatement.user)} onShare={()=>openStatementShare(activeCommentStatement)}
     onMore={()=>setNoteMoreOpen(true)} onLike={()=>void toggleStatementLike(activeCommentStatement)}
@@ -2257,6 +2268,10 @@ export default function SquarePage() {
           {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
+      {editingStatement && <SquareStatementEditor key={editingStatement.statement_id} statement={editingStatement} limit={MAX_TEXT_LENGTH}
+        onClose={() => setEditingStatement(null)} />}
+      {statementHistoryId !== null && <SquareStatementHistory key={statementHistoryId} statementId={statementHistoryId}
+        onClose={() => setStatementHistoryId(null)} />}
       <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless floatingBack={false}>
         <SquareComposerEditor text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video} voice={voiceFile&&voicePreview?{uri:voicePreview,duration:voiceDuration}:null} external={externalMedia}
           onRemovePhoto={removePhoto} onRemoveVideo={()=>{if(video)URL.revokeObjectURL(video.preview);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
@@ -2335,6 +2350,8 @@ export default function SquarePage() {
         {noteDetailContent}
       </SideDrawer>
       <ActionSheet open={noteMoreOpen&&noteDetailActive&&Boolean(activeCommentStatement)} onClose={()=>setNoteMoreOpen(false)} title={t('common.more')} compactHeader actions={activeCommentStatement?[
+        ...(activeCommentStatement.can_edit ? [{ key: 'edit', label: t('square.editStatement'),
+          icon: <span className="material-symbols-outlined">edit</span>, onSelect: () => setEditingStatement(activeCommentStatement) }] : []),
         ...(activeCommentStatement.can_pin?[{key:'pin',label:t(activeCommentStatement.is_pinned?'square.unpinStatement':'square.pinStatement'),icon:<span className="material-symbols-outlined">keep</span>,onSelect:()=>{void toggleStatementPinned(activeCommentStatement)}}]:[]),
         ...(activeCommentStatement.can_mute?[{key:'mute',label:t('square.muteAuthor'),icon:<span className="material-symbols-outlined">voice_over_off</span>,onSelect:()=>setMuteStatement(activeCommentStatement)}]:[]),
         ...(activeCommentStatement.can_delete?[{key:'delete',label:t('common.delete'),danger:true,icon:<span className="material-symbols-outlined">delete</span>,onSelect:()=>setDeleteStatementId(activeCommentStatement.statement_id)}]:[])
@@ -2343,7 +2360,7 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(activeCommentStatement, "image", index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementMedia(activeCommentStatement, "video")} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onEdit={() => setEditingStatement(activeCommentStatement)} onHistory={() => setStatementHistoryId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(activeCommentStatement, "image", index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementMedia(activeCommentStatement, "video")} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             {discussionContent}
           </div>

@@ -52,3 +52,14 @@ test('older feed and detail requests cannot roll back a successful like',()=>{
   assert.equal(rememberSquareResponse(scope,'/square/statements','GET',[stale],revision)[0].like_count,5);
   assert.equal(rememberSquareResponse(scope,'/square/statements/3','GET',stale,revision).liked,true);
 });
+
+test('edits update cached copies without losing newer text or unrelated counts', () => {
+  const scope = 'edit:1';
+  const original = { statement_id: 3, text: 'First', edit_revision: 0, like_count: 1 };
+  writeTabCache(scope, 'square:friends', { version: 2, items: [original], hasMore: false });
+  rememberSquareResponse(scope, '/square/statements/3', 'PATCH',
+    { ...original, text: 'Second', edit_revision: 1, edited_at: 42, like_count: 0 }, squareSyncRevision(scope));
+  applySquareSync(scope, { items: [{ ...original, like_count: 2 }], removed_ids: [] });
+  const cached = readTabCache<{ items: typeof original[] }>(scope, 'square:friends')?.data.items[0];
+  assert.deepEqual(cached && [cached.text, cached.edit_revision, cached.like_count], ['Second', 1, 2]);
+});

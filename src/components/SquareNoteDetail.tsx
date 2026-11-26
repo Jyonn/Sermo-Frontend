@@ -13,6 +13,7 @@ import {MediaLightbox, type MediaLightboxItem} from './ImageLightbox';
 import {MediaMetadataPanel} from './MediaMetadataPanel';
 import {MediaWaitFeedback} from './MediaWaitFeedback';
 import {StatementVideoThumbnail} from './StatementVideoThumbnail';
+import { SquareEditedLabel } from './SquareStatementEdits';
 import {DrawerDismissButton, OverlayIconButton} from './OverlayIconButton';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareNoteDetail.css';
@@ -26,6 +27,7 @@ interface Props{
   panel?:boolean;
   statement:SquareStatementDTO;discussion:ReactNode;composer:ReactNode;text:ReactNode;canInteract:boolean;
   onBack:()=>void;onProfile:()=>void;onShare:()=>void;onMore:()=>void;onLike:()=>void;onLocation:()=>void;
+  onHistory: () => void;
 }
 
 export function SquareNoteDetailHeader({panel, onDismiss, children}: {
@@ -97,7 +99,10 @@ export function SquareNoteDetail(p:Props){
       {s.text?<div className="square-reader-text">{p.text}</div>:null}
       {collection?.title?<a className="square-reader-source" href={collection.canonical_url} target="_blank" rel="noreferrer">{collection.title}<span className="material-symbols-outlined">arrow_outward</span></a>:null}
       {s.location?<button className="square-reader-location" onClick={p.onLocation} type="button"><span className="material-symbols-outlined">location_on</span>{s.location.address||t('square.location')}<span className="material-symbols-outlined">chevron_right</span></button>:null}
-      <div className="square-reader-meta"><time dateTime={new Date(s.created_at*1000).toISOString()}>{formatSquareTime(s.created_at,language,t('time.yesterday'))}</time><span>{s.is_anonymous?t('square.publishAnonymously'):s.visibility==='friends'?t('square.friendsOnly'):t('square.audiencePublic')}</span></div>
+      <div className="square-reader-meta"><time dateTime={new Date(s.created_at*1000).toISOString()}>{formatSquareTime(s.created_at,language,t('time.yesterday'))}</time>
+        {!!s.edited_at && <SquareEditedLabel onHistory={p.onHistory} />}
+        <span>{s.is_anonymous?t('square.publishAnonymously'):s.visibility==='friends'?t('square.friendsOnly'):t('square.audiencePublic')}</span>
+      </div>
     </div><div ref={comments}>{p.discussion}</div></div></div>
     <footer className="square-reader-footer"><div className="square-reader-composer">{p.composer||<span>{t('square.readOnlyHint')}</span>}</div><button className={s.liked?'is-liked':''} disabled={!p.canInteract} aria-label={`${t('square.like')} ${s.like_count}`} aria-pressed={s.liked} onClick={p.onLike} type="button"><span className="material-symbols-outlined">favorite</span><small>{s.like_count||t('square.like')}</small></button><button aria-label={t('square.comments')} onClick={()=>comments.current?.scrollIntoView({behavior:reduce()?'auto':'smooth',block:'start'})} type="button"><span className="material-symbols-outlined">chat_bubble_outline</span><small>{s.comment_count}</small></button></footer>
     {lightbox !== null && assets.length > 0 ? <MediaLightbox initialInfo={info} index={lightbox} items={assets}

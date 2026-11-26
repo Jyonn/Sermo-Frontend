@@ -20,6 +20,7 @@ import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
 import { SpaceAvatar, UserAvatar } from "../components/UserAvatar";
+import { SpaceAdmissionPanel } from "../components/SpaceAdmissionPanel";
 import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -184,6 +185,7 @@ export default function SpaceAdminDashboardPage() {
   const access = group("access", "shield");
   const adminTabs = [
     { id: "members", icon: "group", label: t("management.memberDirectory"), group: people },
+    { id: "admission", icon: "how_to_reg", label: t("admission.title"), group: people },
     { id: "operators", icon: "shield_person", label: t("admin.operators"), group: people },
     ...(communityEnabled ? [
       { id: "square", icon: "explore", label: t("nav.square"), group: community },
@@ -898,6 +900,8 @@ export default function SpaceAdminDashboardPage() {
               {memberState === "error" && <FeedbackState tone="error" title={t("admin.membersLoadFailed")} action={retryManagement} />}
             </div>
           </section> : null}
+
+          {activeTab === "admission" && <SpaceAdmissionPanel key={currentSpace?.space_id} />}
 
           {activeTab === "square" ? <section className="admin-tab-page admin-square-tab">
             <ManagementToolbar description={t("admin.squareManagementHint")}>

@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.26.5",
+  "id": "2026.11.26.6",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "科研课题工作台",
+      "title": "发言可编辑，空间可设置加入方式",
       "items": [
-        "导师可以布置任务、查看本期汇报提交情况，并从待办直接处理反馈和报销。",
-        "学生可以查看自己的任务期限，从待办提交汇报，或者回到上次未写完的草稿。",
-        "课题可直接创建。任务详情集中展示要求、资料和进展讨论。"
+        "可以编辑自己发言的正文。点击「已编辑」可查看历史版本。",
+        "空间管理员可以选择自由加入、邀请码加入或申请审批。已有成员照常登录。"
       ]
     },
     "en": {
-      "title": "Research workspaces",
+      "title": "Post editing and space admission",
       "items": [
-        "Mentors can assign work, see who has submitted the current report, and open feedback and reimbursement requests from their to-do list.",
-        "Students can see their deadlines, submit reports from their to-do list, and resume unfinished drafts.",
-        "Create a project in one step and find instructions, files, and discussions on each task."
+        "Edit the text of your own posts. Select Edited to see previous versions.",
+        "Space administrators can allow open signups, require an invitation code, or review applications. Existing members can sign in as usual."
       ]
     }
   }

@@ -49,6 +49,11 @@ import type {
   SpaceAdminBroadcastResultDTO,
   SpaceAdminSession,
   SpaceDTO,
+  SpaceAdmissionSettings,
+  SpaceJoinApplication,
+  SpaceJoinMode,
+  SpaceJoinReceipt,
+  SquareStatementRevision,
   SwitchAccountDTO,
   SpaceEmailCodeDTO,
   SpaceAuthDTO,
@@ -111,7 +116,7 @@ type PlatformAdminAuthConfig = {
 };
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "DELETE";
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   query?: Record<string, string | number | boolean | null | undefined>;
   auth?: boolean;
@@ -624,11 +629,35 @@ export const api = {
     });
   },
 
-  joinSpace(payload: { slug: string; name: string; password?: string; language: SupportedLanguage; new_user_intent?: "check" | "create" }) {
+  joinSpace(payload: { slug: string; name: string; password?: string; language: SupportedLanguage; new_user_intent?: "check" | "create"; invite_code?: string; join_receipt?: string }) {
     return request<JoinResponseDTO>("/spaces/join", {
       method: "POST",
       body: payload,
     });
+  },
+
+  applyToSpace(payload: { slug: string; name: string; note: string; receipt: string }) {
+    return request<SpaceJoinReceipt>("/spaces/join/applications", { method: "POST", body: payload });
+  },
+
+  getSpaceJoinApplication(slug: string, receipt: string, signal?: AbortSignal) {
+    return request<SpaceJoinReceipt>("/spaces/join/applications/status", { method: "POST", body: { slug, receipt }, signal });
+  },
+
+  getAdminAdmission(signal?: AbortSignal) {
+    return request<SpaceAdmissionSettings>("/spaces/admin/admission", { adminAuth: true, signal });
+  },
+
+  updateAdminAdmission(mode: SpaceJoinMode, rotate = false) {
+    return request<SpaceAdmissionSettings>("/spaces/admin/admission", { adminAuth: true, method: "POST", body: { mode, rotate: rotate ? 1 : 0 } });
+  },
+
+  getAdminJoinApplications(status: "pending" | "reviewed", before?: number, signal?: AbortSignal) {
+    return request<{ items: SpaceJoinApplication[]; next_before: number | null }>("/spaces/admin/admission/applications", { adminAuth: true, query: { status, before }, signal });
+  },
+
+  reviewAdminJoinApplication(id: number, decision: "approve" | "reject") {
+    return request<SpaceJoinApplication>(`/spaces/admin/admission/applications/${id}`, { adminAuth: true, method: "POST", body: { decision } });
   },
 
   lookupPasswordRecovery(payload: { slug: string; name: string }) {
@@ -1171,6 +1200,14 @@ export const api = {
 
   syncSquareStatements(statement_ids:number[],signal?:AbortSignal){
     return request<SquareSyncResult>('/square/statements/sync',{auth:true,method:'POST',body:{statement_ids},signal});
+  },
+
+  editSquareStatement(id: number, text: string, revision: number) {
+    return request<SquareStatementDTO>(`/square/statements/${id}`, { method: "PATCH", auth: true, body: { text, revision } });
+  },
+
+  getSquareStatementHistory(id: number, before?: number, signal?: AbortSignal) {
+    return request<{ items: SquareStatementRevision[]; next_before: number | null }>(`/square/statements/${id}/history`, { auth: true, query: { before }, signal });
   },
 
   getSquareCalendar(params: { month: number; scope?: "all" | "friends" | "mine"; user_id?: number; year: number }, signal?: AbortSignal) {

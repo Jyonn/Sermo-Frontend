@@ -1,4 +1,4 @@
-export const spaceManagementSections = ["members", "operators", "square", "mutes", "activities", "official", "basics", "levels", "verification", "permissions"] as const;
+export const spaceManagementSections = ["members", "admission", "operators", "square", "mutes", "activities", "official", "basics", "levels", "verification", "permissions"] as const;
 export const platformManagementSections = ["overview", "spaces", "reviews", "resources", "oauth", "emails", "emailReview", "audit", "debug", "permissions", "security"] as const;
 export type SpaceManagementSection = typeof spaceManagementSections[number];
 export type PlatformManagementSection = typeof platformManagementSections[number];

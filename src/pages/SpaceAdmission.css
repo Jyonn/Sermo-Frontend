@@ -1,0 +1,25 @@
+.join-admission-hint,
+.space-admission-caption,
+.join-admission-fields small { margin: 0; color: var(--text-muted); font-size: .86rem; line-height: 1.6; }
+
+.join-admission-fields { display: grid; gap: 12px; margin-block: 14px 0; text-align: start; }
+.join-admission-fields label { display: grid; gap: 7px; font-size: .9rem; font-weight: 650; }
+.join-admission-fields .input { width: 100%; }
+.join-admission-fields textarea { min-height: 86px; padding: 10px 12px; resize: vertical; }
+.join-admission-error { margin: 0; color: var(--danger); font-size: .86rem; overflow-wrap: anywhere; }
+
+.join-application-status,
+.space-admission-code { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px; border: 1px solid var(--line-soft); border-radius: 14px; }
+.join-application-status > div,
+.space-admission-code > code { flex: 1 1 160px; min-width: 0; }
+.join-application-status small { display: block; margin-top: 4px; color: var(--text-muted); font-size: .8rem; line-height: 1.5; }
+.space-admission-code > code { font-size: 1.08rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.space-admission-panel .management-settings-group { display: grid; gap: 12px; }
+.space-admission-panel .management-settings-group > .button { justify-self: start; }
+.admission-review-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.admission-review-list { display: grid; list-style: none; padding: 0; margin: 0; }
+.admission-review-list > li { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line-soft); }
+.admission-review-copy { flex: 1 1 240px; min-width: 0; }
+.admission-review-copy > small { display: block; margin-top: 4px; color: var(--text-muted); }
+.admission-review-copy > p { margin: 7px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.admission-review-actions { display: inline-flex; gap: 8px; align-items: center; }
