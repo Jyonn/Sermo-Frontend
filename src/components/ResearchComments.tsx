@@ -6,6 +6,7 @@ import { useI18n, type TranslationKey } from "../lib/language";
 import type { ResearchMember, ResearchProgress, ResearchProject, ResearchTask } from "../lib/research";
 import type { SquareStatementCommentDTO, TinyUserDTO } from "../types";
 import { CommentThread } from "./CommentThread";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { Markdown } from "./ResearchMarkdown";
 import { MarkdownInput } from "./ResearchMarkdownInput";
 import { QuietState } from "./BoundaryState";
@@ -26,7 +27,9 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
 }) {
   const { t, language } = useI18n();
   const [day, setDay] = useState("all");
-  const [editor, setEditor] = useState<{ replyTo?: string } | null>(null);
+  const [editor, setEditor] = useState<{ replyTo?: string; editId?: string } | null>(null);
+  const [deleting, setDeleting] = useState<ResearchProgress | null>(null);
+  const [deleteFailed, setDeleteFailed] = useState(false);
   const [profile, setProfile] = useState<TinyUserDTO | null>(null);
   const [award, setAward] = useState<{ userId: number; sourceId: string; awardId?: string } | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -76,7 +79,8 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
     const root = roots.get(entry.id) ?? entry.id;
     const parent = entry.reply_to ? byId.get(entry.reply_to) : undefined;
     return { comment_id: commentIds.current.get(entry.id)!, statement_id: 0, user: person(entry.user_id), text: entry.body,
-      created_at: Date.parse(entry.created_at) / 1000, like_count: 0, reply_count: 0, liked: false, can_delete: false,
+      created_at: Date.parse(entry.created_at) / 1000, edited_at: entry.edited_at ? Date.parse(entry.edited_at) / 1000 : null,
+      like_count: 0, reply_count: 0, liked: false, can_edit: writable && entry.can_edit, can_delete: writable && Boolean(entry.can_delete),
       parent_id: root !== entry.id ? commentIds.current.get(root) : null, reply_to_user: parent ? person(parent.user_id) : null };
   };
 
@@ -95,6 +99,7 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
   }, [focusProgressId, focusedRoot]);
 
   const target = editor?.replyTo ? byId.get(editor.replyTo) : undefined;
+  const edited = editor?.editId ? byId.get(editor.editId) : undefined;
   const targets = project.members.filter(member => member.id !== userId && (owner ? !member.owner : member.owner));
   const bonuses = project.workflow?.comment_awards ?? [];
   const commentShare = (entry: SquareStatementCommentDTO) => {
@@ -126,7 +131,18 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
           const thread = [...(replies.get(entry.id) ?? [])].reverse().map(dto);
           return <CommentThread key={entry.id} comment={{ ...root, replies: thread, reply_count: thread.length }}
             canInteract={writable} authorAccessory={commentShare} expanded={expanded === root.comment_id}
-            onToggleReplies={id => setExpanded(previous => previous === id ? null : id)} onDelete={() => {}}
+            onToggleReplies={id => setExpanded(previous => previous === id ? null : id)}
+            onEdit={comment => {
+              const item = byCommentId.get(comment.comment_id);
+              if (!busy && item?.can_edit) setEditor({ editId: item.id });
+            }}
+            onDelete={comment => {
+              const item = byCommentId.get(comment.comment_id);
+              if (!busy && item?.can_delete) {
+                setDeleteFailed(false);
+                setDeleting(item);
+              }
+            }}
             onOpenProfile={setProfile} onReply={comment => {
               const source = byCommentId.get(comment.comment_id);
               if (!source) return;
@@ -174,19 +190,34 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
         <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>{t("researchWorkbench.writeUpdate")}
       </button>
     </div>}
-    <SideDrawer className="research-workflow-drawer research-writing-drawer" showTitle historyKey="research-write-update" open={Boolean(editor) && writable}
-      title={t(target ? "researchWorkbench.publishReply" : "researchWorkbench.writeUpdate")} onClose={() => { if (!busy) setEditor(null); }}>
-      {editor && <ResearchNoteEditor key={editor.replyTo || "update"} draftKey={`note:${userId}:${project.id}:${task.id}:${editor.replyTo || ""}`}
-        task={task} target={target} targetName={target ? person(target.user_id).name : undefined} targets={targets}
+    <SideDrawer className="research-workflow-drawer research-writing-drawer" showTitle historyKey="research-write-update" open={Boolean(editor) && writable && (!editor?.editId || Boolean(edited))}
+      title={t(edited ? "research.editProgress" : target ? "researchWorkbench.publishReply" : "researchWorkbench.writeUpdate")} onClose={() => { if (!busy) setEditor(null); }}>
+      {editor && <ResearchNoteEditor key={editor.editId || editor.replyTo || "update"}
+        draftKey={`note:${userId}:${project.id}:${task.id}:${editor.editId ? `edit:${editor.editId}` : editor.replyTo || ""}`}
+        task={task} target={target} targetName={target ? person(target.user_id).name : undefined} targets={edited ? [] : targets} edited={edited}
         owner={owner} busy={busy} error={error} onSend={async (body, recipient) => {
-          const ok = await send(body, editor.replyTo, recipient);
+          const ok = edited
+            ? await mutate({ action: "progress_edit", task_id: task.id, progress_id: edited.id, body })
+            : await send(body, editor.replyTo, recipient);
           if (ok) {
             if (target) setExpanded(commentIds.current.get(roots.get(target.id) ?? target.id) ?? null);
             setEditor(null);
           }
-          return ok;
+          return Boolean(ok);
         }} />}
     </SideDrawer>
+    <ConfirmDialog open={Boolean(deleting)} busy={busy} danger title={t("research.deleteProgress")}
+      description={t(deleting?.report_kind ? "research.deleteReportHint" : "research.deleteProgressHint")}
+      confirmLabel={t("common.delete")} onClose={() => { if (!busy) setDeleting(null); }}
+      onConfirm={async () => {
+        if (!deleting || busy) return;
+        setDeleteFailed(false);
+        const ok = await mutate({ action: "progress_delete", task_id: task.id, progress_id: deleting.id });
+        if (ok) setDeleting(null);
+        else setDeleteFailed(true);
+      }}>
+      {deleteFailed && <p role="alert" className="research-form-error">{error || t("research.failed")}</p>}
+    </ConfirmDialog>
     <SideDrawer className="research-workflow-drawer" open={Boolean(award)} historyKey="research-comment-award"
       title={t("researchFlow.award")} onClose={() => { if (!busy) setAward(null); }}>
       {award && <ResearchAwardForm key={award.awardId || award.sourceId} award={bonuses.find(item => item.id === award.awardId)}
@@ -198,12 +229,12 @@ export function ResearchComments({ project, task, userId, scope, onScope, writab
   </section>;
 }
 
-function ResearchNoteEditor({ draftKey, task, target, targetName, targets, owner, busy, error, onSend }: {
+function ResearchNoteEditor({ draftKey, task, target, targetName, targets, edited, owner, busy, error, onSend }: {
   draftKey: string; task: ResearchTask; target?: ResearchProgress; targetName?: string; targets: ResearchMember[];
-  owner: boolean; busy: boolean; error?: string; onSend: (body: string, recipient?: number) => Promise<boolean>;
+  edited?: ResearchProgress; owner: boolean; busy: boolean; error?: string; onSend: (body: string, recipient?: number) => Promise<boolean>;
 }) {
   const { t } = useI18n();
-  const [body, setBody] = useResearchDraft(draftKey);
+  const [body, setBody] = useResearchDraft(draftKey, edited?.body);
   const [request, setRequest] = useState(false);
   const [failed, setFailed] = useState(false);
   const [recipient, setRecipient] = useState(() => String(targets.find(member => member.id === target?.user_id)?.id || targets[0]?.id || ""));
@@ -226,7 +257,7 @@ function ResearchNoteEditor({ draftKey, task, target, targetName, targets, owner
       onChange={setRecipient} options={targets.map(member => ({ value: String(member.id), label: member.name }))} disabled={busy} />}
     {failed && <p role="alert" className="research-form-error">{error || t("research.failed")}</p>}
     <footer className="research-task-editor-footer">
-      <button className="button" disabled={busy || !body.trim()} type="submit">{t(busy ? "common.processing" : target ? "researchWorkbench.publishReply" : "researchWorkbench.publishUpdate")}</button>
+      <button className="button" disabled={busy || !body.trim()} type="submit">{t(busy ? "common.processing" : edited ? "common.save" : target ? "researchWorkbench.publishReply" : "researchWorkbench.publishUpdate")}</button>
     </footer>
   </form>;
 }

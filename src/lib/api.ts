@@ -1416,8 +1416,16 @@ export const api = {
     });
   },
 
+  editSquareComment(commentId: number, revision: number, content: { text: string; sticker_asset_id?: number; mention_user_ids?: number[] }) {
+    return request<SquareStatementCommentDTO>(`/square/comments/${commentId}`, {
+      method: "PATCH",
+      auth: true,
+      body: { revision, ...content },
+    });
+  },
+
   deleteSquareComment(commentId: number) {
-    return request<{ comment_id: number; statement_id: number; deleted_count: number; root_deleted: boolean }>(`/square/comments/${commentId}`, {
+    return request<{ comment_id: number; statement_id: number; deleted_count: number; deleted_ids?: number[]; root_deleted: boolean }>(`/square/comments/${commentId}`, {
       method: "DELETE",
       auth: true,
     });

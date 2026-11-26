@@ -1,4 +1,10 @@
 {
+  "common.edit": "Edit",
+  "square.editComment": "Edit comment",
+  "research.editProgress": "Edit progress",
+  "research.deleteProgress": "Delete progress",
+  "research.deleteProgressHint": "Replies from other members will remain visible.",
+  "research.deleteReportHint": "Replies, the submission period, and reward records will be kept.",
   "researchWorkbench.browseResources": "Browse materials",
   "researchWorkbench.allClaims": "All claims",
   "researchWorkbench.claimsPending": "Needs action ({{count}})",

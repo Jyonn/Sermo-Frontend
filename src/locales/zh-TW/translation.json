@@ -1,4 +1,10 @@
 {
+  "common.edit": "編輯",
+  "square.editComment": "編輯留言",
+  "research.editProgress": "編輯進度",
+  "research.deleteProgress": "刪除進度",
+  "research.deleteProgressHint": "刪除後，其他成員的回覆仍會保留。",
+  "research.deleteReportHint": "刪除後，回覆、已提交的週期和獎勵記錄仍會保留。",
   "researchWorkbench.browseResources": "瀏覽資料",
   "researchWorkbench.allClaims": "全部報銷",
   "researchWorkbench.claimsPending": "待處理 {{count}}",

@@ -7,7 +7,7 @@ import { FeedbackState } from "./FeedbackState";
 
 type CommentSort = "hot" | "latest";
 type SquareDiscussionProps = Pick<ComponentProps<typeof CommentThread>,
-  "canInteract" | "onDelete" | "onLike" | "onOpenProfile" | "onReply" | "onToggleReplies" | "renderContent"
+  "canInteract" | "onDelete" | "onEdit" | "onLike" | "onOpenProfile" | "onReply" | "onToggleReplies" | "renderContent"
 > & {
   comments: SquareStatementCommentDTO[];
   count: number;

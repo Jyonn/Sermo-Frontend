@@ -1,6 +1,6 @@
 export type ReportKind='daily'|'weekly'|'monthly';
 export type ReportRule={reward_type?:string;amount:number};
-export type ResearchProgress={id:string;user_id:number;body:string;created_at:string;reply_to?:string;report_kind?:ReportKind;period_start?:string;ai_slots?:number;thinking_slots?:number;waive_reward?:boolean;response_to?:number;resolved_at?:string};
+export type ResearchProgress={id:string;user_id:number;body:string;created_at:string;edited_at?:string;can_edit?:boolean;can_delete?:boolean;reply_to?:string|null;report_kind?:ReportKind;period_start?:string;ai_slots?:number;thinking_slots?:number;waive_reward?:boolean;response_to?:number;resolved_at?:string};
 export type ResearchTask = {id:string;title:string;body:string;start:string;end:string|null;assignees:number[];status:'active'|'archived';reporting?:Partial<Record<ReportKind,ReportRule>>;progress:ResearchProgress[]};
 export type ResearchMilestone={id:string;date:string;title:string;body:string};
 export type ResearchReward={id:string;name:string;description:string};

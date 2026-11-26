@@ -143,12 +143,15 @@
 .square-comment-more{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;margin:0 0 0 auto;padding:0;border:0;border-radius:8px;color:var(--text-muted);background:transparent;transition:color 140ms ease,background 140ms ease}
 .square-comment-more:hover,.square-comment-more[aria-expanded="true"]{color:var(--text-strong);background:color-mix(in srgb,var(--line-soft) 58%,transparent)}
 .square-comment-more .material-symbols-outlined{font-size:17px}
-.square-comment-menu{position:fixed;z-index:80;width:104px;padding:5px;border:1px solid color-mix(in srgb,var(--line-soft) 88%,transparent);border-radius:12px;background:color-mix(in srgb,var(--bg-elevated) 96%,transparent);box-shadow:0 12px 30px rgba(20,36,30,.16);backdrop-filter:blur(18px)}
-.square-comment-menu button{display:flex;align-items:center;justify-content:flex-start;gap:7px;width:100%;min-height:36px;padding:0 9px;border:0;border-radius:8px;color:var(--danger,#bc4051);font:inherit;font-size:12px;font-weight:700;background:transparent;white-space:nowrap}
-.square-comment-menu button:hover{background:color-mix(in srgb,var(--danger,#bc4051) 9%,transparent)}
+.square-comment-menu{position:fixed;z-index:120;width:104px;padding:5px;border:1px solid color-mix(in srgb,var(--line-soft) 88%,transparent);border-radius:12px;background:color-mix(in srgb,var(--bg-elevated) 96%,transparent);box-shadow:0 12px 30px rgba(20,36,30,.16);backdrop-filter:blur(18px)}
+.square-comment-menu button{display:flex;align-items:center;justify-content:flex-start;gap:7px;width:100%;min-height:36px;padding:0 9px;border:0;border-radius:8px;color:var(--text-primary);font:inherit;font-size:12px;font-weight:700;background:transparent;white-space:nowrap}
+.square-comment-menu button.is-danger{color:var(--danger,#bc4051)}
+.square-comment-menu button:hover{background:color-mix(in srgb,currentColor 9%,transparent)}
 .square-comment-menu .material-symbols-outlined{font-size:17px}
 .square-comment-footer{display:flex;align-items:center;min-height:28px;margin-top:5px}
 .square-comment-footer>time{flex:0 0 auto;color:var(--text-muted);font:500 10px/1.2 var(--font-mono,monospace);font-variant-numeric:tabular-nums;white-space:nowrap}
+.square-comment-edited{margin-inline-start:6px;color:var(--text-muted);font-size:10px;white-space:nowrap}
+.square-comment-edit-sticker{display:block;width:36px;height:36px;margin:4px 0 6px;object-fit:contain}
 .square-comment-actions{margin-top:4px;display:flex;align-items:center;gap:5px;margin:0 0 0 auto}
 .square-comment-actions button{font:inherit;display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 9px;border:0;border-radius:999px;color:var(--text-muted);font-size:11px;font-weight:700;background:transparent;transition:color 140ms ease,background 140ms ease,transform 140ms ease}
 .square-comment-actions button .material-symbols-outlined{font-size:15px}

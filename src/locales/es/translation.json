@@ -1,4 +1,10 @@
 {
+  "common.edit": "Editar",
+  "square.editComment": "Editar comentario",
+  "research.editProgress": "Editar avance",
+  "research.deleteProgress": "Eliminar avance",
+  "research.deleteProgressHint": "Las respuestas de otros miembros seguirán visibles.",
+  "research.deleteReportHint": "Se conservarán las respuestas, el período de entrega y los registros de recompensas.",
   "square.medalsTab": "Medallas",
   "square.medalsRecordShop": "Echo Record Shop · ¿Quién los encontró primero?",
   "square.medalsEmpty": "Aquí todavía nadie ha encontrado un disco Diamante u Obsidiana",

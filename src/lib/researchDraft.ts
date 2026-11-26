@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-export function useResearchDraft(key: string) {
+export function useResearchDraft(key: string, initial = "") {
   const storageKey = `research:draft:${key}`;
   const [text, setText] = useState(() => {
-    try { return sessionStorage.getItem(storageKey) ?? ""; }
-    catch { return ""; }
+    try { return sessionStorage.getItem(storageKey) ?? initial; }
+    catch { return initial; }
   });
   function save(next: string) {
     setText(next);

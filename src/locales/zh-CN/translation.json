@@ -1,4 +1,10 @@
 {
+  "common.edit": "编辑",
+  "square.editComment": "编辑评论",
+  "research.editProgress": "编辑进展",
+  "research.deleteProgress": "删除进展",
+  "research.deleteProgressHint": "删除后，其他人发布的回复仍会保留。",
+  "research.deleteReportHint": "删除后，回复、已提交的周期和奖励记录仍会保留。",
   "researchWorkbench.browseResources": "浏览资料",
   "researchWorkbench.allClaims": "全部报销",
   "researchWorkbench.claimsPending": "待处理 {{count}}",

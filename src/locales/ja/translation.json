@@ -1,4 +1,10 @@
 {
+  "common.edit": "編集",
+  "square.editComment": "コメントを編集",
+  "research.editProgress": "進捗を編集",
+  "research.deleteProgress": "進捗を削除",
+  "research.deleteProgressHint": "他のメンバーの返信は引き続き表示されます。",
+  "research.deleteReportHint": "返信、提出期間、報酬の記録は保持されます。",
   "square.medalsTab": "メダル",
   "square.medalsRecordShop": "エコーレコード店・最初に見つけた人",
   "square.medalsEmpty": "ダイヤモンドやオブシディアンのレコードを見つけた人はまだいません",

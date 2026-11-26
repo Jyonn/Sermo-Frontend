@@ -1,4 +1,10 @@
 {
+  "common.edit": "수정",
+  "square.editComment": "댓글 수정",
+  "research.editProgress": "진행 상황 수정",
+  "research.deleteProgress": "진행 상황 삭제",
+  "research.deleteProgressHint": "다른 구성원이 작성한 답글은 계속 표시됩니다.",
+  "research.deleteReportHint": "답글, 제출 기간 및 보상 기록은 유지됩니다.",
   "square.medalsTab": "메달",
   "square.medalsRecordShop": "에코 레코드숍 · 누가 먼저 찾았을까요?",
   "square.medalsEmpty": "아직 다이아몬드나 옵시디언 음반을 찾은 사람이 없어요",

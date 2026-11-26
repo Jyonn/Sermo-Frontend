@@ -16,11 +16,12 @@ function QqSourceTag({ compact = false }: { compact?: boolean }) {
   return <span className={`square-qq-source-tag${compact ? " is-compact" : ""}`}><span className="square-qq-source-tag-mark">QQ</span>{compact ? null : <span className="square-qq-source-tag-label">{t("square.qqSource")}</span>}</span>;
 }
 
-export function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies, renderContent, authorAccessory }: {
+export function CommentThread({ comment, canInteract, expanded = false, onDelete, onEdit, onLike, onOpenProfile, onReply, onToggleReplies, renderContent, authorAccessory }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
   expanded?: boolean;
   onDelete: (comment: SquareStatementCommentDTO) => void;
+  onEdit?: (comment: SquareStatementCommentDTO) => void;
   onLike?: (comment: SquareStatementCommentDTO) => void;
   renderContent: (comment: SquareStatementCommentDTO, onReply: (event: ReactMouseEvent) => void) => ReactNode;
   authorAccessory?: (comment: SquareStatementCommentDTO) => ReactNode;
@@ -31,13 +32,26 @@ export function CommentThread({ comment, canInteract, expanded = false, onDelete
   const { t } = useI18n();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const canEdit = Boolean(comment.can_edit && canInteract && onEdit);
   useEffect(() => {
     if (!menuPosition) return;
     const close = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuPosition(null);
+      if (!menuRef.current?.contains(event.target as Node) && !triggerRef.current?.contains(event.target as Node)) setMenuPosition(null);
     };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setMenuPosition(null);
+      triggerRef.current?.focus();
+    };
+    menuRef.current?.querySelector("button")?.focus();
     window.addEventListener("pointerdown", close);
-    return () => window.removeEventListener("pointerdown", close);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", close);
+      window.removeEventListener("keydown", onKey);
+    };
   }, [menuPosition]);
   const beginReply = (event: ReactMouseEvent) => {
     event.stopPropagation();
@@ -55,18 +69,32 @@ export function CommentThread({ comment, canInteract, expanded = false, onDelete
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}${hasExpandableReplies ? " has-replies" : ""}`} onClick={comment.parent_id ? beginReply : toggleReplies}>
     {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
     <div>
-      <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}>{qqUser ? <button className="square-comment-author-profile" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><strong>{displayName}</strong><QqSourceTag /></button> : <><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} name={comment.user.growth_level_name} /> : null}</>}{authorAccessory?.(comment)}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
+      <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}>{qqUser ? <button className="square-comment-author-profile" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><strong>{displayName}</strong><QqSourceTag /></button> : <><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} name={comment.user.growth_level_name} /> : null}</>}{authorAccessory?.(comment)}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>
+        {(canEdit || comment.can_delete) && <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" ref={triggerRef}
+          onClick={(event) => {
+            event.stopPropagation();
+            const rect = event.currentTarget.getBoundingClientRect();
+            const height = canEdit && comment.can_delete ? 84 : 48;
+            const top = rect.bottom + height + 5 <= window.innerHeight ? rect.bottom + 5 : rect.top - height - 5;
+            setMenuPosition((current) => current ? null : { top: Math.max(8, top), left: Math.max(8, Math.min(window.innerWidth - 112, rect.right - 104)) });
+          }} type="button"><span className="material-symbols-outlined">more_horiz</span></button>}
+      </header>
       {renderContent(comment, beginReply)}
       <div className="square-comment-footer">
         <time>{formatRelativeTime(comment.created_at)}</time>
+        {comment.edited_at ? <span className="square-comment-edited">{t("square.edited")}</span> : null}
         <div className="square-comment-actions">
           {canInteract ? <button onClick={beginReply} type="button"><span>{t("square.reply")}</span></button> : null}
           {onLike ? <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button> : null}
         </div>
       </div>
       {hasExpandableReplies ? <button aria-expanded={expanded} className="square-comment-replies-toggle" onClick={toggleReplies} type="button"><span>{expanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
-      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} renderContent={renderContent} authorAccessory={authorAccessory} />)}</div></div> : null}
+      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onEdit={onEdit} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} renderContent={renderContent} authorAccessory={authorAccessory} />)}</div></div> : null}
     </div>
-    {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
+    {menuPosition && typeof document !== "undefined" ? createPortal(
+      <div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
+        {canEdit && <button onClick={() => { setMenuPosition(null); onEdit?.(comment); }} type="button"><span className="material-symbols-outlined">edit</span><span>{t("common.edit")}</span></button>}
+        {comment.can_delete && <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>}
+      </div>, document.body) : null}
   </article>;
 }

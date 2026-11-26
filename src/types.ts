@@ -1004,6 +1004,9 @@ export interface SquareStatementCommentDTO {
   is_author?: boolean;
   replies?: SquareStatementCommentDTO[];
   created_at: number;
+  can_edit?: boolean;
+  edit_revision?: number;
+  edited_at?: number | null;
 }
 
 export interface SquareStatementDraftMedia {
