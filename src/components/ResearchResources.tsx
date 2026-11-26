@@ -15,12 +15,12 @@ import { FileDropGuide } from './FileDropGuide';
 import './ResearchResources.css';
 
 const symbol=(kind:string)=>kind==='folder'?'folder':kind==='link'?'link':'description';
-export function ResearchResources({projectId,taskId='',title,members=[],onClose}:{projectId:number;taskId?:string;title:string;members?:ResearchMember[];onClose:()=>void}) {
+export function ResearchResources({projectId,taskId='',title,members=[],initialAdd=false,onClose}:{projectId:number;taskId?:string;title:string;members?:ResearchMember[];initialAdd?:boolean;onClose:()=>void}) {
   const {t}=useI18n();
   const [space,setSpace]=useState<ResearchResourceSpace|null>(null),[parent,setParent]=useState<number|null>(null);
   const [query,setQuery]=useState(''),[kind,setKind]=useState('all'),[sort,setSort]=useState('recent');
   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[uploadName,setUploadName]=useState('');
-  const [addMenu,setAddMenu]=useState(false),[selected,setSelected]=useState<ResearchResource|null>(null);
+  const [addMenu,setAddMenu]=useState(initialAdd),[selected,setSelected]=useState<ResearchResource|null>(null);
   const [adding,setAdding]=useState<'folder'|'link'|null>(null),[name,setName]=useState(''),[url,setUrl]=useState('');
   const [deleting,setDeleting]=useState<ResearchResource|null>(null);
   const fileInput=useRef<HTMLInputElement>(null);
@@ -64,7 +64,7 @@ export function ResearchResources({projectId,taskId='',title,members=[],onClose}
       </>}
       <input ref={fileInput} type="file" multiple hidden onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';void uploadFiles(files);}}/>
     </div>
-    <ActionSheet compactHeader open={addMenu} title={t('resources.add')} onClose={()=>setAddMenu(false)} actions={[
+    <ActionSheet compactHeader open={addMenu&&!!space?.writable} title={t('resources.add')} onClose={()=>setAddMenu(false)} actions={[
       {key:'file',label:t('resources.upload'),description:t('resources.uploadHint'),icon:<span className="material-symbols-outlined">upload_file</span>,onSelect:()=>fileInput.current?.click()},
       {key:'link',label:t('resources.addLink'),description:t('resources.linkHint'),icon:<span className="material-symbols-outlined">add_link</span>,onSelect:()=>add('link')},
       ...(!taskId?[{key:'folder',label:t('resources.addFolder'),description:t('resources.projectHint'),disabled:path.length>=2,icon:<span className="material-symbols-outlined">create_new_folder</span>,onSelect:()=>add('folder')}]:[]),

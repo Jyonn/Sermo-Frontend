@@ -4,12 +4,15 @@ import { useI18n, type TranslationKey } from '../lib/language';
 import { chronelleOrigin } from '../lib/chronelleOrigin';
 import type { ResearchProject } from '../lib/research';
 import type { CalendarDisplays, CalendarSetup, ResearchMeeting } from '../lib/researchCalendar';
-import { localInput, type CalendarRange } from '../lib/chronelleBridge';
+import type { CalendarRange } from '../lib/chronelleBridge';
+import { meetingRangeFromFields, meetingTimeFields, newMeetingRange } from '../lib/researchMeetingTime';
+import { showToast } from '../lib/toast';
 import { CalendarFrame } from './ChronelleFrame';
 import { ResearchFilteredAgenda } from './ResearchFilteredAgenda';
 import { ChronellePluginDialog } from './ChronellePluginDialog';
 import { SideDrawer } from './SideDrawer';
-import { SettingSelect } from './SettingRow';
+import { SettingRow, SettingSelect, SettingSwitch } from './SettingRow';
+import { DatePickerField } from './DatePickerField';
 import { ChronellePermissionsDrawer } from './ChronellePermissionsDrawer';
 import { QuietState } from './BoundaryState';
 import { MarkdownInput } from './ResearchMarkdownInput';
@@ -30,6 +33,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [consent, setConsent] = useState(false);
   const [range, setRange] = useState<CalendarRange | null>(null);
+  const [prefilledInvitees, setPrefilledInvitees] = useState<number[]>([]);
   const [meetings,setMeetings]=useState<ResearchMeeting[]>([]);
   const [loadingMeetings, setLoadingMeetings] = useState(true);
   const [meetingError, setMeetingError] = useState('');
@@ -71,7 +75,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     return()=>controller.abort();
   },[project.id,tick]);
   useEffect(() => {
-    setRange(null); setDisplays(null);
+    setDisplays(null);
     if (setup?.status !== 'active') return;
     if (!selected.length) { setLoading(false); setError(''); return; }
     const controller = new AbortController();
@@ -92,18 +96,27 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
 
   const active = setup?.status === 'active';
   const writable = project.status === 'active';
-  const resetRange = (value: CalendarRange) => {
-    if (writable) { setResume(null); setRange(value); }
+  const openMeeting = (value: CalendarRange, peers: number[]) => {
+    if (!writable) return;
+    setResume(null);
+    setPrefilledInvitees(peers.filter(id => id !== userId));
+    setRange(value);
   };
-  const dateTime = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' });
-  const dateOnly = new Intl.DateTimeFormat(language, { dateStyle: 'medium' });
-  const timeOnly = new Intl.DateTimeFormat(language, { timeStyle: 'short' });
+  const resetRange = (value: CalendarRange) => openMeeting(value, selected);
   function meetingTime(item: ResearchMeeting) {
+    const timeZone = item.timezone;
     const start = new Date(item.start);
     const end = new Date(item.end);
-    if (item.all_day) return dateOnly.format(start);
-    const sameDay = start.toDateString() === end.toDateString();
-    return dateTime.format(start) + ' – ' + (sameDay ? timeOnly : dateTime).format(end);
+    if (item.all_day) {
+      const dateOnly = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeZone });
+      const first = dateOnly.format(start);
+      const last = dateOnly.format(new Date(end.getTime() - 1));
+      return first === last ? first : first + ' – ' + last;
+    }
+    const dateTime = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short', timeZone });
+    const { from, to } = meetingTimeFields(item);
+    const endFormat = from === to ? new Intl.DateTimeFormat(language, { timeStyle: 'short', timeZone }) : dateTime;
+    return dateTime.format(start) + ' – ' + endFormat.format(end);
   }
   const now = Date.now();
   const visibleMeetings = [...meetings].sort((first, second) => {
@@ -117,6 +130,10 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
       <div className="research-calendar-tools">
         {active && view === 'schedule' && <button className="ghost-button" onClick={() => setSettingsOpen(true)} aria-label={tr('visibility')}>
           <span className="material-symbols-outlined" aria-hidden="true">tune</span><span>{tr('visibility')}</span>
+        </button>}
+        {active && writable && <button type="button" className="button research-meeting-create"
+          onClick={() => openMeeting(newMeetingRange(), [])}>
+          <span className="material-symbols-outlined" aria-hidden="true">add</span>{tr('newEvent')}
         </button>}
       </div>
     </header>
@@ -149,7 +166,10 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     {view === 'meetings' && !loadingMeetings && !meetingError && <section className="research-meetings">
       {visibleMeetings.length ? visibleMeetings.map(item => <article key={item.id}>
         <div><strong>{item.title}</strong>
-          <p>{meetingTime(item)}</p>
+          <p>{meetingTime(item)}{item.all_day ? ` · ${tr('allDay')}` : ''}</p>
+          {item.members.length > 1 && <p>
+            {project.members.filter(member => member.id !== item.creator_id && item.members.includes(member.id)).map(member => member.name).join(' · ')}
+          </p>}
           <small>{tr('meetingStatus.' + item.status)}</small>
         </div>
         {item.invitation_id ? <a className="ghost-button" href={chronelleOrigin() + '/#/invitations/' + item.invitation_id}
@@ -158,7 +178,7 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
         </a> : writable && item.creator_id === userId && <button className="ghost-button" onClick={() => {
           setResume(item);
           setRange({ start: item.start, end: item.end, timezone: item.timezone, all_day: item.all_day });
-        }}>{tr('retryMeeting')}</button>}
+        }}>{tr(item.status === 'failed' ? 'editInvitation' : 'retryMeeting')}</button>}
       </article>) : <QuietState icon="event_available" title={tr('noMeetings')} description={writable ? tr('meetingHint') : undefined}
         action={<button className="ghost-button" onClick={() => setView('schedule')}>{tr('schedule')}</button>} />}
     </section>}
@@ -167,46 +187,157 @@ export function ResearchCalendar({ project, userId, onboarding=false, onOnboarde
     <ChronellePermissionsDrawer open={settingsOpen} onClose={()=>setSettingsOpen(false)} onRebind={()=>{setSettingsOpen(false);setConsent(true);}}/>
     <ChronellePluginDialog open={consent} onClose={()=>setConsent(false)} userId={userId}
       context={{entry:"research",project:project.id,onboarding}} onChange={()=>setTick(n=>n+1)}/>
-    <SideDrawer className="research-workflow-drawer" historyKey="research-meeting-create" open={!!range} onClose={() => setRange(null)} title={tr('meeting')}>
-      {range && <MeetingForm key={resume?.id||`${range.start}-${range.end}`} range={range} project={project} members={[...new Set([userId,...selected])]} groups={setup?.groups||[]} resume={resume} errorText={errorText} onDone={()=>{setRange(null);setTick(n=>n+1);}} onAttempt={()=>{void api.researchMeetings(project.id).then(setMeetings).catch(()=>{});}}/>}
+    <SideDrawer showTitle className="research-workflow-drawer research-meeting-drawer" historyKey="research-meeting-create"
+      open={!!range} onClose={() => setRange(null)} title={tr(resume ? 'editInvitation' : 'newEvent')}>
+      {range && <MeetingForm key={resume?.id || range.start} range={range} project={project} userId={userId}
+        initialInvitees={prefilledInvitees} groups={setup?.groups || []} eligible={setup?.invitable_member_ids}
+        resume={resume} errorText={errorText} onDone={() => {
+          setRange(null);
+          showToast(tr('invitationSent'));
+          setView('meetings');
+          setTick(n => n + 1);
+        }} onAttempt={() => {
+          void api.researchMeetings(project.id).then(setMeetings).catch(() => {});
+        }} />}
     </SideDrawer>
   </section>;
 }
 
-function MeetingForm({range,project,members,groups,resume,errorText,onDone,onAttempt}:{range:CalendarRange;project:ResearchProject;members:number[];groups:CalendarSetup['groups'];resume:ResearchMeeting|null;errorText:(code:string)=>string;onDone:()=>void;onAttempt:()=>void}) {
-  const {t}=useI18n();
-  const tr=(key:string)=>t(('research.calendarUI.'+key) as TranslationKey);
-  const [command,setCommand]=useState(()=>resume?.id||crypto.randomUUID());
-  const [description,setDescription]=useState(resume?.description||'');
-  const [group,setGroup]=useState(String(resume?.group_id||groups[0]?.id||''));
-  const [attempt,setAttempt]=useState<Record<string,unknown>|null>(resume?{...resume,command_id:resume.id}:null);
-  const [busy,setBusy]=useState(false),[error,setError]=useState('');
-  return <form className="research-form" onSubmit={async event=>{
-    event.preventDefault();if(busy)return;
-    const form=new FormData(event.currentTarget);
-    let body=attempt;
-    if(!body){
-      const date=(key:string)=>new Date(String(form.get(key))+(range.all_day?'T00:00':'')).toISOString();
-      try{body={command_id:command,title:form.get('title'),location:form.get('location'),description,start:date('start'),end:date('end'),all_day:range.all_day,timezone:range.timezone,group_id:Number(group),members};}
-      catch{setError(tr('invalidTime'));return;}
+function MeetingForm({
+  range, project, userId, initialInvitees, groups, eligible, resume, errorText, onDone, onAttempt,
+}: {
+  range: CalendarRange; project: ResearchProject; userId: number; initialInvitees: number[];
+  groups: CalendarSetup['groups']; eligible?: number[]; resume: ResearchMeeting | null;
+  errorText: (code: string) => string; onDone: () => void; onAttempt: () => void;
+}) {
+  const { t } = useI18n();
+  const tr = (key: string) => t(('research.calendarUI.' + key) as TranslationKey);
+  const [command, setCommand] = useState(() => crypto.randomUUID());
+  const [fields, setFields] = useState(() => {
+    const initial = meetingTimeFields(range);
+    return range.all_day ? { ...initial, startTime: '09:00', endTime: '09:30' } : initial;
+  });
+  const [allDay, setAllDay] = useState(range.all_day);
+  const [description, setDescription] = useState(resume?.description ?? '');
+  const [group, setGroup] = useState(String(resume?.group_id ?? groups[0]?.id ?? ''));
+  const [invitees, setInvitees] = useState(() => (resume?.members ?? initialInvitees).filter(id => id !== userId));
+  const [picking, setPicking] = useState(false);
+  const [attempt, setAttempt] = useState<Record<string, unknown> | null>(() =>
+    resume && resume.status !== 'failed' ? { ...resume, command_id: resume.id } : null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const selected = new Set(invitees);
+  const ready = eligible && new Set(eligible);
+  const candidates = project.members.filter(member => member.id !== userId);
+  const people = candidates.filter(member => selected.has(member.id));
+  const cannotSend = people.some(member => ready && !ready.has(member.id));
+  const locked = busy || Boolean(attempt);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || (!attempt && (!group || !people.length || cannotSend))) return;
+    let body = attempt;
+    if (!body) {
+      const form = new FormData(event.currentTarget);
+      const title = String(form.get('title') ?? '').trim();
+      if (!title) {
+        setError(tr('titleRequired'));
+        return;
+      }
+      try {
+        body = {
+          ...meetingRangeFromFields(fields, range.timezone, allDay),
+          command_id: command,
+          title,
+          location: String(form.get('location') ?? ''),
+          description, group_id: Number(group), members: [userId, ...people.map(member => member.id)],
+        };
+      } catch {
+        setError(tr('invalidTime'));
+        return;
+      }
     }
-    setAttempt(body);setBusy(true);setError('');
-    try{await api.researchBookMeeting(project.id,body);onDone();}
-    catch(e){setError(errorText(e instanceof Error?e.message:'meeting_result_unknown'));if(e instanceof ApiError&&e.status===400){setAttempt(null);setCommand(crypto.randomUUID());}}
-    finally{setBusy(false);onAttempt();}
-  }}>
-    <p className="research-muted">{tr('selectionHint')}</p>
-    <fieldset disabled={busy||!!attempt}>
-      <label>{tr('meetingTitle')}<input name="title" required maxLength={160} defaultValue={resume?.title}/></label>
-      <div className="research-period"><label>{t('research.start')}<input name="start" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.start).slice(0,range.all_day?10:16)}/></label><label>{t('research.end')}<input name="end" type={range.all_day?'date':'datetime-local'} required defaultValue={localInput(range.end).slice(0,range.all_day?10:16)}/></label></div>
-      <label>{tr('location')}<input name="location" maxLength={1000} defaultValue={resume?.location}/></label>
-      <SettingSelect label={tr('destination')} value={group} disabled={busy||!!attempt} options={groups.map(item=>({value:String(item.id),label:item.name}))} onChange={setGroup}/>
-      <p className="research-muted">{(resume?.members||members).map(id=>project.members.find(m=>m.id===id)?.name||`#${id}`).join(' · ')}</p>
-      <MarkdownInput value={description} onChange={setDescription}/>
+    setBusy(true);
+    setError('');
+    try {
+      await api.researchBookMeeting(project.id, body);
+      onDone();
+    } catch (cause) {
+      const code = cause instanceof ApiError ? cause.message : 'meeting_result_unknown';
+      setError(errorText(code));
+      if (attempt || !(cause instanceof ApiError) || cause.status >= 500 || code === 'meeting_processing') {
+        setAttempt(body);
+      } else {
+        setCommand(crypto.randomUUID());
+      }
+      onAttempt();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <form className="research-form research-meeting-form" onSubmit={submit}>
+    <fieldset disabled={locked}>
+      <label>{tr('meetingTitle')}<input name="title" required maxLength={160} placeholder={tr('titleExample')} defaultValue={resume?.title} /></label>
+      <section className="research-meeting-invitees">
+        <div className="research-meeting-section-heading">
+          <strong>{tr('invitees')}{people.length ? ` · ${people.length}` : ''}</strong>
+          <button className="ghost-button" type="button" onClick={() => setPicking(true)}>
+            <span className="material-symbols-outlined" aria-hidden="true">person_add</span>
+            {tr(people.length ? 'changeInvitees' : 'choosePeople')}
+          </button>
+        </div>
+        {people.length ? <ul className="research-meeting-people">{people.map(member => <li key={member.id}>
+          <UserAvatar className="research-calendar-avatar" name={member.name} uri={member.avatar_uri}
+            cacheKey={member.avatar_cache_key} frame={member.avatar_frame_style} />
+          <span>{member.name}</span>
+          {!attempt && <button type="button" className="icon-button" aria-label={tr('removeInvitee') + ' ' + member.name}
+            onClick={() => setInvitees(ids => ids.filter(id => id !== member.id))}>
+            <span className="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>}
+        </li>)}</ul> : <p className="research-muted">{tr('chooseInvitees')}</p>}
+        {cannotSend && !attempt && <p className="research-error" role="status">{tr('error.invitation_recipient_unavailable')}</p>}
+      </section>
+
+      <section className="research-meeting-time">
+        <SettingRow title={tr('allDay')} description={range.timezone} trailing={<SettingSwitch label={tr('allDay')} checked={allDay}
+          onChange={setAllDay} disabled={locked} />} />
+        <div className="research-meeting-time-grid">
+          <div>
+            <DatePickerField label={t('research.start')} value={fields.from} required onChange={from =>
+              setFields(previous => ({ ...previous, from, to: previous.to === previous.from || previous.to < from ? from : previous.to }))} />
+            {!allDay && <input type="time" required aria-label={tr('startTime')} value={fields.startTime}
+              onChange={event => setFields(previous => ({ ...previous, startTime: event.target.value }))} />}
+          </div>
+          <div>
+            <DatePickerField label={t('research.end')} value={fields.to} min={fields.from} required
+              onChange={to => setFields(previous => ({ ...previous, to }))} />
+            {!allDay && <input type="time" required aria-label={tr('endTime')} value={fields.endTime}
+              onChange={event => setFields(previous => ({ ...previous, endTime: event.target.value }))} />}
+          </div>
+        </div>
+      </section>
+
+      <details className="research-form-options" open={Boolean(resume?.location || resume?.description) || undefined}>
+        <summary>{tr('meetingOptions')}</summary>
+        <label>{tr('location')}<input name="location" maxLength={1000} defaultValue={resume?.location} /></label>
+        <MarkdownInput value={description} onChange={setDescription} rows={4} mobileImmersive={false} workspace />
+      </details>
+      <SettingSelect label={tr('destination')} value={group} disabled={locked}
+        options={groups.map(item => ({ value: String(item.id), label: item.name }))} onChange={setGroup} />
     </fieldset>
-    {error&&<p className="research-error" role="alert">{error}</p>}
-    {attempt&&<p className="research-muted">{tr('sameRequest')}</p>}
-    {(resume?.members||members).length<2&&<p className="research-muted">{tr('chooseInvitees')}</p>}
-    <button className="button" disabled={busy||!groups.length||(resume?.members||members).length<2}>{tr(attempt?'retryMeeting':'sendInvitations')}</button>
+    <footer className="research-task-editor-footer research-meeting-submit">
+      {error && <p className="research-form-error" role="alert">{error}</p>}
+      <p className="research-muted">{tr(attempt ? 'sameRequest' : !groups.length ? 'noDestination' : 'inviteConfirmation')}</p>
+      <button className="button" disabled={busy || (!attempt && (!group || !people.length || cannotSend))}>
+        {tr(busy ? 'sending' : attempt ? 'retryMeeting' : 'sendInvitations')}{!attempt && people.length > 0 ? ` · ${people.length}` : ''}
+      </button>
+    </footer>
+    {picking && <MemberPickerSheet title={tr('choosePeople')} initial={invitees.filter(id => !ready || ready.has(id))}
+      members={candidates.map(member => ({
+        ...member,
+        locked: ready ? !ready.has(member.id) : false,
+        lockedLabel: tr('notLinked'),
+      }))} limit={19} onClose={() => setPicking(false)} onApply={setInvitees} />}
   </form>;
 }

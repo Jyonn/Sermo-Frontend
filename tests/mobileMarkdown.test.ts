@@ -12,7 +12,7 @@ test('shared Markdown editing opts phones in without replacing the textarea',()=
   assert.match(input,/if\(immersive.mobile&&!immersive.active\)setPreview\(false\)/);
   assert.equal((input.match(/<textarea /g)||[]).length,1);
   assert.doesNotMatch(input,/createPortal/);
-  for(const file of ['components/ResearchComments.tsx','components/ResearchCalendar.tsx','components/MarkdownEditorDialog.tsx','pages/ResearchPage.tsx'])assert.match(source(file),/<MarkdownInput/);
+  for(const file of ['components/ResearchComments.tsx','components/ResearchCalendar.tsx','components/MarkdownEditorDialog.tsx','components/ResearchWorkflow.tsx'])assert.match(source(file),/<MarkdownInput/);
 });
 
 test('immersive editing follows the visual viewport and preserves nested focus layers',()=>{
@@ -53,14 +53,14 @@ test('preview is pinned outside the scrolling toolbar and phone actions occupy t
   assert.match(source('components/MobileMarkdownEditor.css'),/v3-md-input>\.v3-md-preview-toggle\{position:absolute;top:0;right:0/);
 });
 
-test('phone descriptions open directly and task progress starts as a compact comment trigger',()=>{
+test('phone descriptions use the immersive editor and task notes keep writing and preview in one drawer',()=>{
   const dialog=source('components/MarkdownEditorDialog.tsx');
   assert.match(dialog,/if\(mobile\)return createPortal\(<MarkdownInput/);
   assert.match(dialog,/mobileSession=\{\{onDone/);
   const comments=source('components/ResearchComments.tsx');
-  assert.match(comments,/editing&&!mobile\?/);
-  assert.match(comments,/research-progress-trigger/);
-  assert.match(comments,/editing&&mobile&&<MarkdownEditorDialog/);
+  assert.match(comments,/historyKey="research-write-update"/);
+  assert.match(comments,/<MarkdownInput[^>]+mobileImmersive=\{false\} workspace/);
+  assert.match(source('components/ResearchMarkdownInput.tsx'),/className="v3-md-modes"/);
   assert.doesNotMatch(source('components/ResearchWorkspace.tsx'),/editDescription|HeaderIconButton/);
   assert.match(source('components/ResearchProjectDetails.tsx'),/onClick=\{owner\?onDescription/);
   assert.doesNotMatch(source('styles/app/40-square-platform.css'),/\.square-comment-thread header span\{/);

@@ -25,3 +25,92 @@
 .research-page .ghost-button,.research-workflow-drawer .ghost-button,.research-resource-drawer .ghost-button{min-height:32px;padding:6px 10px;border-radius:8px;box-shadow:none;font-size:12px;line-height:1.5}.research-page .button,.research-workflow-drawer .button,.research-resource-drawer .button{min-height:38px;padding:9px 15px;border-radius:10px;box-shadow:none;font-size:13px;line-height:1.5}.research-workflow-drawer .research-form>.button,.research-workflow-drawer .research-reward-editor>.button{justify-self:end;min-width:92px;width:auto}.research-report-launch{margin-block:14px 8px}.research-report-launch>.ghost-button{min-height:32px;padding:6px 11px;border:1px solid var(--line-soft);border-radius:8px;background:transparent;font-size:12px;font-weight:500}.research-flow-section>header>.ghost-button{min-height:30px;padding:4px 8px;font-size:12px}.research-task-comments .research-comment-send>.ghost-button{min-height:30px;padding:4px 8px;border:0;background:transparent;box-shadow:none;font-size:12px;font-weight:500}
 .confirm-dialog:has(.research-date-field) .confirm-dialog-actions>button{min-height:36px;padding:8px 14px;border-radius:8px;font-size:13px;box-shadow:none}
 .confirm-dialog.research-milestone-dialog{display:flex;flex-direction:column;width:min(560px,calc(100vw - 32px));max-height:85dvh;padding:0;overflow:hidden}.research-milestone-dialog>.confirm-dialog-copy{flex:none;padding:22px 24px 0}.research-milestone-dialog>.research-form{min-height:0;overflow-y:auto;padding:20px 24px;gap:14px;overscroll-behavior:contain}.research-milestone-dialog>.confirm-dialog-actions{flex:none;margin:0;padding:14px 24px;border-top:1px solid var(--line-soft)}.research-milestone-dialog .button,.research-milestone-dialog .ghost-button{min-height:34px;padding:7px 12px;border-radius:8px;box-shadow:none;font-size:12px}.research-milestone-content>.button,.research-milestone-content>.ghost-button{justify-self:start}.research-milestone-dialog .confirm-dialog-copy>h2{font-size:18px}.research-milestone-dialog .confirm-dialog-copy>p:empty{display:none}
+
+.research-writing-drawer.has-floating-toolbar,
+.research-meeting-drawer.has-floating-toolbar {
+  --drawer-toolbar-space: calc(66px + env(safe-area-inset-top));
+}
+.research-writing-drawer > .drawer-floating-toolbar,
+.research-meeting-drawer > .drawer-floating-toolbar {
+  background: var(--bg-canvas);
+  border-radius: 16px;
+}
+.research-writing-drawer > .drawer-body,
+.research-meeting-drawer > .drawer-body {
+  display: block;
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+.research-writing-drawer .research-form:is(.research-note-form,.research-report-form) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 14px;
+  padding: 8px clamp(16px,4vw,26px) 0;
+}
+.research-writing-drawer .research-report-context > strong {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.research-writing-drawer .research-note-form > .setting-row {
+  min-height: 42px;
+  padding: 4px 0;
+}
+.research-writing-drawer .research-task-editor-footer {
+  margin-top: auto;
+}
+.research-form .v3-md-workspace {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+}
+.research-form .v3-md-workspace > .v3-md-toolbar {
+  margin: 0;
+  padding: 4px 8px;
+}
+.research-form .v3-md-workspace > textarea {
+  border: 0;
+  border-radius: 0 0 13px 13px;
+  background: transparent;
+  padding: 14px;
+  resize: vertical;
+}
+.research-form .v3-md-workspace > textarea:focus-visible { outline-offset: -2px; }
+.v3-md-modes {
+  display: flex;
+  gap: 4px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.v3-md-modes > button {
+  min-height: 32px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.v3-md-modes > button[aria-pressed="true"] {
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  font-weight: 650;
+}
+.research-writing-drawer .v3-md-workspace { flex: 1; }
+.research-writing-drawer .v3-md-workspace > :is(textarea,.v3-editor-preview) {
+  flex: 1;
+  min-height: 160px;
+  max-height: none;
+}
+@media(max-width:719px) {
+  .research-form .v3-md-workspace > textarea,
+  .research-form.research-meeting-form input { font-size: 16px; }
+}
+.research-reimbursement-list > button { gap:8px; padding:13px 0; }
+.research-reimbursement-list > button:hover { background:var(--bg-panel); }
+.research-reimbursement-list > button > span:first-child { gap:3px; }
+.research-reimbursement-list > button > .material-symbols-outlined { font-size:18px; color:var(--text-muted); }
+.research-reimbursement-list > button > b { font-size:13px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.research-reimbursement-state { font-size:11px; white-space:nowrap; padding:4px 7px; border-radius:20px; background:var(--bg-soft); color:var(--text-secondary); }
+.research-reimbursement-state[data-status="needs_info"] { color:var(--danger); }
+.research-reimbursement-state[data-status="submitted"] { color:var(--brand-primary-press,var(--brand-primary)); }

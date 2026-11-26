@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.26.6",
+  "id": "2026.11.26.7",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "发言可编辑，空间可设置加入方式",
+      "title": "科研任务与会议邀请更顺手",
       "items": [
-        "可以编辑自己发言的正文。点击「已编辑」可查看历史版本。",
-        "空间管理员可以选择自由加入、邀请码加入或申请审批。已有成员照常登录。"
+        "优化任务列表和详情，记录进展、提交周报时可以在 Markdown 编辑和预览间切换。",
+        "可直接新建会议，自选受邀成员，并在会议列表查看邀请。",
+        "从「资料与事务」直接添加资料、发放奖励或提交报销，待处理报销优先展示。"
       ]
     },
     "en": {
-      "title": "Post editing and space admission",
+      "title": "A smoother research workspace",
       "items": [
-        "Edit the text of your own posts. Select Edited to see previous versions.",
-        "Space administrators can allow open signups, require an invitation code, or review applications. Existing members can sign in as usual."
+        "Find tasks more easily and switch between writing and previewing Markdown for updates and reports.",
+        "Create meetings from the toolbar, choose who to invite, and find sent invitations in the meeting list.",
+        "Add materials, grant rewards, and submit claims from the workspace. Claims that need attention appear first."
       ]
     }
   }

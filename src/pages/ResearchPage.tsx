@@ -21,7 +21,6 @@ import { ResearchResources } from "../components/ResearchResources";
 import { ResearchCurrentReport, ResearchTaskBrowser } from "../components/ResearchTaskBrowser";
 import { ResearchReportForm, ResearchTaskEditor, ResearchTools } from "../components/ResearchWorkflow";
 import { ResearchHome, ResearchOverview } from "../components/ResearchWorkspace";
-import { SelectControl } from "../components/SettingRow";
 import { SideDrawer } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { api, ApiError } from "../lib/api";
@@ -83,7 +82,7 @@ function ResearchWorkspacePage() {
   const [onboarding, setOnboarding] = useState(Boolean(returning));
   const [panel, setPanel] = useState<ProjectPanel | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const [resourceTarget, setResourceTarget] = useState<{ taskId?: string } | null>(null);
+  const [resourceTarget, setResourceTarget] = useState<{ taskId?: string; adding?: boolean } | null>(null);
   const [report, setReport] = useState<{ taskId: string; kind: ReportKind } | null>(null);
   const [claim, setClaim] = useState<{ id: string } | null>(null);
   const [editingTask, setEditingTask] = useState(false);
@@ -482,13 +481,14 @@ function ResearchWorkspacePage() {
                 onboarding={onboarding} onOnboarded={finishCalendarSetup} />}
               {tab === "tools" && <ResearchTools key={`${current.id}:${claim?.id || ""}`} project={current} owner={owner} userId={userId}
                 busy={busy} mutate={mutate} mutationError={error} initialReimbursementId={claim?.id}
-                onOpenComment={openTask} onResources={() => setResourceTarget({})} />}
+                onOpenComment={openTask} onResources={adding => setResourceTarget({ adding })} />}
               {tab === "tasks" && <div className={`research-task-layout${task ? " has-detail" : ""}`}>
                 <ResearchTaskBrowser key={`${current.id}:${owner}`} project={current} taskId={taskId} owner={owner} userId={userId} open={openTask} create={createTask} />
                 <article className="research-task-detail">
                   {task ? <ResearchComments key={task.id} focusProgressId={focusProgressId} project={current} task={task}
-                    userId={userId} scope={scope} writable={writable && task.status === "active"} busy={busy} mutate={mutate} error={error}
-                    send={(body, reply_to, response_to) => mutate({ action: "progress", task_id: task.id, body, reply_to, response_to })}>
+                    userId={userId} scope={scope} onScope={setScope} writable={writable && task.status === "active"} busy={busy} mutate={mutate} error={error}
+                    send={(body, reply_to, response_to) => mutate({ action: "progress", task_id: task.id, body, reply_to, response_to })}
+                    header={<>
                     <header className="research-task-heading">
                       <button className="ghost-button research-back" type="button" onClick={closeTask} aria-label={t("researchWorkbench.backToTasks")}>
                         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
@@ -506,9 +506,10 @@ function ResearchWorkspacePage() {
                         {researchDate(task.start, language)} · {task.end ? researchDate(task.end, language) : t("research.openEnd")}
                       </span>
                     </div>
-                    <div className="research-task-document">
-                      <div className="research-task-body"><Markdown body={task.body} /></div>
+                    </>}>
+                    <section className="research-task-document">
                       <div className="research-task-document-actions">
+                        <h3>{t("researchFlow.taskInstructions")}</h3>
                         <button type="button" className="ghost-button" onClick={() => setResourceTarget({ taskId: task.id })}>
                           <span className="material-symbols-outlined" aria-hidden="true">folder_open</span>{t("resources.task")}
                         </button>
@@ -520,16 +521,11 @@ function ResearchWorkspacePage() {
                           }}
                         >{t(task.status === "active" ? "researchWorkbench.archiveTask" : "researchWorkbench.reopenTask")}</button>}
                       </div>
-                    </div>
+                      {task.body && <div className="research-task-body"><Markdown body={task.body} /></div>}
+                    </section>
                     <ResearchCurrentReport project={current} task={task} owner={owner} userId={userId}
                       onWrite={kind => { setError(""); setReport({ taskId: task.id, kind }); }}
                       onOpen={progressId => openTask(task.id, progressId)} />
-                    <div className="research-progress-head">
-                      <h2>{t("researchWorkbench.discussion")}</h2>
-                      {task.progress.length > 0 && <SelectControl compact label={t("researchFlow.memberFilter")} value={scope}
-                        onChange={setScope} options={[{ value: "all", label: t("researchWorkbench.everyone") },
-                          ...current.members.map(member => ({ value: String(member.id), label: member.name }))]} />}
-                    </div>
                   </ResearchComments> : <QuietState icon="assignment" title={t(taskId ? "researchWorkbench.taskUnavailable" : "research.chooseTask")} />}
                 </article>
               </div>}
@@ -540,7 +536,7 @@ function ResearchWorkspacePage() {
 
       <FloatingDrawerScope>
         {resourceTarget && current && <ResearchResources key={`${current.id}:${resourceTarget.taskId || ""}`}
-          projectId={current.id} taskId={resourceTarget.taskId} members={current.members}
+          projectId={current.id} taskId={resourceTarget.taskId} members={current.members} initialAdd={resourceTarget.adding}
           title={resourceTarget.taskId ? t("resources.task") : t("resources.title")} onClose={() => setResourceTarget(null)} />}
         <SideDrawer historyKey="research-chat" className="research-chat-drawer" headerless floatingBack={false} fullscreen
           open={chatOpen && Boolean(current)} onClose={() => setChatOpen(false)} title={t("research.group")}>
@@ -557,7 +553,7 @@ function ResearchWorkspacePage() {
             onChat={() => { setPanel(null); setChatOpen(true); }} onDanger={() => setConfirm({ action: owner ? "dissolve" : "leave" })}
             onStatus={async status => { if (!await mutate({ action: "settings", status })) throw new Error("Status update failed"); }} />}
         </SideDrawer>
-        <SideDrawer className="research-workflow-drawer" historyKey="research-task-create" open={panel === "task"}
+        <SideDrawer showTitle className="research-workflow-drawer research-writing-drawer" historyKey="research-task-create" open={panel === "task"}
           onClose={() => { if (!busy) setPanel(null); }} title={t(editingTask ? "researchFlow.editTask" : "research.addTask")}>
           {current && <ResearchTaskEditor key={editingTask ? task?.id : "new"} project={current} task={editingTask ? task : undefined}
             busy={busy} error={error} onSave={async body => { const ok = await mutate(body); if (ok) setPanel(null); return ok; }} />}
@@ -586,7 +582,7 @@ function ResearchWorkspacePage() {
           }}>
           {error && <p className="research-error" role="alert">{error}</p>}
         </ConfirmDialog>
-        <SideDrawer className="research-workflow-drawer" open={Boolean(report && reportTask)} historyKey="research-report"
+        <SideDrawer showTitle className="research-workflow-drawer research-writing-drawer" open={Boolean(report && reportTask)} historyKey="research-report"
           title={t(`researchFlow.${report?.kind || "daily"}`)} onClose={() => { if (!busy) setReport(null); }}>
           {current && report && reportTask && <ResearchReportForm
             key={`${reportTask.id}:${report.kind}:${current.workflow?.report_periods[report.kind]}`}

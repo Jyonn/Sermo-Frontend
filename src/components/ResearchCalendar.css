@@ -49,3 +49,29 @@
 .research-filtered-agenda li time,.research-filtered-agenda li small { color:var(--text-muted); font-size:12px; }
 .research-filtered-agenda li small { display:block; overflow-wrap:anywhere; white-space:pre-wrap; }
 .research-filtered-meeting { justify-self:end; }
+.research-meeting-create { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.research-meeting-create .material-symbols-outlined { font-size:18px; }
+.research-form.research-meeting-form { gap:14px; padding:8px clamp(16px,4vw,26px) 0; }
+.research-meeting-form fieldset { gap:14px; }
+.research-meeting-invitees,
+.research-meeting-time { padding:11px 13px; border:1px solid var(--line-soft); border-radius:12px; background:var(--bg-panel); }
+.research-meeting-section-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px 10px; }
+.research-meeting-section-heading strong { font-size:14px; }
+.research-meeting-section-heading button { display:inline-flex; align-items:center; gap:6px; }
+.research-meeting-section-heading .material-symbols-outlined { font-size:17px; }
+.research-meeting-invitees > p { margin:5px 0 0; font-size:12px; }
+.research-meeting-people { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; list-style:none; padding:0; }
+.research-meeting-people > li { display:flex; align-items:center; min-width:0; gap:6px; border-radius:20px; background:var(--bg-soft); padding:4px 8px 4px 4px; font-size:12px; }
+.research-meeting-people > li > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.research-meeting-people .research-calendar-avatar { width:24px; height:24px; flex:none; border-radius:50%; }
+.research-meeting-people button { min-width:24px; min-height:24px; padding:0; border:0; background:transparent; color:var(--text-muted); }
+.research-meeting-people button .material-symbols-outlined { font-size:16px; }
+.research-meeting-time > .setting-row { min-height:42px; padding:0 0 9px; }
+.research-meeting-time-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.research-meeting-time-grid > div { display:grid; gap:6px; min-width:0; }
+.research-meeting-time-grid .date-picker-field-trigger { width:100%; }
+.research-meeting-time-grid .date-picker-field-trigger strong { font-size:13px; }
+.research-meeting-form input[type=time] { min-height:40px; padding:6px 8px; font-variant-numeric:tabular-nums; color-scheme:light dark; }
+.research-meeting-submit { align-items:center; flex-wrap:wrap; gap:8px 12px; }
+.research-meeting-submit > p { flex:1; min-width:min(180px,100%); margin:0; font-size:12px; }
+.research-meeting-submit > .research-form-error { flex:0 0 100%; }

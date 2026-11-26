@@ -19,9 +19,10 @@ import "./ResearchComments.css";
 
 type Send = (body: string, replyTo?: string, responseTo?: number) => Promise<boolean>;
 
-export function ResearchComments({ project, task, userId, scope, writable, busy, send, children, mutate, focusProgressId, error }: {
+export function ResearchComments({ project, task, userId, scope, onScope, writable, busy, send, header, children, mutate, focusProgressId, error }: {
   project: ResearchProject; task: ResearchTask; userId: number; scope: string; writable: boolean; busy: boolean;
-  send: Send; mutate: ResearchMutation; children?: ReactNode; focusProgressId?: string; error?: string;
+  send: Send; mutate: ResearchMutation; header?: ReactNode; children?: ReactNode; focusProgressId?: string; error?: string;
+  onScope: (value: string) => void;
 }) {
   const { t, language } = useI18n();
   const [day, setDay] = useState("all");
@@ -104,14 +105,21 @@ export function ResearchComments({ project, task, userId, scope, writable, busy,
   };
 
   return <section className="research-task-comments">
+    {header && <div className="research-task-sticky">{header}</div>}
     <div className="research-comments-scroll">
       {children}
-      {dayChoices.length > 1 && <div className="research-discussion-filter">
-        <SelectControl compact label={t("researchFlow.discussionDate")} value={selectedDay} onChange={setDay} options={[
-          { value: "all", label: t("researchWorkbench.allDates") },
-          ...dayChoices.map(value => ({ value, label: researchDate(value, language) })),
-        ]} />
-      </div>}
+      <div className="research-progress-head">
+        <h2>{t("researchWorkbench.discussion")}</h2>
+        {items.length > 0 && <div className="research-discussion-filter">
+          <SelectControl compact label={t("researchFlow.memberFilter")} value={scope} onChange={onScope}
+            options={[{ value: "all", label: t("researchWorkbench.everyone") },
+              ...project.members.map(member => ({ value: String(member.id), label: member.name }))]} />
+          {dayChoices.length > 1 && <SelectControl compact label={t("researchFlow.discussionDate")} value={selectedDay} onChange={setDay} options={[
+            { value: "all", label: t("researchWorkbench.allDates") },
+            ...dayChoices.map(value => ({ value, label: researchDate(value, language) })),
+          ]} />}
+        </div>}
+      </div>
       <div className="square-comment-list">
         {rootEntries.map(entry => {
           const root = dto(entry);
@@ -166,8 +174,8 @@ export function ResearchComments({ project, task, userId, scope, writable, busy,
         <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>{t("researchWorkbench.writeUpdate")}
       </button>
     </div>}
-    <SideDrawer className="research-workflow-drawer" historyKey="research-write-update" open={Boolean(editor) && writable}
-      title={t(target ? "researchWorkbench.replyAction" : "researchWorkbench.writeUpdate")} onClose={() => { if (!busy) setEditor(null); }}>
+    <SideDrawer className="research-workflow-drawer research-writing-drawer" showTitle historyKey="research-write-update" open={Boolean(editor) && writable}
+      title={t(target ? "researchWorkbench.publishReply" : "researchWorkbench.writeUpdate")} onClose={() => { if (!busy) setEditor(null); }}>
       {editor && <ResearchNoteEditor key={editor.replyTo || "update"} draftKey={`note:${userId}:${project.id}:${task.id}:${editor.replyTo || ""}`}
         task={task} target={target} targetName={target ? person(target.user_id).name : undefined} targets={targets}
         owner={owner} busy={busy} error={error} onSend={async (body, recipient) => {
@@ -210,7 +218,7 @@ function ResearchNoteEditor({ draftKey, task, target, targetName, targets, owner
   }}>
     <div className="research-report-context"><strong>{task.title}</strong></div>
     {target && <blockquote className="research-note-context"><strong>{targetName}</strong><small>{researchExcerpt(target)}</small></blockquote>}
-    <MarkdownInput value={body} onChange={setBody} rows={7} required mobileImmersive={false} />
+    <MarkdownInput value={body} onChange={setBody} rows={8} required mobileImmersive={false} workspace />
     {targets.length > 0 && <SettingRow title={t(owner ? "researchFlow.needsAnswer" : "researchFlow.askMentor")} trailing={
       <SettingSwitch label={t(owner ? "researchFlow.needsAnswer" : "researchFlow.askMentor")} checked={request} onChange={setRequest} disabled={busy} />
     } />}

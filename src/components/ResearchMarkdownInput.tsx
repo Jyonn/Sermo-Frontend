@@ -10,7 +10,7 @@ import './MobileMarkdownEditor.css';
 
 type MobileSession = {onDone:()=>void;onCancel:()=>void;busy?:boolean;error?:string;doneLabel?:string;onSkip?:()=>void;skipLabel?:string};
 
-export function MarkdownInput({ value, initialValue = '', onChange, required = false, rows = 6, mobileImmersive = true, mobileSession }: { value?: string; initialValue?:string; onChange?: (value: string) => void; required?: boolean; rows?: number; mobileImmersive?: boolean; mobileSession?:MobileSession }) {
+export function MarkdownInput({ value, initialValue = '', onChange, required = false, rows = 6, mobileImmersive = true, workspace = false, mobileSession }: { value?: string; initialValue?:string; onChange?: (value: string) => void; required?: boolean; rows?: number; mobileImmersive?: boolean; workspace?: boolean; mobileSession?:MobileSession }) {
   const {t:translate}=useI18n();
   const t=(key:string)=>translate(('research.md.'+key) as TranslationKey);
   const [local, setLocal] = useState(initialValue);
@@ -32,6 +32,11 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
   function focus(){if(!immersive.active)snapshot.current=body;immersive.focus();}
   function start(){if(!immersive.active)snapshot.current=body;immersive.start();}
   useLayoutEffect(()=>{if(mobileSession&&immersive.mobile)ref.current?.focus({preventScroll:true});},[Boolean(mobileSession),immersive.mobile]);
+  function setMode(reading: boolean) {
+    setHeadingOpen(false);
+    setTableOpen(false);
+    setPreview(reading);
+  }
   const previewButton=<button className="v3-md-preview-toggle" type="button" title={t(preview ? 'edit' : 'previewMd')} aria-label={t(preview ? 'edit' : 'previewMd')} aria-pressed={preview} onMouseDown={event=>event.preventDefault()} onClick={event => {if(!immersive.mobile)event.currentTarget.focus({preventScroll:true});setHeadingOpen(false);setTableOpen(false);setPreview(!preview);if(preview)requestAnimationFrame(()=>ref.current?.focus({preventScroll:true}));}}><span className="material-symbols-outlined" aria-hidden="true">{preview?'edit':'visibility'}</span></button>;
   function insert(before: string, after = '', fallback = t('mdText')) {
     const input = ref.current;
@@ -47,8 +52,13 @@ export function MarkdownInput({ value, initialValue = '', onChange, required = f
     ['format_list_bulleted', 'mdList', '\n- ', ''], ['format_list_numbered', 'mdOrdered', '\n1. ', ''],
     ['code', 'mdCode', '`', '`'], ['data_object', 'mdBlock', '\n```\n', '\n```\n'],
   ] as const;
-  return <div ref={root} className={`v3-md-input${immersive.mobile?' v3-md-mobile':''}${immersive.active?' v3-md-immersive':''}`} role={immersive.active?'dialog':undefined} aria-modal={immersive.active||undefined} aria-label={immersive.active?t('body'):undefined}>
-    {immersive.active?<div className="v3-md-mobile-actions"><button type="button" disabled={mobileSession?.busy} onMouseDown={event=>event.preventDefault()} onClick={cancel}>{translate('common.cancel')}</button>{mobileSession?.onSkip&&<button type="button" disabled={mobileSession.busy} onClick={mobileSession.onSkip}>{mobileSession.skipLabel}</button>}<span/>{previewButton}<button type="button" className="v3-md-done" disabled={mobileSession?.busy} onMouseDown={event=>event.preventDefault()} onClick={finish}>{mobileSession?.busy?translate('common.processing'):mobileSession?.doneLabel||translate('common.done')}</button></div>:previewButton}
+  return <div ref={root} className={`v3-md-input${workspace?' v3-md-workspace':''}${immersive.mobile?' v3-md-mobile':''}${immersive.active?' v3-md-immersive':''}`} role={immersive.active?'dialog':undefined} aria-modal={immersive.active||undefined} aria-label={immersive.active?t('body'):undefined}>
+    {immersive.active?<div className="v3-md-mobile-actions"><button type="button" disabled={mobileSession?.busy} onMouseDown={event=>event.preventDefault()} onClick={cancel}>{translate('common.cancel')}</button>{mobileSession?.onSkip&&<button type="button" disabled={mobileSession.busy} onClick={mobileSession.onSkip}>{mobileSession.skipLabel}</button>}<span/>{previewButton}<button type="button" className="v3-md-done" disabled={mobileSession?.busy} onMouseDown={event=>event.preventDefault()} onClick={finish}>{mobileSession?.busy?translate('common.processing'):mobileSession?.doneLabel||translate('common.done')}</button></div>:workspace
+      ? <div className="v3-md-modes" role="group" aria-label={t('body')}>
+          <button type="button" aria-pressed={!preview} onClick={() => setMode(false)}>{t('edit')}</button>
+          <button type="button" aria-pressed={preview} onClick={() => setMode(true)}>{t('previewMd')}</button>
+        </div>
+      : previewButton}
     <div className="v3-md-toolbar" role="toolbar" aria-label={t('mdTools')}>
       <button type="button" ref={headingAnchor} title={t('mdHeading')} aria-label={t('mdHeading')} aria-haspopup="menu" aria-expanded={headingOpen} disabled={preview} onMouseDown={e=>e.preventDefault()} onClick={()=>{setTableOpen(false);setHeadingOpen(!headingOpen);}}><span className="material-symbols-outlined" aria-hidden="true">format_h1</span></button>
       {headingOpen&&<MarkdownHeadingMenu anchor={headingAnchor} label={t('mdHeading')} onClose={()=>setHeadingOpen(false)} onSelect={level=>{insert(`\n${'#'.repeat(level)} `);setHeadingOpen(false);}}/>}

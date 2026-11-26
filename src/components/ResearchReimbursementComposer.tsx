@@ -1,7 +1,7 @@
 import {useRef,useState,type FormEvent} from 'react';
 import {useI18n,type TranslationKey} from '../lib/language';
 import {uploadMessageMedia} from '../lib/messageUpload';
-import {defaultDateRange} from '../lib/calendarDate';
+import {researchToday} from '../lib/researchWorkbench';
 import {normalizeMoney,reimbursementCny,reimbursementTotal} from '../lib/researchReimbursement';
 import {SideDrawer} from './SideDrawer';
 import {DateRangeField} from './DateRangeField';
@@ -24,7 +24,11 @@ function EvidenceField({label,files,multiple=false,onChange}:{label:string;files
 
 export function ResearchReimbursementComposer({currencies,busy,mutationError,mutate,onDone,onBusy}:{currencies:string[];busy:boolean;mutationError?:string;mutate:ResearchMutation;onDone:()=>void;onBusy:(busy:boolean)=>void}){
   const {t}=useI18n();
-  const [title,setTitle]=useState(''),[range,setRange]=useState(defaultDateRange),[notes,setNotes]=useState(''),[items,setItems]=useState<Draft[]>([]),[draft,setDraft]=useState<Draft|null>(null);
+  const [title,setTitle]=useState(''),[notes,setNotes]=useState(''),[items,setItems]=useState<Draft[]>([]),[draft,setDraft]=useState<Draft|null>(null);
+  const [range,setRange]=useState(()=>{
+    const date=researchToday();
+    return {from:date,to:date};
+  });
   const [uploading,setUploading]=useState(false),[progress,setProgress]=useState(0),[error,setError]=useState('');
   const uploaded=useRef(new Map<File,number>());
   const total=reimbursementTotal(items);
@@ -37,7 +41,7 @@ export function ResearchReimbursementComposer({currencies,busy,mutationError,mut
       async function upload(file:File){let id=uploaded.current.get(file);if(id===undefined){const result=await uploadMessageMedia(file,'file',value=>setProgress((finished+value/100)/count*100));id=result.resource.resource_id;uploaded.current.set(file,id);}finished++;setProgress(finished/count*100);return id;}
       const rows=[];
       for(const item of items){const payment_id=await upload(item.payment!),invoice_id=await upload(item.invoice!),other_ids=[];for(const file of item.other)other_ids.push(await upload(file));rows.push({title:item.title,amount:normalizeMoney(item.amount),currency:item.currency,exchange_rate:item.currency==='CNY'?'100.00':normalizeMoney(item.exchange_rate),payment_id,invoice_id,other_ids,notes:item.notes});}
-      if(await mutate({action:'reimbursement',title,start:range.from,end:range.to,notes,items:rows}))onDone();else setError(t('research.failed'));
+      if(await mutate({action:'reimbursement',title,start:range.from,end:range.to,notes,items:rows}))onDone();
     }catch(e){setError(e instanceof Error?e.message:t('research.failed'));}finally{setUploading(false);onBusy(false);}
   }
   return <><form className="research-form reimbursement-composer" onSubmit={submit}>
@@ -50,9 +54,9 @@ export function ResearchReimbursementComposer({currencies,busy,mutationError,mut
     <label>{t('researchFlow.totalNotes')}<textarea maxLength={4000} value={notes} onChange={event=>setNotes(event.target.value)} disabled={uploading||busy}/></label>
     <div className="reimbursement-total"><span>{t('researchFlow.cnyTotal')}</span><strong>¥{total||'0.00'}</strong></div>
     {(error||mutationError)&&<p className="research-error" role="alert">{error||mutationError}</p>}
-    <button className="button" disabled={uploading||busy||!title.trim()||!items.length||!range.from||!range.to||!total||total==='0.00'}>{uploading?`${t('common.loading')} ${Math.round(progress)}%`:t('research.save')}</button>
+    <button className="button" disabled={uploading||busy||!title.trim()||!items.length||!range.from||!range.to||!total||total==='0.00'}>{uploading?`${t('common.loading')} ${Math.round(progress)}%`:t('researchWorkbench.submitClaim')}</button>
   </form>
-  <SideDrawer className="research-workflow-drawer" open={!!draft} historyKey="research-expense-item" title={t('researchFlow.expenseItem')} onClose={()=>setDraft(null)}>
+  <SideDrawer showTitle className="research-workflow-drawer" open={!!draft} historyKey="research-expense-item" title={t('researchFlow.expenseItem')} onClose={()=>setDraft(null)}>
     {draft&&<form className="research-form research-reward-editor" onSubmit={event=>{event.preventDefault();if(!converted||!draft.payment||!draft.invoice)return;const row={...draft,title:draft.title.trim(),amount:normalizeMoney(draft.amount),exchange_rate:draft.currency==='CNY'?'100.00':normalizeMoney(draft.exchange_rate)};setItems(old=>old.some(item=>item.id===row.id)?old.map(item=>item.id===row.id?row:item):[...old,row]);setDraft(null);}}>
       <label>{t('research.name')}<input required maxLength={160} value={draft.title} onChange={event=>update({title:event.target.value})}/></label>
       <div className="reimbursement-money"><label>{t('researchFlow.invoiceAmount')}<input inputMode="decimal" required pattern="[0-9]+([.][0-9]{1,2})?" placeholder="0.00" value={draft.amount} onChange={event=>update({amount:event.target.value})} onBlur={()=>update({amount:normalizeMoney(draft.amount)})}/></label><SelectControl label={t('researchFlow.currency')} value={draft.currency} options={currencies.map(code=>({value:code,label:t(('researchCurrency.'+code) as TranslationKey)+' '+code}))} onChange={currency=>update({currency,exchange_rate:''})}/></div>

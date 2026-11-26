@@ -308,6 +308,13 @@
   border-radius: 0;
 }
 .research-direct-workspace .research-task-browser .research-task-row-copy { gap: 5px; }
+.research-task-row-copy > strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
 .research-task-row .research-task-assignees {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -332,7 +339,7 @@
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
-.research-task-detail .research-task-meta { gap: 6px 13px; margin-bottom: 18px; }
+.research-task-detail .research-task-meta { gap: 6px 13px; margin: 6px 0 0; }
 .research-task-detail .research-task-meta > span { display: inline-flex; align-items: center; gap: 5px; }
 .research-task-detail .research-task-meta .material-symbols-outlined { font-size: 16px; }
 .research-task-document {
@@ -341,7 +348,9 @@
   border-radius: 10px;
   background: var(--bg-panel);
 }
-.research-task-document-actions { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.research-task-document-actions { display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; }
+.research-task-document-actions h3 { margin: 0 auto 0 0; font-size: .94rem; }
+.research-task-document-actions + .research-task-body { margin-top: 8px; }
 .research-task-document-actions .ghost-button { min-height: 36px; font-size: .79rem; }
 .research-current-report { margin-top: 25px; padding-top: 12px; border-top: 1px solid var(--research-ruler); }
 .research-current-report > header { justify-content: space-between; min-height: 46px; }
@@ -359,8 +368,8 @@
   font-size: .81rem;
 }
 .research-report-roster .research-workbench-avatar { width: 24px; height: 24px; }
-.research-task-detail .research-progress-head { align-items: center; justify-content: space-between; }
-.research-discussion-filter { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.research-task-detail .research-progress-head { align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.research-discussion-filter { display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .research-note-awards {
   display: flex;
   flex-wrap: wrap;
@@ -400,9 +409,46 @@
 .research-form-options { border-block: 1px solid var(--line-soft); }
 .research-form-options > div { padding-block: 6px 12px; }
 .research-form-error { margin: 0; font-size: .84rem; color: var(--danger); line-height: 1.55; }
-.research-administration { padding: 24px var(--research-inset) 40px; }
-.research-administration h2 { margin: 0 0 15px; font-size: 1.15rem; }
-.research-administration .setting-group { max-width: 720px; }
+.research-administration {
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding:22px var(--research-inset) 36px;
+}
+.research-administration h2 { margin:0; font-size:1rem; }
+.research-administration p { margin:5px 0 0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
+.research-administration-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.research-administration-shortcuts > section {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:12px;
+  padding:15px;
+  border:1px solid var(--research-ruler);
+  border-radius:12px;
+  background:var(--bg-panel);
+}
+.research-administration-shortcuts > section > .material-symbols-outlined {
+  display:grid;
+  width:38px;
+  aspect-ratio:1;
+  place-items:center;
+  border-radius:10px;
+  background:var(--bg-soft);
+  color:var(--text-secondary);
+  font-size:21px;
+}
+.research-administration-shortcuts .research-flow-actions { grid-column:2; }
+.research-claims-overview { margin-top:24px; }
+.research-claims-overview > header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.research-claims-overview h2 { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.research-claims-overview h2 .research-workbench-count { width:auto; padding:4px 8px; }
+.research-claims-overview .quiet-state { min-height:120px; }
+.research-claims-overview > .research-reimbursement-list { margin-top:12px; border-top:1px solid var(--line-soft); }
+@container(max-width:580px) {
+  .research-administration-shortcuts { grid-template-columns:1fr; }
+  .research-administration-shortcuts > section { padding:12px; gap:8px 11px; }
+}
 
 .research-reimbursement-workspace { align-items: start; }
 .research-reimbursement-workspace > button { justify-self: start; }
