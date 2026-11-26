@@ -1160,11 +1160,58 @@ html[data-theme="dark"] .user-profile-panel {
   font-size: 1.45rem;
 }
 
+.bottom-sheet.account-switch-sheet .sheet-header {
+  padding-block: 0 10px;
+  padding-inline-end: 52px;
+}
+
+.account-switch-sheet .sheet-title-row {
+  min-height: 42px;
+  gap: 12px;
+}
+
+.account-switch-sheet .panel-title {
+  overflow-wrap: anywhere;
+}
+
+.bottom-sheet.account-switch-sheet .sheet-close {
+  top: 29px;
+  right: 18px;
+}
+
+.bottom-sheet.account-switch-sheet .sheet-body {
+  padding-top: 4px;
+}
+
 .account-switch-list {
-  padding-bottom: env(safe-area-inset-bottom);
-  max-height: min(60dvh, 520px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: grid;
+}
+
+.sheet-body .account-switch-list .simple-row {
+  min-height: 64px;
+  padding: 10px 8px;
+  color: var(--text-primary);
+}
+
+.account-switch-list .simple-row > .material-symbols-outlined {
+  color: var(--text-secondary);
+}
+
+.account-switch-list .simple-row:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-input);
+}
+
+@media (min-width: 720px) {
+  .bottom-sheet.account-switch-sheet {
+    max-width: 460px;
+  }
+
+  .bottom-sheet.account-switch-sheet .sheet-close {
+    top: 24px;
+    right: 24px;
+  }
 }
 
 .list-screen,

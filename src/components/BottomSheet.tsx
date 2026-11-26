@@ -12,6 +12,7 @@ import {OverlayIconButton} from './OverlayIconButton';
 interface BottomSheetProps {
   open: boolean;
   title: string;
+  titleLeading?: ReactNode;
   titleAccessory?: ReactNode;
   description?: string;
   onClose: () => void;
@@ -28,6 +29,7 @@ interface BottomSheetProps {
 export function BottomSheet({
   open,
   title,
+  titleLeading,
   titleAccessory,
   description,
   onClose,
@@ -143,6 +145,7 @@ export function BottomSheet({
             onPointerDown={desktopModal ? undefined : (event) => { if ((event.target as HTMLElement).closest('button,input,a,select,textarea')) return; event.currentTarget.setPointerCapture(event.pointerId); startDrag(event.clientY); }}
           >
             <div className="sheet-title-row">
+              {titleLeading}
               <h3 id={titleId} className="panel-title">{title}</h3>
               {titleAccessory}
             </div>

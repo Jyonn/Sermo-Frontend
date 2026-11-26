@@ -16,7 +16,7 @@ import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AvatarCropDialog } from "../components/AvatarCropDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
-import { AccountSwitchList } from "../components/AccountSwitchList";
+import { AccountSwitchSheet } from "../components/AccountSwitchSheet";
 import { ChatQuickActionSettings } from "../components/ChatQuickActionSettings";
 import { ChatQuickActionsMark } from "../components/ChatActionIcon";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
@@ -3159,16 +3159,15 @@ export default function MenuPage() {
         </SideDrawer>
       ) : null}
 
-      <BottomSheet
-        open={accountSwitcherOpen}
-        title={t("menu.switchAccount")}
-        onClose={() => {
-          if (switchingUserId !== null) return;
-          setAccountSwitcherOpen(false);
-        }}
-      >
-        <AccountSwitchList key={String(accountSwitcherOpen)} accounts={switchAccounts} loading={accountSwitcherLoading} switchingUserId={switchingUserId} onSelect={(account) => void switchAccount(account)} />
-      </BottomSheet>
+      {accountSwitcherOpen ? (
+        <AccountSwitchSheet
+          accounts={switchAccounts}
+          loading={accountSwitcherLoading}
+          onClose={() => setAccountSwitcherOpen(false)}
+          onSelect={(account) => void switchAccount(account)}
+          switchingUserId={switchingUserId}
+        />
+      ) : null}
 
       <SignatureSettings key={`${session?.user.space_id}:${currentUserId}`} open={signatureOpen} onOpen={()=>setSignatureOpen(true)} value={me?.signature??session?.user.signature??''} onClose={()=>setSignatureOpen(false)} onSave={async signature=>{const account=webPushAccountRef.current;const payload=await api.updateUserSignature(signature);if(account!==webPushAccountRef.current||payload.user_id!==currentUserId)throw new Error(t('webPush.accountChanged'));setMe(current=>current?{...current,signature:payload.signature}:current);patchSessionUser({signature:payload.signature});showToast(t('signature.saved'));}}/>
       <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>

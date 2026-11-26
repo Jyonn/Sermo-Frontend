@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.26.9",
+  "id": "2026.11.26.10",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "深色模式下的输入框更协调",
+      "title": "同空间切换账号更清楚",
       "items": [
-        "发表和编辑发言时，正文自然融入面板。",
-        "聊天、搜索、科研和管理表单的输入框更贴合深色背景。"
+        "同空间有多个账号时，可在同一个弹窗中选择账号，或从标题栏返回空间列表。"
       ]
     },
     "en": {
-      "title": "Softer input surfaces in dark mode",
+      "title": "Clearer account switching",
       "items": [
-        "The Square writing area now blends into the composer.",
-        "Inputs in chat, search, research and management use subtler dark surfaces."
+        "Choose from multiple accounts in the same space and return to the space list from the same dialog."
       ]
     }
   }
