@@ -7383,7 +7383,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.9rem;
   font-weight: 540;
   line-height: 1.55;
-  white-space: pre-wrap;
+  white-space: normal;
   word-break: break-word;
 }
 

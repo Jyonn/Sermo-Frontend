@@ -608,6 +608,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
       : transcript?.status === "ready" && transcriptVisible
         ? i18n.t("audio.transcriptCollapse")
         : i18n.t("audio.transcribe");
+  const transcriptText = transcript?.text.replace(/[\r\n\u2028\u2029]+/g, " ").trim();
 
   const playbackWidth = `${170 + Math.min(60, Math.max(0, durationSeconds || totalDuration)) * 2}px`;
   return (
@@ -675,9 +676,8 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
               className={`message-audio-transcript ${from} ${className ?? ""}${transcript.status === "failed" ? " is-failed" : ""}`.trim()}
               role={transcriptVisible ? "status" : undefined}
             >
-              <p className={artist ? "message-audio-transcript-quote" : undefined}
-                tabIndex={artist && transcriptVisible ? 0 : undefined}>
-                {transcript.status === "ready" ? transcript.text || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}
+              <p className={artist ? "message-audio-transcript-quote" : undefined}>
+                {transcript.status === "ready" ? transcriptText || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}
               </p>
             </div>
           </div>

@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.26.2",
+  "id": "2026.11.26.3",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "语音消息与歌手气泡",
+      "title": "语音转写排版调整",
       "items": [
-        "听语音时可以继续滑动聊天记录，离开会话时自动停止。",
-        "歌手语音沿用各自的气泡配色，展开转写时唱片留在语音旁。"
+        "转写文字随气泡宽度自然折行，歌手气泡的内外圆角也会对齐。"
       ]
     },
     "en": {
-      "title": "Voice messages and artist bubbles",
+      "title": "Easier-to-read voice transcripts",
       "items": [
-        "Voice messages keep playing while you scroll and stop when you leave the conversation.",
-        "Artist voice messages match their bubble theme, and the record stays beside the audio when you open the transcript."
+        "Transcripts wrap to fit the bubble, and the inner and outer corners of artist bubbles line up."
       ]
     }
   }

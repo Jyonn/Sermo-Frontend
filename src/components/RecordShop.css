@@ -205,29 +205,40 @@ html[data-theme="dark"] [data-record-shop-artist].other > :is(.record-shop-text-
 }
 .message-audio-unit.record-shop-voice > .message-audio-transcript-reveal.is-open { margin-top:2px; }
 .record-shop-voice .message-audio-transcript {
+  --record-transcript-inset:6px;
+  --record-transcript-seam:4px;
   margin:0;
-  padding:6px;
+  padding:var(--record-transcript-inset);
   border-radius:var(--radius-bubble);
   animation:none;
 }
-.record-shop-voice.self .message-audio-transcript { border-top-right-radius:4px; }
-.record-shop-voice.other .message-audio-transcript { border-top-left-radius:4px; }
-.record-shop-voice.self:not(.group-end) .message-audio-transcript { border-bottom-right-radius:4px; }
-.record-shop-voice.other:not(.group-end) .message-audio-transcript { border-bottom-left-radius:4px; }
 .record-shop-voice .message-audio-transcript .message-audio-transcript-quote {
+  --record-transcript-seam:2px;
   margin:0;
   padding:7px 9px;
   border:1px solid var(--reply-preview-border);
-  border-radius:var(--reply-preview-radius, 9px);
+  border-radius:max(2px, calc(var(--radius-bubble) - var(--record-transcript-inset) - 1px));
   background:var(--reply-preview-bg);
   color:var(--reply-preview-color);
   font-size:var(--message-reply-text-size);
   font-weight:400;
   line-height:inherit;
-  white-space:nowrap;
-  overflow:auto hidden;
-  scrollbar-width:none;
-  overscroll-behavior-inline:contain;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.record-shop-voice.self :is(.message-audio-transcript, .message-audio-transcript-quote) {
+  border-top-right-radius:var(--record-transcript-seam);
+}
+.record-shop-voice.other :is(.message-audio-transcript, .message-audio-transcript-quote) {
+  border-top-left-radius:var(--record-transcript-seam);
+}
+.record-shop-voice.self:not(.group-end) :is(.message-audio-transcript, .message-audio-transcript-quote) {
+  border-bottom-right-radius:var(--record-transcript-seam);
+}
+.record-shop-voice.other:not(.group-end) :is(.message-audio-transcript, .message-audio-transcript-quote) {
+  border-bottom-left-radius:var(--record-transcript-seam);
+}
 }
 @media (max-width: 719px) {
   .message-bubble.record-shop-voice-bubble:has(.message-audio-transcribe) {
