@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.26.3",
+  "id": "2026.11.26.4",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
       "title": "语音转写排版调整",
       "items": [
-        "转写文字随气泡宽度自然折行，歌手气泡的内外圆角也会对齐。"
+        "语音转写气泡随文字长度收紧，最长与语音条同宽，超出后自然折行。"
       ]
     },
     "en": {
       "title": "Easier-to-read voice transcripts",
       "items": [
-        "Transcripts wrap to fit the bubble, and the inner and outer corners of artist bubbles line up."
+        "Transcript bubbles fit their text and wrap when they reach the width of the voice message."
       ]
     }
   }

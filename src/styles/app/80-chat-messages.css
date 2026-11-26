@@ -523,11 +523,15 @@
     radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
 }
 
-.message-audio-playback-row { position: relative; max-width: 100%; }
+.message-audio-playback-row {
+  position: relative;
+  width: var(--message-voice-width);
+  max-width: 100%;
+}
 .message-audio-unit.self > :is(.message-audio-playback-row,.message-audio-transcript-reveal) { margin-inline-start: auto; }
 .message-audio-unit > .message-audio-transcript-reveal {
   width: max-content;
-  max-width: min(320px, 100%);
+  max-width: min(var(--message-voice-width), 100%);
   clip-path: none;
 }
 .message-audio-unit > .message-audio-transcript-reveal > div { overflow: hidden; border-radius: var(--voice-quote-radius, 9px); background: var(--bg-surface); }

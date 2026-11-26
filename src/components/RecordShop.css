@@ -194,8 +194,8 @@ html[data-theme="dark"] [data-record-shop-artist].other > :is(.record-shop-text-
 }
 .record-shop-voice.self .message-audio-transcribe { left:calc(-1 * var(--record-voice-action-gap, 7px)); }
 .record-shop-voice.other .message-audio-transcribe { right:calc(-1 * var(--record-voice-action-gap, 7px)); }
+.message-audio-unit.record-shop-voice { width:var(--message-voice-width); }
 .message-audio-unit.record-shop-voice > .message-audio-transcript-reveal {
-  width:100%;
   pointer-events:auto;
 }
 .message-audio-unit.record-shop-voice > .message-audio-transcript-reveal:not(.is-open) { pointer-events:none; }
@@ -238,7 +238,6 @@ html[data-theme="dark"] [data-record-shop-artist].other > :is(.record-shop-text-
 }
 .record-shop-voice.other:not(.group-end) :is(.message-audio-transcript, .message-audio-transcript-quote) {
   border-bottom-left-radius:var(--record-transcript-seam);
-}
 }
 @media (max-width: 719px) {
   .message-bubble.record-shop-voice-bubble:has(.message-audio-transcribe) {

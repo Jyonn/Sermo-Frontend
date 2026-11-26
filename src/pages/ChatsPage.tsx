@@ -616,9 +616,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
       aria-label={i18n.t("message.audio")}
       className={`message-audio-unit ${className ?? from}${artist ? " record-shop-voice" : ""}`}
       role="group"
-      style={artist ? { width: playbackWidth } : undefined}
+      style={{ "--message-voice-width": playbackWidth } as CSSProperties}
     >
-      <div className="message-audio-playback-row" style={artist ? undefined : { width: playbackWidth }}>
+      <div className="message-audio-playback-row">
       {decoration}
       <div
         className={`message-audio-card ${className ?? from}${isPlaying ? " is-playing" : ""}`}
