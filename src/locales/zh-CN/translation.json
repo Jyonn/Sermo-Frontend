@@ -22,7 +22,7 @@
   "research.calendarUI.noDestination": "请先在时序中创建一个日历类别组。",
   "research.calendarUI.invitationSent": "会议邀请已发送",
   "research.calendarUI.sending": "正在发送…",
-  "research.calendarUI.error.invitation_recipient_unavailable": "部分成员尚未关联时序，或关联已失效。请调整邀请名单。",
+  "research.calendarUI.inviteeLinkRequired": "部分成员尚未关联时序，或关联已失效。请调整邀请名单。",
   "square.editStatement": "编辑发言",
   "square.editHistory": "编辑历史",
   "square.edited": "已编辑",

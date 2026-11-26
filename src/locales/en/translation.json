@@ -22,7 +22,7 @@
   "research.calendarUI.noDestination": "Create a calendar group in Chronelle first.",
   "research.calendarUI.invitationSent": "Meeting invitations sent",
   "research.calendarUI.sending": "Sending…",
-  "research.calendarUI.error.invitation_recipient_unavailable": "Some invitees need to link or reconnect Chronelle. Update the invitee list.",
+  "research.calendarUI.inviteeLinkRequired": "Some invitees need to link or reconnect Chronelle. Update the invitee list.",
   "square.editStatement": "Edit post",
   "square.editHistory": "Edit history",
   "square.edited": "Edited",

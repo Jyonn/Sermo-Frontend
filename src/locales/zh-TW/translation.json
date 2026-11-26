@@ -22,7 +22,7 @@
   "research.calendarUI.noDestination": "請先在時序中建立一個日曆類別群組。",
   "research.calendarUI.invitationSent": "會議邀請已送出",
   "research.calendarUI.sending": "正在送出…",
-  "research.calendarUI.error.invitation_recipient_unavailable": "部分成員尚未連結時序，或連結已失效。請調整邀請名單。",
+  "research.calendarUI.inviteeLinkRequired": "部分成員尚未連結時序，或連結已失效。請調整邀請名單。",
   "research.calendarUI.chooseInvitees": "請選擇至少一位已連結時序的課題成員。",
   "square.editStatement": "編輯發言",
   "square.editHistory": "編輯記錄",

@@ -296,7 +296,7 @@ function MeetingForm({
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>}
         </li>)}</ul> : <p className="research-muted">{tr('chooseInvitees')}</p>}
-        {cannotSend && !attempt && <p className="research-error" role="status">{tr('error.invitation_recipient_unavailable')}</p>}
+        {cannotSend && !attempt && <p className="research-error" role="status">{tr('inviteeLinkRequired')}</p>}
       </section>
 
       <section className="research-meeting-time">
