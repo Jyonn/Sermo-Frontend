@@ -66,23 +66,24 @@ export function ResearchCurrentReport({ project, task, owner, userId, onWrite, o
   const start = workflow.report_periods[kind];
   const label = t(`researchFlow.${kind}`);
   const roster = owner ? researchReportRoster(project, task, kind) : [];
-  const mine = reportForMember(task, kind, start, userId);
+  const { report: myReport, removed: myReportRemoved } = reportForMember(task, kind, start, userId);
   if (owner ? roster.length === 0 : !workflow.reportable_task_ids.includes(task.id)) return null;
   return <section className="research-current-report">
     <header>
       <div><h3>{t("researchWorkbench.currentReport", { kind: label })}</h3>
         <small><time dateTime={start}>{researchDate(start, language)}</time></small>
       </div>
-      {owner ? <span className="research-report-tally">{t("researchWorkbench.reportTally", { done: roster.filter(row => row.report).length, total: roster.length })}</span>
-        : mine ? <button type="button" className="ghost-button" onClick={() => onOpen(mine.id)}>{t("researchWorkbench.viewReport")}</button>
+      {owner ? <span className="research-report-tally">{t("researchWorkbench.reportTally", { done: roster.filter(row => row.report || row.removed).length, total: roster.length })}</span>
+        : myReport ? <button type="button" className="ghost-button" onClick={() => onOpen(myReport.id)}>{t("researchWorkbench.viewReport")}</button>
+        : myReportRemoved ? <span className="research-muted">{t("researchWorkbench.reportBodyRemoved")}</span>
         : <button type="button" className="button" onClick={() => onWrite(kind)}>{t("researchFlow.writeReport", { kind: label })}</button>}
     </header>
     {owner && <ul className="research-report-roster">
-      {roster.map(({ member, report }) => <li key={member.id}>
+      {roster.map(({ member, report, removed }) => <li key={member.id}>
         <PlainAvatar className="research-workbench-avatar" name={member.name} uri={member.avatar_uri} cacheKey={member.avatar_cache_key} />
         <strong>{member.name}</strong>
         {report ? <button className="research-inline-action" type="button" onClick={() => onOpen(report.id)}>{t("researchWorkbench.viewReport")}</button>
-          : <span className="research-muted">{t("researchWorkbench.notSubmitted")}</span>}
+          : <span className="research-muted">{t(removed ? "researchWorkbench.reportBodyRemoved" : "researchWorkbench.notSubmitted")}</span>}
       </li>)}
     </ul>}
   </section>;

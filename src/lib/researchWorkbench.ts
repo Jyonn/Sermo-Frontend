@@ -28,15 +28,19 @@ export function researchDate(date: string, language: string) {
 }
 
 export function reportForMember(task: ResearchTask, kind: ReportKind, period: string | undefined, userId: number) {
-  if (!period) return undefined;
-  return task.progress.find(entry => entry.user_id === userId && entry.report_kind === kind && entry.period_start === period);
+  const matches = (entry: { user_id: number; report_kind?: ReportKind; period_start?: string }) =>
+    Boolean(period) && entry.user_id === userId && entry.report_kind === kind && entry.period_start === period;
+  return {
+    report: task.progress.find(matches),
+    removed: task.removed_report_submissions?.some(matches) ?? false,
+  };
 }
 
 export function researchReportRoster(project: ResearchProject, task: ResearchTask, kind: ReportKind) {
   const period = project.workflow?.report_periods[kind];
   return project.members.filter(member => !member.owner && task.assignees.includes(member.id)).map(member => ({
     member,
-    report: reportForMember(task, kind, period, member.id),
+    ...reportForMember(task, kind, period, member.id),
   }));
 }
 

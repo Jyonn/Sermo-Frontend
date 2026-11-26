@@ -43,6 +43,14 @@ test("the mentor roster counts only this period's reports by assigned students",
     [[2, "new"], [3, undefined]]);
 });
 
+test("a deleted report still counts for its submission period", () => {
+  const withRemovedReport: ResearchTask = { ...task, removed_report_submissions: [
+    { user_id: 3, report_kind: "weekly", period_start: "2026-11-23" },
+  ] };
+  assert.deepEqual(researchReportRoster(project, withRemovedReport, "weekly").map(row => [row.member.id, row.report?.id, row.removed]),
+    [[2, "new", false], [3, undefined, true]]);
+});
+
 test("recent progress excludes replies and focuses students on their assigned work", () => {
   assert.deepEqual(latestResearchUpdates(project).map(row => row.entry.id), ["other-new", "new", "previous"]);
   assert.deepEqual(latestResearchUpdates(project, 2).map(row => row.entry.id), ["new", "previous"]);
