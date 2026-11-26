@@ -7,6 +7,7 @@ import { useChristmasBackgroundOverride } from '../lib/personalTheme';
 import { ExplorerAiExpression } from "../components/ExplorerAiExpression";
 import {RecordShopDecorationView} from '../components/RecordShopAlbum';
 import { RecordShopBubbleArt } from "../components/RecordShopBubbleArt";
+import { ThreadVoicePlaybackBoundary, ThreadVoicePlaybackContext, useThreadVoicePlayback, useVoiceMessagePlayback } from "../components/ThreadVoicePlayback";
 import {
   memo,
   lazy,
@@ -135,7 +136,7 @@ import {
 } from "../lib/messageWindow";
 import { formatMentionTokens } from "../lib/mentions";
 import { copyText, formatRelativeTime } from "../lib/presentation";
-import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
+import { normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageDTO, messageKindFromType } from "../lib/chatMessageMapper";
@@ -509,150 +510,37 @@ function audioWavePattern(durationSeconds: number) {
   return Array.from({ length: barCount }, (_, index) => AUDIO_WAVE_PATTERN[index % AUDIO_WAVE_PATTERN.length]);
 }
 
-function waitForAudioReady(audio: HTMLAudioElement) {
-  if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-    return Promise.resolve();
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    let settled = false;
-    let timeoutId = 0;
-
-    const cleanup = () => {
-      audio.removeEventListener("canplay", handleReady);
-      audio.removeEventListener("canplaythrough", handleReady);
-      audio.removeEventListener("loadeddata", handleReady);
-      audio.removeEventListener("error", handleError);
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-
-    const finish = (callback: () => void) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      callback();
-    };
-
-    const handleReady = () => finish(resolve);
-    const handleError = () => finish(() => reject(new Error("audio_load_failed")));
-
-    timeoutId = window.setTimeout(handleReady, 5000);
-    audio.addEventListener("canplay", handleReady, { once: true });
-    audio.addEventListener("canplaythrough", handleReady, { once: true });
-    audio.addEventListener("loadeddata", handleReady, { once: true });
-    audio.addEventListener("error", handleError, { once: true });
-  });
-}
-
 const AudioMessagePlayer = memo(function AudioMessagePlayer({
   durationSeconds,
   from,
   uri,
+  messageKey,
   messageId,
   className,
   previewTranscript = false,
+  artist,
+  decoration,
+  first,
 }: {
   durationSeconds?: number;
   from: "self" | "other";
   uri: string;
+  messageKey: string;
   messageId?: number;
   className?: string;
   previewTranscript?: boolean;
+  artist?: NonNullable<ChatMessage["recordShop"]>["artist"];
+  decoration?: ReactNode;
+  first?: boolean;
 }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [resolvedDuration, setResolvedDuration] = useState(durationSeconds ?? 0);
-  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const { player, playback } = useVoiceMessagePlayback(messageKey);
+  const isPlaying = playback?.status === "playing";
+  const isLoading = playback?.status === "loading";
+  const currentTime = playback?.time ?? 0;
+  const totalDuration = playback?.duration || durationSeconds || 0;
   const [transcript, setTranscript] = useState<AudioTranscriptDTO | null>(null);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
   const transcriptRequestRef = useRef(0);
-  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    setIsPlaying(false);
-    setIsLoading(false);
-    setCurrentTime(0);
-    setResolvedDuration(durationSeconds ?? 0);
-
-    const sync = () => {
-      const nextDuration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : durationSeconds ?? 0;
-      setResolvedDuration(nextDuration);
-      setCurrentTime(Number.isFinite(audio.currentTime) ? audio.currentTime : 0);
-      setIsPlaying(!audio.paused && !audio.ended);
-    };
-
-    const handleEnded = () => {
-      audio.currentTime = 0;
-      setIsLoading(false);
-      if (activeThreadAudio === audio) {
-        activeThreadAudio = null;
-      }
-      sync();
-    };
-
-    const handlePlaying = () => {
-      setIsLoading(false);
-      sync();
-    };
-
-    const handleWaiting = () => {
-      if (!audio.paused && !audio.ended) {
-        setIsLoading(true);
-      }
-      sync();
-    };
-
-    const handlePause = () => {
-      setIsLoading(false);
-      sync();
-    };
-
-    const handleError = () => {
-      setIsLoading(false);
-      setIsPlaying(false);
-    };
-
-    sync();
-    audio.addEventListener("loadedmetadata", sync);
-    audio.addEventListener("durationchange", sync);
-    audio.addEventListener("timeupdate", sync);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("play", sync);
-    audio.addEventListener("playing", handlePlaying);
-    audio.addEventListener("waiting", handleWaiting);
-    audio.addEventListener("stalled", handleWaiting);
-    audio.addEventListener("error", handleError);
-    audio.addEventListener("ended", handleEnded);
-
-    return () => {
-      audio.pause();
-      setIsLoading(false);
-      if (activeThreadAudio === audio) {
-        activeThreadAudio = null;
-      }
-      audio.removeEventListener("loadedmetadata", sync);
-      audio.removeEventListener("durationchange", sync);
-      audio.removeEventListener("timeupdate", sync);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("play", sync);
-      audio.removeEventListener("playing", handlePlaying);
-      audio.removeEventListener("waiting", handleWaiting);
-      audio.removeEventListener("stalled", handleWaiting);
-      audio.removeEventListener("error", handleError);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, [durationSeconds, resolvedUri]);
-
-  useEffect(() => {
-    setRetryWithFreshUri(false);
-  }, [uri]);
 
   useEffect(() => {
     transcriptRequestRef.current += 1;
@@ -663,42 +551,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     };
   }, [messageId, previewTranscript]);
 
-  const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
   const wavePattern = audioWavePattern(totalDuration);
   const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
   const activeBars = Math.max(1, Math.round(progress * wavePattern.length));
-
-  const togglePlayback = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (audio.paused || audio.ended) {
-      try {
-        if (activeThreadAudio && activeThreadAudio !== audio) {
-          activeThreadAudio.pause();
-          activeThreadAudio.currentTime = 0;
-        }
-        if (audio.ended || audio.currentTime >= (audio.duration || totalDuration || 0)) {
-          audio.currentTime = 0;
-        }
-        activeThreadAudio = audio;
-        setIsLoading(true);
-        audio.load();
-        await waitForAudioReady(audio);
-        await audio.play();
-      } catch {
-        setIsLoading(false);
-        setIsPlaying(false);
-      }
-      return;
-    }
-
-    audio.pause();
-    setIsLoading(false);
-    if (activeThreadAudio === audio) {
-      activeThreadAudio = null;
-    }
-  };
 
   const waitForTranscript = async (requestToken: number, initial: AudioTranscriptDTO) => {
     let next = initial;
@@ -754,21 +609,27 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         ? i18n.t("audio.transcriptCollapse")
         : i18n.t("audio.transcribe");
 
+  const playbackWidth = `${170 + Math.min(60, Math.max(0, durationSeconds || totalDuration)) * 2}px`;
   return (
     <div
       aria-label={i18n.t("message.audio")}
-      className={`message-audio-unit ${from} ${className ?? ""}`.trim()}
+      className={`message-audio-unit ${className ?? from}${artist ? " record-shop-voice" : ""}`}
       role="group"
+      style={artist ? { width: playbackWidth } : undefined}
     >
-      <div className="message-audio-playback-row" style={{width: `${170 + Math.min(60, Math.max(0, totalDuration)) * 2}px`}}>
+      <div className="message-audio-playback-row" style={artist ? undefined : { width: playbackWidth }}>
+      {decoration}
       <div
-        className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}
+        className={`message-audio-card ${className ?? from}${isPlaying ? " is-playing" : ""}`}
       >
         <button
           aria-label={isLoading ? i18n.t("audio.loading") : isPlaying ? i18n.t("audio.pause") : i18n.t("audio.play")}
           className="message-audio-play"
           disabled={isLoading}
-          onClick={() => void togglePlayback()}
+          onClick={(event) => {
+            event.stopPropagation();
+            player?.toggle({ key: messageKey, uri });
+          }}
           type="button"
         >
           {isLoading ? <span aria-hidden="true" className="message-audio-play-spinner" /> : <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />}
@@ -785,21 +646,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           </div>
           <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
         </div>
-        <audio
-          className="message-audio-player"
-          preload="metadata"
-          ref={audioRef}
-          src={resolvedUri}
-          onError={() => {
-            setIsLoading(false);
-            if (!retryWithFreshUri) {
-              forgetStableResourceUri(uri);
-              setRetryWithFreshUri(true);
-              return;
-            }
-            setIsPlaying(false);
-          }}
-        />
+        {artist ? <RecordShopBubbleArt key={artist} artist={artist} animateOnView={!first} /> : null}
       </div>
       {(messageId && messageId > 0) || previewTranscript ? (
         <button
@@ -828,7 +675,10 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
               className={`message-audio-transcript ${from} ${className ?? ""}${transcript.status === "failed" ? " is-failed" : ""}`.trim()}
               role={transcriptVisible ? "status" : undefined}
             >
-              <p>{transcript.status === "ready" ? transcript.text || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}</p>
+              <p className={artist ? "message-audio-transcript-quote" : undefined}
+                tabIndex={artist && transcriptVisible ? 0 : undefined}>
+                {transcript.status === "ready" ? transcript.text || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}
+              </p>
             </div>
           </div>
         </div>
@@ -836,8 +686,6 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     </div>
   );
 });
-
-let activeThreadAudio: HTMLAudioElement | null = null;
 
 function messageTypeFromKind(kind: MessageMediaKind) {
   if (kind === "image") return MESSAGE_TYPE_IMAGE;
@@ -1316,6 +1164,7 @@ function renderMessageContent(
   groupClassName: string,
   onRetry?: () => void,
   bubbleStyle?: ChatBubbleStyle,
+  voiceDecoration?: { ornament: ReactNode; first: boolean },
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
@@ -1359,7 +1208,10 @@ function renderMessageContent(
 
   if (message.kind === "audio" && message.payload?.uri) {
     if (message.payload.bgm_entrance) return <BgmAudioPill title={message.payload.song_title ?? 'BGM'} uri={message.payload.uri} />;
-    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined} previewTranscript={typeof message.id === "string" && message.id.startsWith("preview-")} uri={message.localPreviewUri ?? message.payload.uri} />;
+    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from}
+      messageKey={message.clientId} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined}
+      previewTranscript={typeof message.id === "string" && message.id.startsWith("preview-")} uri={message.localPreviewUri ?? message.payload.uri}
+      artist={voiceDecoration ? message.recordShop?.artist : undefined} decoration={voiceDecoration?.ornament} first={voiceDecoration?.first} />;
   }
 
   if (message.kind === "file" && message.payload?.uri) {
@@ -1603,6 +1455,14 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
   const hasLinkPreview = Boolean(extractFirstMessageUrl(message.payload?.text ?? message.text));
   const recordShopArtist = message.kind === "text" && !hasLinkPreview ? message.recordShop?.artist : undefined;
+  const singerVoice = Boolean(message.recordShop && message.kind === "audio" && message.payload?.uri && !message.payload.bgm_entrance);
+  const singerDecoration = message.recordShop && (isFirst || message.recordShop.album) ? (
+    <RecordShopDecorationView
+      decoration={isFirst ? { ...message.recordShop, album: undefined } : message.recordShop}
+      interactive={!selectionMode}
+    />
+  ) : null;
+  const ornamentInBubble = recordShopArtist || (singerVoice && isFirst && message.replyTo);
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -1663,7 +1523,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     >
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`} data-record-shop-artist={message.recordShop?.artist}>
-        {message.recordShop ? <RecordShopDecorationView decoration={message.recordShop} interactive={!selectionMode} /> : null}
+        {!ornamentInBubble && !singerVoice ? singerDecoration : null}
         {showRetry ? (
           <button aria-label={i18n.t(message.kind === "text" ? "chat.editFailedText" : "message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">{message.kind === "text" ? "edit" : "refresh"}</span>
@@ -1693,6 +1553,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             canOpenActions ? "message-bubble-actionable" : "",
             message.replyTo ? "has-reply" : "",
             recordShopArtist ? "record-shop-text-bubble" : "",
+            singerVoice ? "record-shop-voice-bubble" : "",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -1723,9 +1584,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
-          {recordShopArtist ? (
-            <RecordShopBubbleArt key={recordShopArtist} artist={recordShopArtist} animateOnView={isFirst || isEntering} />
-          ) : null}
+          {ornamentInBubble ? singerDecoration : null}
+          {recordShopArtist ? <RecordShopBubbleArt key={recordShopArtist} artist={recordShopArtist} animateOnView={!isFirst} /> : null}
           {message.replyTo ? (
             <button
               className="message-reply-preview"
@@ -1740,7 +1600,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle)}
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle,
+            singerVoice ? { ornament: ornamentInBubble ? null : singerDecoration, first: isFirst } : undefined)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {!message.recordShop&&isFirst ? <NikoBubbleRunner /> : null}
           {!message.recordShop&&isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
@@ -3448,6 +3309,10 @@ function LiveChatsPage({
   );
   const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
   const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
+  const threadVoicePlayer = useThreadVoicePlayback(
+    selectedChat && !isClosingChatView ? `${cacheScope}:${selectedChat.id}` : undefined,
+    voicePreviewAudioRef,
+  );
   const canInviteSubmissionAuthors = Boolean(
     selectedChat?.purpose === "submission"
       && isSubmissionOriginator
@@ -4033,6 +3898,8 @@ function LiveChatsPage({
   );
 
   const closeChatView = () => {
+    threadVoicePlayer.stop();
+    voicePreviewAudioRef.current?.pause();
     if (embeddedChat) { embeddedChat.onClose(); return; }
     if (!window.matchMedia("(max-width: 719px)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setDetailsSheetOpen(false);
@@ -6566,11 +6433,7 @@ function LiveChatsPage({
       audio.pause();
       return;
     }
-    if (activeThreadAudio && activeThreadAudio !== audio) {
-      activeThreadAudio.pause();
-      activeThreadAudio.currentTime = 0;
-    }
-    activeThreadAudio = audio;
+    threadVoicePlayer.stop();
     try {
       await audio.play();
     } catch {
@@ -7661,6 +7524,7 @@ function LiveChatsPage({
   const quickActionsHeaderButton = shortComposerLayout && hasQuickActions ? <button className={`chat-details-button quick-actions-toggle${quickActionsExpanded ? " is-expanded" : ""}`} type="button" aria-label={t("quickActions.title")} aria-expanded={quickActionsExpanded} onClick={() => setQuickActionsExpanded(value => !value)}><span className="material-symbols-outlined">dashboard_customize</span></button> : null;
 
   return (
+    <ThreadVoicePlaybackContext.Provider value={threadVoicePlayer}>
     <AppChrome
       embedded={!!embeddedChat}
       workspaceSelected={Boolean(displayedChat)}
@@ -8048,7 +7912,7 @@ function LiveChatsPage({
                       <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={composerBusy || voiceComposer.phase === "sending"} onClick={() => { if (requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) toggleDesktopComposerTool("voice"); }} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                         {desktopComposerTool === "voice" ? <DesktopVoiceStudio key={selectedChat?.id} transcript={desktopTranscript} onText={convertDesktopVoiceToText} onClose={()=>{cancelVoiceRecording();setDesktopComposerTool(null)}} phase={voiceComposer.phase} open={voiceComposer.open} bars={voiceComposer.bars} duration={voiceComposer.durationSeconds} previewPlaying={voicePreviewPlaying} onStart={()=>void startVoiceRecording()} onStop={stopVoiceRecording} onCancel={cancelVoiceRecording} onPreview={()=>void toggleVoicePreview()} onSend={()=>void sendRecordedVoiceMessage()}>
-                            <audio ref={voicePreviewAudioRef} hidden onEnded={() => { setVoicePreviewPlaying(false); if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null; }} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
+                            <audio ref={voicePreviewAudioRef} hidden onEnded={() => setVoicePreviewPlaying(false)} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
                         </DesktopVoiceStudio> : null}
                       </span>
                       {selectedChat?.type === "group" ? <button aria-label={t("chat.mentionMembers")} aria-pressed={mentionSearch !== null} className={mentionSearch !== null ? "is-active" : ""} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => { setDesktopComposerTool(null); setEmojiPickerOpen(false); mentionEditorRef.current?.openMentionPicker(); }} title={t("chat.mentionMembers")} type="button"><span className="material-symbols-outlined" aria-hidden="true">alternate_email</span></button> : null}
@@ -9614,6 +9478,7 @@ function LiveChatsPage({
       />
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
+    </ThreadVoicePlaybackContext.Provider>
   );
 }
 
@@ -10001,6 +9866,7 @@ export function ChatPreview({
   }, [initialScrollToEnd, messages.length]);
 
   const handleMessageClick = onMessageClick ? (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest(".message-audio-play, .message-audio-transcribe, .record-shop-message-cover")) return;
     const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
     const messageId = Number(messageNode?.dataset.messageId);
     const source = dtoById.get(messageId);
@@ -10057,9 +9923,10 @@ export function ChatPreview({
     </div>
   );
 
-  if (bare) return messageList;
+  if (bare) return <ThreadVoicePlaybackBoundary>{messageList}</ThreadVoicePlaybackBoundary>;
 
   return (
+    <ThreadVoicePlaybackBoundary>
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
       onClickCapture={handleMessageClick}
@@ -10069,10 +9936,11 @@ export function ChatPreview({
         {messageList}
       </div>
     </section>
+    </ThreadVoicePlaybackBoundary>
   );
 }
 
 export default function ChatsPage({ preview, purpose, embeddedChat }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; embeddedChat?: {id:number;onClose:()=>void;onProjectDetails?:()=>void} }) {
-  if (preview) return <PreviewChatConversation config={preview} />;
+  if (preview) return <ThreadVoicePlaybackBoundary><PreviewChatConversation config={preview} /></ThreadVoicePlaybackBoundary>;
   return embeddedChat ? <div className="research-embedded-chat"><LiveChatsPage purpose={purpose} embeddedChat={embeddedChat}/></div> : <LiveChatsPage purpose={purpose}/>;
 }

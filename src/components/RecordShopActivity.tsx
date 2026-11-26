@@ -171,17 +171,17 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate, onConfigure 
                 </button>}
                 <div className="record-shop-reward-preview">
                   <div className="message-bubble-shell self group-start" data-record-shop-artist={catalogSinger}>
-                    <RecordShopDecorationView decoration={decoration} />
                     <div className="message-bubble self group-start record-shop-text-bubble">
-                      <RecordShopBubbleArt artist={catalogSinger} animateOnView />
+                      <RecordShopDecorationView decoration={decoration} />
+                      <RecordShopBubbleArt artist={catalogSinger} />
                       {t("recordShop.bubblePreviewFirst")}
                     </div>
                   </div>
                   {catalog.length ? (
                     <div className="message-bubble-shell self" data-record-shop-artist={catalogSinger}>
-                      <RecordShopDecorationView decoration={{ ...decoration, album: catalog[0] }} />
                       <div className="message-bubble self group-end record-shop-text-bubble">
-                        <RecordShopBubbleArt artist={catalogSinger} />
+                        <RecordShopDecorationView decoration={{ ...decoration, album: catalog[0] }} />
+                        <RecordShopBubbleArt artist={catalogSinger} animateOnView />
                         {t("recordShop.bubblePreviewNext")}
                       </div>
                     </div>

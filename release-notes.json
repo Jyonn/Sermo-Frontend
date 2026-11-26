@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.26.1",
+  "id": "2026.11.26.2",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "唱片卡片搬到奖章",
+      "title": "语音消息与歌手气泡",
       "items": [
-        "在广场的「奖章」里查看谁最先找到了钻级或曜级唱片，点开卡片即可再看庆祝动画。"
+        "听语音时可以继续滑动聊天记录，离开会话时自动停止。",
+        "歌手语音沿用各自的气泡配色，展开转写时唱片留在语音旁。"
       ]
     },
     "en": {
-      "title": "Record cards move to Medals",
+      "title": "Voice messages and artist bubbles",
       "items": [
-        "See who found each Diamond or Obsidian record first in Square → Medals. Open a record card to watch the celebration again."
+        "Voice messages keep playing while you scroll and stop when you leave the conversation.",
+        "Artist voice messages match their bubble theme, and the record stays beside the audio when you open the transcript."
       ]
     }
   }

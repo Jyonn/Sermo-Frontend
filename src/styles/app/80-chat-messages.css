@@ -544,7 +544,7 @@
   --voice-quote-border: var(--bubble-skin-self-border, var(--line-soft));
   --voice-quote-radius: var(--bubble-skin-self-radius, 9px);
 }
-.message-group:is(.self,.other) .message-audio-unit:is(.self,.other) .message-audio-transcript {
+.message-group:is(.self,.other) .message-audio-unit:is(.self,.other):not(.record-shop-voice) .message-audio-transcript {
   margin: 0;
   padding: 9px 12px;
   border: 1px solid var(--voice-quote-border);
@@ -560,5 +560,5 @@
 .message-group:is(.bubble-style-typewriter,.bubble-style-terminal,.bubble-style-receipt) .message-audio-transcript p { font-family: "JetBrains Mono", monospace; }
 .message-group.bubble-style-comic .message-audio-unit:is(.self,.other) .message-audio-transcript { border-width: 2px 2px 2px 4px; }
 .message-group.bubble-style-receipt .message-audio-unit:is(.self,.other) .message-audio-transcript { border-block-style: dashed; }
-.message-group .message-audio-unit .message-audio-transcript p { font-size: .82rem; font-weight: 400; line-height: 1.65; }
+.message-group .message-audio-unit:not(.record-shop-voice) .message-audio-transcript p { font-size: .82rem; font-weight: 400; line-height: 1.65; }
 .message-group.bubble-style-receipt .message-bubble.is-audio:has(.message-audio-unit)::before { content: none; }

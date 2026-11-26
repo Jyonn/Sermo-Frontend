@@ -5254,6 +5254,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-bubble {
   --message-bubble-max-width: min(100%, 68vw, 320px);
+  --message-reply-text-size: 0.76rem;
   position: relative;
   isolation: isolate;
   padding: 9px 13px;
@@ -5332,7 +5333,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-reply-preview span {
   position: relative;
   z-index: 1;
-  font-size: 0.76rem;
+  font-size: var(--message-reply-text-size, 0.76rem);
 }
 
 .message-reply-preview:disabled {
@@ -7258,11 +7259,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   white-space: nowrap;
 }
 
-.message-audio-player {
-  width: 100%;
-  display: none;
-}
-
 .message-audio-transcribe {
   position: absolute;
   z-index: 4;
@@ -7404,7 +7400,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   }
 }
 
-.message-audio-card > :not(.message-audio-player) {
+.message-audio-card > :is(.message-audio-play, .message-audio-body) {
   position: relative;
   z-index: 1;
 }

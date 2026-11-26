@@ -89,6 +89,7 @@ export function RecordShopBubbleArt({ artist, animateOnView = false }: {
   const root = useRef<SVGSVGElement>(null);
   const [revealed, setRevealed] = useState(false);
   const { resting, strokes } = illustrations[artist];
+  const animating = animateOnView && revealed;
 
   useEffect(() => {
     const node = root.current;
@@ -109,14 +110,14 @@ export function RecordShopBubbleArt({ artist, animateOnView = false }: {
   return (
     <svg
       aria-hidden="true"
-      className={`record-shop-bubble-art${revealed ? " is-revealed" : ""}`}
+      className={`record-shop-bubble-art${animating ? " is-revealed" : ""}`}
       focusable="false"
       ref={root}
       viewBox="0 0 108 44"
       preserveAspectRatio="xMaxYMax meet"
     >
       <path className="record-shop-art-mark" d={resting} />
-      {revealed && strokes.map(({ path, delay, duration }) => (
+      {animating && strokes.map(({ path, delay, duration }) => (
         <path
           className="record-shop-art-stroke"
           key={path}
