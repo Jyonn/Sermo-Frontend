@@ -53,6 +53,17 @@ html[data-site-theme="christmas-2026"] body {
   background-size: 63px 67px, 101px 87px;
 }
 
+html[data-site-theme="christmas-2026"] .gesture-lock-screen {
+  --gesture-track: #365d49;
+  --gesture-art:
+    var(--christmas-garland) center top / 96px 12px repeat-x,
+    var(--christmas-garland) center bottom / 96px 12px repeat-x;
+}
+
+html[data-site-theme="christmas-2026"][data-theme="dark"] .gesture-lock-screen {
+  --gesture-track: var(--christmas-lights);
+}
+
 html[data-site-theme="christmas-2026"] :is(.topbar, .tab-sticky-header, .drawer-topbar) {
   background-color: var(--bg-panel-strong);
   border-bottom-color: color-mix(in srgb, var(--christmas-lights) 55%, var(--line-soft));

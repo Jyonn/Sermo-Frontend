@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation,useParams } from "react-router-dom";
 import {ActivityOverlayProvider} from './lib/activityOverlay';
 import {RecordShopDiscoveries} from './components/RecordShopAlbum';
@@ -116,13 +116,19 @@ export default function App() {
   const features = useSpaceFeatures();
   const {theme:personalTheme}=usePersonalTheme();
   const birthday=useBirthday();
-  const birthdayActive=Boolean(birthday.status?.active&&location.pathname.startsWith('/app/'));
+  const inApp = location.pathname.startsWith('/app/');
+  const birthdayActive=Boolean(birthday.status?.active&&inApp);
   const spaceId = session?.user.space_id;
-  useEffect(() => {
+  const siteTheme = !spaceId || !inApp ? 'default'
+    : personalTheme === 'default' && features.siteTheme === 'qixi-2026' ? features.siteTheme : personalTheme;
+  useLayoutEffect(() => {
+    applySiteTheme(siteTheme);
+    return () => applySiteTheme('default');
+  }, [siteTheme]);
+  useLayoutEffect(() => {
     for(const [key,value] of Object.entries(birthdayAssets))document.documentElement.style.setProperty(`--birthday-${key}`,`url("${value}")`);
-    applySiteTheme(spaceId&&location.pathname.startsWith('/app/') ? (personalTheme === 'default' && features.siteTheme === 'qixi-2026' ? features.siteTheme : personalTheme) : 'default');
-    return () => {applySiteTheme('default');for(const key of Object.keys(birthdayAssets))document.documentElement.style.removeProperty(`--birthday-${key}`);};
-  }, [spaceId,personalTheme,features.siteTheme,location.pathname]);
+    return () => {for(const key of Object.keys(birthdayAssets))document.documentElement.style.removeProperty(`--birthday-${key}`);};
+  }, []);
   useEffect(() => {
     if (!spaceId) return;
     const refresh = () => {

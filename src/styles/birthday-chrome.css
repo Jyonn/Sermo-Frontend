@@ -17,6 +17,26 @@ html[data-site-theme="birthday-botanical"][data-theme="dark"] {
   --birthday-edge-shadow: #0c161e30;
 }
 
+html[data-site-theme="birthday-botanical"] .gesture-lock-screen {
+  --gesture-heading-font: "Songti SC", "Noto Serif SC", serif;
+  --gesture-art:
+    var(--birthday-edge-art) center bottom / var(--birthday-edge-repeat) repeat-x,
+    linear-gradient(var(--birthday-header-grain), var(--birthday-header-grain)) center top / 100% 7px no-repeat;
+}
+
+html[data-site-theme="birthday-botanical"] .gesture-lock-screen::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: auto 0 18px auto;
+  width: min(48vw, 420px);
+  height: min(46svh, 360px);
+  opacity: .25;
+  pointer-events: none;
+  background: var(--birthday-hero) right 74% / cover no-repeat;
+  mask-image: radial-gradient(ellipse at 100% 100%, #000 15%, transparent 72%);
+}
+
 /* Tab surfaces use the existing scroll elevation; no opaque mobile slab. */
 html[data-site-theme="birthday-botanical"] .shell-authenticated {
   --tab-header-paint:

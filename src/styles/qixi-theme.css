@@ -56,6 +56,18 @@ html[data-site-theme="qixi-2026"] body::before {
   mask-image: linear-gradient(#000, transparent 72%);
 }
 
+html[data-site-theme="qixi-2026"] .gesture-lock-screen {
+  --gesture-heading-font: "Songti SC", "Noto Serif SC", serif;
+  --gesture-track: var(--qixi-plum);
+  --gesture-art:
+    var(--qixi-header-image) center bottom / min(100%, 880px) 54px no-repeat,
+    radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--qixi-gold) 17%, transparent), transparent 44%);
+}
+
+html[data-site-theme="qixi-2026"][data-theme="dark"] .gesture-lock-screen {
+  --gesture-track: var(--brand-primary);
+}
+
 html[data-site-theme="qixi-2026"] :is(.topbar, .tab-sticky-header, .drawer-topbar) {
   isolation: isolate;
   border-bottom-color: color-mix(in srgb, var(--qixi-gold) 30%, transparent);

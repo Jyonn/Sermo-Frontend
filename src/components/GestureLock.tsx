@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
   MAX_GESTURE_LOCK_AFTER_MINUTES,
   buildGestureLockPayload,
@@ -10,6 +10,7 @@ import {
 } from "../lib/gestureLock";
 import { ApiError, api } from "../lib/api";
 import { useI18n } from "../lib/language";
+import { useModalFocus } from "../lib/modalFocus";
 import type { GestureLockPreferenceDTO } from "../types";
 
 interface PatternGridProps {
@@ -350,7 +351,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged, onC
       <section className="gesture-lock-stage" aria-label={t("gesture.title")}>
         <header className="gesture-lock-heading">
           <h1>{verifyingDisable ? t("gesture.disable") : t("gesture.title")}</h1>
-          <p className={`gesture-lock-message gesture-lock-message-${tone}`}>{drawing ? prompt : t("gesture.enabled")}</p>
+          <p className={`gesture-lock-message gesture-lock-message-${tone}`} role="status">{drawing ? prompt : t("gesture.enabled")}</p>
         </header>
 
         <div className={`gesture-lock-content${drawing ? " is-drawing" : " is-managing"}`}>
@@ -415,9 +416,12 @@ interface GestureUnlockScreenProps {
 
 export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, onResetAndLogout }: GestureUnlockScreenProps) {
   const { t } = useI18n();
+  const stageRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
   const [message, setMessage] = useState(() => t("gesture.draw"));
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [checking, setChecking] = useState(false);
+  useModalFocus(stageRef, true, undefined, { autoFocus: false, restoreFocus: false });
 
   const complete = async (pattern: string) => {
     if (checking) return;
@@ -436,18 +440,18 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
   };
 
   return (
-    <main className="gesture-lock-screen">
-      <section className="gesture-lock-stage" aria-label={t("gesture.title")}>
+    <main className="gesture-lock-screen" data-overlay-layer>
+      <section className="gesture-lock-stage" ref={stageRef} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <header className="gesture-lock-heading">
-          <h1>{t("gesture.title")}</h1>
+          <h1 id={titleId}>{t("gesture.title")}</h1>
           <p>{userName ? t("gesture.welcomeUser", { name: userName }) : t("gesture.welcome")}</p>
         </header>
         <div className="gesture-lock-content is-drawing">
           <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
         </div>
         <footer className="gesture-lock-actions">
-          <div className={`gesture-lock-message gesture-lock-message-${tone}`}>{message}</div>
-          <button className="ghost-button gesture-lock-reset" onClick={onResetAndLogout} type="button">
+          <div className={`gesture-lock-message gesture-lock-message-${tone}`} role="status">{message}</div>
+          <button className="ghost-button" onClick={onResetAndLogout} type="button">
             {t("auth.logout")}
           </button>
         </footer>

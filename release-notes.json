@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.26.12",
+  "id": "2026.11.26.13",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "编辑广场评论与科研进展",
+      "title": "手势锁跟随主题",
       "items": [
-        "可以编辑自己的广场评论和回复。",
-        "可以编辑或删除自己的科研进展、回复和报告。删除后仍可查看其他成员的回复。"
+        "解锁与设置页面会随默认、圣诞、生日或七夕主题调整，并适配深浅色外观。"
       ]
     },
     "en": {
-      "title": "Edit Square comments and research progress",
+      "title": "Gesture lock follows your theme",
       "items": [
-        "Edit your own Square comments and replies.",
-        "Edit or delete your own research updates, replies, and reports. Replies from other members remain visible."
+        "The unlock screen and settings follow the default, Christmas, birthday, or Qixi theme in both light and dark appearances."
       ]
     }
   }
