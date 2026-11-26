@@ -1198,12 +1198,12 @@ export const api = {
     });
   },
 
-  syncSquareStatements(statement_ids:number[],signal?:AbortSignal){
-    return request<SquareSyncResult>('/square/statements/sync',{auth:true,method:'POST',body:{statement_ids},signal});
+  syncSquareStatements(statement_ids:number[],signal?:AbortSignal,known_revisions?:Record<string,number>){
+    return request<SquareSyncResult>('/square/statements/sync',{auth:true,method:'POST',body:{statement_ids,known_revisions},signal});
   },
 
-  editSquareStatement(id: number, text: string, revision: number) {
-    return request<SquareStatementDTO>(`/square/statements/${id}`, { method: "PATCH", auth: true, body: { text, revision } });
+  editSquareStatement(id: number, text: string | undefined, revision: number, content: import("../types").SquareStatementEditContent) {
+    return request<SquareStatementDTO>(`/square/statements/${id}`, { method: "PATCH", auth: true, body: { text, revision, content } });
   },
 
   getSquareStatementHistory(id: number, before?: number, signal?: AbortSignal) {

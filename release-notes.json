@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.26.7",
+  "id": "2026.11.26.8",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "科研任务与会议邀请更顺手",
+      "title": "发言可编辑更多内容",
       "items": [
-        "优化任务列表和详情，记录进展、提交周报时可以在 Markdown 编辑和预览间切换。",
-        "可直接新建会议，自选受邀成员，并在会议列表查看邀请。",
-        "从「资料与事务」直接添加资料、发放奖励或提交报销，待处理报销优先展示。"
+        "在熟悉的发表界面修改正文、图片、视频、语音、外部分享、位置和可见范围。",
+        "保存后保留原发布时间和互动。点击「已编辑」可查看历史版本及改动项目。"
       ]
     },
     "en": {
-      "title": "A smoother research workspace",
+      "title": "Edit more of your Square posts",
       "items": [
-        "Find tasks more easily and switch between writing and previewing Markdown for updates and reports.",
-        "Create meetings from the toolbar, choose who to invite, and find sent invitations in the meeting list.",
-        "Add materials, grant rewards, and submit claims from the workspace. Claims that need attention appear first."
+        "Use the familiar composer to edit text, photos, video, voice, shared links, location and audience.",
+        "Edits keep the original post time and interactions. Select Edited to see previous versions and what changed."
       ]
     }
   }

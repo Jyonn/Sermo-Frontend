@@ -15,7 +15,7 @@ export function filterSquareRemoved<T extends {statement_id:number}>(scope:strin
 
 function squarePatchForVersion(previous: SquarePatch, patch: SquarePatch): SquarePatch {
   if (patch.edit_revision === undefined || (previous.edit_revision ?? 0) <= patch.edit_revision) return patch;
-  const { edit_revision, edited_at, text, inline_emoticons, ...metadata } = patch;
+  const { edit_revision, edited_at, text, inline_emoticons, visibility, location, media, external_media, chat_record, ...metadata } = patch;
   return metadata;
 }
 
@@ -61,8 +61,8 @@ export function rememberSquareResponse<T>(scope:string|null,path:string,method:s
   const id=Number(path.match(/^\/square\/statements\/(\d+)/)?.[1]);
   if(method==='DELETE'&&/^\/square\/statements\/\d+$/.test(path))applySquareSync(scope,{items:[],removed_ids:[id]});
   else if(method==='PATCH'&&/^\/square\/statements\/\d+$/.test(path)&&data&&typeof data==='object'){
-    const { text, edit_revision, edited_at, inline_emoticons, can_edit } = data as unknown as SquareStatementDTO;
-    applySquareSync(scope,{items:[{statement_id:id,text,edit_revision,edited_at,inline_emoticons,can_edit}],removed_ids:[]});
+    const { text, edit_revision, edited_at, inline_emoticons, can_edit, visibility, location, media, external_media, chat_record } = data as unknown as SquareStatementDTO;
+    applySquareSync(scope,{items:[{statement_id:id,text,edit_revision,edited_at,inline_emoticons,can_edit,visibility,location,media,external_media,chat_record}],removed_ids:[]});
   }
   else if(method!=='GET'&&path.endsWith('/like')&&id&&data&&typeof data==='object')applySquareSync(scope,{items:[{statement_id:id,...data}],removed_ids:[]});
   else if(method!=='GET'&&path.endsWith('/pin')&&data&&typeof data==='object'){
@@ -80,12 +80,12 @@ export function rememberSquareResponse<T>(scope:string|null,path:string,method:s
     for(const item of data){const deletedAt=removed.get(scope)?.get(item.statement_id);if(deletedAt!==undefined&&revision>=deletedAt)removed.get(scope)?.delete(item.statement_id)}
     return filterSquareRemoved(scope,data).map(item=>{
       const fresh=recentPatches.get(scope)?.get(item.statement_id);
-      return fresh&&fresh.revision>revision?{...item,...fresh.patch}:item;
+      return fresh&&fresh.revision>revision?{...item,...squarePatchForVersion(item,fresh.patch)}:item;
     }) as T;
   }
   if(method==='GET'&&/^\/square\/statements\/\d+$/.test(path)&&data&&typeof data==='object'){
     const fresh=recentPatches.get(scope)?.get(id);
-    const statement=fresh&&fresh.revision>revision?{...data,...fresh.patch}:data;
+    const statement=fresh&&fresh.revision>revision?{...data,...squarePatchForVersion(data as unknown as SquarePatch,fresh.patch)}:data;
     if(revision===squareSyncRevision(scope))applySquareSync(scope,{items:[statement as unknown as SquarePatch],removed_ids:[]});
     return statement as T;
   }

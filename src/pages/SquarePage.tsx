@@ -35,7 +35,7 @@ import {SquareFeedHeader} from "../components/SquareFeedHeader";
 import {SquareActivityTile} from "../components/SquareActivityTile";
 import {SquareCreationSheet,type SquareCreationKind} from '../components/SquareCreationSheet';
 import {SquareComposerEditor} from '../components/SquareComposerEditor';
-import { SquareEditedLabel, SquareStatementEditor, SquareStatementHistory } from "../components/SquareStatementEdits";
+import { SquareEditedLabel, SquareStatementHistory } from "../components/SquareStatementEdits";
 import {SquareVoiceRecorder} from '../components/SquareVoiceRecorder';
 import {ActionSheet} from '../components/ActionSheet';
 import { SquareHeaderTools } from "../components/SquareHeaderTools";
@@ -79,25 +79,45 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatementEditMedia, SquareStatementMediaDTO, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 const baxianActivityTitle = "https://api.sermo.jyonn.space/resources/assets/97/display/ae7c175937ef04783fd8b797d59ae536a837464051885c7b1d4be815869c5cab";
 const baxianActivityBanner = "/assets/activity/baxian-banner-clean.webp";
 const spiderMan4PreviewBanner = "https://api.sermo.jyonn.space/resources/assets/95/display/04cb9a19de2826fb02e226e25db209748b37da57da5aa389b9c99a5027c5f7dd";
 const starryNightBanner = "https://api.sermo.jyonn.space/resources/assets/96/display/197e672103b9d0d35015623505bb5ce2e0cd9a51a657cb121173db61265dbfef";
 
-type SelectedPhoto = {
-  id: string;
-  file: File;
-  preview: string;
-};
+type SelectedPhoto = { id: string; preview: string } &
+  ({ file: File; mediaId?: never } | { file?: never; mediaId: number });
 type SelectedVideo = SelectedPhoto & { duration: number };
+type NewStatementDraft = {
+  text: string;
+  visibility: SquareStatementDTO["visibility"];
+  anonymous: boolean;
+  photos: SelectedPhoto[];
+  video: SelectedVideo | null;
+  voiceFile: File | null;
+  voiceDuration: number;
+  external: LinkPreviewDTO | null;
+  location: SquareStatementDTO["location"];
+  pin: boolean;
+  chatRecord: SquareChatRecordDraft | null;
+};
 type SquareChatRecordDraft = {
   messageIds: number[];
   previewMessages: ChatMessageDTO[];
   firstPersonUserId: number | null;
   redacted: boolean;
 };
+
+function releaseSelectedMedia(item?: SelectedPhoto | null) {
+  if (item?.file) URL.revokeObjectURL(item.preview);
+}
+
+function sameStatementLocation(first: SquareStatementDTO["location"], second: SquareStatementDTO["location"]) {
+  return (!first && !second) || first === second || Boolean(first && second && first.latitude === second.latitude &&
+    first.longitude === second.longitude && first.address === second.address &&
+    (first.geocoding_provider ?? "") === (second.geocoding_provider ?? ""));
+}
 
 function chatRecordDraftPreview(draft: SquareChatRecordDraft, officialViewer: boolean) {
   if (!draft.redacted) return { messages: draft.previewMessages, firstPersonUserId: draft.firstPersonUserId };
@@ -510,6 +530,7 @@ export default function SquarePage() {
   const [hasMore, setHasMore] = useState(() => initialFeedSnapshot?.hasMore ?? true);
   const squareLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState("");
+  const [composerError, setComposerError] = useState("");
   const [feedSearchOpen, setFeedSearchOpen] = useState(false);
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
@@ -521,6 +542,7 @@ export default function SquarePage() {
   const [squarePhotoEdits, setSquarePhotoEdits] = useState<File[]>([]);
   const [video, setVideo] = useState<SelectedVideo | null>(null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [savedVoice, setSavedVoice] = useState<SquareStatementMediaDTO | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [recording, setRecording] = useState(false);
   const [recordingStarting,setRecordingStarting]=useState(false);
@@ -644,6 +666,10 @@ export default function SquarePage() {
   const [pendingCommentSticker, setPendingCommentSticker] = useState<StickerAssetDTO | null>(null);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const [editingStatement, setEditingStatement] = useState<SquareStatementDTO | null>(null);
+  const [editKeepsChatRecord, setEditKeepsChatRecord] = useState(false);
+  const [editConflict, setEditConflict] = useState(false);
+  const [loadingEditVersion, setLoadingEditVersion] = useState(false);
+  const newStatementDraft = useRef<NewStatementDraft | null>(null);
   const [statementHistoryId, setStatementHistoryId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
   const [muteStatement, setMuteStatement] = useState<SquareStatementDTO | null>(null);
@@ -668,7 +694,7 @@ export default function SquarePage() {
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
-  useSquareSync(cacheScope,activeFeedCacheKey,statements,pinnedStatement,commentStatementId,change=>{
+  useSquareSync(cacheScope,activeFeedCacheKey,statements,pinnedStatement,commentStatementId,loadedDetailStatement,change=>{
     setStatements(current=>reconcileSquareItems(current,change));
     setLoadedDetailStatement(current=>current?reconcileSquareItems([current],change)[0]??null:null);
     if(commentStatementId!==null&&change.removed_ids.includes(commentStatementId)){
@@ -678,7 +704,9 @@ export default function SquarePage() {
     setPinnedStatement(current=>{
       const candidate=change.items.find(item=>item.is_pinned);
       const known=candidate&&statements.find(item=>item.statement_id===candidate.statement_id);
-      return known?{...known,...candidate}:current?(reconcileSquareItems([current],change).filter(item=>item.is_pinned)[0]??null):null;
+      const base = candidate?.statement_id === current?.statement_id ? current : known;
+      return base ? reconcileSquareItems([base],change).find(item=>item.is_pinned)??null
+        : current ? reconcileSquareItems([current],change).find(item=>item.is_pinned)??null : null;
     });
   });
   const [activities, setActivities] = useState<ActivityCampaignDTO[]>(() => (
@@ -903,10 +931,28 @@ export default function SquarePage() {
     finally {setSharingChatId(null);}
   };
 
-  const publishable = useMemo(
-    () => Boolean(text.trim() || photos.length || voiceFile || video || externalMedia || chatRecordDraft) && !publishing && text.length <= MAX_TEXT_LENGTH,
-    [chatRecordDraft, externalMedia, photos.length, publishing, text, video, voiceFile],
-  );
+  const keptChatRecord = editKeepsChatRecord ? editingStatement?.chat_record : null;
+  const composerRecordPreview = keptChatRecord ? {
+    firstPersonUserId: keptChatRecord.first_person_user_id,
+    messages: forwardBundleItemsAsMessages(keptChatRecord.items ?? []).map(message => (
+      keptChatRecord.redacted_identity && message.user.anonymous
+        ? { ...message, user: { ...message.user, name: t("message.redactedParticipant", { number: message.user.name }) } }
+        : message
+    )),
+  } : chatRecordPreview;
+  const composerRecordRedacted = Boolean(keptChatRecord?.redacted_identity || chatRecordDraft?.redacted);
+  const editTextChanged = Boolean(editingStatement && text !== editingStatement.text && text.trim() !== editingStatement.text.trim());
+  const editHasChanges = !editingStatement || (() => {
+    const mediaIds = [...photos.map(item => item.mediaId), ...(video ? [video.mediaId] : []),
+      ...(voiceFile ? [undefined] : savedVoice ? [savedVoice.media_id] : [])];
+    return editTextChanged || visibility !== editingStatement.visibility ||
+      !sameStatementLocation(statementLocation, editingStatement.location) || Boolean(keptChatRecord) !== Boolean(editingStatement.chat_record) ||
+      (externalMedia?.url ?? null) !== (editingStatement.external_media?.url ?? null) ||
+      mediaIds.length !== editingStatement.media.length || editingStatement.media.some((item, index) => mediaIds[index] !== item.media_id);
+  })();
+  const textWithinLimit = editingStatement && !editTextChanged || Array.from(text.trim()).length <= MAX_TEXT_LENGTH;
+  const publishable = Boolean(text.trim() || photos.length || voiceFile || savedVoice || video || externalMedia || chatRecordDraft || keptChatRecord) &&
+    !publishing && !editConflict && !loadingEditVersion && editHasChanges && textWithinLimit;
 
   useEffect(() => {
     setGrowthLevel(session?.user.growth_level ?? 1);
@@ -1557,11 +1603,12 @@ export default function SquarePage() {
         showToast(t("square.externalMediaUnsupported"), "error");
         return;
       }
-      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+      photos.forEach(releaseSelectedMedia);
       setPhotos([]);
       setVoiceFile(null);
+      setSavedVoice(null);
       setVoiceDuration(0);
-      setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
+      setVideo((current) => { releaseSelectedMedia(current); return null; });
       setExternalMedia(preview);
       setExternalMediaDialogOpen(false);
       setExternalMediaInput("");
@@ -1586,8 +1633,9 @@ export default function SquarePage() {
     const photo = {id, file, preview: URL.createObjectURL(file)};
     setPhotos(current => [...current, photo]);
     setComposerOpen(true);
-    setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
+    setVideo((current) => { releaseSelectedMedia(current); return null; });
     setVoiceFile(null);
+    setSavedVoice(null);
     setVoiceDuration(0);
     setExternalMedia(null);
   };
@@ -1607,10 +1655,11 @@ export default function SquarePage() {
         releaseProbe();
         return;
       }
-      setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
+      setPhotos((current) => { current.forEach(releaseSelectedMedia); return []; });
       setVoiceFile(null);
+      setSavedVoice(null);
       setExternalMedia(null);
-      setVideo({ id: crypto.randomUUID(), file, preview, duration });
+      setVideo(current => { releaseSelectedMedia(current); return { id: crypto.randomUUID(), file, preview, duration }; });
       setComposerOpen(true);
       releaseProbe();
     };
@@ -1622,7 +1671,7 @@ export default function SquarePage() {
   const removePhoto = (id: string) => {
     setPhotos((current) => {
       const target = current.find((photo) => photo.id === id);
-      if (target) URL.revokeObjectURL(target.preview);
+      releaseSelectedMedia(target);
       return current.filter((photo) => photo.id !== id);
     });
   };
@@ -1653,8 +1702,9 @@ export default function SquarePage() {
         const duration = Math.max(1, Math.min(MAX_AUDIO_SECONDS, Math.round((Date.now() - recordingStartedAtRef.current) / 1000)));
         const resolvedType = recorder.mimeType || mimeType || "audio/webm";
         const blob = new Blob(recorderChunksRef.current, { type: resolvedType });
-        setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
-        setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
+        setPhotos((current) => { current.forEach(releaseSelectedMedia); return []; });
+        setVideo((current) => { releaseSelectedMedia(current); return null; });
+        setSavedVoice(null);
         setExternalMedia(null);
         setVoiceFile(new File([blob], `statement-${Date.now()}.${audioFileExtension(resolvedType)}`, { type: resolvedType }));
         setVoiceDuration(duration);
@@ -1680,6 +1730,83 @@ export default function SquarePage() {
     }
   };
 
+  const fillEditor = (statement: SquareStatementDTO) => {
+    const saved = (item: SquareStatementMediaDTO, uri: string) => ({
+      id: `saved-${item.media_id}`, mediaId: item.media_id, preview: resolveStableResourceUri(uri) ?? uri,
+    });
+    const savedVideo = statement.media.find(item => item.kind === "video");
+    setText(statement.text);
+    setVisibility(statement.visibility);
+    setAnonymousStatement(Boolean(statement.is_anonymous));
+    setPhotos(statement.media.filter(item => item.kind === "image").map(item => saved(item, item.thumbnail_uri || item.uri)));
+    setVideo(savedVideo ? { ...saved(savedVideo, savedVideo.uri), duration: savedVideo.duration_seconds ?? 0 } : null);
+    setVoiceFile(null);
+    setSavedVoice(statement.media.find(item => item.kind === "audio") ?? null);
+    setVoiceDuration(0);
+    setExternalMedia(statement.external_media ?? null);
+    setStatementLocation(statement.location ?? null);
+    setPinOnPublish(false);
+    setChatRecordDraft(null);
+    setEditKeepsChatRecord(Boolean(statement.chat_record));
+    setEditingStatement(statement);
+    setEditConflict(false);
+    setComposerError("");
+  };
+
+  const openStatementEditor = (statement: SquareStatementDTO) => {
+    if (!statement.can_edit || composerOpen) return;
+    newStatementDraft.current = {
+      text, visibility, anonymous: anonymousStatement, photos, video, voiceFile, voiceDuration,
+      external: externalMedia, location: statementLocation, pin: pinOnPublish, chatRecord: chatRecordDraft,
+    };
+    fillEditor(statement);
+    setComposerOpen(true);
+  };
+
+  const restoreNewStatementDraft = () => {
+    photos.forEach(releaseSelectedMedia);
+    releaseSelectedMedia(video);
+    const draft = newStatementDraft.current;
+    newStatementDraft.current = null;
+    setEditingStatement(null);
+    setEditKeepsChatRecord(false);
+    setEditConflict(false);
+    setSavedVoice(null);
+    setText(draft?.text ?? "");
+    setVisibility(draft?.visibility ?? "public");
+    setAnonymousStatement(draft?.anonymous ?? false);
+    setPhotos(draft?.photos ?? []);
+    setVideo(draft?.video ?? null);
+    setVoiceFile(draft?.voiceFile ?? null);
+    setVoiceDuration(draft?.voiceDuration ?? 0);
+    setExternalMedia(draft?.external ?? null);
+    setStatementLocation(draft?.location ?? null);
+    setPinOnPublish(draft?.pin ?? false);
+    setChatRecordDraft(draft?.chatRecord ?? null);
+  };
+
+  const closeComposer = () => {
+    if (publishing || loadingEditVersion) return;
+    if (editingStatement) restoreNewStatementDraft();
+    setComposerError("");
+    setComposerOpen(false);
+  };
+
+  const loadLatestEdit = async () => {
+    if (!editingStatement || loadingEditVersion) return;
+    setLoadingEditVersion(true);
+    try {
+      const latest = await api.getSquareStatement(editingStatement.statement_id);
+      photos.forEach(releaseSelectedMedia);
+      releaseSelectedMedia(video);
+      fillEditor(latest);
+    } catch (cause) {
+      setComposerError(cause instanceof Error ? cause.message : t("square.editFailed"));
+    } finally {
+      setLoadingEditVersion(false);
+    }
+  };
+
   const publish = async () => {
     if (!canPublish) {
       setPublishVerificationOpen(true);
@@ -1687,9 +1814,18 @@ export default function SquarePage() {
     }
     if (!publishable) return;
     setPublishing(true);
-    setError("");
-    const total = photos.length + (voiceFile ? 1 : 0) + (video ? 1 : 0);
+    setComposerError("");
+    const total = photos.filter(photo => photo.file).length + Number(Boolean(voiceFile)) + Number(Boolean(video?.file));
     let completed = 0;
+    async function uploadAttachment(kind: SquareStatementDraftMedia["kind"], file: File, duration?: number): Promise<SquareStatementDraftMedia> {
+      const upload = await uploadMessageMediaWith(file, kind, (mediaKind, name, mime) =>
+        api.createSquareUpload(mediaKind as SquareStatementDraftMedia["kind"], name, mime), progress => {
+          setUploadProgress((completed + progress) / Math.max(1, total));
+        });
+      completed += 1;
+      return { kind, key: upload.key, mime_type: file.type, duration_seconds: duration,
+        ...(editingStatement ? { edit_upload_grant: upload.edit_upload_grant } : {}) };
+    }
     try {
       if (chatRecordDraft) {
         const statement = await api.createSquareChatRecordStatement({
@@ -1713,36 +1849,34 @@ export default function SquarePage() {
         showToast(t("message.forwardedToSquare"), "success");
         return;
       }
-      const media: SquareStatementDraftMedia[] = [];
+      const media: SquareStatementEditMedia[] = [];
       for (const photo of photos) {
-        const upload = await uploadMessageMediaWith(photo.file, "image", (kind, fileName, contentType) => api.createSquareUpload(kind as "image", fileName, contentType), (progress) => {
-          setUploadProgress((completed + progress) / Math.max(1, total));
-        });
-        media.push({
-          kind: "image",
-          key: upload.key,
-          mime_type: photo.file.type,
-        });
-        completed += 1;
+        media.push(photo.file ? await uploadAttachment("image", photo.file) : { media_id: photo.mediaId });
       }
       if (voiceFile) {
-        const upload = await uploadMessageMediaWith(voiceFile, "audio", (kind, fileName, contentType) => api.createSquareUpload(kind as "audio", fileName, contentType), (progress) => {
-          setUploadProgress((completed + progress) / Math.max(1, total));
-        });
-        media.push({ kind: "audio", key: upload.key, mime_type: voiceFile.type, duration_seconds: voiceDuration });
-        completed += 1;
+        media.push(await uploadAttachment("audio", voiceFile, voiceDuration));
+      } else if (savedVoice) {
+        media.push({ media_id: savedVoice.media_id });
       }
       if (video) {
-        const upload = await uploadMessageMediaWith(video.file, "video", (kind, fileName, contentType) => api.createSquareUpload(kind as "video", fileName, contentType), (progress) => {
-          setUploadProgress((completed + progress) / Math.max(1, total));
-        });
-        media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
+        media.push(video.file ? await uploadAttachment("video", video.file, video.duration) : { media_id: video.mediaId });
       }
-      const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility, media, external_media_url: externalMedia?.url ?? null, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
+      if (editingStatement) {
+        await api.editSquareStatement(editingStatement.statement_id, editTextChanged ? text.trim() : undefined, editingStatement.edit_revision ?? 0, {
+          media, visibility, location: statementLocation ?? null,
+          external_media_url: externalMedia?.url ?? null, keep_chat_record: Boolean(keptChatRecord),
+        });
+        restoreNewStatementDraft();
+        setComposerOpen(false);
+        showToast(t("square.editedSaved"));
+        return;
+      }
+      const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility,
+        media: media.filter(item => "key" in item), external_media_url: externalMedia?.url ?? null, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
       if (hasFeedFilters) clearFeedSearch();
       else setStatements((current) => [statement, ...current]);
       if (pinOnPublish) setPinnedStatement(statement);
-      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+      photos.forEach(releaseSelectedMedia);
       setText("");
       setPhotos([]);
       setVoiceFile(null);
@@ -1752,13 +1886,15 @@ export default function SquarePage() {
       setAnonymousStatement(false);
       setStatementLocation(null);
       setPinOnPublish(false);
-      if (video) URL.revokeObjectURL(video.preview);
+      releaseSelectedMedia(video);
       setVideo(null);
       setComposerOpen(false);
       void refreshActivities();
     } catch (cause) {
-      const message = toMessageUploadError(cause).message;
-      setError(message);
+      const stale = Boolean(editingStatement && cause instanceof ApiError && cause.status === 409);
+      setEditConflict(stale);
+      const message = stale ? t("square.editConflict") : toMessageUploadError(cause).message;
+      setComposerError(message);
       if (cause instanceof ApiError && cause.identifier.startsWith("SQUARE@MUTED")) {
         showToast(message, "error");
       }
@@ -2021,7 +2157,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : panelActive ? (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); } : undefined} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onEdit={() => setEditingStatement(statement)} onHistory={() => setStatementHistoryId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(statement, "image", index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementMedia(statement, "video")} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} preserveFeedLayout={inDetail && !desktopWorkspace} canInteract={canPublish} cardRef={inDetail ? undefined : panelActive ? (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); } : undefined} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onEdit={() => openStatementEditor(statement)} onHistory={() => setStatementHistoryId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(statement, "image", index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementMedia(statement, "video")} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2268,36 +2404,45 @@ export default function SquarePage() {
           {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
-      {editingStatement && <SquareStatementEditor key={editingStatement.statement_id} statement={editingStatement} limit={MAX_TEXT_LENGTH}
-        onClose={() => setEditingStatement(null)} />}
       {statementHistoryId !== null && <SquareStatementHistory key={statementHistoryId} statementId={statementHistoryId}
         onClose={() => setStatementHistoryId(null)} />}
-      <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={()=>{if(!publishing)setComposerOpen(false)}} open={composerOpen} title={t("square.composeTitle")} headerless floatingBack={false}>
-        <SquareComposerEditor text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video} voice={voiceFile&&voicePreview?{uri:voicePreview,duration:voiceDuration}:null} external={externalMedia}
-          onRemovePhoto={removePhoto} onRemoveVideo={()=>{if(video)URL.revokeObjectURL(video.preview);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
-          onAdd={openCreationMenu} onBack={()=>setComposerOpen(false)} onPublish={()=>void publish()} audienceLabel={anonymousStatement?t("square.publishAnonymously"):visibility==="friends"?t("square.friendsOnly"):t("square.audiencePublic")} onAudience={()=>setVisibilitySheetOpen(true)}
+      <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={closeComposer} open={composerOpen}
+        title={t(editingStatement ? "square.editStatement" : "square.composeTitle")} headerless floatingBack={false}>
+        <SquareComposerEditor editing={Boolean(editingStatement)} text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video}
+          voice={voiceFile && voicePreview ? { uri: voicePreview, duration: voiceDuration }
+            : savedVoice ? { uri: savedVoice.uri, duration: savedVoice.duration_seconds ?? 0 } : null} external={externalMedia}
+          onRemovePhoto={removePhoto} onRemoveVideo={()=>{releaseSelectedMedia(video);setVideo(null)}} onRemoveVoice={()=>{setVoiceFile(null);setSavedVoice(null);setVoiceDuration(0)}} onRemoveExternal={()=>setExternalMedia(null)}
+          onAdd={openCreationMenu} onBack={closeComposer} onPublish={()=>void publish()} audienceLabel={anonymousStatement?t("square.publishAnonymously"):visibility==="friends"?t("square.friendsOnly"):t("square.audiencePublic")}
+          onAudience={editingStatement?.is_anonymous ? undefined : () => setVisibilitySheetOpen(true)}
           locationLabel={statementLocation?.address||t("square.location")} onLocation={locateStatement} onRemoveLocation={statementLocation?()=>setStatementLocation(null):undefined}
-          publishing={publishing} publishable={publishable} progress={uploadProgress} error={error||undefined} quotaLabel={quotaHint}
-          chatPreview={chatRecordDraft ? <section className="square-compose-chat-record">
+          publishing={publishing || loadingEditVersion} publishable={publishable} progress={uploadProgress} error={composerError || undefined}
+          quotaLabel={editingStatement ? undefined : quotaHint}
+          conflictAction={editConflict && <button type="button" className="ghost-button" disabled={loadingEditVersion} onClick={() => void loadLatestEdit()}>
+            {t("square.reviewLatestEdit")}
+          </button>}
+          chatPreview={chatRecordDraft || keptChatRecord ? <section className="square-compose-chat-record">
               <header>
-                <span><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft.messageIds.length })}</small></span>
-                <button aria-label={t("common.close")} onClick={() => setChatRecordDraft(null)} type="button"><span className="material-symbols-outlined">close</span></button>
+                <span><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft?.messageIds.length ?? keptChatRecord?.items?.length ?? 0 })}</small></span>
+                <button aria-label={t("common.remove")} disabled={publishing || loadingEditVersion} onClick={() => {
+                  setChatRecordDraft(null);
+                  setEditKeepsChatRecord(false);
+                }} type="button"><span className="material-symbols-outlined">close</span></button>
               </header>
-              {chatRecordPreview?.messages.length ? <div className="square-chat-record">
+              {composerRecordPreview?.messages.length ? <div className="square-chat-record">
                 <ChatPreview
-                  backgroundTheme={chatRecordDraft.redacted ? "default" : currentUser?.chat_background_theme || "default"}
-                  backgroundUri={chatRecordDraft.redacted ? undefined : currentUser?.chat_background_uri}
+                  backgroundTheme={composerRecordRedacted ? "default" : currentUser?.chat_background_theme || "default"}
+                  backgroundUri={composerRecordRedacted ? undefined : currentUser?.chat_background_uri}
                   className="square-chat-record-preview"
-                  firstPersonUserId={chatRecordPreview.firstPersonUserId}
+                  firstPersonUserId={composerRecordPreview.firstPersonUserId}
                   initialScrollToEnd
-                  messages={chatRecordPreview.messages}
+                  messages={composerRecordPreview.messages}
                   onOpenImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })}
                   onOpenVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })}
                   showSelfAuthors
                 />
               </div> : null}
             </section> : null}
-          extraSettings={currentUser?.official||chatRecordDraft?<details className="square-editor-extras"><summary>{t('square.moreOptions')}</summary>{chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
+          extraSettings={!editingStatement && (currentUser?.official||chatRecordDraft)?<details className="square-editor-extras"><summary>{t('square.moreOptions')}</summary>{chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
               {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}</details>:null}
         />
       </SideDrawer>
@@ -2306,7 +2451,8 @@ export default function SquarePage() {
         submitLabel={t("common.add")} onClose={() => setSquarePhotoEdits([])} onSend={addEditedPhoto} />}
       <input accept="video/*" hidden onChange={event=>chooseVideo(event.target.files)} ref={videoInputRef} type="file"/>
       <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={setStatementLocation} />
-      <SquareCreationSheet open={contentSheetOpen} onClose={()=>setContentSheetOpen(false)} onChoose={chooseCreationKind} voiceAllowed={canSendVoice} videoAllowed={canSendVideo} description={quotaHint} onQuota={()=>{setContentSheetOpen(false);openQuota()}}/>
+      <SquareCreationSheet open={contentSheetOpen} onClose={()=>setContentSheetOpen(false)} onChoose={chooseCreationKind} voiceAllowed={canSendVoice} videoAllowed={canSendVideo}
+        editing={Boolean(editingStatement)} description={quotaHint} onQuota={editingStatement ? undefined : ()=>{setContentSheetOpen(false);openQuota()}}/>
       <InputDialog
         busy={externalMediaResolving}
         confirmLabel={t("square.insertExternalMedia")}
@@ -2321,7 +2467,7 @@ export default function SquarePage() {
         value={externalMediaInput}
       />
       <ActionSheet open={visibilitySheetOpen} onClose={()=>setVisibilitySheetOpen(false)} title={t('square.visibility')} compactHeader actions={[
-        {key:'anonymous',label:t('square.publishAnonymously'),description:t('square.publishAnonymouslyHint'),disabled:!features.squareExploreEnabled||Boolean(chatRecordDraft)||quota?.statements.anonymous_available===false,icon:<span className="material-symbols-outlined">person_off</span>,onSelect:()=>{setAnonymousStatement(true);setVisibility('public')}},
+        ...(!editingStatement ? [{key:'anonymous',label:t('square.publishAnonymously'),description:t('square.publishAnonymouslyHint'),disabled:!features.squareExploreEnabled||Boolean(chatRecordDraft)||quota?.statements.anonymous_available===false,icon:<span className="material-symbols-outlined">person_off</span>,onSelect:()=>{setAnonymousStatement(true);setVisibility('public')}}] : []),
         {key:'public',label:t('square.audiencePublic'),description:t('square.publicHint'),icon:<span className="material-symbols-outlined">public</span>,onSelect:()=>{setAnonymousStatement(false);setVisibility('public')}},
         {key:'friends',label:t('square.friendsOnly'),description:t('square.friendsHint'),icon:<span className="material-symbols-outlined">group</span>,onSelect:()=>{setAnonymousStatement(false);setVisibility('friends')}}
       ]}/>
@@ -2351,7 +2497,7 @@ export default function SquarePage() {
       </SideDrawer>
       <ActionSheet open={noteMoreOpen&&noteDetailActive&&Boolean(activeCommentStatement)} onClose={()=>setNoteMoreOpen(false)} title={t('common.more')} compactHeader actions={activeCommentStatement?[
         ...(activeCommentStatement.can_edit ? [{ key: 'edit', label: t('square.editStatement'),
-          icon: <span className="material-symbols-outlined">edit</span>, onSelect: () => setEditingStatement(activeCommentStatement) }] : []),
+          icon: <span className="material-symbols-outlined">edit</span>, onSelect: () => openStatementEditor(activeCommentStatement) }] : []),
         ...(activeCommentStatement.can_pin?[{key:'pin',label:t(activeCommentStatement.is_pinned?'square.unpinStatement':'square.pinStatement'),icon:<span className="material-symbols-outlined">keep</span>,onSelect:()=>{void toggleStatementPinned(activeCommentStatement)}}]:[]),
         ...(activeCommentStatement.can_mute?[{key:'mute',label:t('square.muteAuthor'),icon:<span className="material-symbols-outlined">voice_over_off</span>,onSelect:()=>setMuteStatement(activeCommentStatement)}]:[]),
         ...(activeCommentStatement.can_delete?[{key:'delete',label:t('common.delete'),danger:true,icon:<span className="material-symbols-outlined">delete</span>,onSelect:()=>setDeleteStatementId(activeCommentStatement.statement_id)}]:[])
@@ -2360,7 +2506,7 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onEdit={() => setEditingStatement(activeCommentStatement)} onHistory={() => setStatementHistoryId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(activeCommentStatement, "image", index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementMedia(activeCommentStatement, "video")} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onEdit={() => openStatementEditor(activeCommentStatement)} onHistory={() => setStatementHistoryId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementMedia(activeCommentStatement, "image", index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementMedia(activeCommentStatement, "video")} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             {discussionContent}
           </div>

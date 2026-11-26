@@ -3,8 +3,8 @@ import {api} from './api';
 import {applySquareSync,SQUARE_SYNC_EVENT,SQUARE_SYNC_STORAGE,SQUARE_DIRTY_EVENT,squareSyncRevision,type SquareSyncChange} from './squareSync';
 import type {SquareStatementDTO} from '../types';
 
-export function useSquareSync(scope:string|null,feedKey:string,items:SquareStatementDTO[],pinned:SquareStatementDTO|null,activeId:number|null,onChange:(change:SquareSyncChange)=>void){
-  const latest=useRef({items,pinned,activeId,onChange});latest.current={items,pinned,activeId,onChange};
+export function useSquareSync(scope:string|null,feedKey:string,items:SquareStatementDTO[],pinned:SquareStatementDTO|null,activeId:number|null,detail:SquareStatementDTO|null,onChange:(change:SquareSyncChange)=>void){
+  const latest=useRef({items,pinned,activeId,detail,onChange});latest.current={items,pinned,activeId,detail,onChange};
   useEffect(()=>{
     if(!scope)return;
     let stopped=false,busy=false,cursor=0;
@@ -23,7 +23,15 @@ export function useSquareSync(scope:string|null,feedKey:string,items:SquareState
       controller.signal.addEventListener('abort',abort,{once:true});
       const timeout=window.setTimeout(abort,10000);
       try{
-        const result=await api.syncSquareStatements(batch,requestController.signal);
+        const known: Record<string,number> = {};
+        const { items, pinned, detail } = latest.current;
+        const requested = new Set(batch);
+        for (const item of [...items, pinned, detail]) {
+          if (!item || !requested.has(item.statement_id)) continue;
+          const revision = item.edit_revision ?? 0;
+          known[item.statement_id] = Math.min(known[item.statement_id] ?? revision, revision);
+        }
+        const result=await api.syncSquareStatements(batch,requestController.signal,known);
         // Concurrent successful local writes take priority over older snapshots.
         if(!stopped&&revision===squareSyncRevision(scope))applySquareSync(scope,result);
       }catch{/* Offline/error responses never imply deletion. */}finally{clearTimeout(timeout);controller.signal.removeEventListener('abort',abort);busy=false}

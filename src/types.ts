@@ -862,6 +862,7 @@ export interface MessageUploadDTO {
   resource_uri: string;
   expires_in: number;
   max_file_size: number;
+  edit_upload_grant?: string;
   instant?: boolean;
   resource?: CloudResourceDTO;
   quota?: CloudResourceQuotaDTO;
@@ -962,6 +963,7 @@ export interface SquareStatementRevision {
   revision: number;
   text: string;
   published_at: number;
+  changes?: Array<"text" | "visibility" | "location" | "media" | "external_media" | "chat_record">;
 }
 
 export interface SquareCalendarDTO {
@@ -1009,11 +1011,22 @@ export interface SquareStatementDraftMedia {
   key: string;
   mime_type?: string;
   duration_seconds?: number;
+  edit_upload_grant?: string;
   location?: {
     latitude: number;
     longitude: number;
     address?: string;
   };
+}
+
+export type SquareStatementEditMedia = SquareStatementDraftMedia | { media_id: number };
+
+export interface SquareStatementEditContent {
+  visibility: SquareStatementDTO["visibility"];
+  media: SquareStatementEditMedia[];
+  external_media_url: string | null;
+  location: SquareStatementDTO["location"];
+  keep_chat_record: boolean;
 }
 
 export interface SquareStatementLocationDTO {
