@@ -13,7 +13,7 @@
 .founder-medal-management { padding-block:18px;border-block:1px solid var(--line-soft);display:grid;gap:12px; }
 .founder-medal-management h3 { margin:0; }
 .founder-medal-management>div { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
-.founder-medal-management input { width:100px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:10px;background:var(--bg-elevated);color:var(--text-primary);font:inherit; }
+.founder-medal-management input { width:100px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:10px;background:var(--field-tint, var(--bg-elevated));color:var(--text-primary);font:inherit; }
 .founder-ceremony { background:radial-gradient(ellipse at 50% 35%,#fff1bf 0,transparent 55%),#faf6eb;color:#473617;outline:none; }
 .founder-ceremony .growth-ceremony-topbar { color:inherit; }
 .founder-ceremony-main { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;min-height:0;overflow:auto;text-align:center;padding:24px; }

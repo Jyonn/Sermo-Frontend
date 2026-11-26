@@ -18,7 +18,7 @@
 .oauth-filter-tabs button { display:flex;align-items:center;gap:5px;min-height:44px;padding:10px 0;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--oauth-muted);font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer; }
 .oauth-filter-tabs button[aria-selected="true"] { border-bottom-color:var(--oauth-accent);color:var(--oauth-ink); }
 .oauth-filter-tabs button span { color:var(--oauth-muted);font-size:10px; }
-.oauth-search { display:flex;align-items:center;gap:8px;width:min(280px,42%);min-width:120px;min-height:40px;padding:0 12px;border:1px solid var(--oauth-line);border-radius:12px;background:var(--oauth-paper); }
+.oauth-search { display:flex;align-items:center;gap:8px;width:min(280px,42%);min-width:120px;min-height:40px;padding:0 12px;border:1px solid var(--oauth-line);border-radius:12px;background:var(--field-tint, var(--oauth-paper)); }
 .oauth-search .material-symbols-outlined { color:var(--oauth-muted);font-size:19px; }
 .oauth-search input { min-width:0;width:100%;padding:0;border:0;border-radius:0;background:transparent;color:var(--oauth-ink);font:inherit;font-size:12px;box-shadow:none; }
 .oauth-application-list { border-top:1px solid var(--oauth-line); }
@@ -102,7 +102,7 @@
 .oauth-editor-fields { display:grid;gap:20px;align-items:start; }
 .oauth-editor-fields>label,.oauth-confirm-form>label,.oauth-advanced>label { display:grid;gap:8px;min-width:0;color:var(--text-secondary);font-size:12px;font-weight:600; }
 .oauth-editor-fields small { color:var(--oauth-muted);font-size:11px;font-weight:400;line-height:1.7; }
-.oauth-panel-body input:not([type="checkbox"]),.oauth-panel-body textarea { box-sizing:border-box;min-width:0;width:100%;min-height:44px;padding:11px 12px;border:1px solid var(--oauth-line);border-radius:12px;background:var(--oauth-paper);color:var(--oauth-ink);font-family:inherit;font-size:14px;font-weight:400;line-height:1.6;box-shadow:none; }
+.oauth-panel-body input:not([type="checkbox"]),.oauth-panel-body textarea { box-sizing:border-box;min-width:0;width:100%;min-height:44px;padding:11px 12px;border:1px solid var(--oauth-line);border-radius:12px;background:var(--field-tint, var(--oauth-paper));color:var(--oauth-ink);font-family:inherit;font-size:14px;font-weight:400;line-height:1.6;box-shadow:none; }
 .oauth-panel-body textarea { min-height:96px;resize:vertical; }
 .oauth-panel-body input:disabled,.oauth-panel-body textarea:disabled { background:var(--oauth-soft);color:var(--oauth-muted); }
 .oauth-editor-permissions { display:grid;gap:16px; }

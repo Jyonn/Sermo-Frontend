@@ -23,7 +23,7 @@ body .guest-language-tool:has(>.setting-select-trigger),.management-header-actio
 .settings-dialog-backdrop{touch-action:pan-y}
 .settings-dialog-body{display:grid;gap:18px;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:18px}
 .settings-dialog-body>.personal-theme-options{padding:0}
-.option-picker-search{display:flex;align-items:center;gap:10px;margin:14px 18px 6px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:12px;background:var(--bg-canvas);color:var(--text-muted);flex-shrink:0}
+.option-picker-search{display:flex;align-items:center;gap:10px;margin:14px 18px 6px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:12px;background:var(--field-tint, var(--bg-canvas));color:var(--text-muted);flex-shrink:0}
 .option-picker-search input{width:100%;min-width:0;border:0;outline:none;background:transparent;color:var(--text-primary);font:inherit;font-size:14px}
 .option-picker-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 14px 14px}
 .option-picker-list>button{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;min-height:52px;padding:14px 12px;text-align:left;border:0;border-radius:12px;background:transparent;color:var(--text-primary);font:inherit;font-size:14px;line-height:1.6;box-shadow:none;overflow-wrap:anywhere}

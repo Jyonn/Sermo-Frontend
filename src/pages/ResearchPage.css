@@ -56,7 +56,7 @@
 .research-chat-detail-link:focus-visible{outline:2px solid var(--brand-primary);outline-offset:-2px}
 .research-project-details .setting-row-copy small{white-space:pre-wrap;overflow-wrap:anywhere}
 .research-form label{display:grid;gap:10px;font-size:13px}
-.research-form input:not([type=checkbox]),.research-form textarea,.research-md-field textarea{width:100%;min-width:0;box-sizing:border-box;background:var(--bg-canvas);color:var(--text-primary);border:1px solid var(--line-soft);border-radius:12px;padding:12px;font:inherit;font-size:14px;line-height:1.8}
+.research-form input:not([type=checkbox]),.research-form textarea,.research-md-field textarea{width:100%;min-width:0;box-sizing:border-box;background:var(--field-tint, var(--bg-canvas));color:var(--text-primary);border:1px solid var(--line-soft);border-radius:12px;padding:12px;font:inherit;font-size:14px;line-height:1.8}
 .research-form fieldset{border:0;padding:0;margin:0}
 .research-form legend{font-size:13px;margin-bottom:12px}
 .research-form .research-check{display:flex;gap:12px;align-items:center;padding:7px 0}

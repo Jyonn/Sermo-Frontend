@@ -458,6 +458,8 @@ html[data-theme="dark"] {
   --text-primary: #eef5f1;
   --text-secondary: #b8c5be;
   --text-muted: #7f9188;
+  --field-tint: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  --field-placeholder: color-mix(in srgb, var(--text-muted) 76%, var(--text-secondary));
 
   --brand-primary: #35d59a;
   --brand-primary-press: #22bc83;
@@ -554,6 +556,22 @@ textarea,
 select {
   font: inherit;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Compound controls and writing areas own their own surface. */
+:where(html[data-theme="dark"]) :where(
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"],
+    [type="file"], [type="button"], [type="submit"], [type="reset"]),
+  textarea,
+  select
+) {
+  color: var(--text-primary);
+  border-color: var(--line-soft);
+  background-color: var(--field-tint);
+}
+
+:where(html[data-theme="dark"] :is(input, textarea))::placeholder {
+  color: var(--field-placeholder);
 }
 
 a {
@@ -1161,7 +1179,7 @@ img {
   width: 100%;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-input);
-  background: var(--bg-elevated);
+  background: var(--field-tint, var(--bg-elevated));
   color: var(--text-primary);
 }
 
@@ -1179,7 +1197,7 @@ img {
 
 .input::placeholder,
 .textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--field-placeholder, var(--text-muted));
 }
 
 .input-group {
@@ -3501,8 +3519,13 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   padding: 12px 14px;
   border-radius: 14px;
   color: var(--text-muted);
-  background: var(--bg-elevated);
+  background: var(--field-tint, var(--bg-elevated));
   border: 1px solid var(--line-soft);
+}
+
+:where(html[data-theme="dark"]) .search-box > :where(input) {
+  border-color: transparent;
+  background-color: transparent;
 }
 
 .chat-list-notices { display: grid; gap: 14px; min-width: 0; }

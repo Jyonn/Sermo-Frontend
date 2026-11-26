@@ -15,7 +15,7 @@
 .square-editor-thumb.is-link>span{font-size:32px}
 .square-editor-thumb>small,.square-editor-duration{position:absolute;bottom:0;left:0;right:0;overflow:hidden;padding:3px 5px;font-size:10px;text-overflow:ellipsis;white-space:nowrap;background:#10151399;color:white}
 .square-editor-body>textarea{box-sizing:border-box;flex-shrink:0;width:100%;min-height:200px;padding:0;border:0;outline:none;resize:none;overflow:hidden;background:none;color:var(--text-primary);font:400 17px/1.8 var(--font-body);box-shadow:none}
-.square-editor-body>textarea::placeholder{color:var(--text-muted)}
+.square-editor-body>textarea::placeholder{color:var(--field-placeholder,var(--text-muted))}
 .square-editor-settings{margin-top:auto;border-top:1px solid var(--line-soft)}
 .square-editor-settings>button,.square-editor-location>button:first-child{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:14px 0;border:0;border-bottom:1px solid var(--line-soft);background:none;color:var(--text-primary);text-align:start}
 .square-editor-settings button>span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}

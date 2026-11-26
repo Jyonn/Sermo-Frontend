@@ -745,7 +745,7 @@ html[data-theme="dark"] .user-profile-panel {
   padding: 0 15px;
   border: 1px solid var(--line-soft);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+  background: var(--field-tint, color-mix(in srgb, var(--bg-elevated) 84%, transparent));
 }
 .friend-search-form label .material-symbols-outlined { color: var(--text-muted); font-size: 21px; }
 .friend-search-form input { width: 100%; padding: 0; border: 0; outline: 0; color: var(--text-primary); background: transparent; font: inherit; }
@@ -3383,7 +3383,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   font-size: 0.74rem;
 }
 
-.admin-member-search { min-width: 0; flex: 1; display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 13px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--surface-elevated);
+.admin-member-search { min-width: 0; flex: 1; display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 13px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--field-tint, var(--surface-elevated));
   margin-bottom: 2px;
   max-width: 360px;
   margin: 0;

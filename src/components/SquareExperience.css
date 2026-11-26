@@ -8,9 +8,7 @@
 .square-search-modal h2 { margin:0;font-size:22px; }
 .square-search-modal form { display:grid;gap:20px; }
 .square-search-field { display:grid;gap:9px;min-width:0;font-size:12px;font-weight:650; }
-.square-search-field input { box-sizing:border-box;width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:13px;color:var(--text-primary);background:var(--bg-canvas);font:inherit;font-size:14px;color-scheme:light dark; }
-html[data-theme="light"] .square-search-field input { color-scheme:light; }
-html[data-theme="dark"] .square-search-field input { color-scheme:dark; }
+.square-search-field input { box-sizing:border-box;width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:13px;color:var(--text-primary);background:var(--field-tint, var(--bg-canvas));font:inherit;font-size:14px; }
 .square-search-field input:focus-visible { outline:2px solid var(--brand-primary);outline-offset:2px; }
 .square-search-range { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:0;padding:0;border:0;min-width:0; }
 .square-search-range legend { margin-bottom:14px;padding:0;font-size:14px;font-weight:700; }

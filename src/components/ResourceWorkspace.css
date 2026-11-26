@@ -36,7 +36,7 @@
 .resource-status.is-live{color:var(--brand-primary)}
 .resource-collection-heading button{font-size:12px}
 .resource-search{display:flex;align-items:center;gap:9px;color:var(--text-muted);max-width:400px;border:1px solid var(--line-soft);border-radius:10px;padding-inline:12px}
-.resource-workspace input,.resource-workspace select{min-width:0;padding:9px 10px;border:1px solid var(--line-soft);border-radius:8px;background:var(--bg-canvas);color:var(--text-primary);font:inherit;font-size:13px}
+.resource-workspace input,.resource-workspace select{min-width:0;padding:9px 10px;border:1px solid var(--line-soft);border-radius:8px;background:var(--field-tint, var(--bg-canvas));color:var(--text-primary);font:inherit;font-size:13px}
 .resource-search input{width:100%;border:0;background:transparent;outline:none;padding:11px 0}
 .resource-search:focus-within{border-color:var(--brand-primary)}
 .resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:20px 16px}

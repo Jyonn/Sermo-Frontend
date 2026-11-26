@@ -1773,7 +1773,7 @@ html[data-theme="dark"] .message-search-controls { background:linear-gradient(co
 html[data-theme="dark"] .message-search-input-wrap {
   color:var(--text-muted);
   border-color:rgba(126,151,139,.2);
-  background:rgba(25,36,31,.94);
+  background:var(--field-tint);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
 }
 html[data-theme="dark"] .message-search-input-wrap:focus-within {

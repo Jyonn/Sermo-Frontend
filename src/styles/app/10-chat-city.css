@@ -3640,17 +3640,6 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
   }
 }
 
-/* Dark surfaces stay neutral and let the brand and media carry the color. */
-html[data-theme="dark"] :is(input, textarea, select, .input, .textarea, .search-box) {
-  color: var(--text-primary);
-  border-color: var(--line-soft);
-  background: var(--bg-elevated);
-}
-
-html[data-theme="dark"] :is(input, textarea)::placeholder {
-  color: var(--text-muted);
-}
-
 html[data-theme="dark"] :is(
   .pwa-recommendation,
   .bottom-sheet,

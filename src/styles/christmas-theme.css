@@ -37,6 +37,12 @@ html[data-site-theme="christmas-2026"][data-theme="dark"] {
   --primary-button-ink: #34191b;
   --christmas-snow: #c8e1d6;
   --christmas-lights: #e5b572;
+  --christmas-writing-surface: #203b31;
+  --christmas-writing-border: color-mix(in srgb, var(--christmas-lights) 24%, var(--line-soft));
+  --christmas-writing-highlight: var(--control-highlight);
+  --christmas-writing-ink: var(--text-primary);
+  --christmas-writing-placeholder: var(--field-placeholder);
+  --christmas-writing-caret: var(--brand-primary-press);
 }
 
 html[data-site-theme="christmas-2026"] body {
@@ -185,7 +191,7 @@ html[data-site-theme="christmas-2026"] :is(.topbar.conversation-topbar, .desktop
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer:is(.is-mobile-quiet, .is-desktop-writing-desk) {
   --chat-chrome-border: #b29561;
-  --chat-input-surface: #fbefd9;
+  --chat-input-surface: var(--christmas-writing-surface, #fbefd9);
   border-top: 1px solid #ad8b52;
   background:
     url("/themes/christmas-2026/composer-snow.webp") left bottom / auto 12px repeat-x,
@@ -241,10 +247,10 @@ html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .compos
 }
 
 html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap {
-  border: 1px solid #c3a46c;
+  border: 1px solid var(--christmas-writing-border, #c3a46c);
   border-radius: 16px;
-  background: linear-gradient(160deg, #fff8e9, #f8e9cf);
-  box-shadow: inset 0 0 0 2px #fff4df, 0 2px 5px #081c1366;
+  background: var(--christmas-writing-surface, linear-gradient(160deg, #fff8e9, #f8e9cf));
+  box-shadow: inset 0 0 0 2px var(--christmas-writing-highlight, #fff4df), 0 2px 5px #081c1366;
 }
 
 html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .mobile-quiet-input-wrap:focus-within {
@@ -263,12 +269,12 @@ html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile
 }
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-input-wrap, .desktop-writing-desk-input) .composer-rich-input {
-  color: #38281e;
-  caret-color: #8b2731;
+  color: var(--christmas-writing-ink, #38281e);
+  caret-color: var(--christmas-writing-caret, #8b2731);
 }
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer :is(.mobile-quiet-input-wrap, .desktop-writing-desk-input) .composer-rich-input::before {
-  color: #6d5747;
+  color: var(--christmas-writing-placeholder, #6d5747);
 }
 
 html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .composer-more-actions {
@@ -289,10 +295,10 @@ html[data-site-theme="christmas-2026"] .composer.is-mobile-quiet .composer-more-
 html[data-site-theme="christmas-2026"] .composer.is-desktop-writing-desk .desktop-writing-desk-input {
   margin-block-start: 8px;
   padding-inline: 14px;
-  border: 1px solid #c3a46c;
+  border: 1px solid var(--christmas-writing-border, #c3a46c);
   border-radius: 12px;
-  background: linear-gradient(160deg, #fff8e9, #f8e9cf);
-  box-shadow: inset 0 0 0 2px #fff4df;
+  background: var(--christmas-writing-surface, linear-gradient(160deg, #fff8e9, #f8e9cf));
+  box-shadow: inset 0 0 0 2px var(--christmas-writing-highlight, #fff4df);
 }
 
 html[data-site-theme="christmas-2026"] .chat-detail-active .composer.is-desktop-writing-desk {

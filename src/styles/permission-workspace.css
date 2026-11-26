@@ -3,7 +3,7 @@
 .permission-tree-panel { display: flex; min-width: 0; min-height: 0; padding: 18px 12px; border-right: 1px solid var(--line-soft); background: var(--bg-canvas); }
 .permission-tree-content { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; }
 .permission-capability-picker { display: none; }
-.permission-search { display: flex; flex: 0 0 40px; align-items: center; gap: 8px; margin: 0 4px 12px; padding: 0 10px; border: 1px solid var(--line-soft); border-radius: 10px; color: var(--text-muted); background: var(--bg-elevated); }
+.permission-search { display: flex; flex: 0 0 40px; align-items: center; gap: 8px; margin: 0 4px 12px; padding: 0 10px; border: 1px solid var(--line-soft); border-radius: 10px; color: var(--text-muted); background: var(--field-tint, var(--bg-elevated)); }
 .permission-search > span { font-size: 19px; }
 .permission-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text-primary); background: transparent; font: inherit; font-size: 13px; }
 .permission-tree { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: none; }
@@ -63,7 +63,7 @@
 .permission-rule-row { display: grid; grid-template-columns: 42px minmax(120px, 1fr) 90px 90px 32px; align-items: end; gap: 8px; max-width: 760px; padding: 0; }
 .permission-rule-row label { display: grid; gap: 5px; min-width: 0; }
 .permission-rule-row label > span { color: var(--text-muted); font-size: 10px; }
-.permission-rule-row select, .permission-rule-row input { width: 100%; min-width: 0; height: 36px; padding: 0 8px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--bg-canvas); font: inherit; font-size: 12px; }
+.permission-rule-row select, .permission-rule-row input { width: 100%; min-width: 0; height: 36px; padding: 0 8px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--field-tint, var(--bg-canvas)); font: inherit; font-size: 12px; }
 .permission-not { height: 36px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-muted); background: var(--bg-canvas); font-size: 10px; font-weight: 750; }
 .permission-not.is-active { color: var(--danger, #b65f56); border-color: currentColor; }
 .permission-boolean { display: flex; grid-column: 3 / span 2; align-items: center; gap: 3px; height: 36px; }
@@ -78,7 +78,7 @@
 .permission-empty-rules small { color: var(--text-muted); font-size: 11px; }
 .permission-limit-list { display: flex; flex-wrap: wrap; gap: 12px; }
 .permission-limit-list label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
-.permission-limit-list input { width: 75px; height: 38px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--bg-canvas); text-align: center; }
+.permission-limit-list input { width: 75px; height: 38px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--field-tint, var(--bg-canvas)); text-align: center; }
 
 .permission-shortcuts { display: grid; gap: 3px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line-soft); }
 .permission-shortcuts:empty { display: none; }
@@ -128,7 +128,7 @@
 .permission-condition-fields { margin: 0; padding: 0; min-width: 0; border: 0; }
 .permission-reset-policy { margin-top: 12px; color: var(--danger); }
 .permission-advanced-expression { width: 100%; overflow-wrap: anywhere; font-size: 12px; }
-.permission-advanced-expression textarea { display: block; width: 100%; min-height: 120px; margin-block: 8px; padding: 8px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--bg-canvas); font-family: var(--font-mono); resize: vertical; }
+.permission-advanced-expression textarea { display: block; width: 100%; min-height: 120px; margin-block: 8px; padding: 8px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--text-primary); background: var(--field-tint, var(--bg-canvas)); font-family: var(--font-mono); resize: vertical; }
 .permission-workspace-loading { display: grid; place-items: center; align-content: center; gap: 12px; min-height: 160px; color: var(--text-muted); }
 .permission-workspace-loading i { width: 22px; height: 22px; border: 2px solid var(--line-soft); border-right-color: var(--brand-accent); border-radius: 50%; animation: permission-spin .8s linear infinite; }
 @keyframes permission-spin { to { transform: rotate(360deg); } }

@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.26.8",
+  "id": "2026.11.26.9",
   "publishedAt": "2026-11-26",
   "locales": {
     "zh-CN": {
-      "title": "发言可编辑更多内容",
+      "title": "深色模式下的输入框更协调",
       "items": [
-        "在熟悉的发表界面修改正文、图片、视频、语音、外部分享、位置和可见范围。",
-        "保存后保留原发布时间和互动。点击「已编辑」可查看历史版本及改动项目。"
+        "发表和编辑发言时，正文自然融入面板。",
+        "聊天、搜索、科研和管理表单的输入框更贴合深色背景。"
       ]
     },
     "en": {
-      "title": "Edit more of your Square posts",
+      "title": "Softer input surfaces in dark mode",
       "items": [
-        "Use the familiar composer to edit text, photos, video, voice, shared links, location and audience.",
-        "Edits keep the original post time and interactions. Select Edited to see previous versions and what changed."
+        "The Square writing area now blends into the composer.",
+        "Inputs in chat, search, research and management use subtler dark surfaces."
       ]
     }
   }
