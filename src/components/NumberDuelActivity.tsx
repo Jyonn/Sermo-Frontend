@@ -12,6 +12,7 @@ import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "..
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import { GameLeaderboard } from "./GameLeaderboard";
 import { DuelRuleGuide } from "./GameRules";
 import { ChatTargetPicker } from "./ChatTargetPicker";
 import { NumberDuelCard } from "./NumberDuelCard";
@@ -239,7 +240,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
       <nav aria-label={t('duel.sections')}>
         <button type="button" onClick={() => setSheet('rules')}>{t('duel.rulesShort')}</button>
         <button type="button" onClick={() => setSheet('history')}>{t('duel.historyShort')}</button>
-        <button type="button" onClick={() => setSheet('leaders')}>{t('duel.leadersShort')}</button>
+        <button type="button" onClick={() => setSheet('leaders')} aria-label={t('landlord.ranking')}>{t('duel.leadersShort')}</button>
         {roomCode && match && <GameAudio game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
           token={`${match.id}:${match.round}`} />}
       </nav>
@@ -341,11 +342,11 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
       </footer>}
     </>}
     <GameExitDialog exit={exit} live={live} busy={busy} />
-    <BottomSheet open={sheet === "history" || sheet === "leaders"} className="game-table-panel" onClose={() => setSheet(null)} title={t(sheet === "history" ? "duel.history" : "duel.leaders")}>
+    <GameLeaderboard activityKey={activity.key} open={sheet === 'leaders'} onClose={() => setSheet(null)} scoredOnly />
+    <BottomSheet open={sheet === "history"} className="game-table-panel" onClose={() => setSheet(null)} title={t('duel.history')}>
       <div className="duel-panel">
         {error ? <p className="duel-error" role="alert">{error}</p> : null}
         {sheet === "history" ? lobby?.history.length ? <div className="duel-records">{lobby.history.map((row) => <button key={row.id} type="button" onClick={() => showMatch(row.code)}><span>{row.opponent || t("duel.waitingPeer")}<small>{date(row.finished_at)}</small></span><b>{t(row.reason === "normal" || (row.reason === "forfeit" && row.outcome !== "draw") ? `duel.outcome.${row.outcome}` : "duel.cancelled")}</b><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</div> : <p className="duel-empty">{t("duel.noHistory")}</p> : null}
-        {sheet === "leaders" ? lobby?.leaders.length ? <ol className="duel-leaders">{lobby.leaders.map((row) => <li key={row.user_id}><span>{row.name}</span><b>+{row.points}</b></li>)}</ol> : <p className="duel-empty">{t("duel.noLeaders")}</p> : null}
       </div>
     </BottomSheet>
     <BottomSheet open={sheet === "rules"} className="game-table-panel" onClose={() => setSheet(null)} title={t("duel.rules")}><DuelRuleGuide /><ol className="duel-rule-list">{[1, 2, 3, 4, 5, 6].map((index) => <li key={index}>{t(`duel.rule${index}`)}</li>)}</ol></BottomSheet>

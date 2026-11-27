@@ -3,10 +3,11 @@ import {useLocation} from 'react-router-dom';
 import {api, ApiError} from '../lib/api';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {showToast} from '../lib/toast';
-import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordRanking, type LandlordRankingMetric, type LandlordTableView} from '../lib/landlord';
+import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordTableView} from '../lib/landlord';
 import type {ActivityCampaignDTO} from '../types';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
+import {GameLeaderboard} from './GameLeaderboard';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
 import {CardRuleGuide} from './GameRules';
@@ -257,8 +258,8 @@ export function LandlordActivity({activity, exitHandler}: {activity: ActivityCam
         {canChooseMode && <div className="landlord-mode-row"><TableModePicker choices={MODES} mode={table.mode ?? 'classic'} disabled={busy}
           onChange={mode => void perform({action:'mode', code:table.code, version:table.version, value:mode})} /></div>}
         {bidding || doubling || playing ? <>
-          <SelectableHand key={`${table.code}:${table.round}:${table.turn}`} cards={hand} last={lastPlay} game="landlord"
-            selected={selected} disabled={!playing || !canAct} suggested={table.suggested_cards} onSelect={setSelected} />
+          <SelectableHand key={`${table.code}:${table.round}`} cards={hand}
+            selected={selected} disabled={!playing || busy || Boolean(self?.trustee)} onSelect={setSelected} />
           {bidding ? <div className="landlord-controls">
             {turn && table.bid_options.map(value => <button key={value} className={value ? 'landlord-primary' : 'landlord-secondary'}
               disabled={!canAct} type="button" onClick={() => void perform({action:'bid', code:table.code, version:table.version, value})}>
@@ -313,53 +314,10 @@ export function LandlordActivity({activity, exitHandler}: {activity: ActivityCam
       <CardRuleGuide game="landlord" />
       <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult','ruleNoShuffle'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
     </SettingsDialog>
-    <SettingsDialog open={dialog === 'ranking'} title={t('landlord.ranking')} onClose={() => setDialog(null)}>
-      {dialog === 'ranking' && <Ranking activityKey={activity.key} />}
-    </SettingsDialog>
+    <GameLeaderboard activityKey={activity.key} open={dialog === 'ranking'} onClose={() => setDialog(null)} />
     <GameExitDialog exit={exit} live={live} busy={busy} />
     {table && canShareRoom && <ChatSharePicker open={shareOpen} title={t('landlord.chooseChat')} onClose={() => setShareOpen(false)}
       sendToChat={(chatId, clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'landlord_room', activity_key:activity.key,
         room_code:table.code, title}), undefined, clientId)} />}
   </section>;
-}
-
-function Ranking({activityKey}: {activityKey: string}) {
-  const {t, language} = useI18n();
-  const [year, setYear] = useState<number>();
-  const [metric, setMetric] = useState<LandlordRankingMetric>('points');
-  const [data, setData] = useState<LandlordRanking>();
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    const request = new AbortController();
-    setFailed(false);
-    void api.getLandlordRanking(activityKey, year, metric, request.signal).then(result => {
-      if (!request.signal.aborted) setData(result);
-    }).catch(() => {if (!request.signal.aborted) setFailed(true);});
-    return () => request.abort();
-  }, [activityKey, year, metric, attempt]);
-  const waiting = !data || data.metric !== metric || (year !== undefined && year !== data.year);
-  const percent = new Intl.NumberFormat(language, {style:'percent', maximumFractionDigits:1});
-  const format = (row: {points: number; win_rate: number}) => metric === 'points'
-    ? t('landlord.points', {count:row.points}) : percent.format(row.win_rate);
-  return <div className="landlord-ranking">
-    {data && <header><span>{t('landlord.rankPolicy')}</span><select aria-label={t('landlord.rankYear')} value={year ?? data.year}
-      onChange={event => setYear(Number(event.target.value))}>{data.years.map(value => <option key={value} value={value}>{t('landlord.yearLabel', {year:value})}</option>)}</select></header>}
-    <div className="landlord-rank-tabs" role="group" aria-label={t('landlord.ranking')}>
-      {(['points','win_rate'] as const).map(value => <button key={value} type="button" aria-pressed={metric === value} onClick={() => setMetric(value)}>
-        {t(value === 'points' ? 'landlord.pointsBoard' : 'landlord.winRateBoard')}
-      </button>)}
-    </div>
-    {failed ? <div className="landlord-empty"><p>{t('landlord.rankFailed')}</p><button className="landlord-text-button" onClick={() => setAttempt(value => value + 1)} type="button">{t('common.retry')}</button></div>
-      : waiting ? <p className="landlord-empty" role="status">{t('common.loading')}</p>
-      : !data.rows.length ? <p className="landlord-empty">{t('landlord.noRanks')}</p>
-      : <>
-        {data.mine && <p className="landlord-rank-mine">{t('landlord.myRank', {rank:data.mine.rank, score:format(data.mine)})}</p>}
-        <ol>{data.rows.map(row => <li key={row.member.user_id}>
-          <span className="landlord-rank-number">{row.rank}</span>
-          <UserAvatar className="landlord-list-avatar" name={row.member.name} uri={row.member.avatar_uri} />
-          <b>{row.member.name}</b><span>{format(row)}<small>{t('landlord.winRecord', {wins:row.wins, games:row.games})}</small></span>
-        </li>)}</ol>
-      </>}
-  </div>;
 }

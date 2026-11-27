@@ -170,9 +170,6 @@
 .duel-records > button > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .duel-records small { display: block; margin-top: 4px; color: var(--text-secondary); font-size: 11px; }
 .duel-records b { color: var(--text-secondary); font-size: 12px; }
-.duel-leaders { margin: 0; padding-inline-start: 22px; }
-.duel-leaders li { padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
-.duel-leaders b { float: inline-end; color: var(--brand-primary-press); }
 .duel-rule-list { padding-inline-start: 20px; margin: 0; }
 .duel-rule-list li { padding: 6px 0; color: var(--text-primary); font-size: 13px; line-height: 1.6; }
 .duel-share { display: flex; flex-wrap: wrap; gap: 7px; }

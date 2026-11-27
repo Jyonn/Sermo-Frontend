@@ -8,8 +8,8 @@
   "game.leaveRoomConfirm": "Leave this room?",
   "game.stay": "Stay at the table",
   "game.finishedByForfeit": "Round settled by forfeit",
-  "game.invalidSelection": "These cards cannot be played together here.",
-  "game.handGesture": "Tap one card or drag across adjacent cards. Release to keep a legal play.",
+  "game.handGesture": "Tap a card to toggle it, or drag to select several. Play becomes available when the selection is legal.",
+  "game.scoredRankPolicy": "Code Duel rankings include scored matches.",
   "game.rankOrder": "Single cards, low to high",
   "game.cardExamples": "Common combinations",
   "game.examplePair": "Pair",
@@ -912,7 +912,7 @@
   "quickActions.dragHint": "Drag to reorder",
   "quickActions.remove": "Remove",
   "quickActions.preview": "Chat preview",
-  "quickActions.title": "Chat quick actions",
+  "quickActions.title": "Quick actions",
   "quickActions.status": "Member status",
   "quickActions.settingsHint": "Choose and order 1–4 buttons. Available actions share the width. Saved for this account on this device. On short screens, expand them from the chat header.",
   "quickActions.order": "Button order",
@@ -3619,7 +3619,11 @@
   "update.currentVersion": "Current version",
   "update.latestVersion": "Latest version",
   "update.changes": "What's new",
-  "square.layout": "Square feed layout",
+  "square.layout": "Layout",
+  "square.entry": "Start on",
+  "square.entryTitle": "Choose your Square entry",
+  "square.entryUnset": "Not set",
+  "square.entrySelected": "Selected",
   "square.layoutUnified": "Use list layout everywhere",
   "square.layoutUnifiedHint": "Show Explore, Friends, and My posts as lists.",
   "square.layoutCustom": "Set separately",
@@ -4964,7 +4968,7 @@
   ,"bgm.autoDismiss": "Closes without sending if no key is chosen"
   ,"bgm.entranceFailed": "Entrance not sent. Check chat permissions or try again later."
   ,"bgm.stopPlayback": "Stop playback"
-  ,"bgm.myKeychain": "Character keychain"
+  ,"bgm.entranceSetting": "Character entrance"
   ,"bgm.manageKeychain": "Manage tracks, keys and entrance sounds"
   ,"resources.dropToUpload": "Drop files to upload"
   ,"resources.dropHint": "Add files to the current folder"
@@ -5028,7 +5032,7 @@
 ,"voice.lab.active": "Connected call"
 ,"voice.lab.low": "Last 15 seconds"
 ,"voice.lab.reset": "Reset"
-,"voiceInput.mode": "Mobile voice input"
+,"voiceInput.mode": "Voice input"
 ,"voiceInput.modeHint": "For the collapsed composer, on this device"
 ,"voiceInput.tapToRecord": "Tap to record"
 ,"voiceInput.stop": "Stop recording"

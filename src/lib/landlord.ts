@@ -44,24 +44,6 @@ export interface LandlordLobby {
   rooms: Array<{ code: string; host: LandlordMember; count: number }>;
 }
 
-interface LandlordResult {
-  rank: number;
-  wins: number;
-  games: number;
-  points: number;
-  win_rate: number;
-}
-
-export type LandlordRankingMetric = "points" | "win_rate";
-
-export interface LandlordRanking {
-  year: number;
-  years: number[];
-  metric: LandlordRankingMetric;
-  rows: Array<LandlordResult & { member: LandlordMember }>;
-  mine: LandlordResult | null;
-}
-
 interface LandlordTableAction {
   code: string;
   version: number;

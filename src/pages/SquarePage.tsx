@@ -54,7 +54,8 @@ import {SquareChannelPager} from '../components/SquareChannelPager';
 import {SquareChannelPage} from '../components/SquareChannelPage';
 import type {SquareChannel} from '../lib/squareSwipe';
 import '../components/SquareActivities.css';
-import {useSquareFeedLayout} from '../lib/useSquareFeedLayout';
+import {useSquareEntry, useSquareFeedLayout} from '../lib/useSquareFeedLayout';
+import {SquareEntryDialog} from '../components/SquareEntryDialog';
 import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
@@ -477,6 +478,9 @@ export default function SquarePage() {
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
+  const [squareEntry, setSquareEntry] = useSquareEntry(cacheScope);
+  const isSquareLanding = location.pathname === "/app/square" && !location.search;
+  const [chooseEntry, setChooseEntry] = useState(() => isSquareLanding && squareEntry === null);
   const [specialChannel, setSpecialChannel] = useState<"medals" | "activities" | null>(null);
   const activityTab = specialChannel === "activities";
   const isFeedTab = specialChannel === null;
@@ -491,9 +495,8 @@ export default function SquarePage() {
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedFrom || selectedFeedTo || selectedFeedKeyword);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(() => {
     if (profileFeedUserId) return "user";
-    return "friends";
+    return features.squareExploreEnabled && squareEntry === "explore" ? "all" : "friends";
   });
-  useEffect(() => { if (feedMode !== "user") writeTabCache(cacheScope, "square:mode", feedMode); }, [cacheScope, feedMode]);
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? "friends"
     : feedMode;
@@ -2244,6 +2247,13 @@ export default function SquarePage() {
 
   return (
     <AppChrome workspaceSelected={workspaceDetailActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
+      <SquareEntryDialog open={chooseEntry && isSquareLanding && squareEntry === null && features.squareExploreEnabled} value={squareEntry}
+        onClose={() => setChooseEntry(false)}
+        onChoose={channel => {
+          setSquareEntry(channel);
+          selectFeedTab(channel === 'explore' ? 'all' : 'friends');
+          setChooseEntry(false);
+        }} />
       <div className={`square-desktop-workspace is-square${squareFeedLayout==='masonry'?' is-masonry':''}${workspaceDetailActive ? " has-selection" : ""}`}>
       <main
         className="list-screen square-feed-screen is-square-workspace is-channel-pager"

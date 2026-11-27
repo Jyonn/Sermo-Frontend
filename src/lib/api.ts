@@ -4,7 +4,8 @@ import { mergeSessionUser } from "./sessionUser";
 import {applySquareSync,rememberSquareResponse,squareSyncRevision,type SquareSyncResult} from './squareSync';
 import {buildTabCacheScope} from './tabCache';
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
-import type { LandlordAction, LandlordLobby, LandlordRanking, LandlordRankingMetric, LandlordTableView } from "./landlord";
+import type { LandlordAction, LandlordLobby, LandlordTableView } from "./landlord";
+import type { GameRanking, GameRankingMetric } from "./gameLeaderboard";
 import type { FourPlayerAction, FourPlayerLobby, FourPlayerTable } from "./tabletop";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
@@ -1283,8 +1284,8 @@ export const api = {
       auth: true, method: "POST", body, signal, cache: "no-store",
     });
   },
-  getLandlordRanking(key: string, year: number | undefined, metric: LandlordRankingMetric, signal: AbortSignal) {
-    return request<LandlordRanking>(`/activities/${key}/landlord/leaderboard`, { auth: true, query: { year, metric }, signal, cache: "no-store" });
+  getGameLeaderboard(key: string, year: number | undefined, metric: GameRankingMetric, signal: AbortSignal) {
+    return request<GameRanking>(`/activities/${key}/leaderboard`, {auth:true, query:{year,metric}, signal, cache:'no-store'});
   },
   getFourPlayerLobby(key: string, code?: string, signal?: AbortSignal) {
     return request<FourPlayerLobby>(`/activities/${key}/table`, {auth:true, query:{code}, signal, cache:'no-store'});

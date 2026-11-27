@@ -1,5 +1,5 @@
 import {useRef, useState, type CSSProperties, type PointerEvent, type ReactNode} from 'react';
-import {isLegalPlay, playingCardRank, type CardGame} from '../lib/cardPatterns';
+import {playingCardRank} from '../lib/cardPatterns';
 import {useI18n} from '../lib/language';
 import './PlayingCards.css';
 
@@ -27,28 +27,15 @@ export function PlayingCard({id, selected, preview, disabled, resolvedRank, onCl
     : <span className={className} data-suit={suit} role="img" aria-label={label}>{content}</span>;
 }
 
-export function SelectableHand({cards, last, game, selected, disabled, suggested, onSelect}: {
-  cards: number[]; last: number[]; game: CardGame; selected: number[]; disabled: boolean; suggested: number[]; onSelect: (cards: number[]) => void;
+export function SelectableHand({cards, selected, disabled, onSelect}: {
+  cards: number[]; selected: number[]; disabled: boolean; onSelect: (cards: number[]) => void;
 }) {
   const {t} = useI18n();
   const gesture = useRef<{pointer: number; start: number; end: number; coordinate: number; vertical: boolean; stops: number[]; moving: boolean}>();
   const [preview,setPreview] = useState<number[]>([]);
-  const [rejected,setRejected] = useState(false);
-  const legal = (candidate: number[]) => !candidate.length || isLegalPlay(candidate,last,game);
-
-  function commit(range: number[], tap: boolean) {
+  function commit(range: number[]) {
     const removing = range.every(id => selected.includes(id));
-    const combined = removing ? selected.filter(id => !range.includes(id)) : [...new Set([...selected,...range])];
-    const choices = [combined];
-    if (!removing) choices.push(range);
-    if (tap && !removing) {
-      const same = cards.filter(id => id !== range[0] && playingCardRank(id) === playingCardRank(range[0]));
-      for (let count=1; count <= same.length; count++) choices.push([...range,...same.slice(0,count)]);
-      if (suggested.includes(range[0])) choices.push(suggested);
-    }
-    const next = choices.find(legal);
-    setRejected(!next);
-    if (next) onSelect(next);
+    onSelect(removing ? selected.filter(id => !range.includes(id)) : [...new Set([...selected,...range])]);
   }
 
   function pointerDown(event: PointerEvent<HTMLDivElement>) {
@@ -74,7 +61,6 @@ export function SelectableHand({cards, last, game, selected, disabled, suggested
     active.stops.forEach((stop, candidate) => {if (stop <= coordinate) index = candidate;});
     active.end = Math.max(0,index);
     setPreview(cards.slice(Math.min(active.start,active.end), Math.max(active.start,active.end) + 1));
-    setRejected(false);
   }
   function finish(event: PointerEvent<HTMLDivElement>, cancel = false) {
     const active = gesture.current;
@@ -83,7 +69,7 @@ export function SelectableHand({cards, last, game, selected, disabled, suggested
     setPreview([]);
     if (!cancel && !disabled) {
       const range = cards.slice(Math.min(active.start,active.end), Math.max(active.start,active.end) + 1);
-      if (range.length) commit(range, !active.moving);
+      if (range.length) commit(range);
     }
   }
   return <div className="selectable-hand">
@@ -92,9 +78,8 @@ export function SelectableHand({cards, last, game, selected, disabled, suggested
       onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={finish} onPointerCancel={event => finish(event,true)}
       onLostPointerCapture={event => finish(event,true)}>
       {cards.map(id => <PlayingCard id={id} key={id} selected={selected.includes(id)} disabled={disabled}
-        preview={preview.includes(id)} onClick={event => {if (!event.detail) commit([id],true);}} />)}
+        preview={preview.includes(id)} onClick={event => {if (!event.detail) commit([id]);}} />)}
     </div>
-    {rejected && !disabled && <span className="game-hand-hint" role="status">{t('game.invalidSelection')}</span>}
   </div>;
 }
 

@@ -11,6 +11,7 @@ import {ChatSharePicker} from './ChatSharePicker';
 import {MahjongTile} from './MahjongTile';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameLeaderboard} from './GameLeaderboard';
 import {CardRuleGuide, MahjongRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
 import {SettingsDialog} from './SettingsDialog';
@@ -86,7 +87,7 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
   const canPlay = activity.active && activity.verified;
   const {lobby, table, failed, busy, seconds, closeExpired, move, perform, retry} = useFourPlayerRoom(activity.key, canPlay, invitation);
   const [selected, setSelected] = useState<number[]>([]);
-  const [panel, setPanel] = useState<'rules' | 'share' | null>(null);
+  const [panel, setPanel] = useState<'rules' | 'share' | 'ranking' | null>(null);
   const board = table?.board;
   const meld = board && 'melds' in board ? board : null;
   const cards = board && 'last' in board ? board : null;
@@ -96,14 +97,15 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
   const myTurn = Boolean(board && board.turn === table?.your_seat);
   const canAct = playing && !busy && !self?.trustee && seconds > 0;
   const cardGame = table?.mode === 'firefight' ? 'firefight' : 'classic';
-  const canSubmit = Boolean(canAct && myTurn && cards && isLegalPlay(selected,cards.last,cardGame));
+  const selectedCards = cards ? selected.filter(id => cards.hand.includes(id)) : [];
+  const canSubmit = Boolean(canAct && myTurn && cards && isLegalPlay(selectedCards,cards.last,cardGame));
   const exit = useGameExit(Boolean(table && state !== 'abandoned'),playing,exitHandler,async () => Boolean(await move({action:'leave'})));
   const canShare = table && (state === 'waiting' || state === 'finished') && table.seats.length < 4;
   const title = language.startsWith('zh') ? activity.title : activity.title_en || activity.title;
   const hand = cards ? [...cards.hand].sort((a,b) => playingCardRank(b) - playingCardRank(a)) : meld?.hand ?? [];
   const outcome = board?.outcome && OUTCOMES[board.outcome] ? t(OUTCOMES[board.outcome]) : t('landlord.loss');
 
-  useEffect(() => {setSelected([]);}, [table?.code, table?.round, board?.turn, meld?.pending?.decision]);
+  useEffect(() => {setSelected([]);}, [table?.code, table?.round, meld?.turn, meld?.pending?.decision]);
   useEffect(() => {if (!canShare && panel === 'share') setPanel(null);}, [canShare, panel]);
 
   function send(moveToSend: GameMove) {
@@ -123,7 +125,9 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
       <div className="four-player-lobby">
         <div className="four-player-actions"><button className="landlord-primary" type="button" disabled={!canPlay || busy}
           onClick={() => void perform({action:'create'})}>{icon('add_circle')}{t('landlord.create')}</button>
-          <button className="landlord-secondary" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button></div>
+          <button className="landlord-secondary" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button>
+          {activity.active && <button className="landlord-secondary" type="button" onClick={() => setPanel('ranking')}>
+            {icon('emoji_events')}{t('landlord.ranking')}</button>}</div>
         {!canPlay ? <p className="four-player-placeholder">{t(activity.active ? 'landlord.verifiedOnly' : 'landlord.closed')}</p>
           : failed ? <p className="four-player-placeholder">{t('landlord.lobbyFailed')} <button type="button" className="landlord-text-button" onClick={retry}>{t('common.retry')}</button></p>
           : !lobby ? <p className="four-player-placeholder" role="status">{t('common.loading')}</p>
@@ -139,6 +143,8 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
     </div> : <div className={`four-player-room is-${state}`}>
       <header className="four-player-room-info"><span>{t(MODE_NAMES[table.mode])}{table.round > 0 && ` · ${t('landlord.round', {count:table.round})}`}</span>
         <button className="landlord-text-button" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button>
+        {!playing && <button className="landlord-text-button" type="button" onClick={() => setPanel('ranking')}
+          aria-label={t('landlord.ranking')} title={t('landlord.ranking')}>{icon('emoji_events')}</button>}
         <GameAudio game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
           : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} /></header>
       <div className="four-player-arena">
@@ -159,9 +165,8 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
           {meld ? <div className="mahjong-hand" role="group" aria-label={t('landlord.yourHand')}>
             {hand.map(tile => <MahjongTile key={tile} tile={tile} selected={selected.includes(tile)} drawn={tile === meld.drawn}
               disabled={!myTurn || !canAct || Boolean(meld.pending)} onClick={() => setSelected(selected[0] === tile ? [] : [tile])} />)}
-          </div> : cards && <SelectableHand key={`${table.code}:${table.round}:${board?.turn}`} cards={hand} last={cards.last}
-            game={cardGame} selected={selected} disabled={!canAct || !myTurn}
-            suggested={cards.suggested} onSelect={setSelected} />}
+          </div> : cards && <SelectableHand key={`${table.code}:${table.round}`} cards={hand}
+            selected={selectedCards} disabled={busy || Boolean(self?.trustee)} onSelect={setSelected} />}
           <div className="four-player-actions">
             {meld?.pending ? meld.pending.choices && <>
               <button type="button" className="landlord-secondary" disabled={!canAct}
@@ -177,7 +182,7 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
               <button className="landlord-secondary" type="button" onClick={() => send({action:'pass'})} disabled={!canAct || !cards.can_pass}>{t('landlord.pass')}</button>
               <button className="landlord-secondary" type="button" disabled={!canAct || !myTurn || !cards.suggested.length}
                 onClick={() => setSelected(cards.suggested)}>{t('landlord.hint')}</button>
-              <button className="landlord-primary" type="button" onClick={() => send({action:'play', cards:selected})} disabled={!canSubmit}>{t('landlord.play')}</button>
+              <button className="landlord-primary" type="button" onClick={() => send({action:'play', cards:selectedCards})} disabled={!canSubmit}>{t('landlord.play')}</button>
             </>}
             <button className="landlord-text-button four-player-trustee" type="button" disabled={busy} aria-pressed={self?.trustee ?? false}
               onClick={() => send({action:'trustee', value:!self?.trustee})}>{icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}</button>
@@ -206,6 +211,7 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
         ? ['tabletop.ruleTeams','tabletop.ruleClassic','tabletop.ruleFirefight'] : ['tabletop.ruleTiles','tabletop.ruleCalls','tabletop.ruleHu','tabletop.ruleMahjongPoints'])
         .map(key => <li key={key}>{t(key as TranslationKey)}</li>)}</ol>
     </SettingsDialog>
+    <GameLeaderboard activityKey={activity.key} open={panel === 'ranking'} onClose={() => setPanel(null)} />
     <GameExitDialog exit={exit} live={playing} busy={busy} />
     {table && canShare && <ChatSharePicker open={panel === 'share'} title={t('landlord.chooseChat')} onClose={() => setPanel(null)}
       sendToChat={(chatId,clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'table_room', activity_key:activity.key, room_code:table.code, title}), undefined, clientId)} />}

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { SquareFeedLayout } from "./squareFeedLayout";
 
 export type SquareLayoutChannel = "explore" | "friends" | "user";
+export type SquareEntryChannel = "friends" | "explore";
 const prefix = "frienden:square-layout:v2:";
 const legacyPrefix = "frienden:square-layout:v1:";
 const memory = new Map<string, string>();
@@ -73,4 +74,14 @@ export function useSquareChannelLayout(scope: string | null, channel: SquareLayo
 export function useSquareFeedLayout(scope: string | null, channel: SquareLayoutChannel) {
   const value = useSyncExternalStore(subscribe, () => getSquareFeedLayout(scope, channel), () => "list" as const);
   return [value] as const;
+}
+
+export function getSquareEntry(scope: string | null): SquareEntryChannel | null {
+  const value = preference(scopeKey(scope) + ":entry", "");
+  return value === "friends" || value === "explore" ? value : null;
+}
+
+export function useSquareEntry(scope: string | null) {
+  const value = useSyncExternalStore(subscribe, () => getSquareEntry(scope), () => null);
+  return [value, (channel: SquareEntryChannel) => writePreference(scopeKey(scope) + ":entry", channel)] as const;
 }

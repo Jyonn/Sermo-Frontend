@@ -18,7 +18,6 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { AccountSwitchSheet } from "../components/AccountSwitchSheet";
 import { ChatQuickActionSettings } from "../components/ChatQuickActionSettings";
-import { ChatQuickActionsMark } from "../components/ChatActionIcon";
 import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -49,7 +48,6 @@ import { PermissionQuotaDrawer } from "../components/PermissionQuotaDrawer";
 import {SettingsDialog} from '../components/SettingsDialog';
 import {SquareLayoutSettings} from '../components/SquareLayoutSettings';
 import { UserAvatar } from "../components/UserAvatar";
-import { BgmIcon } from "../components/BgmIcon";
 import { BgmEntranceSettings } from "../components/BgmEntranceSettings";
 import { bgmRunAvailable } from '../lib/bgmPolicy';
 import { useBgmPlayback } from '../lib/bgmPlayback';
@@ -92,7 +90,8 @@ import pockloIcon from "../assets/pocklo-mark.svg";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
-import {useSquareLayoutUnified} from '../lib/useSquareFeedLayout';
+import {SquareEntryDialog} from '../components/SquareEntryDialog';
+import {useSquareEntry, useSquareLayoutUnified} from '../lib/useSquareFeedLayout';
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
@@ -540,7 +539,10 @@ export default function MenuPage() {
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
+  const [chatSettingsOpen, setChatSettingsOpen] = useState(false);
+  const [squareSettingsOpen, setSquareSettingsOpen] = useState(false);
   const [squareLayoutDialogOpen, setSquareLayoutDialogOpen] = useState(false);
+  const [squareEntryDialogOpen, setSquareEntryDialogOpen] = useState(false);
   const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string; activity: ActivityCampaignDTO } | null>(null);
   const [bgmSettingsOpen, setBgmSettingsOpen] = useState(false);
   const { available: bgmPlaybackAvailable, refresh: refreshBgmPlayback } = useBgmPlayback();
@@ -623,6 +625,7 @@ export default function MenuPage() {
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const [unifiedSquareLayout] = useSquareLayoutUnified(cacheScope);
+  const [squareEntry, setSquareEntry] = useSquareEntry(cacheScope);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   useEffect(() => {
     if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
@@ -2555,10 +2558,10 @@ export default function MenuPage() {
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} onChange={()=>setChronelleInfoOpen(false)} /> : null}
       {session ? <MyProfileCardDrawer onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} user={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }} /> : null}
 
-      {bgmSettingsAvailable ? <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.myKeychain")}>
+      {bgmSettingsAvailable ? <SideDrawer historyKey="bgm-settings" onRouteOpen={() => setBgmSettingsOpen(true)} open={bgmSettingsOpen} onClose={() => setBgmSettingsOpen(false)} title={t("bgm.entranceSetting")} showTitle>
         {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <BgmEntranceSettings key={bgmCollection.scope + bgmCollection.key} activity={bgmCollection.activity} onUpdate={(activity) => setBgmCollection((current) => current?.scope === bgmCollection.scope ? { ...current, activity } : current)} /> : null}
       </SideDrawer> : null}
-      <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")}><ChatQuickActionSettings /></SideDrawer>
+      <SideDrawer historyKey="chat-actions" onRouteOpen={() => setQuickActionsSettingsOpen(true)} open={quickActionsSettingsOpen} onClose={() => {acknowledgeCallShortcut();setQuickActionsSettingsOpen(false)}} title={t("quickActions.title")} showTitle><ChatQuickActionSettings /></SideDrawer>
       <SettingsDialog open={themeDialogOpen} onClose={()=>setThemeDialogOpen(false)} title={t('menu.siteTheme')}>{themeDialogOpen?<PersonalThemeSettings/>:null}</SettingsDialog>
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
@@ -2589,23 +2592,11 @@ export default function MenuPage() {
               ]}
               value={languagePreference}
             />
-            <SettingRow
-              description={t("menu.showSelfAvatarHint")}
-              title={t("menu.showSelfAvatar")}
-              trailing={<SettingSwitch
-                checked={me?.show_self_avatar ?? true}
-                disabled={personalizationSaving}
-                label={t("menu.showSelfAvatar")}
-                onChange={() => void saveSelfAvatarPreference()}
-              />}
-            />
           </SettingGroup>
           <SettingGroup>
-            <MobileVoiceInputSettings/>
-            <SettingDialogRow label={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
-              open={squareLayoutDialogOpen} onClick={() => setSquareLayoutDialogOpen(true)} />
+            <SettingRow title={<span className="menu-update-label">{t("nav.chats")}<CallShortcutDiscoveryMarker/></span>} onClick={() => setChatSettingsOpen(true)} />
+            <SettingRow title={t("nav.square")} onClick={() => setSquareSettingsOpen(true)} />
           </SettingGroup>
-          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setQuickActionsSettingsOpen(true)} type="button"><ChatQuickActionsMark/><span><strong className="menu-update-label">{t("quickActions.title")}<CallShortcutDiscoveryMarker/></strong><small>{t("quickActions.entryHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
           <button
             className="personalization-background-entry personalization-feature-entry personalization-chat-page-entry"
             onClick={() => discoverThen("capability.custom_background", () => {
@@ -2637,17 +2628,47 @@ export default function MenuPage() {
             <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
-          {bgmSettingsAvailable && bgmCollection ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setBgmSettingsOpen(true)} type="button">
-            <span className="personalization-entry-preview bgm-key-entry-preview"><BgmIcon name="music_note" /></span>
-            <span><strong>{t("bgm.myKeychain")}</strong><small>{t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button> : null}
         </div>
+      </SideDrawer>
+      <SideDrawer historyKey="chat-settings" onRouteOpen={() => setChatSettingsOpen(true)} open={chatSettingsOpen} onClose={() => setChatSettingsOpen(false)} title={t("nav.chats")} showTitle>
+        <div className="personalization-drawer">
+          <SettingGroup>
+            <SettingRow
+              description={t("menu.showSelfAvatarHint")}
+              title={t("menu.showSelfAvatar")}
+              trailing={<SettingSwitch
+                checked={me?.show_self_avatar ?? true}
+                disabled={personalizationSaving}
+                label={t("menu.showSelfAvatar")}
+                onChange={() => void saveSelfAvatarPreference()}
+              />}
+            />
+          </SettingGroup>
+          <SettingGroup>
+            <MobileVoiceInputSettings/>
+            <SettingRow title={<span className="menu-update-label">{t("quickActions.title")}<CallShortcutDiscoveryMarker/></span>} onClick={() => setQuickActionsSettingsOpen(true)} />
+          </SettingGroup>
+          {bgmSettingsAvailable && bgmCollection ? <SettingGroup>
+            <SettingRow title={t("bgm.entranceSetting")} value={t(`bgm.mode.${bgmCollection.activity.bgm?.mode ?? "off"}`)} onClick={() => setBgmSettingsOpen(true)} />
+          </SettingGroup> : null}
+        </div>
+      </SideDrawer>
+      <SideDrawer historyKey="square-settings" onRouteOpen={() => setSquareSettingsOpen(true)} open={squareSettingsOpen} onClose={() => setSquareSettingsOpen(false)} title={t("nav.square")} showTitle>
+        <SettingGroup>
+          <SettingDialogRow label={t("square.layout")} value={t(unifiedSquareLayout ? "square.layoutUnified" : "square.layoutCustom")}
+            open={squareLayoutDialogOpen} onClick={() => setSquareLayoutDialogOpen(true)} />
+          {spaceFeatures.squareExploreEnabled && <SettingDialogRow label={t("square.entry")}
+            value={t(squareEntry === "explore" ? "square.feedAll" : squareEntry === "friends" ? "square.feedFriends" : "square.entryUnset")}
+            open={squareEntryDialogOpen} onClick={() => setSquareEntryDialogOpen(true)} />}
+        </SettingGroup>
       </SideDrawer>
       <SettingsDialog open={squareLayoutDialogOpen}
         onClose={() => setSquareLayoutDialogOpen(false)} title={t("square.layout")}>
         <SquareLayoutSettings scope={cacheScope}/>
       </SettingsDialog>
+      <SquareEntryDialog open={squareSettingsOpen && squareEntryDialogOpen && spaceFeatures.squareExploreEnabled} value={squareEntry}
+        onClose={() => setSquareEntryDialogOpen(false)}
+        onChoose={channel => { setSquareEntry(channel); setSquareEntryDialogOpen(false); }} />
 
       <SideDrawer
         actionBusy={personalizationSaving}

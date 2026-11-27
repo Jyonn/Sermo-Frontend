@@ -1,19 +1,21 @@
 {
-  "id": "2026.11.27.11",
+  "id": "2026.11.27.12",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "认证账号均可参加游戏",
+      "title": "游戏与个性化设置",
       "items": [
-        "已认证的官方账号也可以创建、分享和加入游戏房间。",
-        "与官方账号进行数字交锋时，双方直接进入免费练习。"
+        "斗地主和双扣可以自由点选、划选或取消手牌。牌型不符合规则时，出牌按钮会禁用。",
+        "斗地主、双扣、麻将和数字交锋均可按年度查看空间内的积分榜和胜率榜。",
+        "个性化新增聊天与广场设置入口。快捷操作更易调整，打开广场时可以选择先看好友或探索。"
       ]
     },
     "en": {
-      "title": "Games for all verified accounts",
+      "title": "Games and personalization",
       "items": [
-        "Verified official accounts can now create, share, and join game rooms.",
-        "Code Duel matches with an official account start as free practice."
+        "Tap, drag to select, and deselect cards freely in Dou Dizhu and Shuangkou. Play is enabled for legal combinations.",
+        "Dou Dizhu, Shuangkou, Mahjong, and Code Duel all have annual points and win-rate rankings for your space.",
+        "Chat and Square now have separate personalization settings. Customize chat shortcuts and choose whether Square opens to Friends or Explore."
       ]
     }
   }

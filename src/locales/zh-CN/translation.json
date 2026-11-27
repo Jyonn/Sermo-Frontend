@@ -8,8 +8,8 @@
   "game.leaveRoomConfirm": "确定离开当前房间？",
   "game.stay": "继续留桌",
   "game.finishedByForfeit": "有人认输，本局已结算",
-  "game.invalidSelection": "这组牌当前不能出",
-  "game.handGesture": "轻点单张，或按住划过相邻的牌。松手时只保留当前能打出的组合。",
+  "game.handGesture": "轻点可选中或取消一张牌，按住划过可一次选中多张。牌型合法时可以出牌。",
+  "game.scoredRankPolicy": "数字交锋统计计分对局。",
   "game.rankOrder": "单张大小 · 从小到大",
   "game.cardExamples": "常见牌型",
   "game.examplePair": "对子",
@@ -910,7 +910,7 @@
   "quickActions.dragHint": "按住拖动排序",
   "quickActions.remove": "移除",
   "quickActions.preview": "聊天顶部",
-  "quickActions.title": "聊天快捷操作",
+  "quickActions.title": "快捷操作",
   "quickActions.status": "成员状态",
   "quickActions.settingsHint": "选择并排序 1–4 个按钮。不可用项自动隐藏，其余平分宽度；设置保存在此设备的当前账号。矮屏可从聊天右上角展开。",
   "quickActions.order": "按钮顺序",
@@ -3617,7 +3617,11 @@
   "update.currentVersion": "当前版本",
   "update.latestVersion": "最新版本",
   "update.changes": "更新内容",
-  "square.layout": "广场布局",
+  "square.layout": "布局",
+  "square.entry": "入口",
+  "square.entryTitle": "选择广场入口",
+  "square.entryUnset": "未设置",
+  "square.entrySelected": "已选",
   "square.layoutUnified": "统一使用列表",
   "square.layoutUnifiedHint": "探索、好友和我的都使用列表布局。",
   "square.layoutCustom": "分别设置",
@@ -4962,7 +4966,7 @@
   ,"bgm.autoDismiss": "未选择将自动收起，不发送消息"
   ,"bgm.entranceFailed": "本次登场未发送，请检查会话权限或稍后重试。"
   ,"bgm.stopPlayback": "停止播放"
-  ,"bgm.myKeychain": "主角按键"
+  ,"bgm.entranceSetting": "主角登场"
   ,"bgm.manageKeychain": "管理曲库、装配与进会话音效"
   ,"resources.dropToUpload": "松开以上传文件"
   ,"resources.dropHint": "文件将添加到当前目录"
@@ -5026,7 +5030,7 @@
 ,"voice.lab.active": "通话中"
 ,"voice.lab.low": "最后十五秒"
 ,"voice.lab.reset": "重置"
-,"voiceInput.mode": "手机语音输入"
+,"voiceInput.mode": "语音输入"
 ,"voiceInput.modeHint": "折叠输入框时使用，在此设备生效"
 ,"voiceInput.tapToRecord": "点击录制"
 ,"voiceInput.stop": "停止录制"

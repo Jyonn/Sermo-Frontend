@@ -70,22 +70,12 @@
 .landlord-text-button:hover { text-decoration: underline; }
 .landlord-primary:disabled, .landlord-secondary:disabled { opacity: .42; cursor: default; }
 .landlord-primary .material-symbols-outlined, .landlord-secondary .material-symbols-outlined { font-size: 18px; }
-.landlord-ranking select {
-  width: 100%;
-  min-height: 42px;
-  padding: 8px 12px;
-  border: 1px solid var(--line-soft);
-  border-radius: 11px;
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  font: inherit;
-}
 .landlord-open-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; border-bottom: 1px solid var(--line-soft); }
 .landlord-open-heading h3 { margin: 0; font-size: 1rem; }
 .landlord-empty, .landlord-reconnecting { margin: 0; padding: 17px 2px 7px; color: var(--text-secondary); font-size: .85rem; line-height: 1.6; }
 .landlord-empty p, .landlord-reconnecting p { margin: 0; }
-.landlord-rooms, .landlord-ranking ol { display: grid; margin: 0; padding: 0; list-style: none; }
-.landlord-rooms li, .landlord-ranking li {
+.landlord-rooms { display: grid; margin: 0; padding: 0; list-style: none; }
+.landlord-rooms li {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -94,8 +84,8 @@
   border-bottom: 1px solid var(--line-soft);
 }
 .landlord-list-avatar { width: 32px; height: 32px; }
-.landlord-rooms li b, .landlord-ranking li b { display: block; overflow: hidden; font-size: .89rem; text-overflow: ellipsis; white-space: nowrap; }
-.landlord-rooms small, .landlord-ranking li small { display: block; margin-top: 3px; color: var(--text-muted); font-size: .73rem; }
+.landlord-rooms li b { display: block; overflow: hidden; font-size: .89rem; text-overflow: ellipsis; white-space: nowrap; }
+.landlord-rooms small { display: block; margin-top: 3px; color: var(--text-muted); font-size: .73rem; }
 .landlord-restricted { display: grid; justify-items: start; gap: 9px; }
 .landlord-restricted p { margin: 0; color: var(--text-secondary); }
 .landlord-room {
@@ -192,16 +182,6 @@
 .landlord-settlement b { font: 700 1.2rem Georgia, serif; color: var(--landlord-ivory); }
 .landlord-reconnecting { text-align: center; }
 .landlord-rules { display: grid; gap: 13px; margin: 0; padding-inline-start: 20px; color: var(--text-secondary); font-size: .9rem; line-height: 1.65; }
-.landlord-ranking header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; color: var(--text-secondary); font-size: .8rem; }
-.landlord-ranking select { width: auto; }
-.landlord-rank-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-top: 10px; padding: 4px; border: 1px solid var(--line-soft); border-radius: 12px; }
-.landlord-rank-tabs button { min-height: 38px; border: 0; border-radius: 8px; color: var(--text-secondary); background: transparent; font-weight: 700; cursor: pointer; }
-.landlord-rank-tabs button[aria-pressed="true"] { color: var(--text-primary); background: var(--bg-elevated); }
-.landlord-ranking li { grid-template-columns: 2ch auto minmax(0, 1fr) auto; }
-.landlord-ranking li > span:last-child { text-align: end; font-size: .81rem; }
-.landlord-rank-number { color: var(--text-muted); font: 700 1.12rem Georgia, serif; font-variant-numeric: tabular-nums; }
-.landlord-ranking li:nth-child(-n+3) .landlord-rank-number { color: var(--brand-accent); }
-.landlord-rank-mine { margin: 12px 0 0; padding: 10px 0; border-block: 1px solid var(--line-soft); font-size: .86rem; font-weight: 750; }
 @container (min-width: 475px) {
   .landlord-hero-art { right: 2%; }
 }

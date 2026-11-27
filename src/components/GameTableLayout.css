@@ -59,7 +59,7 @@ body:has([data-game-room]) .chat-sync-popup { z-index: 650; }
   }
   body:has(.game-table-drawer, .game-table-screen) :is(
     .sheet-backdrop:has(.chat-target-picker-sheet, .game-table-panel),
-    .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules),
+    .settings-dialog-backdrop:has(.game-ranking, .landlord-rules),
     .confirm-dialog-backdrop:has(.game-table-panel)
   ) {
     inset: 50% auto auto 50%;
@@ -72,5 +72,5 @@ body:has([data-game-room]) .chat-sync-popup { z-index: 650; }
     animation: none;
   }
   body:has(.game-table-drawer, .game-table-screen) :is(.chat-target-picker-sheet, .bottom-sheet.game-table-panel) { width: min(520px, 100%); max-height: calc(100dvw - 20px); border-radius: 20px; }
-  body:has(.game-table-drawer) .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules) > section { max-height: calc(100dvw - 20px); }
+  body:has(.game-table-drawer, .game-table-screen) .settings-dialog-backdrop:has(.game-ranking, .landlord-rules) > section { max-height: calc(100dvw - 20px); }
 }
