@@ -1358,7 +1358,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "activity") {
-    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} className={groupClassName} title={message.payload?.title} roomCode={message.payload?.room_code} room={message.payload?.duel_room} />;
+    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} className={groupClassName} title={message.payload?.title} roomCode={message.payload?.room_code} landlordRoom={message.payload?.landlord_room_code} room={message.payload?.duel_room} />;
   }
 
   if (message.kind === "forward_bundle") {
@@ -8747,7 +8747,7 @@ function LiveChatsPage({
                 } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
                   navigate(`/app/square/statements/${message.payload.statement_id}`);
                 } else if (message.type === MESSAGE_TYPE_ACTIVITY && message.payload?.activity_key) {
-                  if(message.payload.room_code)navigate(`/app/number-duel/${message.payload.room_code}`);else if(message.payload.activity_key)openActivity(message.payload.activity_key);
+                  if(message.payload.room_code)navigate(`/app/number-duel/${message.payload.room_code}`);else openActivity(message.payload.activity_key,message.payload.landlord_room_code);
                 } else {
                   revealMessageFromSearch(message.message_id);
                 }

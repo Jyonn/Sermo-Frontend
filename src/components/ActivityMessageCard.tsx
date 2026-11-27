@@ -14,10 +14,11 @@ interface ActivityMessageCardProps {
   className?: string;
   title?: string;
   roomCode?: string;
+  landlordRoom?: string;
   room?: DuelRoomSummary;
 }
 
-export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, room }: ActivityMessageCardProps) {
+export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, landlordRoom, room }: ActivityMessageCardProps) {
   const navigate = useNavigate();
   const openActivity=useActivityOverlay();
   const { t } = useI18n();
@@ -30,7 +31,9 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
     return <NumberDuelCard room={room} className={className} onClick={() => roomCode ? navigate(`/app/number-duel/${roomCode}`) : openActivity(key)} />;
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
-    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(key === LANDLORD_KEY ? "landlord.permanent" : "message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key)} />;
+    const eyebrow = landlordRoom ? 'landlord.roomInvite' : key === LANDLORD_KEY ? 'landlord.permanent' : 'message.activityEyebrow';
+    const hint = landlordRoom ? 'landlord.join' : activity?.active ? 'message.activityOpen' : 'message.activityEnded';
+    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(eyebrow)} hint={t(hint)} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key, landlordRoom)} />;
   }
 
   return (

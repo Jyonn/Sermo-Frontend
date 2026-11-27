@@ -1,0 +1,42 @@
+.playing-card-stack {
+  --card-width: clamp(36px, 12cqw, 62px);
+  --card-max-step: calc(var(--card-width) * .65);
+  --card-step: min(var(--card-max-step), calc(max(0px, 100cqw - var(--card-width) - 4px) / var(--card-overlaps)));
+  display: flex;
+  justify-content: center;
+  isolation: isolate;
+  padding-block: 10px 12px;
+}
+.playing-card-stack.is-compact { --card-width: 28px; --card-max-step: 17px; padding-block: 0; }
+.playing-card-stack .playing-card + .playing-card { margin-inline-start: calc(var(--card-step) - var(--card-width)); }
+.playing-card {
+  position: relative;
+  display: inline-flex;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: var(--card-width, 28px);
+  aspect-ratio: 0.71;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: start;
+  padding: 4px 0 0 2px;
+  border: 1px solid #ac8e62;
+  border-radius: 6px;
+  color: #24372e;
+  background: #fbf0d9;
+  box-shadow: inset 0 0 0 1px #fff9ea, 0 2px 5px #08140c3b;
+  font: 700 clamp(.68rem, 3cqw, 1.05rem)/.95 Georgia, serif;
+  user-select: none;
+}
+.playing-card b, .playing-card > span { z-index: 1; }
+.playing-card > span { font-size: .88em; }
+.playing-card[data-suit]::after { position: absolute; inset: 40% 0 auto; content: attr(data-suit); text-align: center; opacity: .34; font-size: 1.75em; }
+.playing-card.is-red { color: #9d3527; }
+.playing-card.is-backed { align-items: center; justify-content: center; padding: 0; color: #f1d18b; background: repeating-linear-gradient(42deg, #34583a 0 2px, #19362c 2px 5px); }
+.playing-card[aria-pressed] { transition: transform .15s ease-out, background-color .15s; }
+.playing-card[aria-pressed]:enabled { cursor: pointer; }
+.playing-card[aria-pressed="true"] { transform: translateY(-8px); background: #ffdda4; border-color: #a95b2a; }
+.playing-card:focus-visible { outline: none; }
+.playing-card:focus-visible::before { position: absolute; inset: 1px auto 1px 1px; width: 8px; border-left: 2px solid #a14f25; border-radius: 4px; content: ''; }
+.playing-card-stack.is-compact .playing-card { padding-block-start: 2px; font-size: .72rem; }
+@media (prefers-reduced-motion: reduce) { .playing-card[aria-pressed] { transition: none; } }

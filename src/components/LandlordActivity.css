@@ -70,8 +70,7 @@
 .landlord-text-button:hover { text-decoration: underline; }
 .landlord-primary:disabled, .landlord-secondary:disabled { opacity: .42; cursor: default; }
 .landlord-primary .material-symbols-outlined, .landlord-secondary .material-symbols-outlined { font-size: 18px; }
-.landlord-join { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; margin: 13px 0 18px; }
-.landlord-join input, .landlord-ranking select {
+.landlord-ranking select {
   width: 100%;
   min-height: 42px;
   padding: 8px 12px;
@@ -81,8 +80,7 @@
   color: var(--text-primary);
   font: inherit;
 }
-.landlord-join input { letter-spacing: .07em; }
-.landlord-open-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line-soft); }
+.landlord-open-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; border-bottom: 1px solid var(--line-soft); }
 .landlord-open-heading h3 { margin: 0; font-size: 1rem; }
 .landlord-empty, .landlord-reconnecting { margin: 0; padding: 17px 2px 7px; color: var(--text-secondary); font-size: .85rem; line-height: 1.6; }
 .landlord-empty p, .landlord-reconnecting p { margin: 0; }
@@ -104,7 +102,6 @@
 .landlord-board::before { inset: 104px 11px 11px; background: #0d251a36; }
 .landlord-table-nav { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding-inline: 4px; }
 .landlord-table-nav > span { font-size: .72rem; color: #e1ce9f; }
-.landlord-table-nav b { margin-inline-start: 5px; font: 700 .9rem/1.2 ui-monospace, monospace; letter-spacing: .12em; color: var(--landlord-ivory); }
 .landlord-table-nav button { color: var(--landlord-ivory); }
 .landlord-opponents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .landlord-opponents .landlord-seat:last-child { justify-self: end; }
@@ -137,44 +134,24 @@
 .landlord-table-art { height: 80px; width: 108px; object-fit: contain; }
 .landlord-clock { font-variant-numeric: tabular-nums; }
 .landlord-your-seat { display: flex; justify-content: center; }
-.landlord-card {
-  position: relative;
-  display: inline-flex;
-  width: clamp(25px, 7.5cqw, 48px);
-  min-width: 0;
-  min-height: 44px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 2px;
-  border: 1px solid #c9ac77;
-  border-radius: 7px;
-  color: #24372e;
-  background: #f9e9c9;
-  box-shadow: inset 0 0 0 2px #fff5db8a, 0 2px 2px #08140c24;
-  font: 700 clamp(.88rem, 4.3cqw, 1.35rem)/1.04 Georgia, serif;
-  user-select: none;
-}
-.landlord-card b { font-weight: 700; }
-.landlord-card span { font-size: .85em; }
-.landlord-card.is-red { color: #9d3527; }
-.landlord-card.is-joker b { font-family: inherit; font-size: .58em; white-space: nowrap; }
-.landlord-card.is-backed { border: 1px solid #c5a36a; background: repeating-linear-gradient(42deg, #34583a 0 2px, #19362c 2px 5px); color: #dec492; }
-.landlord-card[aria-pressed] { cursor: pointer; transition: transform .16s ease-out, background-color .16s; }
-.landlord-card[aria-pressed="true"] { z-index: 1; transform: translateY(-5px); background: #ffce7c; border-color: #aa3e2d; box-shadow: 0 0 0 2px #aa3e2d; }
-.landlord-bottom-cards, .landlord-last-play > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
-.landlord-bottom-cards .landlord-card { width: 21px; min-height: 27px; border-radius: 4px; font-size: .7rem; }
 .landlord-last-play small { display: block; margin-bottom: 4px; color: #e0cd9e; font-size: .7rem; }
-.landlord-last-play .landlord-card { width: 22px; min-height: 31px; border-radius: 5px; font-size: .85rem; }
-.landlord-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 4px; padding: 4px 0 15px; }
+.landlord-play-controls > .playing-card-stack { container-type: inline-size; }
 .landlord-controls { justify-content: center; }
 .landlord-controls > button { min-width: 67px; }
-.landlord-leave { display: flex; margin: 9px auto 0; }
+.landlord-table-actions { margin-top: 8px; }
+.landlord-table-actions button[aria-pressed="true"] { color: var(--brand-accent); }
+.landlord-table-actions .material-symbols-outlined { font-size: 17px; }
+.landlord-choice { min-height: 42px; display: grid; place-items: center; color: var(--text-secondary); font-size: .85rem; }
+.landlord-settlement { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; width: min(238px, 100%); }
+.landlord-settlement span { display: grid; gap: 3px; padding: 6px 4px; border: 1px solid var(--landlord-line); border-radius: 7px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #dfc997; font-size: .7rem; }
+.landlord-settlement b { font: 700 1.2rem Georgia, serif; color: var(--landlord-ivory); }
 .landlord-reconnecting { text-align: center; }
 .landlord-rules { display: grid; gap: 13px; margin: 0; padding-inline-start: 20px; color: var(--text-secondary); font-size: .9rem; line-height: 1.65; }
 .landlord-ranking header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; color: var(--text-secondary); font-size: .8rem; }
 .landlord-ranking select { width: auto; }
+.landlord-rank-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-top: 10px; padding: 4px; border: 1px solid var(--line-soft); border-radius: 12px; }
+.landlord-rank-tabs button { min-height: 38px; border: 0; border-radius: 8px; color: var(--text-secondary); background: transparent; font-weight: 700; cursor: pointer; }
+.landlord-rank-tabs button[aria-pressed="true"] { color: var(--text-primary); background: var(--bg-elevated); }
 .landlord-ranking li { grid-template-columns: 2ch auto minmax(0, 1fr) auto; }
 .landlord-ranking li > span:last-child { text-align: end; font-size: .81rem; }
 .landlord-rank-number { color: var(--text-muted); font: 700 1.12rem Georgia, serif; font-variant-numeric: tabular-nums; }
@@ -182,8 +159,4 @@
 .landlord-rank-mine { margin: 12px 0 0; padding: 10px 0; border-block: 1px solid var(--line-soft); font-size: .86rem; font-weight: 750; }
 @container (min-width: 475px) {
   .landlord-hero-art { right: 2%; }
-  .landlord-card { width: 42px; min-height: 59px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .landlord-card[aria-pressed] { transition: none; }
 }

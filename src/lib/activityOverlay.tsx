@@ -7,8 +7,9 @@ import {SideDrawer} from '../components/SideDrawer';
 import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ActivityLoadingState} from '../components/ActivityLoadingState';
 import {activityDrawerClassName} from './activityTheme';
+import {LANDLORD_ROOM_PARAM} from './landlord';
 const Experience=lazy(()=>import('../components/ActivityExperience').then(module=>({default:module.ActivityExperience})));
-const ActivityOverlayContext=createContext<(key:string)=>void>(()=>undefined);
+const ActivityOverlayContext=createContext<(key:string,room?:string)=>void>(()=>undefined);
 const ActivityPageReadyContext=createContext<(path:string)=>void>(()=>undefined);
 export const useActivityOverlay=()=>useContext(ActivityOverlayContext);
 export const useActivityPageReady=()=>useContext(ActivityPageReadyContext);
@@ -20,11 +21,11 @@ export function ActivityOverlayProvider({children}:{children:ReactNode}) {
   const {t}=useI18n();
   const [readyPath,setReadyPath]=useState<string|null>(null);
   const key=activityKeyFromSearch(location.search);
-  const open=(activityKey:string)=>{
-    if(activityKey===key)return;
+  const open=(activityKey:string,room?:string)=>{
+    if(activityKey===key && (room ?? null) === new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM))return;
     // Shared drawers also write their path with history.pushState. Read that
     // current path so opening an activity preserves the complete parent stack.
-    navigate({pathname:location.pathname,search:activityOverlaySearch(window.location.search,activityKey),hash:window.location.hash},{state:{...location.state,activityOverlay:true}});
+    navigate({pathname:location.pathname,search:activityOverlaySearch(window.location.search,activityKey,room),hash:window.location.hash},{state:{...location.state,activityOverlay:true}});
   };
   const close=()=>{
     if(location.state?.activityOverlay)navigate(-1);

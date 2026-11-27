@@ -10,7 +10,7 @@ export interface LandlordMember {
 
 export interface LandlordTableView {
   code: string;
-  status: "waiting" | "bidding" | "playing" | "finished" | "abandoned";
+  status: "waiting" | "bidding" | "doubling" | "playing" | "finished" | "abandoned";
   version: number;
   your_seat: number;
   turn: number | null;
@@ -18,13 +18,16 @@ export interface LandlordTableView {
   winner: number | null;
   hand: number[];
   ready_count: number;
-  seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean }>;
+  seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean; doubled: boolean | null; trustee: boolean; score: number }>;
   bottom_cards: number[];
   bids: Array<number | null>;
   moves: Array<{ cards: number[]; automatic: boolean } | null>;
   last_player: number | null;
   deadline: number | null;
   server_now: number;
+  base: number;
+  multiplier: number;
+  spring: boolean;
   bid_options: number[];
   can_pass: boolean;
   suggested_cards: number[];
@@ -39,11 +42,16 @@ interface LandlordResult {
   rank: number;
   wins: number;
   games: number;
+  points: number;
+  win_rate: number;
 }
+
+export type LandlordRankingMetric = "points" | "win_rate";
 
 export interface LandlordRanking {
   year: number;
   years: number[];
+  metric: LandlordRankingMetric;
   rows: Array<LandlordResult & { member: LandlordMember }>;
   mine: LandlordResult | null;
 }
@@ -56,7 +64,7 @@ interface LandlordTableAction {
 export type LandlordAction =
   | { action: "create" }
   | { action: "join"; code: string }
-  | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
+  | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "double" | "trustee"; value: boolean } | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
 
 export const LANDLORD_ROOM_CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/;
 export const LANDLORD_ROOM_PARAM = "landlord_room";

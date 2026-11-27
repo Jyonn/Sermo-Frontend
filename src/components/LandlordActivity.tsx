@@ -2,33 +2,18 @@ import {useEffect, useRef, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import {api, ApiError} from '../lib/api';
 import {useI18n, type TranslationKey} from '../lib/language';
-import {copyText} from '../lib/presentation';
 import {showToast} from '../lib/toast';
-import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordRanking, type LandlordTableView} from '../lib/landlord';
+import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordRanking, type LandlordRankingMetric, type LandlordTableView} from '../lib/landlord';
 import type {ActivityCampaignDTO} from '../types';
 import {ActivityTitle} from './ActivityCampaignCard';
+import {ChatSharePicker} from './ChatSharePicker';
 import {ConfirmDialog} from './ConfirmDialog';
+import {PlayingCard, PlayingCardStack, playingCardRank} from './PlayingCards';
 import {SettingsDialog} from './SettingsDialog';
 import {UserAvatar} from './UserAvatar';
 import './LandlordActivity.css';
 
-const ranks = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
-const pips = ['♠', '♥', '♣', '♦'];
 const icon = (name: string) => <span aria-hidden="true" className="material-symbols-outlined">{name}</span>;
-
-function Card({id, selected, onClick}: {id?: number; selected?: boolean; onClick?: () => void}) {
-  const {t} = useI18n();
-  if (id === undefined) return <span className="landlord-card is-backed" aria-hidden="true">♦</span>;
-  const joker = id >= 52;
-  const rank = joker ? (id === 53 ? t('landlord.bigJoker') : t('landlord.smallJoker')) : ranks[Math.floor(id / 4)];
-  const suit = joker ? '✦' : pips[id % 4];
-  const label = joker ? rank : rank + ' ' + suit;
-  const className = `landlord-card${suit === '♥' || suit === '♦' || id === 53 ? ' is-red' : ''}${joker ? ' is-joker' : ''}`;
-  const content = <><b>{rank}</b><span aria-hidden="true">{suit}</span></>;
-  return onClick
-    ? <button type="button" className={className} aria-label={label} aria-pressed={Boolean(selected)} onClick={onClick}>{content}</button>
-    : <span className={className} aria-label={label}>{content}</span>;
-}
 
 function Seat({table, position, self = false}: {table: LandlordTableView; position: number; self?: boolean}) {
   const {t} = useI18n();
@@ -42,8 +27,9 @@ function Seat({table, position, self = false}: {table: LandlordTableView; positi
     <UserAvatar className="landlord-seat-avatar" name={seat.member.name} uri={seat.member.avatar_uri} />
     <div className="landlord-seat-copy">
       <b>{self ? t('common.you') : seat.member.name}</b>
-      <small>{label}{label && table.status === 'playing' ? ' · ' : ''}{table.status === 'playing' && t('landlord.cardCount', {count: seat.remaining})}</small>
+      <small>{[label, table.status === 'playing' && t('landlord.cardCount', {count: seat.remaining}), seat.trustee && t('landlord.trustee')].filter(Boolean).join(' · ')}</small>
     </div>
+    {seat.doubled && ['doubling', 'playing'].includes(table.status) && <span className="landlord-passed" aria-label={t('landlord.double')}>×2</span>}
     {table.status === 'playing' && move && !move.cards.length && <span className="landlord-passed">{t('landlord.pass')}</span>}
   </div>;
 }
@@ -56,7 +42,8 @@ const actionErrors: Record<string, TranslationKey> = {
 export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const {t, language} = useI18n();
   const location = useLocation();
-  const [joinCode, setJoinCode] = useState(() => new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM)?.toUpperCase().slice(0, 8) ?? '');
+  const invitation = new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM);
+  const openedInvitation = useRef<string | null>(null);
   const [lobby, setLobby] = useState<LandlordLobby>();
   const [table, setTable] = useState<LandlordTableView | null>(null);
   const [busy, setBusy] = useState(false);
@@ -64,6 +51,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const [attempt, setAttempt] = useState(0);
   const [selected, setSelected] = useState<number[]>([]);
   const [dialog, setDialog] = useState<'ranking' | 'rules' | 'leave' | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const [now, setNow] = useState(Date.now);
   const [clockOffset, setClockOffset] = useState(0);
   const tableRef = useRef<LandlordTableView | null>(null);
@@ -73,7 +61,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const title = language.startsWith('zh') ? activity.title : activity.title_en || activity.title;
 
   const receiveTable = (next: LandlordTableView | null) => {
-    if (next?.code !== tableRef.current?.code || next?.turn !== next?.your_seat) setSelected([]);
+    if (next?.code !== tableRef.current?.code || next?.status !== 'playing') setSelected([]);
     else if (next?.version !== tableRef.current?.version) setSelected(current => current.filter(id => next?.hand.includes(id)));
     tableRef.current = next;
     setTable(next);
@@ -109,7 +97,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       }
       if (!stopped) {
         const status = tableRef.current?.status;
-        const interval = status === 'playing' || status === 'bidding' ? 1200 : status === 'waiting' ? 2200 : 5000;
+        const interval = status === 'playing' || status === 'bidding' || status === 'doubling' ? 1000 : status === 'waiting' ? 2200 : 5000;
         timer = window.setTimeout(refresh, interval);
       }
     };
@@ -144,7 +132,6 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       setSelected([]);
       if (result.changed) showToast(t('landlord.tableUpdated'), 'info');
       if (action.action === 'leave') setDialog(null);
-      if (action.action === 'join') setJoinCode('');
       setFailed(false);
     } catch (error) {
       if (request.signal.aborted) return;
@@ -156,14 +143,12 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
     }
   };
   const join = (code: string) => void perform({action: 'join', code});
-  const invite = async () => {
-    if (!table) return;
-    const url = new URL('/app/menu', window.location.origin);
-    url.searchParams.set('panel', 'activities');
-    url.searchParams.set('activity', activity.key);
-    url.searchParams.set(LANDLORD_ROOM_PARAM, table.code);
-    showToast(t(await copyText(url.href) ? 'landlord.inviteCopied' : 'landlord.copyFailed'));
-  };
+  useEffect(() => {
+    if (!invitation) openedInvitation.current = null;
+    if (!canPlay || !invitation || !LANDLORD_ROOM_CODE.test(invitation) || openedInvitation.current === invitation || busy) return;
+    openedInvitation.current = invitation;
+    join(invitation);
+  }, [invitation, canPlay, busy]);
   const returnToLobby = () => {
     pollRequest.current?.abort();
     receiveTable(null);
@@ -172,6 +157,13 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const turn = table?.turn === table?.your_seat;
   const remaining = table?.deadline ? Math.max(0, Math.ceil(table.deadline - now / 1000 - clockOffset)) : 0;
   const openRanking = () => setDialog('ranking');
+  const self = table?.seats.find(seat => seat.position === table.your_seat);
+  const playing = table?.status === 'playing';
+  const bidding = table?.status === 'bidding';
+  const doubling = table?.status === 'doubling';
+  const lastPlay = table?.last_player != null ? table.moves[table.last_player]?.cards ?? [] : [];
+  const hand = table ? [...table.hand].sort((a, b) => playingCardRank(b) - playingCardRank(a)) : [];
+  const canAct = turn && !busy && remaining > 0 && !self?.trustee;
 
   return <section className="landlord-activity">
     {!table ? <>
@@ -189,11 +181,6 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
             <button className="landlord-primary" disabled={busy} type="button" onClick={() => void perform({action:'create'})}>{icon('add_circle')}{t('landlord.create')}</button>
             <button className="landlord-secondary" type="button" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>
           </div>
-          <form className="landlord-join" onSubmit={event => {event.preventDefault(); if (LANDLORD_ROOM_CODE.test(joinCode)) join(joinCode);}}>
-            <input value={joinCode} onChange={event => setJoinCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
-              autoCapitalize="characters" autoComplete="off" spellCheck={false} placeholder={t('landlord.roomCode')} aria-label={t('landlord.roomCode')} />
-            <button className="landlord-secondary" disabled={busy || !LANDLORD_ROOM_CODE.test(joinCode)} type="submit">{t('landlord.join')}</button>
-          </form>
           <div className="landlord-open-heading"><h3>{t('landlord.openTables')}</h3><button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button></div>
           {failed ? <div className="landlord-empty"><p>{t('landlord.lobbyFailed')}</p><button className="landlord-text-button" type="button" onClick={() => setAttempt(value => value + 1)}>{t('common.retry')}</button></div>
             : !lobby ? <p role="status" className="landlord-empty">{t('common.loading')}</p>
@@ -210,7 +197,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
     </> : <>
       <div className="landlord-board">
         <div className="landlord-table-nav">
-          <span>{t('landlord.table')} <b>{table.code}</b></span>
+          <span>{table.base ? t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier}) : t('landlord.table')}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
         </div>
         <div className="landlord-opponents">
@@ -224,43 +211,57 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
           </> : table.status === 'finished' || table.status === 'abandoned' ? <>
             {icon(table.status === 'abandoned' ? 'door_open' : 'emoji_events')}
             <strong>{t(table.status === 'abandoned' ? 'landlord.abandoned' : table.seats.find(seat => seat.position === table.your_seat)?.won ? 'landlord.win' : 'landlord.loss')}</strong>
-            {table.status === 'finished' && <span>{t(table.winner === table.landlord ? 'landlord.landlordWon' : 'landlord.farmersWon')}</span>}
+            {table.status === 'finished' && <>
+              <span>{t(table.winner === table.landlord ? 'landlord.landlordWon' : 'landlord.farmersWon')}{table.spring ? ` · ${t('landlord.spring')}` : ''}</span>
+              <div className="landlord-settlement">{table.seats.map(seat => <span key={seat.position}><b>{seat.score > 0 ? '+' : ''}{seat.score}</b>{seat.position === table.your_seat ? t('common.you') : seat.member.name}</span>)}</div>
+            </>}
           </> : <>
-            <div className="landlord-bottom-cards" aria-label={t('landlord.bottomCards')}>{Array.from({length:3}, (_, index) => <Card id={table.bottom_cards[index]} key={index} />)}</div>
-            <strong className="landlord-turn" role="status">{t(table.status === 'bidding' ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong>
+            <PlayingCardStack count={3} label={t('landlord.bottomCards')} compact>{Array.from({length:3}, (_, index) => <PlayingCard id={table.bottom_cards[index]} key={index} />)}</PlayingCardStack>
+            <strong className="landlord-turn" role="status">{t(doubling ? 'landlord.doubling' : bidding ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong>
             <span className="landlord-clock">{t('landlord.seconds', {count: remaining})}</span>
             {table.last_player !== null && <div className="landlord-last-play">
               <small>{t('landlord.lastPlay', {name: table.seats.find(seat => seat.position === table.last_player)?.member.name ?? ''})}</small>
-              <div>{table.moves[table.last_player]?.cards.map(id => <Card id={id} key={id} />)}</div>
+              <PlayingCardStack count={lastPlay.length} compact>{lastPlay.map(id => <PlayingCard id={id} key={id} />)}</PlayingCardStack>
             </div>}
           </>}
         </div>
         <div className="landlord-your-seat"><Seat table={table} position={table.your_seat} self /></div>
       </div>
       <div className="landlord-play-controls">
-        {table.status === 'bidding' || table.status === 'playing' ? <>
-          <div className="landlord-hand" role="group" aria-label={t('landlord.yourHand')}>
-            {table.hand.map(id => <Card id={id} key={id} selected={selected.includes(id)} onClick={() => {
-              if (table.status === 'playing' && !busy) setSelected(cards => cards.includes(id) ? cards.filter(card => card !== id) : [...cards, id]);
-            }} />)}
-          </div>
-          {table.status === 'bidding' ? <div className="landlord-controls">
+        {bidding || doubling || playing ? <>
+          <PlayingCardStack count={hand.length} label={t('landlord.yourHand')}>
+            {hand.map(id => <PlayingCard id={id} key={id} selected={selected.includes(id)} disabled={!playing || busy || self?.trustee}
+              onClick={() => setSelected(cards => cards.includes(id) ? cards.filter(card => card !== id) : [...cards, id])} />)}
+          </PlayingCardStack>
+          {bidding ? <div className="landlord-controls">
             {turn && table.bid_options.map(value => <button key={value} className={value ? 'landlord-primary' : 'landlord-secondary'}
-              disabled={busy || remaining <= 0} type="button" onClick={() => void perform({action:'bid', code:table.code, version:table.version, value})}>
+              disabled={!canAct} type="button" onClick={() => void perform({action:'bid', code:table.code, version:table.version, value})}>
               {t(value ? 'landlord.bidPoints' : 'landlord.noBid', {points:value})}
             </button>)}
+          </div> : doubling ? <div className="landlord-controls">
+            {self?.doubled != null ? <span className="landlord-choice" role="status">{t('landlord.doubleReady')}</span>
+              : [false, true].map(value => <button key={String(value)} className={value ? 'landlord-primary' : 'landlord-secondary'}
+                disabled={busy || remaining <= 0} type="button" onClick={() => void perform({action:'double', code:table.code, version:table.version, value})}>
+                {t(value ? 'landlord.double' : 'landlord.noDouble')}
+              </button>)}
           </div> : <div className="landlord-controls">
-            <button className="landlord-secondary" type="button" disabled={!turn || busy || remaining <= 0 || !table.can_pass}
+            <button className="landlord-secondary" type="button" disabled={!canAct || !table.can_pass}
               onClick={() => void perform({action:'pass', code:table.code, version:table.version})}>{t('landlord.pass')}</button>
-            <button className="landlord-secondary" type="button" disabled={!turn || busy || remaining <= 0}
+            <button className="landlord-secondary" type="button" disabled={!canAct}
               onClick={() => table.suggested_cards.length ? setSelected(table.suggested_cards) : showToast(t('landlord.noHint'), 'info')}>{t('landlord.hint')}</button>
-            <button className="landlord-primary" type="button" disabled={!turn || busy || remaining <= 0 || !selected.length}
+            <button className="landlord-primary" type="button" disabled={!canAct || !selected.length}
               onClick={() => void perform({action:'play', code:table.code, version:table.version, cards:selected})}>{t('landlord.play')}</button>
           </div>}
-          <button className="landlord-text-button landlord-leave" type="button" disabled={busy} onClick={() => setDialog('leave')}>{t('landlord.leave')}</button>
+          <div className="landlord-controls landlord-table-actions">
+            <button className="landlord-text-button" type="button" disabled={busy} aria-pressed={self?.trustee ?? false}
+              onClick={() => void perform({action:'trustee', code:table.code, version:table.version, value:!self?.trustee})}>
+              {icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}
+            </button>
+            <button className="landlord-text-button" type="button" disabled={busy} onClick={() => setDialog('leave')}>{t('landlord.leave')}</button>
+          </div>
         </> : table.status === 'waiting' ? <div className="landlord-controls">
           <button className="landlord-secondary" type="button" disabled={busy} onClick={() => void perform({action:'leave', code:table.code, version:table.version})}>{t('landlord.leave')}</button>
-          <button className="landlord-primary" type="button" onClick={() => void invite()}>{icon('link')}{t('landlord.invite')}</button>
+          <button className="landlord-primary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>
         </div> : <div className="landlord-controls">
           <button className="landlord-secondary" type="button" onClick={returnToLobby}>{t('landlord.backLobby')}</button>
           <button className="landlord-primary" type="button" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>
@@ -269,7 +270,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       </div>
     </>}
     <SettingsDialog open={dialog === 'rules'} title={t('landlord.rules')} onClose={() => setDialog(null)}>
-      <ol className="landlord-rules">{(['ruleBid','rulePlay','ruleResult'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
+      <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
     </SettingsDialog>
     <SettingsDialog open={dialog === 'ranking'} title={t('landlord.ranking')} onClose={() => setDialog(null)}>
       {dialog === 'ranking' && <Ranking activityKey={activity.key} />}
@@ -277,36 +278,48 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
     <ConfirmDialog open={dialog === 'leave'} title={t('landlord.leave')} description={t('landlord.leaveConfirm')}
       confirmLabel={t('landlord.leave')} busy={busy} onClose={() => setDialog(null)}
       onConfirm={() => {if (table) void perform({action:'leave', code:table.code, version:table.version});}} />
+    {table?.status === 'waiting' && <ChatSharePicker open={shareOpen} title={t('landlord.invite')} groupsOnly onClose={() => setShareOpen(false)}
+      sendToChat={(chatId, clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'landlord_room', activity_key:activity.key,
+        room_code:table.code, title}), undefined, clientId)} />}
   </section>;
 }
 
 function Ranking({activityKey}: {activityKey: string}) {
-  const {t} = useI18n();
+  const {t, language} = useI18n();
   const [year, setYear] = useState<number>();
+  const [metric, setMetric] = useState<LandlordRankingMetric>('points');
   const [data, setData] = useState<LandlordRanking>();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const request = new AbortController();
     setFailed(false);
-    void api.getLandlordRanking(activityKey, year, request.signal).then(result => {
+    void api.getLandlordRanking(activityKey, year, metric, request.signal).then(result => {
       if (!request.signal.aborted) setData(result);
     }).catch(() => {if (!request.signal.aborted) setFailed(true);});
     return () => request.abort();
-  }, [activityKey, year, attempt]);
-  const waiting = !data || (year !== undefined && year !== data.year);
+  }, [activityKey, year, metric, attempt]);
+  const waiting = !data || data.metric !== metric || (year !== undefined && year !== data.year);
+  const percent = new Intl.NumberFormat(language, {style:'percent', maximumFractionDigits:1});
+  const format = (row: {points: number; win_rate: number}) => metric === 'points'
+    ? t('landlord.points', {count:row.points}) : percent.format(row.win_rate);
   return <div className="landlord-ranking">
     {data && <header><span>{t('landlord.rankPolicy')}</span><select aria-label={t('landlord.rankYear')} value={year ?? data.year}
       onChange={event => setYear(Number(event.target.value))}>{data.years.map(value => <option key={value} value={value}>{t('landlord.yearLabel', {year:value})}</option>)}</select></header>}
+    <div className="landlord-rank-tabs" role="group" aria-label={t('landlord.ranking')}>
+      {(['points','win_rate'] as const).map(value => <button key={value} type="button" aria-pressed={metric === value} onClick={() => setMetric(value)}>
+        {t(value === 'points' ? 'landlord.pointsBoard' : 'landlord.winRateBoard')}
+      </button>)}
+    </div>
     {failed ? <div className="landlord-empty"><p>{t('landlord.rankFailed')}</p><button className="landlord-text-button" onClick={() => setAttempt(value => value + 1)} type="button">{t('common.retry')}</button></div>
       : waiting ? <p className="landlord-empty" role="status">{t('common.loading')}</p>
       : !data.rows.length ? <p className="landlord-empty">{t('landlord.noRanks')}</p>
       : <>
-        {data.mine && <p className="landlord-rank-mine">{t('landlord.myRank', {...data.mine})}</p>}
+        {data.mine && <p className="landlord-rank-mine">{t('landlord.myRank', {rank:data.mine.rank, score:format(data.mine)})}</p>}
         <ol>{data.rows.map(row => <li key={row.member.user_id}>
           <span className="landlord-rank-number">{row.rank}</span>
           <UserAvatar className="landlord-list-avatar" name={row.member.name} uri={row.member.avatar_uri} />
-          <b>{row.member.name}</b><span>{t('landlord.wins', {count:row.wins})}<small>{t('landlord.games', {count:row.games})}</small></span>
+          <b>{row.member.name}</b><span>{format(row)}<small>{t('landlord.winRecord', {wins:row.wins, games:row.games})}</small></span>
         </li>)}</ol>
       </>}
   </div>;

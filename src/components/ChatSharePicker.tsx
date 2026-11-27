@@ -6,11 +6,12 @@ import {showToast} from '../lib/toast';
 import type {ChatDTO} from '../types';
 import {ChatTargetPicker} from './ChatTargetPicker';
 
-export function ChatSharePicker({open, title, onClose, sendToChat}: {
+export function ChatSharePicker({open, title, onClose, sendToChat, groupsOnly = false}: {
   open: boolean;
   title: string;
   onClose: () => void;
   sendToChat: (chatId: number, clientId: string) => Promise<unknown>;
+  groupsOnly?: boolean;
 }) {
   const {t} = useI18n();
   const {session} = useAuth();
@@ -54,13 +55,13 @@ export function ChatSharePicker({open, title, onClose, sendToChat}: {
     }
   };
 
-  return <ChatTargetPicker open={open} title={title} targets={chats.map(chat => {
+  return <ChatTargetPicker open={open} title={title} targets={chats.filter(chat => !groupsOnly || chat.group).map(chat => {
     const peer = chat.members.find(member => member.user_id !== session?.user.user_id) ?? chat.members[0];
     return {
       id: chat.chat_id, title: chat.title || peer?.name || t('nav.chats'), preview: chat.last_message?.content || '',
       avatarUri: chat.group ? undefined : peer?.avatar_uri,
       groupMembers: chat.group ? chat.members.map(member => ({name: member.name, uri: member.avatar_uri})) : undefined,
     };
-  })} loading={loading} busy={busy !== null} busyTargetId={busy} emptyTitle={t('square.noChatsToShare')}
+  })} loading={loading} busy={busy !== null} busyTargetId={busy} emptyTitle={t(groupsOnly ? 'landlord.noGroups' : 'square.noChatsToShare')}
     onClose={() => {if (!sending.current) onClose();}} onSubmit={send} />;
 }
