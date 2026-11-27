@@ -1,4 +1,9 @@
 {
+  "duel.keypad": "Number pad",
+  "duel.eraseDigit": "Delete last digit",
+  "duel.noRounds": "Completed rounds will appear here",
+  "duel.submitted": "Submitted",
+  "duel.thinking": "Entering digits",
   "landlord.round": "Round {{count}}",
   "landlord.host": "Host",
   "landlord.ready": "Ready",

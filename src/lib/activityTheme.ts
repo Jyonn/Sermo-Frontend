@@ -15,5 +15,6 @@ export function activityThemeForKey(key?:string) {return key?themes[key]??'':'';
 export function activityDrawerClassName(key:string,declaredTheme?:string) {
   const theme=declaredTheme||activityThemeForKey(key);
   const modifier:Record<string,string>={baxian:'is-baxian-activity',explorer:'is-explorer-activity',bgm:'is-bgm-activity','spider-man-4':'is-friendly-neighbor','starry-night':'is-starry-night',number_duel:'is-number-duel-activity','permanent-vip':'vip-activity-drawer','record-shop':'is-record-shop-activity',landlord:'is-landlord-activity'};
-  return ['activity-drawer','activity-transparent-header',theme!=='baxian'?'is-custom-activity':'',modifier[theme]??''].filter(Boolean).join(' ');
+  return ['activity-drawer','activity-transparent-header',theme!=='baxian'?'is-custom-activity':'',modifier[theme]??'',
+    ['landlord','number_duel'].includes(theme)?'game-table-drawer':''].filter(Boolean).join(' ');
 }

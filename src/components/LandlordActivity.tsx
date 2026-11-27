@@ -178,7 +178,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   useEffect(() => { if (!canShareRoom) setShareOpen(false); }, [canShareRoom]);
 
   return <section className="landlord-activity">
-    {!table ? <>
+    {!table ? <div className="landlord-lobby-layout">
       <div className="landlord-hero">
         <img className="landlord-hero-art" src={LANDLORD_ART} alt="" draggable={false} />
         <div className="landlord-hero-copy">
@@ -206,7 +206,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
           {activity.active && <button type="button" className="landlord-secondary" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>}
         </div>}
       </div>
-    </> : <div className={`landlord-room is-${table.status}`}>
+    </div> : <div className={`landlord-room is-${table.status}`}>
       <div className="landlord-board">
         <div className="landlord-table-nav">
           <span className="landlord-round-no">{t('landlord.round', {count:table.round})}</span>
@@ -301,7 +301,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
     <SettingsDialog open={dialog === 'ranking'} title={t('landlord.ranking')} onClose={() => setDialog(null)}>
       {dialog === 'ranking' && <Ranking activityKey={activity.key} />}
     </SettingsDialog>
-    <ConfirmDialog open={dialog === 'leave'} title={t('landlord.leave')} description={t('landlord.leaveConfirm')}
+    <ConfirmDialog open={dialog === 'leave'} className="game-table-panel" title={t('landlord.leave')} description={t('landlord.leaveConfirm')}
       confirmLabel={t('landlord.leave')} busy={busy} onClose={() => setDialog(null)}
       onConfirm={() => {if (table) void perform({action:'leave', code:table.code, version:table.version});}} />
     {table && canShareRoom && <ChatSharePicker open={shareOpen} title={t('landlord.chooseChat')} onClose={() => setShareOpen(false)}

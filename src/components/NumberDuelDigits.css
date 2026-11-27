@@ -8,7 +8,7 @@
 }
 
 .number-duel,.duel-panel,.number-duel-card { --duel-number-font:"Frienden Duel Digits",var(--font-body); font-family:var(--duel-number-font); font-variant-numeric:tabular-nums lining-nums slashed-zero; }
-.number-duel :is(.duel-timer,.duel-digit-input,.duel-tiers strong,.duel-daily strong,.duel-result-points,.duel-secrets strong,.duel-history-row strong,.duel-history-row small,.duel-round-wait > strong,.duel-feedback,.duel-entry-ledger dd,.duel-leaders b,.duel-topline time,.duel-cost-preview,.duel-tier-agreement > .button),
+.number-duel :is(.duel-timer,.duel-digit-display,.duel-keypad,.duel-tiers strong,.duel-daily strong,.duel-result-points,.duel-secrets strong,.duel-history-row strong,.duel-history-row small,.duel-round-wait > strong,.duel-entry-ledger dd,.duel-topline time,.duel-cost-preview,.duel-tier-agreement > .button),
 .duel-panel :is(.duel-records small,.duel-leaders b),
 .duel-card-code b {
   font-family:var(--duel-number-font);

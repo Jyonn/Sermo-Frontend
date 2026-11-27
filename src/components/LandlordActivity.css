@@ -1,5 +1,4 @@
 .is-landlord-activity .drawer-body { padding: 0; }
-.side-drawer.activity-drawer.is-landlord-activity:has(.landlord-room) { max-width: none; }
 .landlord-drawer-title { display: block; width: min(95px, 25vw); }
 .landlord-activity {
   --landlord-felt: #15362b;
@@ -106,7 +105,12 @@
   color: var(--landlord-ivory);
   background: #10271e;
 }
-.landlord-activity:has(.landlord-room) { height: 100%; background: #10271e; }
+.landlord-activity { height: 100%; background: #10271e; }
+.landlord-lobby-layout { display: grid; height: 100%; grid-template: minmax(0, 1fr) / minmax(0, 46fr) minmax(0, 54fr); }
+.landlord-lobby-layout .landlord-hero { display: grid; align-content: center; }
+.landlord-lobby-layout .landlord-hero-art { right: -7%; }
+.landlord-lobby-layout .landlord-lobby { overflow: auto; background: var(--bg-canvas); padding-top: 76px; }
+.landlord-lobby-layout .landlord-hero-copy { width: 72%; }
 .landlord-room .landlord-secondary { color: var(--landlord-ivory); border-color: #d8b77866; background: #254238; }
 .landlord-room .landlord-secondary:hover:not(:disabled) { border-color: #d8b778; }
 .landlord-room .landlord-text-button, .landlord-room .landlord-choice, .landlord-room .landlord-reconnecting { color: #e4ce9e; }
@@ -200,63 +204,20 @@
 @container (min-width: 475px) {
   .landlord-hero-art { right: 2%; }
 }
-@media (min-width: 720px) and (pointer: fine) {
-  .detached-drawer-slot:has(.landlord-room) {
-    inset: 50% auto auto 50%;
-    width: min(910px, calc(100dvw - 48px));
-    height: min(650px, calc(100dvh - 48px));
-    transform: translate(-50%, -50%);
-  }
-}
 @media (any-pointer: coarse) and (max-width: 980px) {
-  .detached-drawer-slot:has(.landlord-room) { inset: 0; width: 100dvw; height: 100dvh; min-height: 0; }
-  .side-drawer.is-landlord-activity:has(.landlord-room) {
-    position: fixed;
-    inset: 0 auto auto 0;
-    width: 100dvw;
-    height: 100dvh;
-    max-height: none;
-    border: 0;
-    border-radius: 0;
-    animation: none;
-    --overlay-control-size: 36px;
-    --drawer-control-top: max(8px, env(safe-area-inset-top));
-  }
-  .is-landlord-activity:has(.landlord-room) .drawer-surface-dismiss { order: 0; }
-  .is-landlord-activity:has(.landlord-room) .drawer-dismiss-control > .drawer-dismiss-mobile { display: block; }
-  .is-landlord-activity:has(.landlord-room) .drawer-dismiss-control > .drawer-dismiss-desktop { display: none; }
+  .landlord-lobby-layout .landlord-lobby { padding-top: 61px; }
   .landlord-board { padding-top: 44px; padding-bottom: 6px; gap: 3px; }
   .landlord-board::before { inset: 79px 15px 4px; }
   .landlord-arena { grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr); }
   .landlord-center { min-height: 92px; gap: 4px; }
-  .landlord-play-controls { padding-top: 2px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .landlord-play-controls { padding-top: 2px; padding-bottom: max(6px, var(--game-safe-bottom, 0px)); }
   .landlord-play-controls > .playing-card-stack { --playing-card-width: 45px; padding-block: 9px 6px; }
   .landlord-play-controls > .landlord-controls > button, .landlord-rematch button { min-height: 36px; }
   .landlord-room .landlord-table-actions { margin-top: 2px; }
   .landlord-room .landlord-table-actions .landlord-seat { min-height: 36px; padding-block: 1px; }
   .landlord-room .landlord-table-actions .landlord-role-seal { bottom: -3px; }
 }
-@media (any-pointer: coarse) and (max-width: 980px) and (orientation: portrait) {
-  .side-drawer.is-landlord-activity:has(.landlord-room) {
-    inset: 50% auto auto 50%;
-    width: 100dvh;
-    height: 100dvw;
-    transform: translate(-50%, -50%) rotate(90deg);
-    --drawer-control-top: max(8px, env(safe-area-inset-right));
-    --drawer-control-start: max(16px, env(safe-area-inset-top));
-    --drawer-control-end: max(16px, env(safe-area-inset-bottom));
-  }
-  .landlord-room .landlord-play-controls { padding-bottom: max(6px, env(safe-area-inset-left)); }
-  body:has(.landlord-room) :is(.sheet-backdrop:has(.chat-target-picker-sheet), .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules)) {
-    inset: 50% auto auto 50%;
-    display: grid;
-    place-items: center;
-    width: 100dvh;
-    height: 100dvw;
-    padding: 10px 18px;
-    transform: translate(-50%, -50%) rotate(90deg);
-    animation: none;
-  }
-  body:has(.landlord-room) .sheet-backdrop .chat-target-picker-sheet { width: min(480px, 100%); max-height: calc(100dvw - 20px); border-radius: 20px; }
-  body:has(.landlord-room) .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules) > section { max-height: calc(100dvw - 20px); }
+@container (max-width: 520px) {
+  .landlord-lobby-layout { height: auto; grid-template: auto / 1fr; }
+  .landlord-lobby-layout .landlord-lobby { padding-top: 18px; }
 }

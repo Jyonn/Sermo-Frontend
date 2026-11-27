@@ -8,6 +8,7 @@ import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ActivityLoadingState} from '../components/ActivityLoadingState';
 import {activityDrawerClassName} from './activityTheme';
 import {LANDLORD_ROOM_PARAM} from './landlord';
+import '../components/GameTableLayout.css';
 const Experience=lazy(()=>import('../components/ActivityExperience').then(module=>({default:module.ActivityExperience})));
 const ActivityOverlayContext=createContext<(key:string,room?:string)=>void>(()=>undefined);
 const ActivityPageReadyContext=createContext<(path:string)=>void>(()=>undefined);

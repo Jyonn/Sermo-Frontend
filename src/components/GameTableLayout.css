@@ -1,0 +1,67 @@
+.side-drawer.activity-drawer.game-table-drawer { max-width: none; }
+.game-table-drawer > .drawer-body { overscroll-behavior: contain; }
+.game-table-drawer:has(.landlord-lobby-layout, .duel-lobby-layout) .drawer-floating-identity { visibility: hidden; }
+
+@media (min-width: 720px) and (pointer: fine) {
+  .detached-drawer-slot:has(.game-table-drawer) {
+    inset: 50% auto auto 50%;
+    width: min(910px, calc(100dvw - 48px));
+    height: min(650px, calc(100dvh - 48px));
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (any-pointer: coarse) and (max-width: 980px) {
+  .detached-drawer-slot:has(.game-table-drawer) { inset: 0; width: 100dvw; height: 100dvh; min-height: 0; }
+  :is(.side-drawer.activity-drawer.game-table-drawer, main.game-table-screen) {
+    position: fixed;
+    inset: 0 auto auto 0;
+    width: 100dvw;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    animation: none;
+    --overlay-control-size: 36px;
+    --drawer-control-top: max(8px, env(safe-area-inset-top));
+    --game-safe-bottom: env(safe-area-inset-bottom);
+    --game-safe-left: env(safe-area-inset-left);
+    --game-safe-right: env(safe-area-inset-right);
+    --game-safe-top: env(safe-area-inset-top);
+  }
+  .game-table-drawer .drawer-surface-dismiss { order: 0; }
+  .game-table-drawer .drawer-dismiss-control > .drawer-dismiss-mobile { display: block; }
+  .game-table-drawer .drawer-dismiss-control > .drawer-dismiss-desktop { display: none; }
+}
+
+@media (any-pointer: coarse) and (max-width: 980px) and (orientation: portrait) {
+  :is(.side-drawer.activity-drawer.game-table-drawer, main.game-table-screen) {
+    inset: 50% auto auto 50%;
+    width: 100dvh;
+    height: 100dvw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    --drawer-control-top: max(8px, env(safe-area-inset-right));
+    --drawer-control-start: max(16px, env(safe-area-inset-top));
+    --drawer-control-end: max(16px, env(safe-area-inset-bottom));
+    --game-safe-bottom: env(safe-area-inset-left);
+    --game-safe-left: env(safe-area-inset-top);
+    --game-safe-right: env(safe-area-inset-bottom);
+    --game-safe-top: env(safe-area-inset-right);
+  }
+  body:has(.game-table-drawer, .game-table-screen) :is(
+    .sheet-backdrop:has(.chat-target-picker-sheet, .game-table-panel),
+    .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules),
+    .confirm-dialog-backdrop:has(.game-table-panel)
+  ) {
+    inset: 50% auto auto 50%;
+    display: grid;
+    place-items: center;
+    width: 100dvh;
+    height: 100dvw;
+    padding: 10px 18px;
+    transform: translate(-50%, -50%) rotate(90deg);
+    animation: none;
+  }
+  body:has(.game-table-drawer, .game-table-screen) :is(.chat-target-picker-sheet, .bottom-sheet.game-table-panel) { width: min(520px, 100%); max-height: calc(100dvw - 20px); border-radius: 20px; }
+  body:has(.game-table-drawer) .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules) > section { max-height: calc(100dvw - 20px); }
+}

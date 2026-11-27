@@ -1,4 +1,9 @@
 {
+  "duel.keypad": "数字键盘",
+  "duel.eraseDigit": "删除最后一位",
+  "duel.noRounds": "已完成的回合会显示在这里",
+  "duel.submitted": "已提交",
+  "duel.thinking": "输入中",
   "landlord.round": "第 {{count}} 局",
   "landlord.host": "房主",
   "landlord.ready": "已准备",

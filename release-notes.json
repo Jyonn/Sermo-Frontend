@@ -1,5 +1,5 @@
 {
-  "id": "2026.11.27.6",
+  "id": "2026.11.27.7",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
@@ -7,7 +7,7 @@
       "items": [
         "空间管理员可领取斗地主常驻活动。认证成员可把牌桌发给好友或分享到群聊，点击邀请即可加入。",
         "手机横屏打牌，支持加倍、提示和托管。三人准备后，房主可在原房间继续开局。",
-        "年度排行榜分为积分榜与胜率榜。"
+        "年度排行榜分为积分榜与胜率榜。数字交锋也已改用横屏牌桌，数字键盘和回合记录同屏显示。"
       ]
     },
     "en": {
@@ -15,7 +15,7 @@
       "items": [
         "Space admins can enable Dou Dizhu. Verified members can share tables in direct or group chats and tap the invitation to join.",
         "Play in landscape on mobile with doubling, hints and auto-play. Once all three players are ready, the host can start another round at the same table.",
-        "Annual leaderboards track points and win rate."
+        "Annual leaderboards track points and win rate. Code Duel now uses a landscape table with an in-game keypad and round history side by side."
       ]
     }
   }
