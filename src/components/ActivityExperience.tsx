@@ -256,7 +256,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         className={activityDrawerClassName(activityKey,theme)}
         contentUnderToolbar
         trapFocus
-        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t("square.share")} onClick={() => openActivityShare(activeActivity)} /> : null}
+        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t(activeActivity.theme === 'landlord' ? 'landlord.shareActivity' : 'square.share')} title={activeActivity.theme === 'landlord' ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} /> : null}
         historyMode="route"
         onClose={onClose}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
@@ -361,7 +361,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         </div> : loadError?<FeedbackState tone="error" title={t("square.activitiesLoadFailed")} action={<button className="secondary-button" onClick={()=>setRetry(value=>value+1)}>{t("common.retry")}</button>}/>:<ActivityLoadingState/>}
       </SideDrawer>
 
-      <ChatTargetPicker open={shareOpen} title={t('square.shareToChat')} targets={shareChats.map(chat=>{const peer=chat.members.find(member=>member.user_id!==session?.user.user_id)||chat.members[0];return {id:chat.chat_id,title:chat.title||peer?.name||t('nav.chats'),preview:chat.last_message?.content||'',avatarUri:chat.group?undefined:peer?.avatar_uri,groupMembers:chat.group?chat.members.map(member=>({name:member.name,uri:member.avatar_uri})):undefined};})} loading={shareLoading} busy={sharingId!==null} busyTargetId={sharingId} emptyTitle={t('square.noChatsToShare')} onClose={()=>{if(sharingId===null)setShareOpen(false);}} onSubmit={sendShare}/>
+      <ChatTargetPicker open={shareOpen} title={t(activeActivity?.theme === 'landlord' ? 'landlord.shareActivity' : 'square.shareToChat')} targets={shareChats.map(chat=>{const peer=chat.members.find(member=>member.user_id!==session?.user.user_id)||chat.members[0];return {id:chat.chat_id,title:chat.title||peer?.name||t('nav.chats'),preview:chat.last_message?.content||'',avatarUri:chat.group?undefined:peer?.avatar_uri,groupMembers:chat.group?chat.members.map(member=>({name:member.name,uri:member.avatar_uri})):undefined};})} loading={shareLoading} busy={sharingId!==null} busyTargetId={sharingId} emptyTitle={t('square.noChatsToShare')} onClose={()=>{if(sharingId===null)setShareOpen(false);}} onSubmit={sendShare}/>
 
  </>;
 }

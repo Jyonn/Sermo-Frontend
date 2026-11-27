@@ -5,15 +5,17 @@
     "zh-CN": {
       "title": "斗地主常驻活动",
       "items": [
-        "空间管理员可领取斗地主常驻活动。认证成员可把牌桌分享到群聊，点击邀请即可加入。",
-        "牌桌支持加倍、出牌提示和托管，年度排行榜分为积分榜与胜率榜。"
+        "空间管理员可领取斗地主常驻活动。认证成员可把牌桌发给好友或分享到群聊，点击邀请即可加入。",
+        "手机横屏打牌，支持加倍、提示和托管。三人准备后，房主可在原房间继续开局。",
+        "年度排行榜分为积分榜与胜率榜。"
       ]
     },
     "en": {
       "title": "Dou Dizhu comes to your space",
       "items": [
-        "Space admins can enable Dou Dizhu. Verified members can share tables to group chats and tap the invitation to join.",
-        "The table supports doubling, hints and auto-play. Annual leaderboards track points and win rate."
+        "Space admins can enable Dou Dizhu. Verified members can share tables in direct or group chats and tap the invitation to join.",
+        "Play in landscape on mobile with doubling, hints and auto-play. Once all three players are ready, the host can start another round at the same table.",
+        "Annual leaderboards track points and win rate."
       ]
     }
   }

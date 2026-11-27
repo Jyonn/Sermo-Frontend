@@ -1,4 +1,5 @@
 .is-landlord-activity .drawer-body { padding: 0; }
+.side-drawer.activity-drawer.is-landlord-activity:has(.landlord-room) { max-width: none; }
 .landlord-drawer-title { display: block; width: min(95px, 25vw); }
 .landlord-activity {
   --landlord-felt: #15362b;
@@ -98,13 +99,38 @@
 .landlord-rooms small, .landlord-ranking li small { display: block; margin-top: 3px; color: var(--text-muted); font-size: .73rem; }
 .landlord-restricted { display: grid; justify-items: start; gap: 9px; }
 .landlord-restricted p { margin: 0; color: var(--text-secondary); }
-.landlord-board { display: grid; gap: 12px; padding: 61px clamp(15px, 5cqw, 27px) 22px; }
-.landlord-board::before { inset: 104px 11px 11px; background: #0d251a36; }
+.landlord-room {
+  display: grid;
+  min-height: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  color: var(--landlord-ivory);
+  background: #10271e;
+}
+.landlord-activity:has(.landlord-room) { height: 100%; background: #10271e; }
+.landlord-room .landlord-secondary { color: var(--landlord-ivory); border-color: #d8b77866; background: #254238; }
+.landlord-room .landlord-secondary:hover:not(:disabled) { border-color: #d8b778; }
+.landlord-room .landlord-text-button, .landlord-room .landlord-choice, .landlord-room .landlord-reconnecting { color: #e4ce9e; }
+.landlord-board {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 63px clamp(12px, 4cqw, 32px) 12px;
+  background: radial-gradient(ellipse at 50% 46%, #42634b, transparent 72%),
+    repeating-linear-gradient(38deg, #f9ebbe0a 0 1px, transparent 1px 13px), #1a382c;
+}
+.landlord-board::before {
+  inset: 105px 15px 12px;
+  border: 1px solid #d2b67f55;
+  border-radius: 70px;
+  background: #0d251a26;
+  box-shadow: inset 0 0 0 5px #122c2259, 0 8px 18px #0c251b3e;
+}
 .landlord-table-nav { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding-inline: 4px; }
 .landlord-table-nav > span { font-size: .72rem; color: #e1ce9f; }
+.landlord-table-nav > .landlord-round-no { padding: 4px 8px; border: 1px solid var(--landlord-line); border-radius: 7px; color: #f3deb1; white-space: nowrap; }
 .landlord-table-nav button { color: var(--landlord-ivory); }
-.landlord-opponents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.landlord-opponents .landlord-seat:last-child { justify-self: end; }
+.landlord-arena { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 6px; align-items: center; }
+.landlord-arena > .landlord-seat:last-child { justify-self: end; }
 .landlord-seat {
   display: flex;
   width: fit-content;
@@ -119,6 +145,15 @@
 }
 .landlord-seat.is-turn { border-color: #e9be73; background: #31523b; box-shadow: 0 0 0 2px #e9be7324; }
 .landlord-seat.is-empty { background: #173a2c; }
+.landlord-seat.is-ready { border-color: #92c6a487; }
+.landlord-seat.is-ready small { color: #b4e9c7; }
+.landlord-seat.is-landlord { border-color: #c99959; background: linear-gradient(130deg, #79442c, #41281f); }
+.landlord-seat.is-landlord.is-turn { border-color: #fff0ba; box-shadow: 0 0 0 2px #e9be7370; }
+.landlord-seat-portrait { position: relative; flex: 0 0 30px; }
+.landlord-role-seal { position: absolute; bottom: -6px; left: 50%; display: flex; align-items: center; gap: 1px; padding: 2px 4px; transform: translateX(-50%); border: 1px solid #ffe7ae; border-radius: 4px; background: #e6bd75; color: #3d2819; font-size: 8px; font-weight: 800; line-height: .9; white-space: nowrap; }
+.landlord-role-seal .material-symbols-outlined { font-size: 10px; }
+.landlord-host-mark { display: inline-flex; margin-inline-start: 4px; color: var(--landlord-gold); vertical-align: middle; }
+.landlord-host-mark .material-symbols-outlined { font-size: 12px; }
 .landlord-seat-avatar { display: grid; flex: 0 0 30px; width: 30px; height: 30px; place-items: center; border-radius: 10px; }
 .landlord-seat.is-empty .landlord-seat-avatar { background: #e7ce8b17; color: #e0c891; }
 .landlord-seat-avatar .material-symbols-outlined { font-size: 17px; }
@@ -127,21 +162,26 @@
 .landlord-seat small { display: block; color: #dbcda9; font-size: .69rem; }
 .landlord-seat.is-landlord small { color: #ffbe93; }
 .landlord-passed { color: #e8cda1; font-size: .7rem; }
-.landlord-center { display: grid; min-height: 133px; align-content: center; justify-items: center; gap: 7px; text-align: center; }
+.landlord-center { display: grid; min-height: 105px; align-content: center; justify-items: center; gap: 7px; text-align: center; }
 .landlord-center strong { font-size: clamp(1rem, 4.7cqw, 1.37rem); }
 .landlord-center > span { color: #dfc997; font-size: .8rem; }
 .landlord-center > .material-symbols-outlined { font-size: 39px; }
 .landlord-table-art { height: 80px; width: 108px; object-fit: contain; }
-.landlord-clock { font-variant-numeric: tabular-nums; }
-.landlord-your-seat { display: flex; justify-content: center; }
+.landlord-turn-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 7px; }
+.landlord-clock { padding: 2px 6px; border: 1px solid var(--landlord-line); border-radius: 7px; color: #dfc997; font-size: .72rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.landlord-last-play { min-width: 0; max-width: 100%; }
+.landlord-last-play .playing-card-stack { container-type: inline-size; width: min(280px, 45cqw); }
 .landlord-last-play small { display: block; margin-bottom: 4px; color: #e0cd9e; font-size: .7rem; }
+.landlord-play-controls { padding-top: 8px; }
 .landlord-play-controls > .playing-card-stack { container-type: inline-size; }
 .landlord-controls { justify-content: center; }
 .landlord-controls > button { min-width: 67px; }
 .landlord-table-actions { margin-top: 8px; }
+.landlord-table-actions .landlord-seat { box-shadow: none; }
 .landlord-table-actions button[aria-pressed="true"] { color: var(--brand-accent); }
 .landlord-table-actions .material-symbols-outlined { font-size: 17px; }
-.landlord-choice { min-height: 42px; display: grid; place-items: center; color: var(--text-secondary); font-size: .85rem; }
+.landlord-choice { min-height: 32px; display: grid; place-items: center; color: var(--text-secondary); font-size: .85rem; }
+.landlord-rematch { display: grid; justify-content: center; gap: 5px; }
 .landlord-settlement { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; width: min(238px, 100%); }
 .landlord-settlement span { display: grid; gap: 3px; padding: 6px 4px; border: 1px solid var(--landlord-line); border-radius: 7px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #dfc997; font-size: .7rem; }
 .landlord-settlement b { font: 700 1.2rem Georgia, serif; color: var(--landlord-ivory); }
@@ -159,4 +199,62 @@
 .landlord-rank-mine { margin: 12px 0 0; padding: 10px 0; border-block: 1px solid var(--line-soft); font-size: .86rem; font-weight: 750; }
 @container (min-width: 475px) {
   .landlord-hero-art { right: 2%; }
+}
+@media (min-width: 720px) and (pointer: fine) {
+  .detached-drawer-slot:has(.landlord-room) {
+    inset: 50% auto auto 50%;
+    width: min(910px, calc(100dvw - 48px));
+    height: min(650px, calc(100dvh - 48px));
+    transform: translate(-50%, -50%);
+  }
+}
+@media (any-pointer: coarse) and (max-width: 980px) {
+  .detached-drawer-slot:has(.landlord-room) { inset: 0; width: 100dvw; height: 100dvh; min-height: 0; }
+  .side-drawer.is-landlord-activity:has(.landlord-room) {
+    position: fixed;
+    inset: 0 auto auto 0;
+    width: 100dvw;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    animation: none;
+    --overlay-control-size: 36px;
+    --drawer-control-top: max(8px, env(safe-area-inset-top));
+  }
+  .is-landlord-activity:has(.landlord-room) .drawer-surface-dismiss { order: 0; }
+  .landlord-board { padding-top: 44px; padding-bottom: 6px; gap: 3px; }
+  .landlord-board::before { inset: 79px 15px 4px; }
+  .landlord-arena { grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr); }
+  .landlord-center { min-height: 92px; gap: 4px; }
+  .landlord-play-controls { padding-top: 2px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .landlord-play-controls > .playing-card-stack { --playing-card-width: 45px; padding-block: 9px 6px; }
+  .landlord-play-controls > .landlord-controls > button, .landlord-rematch button { min-height: 36px; }
+  .landlord-room .landlord-table-actions { margin-top: 2px; }
+  .landlord-room .landlord-table-actions .landlord-seat { min-height: 36px; padding-block: 1px; }
+  .landlord-room .landlord-table-actions .landlord-role-seal { bottom: -3px; }
+}
+@media (any-pointer: coarse) and (max-width: 980px) and (orientation: portrait) {
+  .side-drawer.is-landlord-activity:has(.landlord-room) {
+    inset: 50% auto auto 50%;
+    width: 100dvh;
+    height: 100dvw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    --drawer-control-top: max(8px, env(safe-area-inset-right));
+    --drawer-control-start: max(16px, env(safe-area-inset-top));
+    --drawer-control-end: max(16px, env(safe-area-inset-bottom));
+  }
+  .landlord-room .landlord-play-controls { padding-bottom: max(6px, env(safe-area-inset-left)); }
+  body:has(.landlord-room) :is(.sheet-backdrop:has(.chat-target-picker-sheet), .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules)) {
+    inset: 50% auto auto 50%;
+    display: grid;
+    place-items: center;
+    width: 100dvh;
+    height: 100dvw;
+    padding: 10px 18px;
+    transform: translate(-50%, -50%) rotate(90deg);
+    animation: none;
+  }
+  body:has(.landlord-room) .sheet-backdrop .chat-target-picker-sheet { width: min(480px, 100%); max-height: calc(100dvw - 20px); border-radius: 20px; }
+  body:has(.landlord-room) .settings-dialog-backdrop:has(.landlord-ranking, .landlord-rules) > section { max-height: calc(100dvw - 20px); }
 }

@@ -12,19 +12,22 @@ export interface LandlordTableView {
   code: string;
   status: "waiting" | "bidding" | "doubling" | "playing" | "finished" | "abandoned";
   version: number;
+  host: number;
+  round: number;
   your_seat: number;
   turn: number | null;
   landlord: number | null;
   winner: number | null;
   hand: number[];
   ready_count: number;
-  seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean; doubled: boolean | null; trustee: boolean; score: number }>;
+  seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean; doubled: boolean | null; trustee: boolean; score: number; ready: boolean }>;
   bottom_cards: number[];
   bids: Array<number | null>;
   moves: Array<{ cards: number[]; automatic: boolean } | null>;
   last_player: number | null;
   deadline: number | null;
   server_now: number;
+  can_start: boolean;
   base: number;
   multiplier: number;
   spring: boolean;
@@ -64,7 +67,9 @@ interface LandlordTableAction {
 export type LandlordAction =
   | { action: "create" }
   | { action: "join"; code: string }
-  | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "double" | "trustee"; value: boolean } | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
+  | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "double" | "trustee"; value: boolean }
+    | { action: "ready"; value: boolean; round: number } | { action: "start"; round: number }
+    | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
 
 export const LANDLORD_ROOM_CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/;
 export const LANDLORD_ROOM_PARAM = "landlord_room";

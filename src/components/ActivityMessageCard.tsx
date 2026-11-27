@@ -32,7 +32,7 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
     const eyebrow = landlordRoom ? 'landlord.roomInvite' : key === LANDLORD_KEY ? 'landlord.permanent' : 'message.activityEyebrow';
-    const hint = landlordRoom ? 'landlord.join' : activity?.active ? 'message.activityOpen' : 'message.activityEnded';
+    const hint = landlordRoom ? 'landlord.takeSeat' : key === LANDLORD_KEY && activity?.active ? 'landlord.openLobby' : activity?.active ? 'message.activityOpen' : 'message.activityEnded';
     return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(eyebrow)} hint={t(hint)} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key, landlordRoom)} />;
   }
 

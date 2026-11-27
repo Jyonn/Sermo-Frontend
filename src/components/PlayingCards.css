@@ -1,5 +1,5 @@
 .playing-card-stack {
-  --card-width: clamp(36px, 12cqw, 62px);
+  --card-width: var(--playing-card-width, clamp(36px, 12cqw, 62px));
   --card-max-step: calc(var(--card-width) * .65);
   --card-step: min(var(--card-max-step), calc(max(0px, 100cqw - var(--card-width) - 4px) / var(--card-overlaps)));
   display: flex;
