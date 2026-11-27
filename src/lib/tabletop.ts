@@ -17,6 +17,7 @@ interface Board {
   turn: number | null;
   winners: number[];
   outcome: string | null;
+  forfeited_position?: number | null;
 }
 
 export interface ShuangkouBoard extends Board {

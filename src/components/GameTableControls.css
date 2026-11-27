@@ -1,0 +1,88 @@
+.game-seat {
+  --seat-accent: var(--table-accent, #efcb86);
+  position: relative;
+}
+.duel-seat.game-seat { --seat-accent: #83e4d3; padding: 5px; border: 1px solid transparent; border-radius: 12px; }
+.duel-seat.game-seat.is-turn { border-color: #6bcab477; background: #6bcab416; }
+.game-seat.is-turn::after {
+  position: absolute;
+  inset: auto 28% -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--seat-accent);
+  box-shadow: 0 0 10px color-mix(in srgb,var(--seat-accent) 55%,transparent);
+  content: '';
+  pointer-events: none;
+}
+.game-seat-clock {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 25px;
+  height: 25px;
+  margin-inline-start: auto;
+  padding-inline: 4px;
+  border-radius: 7px;
+  background: var(--seat-accent);
+  color: #18302a;
+  font-size: .74rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.game-seat-clock.is-urgent { background: #a13832; color: #fff1d8; box-shadow: 0 0 0 1px #f4b48d; }
+.duel-seat.is-peer .game-seat-clock { margin-inline: auto 0; }
+.game-audio { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 3px; color: inherit; }
+.game-audio > button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  min-height: 29px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  color: var(--table-accent,var(--landlord-ivory,#a6e3d5));
+  background: #171f2260;
+  cursor: pointer;
+}
+.game-audio > button[aria-pressed='false'] { opacity: .60; }
+.game-audio .material-symbols-outlined { font-size: 17px; }
+.landlord-table-nav .game-audio { margin-inline-start: auto; }
+.game-rule-guide { display: grid; gap: 10px; min-width: 0; margin-block: 0 18px; }
+.game-rule-guide h3, .game-rule-guide p { margin: 0; }
+.game-rule-guide h3 { font-size: .88rem; color: var(--ink); }
+.game-rule-guide p { color: var(--ink-soft); font-size: .79rem; line-height: 1.5; }
+.game-card-ranks {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  overflow-x: auto;
+  padding: 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface-2);
+  --card-width: 27px;
+}
+.game-rule-examples, .game-tile-families { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.game-rule-examples > div, .game-tile-families > div { display: grid; gap: 5px; padding: 7px; border: 1px solid var(--line-soft); border-radius: 10px; }
+.game-rule-examples > div > div { display: flex; flex-wrap: wrap; gap: 3px; --card-width: 24px; }
+.game-rule-examples b { font-size: .78rem; }
+.game-rule-modes { display: inline-flex; gap: 4px; }
+.game-rule-modes button { padding: 5px 9px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--surface-2); font-size: .76rem; }
+.game-rule-modes button[aria-pressed='true'] { background: #e6ce9e; color: #32291a; border-color: #b99259; }
+.game-rule-examples .playing-card b, .game-card-ranks .playing-card b { font-size: .76rem; }
+.game-rule-examples .mahjong-tile b, .game-tile-families .mahjong-tile b { font-size: .68rem; }
+.game-tile-families > div { display: flex; flex-wrap: wrap; align-items: center; }
+.game-duel-example { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 12px; font-size: .81rem; }
+.game-duel-example > div { display: flex; gap: 5px; }
+.game-duel-example span { display: grid; width: 32px; height: 34px; place-items: center; border: 1px solid var(--line-soft); border-radius: 7px; }
+.game-duel-example .is-exact { color: #193d33; border-color: #61ba9f; background: #b1e9d4; font-weight: 800; }
+
+@media (any-pointer: coarse) and (max-width: 980px) {
+  .game-seat-clock { min-width: 22px; height: 21px; padding-inline: 3px; font-size: .66rem; }
+  .game-audio > button { width: 27px; min-height: 26px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .game-seat-clock.is-urgent { animation: game-clock-tick 1s linear infinite alternate; }
+}
+@keyframes game-clock-tick { to { box-shadow: 0 0 0 2px #f4b48d; } }

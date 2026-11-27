@@ -11,7 +11,8 @@ import { showToast } from "../lib/toast";
 import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "../lib/numberDuel";
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import { DuelRuleGuide } from "./GameRules";
 import { ChatTargetPicker } from "./ChatTargetPicker";
 import { NumberDuelCard } from "./NumberDuelCard";
 import { UserAvatar } from "./UserAvatar";
@@ -81,7 +82,7 @@ function DuelRoundHistory({match, t}: {match: DuelMatch; t: DuelTranslate}) {
   </section>;
 }
 
-export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number }) {
+export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitHandler }: { activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number; exitHandler?: GameExitHandler }) {
   const navigate = useNavigate();
   const { t: translate, locale } = useI18n();
   const t: DuelTranslate = (key, values) => translate(key as TranslationKey, values);
@@ -95,7 +96,6 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   const [offline, setOffline] = useState(false);
   const [now, setNow] = useState(Date.now() / 1000);
   const [sheet, setSheet] = useState<"rules" | "share" | "history" | "leaders" | null>(null);
-  const [leave, setLeave] = useState(false);
   const [chats, setChats] = useState<ChatDTO[] | null>(null);
   const [selectedChats, setSelectedChats] = useState<number[]>([]);
   const shareIds = useRef(new Map<number, string>());
@@ -159,18 +159,19 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   }, [match?.id, match?.funded, settled, patchSessionUser]);
 
   async function act(action: string, extra: Record<string, unknown> = {}) {
-    if (mutation.current) return;
+    if (mutation.current) return false;
     mutation.current = true; generation.current++; setBusy(true); setError("");
     try {
       const data = await api.numberDuelAction(activity.key, { action, room_flow: 2, ...(match ? { id: match.id } : {}), ...extra });
-      if (!alive.current) return;
+      if (!alive.current) return false;
       selected.current = data.id;
       setNow(Date.now() / 1000 + clockOffset.current);
       setLobby((current) => current ? { ...current, match: data } : current);
-      setLeave(false); setSheet(null);
-      if (action === "create") { navigate(`/app/number-duel/${data.code}`); return; }
+      setSheet(null);
+      if (action === "create") { navigate(`/app/number-duel/${data.code}`); return true; }
       await refresh();
-    } catch (cause) { if (alive.current) setError(failure(cause)); }
+      return true;
+    } catch (cause) { if (alive.current) setError(failure(cause)); return false; }
     finally { mutation.current = false; if (alive.current) setBusy(false); }
   }
   function invitationUrl() {
@@ -210,6 +211,9 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
   const seconds = match?.status === 'playing' && lobby ? Math.min(remaining, lobby.round_seconds) : remaining;
   const myGuess = match?.guesses.find((row) => row.mine && row.round === match.round);
   const done = match?.status === "finished";
+  const inRoom = Boolean(roomCode && match && !done);
+  const live = inRoom && match?.status !== 'waiting';
+  const exit = useGameExit(inRoom,live,exitHandler,() => act('leave'));
   const date = (value: number) => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(value * 1000);
   const secretStage = match?.status === "secrets";
   const canEnter = Boolean(lobby?.eligible && lobby.active);
@@ -217,7 +221,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     setSheet(null); navigate(value ? `/app/number-duel/${value}` : `/app/menu?panel=activities&activity=${activity.key}`);
   }
   const opponentSubmitted = match?.guesses.some(row => !row.mine && row.round === match.round);
-  const stageTitle = match && (done ? t(match.reason === 'normal' ? `duel.outcome.${match.outcome}` : 'duel.cancelled')
+  const stageTitle = match && (done ? t(match.reason === 'normal' || (match.reason === 'forfeit' && match.outcome !== 'draw') ? `duel.outcome.${match.outcome}` : 'duel.cancelled')
     : t(match.status === 'waiting' ? 'duel.waiting' : match.status === 'choosing' ? 'duel.chooseTier'
       : secretStage ? 'duel.setSecret' : 'duel.round', {round: match.round, total: lobby?.max_rounds}));
   const yourSummary = secretStage ? t(match?.own_secret ? 'duel.secretLocked' : 'duel.thinking')
@@ -227,13 +231,17 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     : match?.status === 'playing' ? t(opponentSubmitted ? 'duel.submitted' : 'duel.thinking')
     : match?.opponent_tier ? t('duel.stake', {points:match.opponent_tier}) : t('duel.tierPending');
 
-  return <div className={`number-duel${match && roomCode ? ` is-${match.status}` : ''}`}>
+  const myTurn = live && (secretStage ? !match?.own_secret : match?.status === 'playing' ? !myGuess : !match?.own_tier);
+  const peerTurn = live && (secretStage ? !match?.opponent_locked : match?.status === 'playing' ? !opponentSubmitted : !match?.opponent_tier);
+  return <div className={`number-duel${match && roomCode ? ` is-${match.status}` : ''}`} data-game-room={inRoom ? '' : undefined}>
     <div className="duel-topline">
       {!roomCode && <time>{lobby?.ends_at ? `${date(activity.starts_at)} — ${date(lobby.ends_at)}` : t('duel.week')}</time>}
       <nav aria-label={t('duel.sections')}>
         <button type="button" onClick={() => setSheet('rules')}>{t('duel.rulesShort')}</button>
         <button type="button" onClick={() => setSheet('history')}>{t('duel.historyShort')}</button>
         <button type="button" onClick={() => setSheet('leaders')}>{t('duel.leadersShort')}</button>
+        {roomCode && match && <GameAudio game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
+          token={`${match.id}:${match.round}`} />}
       </nav>
     </div>
     {offline && <p className="duel-notice" role="status">{t('duel.reconnecting')}<button type="button" onClick={() => void refresh()}>{t('duel.retry')}</button></p>}
@@ -269,20 +277,20 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
     </section> : <>
       <div className="duel-table-board">
         <div className="duel-versus">
-          <div className="duel-seat">
+          <div className={`duel-seat game-seat${myTurn ? ' is-turn' : ''}`}>
             <UserAvatar className="duel-player-avatar" name={session?.user.name ?? t('duel.you')} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} />
             <div><strong>{t('duel.you')}</strong><small>{yourSummary}</small></div>
+            <GameSeatClock seconds={myTurn || match.status === 'waiting' ? seconds : null} />
           </div>
           <header className="duel-match-heading">
             <h2>{stageTitle}</h2>
-            {done ? <strong className={`duel-result-points${match.points < 0 ? ' is-loss' : ''}`}>{signedGrowthPoints(match.points)}</strong>
-              : <time className={`duel-timer${seconds <= 5 ? ' is-urgent' : ''}`} aria-label={t('duel.seconds', {count:seconds})}>
-                {seconds >= 60 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2,'0')}` : `${seconds}s`}
-              </time>}
+            {done && <strong className={`duel-result-points${match.points < 0 ? ' is-loss' : ''}`}>{signedGrowthPoints(match.points)}</strong>}
+            {done && match.reason === 'forfeit' && match.outcome !== 'draw' && <small>{t('game.finishedByForfeit')}</small>}
           </header>
-          <div className="duel-seat is-peer">
+          <div className={`duel-seat game-seat is-peer${peerTurn ? ' is-turn' : ''}`}>
             <UserAvatar className="duel-player-avatar" name={match.opponent?.name ?? '?'} uri={match.opponent?.avatar_uri} cacheKey={match.opponent?.avatar_cache_key} />
             <div><strong>{match.opponent?.name ?? t('duel.waitingPeer')}</strong><small>{peerSummary}</small></div>
+            <GameSeatClock seconds={peerTurn ? seconds : null} />
           </div>
         </div>
       </div>
@@ -329,18 +337,18 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0 }: { a
       </div>
       {!done && <footer className="duel-table-footer">
         {(match.funded || match.practice_reason) && <span>{t(match.funded ? 'duel.stake' : 'duel.practiceMatch', {points:match.stake})}</span>}
-        <button className="duel-leave" disabled={busy} onClick={() => setLeave(true)} type="button">{t('duel.leave')}</button>
+        <button className="duel-leave" disabled={busy} onClick={exit.request} type="button">{t('duel.leave')}</button>
       </footer>}
     </>}
-    <ConfirmDialog open={leave} className="game-table-panel" title={t("duel.leave")} description={t("duel.leaveHint")} busy={busy} onClose={() => setLeave(false)} onConfirm={() => void act("leave")} danger />
+    <GameExitDialog exit={exit} live={live} busy={busy} />
     <BottomSheet open={sheet === "history" || sheet === "leaders"} className="game-table-panel" onClose={() => setSheet(null)} title={t(sheet === "history" ? "duel.history" : "duel.leaders")}>
       <div className="duel-panel">
         {error ? <p className="duel-error" role="alert">{error}</p> : null}
-        {sheet === "history" ? lobby?.history.length ? <div className="duel-records">{lobby.history.map((row) => <button key={row.id} type="button" onClick={() => showMatch(row.code)}><span>{row.opponent || t("duel.waitingPeer")}<small>{date(row.finished_at)}</small></span><b>{t(row.reason === "normal" ? `duel.outcome.${row.outcome}` : "duel.cancelled")}</b><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</div> : <p className="duel-empty">{t("duel.noHistory")}</p> : null}
+        {sheet === "history" ? lobby?.history.length ? <div className="duel-records">{lobby.history.map((row) => <button key={row.id} type="button" onClick={() => showMatch(row.code)}><span>{row.opponent || t("duel.waitingPeer")}<small>{date(row.finished_at)}</small></span><b>{t(row.reason === "normal" || (row.reason === "forfeit" && row.outcome !== "draw") ? `duel.outcome.${row.outcome}` : "duel.cancelled")}</b><span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>)}</div> : <p className="duel-empty">{t("duel.noHistory")}</p> : null}
         {sheet === "leaders" ? lobby?.leaders.length ? <ol className="duel-leaders">{lobby.leaders.map((row) => <li key={row.user_id}><span>{row.name}</span><b>+{row.points}</b></li>)}</ol> : <p className="duel-empty">{t("duel.noLeaders")}</p> : null}
       </div>
     </BottomSheet>
-    <BottomSheet open={sheet === "rules"} className="game-table-panel" onClose={() => setSheet(null)} title={t("duel.rules")}><ol className="duel-rule-list">{[1, 2, 3, 4, 5, 6].map((index) => <li key={index}>{t(`duel.rule${index}`)}</li>)}</ol></BottomSheet>
+    <BottomSheet open={sheet === "rules"} className="game-table-panel" onClose={() => setSheet(null)} title={t("duel.rules")}><DuelRuleGuide /><ol className="duel-rule-list">{[1, 2, 3, 4, 5, 6].map((index) => <li key={index}>{t(`duel.rule${index}`)}</li>)}</ol></BottomSheet>
     <ChatTargetPicker open={sheet === "share"} title={t("duel.shareChat")} emptyTitle={t("duel.noChats")} loading={chats === null} busy={busy} multiple selectedIds={selectedChats} onSelectionChange={setSelectedChats} onClose={() => { if (!busy) setSheet(null); }} onSubmit={share} beforeList={<div className="duel-share"><NumberDuelCard room={lobby?.room} /><button type="button" className="ghost-button" onClick={() => void copyInvite()}>{t("duel.copyLink")}</button>{navigator.share ? <button type="button" className="ghost-button" onClick={() => { void navigator.share({ title: t("duel.title"), url: invitationUrl() }).catch(() => undefined); }}>{t("duel.systemShare")}</button> : null}</div>} targets={[...(chats ?? [])].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || b.last_chat_at - a.last_chat_at).map((chat) => { const peer = chat.members.find((member) => member.user_id !== session?.user.user_id); return { id: chat.chat_id, title: chat.title || peer?.name || t("chat.group"), preview: chat.last_message?.content || t(chat.group ? "chat.group" : "square.directChat"), time: formatRelativeTime(chat.last_message?.created_at ?? chat.last_chat_at), pinned: Boolean(chat.pinned), avatarUri: peer?.avatar_uri, avatarCacheKey: peer?.avatar_cache_key, avatarFrameStyle: peer?.avatar_frame_style, groupMembers: chat.group ? chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key })) : undefined }; })} />
   </div>;
 }

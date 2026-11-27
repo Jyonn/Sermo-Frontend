@@ -78,23 +78,25 @@ export function useFourPlayerRoom(key: string, enabled: boolean, invitation: str
   }, [table?.deadline]);
 
   async function perform(action: FourPlayerAction) {
-    if (!enabled || operation.current) return;
+    if (!enabled || operation.current) return false;
     poll.current?.abort();
     const request = new AbortController();
     operation.current = request;
     setBusy(true);
     try {
       const result = await api.fourPlayerAction(key, action, request.signal);
-      if (request.signal.aborted) return;
+      if (request.signal.aborted) return false;
       receive(result.table);
       setFailed(false);
       if (result.changed) showToast(t('landlord.tableUpdated'), 'info');
       if (!result.table) retry();
+      return !result.changed;
     } catch (cause) {
       if (!request.signal.aborted) {
         const identifier = cause instanceof ApiError ? cause.identifier.split('@').pop() ?? '' : '';
         showToast(t(errors[identifier] ?? 'landlord.actionFailed'), 'error');
       }
+      return false;
     } finally {
       if (operation.current === request) {
         operation.current = undefined;

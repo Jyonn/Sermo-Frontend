@@ -1,6 +1,8 @@
 .side-drawer.activity-drawer.game-table-drawer { max-width: none; }
 .game-table-drawer > .drawer-body { overscroll-behavior: contain; }
+.game-table-drawer .drawer-floating-identity { pointer-events: none; }
 .game-table-drawer:has(.landlord-lobby-layout, .duel-lobby-layout, .four-player-lobby-layout) .drawer-floating-identity { visibility: hidden; }
+body:has([data-game-room]) .chat-sync-popup { z-index: 650; }
 
 @media (min-width: 720px) and (pointer: fine) {
   .detached-drawer-slot:has(.game-table-drawer) {
@@ -35,6 +37,13 @@
 }
 
 @media (any-pointer: coarse) and (max-width: 980px) and (orientation: portrait) {
+  body:has([data-game-room]) .chat-sync-popup {
+    top: 50%;
+    left: calc(100dvw - max(10px,env(safe-area-inset-right)) - 32px);
+    width: min(420px,calc(100dvh - 28px));
+    transform: translate(-50%,-50%) rotate(90deg) translateY(var(--popup-drag-y,0));
+    touch-action: none;
+  }
   :is(.side-drawer.activity-drawer.game-table-drawer, main.game-table-screen) {
     inset: 50% auto auto 50%;
     width: 100dvh;

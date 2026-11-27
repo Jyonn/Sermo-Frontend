@@ -1,21 +1,21 @@
 {
-  "id": "2026.11.27.8",
+  "id": "2026.11.27.9",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "双扣、麻将和不洗牌斗地主",
+      "title": "牌桌体验升级",
       "items": [
-        "空间管理员可领取双扣和麻将常驻活动。认证成员可以开桌，直接把房间邀请发给好友或群聊。",
-        "四人双扣支持经典和火拼玩法。麻将支持吃、碰、杠、自摸和点炮胡，四人准备后可在原桌再开一局。",
-        "斗地主房主可以在两局之间切换经典和不洗牌模式。"
+        "斗地主、双扣、麻将和数字交锋加入各自的背景音乐与语音提示，倒计时移到玩家座位。",
+        "斗地主和双扣支持划选手牌。玩法中可查看牌面、牌型和数字猜测示例。",
+        "对局中收到聊天消息会在顶部提示，确认离开正在进行的对局后会判负。"
       ]
     },
     "en": {
-      "title": "Shuangkou, Mahjong and No reshuffle",
+      "title": "A better game table",
       "items": [
-        "Space admins can enable Shuangkou and Mahjong. Verified members can open a table and invite friends directly or in a group chat.",
-        "Play Classic or Firefight Shuangkou, or four-player Mahjong with chi, pong, kong, self-drawn wins and wins on discards. Ready up to play another round at the same table.",
-        "Dou Dizhu hosts can switch between Classic and No reshuffle between rounds."
+        "Dou Dizhu, Shuangkou, Mahjong and Code Duel now have table music, voice cues and seat-side timers.",
+        "Drag across cards in Dou Dizhu and Shuangkou. Illustrated guides explain ranks, combinations and how to read a guess.",
+        "Chat notifications appear at the top of a match. Leaving an active match requires confirmation and counts as a loss."
       ]
     }
   }

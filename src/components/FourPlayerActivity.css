@@ -97,7 +97,7 @@
 .four-player-turn time { padding: 2px 6px; border: 1px solid var(--table-edge); border-radius: 6px; color: var(--table-accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .four-player-last { display: grid; gap: 3px; container-type: inline-size; }
 .four-player-controls { position: relative; display: grid; justify-items: center; gap: 4px; min-width: 0; padding-inline: clamp(0px,3cqw,24px); }
-.four-player-controls > .playing-card-stack { width: 100%; container-type: inline-size; --playing-card-width: clamp(35px, 8cqw, 60px); }
+.four-player-controls .selectable-hand { width: 100%; container-type: inline-size; --playing-card-width: clamp(35px, 8cqw, 60px); }
 .four-player-management { display: grid; gap: 6px; justify-items: center; }
 .four-player .table-mode-picker { color: var(--table-ink); }
 .four-player-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
@@ -141,9 +141,30 @@
   user-select: none;
 }
 .mahjong-tile.suit-0 span, .mahjong-tile.is-red-dragon { color: #9c332d; }
+.mahjong-tile.is-green-dragon { color: #276746; }
+.mahjong-tile.is-white-dragon { color: #264c72; }
 .mahjong-tile.suit-1 span { color: #2e5390; }
 .mahjong-tile.suit-2 span { color: #35653e; }
 .mahjong-tile > span { margin-block-start: .09em; font-size: .67em; }
+.mahjong-tile > .mahjong-pips {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  grid-template-rows: repeat(3,minmax(0,1fr));
+  place-items: center;
+  gap: 3%;
+  width: 79%;
+  height: 76%;
+  color: #28537a;
+}
+.mahjong-pips i { width: 80%; height: 86%; }
+.mahjong-pips.is-dots [data-mark] { aspect-ratio: 1; height: auto; border-radius: 50%; background: currentColor; box-shadow: inset 0 0 0 .07em #f6e7c8; }
+.mahjong-pips.is-dots [data-mark]:nth-child(3n + 2) { color: #9c332d; }
+.mahjong-pips.is-dots.is-single [data-mark] { transform: scale(2.4); background: radial-gradient(circle,#993b33 22%,#ede3c6 23% 41%,#355786 42%); }
+.mahjong-pips.is-bamboo [data-mark] { width: 53%; border-radius: 55% 55% 28% 28%; background: linear-gradient(180deg,#366f56 39%,#c0c08c 41% 54%,#27624e 56%); }
+.mahjong-honor { display: grid; place-items: center; gap: 1px; }
+.mahjong-honor .material-symbols-outlined, .mahjong-bird.material-symbols-outlined { font-size: 1.05em; line-height: 1; font-style: normal; }
+.mahjong-honor .material-symbols-outlined:only-child { font-size: 1.95em; }
+.mahjong-tile .mahjong-bird.material-symbols-outlined { color: #286d4f; font-size: 1.23em; }
 .mahjong-tile.is-covered { background: #438061; border-color: #aac8a2; box-shadow: none; }
 .mahjong-tile[aria-pressed]:enabled { cursor: pointer; }
 .mahjong-tile[aria-pressed='true'] { transform: translateY(-5px); outline: 2px solid #efc881; }
@@ -159,7 +180,7 @@
   .four-player-room.is-playing { height: var(--four-board-height); min-height: 0; }
   .four-player-arena { min-height: 0; gap: 4px 6px; padding: 5px 9px; }
   .four-player-center { min-height: 0; align-self: stretch; align-content: safe center; overflow: auto; scrollbar-width: thin; }
-  .four-player-controls > .playing-card-stack { --playing-card-width: 40px; padding-block: 8px 1px; }
+  .four-player-controls .is-selectable { --playing-card-width: 40px; padding-block: 8px 1px; }
   .mahjong-hand { --tile-width: clamp(16px,4.6cqw,38px); }
   .mahjong-rivers { --tile-width: 15px; --tile-type: .52rem; }
   .mahjong-river { padding-block: 1px; }

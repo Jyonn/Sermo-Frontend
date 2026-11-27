@@ -97,6 +97,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
   const {session,patchSessionUser}=useAuth();
   const features=useSpaceFeatures();
   const navigate=useNavigate();
+  const gameExit=useRef<((after?: () => void) => void)>();
   const [activeActivity,setActiveActivity]=useState<ActivityCampaignDTO|null>(null);
   const theme=activeActivity?.theme||activityThemeForKey(activityKey);
   const [vipCampaign,setVipCampaign]=useState<PermanentVipCampaignDTO|null>(null);
@@ -260,7 +261,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         trapFocus
         headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t(isTabletopGame(activeActivity.theme) ? 'landlord.shareActivity' : 'square.share')} title={isTabletopGame(activeActivity.theme) ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} /> : null}
         historyMode="route"
-        onClose={onClose}
+        onClose={() => gameExit.current ? gameExit.current(onClose) : onClose()}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
         title={drawerTitle}
         titleLeading={isTabletopGame(theme) && activeActivity ? (
@@ -269,8 +270,8 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
           <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : undefined}
       >
-        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} />
-          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} /> : activeActivity?.record_shop ? (
+        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} exitHandler={gameExit} />
+          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} exitHandler={gameExit} /> : activeActivity?.record_shop ? (
           <RecordShopActivity
             activity={activeActivity}
             dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}

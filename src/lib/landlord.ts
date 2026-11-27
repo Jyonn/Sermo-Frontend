@@ -19,6 +19,8 @@ export interface LandlordTableView {
   turn: number | null;
   landlord: number | null;
   winner: number | null;
+  forfeited_position?: number | null;
+  last_cards?: number[];
   hand: number[];
   ready_count: number;
   seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean; doubled: boolean | null; trustee: boolean; score: number; ready: boolean }>;
@@ -71,7 +73,7 @@ export type LandlordAction =
   | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "double" | "trustee"; value: boolean }
     | { action: "mode"; value: 'classic' | 'no_shuffle' }
     | { action: "ready"; value: boolean; round: number; mode: LandlordTableView["mode"] } | { action: "start"; round: number }
-    | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
+    | { action: "play"; cards: number[] } | { action: "pass" } | { action: "leave"; round: number }));
 
 export const LANDLORD_ROOM_CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/;
 export const LANDLORD_ROOM_PARAM = "landlord_room";

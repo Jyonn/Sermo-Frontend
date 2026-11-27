@@ -31,12 +31,20 @@
 .playing-card b, .playing-card > span { z-index: 1; }
 .playing-card > span { font-size: .88em; }
 .playing-card[data-suit]::after { position: absolute; inset: 40% 0 auto; content: attr(data-suit); text-align: center; opacity: .34; font-size: 1.75em; }
+.playing-card.is-joker::after { content: none; }
+.playing-card.is-joker img { position: absolute; inset: auto auto 12% 50%; width: 64%; border-radius: 20%; transform: translateX(-50%); mix-blend-mode: multiply; pointer-events: none; }
+.playing-card.is-joker:not(.is-red) img { filter: grayscale(1); }
+.playing-card.is-joker b { white-space: nowrap; font-size: .7em; }
 .playing-card-wild { position: absolute; inset: auto auto 1px 1px; z-index: 2; padding: 2px; border-radius: 2px; background: #aa3323; color: #fff4d6; font-size: 9px; }
 .playing-card.is-red { color: #9d3527; }
 .playing-card.is-backed { align-items: center; justify-content: center; padding: 0; color: #f1d18b; background: repeating-linear-gradient(42deg, #34583a 0 2px, #19362c 2px 5px); }
 .playing-card[aria-pressed] { transition: transform .15s ease-out, background-color .15s; }
 .playing-card[aria-pressed]:enabled { cursor: pointer; }
 .playing-card[aria-pressed="true"] { transform: translateY(-8px); background: #ffdda4; border-color: #a95b2a; }
+.selectable-hand { position: relative; min-width: 0; }
+.playing-card-stack.is-selectable { touch-action: none; user-select: none; }
+.playing-card[data-preview] { transform: translateY(-4px); background: #f6d794; }
+.game-hand-hint { position: absolute; inset: auto 0 calc(100% + 3px); z-index: 2; width: max-content; max-width: 100%; margin: auto; padding: 3px 9px; border-radius: 999px; background: #2d211d; color: #ffddac; font-size: .73rem; pointer-events: none; }
 .playing-card:focus-visible { outline: none; }
 .playing-card:focus-visible::before { position: absolute; inset: 1px auto 1px 1px; width: 8px; border-left: 2px solid #a14f25; border-radius: 4px; content: ''; }
 .playing-card-stack.is-compact .playing-card { padding-block-start: 2px; font-size: .72rem; }

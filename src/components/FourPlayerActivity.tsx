@@ -8,9 +8,11 @@ import {TABLE_ROOM_PARAM, type FourPlayerGame, type FourPlayerMode, type FourPla
 import type {ActivityCampaignDTO} from '../types';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
-import {ConfirmDialog} from './ConfirmDialog';
 import {MahjongTile} from './MahjongTile';
-import {PlayingCard, PlayingCardStack, playingCardRank} from './PlayingCards';
+import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
+import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {CardRuleGuide, MahjongRuleGuide} from './GameRules';
+import {isLegalPlay} from '../lib/cardPatterns';
 import {SettingsDialog} from './SettingsDialog';
 import {TableModePicker} from './TableModePicker';
 import {UserAvatar} from './UserAvatar';
@@ -19,13 +21,13 @@ import './FourPlayerActivity.css';
 const MODE_NAMES = {classic:'tabletop.classicShuangkou', firefight:'tabletop.firefight', standard:'tabletop.standard'} as const;
 const CARD_MODES: ReadonlyArray<readonly [FourPlayerMode, TranslationKey]> = [['classic',MODE_NAMES.classic], ['firefight',MODE_NAMES.firefight]];
 const OUTCOMES: Record<string, TranslationKey> = {double:'tabletop.double', single:'tabletop.single', even:'tabletop.even',
-  draw:'tabletop.draw', self_draw:'tabletop.selfDraw', discard_win:'tabletop.discardWin', rob_kong:'tabletop.robKong'};
+  draw:'tabletop.draw', self_draw:'tabletop.selfDraw', discard_win:'tabletop.discardWin', rob_kong:'tabletop.robKong', forfeit:'game.finishedByForfeit'};
 const CALLS = {chi:'tabletop.chi', pong:'tabletop.pong', kong:'tabletop.kong', hu:'tabletop.hu',
   concealed_kong:'tabletop.concealedKong', added_kong:'tabletop.addedKong'} as const;
 const WINDS = ['tabletop.east','tabletop.south','tabletop.west','tabletop.north'] as const;
 const icon = (name: string) => <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
 
-function TableSeat({table, position, game, side}: {table: FourPlayerTable; position: number; game: FourPlayerGame; side: string}) {
+function TableSeat({table, position, game, side, seconds}: {table: FourPlayerTable; position: number; game: FourPlayerGame; side: string; seconds: number}) {
   const {t} = useI18n();
   const seat = table.seats.find(item => item.position === position);
   if (!seat) return <div className={`four-player-seat is-${side} is-empty`}>{icon('person_add')}{t('landlord.openSeat')}</div>;
@@ -36,11 +38,14 @@ function TableSeat({table, position, game, side}: {table: FourPlayerTable; posit
     : board && 'dealer' in board ? t(WINDS[(position - board.dealer + 4) % 4]) : null;
   const status = table.status === 'playing' ? seat.trustee ? t('landlord.trustee') : placing >= 0 ? t('tabletop.place', {count:placing + 1})
     : t('landlord.cardCount', {count:seat.remaining}) : t(seat.ready ? 'landlord.ready' : 'landlord.notReady');
-  return <div className={`four-player-seat is-${side}${board?.turn === position ? ' is-turn' : ''}${seat.ready ? ' is-ready' : ''}`}>
+  const pending = board && 'pending' in board ? board.pending : null;
+  const active = pending ? self && Boolean(pending.choices?.length) : position === board?.turn;
+  return <div className={`four-player-seat game-seat is-${side}${active ? ' is-turn' : ''}${seat.ready ? ' is-ready' : ''}`}>
     <UserAvatar className="four-player-avatar" name={seat.member.name} uri={seat.member.avatar_uri} />
     <div><strong>{self ? t('common.you') : seat.member.name}{position === table.host && <small title={t('landlord.host')}>{icon('key')}</small>}</strong>
       <span>{role && `${role} · `}{status}</span></div>
     {table.status === 'finished' && seat.score !== null && <b className="four-player-points">{seat.score > 0 ? '+' : ''}{seat.score}</b>}
+    <GameSeatClock seconds={active ? seconds : null} />
   </div>;
 }
 
@@ -74,14 +79,14 @@ function MahjongChoiceButton({choice, disabled, onClick}: {choice: MahjongChoice
   </button>;
 }
 
-export function FourPlayerActivity({activity, game}: {activity: ActivityCampaignDTO; game: FourPlayerGame}) {
+export function FourPlayerActivity({activity, game, exitHandler}: {activity: ActivityCampaignDTO; game: FourPlayerGame; exitHandler: GameExitHandler}) {
   const {t, language} = useI18n();
   const {search} = useLocation();
   const invitation = new URLSearchParams(search).get(TABLE_ROOM_PARAM);
   const canPlay = activity.active && activity.verified;
   const {lobby, table, failed, busy, seconds, closeExpired, move, perform, retry} = useFourPlayerRoom(activity.key, canPlay, invitation);
   const [selected, setSelected] = useState<number[]>([]);
-  const [panel, setPanel] = useState<'rules' | 'share' | 'leave' | null>(null);
+  const [panel, setPanel] = useState<'rules' | 'share' | null>(null);
   const board = table?.board;
   const meld = board && 'melds' in board ? board : null;
   const cards = board && 'last' in board ? board : null;
@@ -90,6 +95,9 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
   const playing = state === 'playing';
   const myTurn = Boolean(board && board.turn === table?.your_seat);
   const canAct = playing && !busy && !self?.trustee && seconds > 0;
+  const cardGame = table?.mode === 'firefight' ? 'firefight' : 'classic';
+  const canSubmit = Boolean(canAct && myTurn && cards && isLegalPlay(selected,cards.last,cardGame));
+  const exit = useGameExit(Boolean(table && state !== 'abandoned'),playing,exitHandler,async () => Boolean(await move({action:'leave'})));
   const canShare = table && (state === 'waiting' || state === 'finished') && table.seats.length < 4;
   const title = language.startsWith('zh') ? activity.title : activity.title_en || activity.title;
   const hand = cards ? [...cards.hand].sort((a,b) => playingCardRank(b) - playingCardRank(a)) : meld?.hand ?? [];
@@ -103,7 +111,7 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
     void move(moveToSend);
   }
 
-  return <section className={`four-player game-${game}`}>
+  return <section className={`four-player game-${game}`} data-game-room={table && state !== 'abandoned' ? '' : undefined}>
     {!table ? <div className="four-player-lobby-layout">
       <div className="four-player-hero">
         <div className="four-player-hero-copy"><small>{t('landlord.permanent')}</small><ActivityTitle activity={activity} title={title} />
@@ -130,16 +138,18 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
       </div>
     </div> : <div className={`four-player-room is-${state}`}>
       <header className="four-player-room-info"><span>{t(MODE_NAMES[table.mode])}{table.round > 0 && ` · ${t('landlord.round', {count:table.round})}`}</span>
-        <button className="landlord-text-button" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button></header>
+        <button className="landlord-text-button" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button>
+        <GameAudio game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
+          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} /></header>
       <div className="four-player-arena">
-        {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} position={(table.your_seat + index) % 4} />)}
+        {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} seconds={seconds}
+          position={(table.your_seat + index) % 4} />)}
         <div className="four-player-center">
           {state === 'waiting' ? <div className="four-player-announcement"><strong>{t(table.seats.length < 4 ? 'landlord.waiting' : 'tabletop.waitingReady')}</strong><span>{t('tabletop.seated', {count:table.seats.length})}</span></div>
             : state === 'abandoned' ? <div className="four-player-announcement"><strong>{t('landlord.abandoned')}</strong></div>
             : state === 'finished' ? <div className="four-player-announcement"><strong>{outcome}</strong><span>{t('landlord.prepareNext')}</span></div>
             : <><div className="four-player-turn"><strong role="status">{t(meld?.pending ? 'tabletop.waitingCall' : myTurn ? 'landlord.yourPlay' : 'landlord.otherPlay',
-                {name:table.seats.find(seat => seat.position === board?.turn)?.member.name ?? ''})}</strong>
-              <time>{t('landlord.seconds', {count:seconds})}</time></div>
+                {name:table.seats.find(seat => seat.position === board?.turn)?.member.name ?? ''})}</strong></div>
               {meld ? <MahjongCenter board={meld} yourSeat={table.your_seat} /> : cards && <ShuangkouCenter board={cards} table={table} />}
             </>}
         </div>
@@ -149,10 +159,9 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
           {meld ? <div className="mahjong-hand" role="group" aria-label={t('landlord.yourHand')}>
             {hand.map(tile => <MahjongTile key={tile} tile={tile} selected={selected.includes(tile)} drawn={tile === meld.drawn}
               disabled={!myTurn || !canAct || Boolean(meld.pending)} onClick={() => setSelected(selected[0] === tile ? [] : [tile])} />)}
-          </div> : <PlayingCardStack count={hand.length} label={t('landlord.yourHand')}>
-            {hand.map(id => <PlayingCard key={id} id={id} selected={selected.includes(id)} disabled={busy || self?.trustee}
-              onClick={() => setSelected(current => current.includes(id) ? current.filter(card => card !== id) : [...current,id])} />)}
-          </PlayingCardStack>}
+          </div> : cards && <SelectableHand key={`${table.code}:${table.round}:${board?.turn}`} cards={hand} last={cards.last}
+            game={cardGame} selected={selected} disabled={!canAct || !myTurn}
+            suggested={cards.suggested} onSelect={setSelected} />}
           <div className="four-player-actions">
             {meld?.pending ? meld.pending.choices && <>
               <button type="button" className="landlord-secondary" disabled={!canAct}
@@ -168,7 +177,7 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
               <button className="landlord-secondary" type="button" onClick={() => send({action:'pass'})} disabled={!canAct || !cards.can_pass}>{t('landlord.pass')}</button>
               <button className="landlord-secondary" type="button" disabled={!canAct || !myTurn || !cards.suggested.length}
                 onClick={() => setSelected(cards.suggested)}>{t('landlord.hint')}</button>
-              <button className="landlord-primary" type="button" onClick={() => send({action:'play', cards:selected})} disabled={!canAct || !myTurn || !selected.length}>{t('landlord.play')}</button>
+              <button className="landlord-primary" type="button" onClick={() => send({action:'play', cards:selected})} disabled={!canSubmit}>{t('landlord.play')}</button>
             </>}
             <button className="landlord-text-button four-player-trustee" type="button" disabled={busy} aria-pressed={self?.trustee ?? false}
               onClick={() => send({action:'trustee', value:!self?.trustee})}>{icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}</button>
@@ -186,18 +195,18 @@ export function FourPlayerActivity({activity, game}: {activity: ActivityCampaign
             </div>
           </div>}
         {state !== 'abandoned' && <button className="landlord-text-button four-player-leave" type="button" disabled={busy}
-          onClick={() => playing ? setPanel('leave') : send({action:'leave'})}>{t('landlord.leave')}</button>}
+          onClick={exit.request}>{t('landlord.leave')}</button>}
         {failed && <p className="four-player-placeholder" role="status">{t('landlord.reconnecting')}</p>}
       </div>
     </div>}
 
     <SettingsDialog open={panel === 'rules'} title={t('landlord.rules')} onClose={() => setPanel(null)}>
+      {game === 'shuangkou' ? <CardRuleGuide game={cardGame} /> : <MahjongRuleGuide />}
       <ol className="landlord-rules">{(game === 'shuangkou'
         ? ['tabletop.ruleTeams','tabletop.ruleClassic','tabletop.ruleFirefight'] : ['tabletop.ruleTiles','tabletop.ruleCalls','tabletop.ruleHu','tabletop.ruleMahjongPoints'])
         .map(key => <li key={key}>{t(key as TranslationKey)}</li>)}</ol>
     </SettingsDialog>
-    <ConfirmDialog open={panel === 'leave'} className="game-table-panel" title={t('landlord.leave')} description={t('tabletop.leaveConfirm')}
-      busy={busy} onClose={() => setPanel(null)} onConfirm={() => {setPanel(null); send({action:'leave'});}} />
+    <GameExitDialog exit={exit} live={playing} busy={busy} />
     {table && canShare && <ChatSharePicker open={panel === 'share'} title={t('landlord.chooseChat')} onClose={() => setPanel(null)}
       sendToChat={(chatId,clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'table_room', activity_key:activity.key, room_code:table.code, title}), undefined, clientId)} />}
   </section>;

@@ -7,8 +7,10 @@ import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordActi
 import type {ActivityCampaignDTO} from '../types';
 import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
-import {ConfirmDialog} from './ConfirmDialog';
-import {PlayingCard, PlayingCardStack, playingCardRank} from './PlayingCards';
+import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
+import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {CardRuleGuide} from './GameRules';
+import {isLegalPlay} from '../lib/cardPatterns';
 import {TableModePicker} from './TableModePicker';
 import {SettingsDialog} from './SettingsDialog';
 import {UserAvatar} from './UserAvatar';
@@ -17,7 +19,7 @@ import './LandlordActivity.css';
 const icon = (name: string) => <span aria-hidden="true" className="material-symbols-outlined">{name}</span>;
 const MODES = [['classic','tabletop.classic'], ['no_shuffle','landlord.noShuffle']] as const;
 
-function Seat({table, position, self = false}: {table: LandlordTableView; position: number; self?: boolean}) {
+function Seat({table, position, self = false, seconds}: {table: LandlordTableView; position: number; self?: boolean; seconds: number}) {
   const {t} = useI18n();
   const seat = table.seats.find(item => item.position === position);
   if (!seat) return <div className="landlord-seat is-empty"><span className="landlord-seat-avatar">{icon('person_add')}</span><small>{t('landlord.openSeat')}</small></div>;
@@ -27,11 +29,13 @@ function Seat({table, position, self = false}: {table: LandlordTableView; positi
   const isLandlord = !finished && position === table.landlord;
   const label = finished ? t(seat.ready ? 'landlord.ready' : 'landlord.notReady') : table.landlord !== null && !isLandlord ? t('landlord.farmer')
     : table.status === 'bidding' && typeof bid === 'number' ? t(bid ? 'landlord.bidPoints' : 'landlord.noBid', {points: bid}) : '';
-  return <div className={`landlord-seat${position === table.turn ? ' is-turn' : ''}${isLandlord ? ' is-landlord' : ''}${seat.ready ? ' is-ready' : ''}`}>
+  const active = position === table.turn || (table.status === 'doubling' && seat.doubled === null);
+  return <div className={`landlord-seat game-seat${active ? ' is-turn' : ''}${isLandlord ? ' is-landlord' : ''}${seat.ready ? ' is-ready' : ''}`}>
     <div className="landlord-seat-portrait">
       <UserAvatar className="landlord-seat-avatar" name={seat.member.name} uri={seat.member.avatar_uri} />
       {isLandlord && <span className="landlord-role-seal">{icon('workspace_premium')}{t('landlord.landlord')}</span>}
     </div>
+    <GameSeatClock seconds={active ? seconds : null} />
     <div className="landlord-seat-copy">
       <b>{self ? t('common.you') : seat.member.name}{position === table.host && <i className="landlord-host-mark" title={t('landlord.host')} aria-label={t('landlord.host')}>{icon('key')}</i>}</b>
       <small>{[label, table.status === 'playing' && t('landlord.cardCount', {count: seat.remaining}), seat.trustee && t('landlord.trustee')].filter(Boolean).join(' · ')}</small>
@@ -46,7 +50,7 @@ const actionErrors: Record<string, TranslationKey> = {
   BUSY: 'landlord.alreadySeated', TURN: 'landlord.waitTurn', CARDS: 'landlord.invalidPlay', INVALID: 'landlord.actionFailed',
 };
 
-export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
+export function LandlordActivity({activity, exitHandler}: {activity: ActivityCampaignDTO; exitHandler: GameExitHandler}) {
   const {t, language} = useI18n();
   const location = useLocation();
   const invitation = new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM);
@@ -57,7 +61,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [selected, setSelected] = useState<number[]>([]);
-  const [dialog, setDialog] = useState<'ranking' | 'rules' | 'leave' | null>(null);
+  const [dialog, setDialog] = useState<'ranking' | 'rules' | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [now, setNow] = useState(Date.now);
   const [clockOffset, setClockOffset] = useState(0);
@@ -127,23 +131,24 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   }, [table?.deadline]);
 
   const perform = async (action: LandlordAction) => {
-    if (!canPlay || actionRequest.current) return;
+    if (!canPlay || actionRequest.current) return false;
     pollRequest.current?.abort();
     const request = new AbortController();
     actionRequest.current = request;
     setBusy(true);
     try {
       const result = await api.landlordAction(activity.key, action, request.signal);
-      if (request.signal.aborted) return;
+      if (request.signal.aborted) return false;
       receiveTable(result.table);
       setSelected([]);
       if (result.changed) showToast(t('landlord.tableUpdated'), 'info');
-      if (action.action === 'leave') setDialog(null);
       setFailed(false);
+      return !result.changed;
     } catch (error) {
-      if (request.signal.aborted) return;
+      if (request.signal.aborted) return false;
       const key = error instanceof ApiError ? actionErrors[error.identifier.split('@').pop() ?? ''] : undefined;
       showToast(t(key ?? 'landlord.actionFailed'), 'error');
+      return false;
     } finally {
       if (actionRequest.current === request) {
         actionRequest.current = undefined;
@@ -173,14 +178,18 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const playing = table?.status === 'playing';
   const bidding = table?.status === 'bidding';
   const doubling = table?.status === 'doubling';
-  const lastPlay = table?.last_player != null ? table.moves[table.last_player]?.cards ?? [] : [];
+  const live = Boolean(playing || bidding || doubling);
+  const exit = useGameExit(Boolean(table && table.status !== 'abandoned'),live,exitHandler,
+    async () => Boolean(table && await perform({action:'leave',code:table.code,round:table.round,version:table.version})));
+  const lastPlay = table?.last_cards ?? (table?.last_player != null ? table.moves[table.last_player]?.cards ?? [] : []);
   const hand = table ? [...table.hand].sort((a, b) => playingCardRank(b) - playingCardRank(a)) : [];
   const canAct = turn && !busy && remaining > 0 && !self?.trustee;
+  const canSubmit = Boolean(playing && canAct && isLegalPlay(selected,lastPlay,'landlord'));
   const canShareRoom = table?.status === 'waiting' || (table?.status === 'finished' && table.ready_count < 3);
   const canChooseMode = table && table.host === table.your_seat && (table.status === 'waiting' || table.status === 'finished');
   useEffect(() => { if (!canShareRoom) setShareOpen(false); }, [canShareRoom]);
 
-  return <section className="landlord-activity">
+  return <section className="landlord-activity" data-game-room={table && table.status !== 'abandoned' ? '' : undefined}>
     {!table ? <div className="landlord-lobby-layout">
       <div className="landlord-hero">
         <img className="landlord-hero-art" src={LANDLORD_ART} alt="" draggable={false} />
@@ -216,9 +225,11 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
           <span>{t(table.mode === 'no_shuffle' ? 'landlord.noShuffle' : 'tabletop.classic')}
             {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
+          <GameAudio game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
+            token={table.deadline ?? undefined} />
         </div>
         <div className="landlord-arena">
-          <Seat table={table} position={(table.your_seat + 2) % 3} />
+          <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} />
         <div className="landlord-center">
           {table.status === 'waiting' ? <>
             <img className="landlord-table-art" src={LANDLORD_ART} alt="" />
@@ -227,30 +238,27 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
             {icon(table.status === 'abandoned' ? 'door_open' : 'emoji_events')}
             <strong>{t(table.status === 'abandoned' ? 'landlord.abandoned' : !self?.score ? 'landlord.prepareNext' : self.won ? 'landlord.win' : 'landlord.loss')}</strong>
             {table.status === 'finished' && !!self?.score && <>
-              <span>{t(table.winner === table.landlord ? 'landlord.landlordWon' : 'landlord.farmersWon')}{table.spring ? ` · ${t('landlord.spring')}` : ''}</span>
+              <span>{t(table.forfeited_position != null ? 'game.finishedByForfeit' : table.winner === table.landlord ? 'landlord.landlordWon' : 'landlord.farmersWon')}{table.spring ? ` · ${t('landlord.spring')}` : ''}</span>
               <div className="landlord-settlement">{table.seats.map(seat => <span key={seat.position}><b>{seat.score > 0 ? '+' : ''}{seat.score}</b>{seat.position === table.your_seat ? t('common.you') : seat.member.name}</span>)}</div>
             </>}
           </> : <>
             <PlayingCardStack count={3} label={t('landlord.bottomCards')} compact>{Array.from({length:3}, (_, index) => <PlayingCard id={table.bottom_cards[index]} key={index} />)}</PlayingCardStack>
-            <div className="landlord-turn-row"><strong className="landlord-turn" role="status">{t(doubling ? 'landlord.doubling' : bidding ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong>
-              <span className="landlord-clock">{t('landlord.seconds', {count: remaining})}</span></div>
+            <div className="landlord-turn-row"><strong className="landlord-turn" role="status">{t(doubling ? 'landlord.doubling' : bidding ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong></div>
             {table.last_player !== null && <div className="landlord-last-play">
               <small>{t('landlord.lastPlay', {name: table.seats.find(seat => seat.position === table.last_player)?.member.name ?? ''})}</small>
               <PlayingCardStack count={lastPlay.length} compact>{lastPlay.map(id => <PlayingCard id={id} key={id} />)}</PlayingCardStack>
             </div>}
           </>}
         </div>
-          <Seat table={table} position={(table.your_seat + 1) % 3} />
+          <Seat table={table} position={(table.your_seat + 1) % 3} seconds={remaining} />
         </div>
       </div>
       <div className="landlord-play-controls">
         {canChooseMode && <div className="landlord-mode-row"><TableModePicker choices={MODES} mode={table.mode ?? 'classic'} disabled={busy}
           onChange={mode => void perform({action:'mode', code:table.code, version:table.version, value:mode})} /></div>}
         {bidding || doubling || playing ? <>
-          <PlayingCardStack count={hand.length} label={t('landlord.yourHand')}>
-            {hand.map(id => <PlayingCard id={id} key={id} selected={selected.includes(id)} disabled={!playing || busy || self?.trustee}
-              onClick={() => setSelected(cards => cards.includes(id) ? cards.filter(card => card !== id) : [...cards, id])} />)}
-          </PlayingCardStack>
+          <SelectableHand key={`${table.code}:${table.round}:${table.turn}`} cards={hand} last={lastPlay} game="landlord"
+            selected={selected} disabled={!playing || !canAct} suggested={table.suggested_cards} onSelect={setSelected} />
           {bidding ? <div className="landlord-controls">
             {turn && table.bid_options.map(value => <button key={value} className={value ? 'landlord-primary' : 'landlord-secondary'}
               disabled={!canAct} type="button" onClick={() => void perform({action:'bid', code:table.code, version:table.version, value})}>
@@ -267,19 +275,19 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
               onClick={() => void perform({action:'pass', code:table.code, version:table.version})}>{t('landlord.pass')}</button>
             <button className="landlord-secondary" type="button" disabled={!canAct}
               onClick={() => table.suggested_cards.length ? setSelected(table.suggested_cards) : showToast(t('landlord.noHint'), 'info')}>{t('landlord.hint')}</button>
-            <button className="landlord-primary" type="button" disabled={!canAct || !selected.length}
+            <button className="landlord-primary" type="button" disabled={!canSubmit}
               onClick={() => void perform({action:'play', code:table.code, version:table.version, cards:selected})}>{t('landlord.play')}</button>
           </div>}
           <div className="landlord-controls landlord-table-actions">
-            <Seat table={table} position={table.your_seat} self />
+            <Seat table={table} position={table.your_seat} seconds={remaining} self />
             <button className="landlord-text-button" type="button" disabled={busy} aria-pressed={self?.trustee ?? false}
               onClick={() => void perform({action:'trustee', code:table.code, version:table.version, value:!self?.trustee})}>
               {icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}
             </button>
-            <button className="landlord-text-button" type="button" disabled={busy} onClick={() => setDialog('leave')}>{t('landlord.leave')}</button>
+            <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>
         </> : table.status === 'waiting' ? <div className="landlord-controls">
-          <button className="landlord-secondary" type="button" disabled={busy} onClick={() => void perform({action:'leave', code:table.code, version:table.version})}>{t('landlord.leave')}</button>
+          <button className="landlord-secondary" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           <button className="landlord-primary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>
         </div> : table.status === 'finished' ? <div className="landlord-rematch">
           <span className="landlord-choice">{t('landlord.readyCount', {count:table.seats.filter(seat => seat.ready).length})}</span>
@@ -292,7 +300,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
           </div>
           <div className="landlord-controls landlord-table-actions">
             <button className="landlord-text-button" type="button" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>
-            <button className="landlord-text-button" type="button" disabled={busy} onClick={() => void perform({action:'leave', code:table.code, version:table.version})}>{t('landlord.leave')}</button>
+            <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>
         </div> : <div className="landlord-controls">
           <button className="landlord-secondary" type="button" onClick={returnToLobby}>{t('landlord.backLobby')}</button>
@@ -302,14 +310,13 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       </div>
     </div>}
     <SettingsDialog open={dialog === 'rules'} title={t('landlord.rules')} onClose={() => setDialog(null)}>
+      <CardRuleGuide game="landlord" />
       <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult','ruleNoShuffle'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
     </SettingsDialog>
     <SettingsDialog open={dialog === 'ranking'} title={t('landlord.ranking')} onClose={() => setDialog(null)}>
       {dialog === 'ranking' && <Ranking activityKey={activity.key} />}
     </SettingsDialog>
-    <ConfirmDialog open={dialog === 'leave'} className="game-table-panel" title={t('landlord.leave')} description={t('landlord.leaveConfirm')}
-      confirmLabel={t('landlord.leave')} busy={busy} onClose={() => setDialog(null)}
-      onConfirm={() => {if (table) void perform({action:'leave', code:table.code, version:table.version});}} />
+    <GameExitDialog exit={exit} live={live} busy={busy} />
     {table && canShareRoom && <ChatSharePicker open={shareOpen} title={t('landlord.chooseChat')} onClose={() => setShareOpen(false)}
       sendToChat={(chatId, clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'landlord_room', activity_key:activity.key,
         room_code:table.code, title}), undefined, clientId)} />}

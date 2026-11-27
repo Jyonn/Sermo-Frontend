@@ -14,6 +14,7 @@ import { formatMentionTokens } from "../lib/mentions";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
+import { GAME_NAVIGATION_EVENT } from "./GameTableControls";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageDTO } from "../lib/chatMessageMapper";
@@ -636,8 +637,9 @@ export function GlobalMessageSync() {
         }
         emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved, chatStates: [...allChatStates.values()] });
 
+        const gaming = Boolean(document.querySelector('[data-game-room]'));
         const otherChatItems = allItems.filter((item) => {
-          if (item.chatId === activeChatId || item.message.from !== "other" || item.message.kind === "system" || item.message.kind === "voice_call") return false;
+          if ((!gaming && item.chatId === activeChatId) || item.message.from !== "other" || item.message.kind === "system" || item.message.kind === "voice_call") return false;
           const readState = allChatStates.get(item.chatId);
           if (!readState || readState.unread_count <= 0) return false;
           return readState.last_read_at === null || item.message.createdAt > readState.last_read_at;
@@ -662,7 +664,7 @@ export function GlobalMessageSync() {
         });
         playWebReminderSound();
 
-        if (activeChatId && allItems.some((item) => item.chatId === activeChatId && item.message.from === "other")) {
+        if (!gaming && activeChatId && allItems.some((item) => item.chatId === activeChatId && item.message.from === "other")) {
           void api.markChatRead(activeChatId);
         }
       } catch (error) {
@@ -699,15 +701,18 @@ export function GlobalMessageSync() {
   }, [popup]);
 
   useEffect(() => {
-    if (!popup?.chatId || activeChatId !== popup.chatId) return;
+    if (!popup?.chatId || activeChatId !== popup.chatId || document.querySelector('[data-game-room]')) return;
     setPopup(null);
   }, [activeChatId, popup]);
 
   if (!session || !features.chatEnabled || !popup) return null;
 
+  const portraitGame = () => Boolean(document.querySelector('[data-game-room]') &&
+    matchMedia('(any-pointer: coarse) and (max-width: 980px) and (orientation: portrait)').matches);
+  const popupAxis = (event: ReactPointerEvent<HTMLButtonElement>) => portraitGame() ? -event.clientX : event.clientY;
   const handlePopupPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === "mouse") return;
-    popupPointerRef.current = { pointerId: event.pointerId, startY: event.clientY };
+    popupPointerRef.current = { pointerId: event.pointerId, startY: popupAxis(event) };
     suppressPopupClickRef.current = false;
     setPopupDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -716,7 +721,7 @@ export function GlobalMessageSync() {
   const handlePopupPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const pointer = popupPointerRef.current;
     if (!pointer || pointer.pointerId !== event.pointerId) return;
-    const offset = Math.min(0, event.clientY - pointer.startY);
+    const offset = Math.min(0, popupAxis(event) - pointer.startY);
     if (offset < -6) suppressPopupClickRef.current = true;
     setPopupDragOffset(offset);
   };
@@ -724,7 +729,7 @@ export function GlobalMessageSync() {
   const finishPopupGesture = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const pointer = popupPointerRef.current;
     if (!pointer || pointer.pointerId !== event.pointerId) return;
-    const finalOffset = Math.min(0, event.clientY - pointer.startY);
+    const finalOffset = Math.min(0, popupAxis(event) - pointer.startY);
     popupPointerRef.current = null;
     setPopupDragging(false);
     if (finalOffset <= -34) {
@@ -744,7 +749,8 @@ export function GlobalMessageSync() {
           return;
         }
         setPopup(null);
-        navigate(popup.chatId ? `/app/chats/${popup.chatId}` : "/app/chats");
+        const openChat = () => navigate(popup.chatId ? `/app/chats/${popup.chatId}` : "/app/chats");
+        if (window.dispatchEvent(new CustomEvent(GAME_NAVIGATION_EVENT,{detail:openChat,cancelable:true}))) openChat();
       }}
       onPointerCancel={finishPopupGesture}
       onPointerDown={handlePopupPointerDown}

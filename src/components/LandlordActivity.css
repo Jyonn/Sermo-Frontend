@@ -178,7 +178,7 @@
 .landlord-last-play small { display: block; margin-bottom: 4px; color: #e0cd9e; font-size: .7rem; }
 .landlord-play-controls { padding-top: 8px; }
 .landlord-mode-row { margin-bottom: 8px; }
-.landlord-play-controls > .playing-card-stack { container-type: inline-size; }
+.landlord-play-controls .selectable-hand { container-type: inline-size; }
 .landlord-controls { justify-content: center; }
 .landlord-controls > button { min-width: 67px; }
 .landlord-table-actions { margin-top: 8px; }
@@ -212,7 +212,7 @@
   .landlord-arena { grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr); }
   .landlord-center { min-height: 92px; gap: 4px; }
   .landlord-play-controls { padding-top: 2px; padding-bottom: max(6px, var(--game-safe-bottom, 0px)); }
-  .landlord-play-controls > .playing-card-stack { --playing-card-width: 45px; padding-block: 9px 6px; }
+  .landlord-play-controls .is-selectable { --playing-card-width: 45px; padding-block: 9px 6px; }
   .landlord-play-controls > .landlord-controls > button, .landlord-rematch button { min-height: 36px; }
   .landlord-room .landlord-table-actions { margin-top: 2px; }
   .landlord-room .landlord-table-actions .landlord-seat { min-height: 36px; padding-block: 1px; }
