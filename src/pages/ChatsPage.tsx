@@ -1446,6 +1446,56 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
   });
 }
 
+function useMessageActionGesture(onOpen?: (anchor: HTMLElement, pointerX?: number) => void, keyboard = false, onSelect?: () => void) {
+  const press = useRef<{timer: number; x: number; y: number}>();
+  const suppressClick = useRef(false);
+  const cancelPress = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+    press.current = undefined;
+  };
+  useEffect(() => cancelPress, []);
+  return {
+    onPointerDown: onOpen ? (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      cancelPress();
+      suppressClick.current = false;
+      const anchor = event.currentTarget;
+      const timer = window.setTimeout(() => {
+        press.current = undefined;
+        suppressClick.current = true;
+        onOpen(anchor);
+      }, 380);
+      press.current = {timer, x: event.clientX, y: event.clientY};
+    } : undefined,
+    onPointerMove: (event: ReactPointerEvent<HTMLDivElement>) => {
+      const start = press.current;
+      if (start && (Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8)) cancelPress();
+    },
+    onPointerUp: cancelPress,
+    onPointerCancel: cancelPress,
+    onPointerLeave: cancelPress,
+    onContextMenu: onOpen ? (event: React.MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      cancelPress();
+      onOpen(event.currentTarget, event.clientX);
+    } : undefined,
+    onClickCapture: (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!onSelect && !suppressClick.current) return;
+      suppressClick.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+      onSelect?.();
+    },
+    onKeyDown: onOpen && keyboard ? (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey) ||
+        (event.key === "Enter" && event.target === event.currentTarget)) {
+        event.preventDefault();
+        onOpen(event.currentTarget);
+      }
+    } : undefined,
+  };
+}
+
 const MessageBubbleRow = memo(function MessageBubbleRow({
   auditPreview,
   bubbleStyle,
@@ -1475,44 +1525,11 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   ) : null;
   const ornamentInBubble = recordShopArtist || (singerVoice && isFirst && message.replyTo);
   const canOpenActions = (auditPreview || message.kind !== "submission_invite") && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
-  const bubbleRef = useRef<HTMLDivElement | null>(null);
-  const longPressTimerRef = useRef<number | null>(null);
-  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
-  const suppressClickRef = useRef(false);
-
-  const clearLongPress = () => {
-    if (longPressTimerRef.current !== null) {
-      window.clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    pointerStartRef.current = null;
-  };
-
-  useEffect(() => clearLongPress, []);
-
-  const openActions = (suppressClick = false) => {
-    suppressClickRef.current = suppressClick;
-    clearLongPress();
-    if (!canOpenActions || !bubbleRef.current) return;
-    onOpenActions(message, bubbleRef.current);
-  };
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (selectionMode) return;
-    if (!canOpenActions) return;
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    suppressClickRef.current = false;
-    clearLongPress();
-    pointerStartRef.current = { x: event.clientX, y: event.clientY };
-    longPressTimerRef.current = window.setTimeout(() => openActions(true), 380);
-  };
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!pointerStartRef.current) return;
-    const deltaX = Math.abs(event.clientX - pointerStartRef.current.x);
-    const deltaY = Math.abs(event.clientY - pointerStartRef.current.y);
-    if (deltaX > 8 || deltaY > 8) clearLongPress();
-  };
+  const actionGesture = useMessageActionGesture(
+    canOpenActions && !selectionMode ? (anchor, pointerX) => onOpenActions(message, anchor, pointerX) : undefined,
+    auditPreview,
+    selectionMode ? () => onToggleSelection(message) : undefined,
+  );
 
   const groupClassName = [
     from === "self" ? "self" : "other",
@@ -1541,18 +1558,11 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           </button>
         ) : null}
         <div
-          ref={bubbleRef}
           data-message-id={typeof message.id === "number" ? message.id : undefined}
           title={messageTitle}
           tabIndex={auditPreview && canOpenActions ? 0 : undefined}
           aria-keyshortcuts={auditPreview && canOpenActions ? "Shift+F10" : undefined}
-          onKeyDown={auditPreview && canOpenActions ? (event) => {
-            if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10") ||
-              (event.key === "Enter" && event.target === event.currentTarget)) {
-              event.preventDefault();
-              openActions();
-            }
-          } : undefined}
+          {...actionGesture}
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
@@ -1577,32 +1587,6 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           ]
             .filter(Boolean)
             .join(" ")}
-          onContextMenu={
-            canOpenActions && !selectionMode
-              ? (event) => {
-                  event.preventDefault();
-                  clearLongPress();
-                  onOpenActions(message, event.currentTarget, event.clientX);
-                }
-              : undefined
-          }
-          onClickCapture={(event) => {
-            if (selectionMode) {
-              event.preventDefault();
-              event.stopPropagation();
-              onToggleSelection(message);
-              return;
-            }
-            if (!suppressClickRef.current) return;
-            suppressClickRef.current = false;
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          onPointerCancel={clearLongPress}
-          onPointerDown={canOpenActions && !selectionMode ? handlePointerDown : undefined}
-          onPointerLeave={clearLongPress}
-          onPointerMove={canOpenActions ? handlePointerMove : undefined}
-          onPointerUp={clearLongPress}
         >
           {ornamentInBubble ? singerDecoration : null}
           {recordShopArtist ? <RecordShopBubbleArt key={recordShopArtist} artist={recordShopArtist} animateOnView={!isFirst} /> : null}
@@ -1632,6 +1616,15 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     </div>
   );
 });
+
+function AuditStandaloneMessage({message, onOpenActions, children}: {
+  message: ChatMessage;
+  onOpenActions: MessageGroupBlockProps["onOpenActions"];
+  children: ReactNode;
+}) {
+  const actionGesture = useMessageActionGesture((anchor, pointerX) => onOpenActions(message, anchor, pointerX), true);
+  return <div tabIndex={0} aria-keyshortcuts="Shift+F10" className="platform-audit-standalone-message" {...actionGesture}>{children}</div>;
+}
 
 function MessageAvatarMentionTarget({ children, name, onMention, onOpenProfile }: { children: ReactNode; name: string; onMention?: () => void; onOpenProfile?: () => void }) {
   const timerRef = useRef<number | null>(null);
@@ -1723,12 +1716,15 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
 }: MessageGroupBlockProps) {
   const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
   if (systemMessage) {
+    const row = (
+      <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
+        {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message"><SystemMessageText message={systemMessage} context={systemContext}/>{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <SystemMessageText message={systemMessage} context={systemContext}/>}
+      </div>
+    );
     return (
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-        <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
-          {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message"><SystemMessageText message={systemMessage} context={systemContext}/>{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <SystemMessageText message={systemMessage} context={systemContext}/>}
-        </div>
+        {auditPreview ? <AuditStandaloneMessage message={systemMessage} onOpenActions={onOpenActions}>{row}</AuditStandaloneMessage> : row}
       </div>
     );
   }
@@ -1754,6 +1750,11 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
         ) : null}
       </>
     );
+    const plainNotice = (
+      <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
+        {noticeContent}
+      </article>
+    );
     return (
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
@@ -1767,11 +1768,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           >
             {noticeContent}
           </button>
-        ) : (
-          <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
-            {noticeContent}
-          </article>
-        )}
+        ) : auditPreview ? <AuditStandaloneMessage message={officialNotice} onOpenActions={onOpenActions}>{plainNotice}</AuditStandaloneMessage> : plainNotice}
       </div>
     );
   }
