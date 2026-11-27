@@ -223,6 +223,8 @@
     --drawer-control-top: max(8px, env(safe-area-inset-top));
   }
   .is-landlord-activity:has(.landlord-room) .drawer-surface-dismiss { order: 0; }
+  .is-landlord-activity:has(.landlord-room) .drawer-dismiss-control > .drawer-dismiss-mobile { display: block; }
+  .is-landlord-activity:has(.landlord-room) .drawer-dismiss-control > .drawer-dismiss-desktop { display: none; }
   .landlord-board { padding-top: 44px; padding-bottom: 6px; gap: 3px; }
   .landlord-board::before { inset: 79px 15px 4px; }
   .landlord-arena { grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr); }
