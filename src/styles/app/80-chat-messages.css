@@ -92,37 +92,6 @@
   opacity: 0.94;
 }
 
-.message-group:not(.bubble-style-default) .message-audio-transcript {
-  color: var(--bubble-theme-muted, inherit);
-  box-shadow: var(--bubble-theme-shadow, 0 8px 18px rgba(32, 47, 41, 0.06));
-}
-
-.message-group.other:not(.bubble-style-default) .message-audio-unit {
-  --audio-transcript-radius: var(--bubble-skin-other-radius, var(--radius-bubble));
-}
-
-.message-group.self:not(.bubble-style-default) .message-audio-unit {
-  --audio-transcript-radius: var(--bubble-skin-self-radius, var(--radius-bubble));
-}
-
-.message-group.other:not(.bubble-style-default) .message-audio-transcript:not(.group-end) {
-  border-bottom-left-radius: 5px;
-}
-
-.message-group.self:not(.bubble-style-default) .message-audio-transcript:not(.group-end) {
-  border-bottom-right-radius: 5px;
-}
-
-.message-group.other:not(.bubble-style-default) .message-audio-transcript {
-  border-color: var(--bubble-skin-other-border, var(--message-card-border));
-  background: var(--bubble-theme-surface, var(--bubble-skin-other-bg, var(--message-other-surface)));
-}
-
-.message-group.self:not(.bubble-style-default) .message-audio-transcript {
-  border-color: var(--bubble-skin-self-border, rgba(255, 255, 255, 0.07));
-  background: var(--bubble-theme-surface, var(--bubble-skin-self-bg, var(--message-self-surface)));
-}
-
 .message-group:not(.bubble-style-default) .message-bubble.has-reply > .message-audio-unit > .message-audio-playback-row > .message-audio-card {
   border-color: transparent;
   background: transparent;
@@ -139,16 +108,6 @@
   background: var(--bubble-theme-icon-self);
 }
 
-.message-group[class*="bubble-style-city-"].other .message-audio-transcript {
-  color: var(--bubble-theme-muted-other);
-  background: var(--bubble-skin-other-bg);
-}
-
-.message-group[class*="bubble-style-city-"].self .message-audio-transcript {
-  color: var(--bubble-theme-muted-self);
-  background: var(--bubble-skin-self-bg);
-}
-
 .message-group.bubble-style-comic .message-audio-transcribe {
   color: rgba(38, 52, 46, 0.7);
   border: 1.5px solid color-mix(in srgb, var(--comic-ink) 42%, transparent);
@@ -160,32 +119,11 @@
   background: var(--comic-self);
 }
 
-.message-group.bubble-style-comic .message-audio-transcript {
-  color: rgba(38, 52, 46, 0.72);
-  border-width: 2px;
-  border-color: var(--comic-ink);
-  background: var(--comic-paper);
-  box-shadow: 3px 4px 0 var(--comic-shadow);
-}
-
-.message-group.bubble-style-comic.self .message-audio-transcript {
-  background: var(--comic-self);
-}
-
 .message-group.bubble-style-vip .message-audio-transcribe {
   color: rgba(91, 62, 25, 0.76);
   border-color: rgba(190, 137, 40, 0.34);
   background: #fff8df;
   box-shadow: 0 4px 12px rgba(112, 68, 16, 0.08);
-}
-
-.message-group.bubble-style-vip .message-audio-transcript {
-  color: rgba(52, 45, 31, 0.72);
-  border-color: rgba(190, 137, 40, 0.78);
-  background:
-    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
-    linear-gradient(145deg, #fffdf4, #f4e7c4);
-  box-shadow: 0 8px 18px rgba(112, 68, 16, 0.1);
 }
 
 .message-group.bubble-style-fufu.self .message-audio-transcribe {
@@ -203,9 +141,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .message-audio-transcript-reveal,
-  .message-audio-transcript {
-    animation: none;
+  .message-audio-transcript-reveal {
     transition: none;
   }
 }
@@ -528,41 +464,29 @@
   width: var(--message-voice-width);
   max-width: 100%;
 }
-.message-audio-unit.self > :is(.message-audio-playback-row,.message-audio-transcript-reveal) { margin-inline-start: auto; }
-.message-audio-unit > .message-audio-transcript-reveal {
-  width: max-content;
-  max-width: min(var(--message-voice-width), 100%);
-  clip-path: none;
+
+.message-bubble.is-audio.has-reply {
+  grid-template-columns: minmax(0, 1fr);
 }
-.message-audio-unit > .message-audio-transcript-reveal > div { overflow: hidden; border-radius: var(--voice-quote-radius, 9px); background: var(--bg-surface); }
-.message-audio-unit > .message-audio-transcript-reveal.is-open { margin-top: 8px; }
-.message-group.other .message-audio-unit {
-  --voice-quote-bg: var(--bubble-skin-other-bg, var(--message-other-surface));
-  --voice-quote-ink: var(--bubble-skin-other-color, var(--text-primary));
-  --voice-quote-border: var(--bubble-skin-other-border, var(--line-soft));
-  --voice-quote-radius: var(--bubble-skin-other-radius, 9px);
+
+@media (max-width: 719px) {
+  .message-audio-playback-row:has(.message-audio-transcribe) {
+    max-width: min(100%, calc(100vw - var(--message-voice-action-space, 144px)));
+  }
 }
-.message-group.self .message-audio-unit {
-  --voice-quote-bg: var(--bubble-skin-self-bg, var(--message-self-surface));
-  --voice-quote-ink: var(--bubble-skin-self-color, #eef4fa);
-  --voice-quote-border: var(--bubble-skin-self-border, var(--line-soft));
-  --voice-quote-radius: var(--bubble-skin-self-radius, 9px);
+
+.message-audio-unit.self > :is(.message-audio-playback-row, .message-audio-transcript-reveal),
+.message-audio-unit.self .message-audio-card {
+  margin-inline-start: auto;
 }
-.message-group:is(.self,.other) .message-audio-unit:is(.self,.other):not(.record-shop-voice) .message-audio-transcript {
-  margin: 0;
-  padding: 9px 12px;
-  border: 1px solid var(--voice-quote-border);
-  border-inline-start: 3px solid var(--voice-quote-border);
-  border-radius: var(--voice-quote-radius);
-  color: var(--voice-quote-ink);
-  /* Bubble skins may be layered gradients, not colors. Keep their full paint
-     and put an opaque surface beneath translucent layers for any wallpaper. */
-  background: var(--voice-quote-bg);
-  box-shadow: none;
-  animation: none;
+
+.message-group:not(.bubble-style-default) .message-audio-unit {
+  --audio-transcript-quote-border: color-mix(in srgb, var(--audio-transcript-ink) 20%, transparent);
 }
-.message-group:is(.bubble-style-typewriter,.bubble-style-terminal,.bubble-style-receipt) .message-audio-transcript p { font-family: "JetBrains Mono", monospace; }
-.message-group.bubble-style-comic .message-audio-unit:is(.self,.other) .message-audio-transcript { border-width: 2px 2px 2px 4px; }
-.message-group.bubble-style-receipt .message-audio-unit:is(.self,.other) .message-audio-transcript { border-block-style: dashed; }
-.message-group .message-audio-unit:not(.record-shop-voice) .message-audio-transcript p { font-size: .82rem; font-weight: 400; line-height: 1.65; }
+
+.message-group:is(.bubble-style-typewriter,.bubble-style-terminal,.bubble-style-receipt) .message-audio-transcript-quote {
+  font-family: "JetBrains Mono", monospace;
+}
+
+.message-group.bubble-style-receipt .message-audio-transcript { border-block-style: dashed; }
 .message-group.bubble-style-receipt .message-bubble.is-audio:has(.message-audio-unit)::before { content: none; }

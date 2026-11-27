@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.27.1",
+  "id": "2026.11.27.2",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "为好友单独设置日程可见范围",
+      "title": "语音转写适配所有气泡主题",
       "items": [
-        "在私聊详情里选择这位好友能看到哪些时序日程。已单独设置的好友可以在应用与工具的时序页面统一管理。"
+        "语音转写沿用对应气泡的配色与圆角。短文字贴合内容，长文字自然折行，宽度可以超过语音条。"
       ]
     },
     "en": {
-      "title": "Calendar sharing for individual friends",
+      "title": "Voice transcripts match every bubble theme",
       "items": [
-        "Set what a friend can see from your direct chat. View and edit your exceptions in the Chronelle app settings."
+        "Voice transcripts follow your bubble theme and group shape. Short text stays compact, while longer text can extend past the player and wraps naturally."
       ]
     }
   }

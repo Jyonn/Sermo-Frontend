@@ -672,12 +672,12 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           aria-hidden={!transcriptVisible}
           className={`message-audio-transcript-reveal${transcriptVisible ? " is-open" : ""}`}
         >
-          <div>
+          <div className="message-audio-transcript-clip">
             <div
-              className={`message-audio-transcript ${from} ${className ?? ""}${transcript.status === "failed" ? " is-failed" : ""}`.trim()}
+              className={`message-audio-transcript${transcript.status === "failed" ? " is-failed" : ""}`}
               role={transcriptVisible ? "status" : undefined}
             >
-              <p className={artist ? "message-audio-transcript-quote" : undefined}>
+              <p className="message-audio-transcript-quote">
                 {transcript.status === "ready" ? transcriptText || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}
               </p>
             </div>

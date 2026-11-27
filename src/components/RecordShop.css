@@ -91,8 +91,7 @@
 
 [data-record-shop-artist] > .message-bubble.record-shop-text-bubble,
 [data-record-shop-artist] > .message-bubble.record-shop-voice-bubble.has-reply,
-.record-shop-voice .message-audio-card:is(.self,.other),
-.record-shop-voice .message-audio-transcript:is(.self,.other) {
+.record-shop-voice .message-audio-card:is(.self,.other) {
   background:var(--record-message-surface);
   color:var(--record-message-ink);
   border:1px solid var(--record-bubble-rim);
@@ -194,55 +193,16 @@ html[data-theme="dark"] [data-record-shop-artist].other > :is(.record-shop-text-
 }
 .record-shop-voice.self .message-audio-transcribe { left:calc(-1 * var(--record-voice-action-gap, 7px)); }
 .record-shop-voice.other .message-audio-transcribe { right:calc(-1 * var(--record-voice-action-gap, 7px)); }
-.message-audio-unit.record-shop-voice { width:var(--message-voice-width); }
-.message-audio-unit.record-shop-voice > .message-audio-transcript-reveal {
-  pointer-events:auto;
-}
-.message-audio-unit.record-shop-voice > .message-audio-transcript-reveal:not(.is-open) { pointer-events:none; }
-.message-audio-unit.record-shop-voice > .message-audio-transcript-reveal > div {
-  background:transparent;
-  border-radius:0;
-}
-.message-audio-unit.record-shop-voice > .message-audio-transcript-reveal.is-open { margin-top:2px; }
-.record-shop-voice .message-audio-transcript {
-  --record-transcript-inset:6px;
-  --record-transcript-seam:4px;
-  margin:0;
-  padding:var(--record-transcript-inset);
-  border-radius:var(--radius-bubble);
-  animation:none;
-}
-.record-shop-voice .message-audio-transcript .message-audio-transcript-quote {
-  --record-transcript-seam:2px;
-  margin:0;
-  padding:7px 9px;
-  border:1px solid var(--reply-preview-border);
-  border-radius:max(2px, calc(var(--radius-bubble) - var(--record-transcript-inset) - 1px));
-  background:var(--reply-preview-bg);
-  color:var(--reply-preview-color);
-  font-size:var(--message-reply-text-size);
-  font-weight:400;
-  line-height:inherit;
-  white-space:normal;
-  overflow-wrap:anywhere;
-  word-break:normal;
-}
-.record-shop-voice.self :is(.message-audio-transcript, .message-audio-transcript-quote) {
-  border-top-right-radius:var(--record-transcript-seam);
-}
-.record-shop-voice.other :is(.message-audio-transcript, .message-audio-transcript-quote) {
-  border-top-left-radius:var(--record-transcript-seam);
-}
-.record-shop-voice.self:not(.group-end) :is(.message-audio-transcript, .message-audio-transcript-quote) {
-  border-bottom-right-radius:var(--record-transcript-seam);
-}
-.record-shop-voice.other:not(.group-end) :is(.message-audio-transcript, .message-audio-transcript-quote) {
-  border-bottom-left-radius:var(--record-transcript-seam);
-}
-@media (max-width: 719px) {
-  .message-bubble.record-shop-voice-bubble:has(.message-audio-transcribe) {
-    max-width:min(var(--message-bubble-max-width), calc(100vw - 166px));
-  }
+.message-bubble.record-shop-voice-bubble .message-audio-unit.record-shop-voice {
+  --audio-transcript-surface:var(--record-message-surface);
+  --audio-transcript-border:var(--record-bubble-rim);
+  --audio-transcript-radius:var(--radius-bubble);
+  --audio-transcript-shadow:var(--record-message-shadow);
+  --audio-transcript-ink:var(--reply-preview-color);
+  --audio-transcript-quote-surface:var(--reply-preview-bg);
+  --audio-transcript-quote-border:var(--reply-preview-border);
+  --bubble-skin-border-width:1px;
+  --message-voice-action-space:166px;
 }
 .record-shop-option > .record-shop-option-swatch {
   background:color-mix(in srgb,var(--record-bubble-rim) 17%,var(--bg-panel));
