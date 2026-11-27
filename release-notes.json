@@ -1,21 +1,19 @@
 {
-  "id": "2026.11.27.10",
+  "id": "2026.11.27.11",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "牌桌体验升级",
+      "title": "认证账号均可参加游戏",
       "items": [
-        "斗地主、双扣、麻将和数字交锋加入各自的背景音乐与语音提示，倒计时移到玩家座位。",
-        "斗地主和双扣支持划选手牌。玩法中可查看牌面、牌型和数字猜测示例。",
-        "对局中收到聊天消息会在顶部提示，确认离开正在进行的对局后会判负。"
+        "已认证的官方账号也可以创建、分享和加入游戏房间。",
+        "与官方账号进行数字交锋时，双方直接进入免费练习。"
       ]
     },
     "en": {
-      "title": "A better game table",
+      "title": "Games for all verified accounts",
       "items": [
-        "Dou Dizhu, Shuangkou, Mahjong and Code Duel now have table music, voice cues and seat-side timers.",
-        "Drag across cards in Dou Dizhu and Shuangkou. Illustrated guides explain ranks, combinations and how to read a guess.",
-        "Chat notifications appear at the top of a match. Leaving an active match requires confirmation and counts as a loss."
+        "Verified official accounts can now create, share, and join game rooms.",
+        "Code Duel matches with an official account start as free practice."
       ]
     }
   }
