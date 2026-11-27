@@ -914,7 +914,7 @@
   "quickActions.preview": "Chat preview",
   "quickActions.title": "Quick actions",
   "quickActions.status": "Member status",
-  "quickActions.settingsHint": "Choose and order 1–4 buttons. Available actions share the width. Saved for this account on this device. On short screens, expand them from the chat header.",
+  "quickActions.settingsHint": "Choose and order 1–4 buttons. Available actions share the width. On short screens, expand them from the chat header.",
   "quickActions.order": "Button order",
   "quickActions.moveUp": "Move earlier",
   "quickActions.moveDown": "Move later",
@@ -5033,7 +5033,7 @@
 ,"voice.lab.low": "Last 15 seconds"
 ,"voice.lab.reset": "Reset"
 ,"voiceInput.mode": "Voice input"
-,"voiceInput.modeHint": "For the collapsed composer, on this device"
+,"voiceInput.modeHint": "For the collapsed composer"
 ,"voiceInput.tapToRecord": "Tap to record"
 ,"voiceInput.stop": "Stop recording"
 ,"voiceInput.review": "Recording stopped"

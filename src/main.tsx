@@ -13,6 +13,7 @@ import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdent
 import { LanguageProvider } from "./lib/language";
 import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
+import {InterfacePreferencesProvider} from './lib/interfacePreferences';
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { installGameHistoryGuard } from "./lib/gameNavigation";
 import { chronelleReturnDestination } from './lib/chronelleReturn';
@@ -107,11 +108,11 @@ async function renderApp() {
     <BrowserRouter basename={routerBasename}>
       <AdminAuthProvider>
         <PlatformAdminAuthProvider><AuthProvider>
-          <ThemeProvider>
+          <InterfacePreferencesProvider><ThemeProvider>
             <LanguageProvider>
               <FeatureDiscoveryProvider><MusicPlayerProvider><BirthdayProvider><PersonalThemeProvider><BgmPlaybackProvider><App /></BgmPlaybackProvider></PersonalThemeProvider></BirthdayProvider></MusicPlayerProvider></FeatureDiscoveryProvider>
             </LanguageProvider>
-          </ThemeProvider>
+          </ThemeProvider></InterfacePreferencesProvider>
         </AuthProvider></PlatformAdminAuthProvider>
       </AdminAuthProvider>
     </BrowserRouter>

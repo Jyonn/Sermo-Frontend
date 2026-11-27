@@ -1,87 +1,24 @@
-import { useSyncExternalStore } from "react";
-import type { SquareFeedLayout } from "./squareFeedLayout";
+import {useInterfacePreferences, type SquareLayoutChannel, type SquareEntryChannel} from './interfacePreferences';
+import type {SquareFeedLayout} from './squareFeedLayout';
 
-export type SquareLayoutChannel = "explore" | "friends" | "user";
-export type SquareEntryChannel = "friends" | "explore";
-const prefix = "frienden:square-layout:v2:";
-const legacyPrefix = "frienden:square-layout:v1:";
-const memory = new Map<string, string>();
-const listeners = new Set<() => void>();
-
-function scopeKey(scope: string | null) {
-  return prefix + (scope ?? "guest");
+export function useSquareLayoutUnified() {
+  const {preferences, save} = useInterfacePreferences();
+  return [preferences.square_layout_mode !== 'per-channel',
+    (unified: boolean) => save({square_layout_mode: unified ? 'unified' : 'per-channel'})] as const;
 }
 
-function preference(key: string, fallback: string, legacyKey?: string) {
-  const cached = memory.get(key);
-  if (cached !== undefined) return cached;
-  let value = fallback;
-  try {
-    value = localStorage.getItem(key) ?? (legacyKey ? localStorage.getItem(legacyKey) : null) ?? fallback;
-  } catch { /* Device storage is optional. */ }
-  memory.set(key, value);
-  return value;
+export function useSquareChannelLayout(channel: SquareLayoutChannel) {
+  const {preferences, save} = useInterfacePreferences();
+  const key = `square_layout_${channel}` as const;
+  return [preferences[key] ?? 'list', (layout: SquareFeedLayout) => save({[key]: layout})] as const;
 }
 
-function writePreference(key: string, value: string) {
-  memory.set(key, value);
-  try { localStorage.setItem(key, value); } catch { /* Keep the in-memory preference. */ }
-  listeners.forEach((listener) => listener());
+export function useSquareFeedLayout(channel: SquareLayoutChannel): SquareFeedLayout {
+  const {preferences} = useInterfacePreferences();
+  return preferences.square_layout_mode === 'per-channel' ? preferences[`square_layout_${channel}`] ?? 'list' : 'list';
 }
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => { listeners.delete(listener); };
-}
-
-export function isSquareLayoutUnified(scope: string | null) {
-  return preference(scopeKey(scope) + ":mode", "unified") !== "per-channel";
-}
-
-export function setSquareLayoutUnified(scope: string | null, unified: boolean) {
-  writePreference(scopeKey(scope) + ":mode", unified ? "unified" : "per-channel");
-}
-
-export function getSquareChannelLayout(scope: string | null, channel: SquareLayoutChannel) {
-  const legacyKey = channel === "explore" ? legacyPrefix + (scope ?? "guest") : undefined;
-  return preference(scopeKey(scope) + ":" + channel, "list", legacyKey) === "masonry" ? "masonry" : "list";
-}
-
-export function setSquareFeedLayout(scope: string | null, next: SquareFeedLayout, channel: SquareLayoutChannel) {
-  writePreference(scopeKey(scope) + ":" + channel, next);
-}
-
-export function getSquareFeedLayout(scope: string | null, channel: SquareLayoutChannel) {
-  return isSquareLayoutUnified(scope) ? "list" : getSquareChannelLayout(scope, channel);
-}
-
-if (typeof window !== "undefined") window.addEventListener("storage", (event) => {
-  if (event.key !== null && !event.key.startsWith(prefix) && !event.key.startsWith(legacyPrefix)) return;
-  memory.clear();
-  listeners.forEach((listener) => listener());
-});
-
-export function useSquareLayoutUnified(scope: string | null) {
-  const value = useSyncExternalStore(subscribe, () => isSquareLayoutUnified(scope), () => true);
-  return [value, (unified: boolean) => setSquareLayoutUnified(scope, unified)] as const;
-}
-
-export function useSquareChannelLayout(scope: string | null, channel: SquareLayoutChannel) {
-  const value = useSyncExternalStore(subscribe, () => getSquareChannelLayout(scope, channel), () => "list" as const);
-  return [value, (next: SquareFeedLayout) => setSquareFeedLayout(scope, next, channel)] as const;
-}
-
-export function useSquareFeedLayout(scope: string | null, channel: SquareLayoutChannel) {
-  const value = useSyncExternalStore(subscribe, () => getSquareFeedLayout(scope, channel), () => "list" as const);
-  return [value] as const;
-}
-
-export function getSquareEntry(scope: string | null): SquareEntryChannel | null {
-  const value = preference(scopeKey(scope) + ":entry", "");
-  return value === "friends" || value === "explore" ? value : null;
-}
-
-export function useSquareEntry(scope: string | null) {
-  const value = useSyncExternalStore(subscribe, () => getSquareEntry(scope), () => null);
-  return [value, (channel: SquareEntryChannel) => writePreference(scopeKey(scope) + ":entry", channel)] as const;
+export function useSquareEntry() {
+  const {preferences, save, loaded} = useInterfacePreferences();
+  return [preferences.square_entry ?? null, (channel: SquareEntryChannel) => save({square_entry: channel}), loaded] as const;
 }

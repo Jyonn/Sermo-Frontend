@@ -9,14 +9,14 @@ import {SettingGroup,SettingRow,SettingSwitch} from './SettingRow';
 export const personalThemeLabels:Record<PersonalTheme,TranslationKey>={default:'menu.themeDefault','christmas-2026':'menu.themeChristmas','birthday-botanical':'menu.themeBirthday'};
 const icons:Record<PersonalTheme,string>={default:'palette','christmas-2026':'forest','birthday-botanical':'cake'};
 export function PersonalThemeSettings(){
-  const {scope,theme,unlocks,select,acknowledge,christmasBackgroundOverride,setChristmasBackgroundOverride}=usePersonalTheme();
+  const {scope,theme,unlocks,select,acknowledge,loaded,christmasBackgroundOverride,setChristmasBackgroundOverride}=usePersonalTheme();
   const {t}=useI18n();
   const [moreScope,setMoreScope]=useState<string|null>(null);
   const christmasUnlocked=unlocks.some(item=>item.theme==='christmas-2026');
   const period=unlocks.map(item=>item.token).join('|');
-  useEffect(()=>{acknowledge()},[scope,period]);
+  useEffect(()=>{acknowledge()},[scope,period,loaded]);
   return <><PersonalThemeChoices theme={theme} unlocks={unlocks} select={select} onChristmasMore={()=>setMoreScope(scope)}/>
-    <SettingsDialog open={christmasUnlocked&&moreScope===scope} title={t('menu.christmasMoreSettings')} onClose={()=>setMoreScope(null)}>
+    <SettingsDialog open={Boolean(scope)&&christmasUnlocked&&moreScope===scope} title={t('menu.christmasMoreSettings')} onClose={()=>setMoreScope(null)}>
       <SettingGroup><SettingRow title={t('menu.christmasBackgroundOverride')} description={t('menu.christmasBackgroundOverrideHint')} trailing={<SettingSwitch label={t('menu.christmasBackgroundOverride')} checked={christmasBackgroundOverride} onChange={setChristmasBackgroundOverride}/>}/></SettingGroup>
     </SettingsDialog>
   </>;

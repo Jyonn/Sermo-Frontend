@@ -18,7 +18,7 @@ export function SquareChannelPage({mode,label,cacheKey,scope,active,preload,acti
   };
   const [saved,setSaved]=useState(()=>({key:cacheKey,state:hydrate()}));
   const state=active&&activeState?activeState:saved.key===cacheKey?saved.state:hydrate();
-  const [layout]=useSquareFeedLayout(scope,mode==='all'?'explore':mode==='friends'?'friends':'user');
+  const layout=useSquareFeedLayout(mode==='all'?'explore':mode==='friends'?'friends':'user');
   const scrollPositions=useRef(new Map<string,number>()),scrollTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
   useLayoutEffect(()=>{
     const top=readTabCache<number>(scope,`${cacheKey}:scroll`)?.data??0;

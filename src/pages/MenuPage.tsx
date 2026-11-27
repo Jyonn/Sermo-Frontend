@@ -624,8 +624,8 @@ export default function MenuPage() {
   const pwaGrowthClaimedRef = useRef(false);
   const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
-  const [unifiedSquareLayout] = useSquareLayoutUnified(cacheScope);
-  const [squareEntry, setSquareEntry] = useSquareEntry(cacheScope);
+  const [unifiedSquareLayout] = useSquareLayoutUnified();
+  const [squareEntry, setSquareEntry] = useSquareEntry();
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   useEffect(() => {
     if (new URLSearchParams(location.search).get("panel")?.split("/").includes("oauth-applications")) {
@@ -2664,11 +2664,11 @@ export default function MenuPage() {
       </SideDrawer>
       <SettingsDialog open={squareLayoutDialogOpen}
         onClose={() => setSquareLayoutDialogOpen(false)} title={t("square.layout")}>
-        <SquareLayoutSettings scope={cacheScope}/>
+        <SquareLayoutSettings/>
       </SettingsDialog>
       <SquareEntryDialog open={squareSettingsOpen && squareEntryDialogOpen && spaceFeatures.squareExploreEnabled} value={squareEntry}
         onClose={() => setSquareEntryDialogOpen(false)}
-        onChoose={channel => { setSquareEntry(channel); setSquareEntryDialogOpen(false); }} />
+        onChoose={async channel => { await setSquareEntry(channel); setSquareEntryDialogOpen(false); }} />
 
       <SideDrawer
         actionBusy={personalizationSaving}

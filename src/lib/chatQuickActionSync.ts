@@ -15,14 +15,13 @@ function cached(scope:string): unknown {
 }
 function entry(scope:string) {
   let item=entries.get(scope);
-  if(!item){const value=cached(scope);item={value:{preferences:{direct:actionsForKind(value,'direct'),group:actionsForKind(value,'group')},configured:false,revision:-1,call_hint_seen:false},loaded:false,queue:Promise.resolve(),listeners:new Set()};entries.set(scope,item)}
+  if(!item){item={value:{preferences:{direct:actionsForKind(null,'direct'),group:actionsForKind(null,'group')},configured:false,revision:-1,call_hint_seen:false},loaded:false,queue:Promise.resolve(),listeners:new Set()};entries.set(scope,item)}
   return item;
 }
 function accept(scope:string,value:ShortcutSnapshot){
   const item=entry(scope);
   if(value.revision<item.value.revision)return;
   item.value=value;item.loaded=true;
-  try{if(value.configured)localStorage.setItem(shortcutCacheKey(scope),JSON.stringify(value.preferences))}catch{/* Server saves do not depend on browser storage. */}
   item.listeners.forEach(listener=>listener());
 }
 export const shortcutSnapshot=(scope:string)=>entry(scope).value;
@@ -38,6 +37,10 @@ export async function refreshChatShortcuts(scope:string){
       value=await api.saveChatQuickActions(scope,{migrate:{direct:actionsForKind(legacy,'direct'),group:actionsForKind(legacy,'group')}});
     }
     accept(scope,value);
+    if (legacy !== null) try {
+      localStorage.removeItem(shortcutCacheKey(scope));
+      localStorage.removeItem(`frienden:chat-quick-actions:v1:${scope}`);
+    } catch { /* Migration can be retried. */ }
   })().finally(()=>{item.pending=undefined});
   return item.pending;
 }

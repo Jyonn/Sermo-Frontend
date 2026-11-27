@@ -478,7 +478,7 @@ export default function SquarePage() {
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
-  const [squareEntry, setSquareEntry] = useSquareEntry(cacheScope);
+  const [squareEntry, setSquareEntry, entryLoaded] = useSquareEntry();
   const isSquareLanding = location.pathname === "/app/square" && !location.search;
   const [chooseEntry, setChooseEntry] = useState(() => isSquareLanding && squareEntry === null);
   const [specialChannel, setSpecialChannel] = useState<"medals" | "activities" | null>(null);
@@ -500,7 +500,7 @@ export default function SquarePage() {
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? "friends"
     : feedMode;
-  const [squareFeedLayout]=useSquareFeedLayout(cacheScope,effectiveFeedMode==='all'?'explore':effectiveFeedMode==='friends'?'friends':'user');
+  const squareFeedLayout=useSquareFeedLayout(effectiveFeedMode==='all'?'explore':effectiveFeedMode==='friends'?'friends':'user');
   const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId, selectedFeedDate, selectedFeedKeyword, selectedFeedFrom, selectedFeedTo);
   const initialFeedSnapshotRef = useRef<NormalizedSquareFeedSnapshot<SquareStatementDTO> | null>();
   if (initialFeedSnapshotRef.current === undefined) {
@@ -2247,10 +2247,10 @@ export default function SquarePage() {
 
   return (
     <AppChrome workspaceSelected={workspaceDetailActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
-      <SquareEntryDialog open={chooseEntry && isSquareLanding && squareEntry === null && features.squareExploreEnabled} value={squareEntry}
+      <SquareEntryDialog open={entryLoaded && chooseEntry && isSquareLanding && squareEntry === null && features.squareExploreEnabled} value={squareEntry}
         onClose={() => setChooseEntry(false)}
-        onChoose={channel => {
-          setSquareEntry(channel);
+        onChoose={async channel => {
+          await setSquareEntry(channel);
           selectFeedTab(channel === 'explore' ? 'all' : 'friends');
           setChooseEntry(false);
         }} />

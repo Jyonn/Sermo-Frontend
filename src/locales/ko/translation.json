@@ -65,7 +65,7 @@
   "references.research_reply": "연구 답글",
   "references.unavailable": "이용할 수 없거나 접근 권한이 없습니다",
   "voiceInput.mode": "모바일 음성 입력",
-  "voiceInput.modeHint": "이 기기의 접힌 입력창에서 사용",
+  "voiceInput.modeHint": "입력창이 접혀 있을 때 사용",
   "voiceInput.tapToRecord": "탭하여 녹음",
   "voiceInput.stop": "녹음 중지",
   "voiceInput.review": "녹음이 중지되었습니다",

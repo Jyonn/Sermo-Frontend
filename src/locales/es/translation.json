@@ -65,7 +65,7 @@
   "references.research_reply": "Respuesta de investigación",
   "references.unavailable": "No disponible o acceso restringido",
   "voiceInput.mode": "Entrada de voz móvil",
-  "voiceInput.modeHint": "Para el editor contraído, en este dispositivo",
+  "voiceInput.modeHint": "Para el editor contraído",
   "voiceInput.tapToRecord": "Tocar para grabar",
   "voiceInput.stop": "Detener grabación",
   "voiceInput.review": "Grabación detenida",

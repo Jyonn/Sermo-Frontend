@@ -912,7 +912,7 @@
   "quickActions.preview": "聊天顶部",
   "quickActions.title": "快捷操作",
   "quickActions.status": "成员状态",
-  "quickActions.settingsHint": "选择并排序 1–4 个按钮。不可用项自动隐藏，其余平分宽度；设置保存在此设备的当前账号。矮屏可从聊天右上角展开。",
+  "quickActions.settingsHint": "选择并排序 1–4 个按钮。不可用项自动隐藏，其余平分宽度。矮屏可从聊天右上角展开。",
   "quickActions.order": "按钮顺序",
   "quickActions.moveUp": "前移",
   "quickActions.moveDown": "后移",
@@ -5031,7 +5031,7 @@
 ,"voice.lab.low": "最后十五秒"
 ,"voice.lab.reset": "重置"
 ,"voiceInput.mode": "语音输入"
-,"voiceInput.modeHint": "折叠输入框时使用，在此设备生效"
+,"voiceInput.modeHint": "折叠输入框时使用"
 ,"voiceInput.tapToRecord": "点击录制"
 ,"voiceInput.stop": "停止录制"
 ,"voiceInput.review": "录音已停止"

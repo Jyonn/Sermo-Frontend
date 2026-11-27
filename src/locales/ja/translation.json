@@ -65,7 +65,7 @@
   "references.research_reply": "研究への返信",
   "references.unavailable": "利用不可、またはアクセス権がありません",
   "voiceInput.mode": "モバイル音声入力",
-  "voiceInput.modeHint": "この端末の折りたたみ入力欄で使用",
+  "voiceInput.modeHint": "入力欄を折りたたんだときに使用",
   "voiceInput.tapToRecord": "タップして録音",
   "voiceInput.stop": "録音を停止",
   "voiceInput.review": "録音が停止しました",

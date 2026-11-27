@@ -1172,6 +1172,16 @@ export const api = {
   getChatQuickActions(scope: string) {
     return request<import('./chatQuickActionSync').ShortcutSnapshot>('/users/me/chat-quick-actions', {auth:true, expectedScope:scope});
   },
+  getInterfacePreferences(scope: string, signal?: AbortSignal) {
+    return request<import('./interfacePreferences').InterfacePreferencesSnapshot>('/users/me/interface-preferences', {
+      auth: true, expectedScope: scope, cache: 'no-store', signal,
+    });
+  },
+  saveInterfacePreferences(scope: string, body: {patch: import('./interfacePreferences').InterfacePreferences} | {migrate: import('./interfacePreferences').InterfacePreferences}, signal?: AbortSignal) {
+    return request<import('./interfacePreferences').InterfacePreferencesSnapshot>('/users/me/interface-preferences', {
+      auth: true, expectedScope: scope, method: 'POST', body, signal,
+    });
+  },
   saveChatQuickActions(scope: string, body: unknown) {
     return request<import('./chatQuickActionSync').ShortcutSnapshot>('/users/me/chat-quick-actions', {auth:true, expectedScope:scope, method:'POST', body});
   },

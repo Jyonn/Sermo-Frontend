@@ -23,6 +23,7 @@ import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
 import { RouteResourceState } from "./components/RouteResourceState";
 import { RequireAdminAuth } from "./lib/adminAuth";
 import { RequireAuth, useAuth } from "./lib/auth";
+import {useInterfacePreferences} from './lib/interfacePreferences';
 import FriendInvitePage from "./pages/FriendInvitePage";
 import JoinSpacePage from "./pages/JoinSpacePage";
 import LandingPage from "./pages/LandingPage";
@@ -96,11 +97,12 @@ function SquareEntry() {
   const location = useLocation();
   const {activityKey}=useParams();
   const features=useSpaceFeatures();
+  const {loading:preferencesLoading}=useInterfacePreferences();
   const {t}=useI18n();
   const destination = legacySubmissionDestination(location.pathname, location.search);
   if(activityKey)return <Navigate replace to={`/app/menu?panel=activities&activity=${encodeURIComponent(activityKey)}`}/>;
   if(destination)return <Navigate replace to={destination}/>;
-  if(!features.ready)return <RouteResourceState status="loading"/>;
+  if(!features.ready||preferencesLoading)return <RouteResourceState status="loading"/>;
   return features.squareEnabled?<SquarePage/>:<FeatureUnavailablePage title={t('nav.square')}/>;
 }
 
