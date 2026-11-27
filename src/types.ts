@@ -1342,6 +1342,7 @@ export interface ChatMessagePayloadDTO {
   activity_key?: string;
   room_code?: string;
   landlord_room_code?: string;
+  table_room_code?: string;
   duel_room?: import("./lib/numberDuel").DuelRoomSummary;
   activity?: ActivityCampaignDTO | null;
   sticker_asset_id?: number;

@@ -6,7 +6,7 @@ import type { ActivityCampaignDTO } from "../types";
 import { ActivityCampaignCard } from "./ActivityCampaignCard";
 import { NumberDuelCard } from "./NumberDuelCard";
 import type { DuelRoomSummary } from "../lib/numberDuel";
-import { LANDLORD_KEY } from "../lib/landlord";
+import { isTabletopGame } from "../lib/tabletop";
 
 interface ActivityMessageCardProps {
   activity?: ActivityCampaignDTO | null;
@@ -14,11 +14,11 @@ interface ActivityMessageCardProps {
   className?: string;
   title?: string;
   roomCode?: string;
-  landlordRoom?: string;
+  tableRoom?: string;
   room?: DuelRoomSummary;
 }
 
-export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, landlordRoom, room }: ActivityMessageCardProps) {
+export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, tableRoom, room }: ActivityMessageCardProps) {
   const navigate = useNavigate();
   const openActivity=useActivityOverlay();
   const { t } = useI18n();
@@ -31,9 +31,9 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
     return <NumberDuelCard room={room} className={className} onClick={() => roomCode ? navigate(`/app/number-duel/${roomCode}`) : openActivity(key)} />;
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
-    const eyebrow = landlordRoom ? 'landlord.roomInvite' : key === LANDLORD_KEY ? 'landlord.permanent' : 'message.activityEyebrow';
-    const hint = landlordRoom ? 'landlord.takeSeat' : key === LANDLORD_KEY && activity?.active ? 'landlord.openLobby' : activity?.active ? 'message.activityOpen' : 'message.activityEnded';
-    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(eyebrow)} hint={t(hint)} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key, landlordRoom)} />;
+    const eyebrow = tableRoom ? key === 'landlord' ? 'landlord.roomInvite' : 'tabletop.invitation' : isTabletopGame(key) ? 'landlord.permanent' : 'message.activityEyebrow';
+    const hint = tableRoom ? 'landlord.takeSeat' : isTabletopGame(key) && activity?.active ? 'landlord.openLobby' : activity?.active ? 'message.activityOpen' : 'message.activityEnded';
+    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(eyebrow)} hint={t(hint)} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key, tableRoom)} />;
   }
 
   return (

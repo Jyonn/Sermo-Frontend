@@ -1,0 +1,24 @@
+.table-mode-picker {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #f8e1a94a;
+  border-radius: 11px;
+  background: #0003;
+}
+.table-mode-picker > button {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #f4dfba;
+  background: transparent;
+  font-size: .8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.table-mode-picker > button[aria-pressed="true"] { color: #312417; background: #e8ce96; }
+.table-mode-picker > button:disabled { opacity: .6; cursor: default; }

@@ -9,6 +9,9 @@
     repeating-linear-gradient(35deg, #fce8bd08 0 1px, transparent 1px 13px), #19372d;
 }
 .campaign-card.is-landlord .campaign-card-object.is-image { right: 5%; top: 4%; height: 93%; }
+.campaign-card.campaign-card.is-shuangkou { --campaign-ink:#fff0d1; border-color:#9e664a; background:radial-gradient(ellipse at 82% 40%,#974735,transparent 70%),repeating-linear-gradient(34deg,#fbe3b517 0 1px,transparent 1px 16px),#462321; }
+.campaign-card.campaign-card.is-mahjong { --campaign-ink:#fff1cf; border-color:#6c9677; background:radial-gradient(ellipse at 82% 40%,#477b56,transparent 70%),repeating-linear-gradient(90deg,#d2ddb31a 0 1px,transparent 1px 21px),#173d36; }
+.campaign-card:is(.is-shuangkou,.is-mahjong) .campaign-card-symbol { top:50%; right:15%; display:grid; place-items:center; width:14cqw; aspect-ratio:.76; border:1px solid #d4b881; border-radius:12%; background:#f6e8ca; color:#973120; font:700 9cqw/1 Georgia,serif; opacity:1; transform:translateY(-50%) rotate(12deg); box-shadow:-4px 6px 0 #2b201666; }
 .campaign-card-copy { position:absolute; inset:11% auto 11% 5%; width:53%; display:flex; flex-direction:column; justify-content:space-between; gap:3px; z-index:2; min-width:0; }
 .campaign-card-copy small { font-size:clamp(8px,2.4cqw,13px); letter-spacing:.1em; line-height:1.2; }
 .campaign-card-copy > span { font-size:clamp(8px,2.5cqw,13px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4; }

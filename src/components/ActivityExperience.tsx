@@ -8,6 +8,7 @@ import {useI18n} from '../lib/language';
 import {isChineseLanguage,localeForLanguage} from '../lib/i18n';
 import {showToast} from '../lib/toast';
 import {getDetectedSpaceSlug,buildSpaceHrefForCurrentHost} from '../lib/spaceEntry';
+import {isFourPlayerGame,isTabletopGame} from '../lib/tabletop';
 import type {ActivityCampaignDTO,PermanentVipCampaignDTO,ChatDTO} from '../types';
 import {SideDrawer} from './SideDrawer';
 import {OverlayIconButton} from './OverlayIconButton';
@@ -20,6 +21,7 @@ import {FeedbackState} from './FeedbackState';
 import {ExplorerActivity} from './ExplorerActivity';
 import {NumberDuelActivity} from './NumberDuelActivity';
 import {LandlordActivity} from './LandlordActivity';
+import {FourPlayerActivity} from './FourPlayerActivity';
 import {BgmActivity} from './BgmActivity';
 import {FriendlyNeighborhoodActivity} from './FriendlyNeighborhoodActivity';
 import {StarryNightActivity} from './StarryNightActivity';
@@ -141,7 +143,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
   };
   const sendShare=async(ids:number[])=>{
     const id=ids[0];if(!id||!activeActivity||sharingId!==null)return;setSharingId(id);
-    const path=activityKey==='landlord'?'/app/menu?panel=activities&activity=landlord':`/app/square/activities/${activityKey}`;
+    const path=isTabletopGame(activityKey)?`/app/menu?panel=activities&activity=${activityKey}`:`/app/square/activities/${activityKey}`;
     const slug=getDetectedSpaceSlug();
     const url=slug?buildSpaceHrefForCurrentHost(slug,path):new URL(path,window.location.origin).toString();
     try{await api.sendMessage(id,11,JSON.stringify({kind:'activity',activity_key:activityKey,title:isChineseLanguage(language)?activeActivity.title:activeActivity.title_en||activeActivity.title,url}),undefined,crypto.randomUUID());setShareOpen(false);showToast(t('square.sharedTo',{chat:shareChats.find(chat=>chat.chat_id===id)?.title||t('nav.chats')}));}catch(cause){showToast(cause instanceof Error?cause.message:t('square.shareFailed'),'error');}finally{setSharingId(null);}
@@ -256,18 +258,19 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         className={activityDrawerClassName(activityKey,theme)}
         contentUnderToolbar
         trapFocus
-        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t(activeActivity.theme === 'landlord' ? 'landlord.shareActivity' : 'square.share')} title={activeActivity.theme === 'landlord' ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} /> : null}
+        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t(isTabletopGame(activeActivity.theme) ? 'landlord.shareActivity' : 'square.share')} title={isTabletopGame(activeActivity.theme) ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} /> : null}
         historyMode="route"
         onClose={onClose}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
         title={drawerTitle}
-        titleLeading={theme === "landlord" && activeActivity ? (
+        titleLeading={isTabletopGame(theme) && activeActivity ? (
           <span className="landlord-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : theme === "record-shop" && activeActivity ? (
           <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : undefined}
       >
-        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} /> : activeActivity?.record_shop ? (
+        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} />
+          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} /> : activeActivity?.record_shop ? (
           <RecordShopActivity
             activity={activeActivity}
             dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}
@@ -361,7 +364,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         </div> : loadError?<FeedbackState tone="error" title={t("square.activitiesLoadFailed")} action={<button className="secondary-button" onClick={()=>setRetry(value=>value+1)}>{t("common.retry")}</button>}/>:<ActivityLoadingState/>}
       </SideDrawer>
 
-      <ChatTargetPicker open={shareOpen} title={t(activeActivity?.theme === 'landlord' ? 'landlord.shareActivity' : 'square.shareToChat')} targets={shareChats.map(chat=>{const peer=chat.members.find(member=>member.user_id!==session?.user.user_id)||chat.members[0];return {id:chat.chat_id,title:chat.title||peer?.name||t('nav.chats'),preview:chat.last_message?.content||'',avatarUri:chat.group?undefined:peer?.avatar_uri,groupMembers:chat.group?chat.members.map(member=>({name:member.name,uri:member.avatar_uri})):undefined};})} loading={shareLoading} busy={sharingId!==null} busyTargetId={sharingId} emptyTitle={t('square.noChatsToShare')} onClose={()=>{if(sharingId===null)setShareOpen(false);}} onSubmit={sendShare}/>
+      <ChatTargetPicker open={shareOpen} title={t(isTabletopGame(activeActivity?.theme) ? 'landlord.shareActivity' : 'square.shareToChat')} targets={shareChats.map(chat=>{const peer=chat.members.find(member=>member.user_id!==session?.user.user_id)||chat.members[0];return {id:chat.chat_id,title:chat.title||peer?.name||t('nav.chats'),preview:chat.last_message?.content||'',avatarUri:chat.group?undefined:peer?.avatar_uri,groupMembers:chat.group?chat.members.map(member=>({name:member.name,uri:member.avatar_uri})):undefined};})} loading={shareLoading} busy={sharingId!==null} busyTargetId={sharingId} emptyTitle={t('square.noChatsToShare')} onClose={()=>{if(sharingId===null)setShareOpen(false);}} onSubmit={sendShare}/>
 
  </>;
 }

@@ -2,6 +2,7 @@ import { EXPLORER_ART } from "./explorer.ts";
 import {activityAsset} from './activityAsset.ts';
 import {activityThemeForKey} from './activityTheme.ts';
 import {LANDLORD_ART, LANDLORD_TITLE} from './landlord.ts';
+import {isFourPlayerGame} from './tabletop';
 
 export interface ActivityPresentation {
   palette?: "sage" | "rose" | "ocean" | "gold";
@@ -32,6 +33,7 @@ export function activityPresentation(activity?: { key?: string; theme?: string; 
   const women = activity?.key === 'record-shop-women';
   const custom = activity?.presentation;
   if (theme === 'landlord') return {palette: 'sage', artwork_layout: 'image', artwork_url: LANDLORD_ART, title_art_url: LANDLORD_TITLE};
+  if (isFourPlayerGame(theme)) return {palette: theme === 'mahjong' ? 'sage' : 'rose', title_art_url: `/activity/${theme}/title.webp`};
   const recordShopArt = women ? 'record-shop-women' : 'record-shop';
   return {
     palette: ["sage", "rose", "ocean", "gold"].includes(custom?.palette ?? "") ? custom!.palette : explorer ? "ocean" : women ? "rose" : "sage",

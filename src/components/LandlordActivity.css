@@ -177,6 +177,7 @@
 .landlord-last-play .playing-card-stack { container-type: inline-size; width: min(280px, 45cqw); }
 .landlord-last-play small { display: block; margin-bottom: 4px; color: #e0cd9e; font-size: .7rem; }
 .landlord-play-controls { padding-top: 8px; }
+.landlord-mode-row { margin-bottom: 8px; }
 .landlord-play-controls > .playing-card-stack { container-type: inline-size; }
 .landlord-controls { justify-content: center; }
 .landlord-controls > button { min-width: 67px; }

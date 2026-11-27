@@ -9,11 +9,13 @@ import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
 import {ConfirmDialog} from './ConfirmDialog';
 import {PlayingCard, PlayingCardStack, playingCardRank} from './PlayingCards';
+import {TableModePicker} from './TableModePicker';
 import {SettingsDialog} from './SettingsDialog';
 import {UserAvatar} from './UserAvatar';
 import './LandlordActivity.css';
 
 const icon = (name: string) => <span aria-hidden="true" className="material-symbols-outlined">{name}</span>;
+const MODES = [['classic','tabletop.classic'], ['no_shuffle','landlord.noShuffle']] as const;
 
 function Seat({table, position, self = false}: {table: LandlordTableView; position: number; self?: boolean}) {
   const {t} = useI18n();
@@ -175,6 +177,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
   const hand = table ? [...table.hand].sort((a, b) => playingCardRank(b) - playingCardRank(a)) : [];
   const canAct = turn && !busy && remaining > 0 && !self?.trustee;
   const canShareRoom = table?.status === 'waiting' || (table?.status === 'finished' && table.ready_count < 3);
+  const canChooseMode = table && table.host === table.your_seat && (table.status === 'waiting' || table.status === 'finished');
   useEffect(() => { if (!canShareRoom) setShareOpen(false); }, [canShareRoom]);
 
   return <section className="landlord-activity">
@@ -210,7 +213,8 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       <div className="landlord-board">
         <div className="landlord-table-nav">
           <span className="landlord-round-no">{t('landlord.round', {count:table.round})}</span>
-          <span>{table.base ? t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier}) : t('landlord.table')}</span>
+          <span>{t(table.mode === 'no_shuffle' ? 'landlord.noShuffle' : 'tabletop.classic')}
+            {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
         </div>
         <div className="landlord-arena">
@@ -240,6 +244,8 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
         </div>
       </div>
       <div className="landlord-play-controls">
+        {canChooseMode && <div className="landlord-mode-row"><TableModePicker choices={MODES} mode={table.mode ?? 'classic'} disabled={busy}
+          onChange={mode => void perform({action:'mode', code:table.code, version:table.version, value:mode})} /></div>}
         {bidding || doubling || playing ? <>
           <PlayingCardStack count={hand.length} label={t('landlord.yourHand')}>
             {hand.map(id => <PlayingCard id={id} key={id} selected={selected.includes(id)} disabled={!playing || busy || self?.trustee}
@@ -279,7 +285,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
           <span className="landlord-choice">{t('landlord.readyCount', {count:table.seats.filter(seat => seat.ready).length})}</span>
           <div className="landlord-controls">
             <button className={self?.ready ? 'landlord-secondary' : 'landlord-primary'} type="button" disabled={busy} aria-pressed={self?.ready ?? false}
-              onClick={() => void perform({action:'ready', code:table.code, version:table.version, round:table.round, value:!self?.ready})}>{t(self?.ready ? 'landlord.cancelReady' : 'landlord.readyUp')}</button>
+              onClick={() => void perform({action:'ready', code:table.code, version:table.version, round:table.round, mode:table.mode, value:!self?.ready})}>{t(self?.ready ? 'landlord.cancelReady' : 'landlord.readyUp')}</button>
             {table.your_seat === table.host && <button className="landlord-primary" type="button" disabled={busy || !table.can_start}
               onClick={() => void perform({action:'start', code:table.code, version:table.version, round:table.round})}>{t('landlord.startNext')}</button>}
             {table.ready_count < 3 && <button className="landlord-secondary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>}
@@ -296,7 +302,7 @@ export function LandlordActivity({activity}: {activity: ActivityCampaignDTO}) {
       </div>
     </div>}
     <SettingsDialog open={dialog === 'rules'} title={t('landlord.rules')} onClose={() => setDialog(null)}>
-      <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
+      <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult','ruleNoShuffle'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
     </SettingsDialog>
     <SettingsDialog open={dialog === 'ranking'} title={t('landlord.ranking')} onClose={() => setDialog(null)}>
       {dialog === 'ranking' && <Ranking activityKey={activity.key} />}

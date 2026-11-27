@@ -9,6 +9,7 @@ export interface LandlordMember {
 }
 
 export interface LandlordTableView {
+  mode?: 'classic' | 'no_shuffle';
   code: string;
   status: "waiting" | "bidding" | "doubling" | "playing" | "finished" | "abandoned";
   version: number;
@@ -68,7 +69,8 @@ export type LandlordAction =
   | { action: "create" }
   | { action: "join"; code: string }
   | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "double" | "trustee"; value: boolean }
-    | { action: "ready"; value: boolean; round: number } | { action: "start"; round: number }
+    | { action: "mode"; value: 'classic' | 'no_shuffle' }
+    | { action: "ready"; value: boolean; round: number; mode: LandlordTableView["mode"] } | { action: "start"; round: number }
     | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
 
 export const LANDLORD_ROOM_CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/;

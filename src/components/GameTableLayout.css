@@ -1,6 +1,6 @@
 .side-drawer.activity-drawer.game-table-drawer { max-width: none; }
 .game-table-drawer > .drawer-body { overscroll-behavior: contain; }
-.game-table-drawer:has(.landlord-lobby-layout, .duel-lobby-layout) .drawer-floating-identity { visibility: hidden; }
+.game-table-drawer:has(.landlord-lobby-layout, .duel-lobby-layout, .four-player-lobby-layout) .drawer-floating-identity { visibility: hidden; }
 
 @media (min-width: 720px) and (pointer: fine) {
   .detached-drawer-slot:has(.game-table-drawer) {

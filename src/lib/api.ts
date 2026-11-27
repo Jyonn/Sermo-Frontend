@@ -5,6 +5,7 @@ import {applySquareSync,rememberSquareResponse,squareSyncRevision,type SquareSyn
 import {buildTabCacheScope} from './tabCache';
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
 import type { LandlordAction, LandlordLobby, LandlordRanking, LandlordRankingMetric, LandlordTableView } from "./landlord";
+import type { FourPlayerAction, FourPlayerLobby, FourPlayerTable } from "./tabletop";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import { decodeCompact, type CompactPayload } from "./compactTransport";
@@ -1284,6 +1285,12 @@ export const api = {
   },
   getLandlordRanking(key: string, year: number | undefined, metric: LandlordRankingMetric, signal: AbortSignal) {
     return request<LandlordRanking>(`/activities/${key}/landlord/leaderboard`, { auth: true, query: { year, metric }, signal, cache: "no-store" });
+  },
+  getFourPlayerLobby(key: string, code?: string, signal?: AbortSignal) {
+    return request<FourPlayerLobby>(`/activities/${key}/table`, {auth:true, query:{code}, signal, cache:'no-store'});
+  },
+  fourPlayerAction(key: string, body: FourPlayerAction, signal: AbortSignal) {
+    return request<{table: FourPlayerTable | null; changed?: boolean}>(`/activities/${key}/table`, {auth:true, method:'POST', body, signal, cache:'no-store'});
   },
   numberDuelAction(key: string, body: Record<string, unknown>) {
     return request<DuelMatch>(`/activities/${key}/duel`, { method: "POST", auth: true, body });

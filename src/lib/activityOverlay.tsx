@@ -2,12 +2,11 @@ import {createContext,lazy,Suspense,useContext,useState,type ReactNode} from 're
 import {useLocation,useNavigate} from 'react-router-dom';
 import {useAuth} from './auth';
 import {useI18n} from './language';
-import {activityKeyFromSearch,activityOverlaySearch} from './activityOverlayRoute';
+import {activityKeyFromSearch,activityOverlaySearch,activityRoomParam} from './activityOverlayRoute';
 import {SideDrawer} from '../components/SideDrawer';
 import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ActivityLoadingState} from '../components/ActivityLoadingState';
 import {activityDrawerClassName} from './activityTheme';
-import {LANDLORD_ROOM_PARAM} from './landlord';
 import '../components/GameTableLayout.css';
 const Experience=lazy(()=>import('../components/ActivityExperience').then(module=>({default:module.ActivityExperience})));
 const ActivityOverlayContext=createContext<(key:string,room?:string)=>void>(()=>undefined);
@@ -23,7 +22,8 @@ export function ActivityOverlayProvider({children}:{children:ReactNode}) {
   const [readyPath,setReadyPath]=useState<string|null>(null);
   const key=activityKeyFromSearch(location.search);
   const open=(activityKey:string,room?:string)=>{
-    if(activityKey===key && (room ?? null) === new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM))return;
+    const field=activityRoomParam(activityKey);
+    if(activityKey===key && (room ?? null) === (field ? new URLSearchParams(location.search).get(field) : null))return;
     // Shared drawers also write their path with history.pushState. Read that
     // current path so opening an activity preserves the complete parent stack.
     navigate({pathname:location.pathname,search:activityOverlaySearch(window.location.search,activityKey,room),hash:window.location.hash},{state:{...location.state,activityOverlay:true}});

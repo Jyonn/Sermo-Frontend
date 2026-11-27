@@ -31,6 +31,7 @@
 .playing-card b, .playing-card > span { z-index: 1; }
 .playing-card > span { font-size: .88em; }
 .playing-card[data-suit]::after { position: absolute; inset: 40% 0 auto; content: attr(data-suit); text-align: center; opacity: .34; font-size: 1.75em; }
+.playing-card-wild { position: absolute; inset: auto auto 1px 1px; z-index: 2; padding: 2px; border-radius: 2px; background: #aa3323; color: #fff4d6; font-size: 9px; }
 .playing-card.is-red { color: #9d3527; }
 .playing-card.is-backed { align-items: center; justify-content: center; padding: 0; color: #f1d18b; background: repeating-linear-gradient(42deg, #34583a 0 2px, #19362c 2px 5px); }
 .playing-card[aria-pressed] { transition: transform .15s ease-out, background-color .15s; }

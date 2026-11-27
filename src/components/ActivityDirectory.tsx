@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {useActivityOverlay} from '../lib/activityOverlay';
 import {api} from '../lib/api';
 import {useI18n} from '../lib/language';
+import {isTabletopGame} from '../lib/tabletop';
 import type {ActivityCampaignDTO,PermanentVipCampaignDTO} from '../types';
 import {ActivityCampaignCard} from './ActivityCampaignCard';
 import {FeedbackState} from './FeedbackState';
@@ -27,6 +28,6 @@ export function ActivityDirectory({vip}:{vip?:PermanentVipCampaignDTO|null}) {
   if(!items.length&&!showVip)return <FeedbackState tone="empty" title={t('square.activitiesEmpty')}/>;
   return <div className="activity-directory">{items.map(activity=>{
     const progress=activity.record_shop?{value:activity.record_shop.points,max:activity.record_shop.thresholds[1],label:t("recordShop.points")}:activity.explorer?{value:activity.explorer.completed_count,max:5}:activity.starry_night?{value:activity.starry_night.streak_days,max:activity.starry_night.target_days}:activity.friendly_neighbor?{value:activity.friendly_neighbor.web_points,max:100}:activity.bgm?{value:activity.bgm.tracks.filter(track=>track.owned).length,max:activity.bgm.tracks.length}:activity.theme==='baxian'?{value:activity.space_total,max:activity.target}:undefined;
-    return <ActivityCampaignCard key={activity.key} activity={activity} title={language.startsWith('zh')?activity.title:activity.title_en||activity.title} eyebrow={t(activity.theme==='landlord'?'landlord.permanent':'activity.active')} hint={t('message.activityOpen')} progress={progress} onClick={()=>openActivity(activity.key)}/>;
+    return <ActivityCampaignCard key={activity.key} activity={activity} title={language.startsWith('zh')?activity.title:activity.title_en||activity.title} eyebrow={t(isTabletopGame(activity.theme)?'landlord.permanent':'activity.active')} hint={t('message.activityOpen')} progress={progress} onClick={()=>openActivity(activity.key)}/>;
   })}{showVip?<ActivityCampaignCard activity={{key:'permanent-vip-founding-100',theme:'permanent-vip',presentation:{palette:'gold'}}} title={t('vip.campaignTitle')} eyebrow="FOUNDING 100" hint={t(vip.claimed_by_user?'vip.permanentOwned':'vip.bannerOwnership')} onClick={()=>openActivity('permanent-vip-founding-100')}/>:null}</div>;
 }

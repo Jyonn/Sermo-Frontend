@@ -10,7 +10,7 @@ export function playingCardRank(id: number) {
   return face < 52 ? Math.floor(face / 4) : face - 39;
 }
 
-export function PlayingCard({id, selected, disabled, onClick}: {id?: number; selected?: boolean; disabled?: boolean; onClick?: () => void}) {
+export function PlayingCard({id, selected, disabled, resolvedRank, onClick}: {id?: number; selected?: boolean; disabled?: boolean; resolvedRank?: number; onClick?: () => void}) {
   const {t} = useI18n();
   if (id === undefined) return <span className="playing-card is-backed" aria-hidden="true">♦</span>;
   const face = id % 54;
@@ -19,7 +19,9 @@ export function PlayingCard({id, selected, disabled, onClick}: {id?: number; sel
   const suit = joker ? '✦' : suits[face % 4];
   const label = joker ? t(face === 53 ? 'landlord.bigJoker' : 'landlord.smallJoker') : `${rank} ${suit}`;
   const className = `playing-card${face === 53 || suit === '♥' || suit === '♦' ? ' is-red' : ''}`;
-  const content = <><b aria-hidden="true">{rank}</b><span aria-hidden="true">{suit}</span></>;
+  const wildcard = resolvedRank !== undefined && resolvedRank !== playingCardRank(id);
+  const content = <><b aria-hidden="true">{rank}</b><span aria-hidden="true">{suit}</span>
+    {wildcard && <small className="playing-card-wild" title={label}>{ranks[resolvedRank] ?? '☆'}</small>}</>;
   return onClick
     ? <button type="button" className={className} data-suit={suit} aria-label={label} aria-pressed={Boolean(selected)} disabled={disabled} onClick={onClick}>{content}</button>
     : <span className={className} data-suit={suit} role="img" aria-label={label}>{content}</span>;
