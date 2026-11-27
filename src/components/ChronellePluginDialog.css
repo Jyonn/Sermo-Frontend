@@ -8,3 +8,11 @@
 .chronelle-permissions-content>h3{margin:4px 2px 0;font-size:14px}
 .chronelle-permissions-hint{margin:0 2px;color:var(--text-muted);font-size:12px;line-height:1.6}
 .chronelle-permissions-error{margin:0;color:var(--danger);font-size:12px}
+.chronelle-friend-exceptions { display: grid; gap: 10px; }
+.chronelle-friend-exceptions h3 { margin: 0 2px; font-size: .875rem; }
+.chronelle-friend-exceptions .setting-row-icon:has(.mini-avatar) { background: transparent; }
+.chronelle-friend-identity { display: flex; align-items: center; gap: 12px; padding-block: 4px; }
+.chronelle-friend-identity .mini-avatar { flex-shrink: 0; }
+.chronelle-friend-identity div { min-width: 0; overflow-wrap: anywhere; }
+.chronelle-friend-identity p { margin: 3px 0 0; color: var(--text-secondary); font-size: .82rem; }
+.chronelle-friend-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }

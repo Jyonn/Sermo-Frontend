@@ -37,6 +37,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatCalendarAvailability, useChatCalendarAvailability } from "../components/ChatCalendarAvailability";
+import { ChronelleChatFriendSharing } from "../components/ChronelleFriendSharing";
 import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { MobileChatComposer, useMobileComposerLayout } from "../components/ChatComposerLayout";
@@ -3411,6 +3412,8 @@ function LiveChatsPage({
       && current.scope === `${session?.user.space_id}:${session?.user.user_id}` ? current : null);
   }, [selectedChat?.id, session?.user.space_id, session?.user.user_id]);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
+  const chronelleDetailsPeerId = selectedChat?.type === "direct" && selectedChat.purpose !== "submission"
+    ? selectedChat.detail.members.find(member => !member.isSelf)?.userId : undefined;
   const { data: chatCalendar, loading: calendarLoading } = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
   const { actions: preferredQuickActions } = useChatQuickActions(`${session?.user.space_id}:${currentUserId}`, displayedChat?.type === "direct" ? "direct" : "group");
   const copySuggestions = useGroupCopySuggestions(displayedChat?.type === "group" && displayedChat.purpose !== "submission" ? displayedChat.id : undefined, currentUserId);
@@ -8490,6 +8493,9 @@ function LiveChatsPage({
               </SettingGroup>
             </section> : null}
 
+            {detailsSheetOpen && chronelleDetailsPeerId !== undefined && <ChronelleChatFriendSharing
+              key={chronelleDetailsPeerId} friendId={chronelleDetailsPeerId}
+              onConnect={() => navigate("/app/menu?panel=more-apps/chronelle")} />}
             {selectedChat.purpose === "research" ? <ResearchChatProjectLink chatId={selectedChat.id} navigate={navigate} onProjectDetails={embeddedChat?.onProjectDetails} settings /> : null}
             {selectedChat.purpose !== "submission" ? <>
               {selectedChat.type === "group" || canUseOnlineReminder ? <section className="chat-detail-settings-section"><SettingGroup>

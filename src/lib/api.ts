@@ -574,6 +574,17 @@ export const api = {
   },
   chronellePermissions(signal?:AbortSignal) {return request<import('./chronellePermissions').ChronellePermissionsSetup>('/users/me/chronelle/permissions',{auth:true,signal});},
   saveChronellePermissions(audiences:import('./chronellePermissions').CalendarPermissions, detail_fields?:import('./chronellePermissions').CalendarDetailFields) {return request<{status:string;rebind_required:boolean}>('/users/me/chronelle/permissions',{auth:true,method:'POST',body:{audiences,detail_fields}});},
+  chronelleFriendExceptions(signal?: AbortSignal) {
+    return request<{ friends: import('./chronellePermissions').ChronelleFriendException[] }>('/users/me/chronelle/permissions/friends', { auth: true, signal });
+  },
+  chronelleFriendSharing(friendId: number, signal?: AbortSignal) {
+    return request<import('./chronellePermissions').ChronelleFriendSharing>(`/users/me/chronelle/permissions/friends/${friendId}`, { auth: true, signal });
+  },
+  saveChronelleFriendSharing(friendId: number, policy: import('./chronellePermissions').FriendCalendarPolicy) {
+    return request<{ status: string; rebind_required: boolean }>(`/users/me/chronelle/permissions/friends/${friendId}`, {
+      auth: true, method: 'POST', body: { policy },
+    });
+  },
   getOAuthMetadata(query: Record<string, string>) {
     return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
   },

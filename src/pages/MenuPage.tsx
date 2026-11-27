@@ -27,6 +27,7 @@ import {ChatPageThumbnail} from '../components/ChatPageThumbnail';
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { MyProfileCardDrawer } from "../components/MyProfileCardDrawer";
 import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
+import { ChronelleFriendExceptions } from "../components/ChronelleFriendSharing";
 import { ExternalAppAction, ExternalAppActions, ExternalAppIdentity, type AppConnectionState } from "../components/ExternalAppPanel";
 import { OverlayIconButton } from "../components/OverlayIconButton";
 import { PockloDrawer } from "../components/PockloDrawer";
@@ -2428,6 +2429,7 @@ export default function MenuPage() {
               label={t(chronelleStatus === 'disconnected' ? "chronelle.bind" : "apps.chronelleDisplay")}
               onClick={() => setChronelleInfoOpen(true)} />
           </ExternalAppActions>
+          {chronelleDetailsOpen && <ChronelleFriendExceptions key={pockloScope} onConnect={() => setChronelleInfoOpen(true)} />}
         </div>
       </SideDrawer>
       <StillfolioDrawer

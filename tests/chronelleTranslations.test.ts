@@ -14,7 +14,7 @@ for (const language of ["zh-CN", "en"]) {
       interpolation: { escapeValue: false },
       returnNull: false,
     });
-    const values = { time: "17:00", minutes: 20, hours: 1, percent: 0, duration: "30 min", count: 2 };
+    const values = { time: "17:00", minutes: 20, hours: 1, percent: 0, duration: "30 min", count: 2, mode: "Busy" };
     for (const [key, template] of Object.entries(translation)) {
       if (!key.startsWith("chronelle.") || typeof template !== "string" || !template.includes("{")) continue;
       assert.doesNotMatch(String(i18n.t(key, values)), /[{}]/, key);

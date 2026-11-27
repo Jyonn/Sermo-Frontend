@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.26.13",
-  "publishedAt": "2026-11-26",
+  "id": "2026.11.27.1",
+  "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "手势锁跟随主题",
+      "title": "为好友单独设置日程可见范围",
       "items": [
-        "解锁与设置页面会随默认、圣诞、生日或七夕主题调整，并适配深浅色外观。"
+        "在私聊详情里选择这位好友能看到哪些时序日程。已单独设置的好友可以在应用与工具的时序页面统一管理。"
       ]
     },
     "en": {
-      "title": "Gesture lock follows your theme",
+      "title": "Calendar sharing for individual friends",
       "items": [
-        "The unlock screen and settings follow the default, Christmas, birthday, or Qixi theme in both light and dark appearances."
+        "Set what a friend can see from your direct chat. View and edit your exceptions in the Chronelle app settings."
       ]
     }
   }
