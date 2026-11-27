@@ -11,8 +11,8 @@ const VIEW_MS = 3000;
 const VIEW_SECONDS = VIEW_MS / 1000;
 const keepImageIndex = () => {};
 
-export function FlashImageMessage({id, payload, sent, groupClassName}: {
-  id: number; payload?: ChatMessagePayloadDTO | null; sent: boolean; groupClassName: string;
+export function FlashImageMessage({id, payload, sent, groupClassName, auditPreview = false}: {
+  id: number; payload?: ChatMessagePayloadDTO | null; sent: boolean; groupClassName: string; auditPreview?: boolean;
 }) {
   const {locale, t} = useI18n();
   const [open, setOpen] = useState(false);
@@ -27,11 +27,12 @@ export function FlashImageMessage({id, payload, sent, groupClassName}: {
   const url = useRef('');
   const request = useRef<AbortController>();
   const hasViewed = viewed || payload?.flash_viewed;
-  const canOpen = payload?.flash_available === true && !unavailable && (sent || !hasViewed && !expired);
-  const thumbnail = (canOpen || sent) && payload?.flash_thumbnail?.match(/^[A-Za-z0-9+/=]{1,1500}$/) ? payload.flash_thumbnail : '';
+  const canOpen = !auditPreview && payload?.flash_available === true && !unavailable && (sent || !hasViewed && !expired);
+  const thumbnail = (auditPreview || canOpen || sent) && payload?.flash_thumbnail?.match(/^[A-Za-z0-9+/=]{1,1500}$/) ? payload.flash_thumbnail : '';
   const total = payload?.flash_recipient_count ?? 0;
   const count = payload?.flash_viewed_count ?? 0;
-  const status = sent && total > 1 ? t('photo.flashViewedCount', {count, total})
+  const status = auditPreview ? t(payload?.flash_audit_available ? 'management.inspectFlashHint' : 'photo.flashExpired')
+    : sent && total > 1 ? t('photo.flashViewedCount', {count, total})
     : sent && total === 1 ? t(count ? 'photo.flashRecipientViewed' : 'photo.flashRecipientPending')
     : hasViewed ? t('photo.flashViewed') : t(canOpen ? 'photo.flashOpen' : 'photo.flashExpired');
 
@@ -123,6 +124,7 @@ export function FlashImageMessage({id, payload, sent, groupClassName}: {
   return <>
     <button type="button" className={`message-media-frame image-button has-intrinsic-size flash-image-message ${groupClassName}`}
       style={{'--message-media-aspect': aspect ?? 1.5} as CSSProperties} aria-disabled={!canOpen}
+      tabIndex={auditPreview ? -1 : undefined}
       onClick={event => {event.stopPropagation(); void reveal();}}>
       {thumbnail && <img src={`data:image/jpeg;base64,${thumbnail}`} alt="" draggable={false}
         onLoad={({currentTarget}) => setAspect(messageMediaAspect(currentTarget.naturalWidth, currentTarget.naturalHeight))}/>}

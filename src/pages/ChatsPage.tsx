@@ -887,6 +887,7 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
 
 
 const MessageImageGallery = memo(function MessageImageGallery({
+  auditPreview,
   from,
   isEntering,
   isFirst,
@@ -899,6 +900,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   selectedClientIds,
   selectionMode,
 }: {
+  auditPreview?: boolean;
   from: "self" | "other";
   isEntering: boolean;
   isFirst: boolean;
@@ -941,6 +943,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
     if (selectionMode) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     clearLongPress();
+    suppressClickRef.current = null;
     const element = event.currentTarget;
     pointerStartRef.current = { index, x: event.clientX, y: event.clientY };
     longPressTimerRef.current = window.setTimeout(() => {
@@ -996,6 +999,11 @@ const MessageImageGallery = memo(function MessageImageGallery({
                     clearLongPress();
                     onOpenActions(message, event.currentTarget, event.clientX);
                   }}
+                  onKeyDown={auditPreview ? (event) => {
+                    if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+                    event.preventDefault();
+                    onOpenActions(message, event.currentTarget);
+                  } : undefined}
                   onPointerCancel={clearLongPress}
                   onPointerDown={(event) => startLongPress(event, message, index)}
                   onPointerLeave={clearLongPress}
@@ -1166,13 +1174,14 @@ function renderMessageContent(
   onRetry?: () => void,
   bubbleStyle?: ChatBubbleStyle,
   voiceDecoration?: { ornament: ReactNode; first: boolean },
+  auditPreview = false,
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
   }
   if (message.kind === "flash_image" && typeof message.id === "number") {
     return <FlashImageMessage id={message.payload?.flash_message_id ?? message.id} payload={message.payload}
-      sent={message.payload?.flash_sender ?? message.from === "self"} groupClassName={groupClassName}/>;
+      sent={message.payload?.flash_sender ?? message.from === "self"} groupClassName={groupClassName} auditPreview={auditPreview}/>;
   }
   if (message.kind === "sticker") {
     if (!message.payload?.uri || message.payload.unavailable) {
@@ -1210,7 +1219,7 @@ function renderMessageContent(
   if (message.kind === "audio" && message.payload?.uri) {
     if (message.payload.bgm_entrance) return <BgmAudioPill title={message.payload.song_title ?? 'BGM'} uri={message.payload.uri} />;
     return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from}
-      messageKey={message.clientId} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined}
+      messageKey={message.clientId} messageId={!auditPreview && typeof message.id === "number" && message.status !== "pending" ? message.id : undefined}
       previewTranscript={typeof message.id === "string" && message.id.startsWith("preview-")} uri={message.localPreviewUri ?? message.payload.uri}
       artist={voiceDecoration ? message.recordShop?.artist : undefined} decoration={voiceDecoration?.ornament} first={voiceDecoration?.first} />;
   }
@@ -1438,6 +1447,7 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
 }
 
 const MessageBubbleRow = memo(function MessageBubbleRow({
+  auditPreview,
   bubbleStyle,
   from,
   isEntering,
@@ -1464,7 +1474,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     />
   ) : null;
   const ornamentInBubble = recordShopArtist || (singerVoice && isFirst && message.replyTo);
-  const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
+  const canOpenActions = (auditPreview || message.kind !== "submission_invite") && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1534,6 +1544,15 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           ref={bubbleRef}
           data-message-id={typeof message.id === "number" ? message.id : undefined}
           title={messageTitle}
+          tabIndex={auditPreview && canOpenActions ? 0 : undefined}
+          aria-keyshortcuts={auditPreview && canOpenActions ? "Shift+F10" : undefined}
+          onKeyDown={auditPreview && canOpenActions ? (event) => {
+            if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10") ||
+              (event.key === "Enter" && event.target === event.currentTarget)) {
+              event.preventDefault();
+              openActions();
+            }
+          } : undefined}
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
@@ -1602,7 +1621,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             </button>
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle,
-            singerVoice ? { ornament: ornamentInBubble ? null : singerDecoration, first: isFirst } : undefined)}
+            singerVoice ? { ornament: ornamentInBubble ? null : singerDecoration, first: isFirst } : undefined, auditPreview)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {!message.recordShop&&isFirst ? <NikoBubbleRunner /> : null}
           {!message.recordShop&&isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
@@ -1677,6 +1696,7 @@ function MessageAvatarMentionTarget({ children, name, onMention, onOpenProfile }
 }
 
 const MessageGroupBlock = memo(function MessageGroupBlock({
+  auditPreview,
   enteringMessageIds,
   group,
   onOpenImage,
@@ -1840,6 +1860,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           {rows.map((row) => row.kind === "gallery" ? (
             <Fragment key={`gallery:${row.messages[0].clientId}`}>
               <MessageImageGallery
+                auditPreview={auditPreview}
                 from={group.from}
                 isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
                 isFirst={row.startIndex === 0}
@@ -1856,6 +1877,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           ) : (
             <Fragment key={row.message.clientId}>
               <MessageBubbleRow
+                auditPreview={auditPreview}
                 bubbleStyle={group.chatBubbleStyle}
                 from={group.from}
                 isEntering={enteringMessageIds.includes(row.message.clientId)}
@@ -2012,6 +2034,7 @@ function estimateMessageGroupHeight(group: MessageGroup) {
 }
 
 interface MessageBubbleRowProps {
+  auditPreview?: boolean;
   messageTitle?: string;
   bubbleStyle?: ChatBubbleStyle;
   from: "self" | "other";
@@ -2029,6 +2052,7 @@ interface MessageBubbleRowProps {
 }
 
 interface MessageGroupBlockProps {
+  auditPreview?: boolean;
   systemContext?:SystemMessageContext;
   enteringMessageIds: string[];
   group: MessageGroup;
@@ -9788,6 +9812,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
 }
 
 export function ChatPreview({
+  auditPreview = false,
   backgroundTheme = "default",
   backgroundUri,
   bare = false,
@@ -9796,7 +9821,6 @@ export function ChatPreview({
   initialScrollToEnd = false,
   wheelScrollMode = "internal",
   messages,
-  onMessageClick,
   onMessageAction,
   onOpenImage,
   onOpenVideo,
@@ -9806,6 +9830,7 @@ export function ChatPreview({
   separateMessages = false,
   messageTitle,
 }: {
+  auditPreview?: boolean;
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string | null;
   bare?: boolean;
@@ -9814,7 +9839,6 @@ export function ChatPreview({
   initialScrollToEnd?: boolean;
   wheelScrollMode?: "internal" | "parent";
   messages: ChatMessageDTO[];
-  onMessageClick?: (message: ChatMessageDTO) => void;
   onMessageAction?: (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => void;
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
@@ -9844,16 +9868,10 @@ export function ChatPreview({
   const backgroundStyle = backgroundTheme === "custom" && backgroundUri
     ? ({ "--chat-background-image": `url("${backgroundUri.replace(/"/g, "%22")}")` } as CSSProperties)
     : undefined;
-  const openMessage = (message: ChatMessage) => {
-    if (typeof message.id !== "number") return;
-    const source = dtoById.get(message.id);
-    if (source) onMessageClick?.(source);
-  };
   const openMessageAction = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
     if (typeof message.id !== "number") return;
     const source = dtoById.get(message.id);
     if (source) onMessageAction?.(source, element, pointerX);
-    else openMessage(message);
   };
 
   useLayoutEffect(() => {
@@ -9871,17 +9889,9 @@ export function ChatPreview({
     return () => window.cancelAnimationFrame(firstFrame);
   }, [initialScrollToEnd, messages.length]);
 
-  const handleMessageClick = onMessageClick ? (event: React.MouseEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest(".message-audio-play, .message-audio-transcribe, .record-shop-message-cover")) return;
-    const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
-    const messageId = Number(messageNode?.dataset.messageId);
-    const source = dtoById.get(messageId);
-    if (source) onMessageClick(source);
-  } : undefined;
   const messageList = (
     <div
       className={`message-scroll${bare && className ? ` ${className}` : ""}`}
-      onClickCapture={bare ? handleMessageClick : undefined}
       onWheelCapture={wheelScrollMode === "parent" ? (event) => {
         if (!window.matchMedia("(pointer: fine)").matches || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
         event.preventDefault();
@@ -9901,10 +9911,11 @@ export function ChatPreview({
     >
       {groups.map((group) => (
         <MessageGroupBlock
+          auditPreview={auditPreview}
           enteringMessageIds={[]}
           group={group}
           key={group.key}
-          onOpenActions={onMessageAction ? openMessageAction : (message) => openMessage(message)}
+          onOpenActions={onMessageAction ? openMessageAction : noop}
           onOpenImage={onOpenImage ?? noop}
           onOpenVideo={onOpenVideo ?? noop}
           onRetry={noop}
@@ -9935,7 +9946,6 @@ export function ChatPreview({
     <ThreadVoicePlaybackBoundary>
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
-      onClickCapture={handleMessageClick}
     >
       <div className={`chat-detail-scene is-preview-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
         <FriendenLivingWallpaper theme={backgroundTheme} />

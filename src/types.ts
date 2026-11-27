@@ -1271,6 +1271,7 @@ export interface AudioTranscriptDTO {
 }
 
 export interface ChatMessagePayloadDTO {
+  flash_audit_available?: boolean;
   flash_thumbnail?: string | null;
   flash_available?: boolean;
   flash_expires_at?: number;

@@ -254,6 +254,7 @@ function PlatformAdminConsole() {
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [deliveryAudit, setDeliveryAudit] = useState<PlatformMessageDeliveryAuditDTO | null>(null);
   const [deliveryMessage, setDeliveryMessage] = useState<ChatMessageDTO | null>(null);
+  const deliveryRequest = useRef<AbortController | null>(null);
   const [query, setQuery] = useState("");
   const [auditQuery, setAuditQuery] = useState("");
   const [spaceTier, setSpaceTier] = useState<"all" | PlatformAdminSpaceDTO["verification_tier"]>("all");
@@ -289,6 +290,7 @@ function PlatformAdminConsole() {
     return () => {
       platformRequest.current?.abort();
       memberRequest.current?.abort();
+      deliveryRequest.current?.abort();
     };
   }, []);
   const loadDebugReports = async () => {
@@ -388,7 +390,26 @@ function PlatformAdminConsole() {
   };
   const confirmChat = async () => { if (!pendingChat || !chatReason.trim()) return; try { const reason = chatReason.trim(); const result = await api.getPlatformChatMessages(pendingChat.chat_id, reason, undefined, selectedMember?.user_id); setOpenChat(result.chat); setMessages(result.messages); setAuditReason(reason); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); setPendingChat(null); setChatReason(""); } catch (cause) { showToast(cause instanceof Error ? cause.message : "会话读取失败", "error"); } };
   const loadOlderMessages = async () => { if (!openChat || !auditReason || !messageCursor || !hasOlderMessages || loadingOlderMessages) return; setLoadingOlderMessages(true); try { const result = await api.getPlatformChatMessages(openChat.chat_id, auditReason, messageCursor, selectedMember?.user_id); setMessages((current) => [...current, ...result.messages.filter((item) => !current.some((existing) => existing.message_id === item.message_id))]); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更早记录读取失败", "error"); } finally { setLoadingOlderMessages(false); } };
-  const inspectDelivery = async (message: ChatMessageDTO) => { setDeliveryMessage(message); setDeliveryAudit(null); try { setDeliveryAudit(await api.getPlatformMessageDeliveries(message.message_id, auditReason)); } catch (cause) { setDeliveryMessage(null); showToast(cause instanceof Error ? cause.message : "投递链路读取失败", "error"); } };
+  const closeDelivery = () => {
+    deliveryRequest.current?.abort();
+    setDeliveryMessage(null);
+    setDeliveryAudit(null);
+  };
+  const inspectDelivery = async (message: ChatMessageDTO) => {
+    deliveryRequest.current?.abort();
+    const request = new AbortController();
+    deliveryRequest.current = request;
+    setDeliveryMessage(message);
+    setDeliveryAudit(null);
+    try {
+      const result = await api.getPlatformMessageDeliveries(message.message_id, auditReason, request.signal);
+      if (!request.signal.aborted) setDeliveryAudit(result);
+    } catch (cause) {
+      if (request.signal.aborted) return;
+      closeDelivery();
+      showToast(cause instanceof Error ? cause.message : "投递链路读取失败", "error");
+    }
+  };
   const loadMoreEmailDeliveries = async () => { if (!emailHasMore || !emailCursor || emailLoading) return; setEmailLoading(true); try { const result = await api.getPlatformEmailDeliveries(emailCursor, 40); setEmailDeliveries((current) => [...current, ...result.items.filter((item) => !current.some((existing) => existing.delivery_id === item.delivery_id))]); setEmailCursor(result.next_before); setEmailHasMore(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更多邮件记录加载失败", "error"); } finally { setEmailLoading(false); } };
   const refreshEmailReview = async () => { if (emailReviewBusy) return; setEmailReviewBusy(true); try { setEmailReview(await api.getPlatformEmailReview()); } catch (cause) { showToast(cause instanceof Error ? cause.message : "审阅进度刷新失败", "error"); } finally { setEmailReviewBusy(false); } };
   const toggleEmailReview = async () => { if (emailReviewBusy) return; setEmailReviewBusy(true); try { const next = await api.setPlatformEmailReview(!emailReview?.enabled); setEmailReview(next); setSelectedEmailReview(null); setEmailReviewDetail(null); showToast(next.enabled ? "邮件审阅已开启" : next.captured_count >= next.limit ? "已捕获 20 封并自动停止" : "邮件审阅已停止"); } catch (cause) { showToast(cause instanceof Error ? cause.message : "邮件审阅状态更新失败", "error"); } finally { setEmailReviewBusy(false); } };
@@ -546,8 +567,8 @@ function PlatformAdminConsole() {
   <SideDrawer historyKey="platform-member" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title="成员档案">{selectedMember ? <PlatformMemberPanel key={selectedMember.user_id} member={selectedMember} onChat={(chat) => setPendingChat(chat)} /> : null}</SideDrawer>
   <InputDialog confirmLabel="记录理由并查看" onChange={setChatReason} onClose={() => { setPendingChat(null); setChatReason(""); }} onConfirm={() => void confirmChat()} open={Boolean(pendingChat)} placeholder="例如：处理用户举报 #20260812" title="为什么需要查看这段会话？" value={chatReason} />
   <InputDialog confirmLabel={reviewTarget?.approved ? "确认通过" : "确认驳回"} onChange={setReviewNote} onClose={() => { setReviewTarget(null); setReviewNote(""); }} onConfirm={() => void review()} open={Boolean(reviewTarget)} placeholder={reviewTarget?.approved ? "审核备注（可选）" : "请填写明确的驳回原因"} title={reviewTarget?.approved ? `通过 ${reviewTarget.space.name} 的实名认证？` : `驳回 ${reviewTarget?.space.name ?? ""} 的申请？`} value={reviewNote} />
-  <SideDrawer fullscreen className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); setAuditReason(""); setMessageCursor(null); setHasOlderMessages(false); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <PlatformAuditConversation chat={openChat} reason={auditReason} memberName={selectedMember?.name} firstPersonUserId={selectedMember?.user_id ?? null} hasMore={hasOlderMessages} loading={loadingOlderMessages} messages={messages} onLoadOlder={loadOlderMessages} onMessage={(message) => void inspectDelivery(message)} /> : null}</SideDrawer>
-  <SideDrawer showTitle className="platform-delivery-drawer" historyKey="platform-message-delivery" onClose={() => { setDeliveryMessage(null); setDeliveryAudit(null); }} open={Boolean(deliveryMessage)} title="消息推送链路"><DeliveryAudit value={deliveryAudit} /></SideDrawer>
+  <SideDrawer fullscreen className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); setAuditReason(""); setMessageCursor(null); setHasOlderMessages(false); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <PlatformAuditConversation key={openChat.chat_id} chat={openChat} reason={auditReason} memberName={selectedMember?.name} firstPersonUserId={selectedMember?.user_id ?? null} hasMore={hasOlderMessages} loading={loadingOlderMessages} messages={messages} onLoadOlder={loadOlderMessages} onInspectDelivery={(message) => void inspectDelivery(message)} /> : null}</SideDrawer>
+  <SideDrawer showTitle className="platform-delivery-drawer" historyKey="platform-message-delivery" onClose={closeDelivery} open={Boolean(deliveryMessage)} title="消息推送链路"><DeliveryAudit value={deliveryAudit} /></SideDrawer>
   <SideDrawer showTitle fullscreen className="platform-email-review-drawer" historyKey="platform-email-review" onClose={() => { setSelectedEmailReview(null); setEmailReviewDetail(null); }} open={Boolean(selectedEmailReview)} title="邮件审阅详情"><EmailReviewDetail value={emailReviewDetail} /></SideDrawer>
   <SideDrawer actionDisabled={mfaCode.length !== 6} actionLabel="验证并启用" historyKey="platform-mfa" onAction={() => void verifyMfa()} onClose={() => { setMfaQr(""); setMfaSecret(""); setMfaCode(""); }} open={Boolean(mfaQr)} title="连接验证器"><div className="platform-mfa"><p>使用任意验证器扫描二维码，然后输入 6 位动态口令。</p><img alt="MFA QR code" src={mfaQr} /><code>{mfaSecret}</code><VerificationCodeInput ariaLabel="动态口令" value={mfaCode} onChange={setMfaCode} /></div></SideDrawer>
   <SideDrawer historyKey="platform-recovery" onClose={() => setRecoveryCodes([])} open={recoveryCodes.length > 0} title="保存恢复码"><div className="platform-recovery"><span className="material-symbols-outlined">key</span><h2>仅展示这一次</h2><p>每个恢复码只能使用一次。请离线保存，不要截图上传云端。</p><div>{recoveryCodes.map((code) => <code key={code}>{code}</code>)}</div><button className="platform-primary" onClick={() => setRecoveryCodes([])} type="button">我已安全保存</button></div></SideDrawer></ManagementWorkspace>;

@@ -1,4 +1,9 @@
 {
+  "management.inspectDelivery": "長按或按右鍵開啟訊息操作",
+  "management.auditMessageActions": "訊息操作",
+  "management.inspectMessageDelivery": "訊息傳送紀錄",
+  "management.inspectFlashHint": "長按查看原圖",
+  "management.inspectFlashOriginal": "查看原圖",
   "chronelle.friendSharing.chatEntry": "行程分享",
   "chronelle.friendSharing.editorTitle": "好友行程權限",
   "chronelle.friendSharing.editorHint": "設定這位好友能看到哪些你的時序行程。",

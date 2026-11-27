@@ -2299,6 +2299,12 @@ export const api = {
       platformAdminAuth: true, query: { reason }, signal,
     });
   },
+  getPlatformFlashImage(chatId: number, messageId: number, reason: string, position: number, signal: AbortSignal) {
+    return request<Blob>(`/platform-admin/chats/${chatId}/messages/${messageId}/flash-image`, {
+      method: "POST", platformAdminAuth: true, body: { reason, position }, signal,
+      responseFormat: "image", cache: "no-store",
+    });
+  },
   getPlatformIdentityDocument(spaceId: number) {
     return request<{ uri: string }>(`/platform-admin/identity/${spaceId}/document`, { platformAdminAuth: true });
   },
