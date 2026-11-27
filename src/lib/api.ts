@@ -84,6 +84,7 @@ import type {
   SquareStatementDTO,
   SquareMuteDTO,
   SquareStatementCommentDTO,
+  SquareCommentMode,
   SquareStatementDraftMedia,
   SquareQuotaDTO,
   SquareStatusDTO,
@@ -2154,6 +2155,15 @@ export const api = {
       method: "POST",
       auth: true,
       body: { enabled: enabled ? 1 : 0 },
+    });
+  },
+
+  updateSquareCommentMode(mode: SquareCommentMode) {
+    return request<{ square_comment_mode: SquareCommentMode }>("/users/me/square-comment-mode", {
+      method: "POST",
+      auth: true,
+      retryOn401: false,
+      body: { mode },
     });
   },
 

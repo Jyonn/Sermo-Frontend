@@ -55,7 +55,7 @@ import { bgmRunAvailable } from '../lib/bgmPolicy';
 import { useBgmPlayback } from '../lib/bgmPlayback';
 import { ActionSheet } from "../components/ActionSheet";
 import { AlertDialog } from "../components/AlertDialog";
-import type { ActivityCampaignDTO } from "../types";
+import type { ActivityCampaignDTO, SquareCommentMode } from "../types";
 import { UserProfileCard } from "../components/UserProfileCard";
 import { MusicProfileScene } from "../components/MusicProfileScene";
 import { isMusicProfileCard, musicProfileCards } from "../lib/musicProfileCards";
@@ -450,6 +450,7 @@ export default function MenuPage() {
   const [error, setError] = useState<string | null>(null);
   const [space, setSpace] = useState<SpaceDTO | null>(null);
   const [me, setMe] = useState<UserMeDTO | null>(null);
+  const squareCommentMode = me?.square_comment_mode ?? session?.user.square_comment_mode ?? "public";
   const [prefs, setPrefs] = useState<NotificationPreferences>(emptyPrefs);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null);
@@ -988,6 +989,14 @@ export default function MenuPage() {
     }
   };
 
+  const saveSquareCommentMode = async (mode: SquareCommentMode) => {
+    const account = webPushAccountRef.current;
+    const updated = await api.updateSquareCommentMode(mode);
+    if (account !== webPushAccountRef.current) return;
+    setMe((current) => current ? { ...current, ...updated } : current);
+    patchSessionUser(updated);
+  };
+
   const contactValue = (channel: NotificationChannel) => {
     if (channel === "email") return me?.email ?? "";
     if (channel === "sms") return me?.phone ?? "";
@@ -1229,6 +1238,7 @@ export default function MenuPage() {
           email_unbound_at: meInfo.email_unbound_at,
           phone_unbound_at: meInfo.phone_unbound_at,
           is_private_account: meInfo.is_private_account,
+          square_comment_mode: meInfo.square_comment_mode,
           language: meInfo.language,
           last_heartbeat: meInfo.last_heartbeat,
         });
@@ -2976,6 +2986,18 @@ export default function MenuPage() {
                       : t("account.bindPhoneFirst")}
               title={t("account.private")}
               trailing={<SettingSwitch checked={Boolean(me?.is_private_account)} disabled={privateAccountSaving || !phoneVerified} label={t("account.togglePrivate")} onChange={() => void togglePrivateAccount()} />}
+            />
+            <SettingSelect<SquareCommentMode>
+              key={webPushAccountRef.current}
+              label={t("account.squareCommentMode")}
+              description={t(squareCommentMode === "friends" ? "account.squareCommentFriendsHint" : "account.squareCommentPublicHint")}
+              options={[
+                { value: "public", label: t("account.squareCommentPublic") },
+                { value: "friends", label: t("account.squareCommentFriends") },
+              ]}
+              value={squareCommentMode}
+              disabled={!me || syncing}
+              onChange={saveSquareCommentMode}
             />
           </SettingGroup>
           <SettingGroup className="account-binding-group">

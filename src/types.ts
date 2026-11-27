@@ -227,6 +227,8 @@ export interface GrowthRewardDTO {
   vip_access?: "exclusive" | "early_preview" | "level_or_vip" | null;
 }
 
+export type SquareCommentMode = "public" | "friends";
+
 export interface AccessPayload {
   signature?: string;
   avatar_cache_key?: string;
@@ -248,6 +250,7 @@ export interface AccessPayload {
   email_unbound_at?: number | null;
   phone_unbound_at?: number | null;
   is_private_account?: boolean;
+  square_comment_mode?: SquareCommentMode;
   is_permanent_vip?: boolean;
   show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
@@ -263,6 +266,7 @@ export interface AccessPayload {
 
 export interface UserMeDTO extends UserDTO {
   has_password: boolean;
+  square_comment_mode?: SquareCommentMode;
   official?: boolean;
   language?: string;
   language_preference?: import("./lib/i18n").SupportedLanguage | "system";
