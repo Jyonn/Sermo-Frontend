@@ -169,6 +169,7 @@ export default function SpaceAdminDashboardPage() {
   const operators = dashboard?.operators ?? [];
   const shownActivities = activities.filter((activity) => activityFilter === "all" || activity.status === activityFilter);
   const rerunSeries = new Set(activities.filter(activity => (activity.edition ?? 1) > 1).map(activity => activity.original_key));
+  const rerunDate = (value: number) => new Intl.DateTimeFormat(getActiveLocale(), { dateStyle: "medium", timeZone: "Asia/Shanghai" }).format(new Date(value * 1000));
   const refreshManagement = () => setRefreshTick((value) => value + 1);
   const retryManagement = <button className="ghost-button" onClick={refreshManagement} type="button">{t("common.retry")}</button>;
 
@@ -438,6 +439,20 @@ export default function SpaceAdminDashboardPage() {
       showToast(t("admin.activityClaimed", { name: activity.title }), "success");
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("admin.activityClaimFailed"), "error");
+    } finally {
+      setActivityClaimingKey(null);
+    }
+  };
+
+  const rerunActivity = async (activity: AdminActivityDTO, action: "apply" | "claim") => {
+    if (activityClaimingKey || !activity.rerun) return;
+    setActivityClaimingKey(activity.key);
+    try {
+      setActivities(await api.requestActivityRerun(activity.key, action));
+      showToast(t(action === "apply" ? "activity.rerun.applied" : "admin.activityClaimed", { name: activity.title }), "success");
+      if (action === "claim") setActivityFilter("active");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.rerun.failed"), "error");
     } finally {
       setActivityClaimingKey(null);
     }
@@ -964,7 +979,10 @@ export default function SpaceAdminDashboardPage() {
         <div className="admin-activity-list">
           {shownActivities.map((activity) => {
             const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
-            const numbered = (activity.edition ?? 1) > 1 || rerunSeries.has(activity.key);
+            const rerun = activity.rerun;
+            const numbered = (activity.edition ?? 1) > 1 || !!rerun || rerunSeries.has(activity.key);
+            const rerunAction = rerun?.status === "ready" || rerun?.status === "eligible" || rerun?.status === "rejected";
+            const showRequirements = activity.eligible === false && (!activity.claimed || rerunAction);
             const localizedTitle = getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title;
             const localizedSummary = getActiveLocale().startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
             const missingRequirements = (activity.missing_requirements ?? [])
@@ -974,9 +992,23 @@ export default function SpaceAdminDashboardPage() {
               <header><span><small>{numbered ? t("activity.edition", {count:activity.edition ?? 1}) : activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
               <p>{localizedSummary}</p>
               <dl><div><dt>{t("admin.activityDuration")}</dt><dd>{durationDays === null ? t("admin.activityNoTimeLimit") : t("admin.activityDays", { count: durationDays })}</dd></div>{activity.ends_at ? <div><dt>{t("admin.activityEndsAt")}</dt><dd>{new Date(activity.ends_at * 1000).toLocaleString(getActiveLocale())}</dd></div> : null}</dl>
-              {!activity.claimed && activity.eligible===false ? <p role="note" id={`activity-blocked-${activity.key}`} className="admin-activity-requirements"><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
-              {!activity.claimed && !activity.mandatory ? <button aria-describedby={activity.eligible===false ? `activity-blocked-${activity.key}` : undefined} disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activity.eligible===false ? t('admin.activityUnavailable') : activityClaimingKey === activity.key ? t("common.processing") : t((activity.edition ?? 1) > 1 ? "activity.rerun.activate" : "admin.claimActivity")}</button> : null}
+              {showRequirements ? <p role="note" id={`activity-blocked-${activity.key}`} className="admin-activity-requirements"><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
+              {!activity.claimed && !activity.mandatory ? <button aria-describedby={activity.eligible===false ? `activity-blocked-${activity.key}` : undefined} disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activity.eligible===false ? t('admin.activityUnavailable') : activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
               {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
+              {rerun && <footer className="admin-activity-rerun">
+                <div>
+                  <strong>{t(`activity.rerun.spaceStatus.${rerun.status}`)}</strong>
+                  {rerun.status === "waiting" && <small>{t("activity.rerun.applyAt", { date: rerunDate(rerun.apply_at) })}</small>}
+                  {rerun.status !== "ready" && <small>{t("activity.rerun.autoAt", { date: rerunDate(rerun.auto_at) })}</small>}
+                </div>
+                {rerunAction && <button className={rerun.status === "ready" ? "button" : "ghost-button"}
+                  aria-describedby={showRequirements ? `activity-blocked-${activity.key}` : undefined}
+                  type="button" disabled={activity.eligible === false || Boolean(activityClaimingKey)} onClick={() => void rerunActivity(activity, rerun.status === "ready" ? "claim" : "apply")}>
+                  {activityClaimingKey === activity.key ? t("common.processing") : rerun.status === "ready"
+                    ? t("activity.rerun.claimEdition", { count: rerun.next_edition })
+                    : t(rerun.status === "rejected" ? "activity.rerun.reapply" : "activity.rerun.apply")}
+                </button>}
+              </footer>}
             </article>;
           })}
         </div>

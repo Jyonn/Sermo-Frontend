@@ -642,6 +642,7 @@ export interface FriendOperatorDTO {
 export interface AdminActivityDTO {
   edition?: number;
   original_key?: string;
+  rerun?: { status: "waiting" | "eligible" | "pending" | "rejected" | "ready"; next_edition: number; apply_at: number; auto_at: number } | null;
   eligible?: boolean;
   missing_requirements?: string[];
   key: string;
@@ -659,18 +660,18 @@ export interface AdminActivityDTO {
   ends_at: number | null;
 }
 
-export interface PlatformActivityDTO {
-  key: string;
-  original_key: string;
-  edition: number;
+export interface PlatformActivityRerunDTO {
+  id: number;
+  space_name: string;
   title: string;
   title_en: string;
-  duration_seconds: number | null;
-  joined_spaces: number;
-  active_spaces: number;
-  last_end: number | null;
-  status: "available" | "still_running" | "awaiting_spaces" | "permanent" | "one_time_tasks" | "never_started";
-  previous_editions: Array<{ key: string; edition: number; joined_spaces: number; last_end: number | null }>;
+  next_edition: number;
+  ended_at: number | null;
+  submitted_at: number;
+  reviewed_at: number | null;
+  auto_at: number | null;
+  status: "pending" | "approved" | "rejected" | "closed";
+  revision: string;
 }
 
 export interface AdminMemberContactDTO {

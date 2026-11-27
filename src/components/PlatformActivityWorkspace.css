@@ -4,13 +4,8 @@
 .platform-activity-row h2 { font-size: 1rem; margin: 0; }
 .platform-activity-row p { margin: 5px 0 2px; font-size: .83rem; color: var(--text-secondary); }
 .platform-activity-row small { color: var(--text-muted); }
-.platform-activity-row .ghost-button { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.platform-activity-row .material-symbols-outlined { font-size: 18px; }
-.platform-activity-row details { grid-column: 1 / -1; color: var(--text-secondary); font-size: .82rem; }
-.platform-activity-row summary { cursor: pointer; width: fit-content; }
-.platform-activity-row ul { margin: 8px 0 0; padding: 0; list-style: none; }
-.platform-activity-row li { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.platform-activity-row .management-row-actions button { white-space: nowrap; }
 @media (max-width: 420px) {
-  .platform-activity-row { column-gap: 6px; }
-  .platform-activity-row .ghost-button { padding-inline: 8px; font-size: .82rem; }
+  .platform-activity-row { grid-template-columns: 1fr; }
+  .platform-activity-row .management-row-actions { justify-content: flex-start; }
 }

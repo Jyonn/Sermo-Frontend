@@ -84,6 +84,11 @@
 .management-workspace .admin-statement { margin: 0; border-inline: 1px solid var(--management-line); }
 .management-workspace :is(.admin-activity-card dd, .admin-statement p, .admin-square-mute-card p) { overflow-wrap: anywhere; white-space: pre-wrap; }
 .management-workspace .admin-activity-card > button { justify-self: start; padding-inline: 14px; border-radius: 8px; }
+.admin-activity-card .admin-activity-rerun { justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 2px; }
+.admin-activity-rerun div { display: grid; gap: 4px; line-height: 1.35; }
+.admin-activity-rerun strong { font-size: .83rem; color: var(--text-primary); }
+.admin-activity-rerun small { font-size: .73rem; }
+.admin-activity-rerun button { white-space: nowrap; }
 .management-workspace .admin-statement-media { grid-template-columns: repeat(3, minmax(0, 104px)); }
 .management-workspace .admin-square-mute-card footer div { margin-inline-start: auto; flex-wrap: wrap; }
 .management-workspace .admin-square-mute-card footer button { min-height: 42px; }

@@ -739,6 +739,9 @@ export const api = {
       adminAuth: true,
     });
   },
+  requestActivityRerun(key: string, action: "apply" | "claim") {
+    return request<AdminActivityDTO[]>(`/activities/admin/${key}/rerun/${action}`, { adminAuth: true, method: "POST" });
+  },
 
   createAdminSessionFromOfficialAccount() {
     return request<{ space: SpaceDTO; auth: SpaceAuthDTO }>("/spaces/admin/session", {
@@ -2300,11 +2303,13 @@ export const api = {
   getPlatformDashboard(signal?: AbortSignal) {
     return request<PlatformDashboardDTO>("/platform-admin/dashboard", { platformAdminAuth: true, signal });
   },
-  getPlatformActivities(signal?: AbortSignal) {
-    return request<import("../types").PlatformActivityDTO[]>("/platform-admin/activities", { platformAdminAuth: true, signal });
+  getActivityRerunRequests(signal?: AbortSignal) {
+    return request<import("../types").PlatformActivityRerunDTO[]>("/platform-admin/activity-reruns", { platformAdminAuth: true, signal });
   },
-  publishActivityRerun(key: string) {
-    return request<import("../types").PlatformActivityDTO[]>(`/platform-admin/activities/${key}/rerun`, { platformAdminAuth: true, method: "POST" });
+  reviewActivityRerun(id: number, approved: boolean, revision: string) {
+    return request<import("../types").PlatformActivityRerunDTO[]>(`/platform-admin/activity-reruns/${id}`, {
+      platformAdminAuth: true, method: "POST", body: { approved, revision },
+    });
   },
   getPlatformSpaces(query = "", signal?: AbortSignal) {
     return request<PlatformAdminSpaceDTO[]>("/platform-admin/spaces", { platformAdminAuth: true, query: { q: query }, signal });
