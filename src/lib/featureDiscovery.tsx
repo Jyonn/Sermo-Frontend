@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { api } from "./api";
 import { useAuth } from "./auth";
@@ -34,19 +34,30 @@ export function FeatureDiscoveryProvider({ children }: { children: ReactNode }) 
   const [activeGuide, setActiveGuide] = useState<ActiveGuide | null>(null);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const identity = session ? `${session.user.space_id}:${session.user.user_id}` : "";
+  const dismissed = useMemo(() => new Set<string>(), [identity]);
+  const request = useRef<AbortController | null>(null);
 
   const refresh = useCallback(() => {
-    if (!session) {
-      setStatus({ features: [], pending_count: 0 });
-      return;
-    }
-    void api.getFeatureDiscoveries().then(setStatus).catch(() => undefined);
-  }, [identity]);
+    if (!identity) return;
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
+    void api.getFeatureDiscoveries(controller.signal).then(current => {
+      if (controller.signal.aborted) return;
+      const features = current.features.map(item => dismissed.has(item.reward_id) ? { ...item, is_new: false } : item);
+      setStatus({ features, pending_count: features.filter(item => item.is_new).length });
+    }).catch(() => undefined);
+  }, [dismissed, identity]);
 
   useEffect(() => {
+    setStatus({ features: [], pending_count: 0 });
+    setActiveGuide(null);
     refresh();
     window.addEventListener(FEATURE_DISCOVERY_REFRESH_EVENT, refresh);
-    return () => window.removeEventListener(FEATURE_DISCOVERY_REFRESH_EVENT, refresh);
+    return () => {
+      request.current?.abort();
+      window.removeEventListener(FEATURE_DISCOVERY_REFRESH_EVENT, refresh);
+    };
   }, [refresh]);
 
   useEffect(() => {
@@ -62,17 +73,20 @@ export function FeatureDiscoveryProvider({ children }: { children: ReactNode }) 
   }, [activeGuide]);
 
   const discover = useCallback(async (rewardId: string) => {
+    if (dismissed.has(rewardId)) return;
+    dismissed.add(rewardId);
     setStatus((current) => ({
       ...current,
       pending_count: Math.max(0, current.pending_count - (current.features.some((item) => item.reward_id === rewardId && item.is_new) ? 1 : 0)),
       features: current.features.map((item) => item.reward_id === rewardId ? { ...item, is_new: false } : item),
     }));
     try {
-      setStatus(await api.discoverFeature(rewardId));
+      await api.discoverFeature(rewardId);
     } catch {
-      refresh();
+      dismissed.delete(rewardId);
+      window.dispatchEvent(new Event(FEATURE_DISCOVERY_REFRESH_EVENT));
     }
-  }, [refresh]);
+  }, [dismissed]);
 
   const features = useMemo(() => new Map(status.features.map((item) => [item.reward_id, item])), [status.features]);
   const value = useMemo<FeatureDiscoveryContextValue>(() => ({
@@ -169,8 +183,8 @@ export function FeatureDiscoveryTarget({
   );
 }
 
-export function FeatureDiscoveryMarker({ rewardId }: { rewardId: string }) {
+export function FeatureDiscoveryMarker({ rewardId, className }: { rewardId: string; className?: string }) {
   const { feature } = useFeatureDiscovery();
   const current = feature(rewardId);
-  return current?.is_new ? <i className="feature-discovery-dot is-inline" aria-label={current.title} /> : null;
+  return current?.is_new ? <i className={`feature-discovery-dot is-inline${className ? ` ${className}` : ""}`} aria-label={current.title} /> : null;
 }

@@ -2120,6 +2120,13 @@ html[data-theme="dark"] .user-profile-panel {
   border-color: var(--bg-surface);
 }
 
+.feature-discovery-dot.appearance-catalog-new {
+  position: absolute;
+  top: 8px;
+  inset-inline-start: 8px;
+  inset-inline-end: auto;
+}
+
 .menu-feature-trailing {
   display: inline-flex;
   align-items: center;

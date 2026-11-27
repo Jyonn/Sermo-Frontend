@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { appearanceAsset } from "../lib/appearanceAsset";
 import { usePageActive } from "../lib/pageActivity";
 import type { SingerAvatarFrameStyle } from "../lib/singerAvatarFrames";
@@ -6,12 +6,21 @@ import "./SingerAvatarFrame.css";
 
 let ornamentObserver: IntersectionObserver | undefined;
 
+const lettering = {
+  gem: { count: 5, interval: .48 },
+  "eason-chan": { count: 2, interval: .76 },
+} as const;
+
 export function SingerAvatarFrame({ style, animate }: { style: SingerAvatarFrameStyle; animate: boolean }) {
-  const ornament = useRef<HTMLPictureElement>(null);
-  const [ready, setReady] = useState(false);
+  const ornament = useRef<HTMLSpanElement>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [portraitReady, setPortraitReady] = useState(false);
   const pageActive = usePageActive();
-  const poster = appearanceAsset(`/assets/avatar-frames/singers/${style}/poster.webp`);
-  const frames = appearanceAsset(`/assets/avatar-frames/singers/${style}/frames.webp`);
+  const path = `/assets/avatar-frames/singers/${style}`;
+  const poster = appearanceAsset(`${path}/poster.webp`);
+  const frames = appearanceAsset(`${path}/motion-v2.webp`);
+  const scene = appearanceAsset(`${path}/stage-v2.webp`);
+  const verse = style === "gem" || style === "eason-chan" ? lettering[style] : undefined;
 
   useEffect(() => {
     const target = ornament.current;
@@ -31,11 +40,22 @@ export function SingerAvatarFrame({ style, animate }: { style: SingerAvatarFrame
   }, [animate, pageActive]);
 
   return (
-    <picture ref={ornament} aria-hidden="true"
-      className={`singer-avatar-ornament${animate ? "" : " is-still"}${ready ? " is-loaded" : ""}`}>
-      {animate && <source media="(prefers-reduced-motion: reduce)" srcSet={poster} />}
-      <img alt="" src={animate ? frames : poster} loading="lazy" decoding="async"
-        onLoad={() => setReady(true)} onError={() => setReady(false)} />
-    </picture>
+    <span ref={ornament} aria-hidden="true"
+      className={`singer-avatar-ornament${animate ? "" : " is-still"}${sceneReady && portraitReady ? " is-loaded" : ""}`}>
+      <img className="singer-avatar-stage" src={scene} alt="" loading="lazy" decoding="async" onLoad={() => setSceneReady(true)} />
+      <picture className="singer-avatar-portrait">
+        {animate && <source media="(prefers-reduced-motion: reduce)" srcSet={poster} />}
+        <img alt="" src={animate ? frames : poster} loading="lazy" decoding="async" onLoad={() => setPortraitReady(true)} />
+      </picture>
+      {animate && verse && <span className="singer-avatar-verse" style={{
+        "--letter-art": `url("${appearanceAsset(`${path}/lettering-v2.webp`)}")`,
+        "--letter-count": verse.count,
+      } as CSSProperties}>
+        {Array.from({ length: verse.count }, (_, index) => <i key={index} style={{
+          "--letter-time": `${5.64 + index * verse.interval}s`,
+          "--letter-position": `${100 * index / (verse.count - 1)}%`,
+        } as CSSProperties}><b /></i>)}
+      </span>}
+    </span>
   );
 }

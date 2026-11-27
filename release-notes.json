@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.28.2",
+  "id": "2026.11.28.3",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "限时活动返场",
+      "title": "歌手头像框焕新",
       "items": [
-        "限时活动结束满三个月后，空间管理员可申请返场。满六个月后可以直接领取下一期，新一期的任务从头开始。",
-        "领取已经拥有的活动奖励时，可兑换为 10 点成长值。"
+        "四款歌手头像框加入专属场景与更流畅的人像动画，邓紫棋和陈奕迅的典藏头像框还有逐字演出。",
+        "头像框和个人名片按稀有度分组，每行展示两款。已解锁的新品会显示红点。"
       ]
     },
     "en": {
-      "title": "Activities can return",
+      "title": "Singer avatar frames refreshed",
       "items": [
-        "Space administrators can request a rerun after three months or activate the next edition directly after six months. Tasks start fresh in each edition.",
-        "Claim rewards you already own to receive 10 growth points each."
+        "Four singer avatar frames now have their own backdrops and smoother portrait animation. The G.E.M. and Eason Chan frames add animated lettering.",
+        "Avatar frames and profile cards appear two per row, grouped by rarity. A red dot marks new styles you have unlocked."
       ]
     }
   }

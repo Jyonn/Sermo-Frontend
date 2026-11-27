@@ -9013,6 +9013,10 @@ html[data-theme="dark"] .square-chat-record {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.field-avatar_frame_style {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .personalization-option {
   position: relative;
   display: grid;
@@ -9049,7 +9053,7 @@ html[data-theme="dark"] .square-chat-record {
   opacity: 0.62;
 }
 
-.personalization-option > i {
+.personalization-option > i:not(.feature-discovery-dot) {
   position: relative;
   display: grid;
   height: 48px;

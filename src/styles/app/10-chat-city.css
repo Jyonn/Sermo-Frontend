@@ -896,15 +896,16 @@
   background: #d9e4dd;
 }
 
-.field-avatar_frame_style .personalization-option > i {
+.field-avatar_frame_style .personalization-option > i:not(.feature-discovery-dot) {
+  height: 74px;
   overflow: visible;
 }
 
 .field-avatar_frame_style .personalization-option-avatar {
-  width: 30px;
-  height: 30px;
+  width: 54px;
+  height: 54px;
   border-radius: 38%;
-  font-size: 0.58rem;
+  font-size: 0.9rem;
 }
 .field-square_outfit_style .preview-sunset i span { background: linear-gradient(145deg, #ffba68, #df6948); }
 .field-square_outfit_style .preview-varsity i span { background: linear-gradient(90deg, #ecf0e7 28%, #34735c 28% 72%, #ecf0e7 72%); }

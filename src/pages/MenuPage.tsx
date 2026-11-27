@@ -180,6 +180,9 @@ const personalizationOptions = {
   ],
 } as const;
 
+const profileThemeCatalog = (["default", "level-12", "vip", "spider-city", "explorer-romance", ...Object.keys(musicProfileCards)] as ProfileCardTheme[])
+  .map(theme => [theme, `menu.profileCardTheme.${theme}` as TranslationKey] as const);
+
 const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> }> = [
   {
     label: "menu.collectionEssential",
@@ -641,6 +644,9 @@ export default function MenuPage() {
     if (discoveryFeature(rewardId)?.is_new) void discoverFeature(rewardId);
     action();
   };
+  const newFrame = singerAvatarFrameStyles.map(value => `frame.${value}`).find(id => discoveryFeature(id)?.is_new);
+  const newProfile = Object.keys(musicProfileCards).map(value => `profile.${value}`).find(id => discoveryFeature(id)?.is_new);
+  const newAppearance = newFrame ?? newProfile;
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const ownsInventoryResource = (
@@ -664,7 +670,13 @@ export default function MenuPage() {
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
     category === "frame" && isSingerAvatarFrame(assetKey) ? singerAvatarFrames[assetKey].level : rewardFor(category, assetKey)?.level ?? 1;
-  const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string): GrowthRewardDTO["rarity"] => {
+  const rewardRarity = (category: "background" | "bubble" | "frame" | "profile", assetKey: string): GrowthRewardDTO["rarity"] => {
+    if (category === "profile") {
+      if (isMusicProfileCard(assetKey)) return musicProfileCards[assetKey].rarity;
+      if (assetKey === "explorer-romance") return "legendary";
+      if (assetKey === "vip" || assetKey === "spider-city") return "epic";
+      return assetKey === "level-12" ? "rare" : "common";
+    }
     if (category === "frame" && isSingerAvatarFrame(assetKey)) return singerAvatarFrames[assetKey].rarity;
     if (category === "background" && assetKey === "starry-night") return "legendary";
     if (category === "background" && assetKey === "explorer-duality") return "epic";
@@ -700,7 +712,7 @@ export default function MenuPage() {
     );
   const buildPersonalizationSections = (
     items: readonly PersonalizationCatalogItem[],
-    category: "background" | "bubble" | "frame",
+    category: "background" | "bubble" | "frame" | "profile",
     isOwned: (assetKey: string) => boolean,
   ): PersonalizationCatalogSection[] => {
     const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"] as const;
@@ -2309,7 +2321,7 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong className="menu-update-label">{t("menu.personalization")}{themeNew?<ThemeDiscoveryDot/>:<CallShortcutDiscoveryMarker/>}</strong>
+                <strong className="menu-update-label">{t("menu.personalization")}{themeNew ? <ThemeDiscoveryDot/> : newAppearance ? <FeatureDiscoveryMarker rewardId={newAppearance}/> : <CallShortcutDiscoveryMarker/>}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2618,14 +2630,14 @@ export default function MenuPage() {
                 uri={me?.avatar_uri ?? session?.user.avatar_uri}
               />
             </span>
-            <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
+            <span><strong className="menu-update-label">{t("menu.avatarFrame")}{newFrame && <FeatureDiscoveryMarker rewardId={newFrame} />}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           <button className="personalization-background-entry personalization-feature-entry profile-card-entry" onClick={() => setProfileCardDrawerOpen(true)} type="button">
             <span className={`profile-card-entry-swatch theme-${currentProfileTheme}`}>
               {isMusicProfileCard(currentProfileTheme) ? <MusicProfileScene theme={currentProfileTheme} still /> : <><i /><b /></>}
             </span>
-            <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
+            <span><strong className="menu-update-label">{t("menu.profileCard")}{newProfile && <FeatureDiscoveryMarker rewardId={newProfile} />}</strong><small>{t("menu.profileCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
@@ -2700,18 +2712,26 @@ export default function MenuPage() {
               />
             </div>
           </div>
-          <div className="profile-card-theme-list">
-            {(["default", "level-12", "vip", "spider-city", "explorer-romance", ...Object.keys(musicProfileCards)] as ProfileCardTheme[]).map((theme) => {
-              const lock = profileThemeLock(theme);
-              const music = isMusicProfileCard(theme) ? musicProfileCards[theme] : null;
-              const rarity = music?.rarity ?? (theme === "explorer-romance" ? "legendary" : theme === "level-12" ? "rare" : theme === "vip" || theme === "spider-city" ? "epic" : "common");
-              const rarityText = t(`growth.rarity.${rarity}`);
-              return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${lock ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
-                <span>{isMusicProfileCard(theme) ? <MusicProfileScene theme={theme} still /> : <><i /><b /></>}</span>
-                <strong>{t(`menu.profileCardTheme.${theme}`)}</strong>
-                <small>{music && lock ? `${rarityText} · ${lock}` : lock ?? rarityText}</small>
-              </button>;
-            })}
+          <div className="personalization-library">
+            <PersonalizationCatalogControls onOwnershipChange={setPersonalizationOwnershipFilter} ownership={personalizationOwnershipFilter} />
+            {buildPersonalizationSections(profileThemeCatalog, "profile", key => !profileThemeLock(key as ProfileCardTheme)).map(section => (
+              <section className={`personalization-library-section rarity-${section.key}`} key={section.key}>
+                <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
+                <div className="profile-card-theme-list">
+                  {section.items.map(([key, label]) => {
+                    const theme = key as ProfileCardTheme;
+                    const lock = profileThemeLock(theme);
+                    return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${lock ? " is-locked" : ""}`} key={theme}
+                      onClick={() => discoverThen(`profile.${theme}`, () => setPersonalizationDraft(current => ({ ...current, profile_card_theme: theme })))} type="button">
+                      <span>{isMusicProfileCard(theme) ? <MusicProfileScene theme={theme} still /> : <><i /><b /></>}</span>
+                      <strong>{t(label)}</strong>
+                      {lock && <small>{lock}</small>}
+                      <FeatureDiscoveryMarker className="appearance-catalog-new" rewardId={`profile.${theme}`} />
+                    </button>;
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
         </div>
       </SideDrawer>
@@ -2943,7 +2963,7 @@ export default function MenuPage() {
                       className={`personalization-option preview-${value} rarity-${rewardRarity("frame", value)}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}${!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? " is-locked" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
-                      onClick={() => setPersonalizationDraft((current) => ({ ...current, avatar_frame_style: value as PersonalizationDTO["avatar_frame_style"] }))}
+                      onClick={() => discoverThen(`frame.${value}`, () => setPersonalizationDraft(current => ({ ...current, avatar_frame_style: value as PersonalizationDTO["avatar_frame_style"] })))}
                       type="button"
                     >
                       <i aria-hidden="true">
@@ -2956,6 +2976,7 @@ export default function MenuPage() {
                         />
                       </i>
                       <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("frame", value)} /><strong>{t(label)}</strong></div>
+                      <FeatureDiscoveryMarker className="appearance-catalog-new" rewardId={`frame.${value}`} />
                       {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
                         <small>{activityAvatarFrameStyles.has(value as PersonalizationDTO["avatar_frame_style"])
                           ? t("menu.activityUnlock")

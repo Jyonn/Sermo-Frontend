@@ -58,8 +58,8 @@
 .profile-card-preview-person small { color: var(--text-muted); font-weight: 750; }
 .profile-card-preview-facts { display: flex; gap: 10px; margin: 26px 24px 0 174px; }
 .profile-card-preview-facts i { padding: 8px 13px; border: 1px solid var(--line-soft); border-radius: 999px; font-style: normal; font-weight: 800; }
-.profile-card-theme-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.profile-card-theme-option { display: grid; gap: 8px; min-width: 0; padding: 10px; border: 1px solid var(--line-soft); border-radius: 18px; color: var(--text-primary); background: var(--surface-panel); text-align: left; }
+.profile-card-theme-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.profile-card-theme-option { position: relative; display: grid; gap: 8px; min-width: 0; padding: 10px; border: 1px solid var(--line-soft); border-radius: 18px; color: var(--text-primary); background: var(--surface-panel); text-align: left; }
 .profile-card-theme-option > span { aspect-ratio: 1.7; }
 .profile-card-theme-option strong { overflow: hidden; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
 .profile-card-theme-option small { color: var(--text-muted); font-size: .65rem; }

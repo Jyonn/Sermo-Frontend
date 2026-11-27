@@ -66,48 +66,137 @@
 .singer-avatar-ornament {
   position: absolute;
   z-index: 3;
-  inset: auto 0 2%;
-  width: 56%;
-  margin-inline: auto;
-  aspect-ratio: 1;
+  inset: 7.5%;
+  border-radius: inherit;
   display: block;
   overflow: hidden;
   pointer-events: none;
 }
 
-.singer-avatar-ornament > img {
+.singer-avatar-stage,
+.singer-avatar-portrait,
+.singer-avatar-verse {
+  position: absolute;
   display: block;
-  width: 600%;
-  height: 100%;
-  max-width: none;
   opacity: 0;
 }
 
-.singer-avatar-ornament.is-loaded > img { opacity: 1; }
-.singer-avatar-ornament.is-still > img { width: 100%; }
+.singer-avatar-stage {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.singer-avatar-portrait {
+  bottom: -4%;
+  right: -4%;
+  width: 102%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.singer-avatar-portrait img {
+  display: block;
+  width: 3100%;
+  height: 100%;
+  max-width: none;
+}
+
+.singer-frame-gem .singer-avatar-portrait,
+.singer-frame-eason-chan .singer-avatar-portrait { right: -9%; width: 94%; }
+
+.singer-avatar-ornament.is-loaded.is-still :is(.singer-avatar-stage, .singer-avatar-portrait) { opacity: 1; }
+.singer-avatar-ornament.is-still .singer-avatar-portrait img { width: 100%; }
+
+.singer-avatar-verse {
+  inset: 15% auto auto 5%;
+  width: 38%;
+  aspect-ratio: 1;
+}
+
+.singer-avatar-verse i, .singer-avatar-verse b {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.singer-avatar-verse b {
+  background: var(--letter-art) var(--letter-position) 50% / calc(var(--letter-count) * 100%) 100% no-repeat;
+  opacity: 0;
+}
+
+.singer-frame-gem .singer-avatar-verse i::before,
+.singer-frame-gem .singer-avatar-verse i::after {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  border: 1px solid #d2f3ff;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle at 27% 24%, #fff, transparent 30%);
+  box-shadow: inset -.7px -.7px 1px #d581e7, 1px -1px 2px #d6bbff90;
+}
 
 @media (prefers-reduced-motion: no-preference) {
-  .singer-avatar-ornament:not(.is-still) { opacity: 0; }
-
-  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] {
-    animation: singer-avatar-greeting 10s ease-in-out infinite;
+  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] .singer-avatar-stage {
+    animation: singer-avatar-stage-light 12s ease-in-out infinite;
   }
-
-  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] > img {
-    animation: singer-avatar-performance 10s steps(5, end) infinite;
+  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] .singer-avatar-portrait {
+    animation: singer-avatar-entrance 12s cubic-bezier(.21,.72,.26,1) infinite;
+  }
+  .singer-avatar-ornament.is-loaded:not(.is-still)[data-in-view] .singer-avatar-portrait img {
+    animation: singer-avatar-performance 12s infinite;
+  }
+  .singer-avatar-ornament.is-loaded[data-in-view] .singer-avatar-verse { opacity: 1; }
+  .singer-avatar-ornament.is-loaded[data-in-view] .singer-avatar-verse b {
+    animation: singer-avatar-letter-light 12s var(--letter-time) infinite;
+  }
+  .singer-frame-gem .singer-avatar-ornament.is-loaded[data-in-view] .singer-avatar-verse b {
+    animation-name: singer-avatar-letter-pop;
+  }
+  .singer-frame-gem .singer-avatar-ornament.is-loaded[data-in-view] .singer-avatar-verse i::before {
+    animation: singer-avatar-bubble-burst 12s calc(var(--letter-time) + .05s) ease-out infinite;
+  }
+  .singer-frame-gem .singer-avatar-ornament.is-loaded[data-in-view] .singer-avatar-verse i::after {
+    animation: singer-avatar-bubble-trail 12s calc(var(--letter-time) + .13s) ease-out infinite;
   }
 }
 
-@keyframes singer-avatar-greeting {
-  0%, 25%, 100% { opacity: 0; transform: translateY(72%); }
-  4%, 22% { opacity: 1; transform: translateY(0); }
+@keyframes singer-avatar-stage-light {
+  0%, 27%, 85%, 100% { opacity: 0; }
+  38%, 75% { opacity: 1; }
 }
-
+@keyframes singer-avatar-entrance {
+  0%, 37% { opacity: 0; transform: translateY(17%) scale(.96); }
+  45%, 72% { opacity: 1; transform: translateY(0) scale(1); }
+  79%, 100% { opacity: 0; transform: translateY(5%) scale(.99); }
+}
 @keyframes singer-avatar-performance {
-  0%, 4% { transform: translateX(0); }
-  19%, 100% { transform: translateX(-83.333333%); }
+  0%, 41% { transform: translateX(0); animation-timing-function: steps(30, end); }
+  61%, 100% { transform: translateX(-96.774194%); }
+}
+@keyframes singer-avatar-letter-pop {
+  0% { opacity: 0; transform: scale(.56); }
+  .85% { opacity: 1; transform: scale(1.12); }
+  2.3% { opacity: 1; transform: scale(.96); }
+  3.4%, 100% { opacity: 0; transform: scale(1.03); }
+}
+@keyframes singer-avatar-letter-light {
+  0% { opacity: 0; transform: translateY(10%); clip-path: inset(20% 75% 0 0); }
+  2%, 4.8% { opacity: 1; transform: translateY(0); clip-path: inset(0); }
+  6.1%, 100% { opacity: 0; transform: translateY(-8%); }
+}
+@keyframes singer-avatar-bubble-burst {
+  0% { opacity: 0; transform: scale(.18); }
+  1.1% { opacity: .75; }
+  4.5%, 100% { opacity: 0; transform: scale(1.35) translateY(-6%); }
+}
+@keyframes singer-avatar-bubble-trail {
+  0% { opacity: .85; transform: translate(12%, 17%) scale(.30); }
+  3.5%, 100% { opacity: 0; transform: translate(63%, -60%) scale(.42); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .singer-avatar-ornament > img { width: 100%; }
+  .singer-avatar-ornament:not(.is-still) .singer-avatar-portrait img { width: 100%; }
 }
