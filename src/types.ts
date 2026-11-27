@@ -959,11 +959,14 @@ export interface SquareStatementDTO {
   created_at: number;
 }
 
-export interface SquareStatementRevision {
+export type SquareRevisionField = "visibility" | "location" | "media" | "external_media" | "chat_record";
+
+export interface SquareStatementRevision extends Partial<Pick<SquareStatementDTO, SquareRevisionField | "inline_emoticons">> {
   revision: number;
   text: string;
   published_at: number;
-  changes?: Array<"text" | "visibility" | "location" | "media" | "external_media" | "chat_record">;
+  changes?: Array<"text" | SquareRevisionField>;
+  unavailable_fields?: SquareRevisionField[];
 }
 
 export interface SquareCalendarDTO {

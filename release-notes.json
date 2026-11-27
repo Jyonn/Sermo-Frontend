@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.27.2",
+  "id": "2026.11.27.3",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "语音转写适配所有气泡主题",
+      "title": "完整查看发言的编辑历史",
       "items": [
-        "语音转写沿用对应气泡的配色与圆角。短文字贴合内容，长文字自然折行，宽度可以超过语音条。"
+        "编辑历史逐版展示正文、附件、位置和可见范围，并标出相对上一版的改动。"
       ]
     },
     "en": {
-      "title": "Voice transcripts match every bubble theme",
+      "title": "See full versions of edited posts",
       "items": [
-        "Voice transcripts follow your bubble theme and group shape. Short text stays compact, while longer text can extend past the player and wraps naturally."
+        "See each post version with its text, attachments, location and audience, with changes from the previous version highlighted."
       ]
     }
   }

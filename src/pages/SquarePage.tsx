@@ -60,7 +60,7 @@ import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { isChineseLanguage, localeForLanguage } from "../lib/i18n";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
-import { usePlaybackWait } from "../components/MediaWaitFeedback";
+import { SquareStatementAudio } from "../components/SquareStatementAudio";
 import { formatRelativeTime } from "../lib/presentation";
 import {formatSquareTime} from '../lib/squareTime';
 import {
@@ -318,10 +318,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   onShare: () => void;
 }) {
   const { t,language } = useI18n();
-  const [playing, setPlaying] = useState(false);
-  const audioWait = usePlaybackWait();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const images = statement.media.filter((item) => item.kind === "image");
@@ -404,20 +401,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           ))}
         </div>
       ) : null}
-      {audio ? (
-        <div className="square-statement-audio">
-          <button onClick={(event) => {
-            event.stopPropagation();
-            const player = audioRef.current;
-            if (!player) return;
-            if (player.paused) { if (audioWait.phase === "error") player.load(); audioWait.start(); void player.play().catch(audioWait.fail); }
-            else player.pause();
-          }} type="button" aria-label={audioWait.phase === "error" ? t("common.retry") : audioWait.visible ? t("media.buffering") : playing ? t("media.pause") : t("media.play")}>{audioWait.visible && audioWait.phase !== "error" ? <span className="media-wait-spinner" aria-hidden="true" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}</button>
-          <div className="square-audio-wave" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
-          <small>{audioWait.phase === "error" ? t("common.retry") : audio.duration_seconds ? `${audio.duration_seconds}s` : t("square.voice")}</small>
-          <audio hidden onEnded={() => { setPlaying(false); audioWait.ready(); }} onError={audioWait.fail} onPause={() => { setPlaying(false); audioWait.stop(); }} onPlaying={() => { setPlaying(true); audioWait.ready(); }} onStalled={audioWait.waiting} onWaiting={audioWait.waiting} preload="metadata" ref={audioRef} src={audio.uri} />
-        </div>
-      ) : null}
+      {audio ? <SquareStatementAudio audio={audio} /> : null}
       {video ? <StatementVideoThumbnail className="square-statement-video" durationSeconds={video.duration_seconds} eager={detail} onClick={() => onOpenVideo()} thumbnailUri={video.thumbnail_uri} /> : null}
       {statement.location ? <button aria-label={statement.location.address || t("square.location")} className="square-statement-location" onClick={(event) => { event.stopPropagation(); onOpenLocation(); }} type="button"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
       <footer className="square-statement-footer">
@@ -2457,7 +2441,10 @@ export default function SquarePage() {
         </div>
       </SideDrawer>
       {statementHistoryId !== null && <SquareStatementHistory key={statementHistoryId} statementId={statementHistoryId}
-        onClose={() => setStatementHistoryId(null)} />}
+        onClose={() => setStatementHistoryId(null)}
+        renderText={(text, emoticons) => <InlineRichText text={text} emoticons={emoticons} />}
+        onOpenImages={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })}
+        onOpenVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} />}
       <SideDrawer className="square-compose-side-drawer" historyKey="square-compose" onRouteOpen={openComposer} onClose={closeComposer} open={composerOpen}
         title={t(editingStatement ? "square.editStatement" : "square.composeTitle")} headerless floatingBack={false}>
         <SquareComposerEditor editing={Boolean(editingStatement)} text={text} onText={setText} limit={MAX_TEXT_LENGTH} photos={photos} video={video}

@@ -18,9 +18,51 @@
   cursor: pointer;
 }
 
-.square-history-list p { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.square-history-list { list-style: none; padding: 0; margin: 0 0 12px; }
-.square-history-list li { padding: 16px 0; border-bottom: 1px solid var(--line-soft); }
-.square-history-list li header { display: flex; flex-wrap: wrap; gap: 5px 12px; align-items: baseline; }
-.square-history-list time { font-size: .8rem; color: var(--text-muted); }
-.square-history-changes { display: block; margin-top: 8px; color: var(--text-muted); font-size: .8rem; }
+.square-history-list {
+  --history-highlight: color-mix(in srgb, var(--warning) 22%, transparent);
+  --history-highlight-edge: color-mix(in srgb, var(--warning) 45%, transparent);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.square-history-list > li { padding: 16px 0; border-bottom: 1px solid var(--line-soft); }
+.square-history-list > li > header { display: flex; flex-wrap: wrap; gap: 5px 12px; align-items: baseline; }
+.square-history-list > li > header time { font-size: .8rem; color: var(--text-muted); }
+.square-history-text { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.square-history-text mark {
+  background: var(--history-highlight);
+  border-radius: 3px;
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.square-history-field,
+.square-history-note {
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.square-history-field.is-changed,
+.square-history-images > button.is-changed {
+  outline: 2px solid var(--history-highlight-edge);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.square-history-detail {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  width: fit-content;
+  max-width: 100%;
+  color: var(--text-muted);
+  font-size: .8rem;
+  overflow-wrap: anywhere;
+}
+
+.square-history-detail > .material-symbols-outlined { font-size: 1rem; align-self: center; }
+.square-history-detail.is-changed { background: var(--history-highlight); outline-offset: 0; }
+.square-history-note { display: block; color: var(--text-muted); font-size: .8rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+.square-history-note del { text-decoration-color: var(--warning); }
