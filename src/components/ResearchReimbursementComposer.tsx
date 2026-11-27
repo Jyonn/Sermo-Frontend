@@ -8,6 +8,7 @@ import {DateRangeField} from './DateRangeField';
 import {SelectControl} from './SettingRow';
 import type {ResearchMutation} from './ResearchWorkflow';
 import type {ResearchReimbursementItem} from '../lib/research';
+import {ResearchLocalFilePreview} from './ResearchFilePreview';
 import './ResearchReimbursementComposer.css';
 
 type Draft={id:string;title:string;amount:string;currency:string;exchange_rate:string;notes:string;payment:File|null;invoice:File|null;other:File[]};
@@ -17,9 +18,14 @@ export function ResearchReimbursementItems({items,onOpen}:{items:ResearchReimbur
   const {t}=useI18n();
   return <div className="reimbursement-detail-items">{items.map(item=><section className="reimbursement-detail-item" key={item.id}><header><h3>{item.title}</h3><strong>¥{item.cny_amount}</strong></header><small>{item.currency} {item.amount}{item.currency!=='CNY'?` · ${t('researchFlow.fxQuote')} ${item.exchange_rate}`:''}</small>{item.notes&&<p>{item.notes}</p>}<div className="research-flow-actions"><button type="button" className="ghost-button" onClick={()=>onOpen(item.payment_id)}>{t('researchFlow.payment')}</button><button type="button" className="ghost-button" onClick={()=>onOpen(item.invoice_id)}>{t('researchFlow.invoice')}</button>{item.other_ids.map((id,index)=><button type="button" className="ghost-button" key={id} onClick={()=>onOpen(id)}>{t('researchFlow.otherFiles')} {index+1}</button>)}</div></section>)}</div>;
 }
-function EvidenceField({label,files,multiple=false,onChange}:{label:string;files:File[];multiple?:boolean;onChange:(files:File[])=>void}){
+function EvidenceField({label,files,multiple=false,onChange,onPreview}:{label:string;files:File[];multiple?:boolean;onChange:(files:File[])=>void;onPreview:(file:File)=>void}){
   const {t}=useI18n();
-  return <label className="research-evidence-field"><span className="material-symbols-outlined" aria-hidden="true">attach_file</span><span><strong>{label}</strong><small>{files.length?files.map(file=>file.name).join(' · '):t('researchFlow.chooseEvidence')}</small></span><span className="material-symbols-outlined" aria-hidden="true">add</span><input type="file" accept="image/*,.pdf" multiple={multiple} onChange={event=>onChange(Array.from(event.target.files||[]).slice(0,multiple?6:1))}/></label>;
+  return <div className="research-evidence-input">
+    <label className="research-evidence-field"><span className="material-symbols-outlined" aria-hidden="true">attach_file</span><span><strong>{label}</strong>{!files.length&&<small>{t('researchFlow.chooseEvidence')}</small>}</span><span className="material-symbols-outlined" aria-hidden="true">add</span><input type="file" accept="image/*,.pdf" multiple={multiple} onChange={event=>onChange(Array.from(event.target.files||[]).slice(0,multiple?6:1))}/></label>
+    {files.map((file,index)=><button type="button" className="ghost-button research-attachment-preview" key={file.name+index} onClick={()=>onPreview(file)}>
+      <span className="material-symbols-outlined" aria-hidden="true">visibility</span><span>{file.name}</span>
+    </button>)}
+  </div>;
 }
 
 export function ResearchReimbursementComposer({currencies,busy,mutationError,mutate,onDone,onBusy}:{currencies:string[];busy:boolean;mutationError?:string;mutate:ResearchMutation;onDone:()=>void;onBusy:(busy:boolean)=>void}){
@@ -30,6 +36,7 @@ export function ResearchReimbursementComposer({currencies,busy,mutationError,mut
     return {from:date,to:date};
   });
   const [uploading,setUploading]=useState(false),[progress,setProgress]=useState(0),[error,setError]=useState('');
+  const [preview,setPreview]=useState<File>();
   const uploaded=useRef(new Map<File,number>());
   const total=reimbursementTotal(items);
   const converted=draft?reimbursementCny(draft.amount,draft.currency,draft.exchange_rate):null;
@@ -62,11 +69,11 @@ export function ResearchReimbursementComposer({currencies,busy,mutationError,mut
       <div className="reimbursement-money"><label>{t('researchFlow.invoiceAmount')}<input inputMode="decimal" required pattern="[0-9]+([.][0-9]{1,2})?" placeholder="0.00" value={draft.amount} onChange={event=>update({amount:event.target.value})} onBlur={()=>update({amount:normalizeMoney(draft.amount)})}/></label><SelectControl label={t('researchFlow.currency')} value={draft.currency} options={currencies.map(code=>({value:code,label:t(('researchCurrency.'+code) as TranslationKey)+' '+code}))} onChange={currency=>update({currency,exchange_rate:''})}/></div>
       {draft.currency!=='CNY'&&<div className="reimbursement-fx"><a href="https://www.boc.cn/sourcedb/whpjSearch/index.html" target="_blank" rel="noopener noreferrer">{t('researchFlow.bocRates')}<span className="material-symbols-outlined" aria-hidden="true">open_in_new</span></a><label>{t('researchFlow.fxQuote')}<input required inputMode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" placeholder="0.00" value={draft.exchange_rate} onChange={event=>update({exchange_rate:event.target.value})} onBlur={()=>update({exchange_rate:normalizeMoney(draft.exchange_rate)})}/></label><p>{t('researchFlow.fxHint',{currency:draft.currency})}</p></div>}
       <div className="reimbursement-total"><span>{t('researchFlow.cnyConverted')}</span><strong>{converted?`¥${converted}`:'—'}</strong></div>
-      <EvidenceField label={t('researchFlow.payment')} files={draft.payment?[draft.payment]:[]} onChange={files=>update({payment:files[0]||null})}/>
-      <EvidenceField label={t('researchFlow.invoice')} files={draft.invoice?[draft.invoice]:[]} onChange={files=>update({invoice:files[0]||null})}/>
-      <EvidenceField label={t('researchFlow.otherFiles')} files={draft.other} multiple onChange={other=>update({other})}/>
+      <EvidenceField label={t('researchFlow.payment')} files={draft.payment?[draft.payment]:[]} onChange={files=>update({payment:files[0]||null})} onPreview={setPreview}/>
+      <EvidenceField label={t('researchFlow.invoice')} files={draft.invoice?[draft.invoice]:[]} onChange={files=>update({invoice:files[0]||null})} onPreview={setPreview}/>
+      <EvidenceField label={t('researchFlow.otherFiles')} files={draft.other} multiple onChange={other=>update({other})} onPreview={setPreview}/>
       <label>{t('researchFlow.notes')}<textarea maxLength={4000} value={draft.notes} onChange={event=>update({notes:event.target.value})}/></label>
       <footer className="reimbursement-item-actions">{items.some(item=>item.id===draft.id)&&<button type="button" className="ghost-button" onClick={()=>{setItems(old=>old.filter(item=>item.id!==draft.id));setDraft(null);}}>{t('common.delete')}</button>}<button className="button" disabled={!draft.title.trim()||!draft.payment||!draft.invoice||!converted}>{t('research.save')}</button></footer>
     </form>}
-  </SideDrawer></>;
+  </SideDrawer>{preview&&<ResearchLocalFilePreview file={preview} onClose={()=>setPreview(undefined)}/>}</>;
 }

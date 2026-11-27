@@ -3,10 +3,12 @@ import type { CalendarSetup, ResearchMeeting } from "./researchCalendar.ts";
 
 type ResearchRequestOptions = {
   auth: true;
-  method?: "POST";
+  method?: "POST" | "PATCH" | "DELETE";
   query?: Record<string, string>;
   body?: unknown;
   signal?: AbortSignal;
+  cache?: RequestCache;
+  expectedScope?: string;
 };
 
 // Inject the shared transport so authentication, retries and cancellation stay centralized.
@@ -14,6 +16,9 @@ export type ResearchRequest = <T>(path: string, options: ResearchRequestOptions)
 
 export function createResearchApi(request: ResearchRequest) {
   return {
+    researchChronelle<T>(project: number, resource: string, options: Omit<ResearchRequestOptions, 'auth'> = {}) {
+      return request<T>(`/research/${project}/chronelle/${resource}/`, { ...options, auth: true, cache: "no-store" });
+    },
     researchResources(id: number, taskId: string, signal?: AbortSignal) {
       return request<ResearchResourceSpace>(`/research/${id}/resources/`, { auth: true, query: { task_id: taskId }, signal });
     },

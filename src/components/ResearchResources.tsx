@@ -12,6 +12,7 @@ import { PageTabs } from './PageTabs';
 import { SelectControl } from './SettingRow';
 import { ActionSheet } from './ActionSheet';
 import { FileDropGuide } from './FileDropGuide';
+import { ResearchFilePreview, type ResearchFile } from './ResearchFilePreview';
 import './ResearchResources.css';
 
 const symbol=(kind:string)=>kind==='folder'?'folder':kind==='link'?'link':'description';
@@ -23,6 +24,8 @@ export function ResearchResources({projectId,taskId='',title,members=[],initialA
   const [addMenu,setAddMenu]=useState(initialAdd),[selected,setSelected]=useState<ResearchResource|null>(null);
   const [adding,setAdding]=useState<'folder'|'link'|null>(null),[name,setName]=useState(''),[url,setUrl]=useState('');
   const [deleting,setDeleting]=useState<ResearchResource|null>(null);
+  const [preview,setPreview]=useState<ResearchFile>();
+  const opening=useRef(0);
   const fileInput=useRef<HTMLInputElement>(null);
   const [dragging,setDragging]=useState(false);
   const dragDepth=useRef(0),uploadQueue=useRef(false);
@@ -42,7 +45,15 @@ export function ResearchResources({projectId,taskId='',title,members=[],initialA
   function failed(e:unknown){const message=e instanceof Error?e.message:t('research.failed');setError(message==='Directory is not empty'?t('resources.folderNotEmpty'):message==='Directory already exists'?t('resources.folderExists'):message);}
   async function change(body:Record<string,unknown>){setBusy(true);setError('');try{await api.researchResourceAction(projectId,taskId,body);await reload();if(body.action==='add'){setQuery('');setKind('all');}setAdding(null);setDeleting(null);}catch(e){failed(e);}finally{setBusy(false);}}
   async function upload(file:File){setProgress(0);setUploadName(file.name);setError('');try{const uploaded=await uploadMessageMedia(file,'file',setProgress);await api.researchResourceAction(projectId,taskId,{action:'add',kind:'file',parent_id:parent,name:file.name,resource_id:uploaded.resource.resource_id});await reload();setQuery('');setKind('all');return true;}catch(e){failed(e);return false;}finally{setUploadName('');}}
-  async function open(item:ResearchResource){if(item.kind==='folder'){navigate(item.id);return;}const popup=window.open('about:blank','_blank');if(popup)popup.opener=null;setError('');try{const result=await api.researchResourceAction<{url:string}>(projectId,taskId,{action:'open',id:item.id});if(popup)popup.location.href=result.url;else setError(t('resources.popup'));}catch(e){popup?.close();failed(e);}}
+  async function open(item:ResearchResource){
+    if(item.kind==='folder'){opening.current++;navigate(item.id);return;}
+    const request=++opening.current;
+    setError('');
+    try{
+      const result=await api.researchResourceAction<ResearchFile>(projectId,taskId,{action:'open',id:item.id});
+      if(request===opening.current)setPreview({...result,name:item.name,link:item.kind==='link'});
+    }catch(e){if(request===opening.current)failed(e);}
+  }
   function add(value:'folder'|'link'){setName('');setUrl('');setError('');setAdding(value);}
   function more(item:ResearchResource){return <button className="resource-more" aria-label={t('resources.actions',{name:item.name})} disabled={busy} onClick={()=>setSelected(item)}><span className="material-symbols-outlined" aria-hidden="true">more_horiz</span></button>;}
   return <SideDrawer open className="research-resource-drawer" title={title} historyKey={`research-resources-${taskId||'project'}`} headerAction={space?.writable?<HeaderIconButton label={t('resources.add')} disabled={busy} onClick={()=>setAddMenu(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></HeaderIconButton>:undefined} onClose={()=>{if(!busy)onClose();}}>
@@ -70,10 +81,11 @@ export function ResearchResources({projectId,taskId='',title,members=[],initialA
       ...(!taskId?[{key:'folder',label:t('resources.addFolder'),description:t('resources.projectHint'),disabled:path.length>=2,icon:<span className="material-symbols-outlined">create_new_folder</span>,onSelect:()=>add('folder')}]:[]),
     ]}/>
     <ActionSheet open={!!selected} title={selected?.name||''} onClose={()=>setSelected(null)} actions={selected?[
-      {key:'open',label:t(selected.kind==='folder'?'resources.openFolder':'resources.open'),icon:<span className="material-symbols-outlined">{selected.kind==='folder'?'folder_open':'open_in_new'}</span>,onSelect:()=>{void open(selected);}},
+      {key:'open',label:t(selected.kind==='folder'?'resources.openFolder':'researchChronelle.preview'),icon:<span className="material-symbols-outlined">{selected.kind==='folder'?'folder_open':'visibility'}</span>,onSelect:()=>{void open(selected);}},
       ...(space?.writable&&selected.can_delete?[{key:'delete',label:t('resources.delete'),danger:true,description:selected.kind==='folder'?t('resources.folderNotEmpty'):undefined,icon:<span className="material-symbols-outlined">delete_outline</span>,disabled:selected.kind==='folder'&&space.items.some(item=>item.parent_id===selected.id),onSelect:()=>{setError('');setDeleting(selected);}}]:[]),
     ]:[]}/>
     <ConfirmDialog open={!!adding} title={t(adding==='folder'?'resources.addFolder':'resources.addLink')} description="" busy={busy} confirmDisabled={!name.trim()||(adding==='link'&&!/^https?:\/\//i.test(url.trim()))} onClose={()=>setAdding(null)} onConfirm={()=>void change({action:'add',kind:adding,parent_id:parent,name,url})}><div className="resource-form"><label>{t('research.name')}<input autoFocus maxLength={180} value={name} onChange={event=>setName(event.target.value)} disabled={busy}/></label>{adding==='link'&&<label>{t('resources.link')}<input type="url" inputMode="url" placeholder="https://" maxLength={2048} value={url} onChange={event=>setUrl(event.target.value)} disabled={busy}/></label>}{error&&<p role="alert" className="resource-error">{error}</p>}</div></ConfirmDialog>
     <ConfirmDialog open={!!deleting} title={t('resources.delete')} description={deleting?.name||''} danger busy={busy} onClose={()=>setDeleting(null)} onConfirm={()=>void change({action:'delete',id:deleting?.id})}>{error&&<p role="alert" className="resource-error">{error}</p>}</ConfirmDialog>
+    {preview&&<ResearchFilePreview file={preview} onClose={()=>setPreview(undefined)}/>}
   </SideDrawer>;
 }

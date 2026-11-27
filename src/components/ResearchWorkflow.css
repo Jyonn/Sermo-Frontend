@@ -114,3 +114,9 @@
 .research-reimbursement-state { font-size:11px; white-space:nowrap; padding:4px 7px; border-radius:20px; background:var(--bg-soft); color:var(--text-secondary); }
 .research-reimbursement-state[data-status="needs_info"] { color:var(--danger); }
 .research-reimbursement-state[data-status="submitted"] { color:var(--brand-primary-press,var(--brand-primary)); }
+.research-claim-timeline { list-style:none; display:grid; gap:8px; padding:0 0 0 10px; border-inline-start:1px solid var(--line-soft); margin:12px 0; }
+.research-claim-timeline li { display:flex; justify-content:space-between; gap:8px; align-items:baseline; font-size:.82rem; }
+.research-claim-timeline time { color:var(--text-muted); }
+.research-evidence-input { display:grid; gap:4px; }
+.research-attachment-preview { justify-content:flex-start; gap:6px; min-width:0; text-align:start; }
+.research-attachment-preview span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

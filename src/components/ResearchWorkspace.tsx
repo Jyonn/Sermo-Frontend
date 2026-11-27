@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import { useI18n } from "../lib/language";
 import { latestResearchUpdates, researchDate, researchExcerpt, researchTaskOrder, researchToday, taskPhase } from "../lib/researchWorkbench";
 import type { ResearchProject, ResearchSummary, ResearchTodo } from "../lib/research";
@@ -6,33 +7,42 @@ import { MemberAvatarStack } from "./MemberAvatarStack";
 import { Markdown } from "./ResearchMarkdown";
 import { ResearchTimeline, type ResearchMutation } from "./ResearchWorkflow";
 import { PlainAvatar } from "./UserAvatar";
+import { SideDrawer } from "./SideDrawer";
 
 export function ResearchHome({ projects, selected, open, create }: {
   projects: ResearchSummary[]; selected?: number | null; open: (id: number) => void; create: () => void;
 }) {
   const { t, language } = useI18n();
+  const [archiveOpen,setArchiveOpen]=useState(false);
   if (!projects.length) return <div className="research-home-scroll">
     <QuietState icon="science" title={t("research.empty")} description={t("research.intro")}
       action={<button type="button" className="button" onClick={create}>{t("research.create")}</button>} />
   </div>;
 
-  return <div className="research-home-scroll research-project-directory">
-    {(["active", "archived"] as const).map(status => {
-      const rows = projects.filter(project => project.status === status);
-      if (!rows.length) return null;
-      return <section key={status} className="research-directory-section">
-        <h2>{t(`research.${status}`)} <span>{rows.length}</span></h2>
-        <div className="research-project-list">
+  const active=projects.filter(project=>project.status==='active');
+  const archived=projects.filter(project=>project.status==='archived');
+  const projectRows=(rows:ResearchSummary[],onOpen:(id:number)=>void)=><div className="research-project-list">
           {rows.map(project => <button type="button" className="research-directory-row" key={project.id}
-            aria-current={selected === project.id ? "page" : undefined} onClick={() => open(project.id)}>
+            aria-current={selected === project.id ? "page" : undefined} onClick={() => onOpen(project.id)}>
             <span><strong>{project.title}</strong><small>
               {researchDate(project.start, language)} · {project.end ? researchDate(project.end, language) : t("research.openEnd")}
             </small></span>
             <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>)}
-        </div>
-      </section>;
-    })}
+  </div>;
+  return <div className="research-home-scroll research-project-directory">
+    <section className="research-directory-section">
+      <div className="research-archive-heading"><h2>{t('research.active')} <span>{active.length}</span></h2>
+        {archived.length>0&&<button className="ghost-button" type="button" onClick={()=>setArchiveOpen(true)}>
+          <span className="material-symbols-outlined" aria-hidden="true">archive</span>{t('researchChronelle.archiveProjects')} · {archived.length}
+        </button>}
+      </div>
+      {active.length?projectRows(active,open):<QuietState icon="science" title={t('researchChronelle.noActiveProjects')}/>}
+    </section>
+    <SideDrawer open={archiveOpen} showTitle title={t('researchChronelle.archiveProjects')} historyKey="research-project-archive"
+      className="research-workflow-drawer" onClose={()=>setArchiveOpen(false)}>
+      {projectRows(archived,id=>{setArchiveOpen(false);open(id);})}
+    </SideDrawer>
   </div>;
 }
 

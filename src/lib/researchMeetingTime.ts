@@ -45,12 +45,12 @@ export function meetingTimeFields(range: CalendarRange) {
 }
 
 export function meetingRangeFromFields(
-  fields: ReturnType<typeof meetingTimeFields>, timezone: string, allDay: boolean,
+  fields: ReturnType<typeof meetingTimeFields>, timezone: string, allDay: boolean, maxDays = 7,
 ): CalendarRange {
   const { from, to, startTime, endTime } = fields;
   const start = instantAt(`${from}T${allDay ? '00:00' : startTime}`, timezone);
   const end = instantAt(allDay ? `${shiftMeetingDay(to, 1)}T00:00` : `${to}T${endTime}`, timezone);
   const duration = Date.parse(end) - Date.parse(start);
-  if (duration <= 0 || duration > 7 * day) throw new RangeError('Invalid meeting duration');
+  if (duration <= 0 || duration > maxDays * day) throw new RangeError('Invalid meeting duration');
   return { start, end, timezone, all_day: allDay };
 }

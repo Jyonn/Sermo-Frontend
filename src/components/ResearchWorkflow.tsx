@@ -18,6 +18,7 @@ import { DatePickerField } from "./DatePickerField";
 import { DateRangeField } from "./DateRangeField";
 import { ResearchAssigneesField } from "./ResearchPeople";
 import { ResearchReimbursementComposer, ResearchReimbursementItems } from "./ResearchReimbursementComposer";
+import { ResearchFilePreview, type ResearchFile } from "./ResearchFilePreview";
 import { api } from "../lib/api";
 import { showToast } from "../lib/toast";
 import "./ResearchWorkflow.css";
@@ -209,6 +210,7 @@ export function ResearchTools({ project, owner, userId, busy, mutate, onResource
   const [entryClaim, setEntryClaim] = useState(initialReimbursementId);
   const writable = project.status === "active";
   const { rows: claims, pending } = claimOrder(project);
+  const activeClaims=claims.filter(claim=>claim.status==='submitted'||claim.status==='needs_info');
   const canAward = owner && writable && project.members.some(member => !member.owner);
 
   return <div className="research-administration">
@@ -240,10 +242,10 @@ export function ResearchTools({ project, owner, userId, busy, mutate, onResource
           {writable && <button className="button" type="button" onClick={() => setPanel("newClaim")}>{t("researchFlow.newReimbursement")}</button>}
         </div>
       </header>
-      {claims.length ? <ReimbursementList rows={claims.slice(0, 4)} project={project} onOpen={id => {
+      {activeClaims.length ? <ReimbursementList rows={activeClaims.slice(0, 4)} project={project} onOpen={id => {
         setEntryClaim(id);
         setPanel("reimbursements");
-      }} /> : <QuietState icon="receipt_long" title={t("researchFlow.noReimbursement")} />}
+      }} /> : <QuietState icon="receipt_long" title={t(claims.length?"researchWorkbench.noPendingClaims":"researchFlow.noReimbursement")} />}
     </section>
     {(panel === "reimbursements" || panel === "newClaim") && <ResearchReimbursements project={project} userId={userId} owner={owner} busy={busy}
       initialId={entryClaim} initialAdd={panel === "newClaim"} mutationError={mutationError} mutate={mutate}
@@ -287,30 +289,47 @@ function ResearchReimbursements({ project, userId, owner, busy, initialId, initi
   const { t, language } = useI18n();
   const [detailId, setDetailId] = useState<string | null>(initialId ?? null);
   const [adding, setAdding] = useState(initialAdd);
-  const [filter, setFilter] = useState("all");
+  const statuses=["submitted","needs_info","reviewed","rejected"] as const;
+  const [filter, setFilter] = useState<string>(() => {
+    const rows=project.workflow?.reimbursements??[];
+    const preferred=owner?statuses:["needs_info","submitted","reviewed","rejected"];
+    return rows.find(item=>item.id===initialId)?.status??preferred.find(status=>rows.some(item=>item.status===status))??"submitted";
+  });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const { rows: claims, pending } = claimOrder(project);
+  const [attachment,setAttachment]=useState<ResearchFile>();
+  const [loadingAttachment,setLoadingAttachment]=useState(false);
+  const fileRequest=useRef(0);
+  const { rows: claims } = claimOrder(project);
   const claim = claims.find(item => item.id === detailId);
-  const visible = filter === "pending" ? claims.filter(item => pending.has(item.id)) : claims;
+  const visible = claims.filter(item => item.status===filter);
   const writable = project.status === "active";
   const nameOf = (id: number) => project.members.find(member => member.id === id)?.name ?? String(id);
   const statusOf = (status: string) => t(("researchFlow." + status) as TranslationKey);
   const money = new Intl.NumberFormat(language, { style: "currency", currency: "CNY" });
 
   async function openEvidence(id: string, resource_id: number) {
-    const popup = window.open("about:blank", "_blank");
-    if (popup) popup.opener = null;
+    const requested=++fileRequest.current;
+    setLoadingAttachment(true);
     setError("");
     try {
-      const result = await api.researchUpdate(project.id, project.revision, { action: "reimbursement_open", id, resource_id }) as unknown as { url: string };
-      if (popup) popup.location.href = result.url;
-      else setError(t("resources.popup"));
+      const result = await api.researchUpdate(project.id, project.revision, { action: "reimbursement_open", id, resource_id }) as unknown as ResearchFile;
+      if(requested===fileRequest.current)setAttachment(result);
     } catch (e) {
-      popup?.close();
-      setError(e instanceof Error ? e.message : t("research.failed"));
-    }
+      if(requested===fileRequest.current)setError(e instanceof Error ? e.message : t("research.failed"));
+    } finally { if(requested===fileRequest.current)setLoadingAttachment(false); }
   }
+  const timestamp=new Intl.DateTimeFormat(language,{dateStyle:'medium',timeStyle:'short'});
+  const reviewForm=(row:ResearchReimbursement)=><form onSubmit={event=>{
+    event.preventDefault();
+    const data=new FormData(event.currentTarget);
+    void mutate({action:"reimbursement_review",id:row.id,status:data.get("status"),notes:data.get("notes")||""});
+  }}>
+    <FormSelectField label={t("research.status")} name="status" initialValue={row.status==="submitted"?"reviewed":row.status}
+      options={["reviewed","needs_info","rejected"].map(status=>({value:status,label:statusOf(status)}))} disabled={busy}/>
+    <label>{t("researchFlow.reviewNote")}<textarea name="notes" maxLength={2000} defaultValue={row.reviewer_note}/></label>
+    <button className="button" disabled={busy}>{t("research.save")}</button>
+  </form>;
 
   return <SideDrawer showTitle className="research-workflow-drawer" open historyKey="research-reimbursements"
     title={t(adding ? "researchFlow.newReimbursement" : "researchFlow.reimbursements")} onClose={() => { if (!busy && !uploading) onClose(); }}>
@@ -323,11 +342,13 @@ function ResearchReimbursements({ project, userId, owner, busy, initialId, initi
         <ResearchReimbursementComposer currencies={project.workflow?.reimbursement_currencies || ["CNY"]} busy={busy} mutationError={mutationError}
           mutate={mutate} onDone={() => {
             showToast(t("researchWorkbench.claimSent"));
-            setFilter("all");
+            setFilter("submitted");
             setAdding(false);
           }} onBusy={setUploading} />
       </> : claim ? <>
-        <button type="button" className="ghost-button research-tools-back" disabled={busy} onClick={() => { setError(""); setDetailId(null); }}>
+        <button type="button" className="ghost-button research-tools-back" disabled={busy} onClick={() => {
+          fileRequest.current++;setLoadingAttachment(false);setError("");setFilter(claim.status);setDetailId(null);
+        }}>
           <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>{t("researchFlow.reimbursements")}
         </button>
         <section className="research-reimbursement-row" key={claim.id}>
@@ -335,7 +356,13 @@ function ResearchReimbursements({ project, userId, owner, busy, initialId, initi
           <p>{nameOf(claim.user_id)} · {statusOf(claim.status)}</p>
           {claim.start && claim.end && <p>{researchDate(claim.start, language)} – {researchDate(claim.end, language)}</p>}
           {claim.notes && <p>{claim.notes}</p>}
+          <ol className="research-claim-timeline">
+            <li><strong>{statusOf("submitted")}</strong><time>{timestamp.format(new Date(claim.created_at))}</time></li>
+            {claim.resubmitted_at&&<li><strong>{t("researchChronelle.supplemented")}</strong><time>{timestamp.format(new Date(claim.resubmitted_at))}</time></li>}
+            {claim.reviewed_at&&claim.status!=="submitted"&&<li><strong>{statusOf(claim.status)}</strong><time>{timestamp.format(new Date(claim.reviewed_at))}</time></li>}
+          </ol>
           {claim.reviewer_note && <blockquote className="research-note-context">{claim.reviewer_note}</blockquote>}
+          {loadingAttachment&&<p role="status" className="research-muted">{t("common.loading")}</p>}
           {claim.items?.length ? <ResearchReimbursementItems items={claim.items} onOpen={resourceId => void openEvidence(claim.id, resourceId)} />
             : <div className="research-flow-actions">{claim.evidence.map((id, index) => <button key={id} type="button" className="ghost-button"
               onClick={() => void openEvidence(claim.id, id)}>
@@ -350,28 +377,18 @@ function ResearchReimbursements({ project, userId, owner, busy, initialId, initi
             <label>{t("researchFlow.supplement")}<textarea name="notes" required maxLength={4000} /></label>
             <button className="button" disabled={busy}>{t("researchFlow.resubmit")}</button>
           </form>}
-          {owner && writable && <form onSubmit={event => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            void mutate({ action: "reimbursement_review", id: claim.id, status: data.get("status"), notes: data.get("notes") || "" });
-          }}>
-            <FormSelectField label={t("research.status")} name="status" initialValue={claim.status === "submitted" ? "reviewed" : claim.status}
-              options={["reviewed", "needs_info", "rejected"].map(status => ({ value: status, label: statusOf(status) }))} disabled={busy} />
-            <label>{t("researchFlow.reviewNote")}<textarea name="notes" maxLength={2000} defaultValue={claim.reviewer_note} /></label>
-            <button className="button" disabled={busy}>{t("research.save")}</button>
-          </form>}
+          {owner&&writable&&(claim.status==="submitted"?reviewForm(claim):<details className="research-form-options"><summary>{t("researchChronelle.changeReview")}</summary>{reviewForm(claim)}</details>)}
         </section>
       </> : <>
         <p className="research-flow-hint">{t("researchFlow.evidencePrivacy")}</p>
         {writable && <button type="button" className="button" onClick={() => setAdding(true)}>{t("researchFlow.newReimbursement")}</button>}
-        {claims.length > 0 && <PageTabs label={t("researchFlow.reimbursements")} value={filter} onChange={setFilter} items={[
-          { value: "all", label: t("researchWorkbench.allClaims") },
-          { value: "pending", label: t("researchWorkbench.claimsPending", { count: pending.size }) },
-        ]} />}
+        {claims.length > 0 && <PageTabs label={t("researchFlow.reimbursements")} value={filter} onChange={setFilter}
+          items={statuses.map(value=>({value,label:`${statusOf(value)} · ${claims.filter(item=>item.status===value).length}`}))}/>}
         {visible.length ? <ReimbursementList rows={visible} project={project} onOpen={id => { setError(""); setDetailId(id); }} />
-          : <QuietState icon="receipt_long" title={t(filter === "pending" ? "researchWorkbench.noPendingClaims" : "researchFlow.noReimbursement")} />}
+          : <QuietState icon="receipt_long" title={t("researchChronelle.noClaimsHere")} />}
       </>}
     </div>
+    {attachment&&<ResearchFilePreview file={attachment} onClose={()=>setAttachment(undefined)}/>}
   </SideDrawer>;
 }
 

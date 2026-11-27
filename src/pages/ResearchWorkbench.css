@@ -321,8 +321,8 @@
   white-space: nowrap;
   font-size: .72rem;
 }
-.research-task-archive summary { padding: 14px 16px; font-size: .81rem; cursor: pointer; color: var(--text-secondary); }
-.research-task-archive summary span { padding-inline: 4px; font-size: .73rem; color: var(--text-muted); }
+.research-open-task-archive { justify-content:flex-start; margin:10px 12px; }
+.research-archive-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
 .research-task-browser-empty {
   padding: 14px 16px;
   color: var(--text-muted);

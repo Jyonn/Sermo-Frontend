@@ -5,6 +5,7 @@ import { useI18n } from "../lib/language";
 import { PageTabs } from "./PageTabs";
 import { ResearchTaskItem } from "./ResearchTaskItem";
 import { PlainAvatar } from "./UserAvatar";
+import { SideDrawer } from "./SideDrawer";
 
 export function ResearchTaskBrowser({ project, taskId, owner, userId, open, create }: {
   project: ResearchProject; taskId: string | null; owner: boolean; userId: number;
@@ -14,6 +15,7 @@ export function ResearchTaskBrowser({ project, taskId, owner, userId, open, crea
   const selected = project.tasks.find(task => task.id === taskId);
   const [ownership, setOwnership] = useState<"mine" | "all">(owner || (selected && !selected.assignees.includes(userId)) ? "all" : "mine");
   const [query, setQuery] = useState("");
+  const [archiveOpen,setArchiveOpen] = useState(false);
   const today = project.workflow?.report_periods.daily || researchToday();
   const filter = query.trim().toLocaleLowerCase();
   const visible = researchTaskOrder(project.tasks, today).filter(task => {
@@ -23,7 +25,7 @@ export function ResearchTaskBrowser({ project, taskId, owner, userId, open, crea
   const working = visible.filter(task => task.status === "active");
   const archived = visible.filter(task => task.status === "archived");
   const render = (task: ResearchTask) => <ResearchTaskItem key={task.id} task={task} members={project.members}
-    today={today} selected={taskId === task.id} onClick={() => open(task.id)} />;
+    today={today} selected={taskId === task.id} onClick={() => {setArchiveOpen(false);open(task.id);}} />;
   return <aside className="research-task-browser">
     <div className="research-task-browser-controls">
       <header>
@@ -42,13 +44,15 @@ export function ResearchTaskBrowser({ project, taskId, owner, userId, open, crea
       </label>
     </div>
     {working.map(render)}
-    {archived.length > 0 && <details className="research-task-archive"
-      key={filter ? "results" : "directory"} open={filter || archived.some(task => task.id === taskId) ? true : undefined}>
-      <summary>{t("research.archived")} <span>{archived.length}</span></summary>
+    {archived.length > 0 && <button type="button" className="ghost-button research-open-task-archive" onClick={()=>setArchiveOpen(true)}>
+      <span className="material-symbols-outlined" aria-hidden="true">archive</span>{t('researchChronelle.archiveTasks')} · {archived.length}
+    </button>}
+    <SideDrawer open={archiveOpen} showTitle title={t('researchChronelle.archiveTasks')} historyKey="research-task-archive"
+      className="research-workflow-drawer" onClose={()=>setArchiveOpen(false)}>
       {archived.map(render)}
-    </details>}
-    {!visible.length && <div className="research-task-browser-empty">
-      <p>{t(filter ? "researchWorkbench.noMatchingTask" : ownership === "mine" ? "researchWorkbench.nothingAssigned" : "research.noTasks")}</p>
+    </SideDrawer>
+    {!working.length && <div className="research-task-browser-empty">
+      <p>{t(archived.length ? 'researchChronelle.noActiveTasks' : filter ? "researchWorkbench.noMatchingTask" : ownership === "mine" ? "researchWorkbench.nothingAssigned" : "research.noTasks")}</p>
       {filter && <button className="ghost-button" type="button" onClick={() => setQuery("")}>{t("common.clear")}</button>}
       {!filter && ownership === "mine" && <button className="ghost-button" type="button" onClick={() => setOwnership("all")}>{t("researchWorkbench.allTasks")}</button>}
     </div>}
