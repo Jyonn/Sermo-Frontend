@@ -640,6 +640,8 @@ export interface FriendOperatorDTO {
 }
 
 export interface AdminActivityDTO {
+  edition?: number;
+  original_key?: string;
   eligible?: boolean;
   missing_requirements?: string[];
   key: string;
@@ -655,6 +657,20 @@ export interface AdminActivityDTO {
   claimed: boolean;
   claimed_at: number | null;
   ends_at: number | null;
+}
+
+export interface PlatformActivityDTO {
+  key: string;
+  original_key: string;
+  edition: number;
+  title: string;
+  title_en: string;
+  duration_seconds: number | null;
+  joined_spaces: number;
+  active_spaces: number;
+  last_end: number | null;
+  status: "available" | "still_running" | "awaiting_spaces" | "permanent" | "one_time_tasks" | "never_started";
+  previous_editions: Array<{ key: string; edition: number; joined_spaces: number; last_end: number | null }>;
 }
 
 export interface AdminMemberContactDTO {
@@ -1113,7 +1129,10 @@ export interface SquareMedalDTO {
 }
 
 export interface ActivityCampaignDTO {
-  record_shop?: {points:number;thresholds:[number,number];singers:string[];equipped:string;choices:number;portraits:Record<string,string>;albums:Record<string,RecordShopAlbum[]>};
+  edition?: number;
+  original_key?: string;
+  rerun_growth?: number;
+  record_shop?: {points:number;thresholds:[number,number];singers:string[];equipped:string;choices:number;portraits:Record<string,string>;albums:Record<string,RecordShopAlbum[]>;rerun_growth?:number};
   participation?:{count:number;users:Array<{user_id:number;name:string;avatar_uri?:string}>}|null;
   explorer?: {
     year: number;

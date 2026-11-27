@@ -21,6 +21,7 @@ import { PlatformMemberPanel } from "../components/PlatformMemberPanel";
 import { PlatformAuditConversation } from "../components/PlatformAuditConversation";
 import { emailPreviewDocument } from "../lib/emailPreview";
 import { PlatformSpaceFeatures } from "../components/PlatformSpaceFeatures";
+import { PlatformActivityWorkspace } from "../components/PlatformActivityWorkspace";
 import { spaceFeatureGrants, type SpaceFeatureKey } from "../lib/spaceFeatureGrants";
 import "../styles/platform-inspection.css";
 
@@ -29,6 +30,7 @@ const nav: Array<{ id: Section; icon: string; group: string; groupIcon: string }
   { id: "overview", icon: "space_dashboard", group: "overview", groupIcon: "space_dashboard" },
   { id: "spaces", icon: "domain", group: "governance", groupIcon: "domain" },
   { id: "reviews", icon: "verified_user", group: "governance", groupIcon: "domain" },
+  { id: "activities", icon: "event_repeat", group: "services", groupIcon: "extension" },
   { id: "oauth", icon: "apps", group: "services", groupIcon: "extension" },
   { id: "resources", icon: "perm_media", group: "services", groupIcon: "extension" },
   { id: "emails", icon: "mail", group: "services", groupIcon: "extension" },
@@ -475,6 +477,7 @@ function PlatformAdminConsole() {
       </section>}
 
       {section === "permissions" && <PermissionWorkspace scope="platform" />}
+      {section === "activities" && <PlatformActivityWorkspace />}
       {section === "resources" && <ResourceWorkspace />}
       {section === "oauth" && <OAuthApplicationWorkspace platform />}
 

@@ -168,6 +168,7 @@ export default function SpaceAdminDashboardPage() {
   const deferredQuery = useDeferredValue(query);
   const operators = dashboard?.operators ?? [];
   const shownActivities = activities.filter((activity) => activityFilter === "all" || activity.status === activityFilter);
+  const rerunSeries = new Set(activities.filter(activity => (activity.edition ?? 1) > 1).map(activity => activity.original_key));
   const refreshManagement = () => setRefreshTick((value) => value + 1);
   const retryManagement = <button className="ghost-button" onClick={refreshManagement} type="button">{t("common.retry")}</button>;
 
@@ -963,17 +964,18 @@ export default function SpaceAdminDashboardPage() {
         <div className="admin-activity-list">
           {shownActivities.map((activity) => {
             const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
+            const numbered = (activity.edition ?? 1) > 1 || rerunSeries.has(activity.key);
             const localizedTitle = getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title;
             const localizedSummary = getActiveLocale().startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
             const missingRequirements = (activity.missing_requirements ?? [])
               .map(key => t((['square','free_post','chat','submission','publish'].includes(key) ? `admin.activityRequirement.${key}` : 'admin.activityRequirement.other') as TranslationKey))
               .join(t('admin.activityRequirementSeparator'));
             return <article className={`admin-activity-card is-${activity.status}`} key={activity.key}>
-              <header><span><small>{activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
+              <header><span><small>{numbered ? t("activity.edition", {count:activity.edition ?? 1}) : activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
               <p>{localizedSummary}</p>
               <dl><div><dt>{t("admin.activityDuration")}</dt><dd>{durationDays === null ? t("admin.activityNoTimeLimit") : t("admin.activityDays", { count: durationDays })}</dd></div>{activity.ends_at ? <div><dt>{t("admin.activityEndsAt")}</dt><dd>{new Date(activity.ends_at * 1000).toLocaleString(getActiveLocale())}</dd></div> : null}</dl>
               {!activity.claimed && activity.eligible===false ? <p role="note" id={`activity-blocked-${activity.key}`} className="admin-activity-requirements"><span className="material-symbols-outlined" aria-hidden="true">info</span>{t("admin.activityRequirements",{requirements:missingRequirements})}</p>:null}
-              {!activity.claimed && !activity.mandatory ? <button aria-describedby={activity.eligible===false ? `activity-blocked-${activity.key}` : undefined} disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activity.eligible===false ? t('admin.activityUnavailable') : activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
+              {!activity.claimed && !activity.mandatory ? <button aria-describedby={activity.eligible===false ? `activity-blocked-${activity.key}` : undefined} disabled={activity.eligible===false || Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activity.eligible===false ? t('admin.activityUnavailable') : activityClaimingKey === activity.key ? t("common.processing") : t((activity.edition ?? 1) > 1 ? "activity.rerun.activate" : "admin.claimActivity")}</button> : null}
               {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
             </article>;
           })}

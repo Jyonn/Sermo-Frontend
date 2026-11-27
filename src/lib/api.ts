@@ -2300,6 +2300,12 @@ export const api = {
   getPlatformDashboard(signal?: AbortSignal) {
     return request<PlatformDashboardDTO>("/platform-admin/dashboard", { platformAdminAuth: true, signal });
   },
+  getPlatformActivities(signal?: AbortSignal) {
+    return request<import("../types").PlatformActivityDTO[]>("/platform-admin/activities", { platformAdminAuth: true, signal });
+  },
+  publishActivityRerun(key: string) {
+    return request<import("../types").PlatformActivityDTO[]>(`/platform-admin/activities/${key}/rerun`, { platformAdminAuth: true, method: "POST" });
+  },
   getPlatformSpaces(query = "", signal?: AbortSignal) {
     return request<PlatformAdminSpaceDTO[]>("/platform-admin/spaces", { platformAdminAuth: true, query: { q: query }, signal });
   },

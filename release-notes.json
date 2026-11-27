@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.27.14",
-  "publishedAt": "2026-11-27",
+  "id": "2026.11.28.1",
+  "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "科研日程与事务",
+      "title": "人气活动可以返场",
       "items": [
-        "在科研中管理时序日程、设置重复规则、处理日程邀请。",
-        "归档课题和任务收进独立入口，报销可以按状态查看，资料和票据支持预览。"
+        "空间管理员领取返场活动后，成员可以参加新一期，重新完成任务。",
+        "领取已经拥有的活动奖励时，可兑换为 10 点成长值。"
       ]
     },
     "en": {
-      "title": "Research calendar and workflows",
+      "title": "Activities can return",
       "items": [
-        "Manage Chronelle events, recurrence rules, and invitations inside your research workspace.",
-        "Find archived projects and tasks in dedicated views, filter reimbursements by status, and preview files and receipts."
+        "Join a new edition and complete its tasks again after your space administrator activates it.",
+        "Claim rewards you already own to receive 10 growth points each."
       ]
     }
   }

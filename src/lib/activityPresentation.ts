@@ -20,8 +20,9 @@ export function safeActivityImage(value: unknown): string | undefined {
   } catch { return undefined; }
 }
 
-export function activityPresentation(activity?: { key?: string; theme?: string; presentation?: ActivityPresentation } | null): ActivityPresentation {
-  const theme=activity?.theme||activityThemeForKey(activity?.key);
+export function activityPresentation(activity?: { key?: string; original_key?: string; theme?: string; presentation?: ActivityPresentation } | null): ActivityPresentation {
+  const originalKey = activity?.original_key ?? activity?.key;
+  const theme=activity?.theme||activityThemeForKey(originalKey);
   const bgm = theme==='bgm';
   const duel = theme==='number_duel';
   const explorer = theme==='explorer';
@@ -30,7 +31,7 @@ export function activityPresentation(activity?: { key?: string; theme?: string; 
   const baxian = theme==='baxian';
   const vip = theme==='permanent-vip';
   const recordShop = theme==='record-shop';
-  const women = activity?.key === 'record-shop-women';
+  const women = originalKey === 'record-shop-women';
   const custom = activity?.presentation;
   if (theme === 'landlord') return {palette: 'sage', artwork_layout: 'image', artwork_url: LANDLORD_ART, title_art_url: LANDLORD_TITLE};
   if (isFourPlayerGame(theme)) return {palette: theme === 'mahjong' ? 'sage' : 'rose', title_art_url: `/activity/${theme}/title.webp`};

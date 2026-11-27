@@ -118,7 +118,13 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
   const [shareChats,setShareChats]=useState<ChatDTO[]>([]);
   const [shareLoading,setShareLoading]=useState(false);
   const [sharingId,setSharingId]=useState<number|null>(null);
-  const patchActivity=(activity:ActivityCampaignDTO)=>{setActiveActivity(activity);window.dispatchEvent(new CustomEvent('frienden:activity-updated'));};
+  const patchActivity=(activity:ActivityCampaignDTO)=>{
+    if (activeActivity?.key === activity.key && (activity.rerun_growth ?? 0) > (activeActivity.rerun_growth ?? 0)) {
+      void api.getUserMe().then(me => patchSessionUser(me)).catch(() => undefined);
+    }
+    setActiveActivity(activity);
+    window.dispatchEvent(new CustomEvent('frienden:activity-updated'));
+  };
   useEffect(()=>{
     const controller=new AbortController();
     setLoadError(false);
@@ -200,7 +206,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     try {
       const updated = await api.claimActivityPersonalReward(activeActivity.key);
       patchActivity(updated);
-      showToast(t("activity.personalRewardClaimed"), "success");
+      showRewardResult(updated, t("activity.personalRewardClaimed"));
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
     } finally {
@@ -214,7 +220,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     try {
       const updated = await api.claimActivitySpaceReward(activeActivity.key);
       patchActivity(updated);
-      showToast(t("activity.spaceRewardClaimed"), "success");
+      showRewardResult(updated, t("activity.spaceRewardClaimed"));
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.spaceRewardClaimFailed"), "error");
     } finally {
@@ -228,7 +234,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     try {
       const updated = await api.claimActivityMilestoneReward(activeActivity.key, rewardKey);
       patchActivity(updated);
-      showToast(t("activity.friendly.unlocked"), "success");
+      showRewardResult(updated, t("activity.friendly.unlocked"));
       void api.getUserMe().then((me) => patchSessionUser(me)).catch(() => undefined);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
@@ -243,7 +249,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     try {
       const updated = await api.claimStarryNightReward(activeActivity.key);
       patchActivity(updated);
-      showToast(t("activity.starry.rewardClaimed"), "success");
+      showRewardResult(updated, t("activity.starry.rewardClaimed"));
       void api.getUserMe().then((me) => patchSessionUser(me)).catch(() => undefined);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.starry.rewardClaimFailed"), "error");
@@ -252,6 +258,10 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
     }
   };
 
+  function showRewardResult(updated: ActivityCampaignDTO, message: string) {
+    const growth = (updated.rerun_growth ?? 0) - (activeActivity?.rerun_growth ?? 0);
+    showToast(growth > 0 ? t("activity.rerun.exchanged", { count: growth }) : message, "success");
+  }
   const drawerTitle = activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title");
 
  return <>
@@ -264,6 +274,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         onClose={() => gameExit.current ? gameExit.current(onClose) : onClose()}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
         title={drawerTitle}
+        titleAccessory={(activeActivity?.edition ?? 1) > 1 ? <span className="activity-edition-label">{t("activity.edition", { count: activeActivity?.edition })}</span> : undefined}
         titleLeading={isTabletopGame(theme) && activeActivity ? (
           <span className="landlord-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : theme === "record-shop" && activeActivity ? (

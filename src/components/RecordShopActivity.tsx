@@ -57,8 +57,10 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate, onConfigure 
     if (pending || !activity.active || singerStatus(info, singer) !== "claim") return;
     setPending(singer);
     try {
-      onUpdate({ ...activity, record_shop: await api.claimRecordShopSinger(activity.key, singer) });
-      showToast(t("recordShop.claimed"));
+      const result = await api.claimRecordShopSinger(activity.key, singer);
+      const growth = (result.rerun_growth ?? 0) - (info.rerun_growth ?? 0);
+      onUpdate({ ...activity, record_shop: result, rerun_growth: result.rerun_growth });
+      showToast(growth > 0 ? t("activity.rerun.exchanged", { count: growth }) : t("recordShop.claimed"));
     } catch (error) {
       showToast(error instanceof Error ? error.message : t("common.retry"), "error");
     } finally {
@@ -67,7 +69,7 @@ export function RecordShopActivity({ activity, dateLabel, onUpdate, onConfigure 
   };
 
   return (
-    <section className="record-shop-activity" data-edition={activity.key === "record-shop-women" ? "women" : undefined}>
+    <section className="record-shop-activity" data-edition={(activity.original_key ?? activity.key) === "record-shop-women" ? "women" : undefined}>
       <header className="record-shop-hero">
         {artwork ? <img src={artwork} alt="" decoding="async" /> : null}
         <div className="record-shop-hero-copy">
