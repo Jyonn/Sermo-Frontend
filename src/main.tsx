@@ -14,6 +14,7 @@ import { LanguageProvider } from "./lib/language";
 import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
+import { installGameHistoryGuard } from "./lib/gameNavigation";
 import { chronelleReturnDestination } from './lib/chronelleReturn';
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
@@ -118,6 +119,7 @@ async function renderApp() {
   );
 }
 
+installGameHistoryGuard();
 void renderApp();
 
 if (import.meta.env.PROD) {

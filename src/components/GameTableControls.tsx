@@ -1,11 +1,11 @@
 import {useEffect, useRef, useState, type MutableRefObject} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useLocation} from 'react-router-dom';
+import {GAME_NAVIGATION_EVENT, guardGameHistory} from '../lib/gameNavigation';
 import {useI18n} from '../lib/language';
 import {ConfirmDialog} from './ConfirmDialog';
 import './GameTableControls.css';
 
 export type GameExitHandler = MutableRefObject<((after?: () => void) => void) | undefined>;
-export const GAME_NAVIGATION_EVENT = 'frienden:game-navigation';
 
 export function useGameExit(inRoom: boolean, live: boolean, handler: GameExitHandler | undefined, onLeave: () => Promise<boolean>) {
   const [open,setOpen] = useState(false);
@@ -13,7 +13,6 @@ export function useGameExit(inRoom: boolean, live: boolean, handler: GameExitHan
   const beforeLeave = useRef(onLeave);
   const allowBack = useRef(false);
   const location = useLocation();
-  const navigate = useNavigate();
   beforeLeave.current = onLeave;
   useEffect(() => {
     if (!inRoom) return;
@@ -45,20 +44,25 @@ export function useGameExit(inRoom: boolean, live: boolean, handler: GameExitHan
         before.searchParams.get('landlord_room') === after.searchParams.get('landlord_room');
       if (sameGame) return;
       event.stopImmediatePropagation();
-      if ((event.state?.idx ?? 0) < (state?.idx ?? 0)) window.history.pushState(state,'',current);
+      const backward = (event.state?.idx ?? 0) < (state?.idx ?? 0);
+      if (backward) window.history.pushState(state,'',current);
       else window.history.replaceState(state,'',current);
-      request(() => navigate(after.pathname + after.search + after.hash,{replace:true}));
+      request(() => {
+        if (backward) {window.history.back(); return;}
+        window.history.replaceState(event.state,'',target);
+        window.dispatchEvent(new PopStateEvent('popstate',{state:event.state}));
+      });
     };
     window.addEventListener(GAME_NAVIGATION_EVENT,redirect);
     window.addEventListener('beforeunload',leavePage);
-    window.addEventListener('popstate',pop,true);
+    const releaseHistory = guardGameHistory(pop);
     return () => {
       if (handler?.current === request) handler.current = undefined;
       window.removeEventListener(GAME_NAVIGATION_EVENT,redirect);
       window.removeEventListener('beforeunload',leavePage);
-      window.removeEventListener('popstate',pop,true);
+      releaseHistory();
     };
-  }, [inRoom,live,location.key,handler,navigate]);
+  }, [inRoom,live,location.key,handler]);
 
   return {
     open,

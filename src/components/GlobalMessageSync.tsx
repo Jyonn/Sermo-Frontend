@@ -14,7 +14,7 @@ import { formatMentionTokens } from "../lib/mentions";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
-import { GAME_NAVIGATION_EVENT } from "./GameTableControls";
+import { GAME_NAVIGATION_EVENT } from "../lib/gameNavigation";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageDTO } from "../lib/chatMessageMapper";
