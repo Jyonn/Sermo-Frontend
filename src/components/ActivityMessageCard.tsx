@@ -6,6 +6,7 @@ import type { ActivityCampaignDTO } from "../types";
 import { ActivityCampaignCard } from "./ActivityCampaignCard";
 import { NumberDuelCard } from "./NumberDuelCard";
 import type { DuelRoomSummary } from "../lib/numberDuel";
+import { LANDLORD_KEY } from "../lib/landlord";
 
 interface ActivityMessageCardProps {
   activity?: ActivityCampaignDTO | null;
@@ -29,7 +30,7 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
     return <NumberDuelCard room={room} className={className} onClick={() => roomCode ? navigate(`/app/number-duel/${roomCode}`) : openActivity(key)} />;
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
-    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t("message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key)} />;
+    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t(key === LANDLORD_KEY ? "landlord.permanent" : "message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => openActivity(key)} />;
   }
 
   return (

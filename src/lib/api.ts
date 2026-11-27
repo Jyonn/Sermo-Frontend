@@ -4,6 +4,7 @@ import { mergeSessionUser } from "./sessionUser";
 import {applySquareSync,rememberSquareResponse,squareSyncRevision,type SquareSyncResult} from './squareSync';
 import {buildTabCacheScope} from './tabCache';
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
+import type { LandlordAction, LandlordLobby, LandlordRanking, LandlordTableView } from "./landlord";
 import type { SpaceFeatureKey } from "./spaceFeatureGrants";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import { decodeCompact, type CompactPayload } from "./compactTransport";
@@ -1272,6 +1273,17 @@ export const api = {
 
   getNumberDuel(key: string, matchId?: string, signal?: AbortSignal, roomCode?: string) {
     return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, query: roomCode ? { room_code: roomCode } : matchId ? { match_id: matchId } : undefined });
+  },
+  getLandlordLobby(key: string, code?: string, signal?: AbortSignal) {
+    return request<LandlordLobby>(`/activities/${key}/landlord`, { auth: true, query: { code }, signal, cache: "no-store" });
+  },
+  landlordAction(key: string, body: LandlordAction, signal: AbortSignal) {
+    return request<{ table: LandlordTableView | null; changed?: boolean }>(`/activities/${key}/landlord`, {
+      auth: true, method: "POST", body, signal, cache: "no-store",
+    });
+  },
+  getLandlordRanking(key: string, year: number | undefined, signal: AbortSignal) {
+    return request<LandlordRanking>(`/activities/${key}/landlord/leaderboard`, { auth: true, query: { year }, signal, cache: "no-store" });
   },
   numberDuelAction(key: string, body: Record<string, unknown>) {
     return request<DuelMatch>(`/activities/${key}/duel`, { method: "POST", auth: true, body });

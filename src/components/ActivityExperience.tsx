@@ -19,6 +19,7 @@ import {ActivityLoadingState} from './ActivityLoadingState';
 import {FeedbackState} from './FeedbackState';
 import {ExplorerActivity} from './ExplorerActivity';
 import {NumberDuelActivity} from './NumberDuelActivity';
+import {LandlordActivity} from './LandlordActivity';
 import {BgmActivity} from './BgmActivity';
 import {FriendlyNeighborhoodActivity} from './FriendlyNeighborhoodActivity';
 import {StarryNightActivity} from './StarryNightActivity';
@@ -140,7 +141,7 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
   };
   const sendShare=async(ids:number[])=>{
     const id=ids[0];if(!id||!activeActivity||sharingId!==null)return;setSharingId(id);
-    const path=`/app/square/activities/${activityKey}`;
+    const path=activityKey==='landlord'?'/app/menu?panel=activities&activity=landlord':`/app/square/activities/${activityKey}`;
     const slug=getDetectedSpaceSlug();
     const url=slug?buildSpaceHrefForCurrentHost(slug,path):new URL(path,window.location.origin).toString();
     try{await api.sendMessage(id,11,JSON.stringify({kind:'activity',activity_key:activityKey,title:isChineseLanguage(language)?activeActivity.title:activeActivity.title_en||activeActivity.title,url}),undefined,crypto.randomUUID());setShareOpen(false);showToast(t('square.sharedTo',{chat:shareChats.find(chat=>chat.chat_id===id)?.title||t('nav.chats')}));}catch(cause){showToast(cause instanceof Error?cause.message:t('square.shareFailed'),'error');}finally{setSharingId(null);}
@@ -260,11 +261,13 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
         onClose={onClose}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
         title={drawerTitle}
-        titleLeading={theme === "record-shop" && activeActivity ? (
+        titleLeading={theme === "landlord" && activeActivity ? (
+          <span className="landlord-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
+        ) : theme === "record-shop" && activeActivity ? (
           <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : undefined}
       >
-        {activeActivity?.record_shop ? (
+        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} /> : activeActivity?.record_shop ? (
           <RecordShopActivity
             activity={activeActivity}
             dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}

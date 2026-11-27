@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.27.4",
+  "id": "2026.11.27.5",
   "publishedAt": "2026-11-27",
   "locales": {
     "zh-CN": {
-      "title": "广场发言支持好友评论模式",
+      "title": "斗地主常驻活动",
       "items": [
-        "在「账号与安全」中选择公开或好友模式。好友模式下，查看你发言的人只会看到自己和好友的评论。"
+        "空间管理员领取后，认证成员可开桌、邀请好友参与经典三人斗地主，并查看空间年度排行榜。"
       ]
     },
     "en": {
-      "title": "Choose who sees comments on your Square posts",
+      "title": "Dou Dizhu comes to your space",
       "items": [
-        "Choose Public or Friends in Account & Security. In Friends mode, each viewer sees comments from themselves and their friends."
+        "Space admins can enable the permanent activity. Verified members can play three-player Dou Dizhu with friends and see their annual rankings."
       ]
     }
   }

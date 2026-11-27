@@ -1,0 +1,62 @@
+export const LANDLORD_KEY = "landlord";
+export const LANDLORD_ART = "/activity/landlord/table.webp";
+export const LANDLORD_TITLE = "/activity/landlord/title.webp";
+
+export interface LandlordMember {
+  user_id: number;
+  name: string;
+  avatar_uri?: string;
+}
+
+export interface LandlordTableView {
+  code: string;
+  status: "waiting" | "bidding" | "playing" | "finished" | "abandoned";
+  version: number;
+  your_seat: number;
+  turn: number | null;
+  landlord: number | null;
+  winner: number | null;
+  hand: number[];
+  ready_count: number;
+  seats: Array<{ position: number; member: LandlordMember; remaining: number; won: boolean }>;
+  bottom_cards: number[];
+  bids: Array<number | null>;
+  moves: Array<{ cards: number[]; automatic: boolean } | null>;
+  last_player: number | null;
+  deadline: number | null;
+  server_now: number;
+  bid_options: number[];
+  can_pass: boolean;
+  suggested_cards: number[];
+}
+
+export interface LandlordLobby {
+  table: LandlordTableView | null;
+  rooms: Array<{ code: string; host: LandlordMember; count: number }>;
+}
+
+interface LandlordResult {
+  rank: number;
+  wins: number;
+  games: number;
+}
+
+export interface LandlordRanking {
+  year: number;
+  years: number[];
+  rows: Array<LandlordResult & { member: LandlordMember }>;
+  mine: LandlordResult | null;
+}
+
+interface LandlordTableAction {
+  code: string;
+  version: number;
+}
+
+export type LandlordAction =
+  | { action: "create" }
+  | { action: "join"; code: string }
+  | (LandlordTableAction & ({ action: "bid"; value: number } | { action: "play"; cards: number[] } | { action: "pass" | "leave" }));
+
+export const LANDLORD_ROOM_CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/;
+export const LANDLORD_ROOM_PARAM = "landlord_room";

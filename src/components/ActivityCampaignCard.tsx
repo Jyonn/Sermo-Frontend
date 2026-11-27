@@ -21,7 +21,8 @@ export function ActivityCampaignCard({ activity, title, eyebrow, hint, progress,
   const visual = activityPresentation(activity);
   const explorer = activity?.key === "explorer-2026" || activity?.theme === "explorer";
   const recordShop = activity?.key === "record-shop" || activity?.key === "record-shop-women" || activity?.theme === "record-shop";
-  return <button type="button" disabled={disabled} onClick={(event) => { event.stopPropagation(); onClick(); }} className={`${className} campaign-card palette-${visual.palette}${explorer ? " is-explorer" : ""}${recordShop ? " is-record-shop" : ""}`}>
+  const landlord = activity?.key === "landlord" || activity?.theme === "landlord";
+  return <button type="button" disabled={disabled} onClick={(event) => { event.stopPropagation(); onClick(); }} className={`${className} campaign-card palette-${visual.palette}${explorer ? " is-explorer" : ""}${recordShop ? " is-record-shop" : ""}${landlord ? " is-landlord" : ""}`}>
     <span className="campaign-card-copy"><small>{eyebrow}</small><ActivityTitle activity={activity} title={title} /><span>{hint}</span></span>
     {visual.artwork_url ? <span className={`campaign-card-object is-${visual.artwork_layout}`} style={{ backgroundImage: `url(${JSON.stringify(visual.artwork_url)})` }} aria-hidden="true" /> : <span className="campaign-card-symbol" aria-hidden="true">✦</span>}
     <span className="campaign-card-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>

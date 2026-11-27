@@ -2,6 +2,13 @@
 .campaign-card.palette-rose { --campaign-paper:#f6e6e6; --campaign-wash:#e1bfd1; --campaign-ink:#704656; }
 .campaign-card.palette-ocean { --campaign-paper:#e1eef3; --campaign-wash:#bdd7e8; --campaign-ink:#33536b; }
 .campaign-card.palette-gold { --campaign-paper:#f3ebd5; --campaign-wash:#e6c796; --campaign-ink:#69512b; }
+.campaign-card.campaign-card.is-landlord {
+  --campaign-ink: #ffedc7;
+  border-color: #6d7756;
+  background: radial-gradient(ellipse at 82% 45%, #385b42, transparent 68%),
+    repeating-linear-gradient(35deg, #fce8bd08 0 1px, transparent 1px 13px), #19372d;
+}
+.campaign-card.is-landlord .campaign-card-object.is-image { right: 5%; top: 4%; height: 93%; }
 .campaign-card-copy { position:absolute; inset:11% auto 11% 5%; width:53%; display:flex; flex-direction:column; justify-content:space-between; gap:3px; z-index:2; min-width:0; }
 .campaign-card-copy small { font-size:clamp(8px,2.4cqw,13px); letter-spacing:.1em; line-height:1.2; }
 .campaign-card-copy > span { font-size:clamp(8px,2.5cqw,13px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4; }

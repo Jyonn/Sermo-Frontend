@@ -1,0 +1,189 @@
+.is-landlord-activity .drawer-body { padding: 0; }
+.landlord-drawer-title { display: block; width: min(95px, 25vw); }
+.landlord-activity {
+  --landlord-felt: #15362b;
+  --landlord-ivory: #fbebc7;
+  --landlord-gold: #d6b880;
+  --landlord-red: #aa3e2d;
+  --landlord-line: #f8e1a931;
+  container-type: inline-size;
+  min-height: 100%;
+  color: var(--text-primary);
+  background: var(--bg-canvas);
+}
+.landlord-hero, .landlord-board {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--landlord-ivory);
+  background: radial-gradient(ellipse at 75% 33%, #396049, transparent 66%),
+    repeating-linear-gradient(38deg, #f9ebbe0a 0 1px, transparent 1px 13px), var(--landlord-felt);
+}
+.landlord-hero::before, .landlord-board::before {
+  position: absolute;
+  z-index: -1;
+  inset: 58px 14px 14px;
+  pointer-events: none;
+  border: 1px solid var(--landlord-line);
+  border-radius: 28px 28px 70px 70px;
+  content: "";
+}
+.landlord-hero { min-height: clamp(215px, 51cqw, 305px); padding: clamp(78px, 19cqw, 115px) 8% 34px; }
+.landlord-hero-art {
+  position: absolute;
+  z-index: -1;
+  top: 44px;
+  right: -5%;
+  width: min(51%, 280px);
+  height: calc(100% - 48px);
+  object-fit: contain;
+  pointer-events: none;
+}
+.landlord-hero-copy { display: grid; width: 65%; justify-items: start; gap: 14px; }
+.landlord-hero-copy small { color: #e6cda1; font-size: .73rem; font-weight: 750; letter-spacing: .12em; }
+.landlord-hero-copy .campaign-title-art { width: min(100%, 245px); }
+.landlord-hero-copy .campaign-title-text { font: 700 clamp(2rem, 10cqw, 3.2rem)/1.06 Georgia, serif; }
+.landlord-hero-copy p { max-width: 19ch; margin: 0; font-size: .88rem; line-height: 1.6; }
+.landlord-lobby, .landlord-play-controls { padding: 18px clamp(16px, 5cqw, 28px) max(22px, env(safe-area-inset-bottom)); }
+.landlord-lobby-actions, .landlord-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.landlord-lobby-actions > button { flex: 1; }
+.landlord-primary, .landlord-secondary, .landlord-text-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: inherit;
+  font-size: .87rem;
+  font-weight: 750;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.landlord-primary { background: #aa3e2d; color: #fff3d8; }
+.landlord-primary:hover:not(:disabled) { background: #923121; }
+.landlord-secondary { border-color: var(--line-soft); background: var(--bg-elevated); }
+.landlord-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
+.landlord-text-button { min-height: 36px; padding-inline: 7px; background: transparent; color: var(--text-secondary); }
+.landlord-text-button:hover { text-decoration: underline; }
+.landlord-primary:disabled, .landlord-secondary:disabled { opacity: .42; cursor: default; }
+.landlord-primary .material-symbols-outlined, .landlord-secondary .material-symbols-outlined { font-size: 18px; }
+.landlord-join { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; margin: 13px 0 18px; }
+.landlord-join input, .landlord-ranking select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font: inherit;
+}
+.landlord-join input { letter-spacing: .07em; }
+.landlord-open-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line-soft); }
+.landlord-open-heading h3 { margin: 0; font-size: 1rem; }
+.landlord-empty, .landlord-reconnecting { margin: 0; padding: 17px 2px 7px; color: var(--text-secondary); font-size: .85rem; line-height: 1.6; }
+.landlord-empty p, .landlord-reconnecting p { margin: 0; }
+.landlord-rooms, .landlord-ranking ol { display: grid; margin: 0; padding: 0; list-style: none; }
+.landlord-rooms li, .landlord-ranking li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.landlord-list-avatar { width: 32px; height: 32px; }
+.landlord-rooms li b, .landlord-ranking li b { display: block; overflow: hidden; font-size: .89rem; text-overflow: ellipsis; white-space: nowrap; }
+.landlord-rooms small, .landlord-ranking li small { display: block; margin-top: 3px; color: var(--text-muted); font-size: .73rem; }
+.landlord-restricted { display: grid; justify-items: start; gap: 9px; }
+.landlord-restricted p { margin: 0; color: var(--text-secondary); }
+.landlord-board { display: grid; gap: 12px; padding: 61px clamp(15px, 5cqw, 27px) 22px; }
+.landlord-board::before { inset: 104px 11px 11px; background: #0d251a36; }
+.landlord-table-nav { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding-inline: 4px; }
+.landlord-table-nav > span { font-size: .72rem; color: #e1ce9f; }
+.landlord-table-nav b { margin-inline-start: 5px; font: 700 .9rem/1.2 ui-monospace, monospace; letter-spacing: .12em; color: var(--landlord-ivory); }
+.landlord-table-nav button { color: var(--landlord-ivory); }
+.landlord-opponents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.landlord-opponents .landlord-seat:last-child { justify-self: end; }
+.landlord-seat {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 46px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border: 1px solid var(--landlord-line);
+  border-radius: 14px;
+  background: #0c241d;
+}
+.landlord-seat.is-turn { border-color: #e9be73; background: #31523b; box-shadow: 0 0 0 2px #e9be7324; }
+.landlord-seat.is-empty { background: #173a2c; }
+.landlord-seat-avatar { display: grid; flex: 0 0 30px; width: 30px; height: 30px; place-items: center; border-radius: 10px; }
+.landlord-seat.is-empty .landlord-seat-avatar { background: #e7ce8b17; color: #e0c891; }
+.landlord-seat-avatar .material-symbols-outlined { font-size: 17px; }
+.landlord-seat-copy { min-width: 0; }
+.landlord-seat-copy b { display: block; overflow: hidden; font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+.landlord-seat small { display: block; color: #dbcda9; font-size: .69rem; }
+.landlord-seat.is-landlord small { color: #ffbe93; }
+.landlord-passed { color: #e8cda1; font-size: .7rem; }
+.landlord-center { display: grid; min-height: 133px; align-content: center; justify-items: center; gap: 7px; text-align: center; }
+.landlord-center strong { font-size: clamp(1rem, 4.7cqw, 1.37rem); }
+.landlord-center > span { color: #dfc997; font-size: .8rem; }
+.landlord-center > .material-symbols-outlined { font-size: 39px; }
+.landlord-table-art { height: 80px; width: 108px; object-fit: contain; }
+.landlord-clock { font-variant-numeric: tabular-nums; }
+.landlord-your-seat { display: flex; justify-content: center; }
+.landlord-card {
+  position: relative;
+  display: inline-flex;
+  width: clamp(25px, 7.5cqw, 48px);
+  min-width: 0;
+  min-height: 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid #c9ac77;
+  border-radius: 7px;
+  color: #24372e;
+  background: #f9e9c9;
+  box-shadow: inset 0 0 0 2px #fff5db8a, 0 2px 2px #08140c24;
+  font: 700 clamp(.88rem, 4.3cqw, 1.35rem)/1.04 Georgia, serif;
+  user-select: none;
+}
+.landlord-card b { font-weight: 700; }
+.landlord-card span { font-size: .85em; }
+.landlord-card.is-red { color: #9d3527; }
+.landlord-card.is-joker b { font-family: inherit; font-size: .58em; white-space: nowrap; }
+.landlord-card.is-backed { border: 1px solid #c5a36a; background: repeating-linear-gradient(42deg, #34583a 0 2px, #19362c 2px 5px); color: #dec492; }
+.landlord-card[aria-pressed] { cursor: pointer; transition: transform .16s ease-out, background-color .16s; }
+.landlord-card[aria-pressed="true"] { z-index: 1; transform: translateY(-5px); background: #ffce7c; border-color: #aa3e2d; box-shadow: 0 0 0 2px #aa3e2d; }
+.landlord-bottom-cards, .landlord-last-play > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
+.landlord-bottom-cards .landlord-card { width: 21px; min-height: 27px; border-radius: 4px; font-size: .7rem; }
+.landlord-last-play small { display: block; margin-bottom: 4px; color: #e0cd9e; font-size: .7rem; }
+.landlord-last-play .landlord-card { width: 22px; min-height: 31px; border-radius: 5px; font-size: .85rem; }
+.landlord-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 4px; padding: 4px 0 15px; }
+.landlord-controls { justify-content: center; }
+.landlord-controls > button { min-width: 67px; }
+.landlord-leave { display: flex; margin: 9px auto 0; }
+.landlord-reconnecting { text-align: center; }
+.landlord-rules { display: grid; gap: 13px; margin: 0; padding-inline-start: 20px; color: var(--text-secondary); font-size: .9rem; line-height: 1.65; }
+.landlord-ranking header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; color: var(--text-secondary); font-size: .8rem; }
+.landlord-ranking select { width: auto; }
+.landlord-ranking li { grid-template-columns: 2ch auto minmax(0, 1fr) auto; }
+.landlord-ranking li > span:last-child { text-align: end; font-size: .81rem; }
+.landlord-rank-number { color: var(--text-muted); font: 700 1.12rem Georgia, serif; font-variant-numeric: tabular-nums; }
+.landlord-ranking li:nth-child(-n+3) .landlord-rank-number { color: var(--brand-accent); }
+.landlord-rank-mine { margin: 12px 0 0; padding: 10px 0; border-block: 1px solid var(--line-soft); font-size: .86rem; font-weight: 750; }
+@container (min-width: 475px) {
+  .landlord-hero-art { right: 2%; }
+  .landlord-card { width: 42px; min-height: 59px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landlord-card[aria-pressed] { transition: none; }
+}
