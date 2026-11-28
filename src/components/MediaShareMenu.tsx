@@ -3,10 +3,11 @@ import {useI18n} from '../lib/language';
 import {useModalFocus} from '../lib/modalFocus';
 import {OverlayIconButton} from './OverlayIconButton';
 
-export function MediaShareMenu({share, download, forward, downloadLabel, disabled, suppressed = false}: {
+export function MediaShareMenu({share, download, forward, reply, downloadLabel, disabled, suppressed = false}: {
   share?: () => void;
   download?: () => void;
   forward?: () => void;
+  reply?: () => void;
   downloadLabel?: string;
   disabled?: boolean;
   suppressed?: boolean;
@@ -34,6 +35,7 @@ export function MediaShareMenu({share, download, forward, downloadLabel, disable
     {icon: 'ios_share', label, select: share},
     {icon: 'download', label: t('common.download'), detail: downloadLabel, select: download},
     {icon: 'forward', label: t('message.forward'), select: forward},
+    {icon: 'reply', label: t('message.reply'), select: reply},
   ];
   return <div className="media-drawer-share" ref={root}>
     <OverlayIconButton icon="ios_share" aria-label={label} aria-haspopup="menu" aria-expanded={shown}

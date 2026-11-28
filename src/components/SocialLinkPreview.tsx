@@ -11,8 +11,9 @@ import {hasSocialShareMetadata, isRepeatedShareText, socialShareTitle} from '../
 import './SocialLinkPreview.css';
 
 /** Opening, playing cached media and paid resolution are three separate actions. */
-export function SocialLinkPreview({preview,url,fitMedia=false,embeddedCover=false}:{
+export function SocialLinkPreview({preview,url,fitMedia=false,embeddedCover=false,chatPreview,onReply}:{
   preview:LinkPreviewDTO|null;url:string;fitMedia?:boolean;embeddedCover?:boolean;
+  chatPreview?:boolean;onReply?:()=>void;
 }){
   const {t}=useI18n(),[current,setCurrent]=useState(preview),[open,setOpen]=useState(false),[confirm,setConfirm]=useState(false),[busy,setBusy]=useState(false),[failed,setFailed]=useState(false),[notice,setNotice]=useState(''),[index,setIndex]=useState(0);
   const mounted=useRef(true),generation=useRef(0);
@@ -58,7 +59,7 @@ export function SocialLinkPreview({preview,url,fitMedia=false,embeddedCover=fals
       {!hasMetadata?<button type="button" className="social-link-parse" disabled={busy} onClick={ask}><span className="material-symbols-outlined" aria-hidden="true">link</span>{t('link.parse.action')}</button>:null}
     </div>
     {notice?<span className="social-link-notice" role="status">{notice}</span>:null}
-    {open && <MediaLightbox index={index} items={items} onIndexChange={setIndex} onClose={()=>setOpen(false)}
+    {open && <MediaLightbox index={index} items={items} onIndexChange={setIndex} onClose={()=>setOpen(false)} chatPreview={chatPreview} onReply={onReply}
       altPrefix={title} source={{name: source, logo, url: canonical, author}} historyKey={historyKey.current}
       sharedDetail={<article className="media-drawer-article">
         <h2>{title}</h2>

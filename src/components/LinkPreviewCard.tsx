@@ -25,10 +25,11 @@ import {isSocialUrl} from '../lib/socialSharePresentation';
 function hostname(url:string){try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}}
 
 /** One link lifecycle and provider dispatcher for chat, shares, composers and feeds. */
-export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messageId,statementId,fitMedia=false,presentation='card'}:{preview?:LinkPreviewDTO|null;url?:string;messageId?:number|string;statementId?:number;fitMedia?:boolean;presentation?:'card'|'cover'}){
+export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messageId,statementId,fitMedia=false,presentation='card',onReplyMedia}:{preview?:LinkPreviewDTO|null;url?:string;messageId?:number|string;statementId?:number;fitMedia?:boolean;presentation?:'card'|'cover';onReplyMedia?:()=>void}){
   const {t}=useI18n(),active=usePageActive();
   const [resolved,setResolved]=useState(preview??null),root=useRef<HTMLAnchorElement>(null),[visible,setVisible]=useState(false);
   const currentUrl=resolved?.url||preview?.url||url;
+  const chatMedia = {chatPreview: messageId !== undefined, onReply: onReplyMedia};
   const musicSource=typeof messageId==='number'?{surface:'chat' as const,source_id:messageId}:
     statementId!==undefined?{surface:'square' as const,source_id:statementId}:undefined;
   const drop=dropShareUrl(url)||dropShareUrl(currentUrl),monifa=monifaShareUrl(url)||monifaShareUrl(currentUrl);
@@ -46,14 +47,14 @@ export const LinkPreviewCard=memo(function LinkPreviewCard({preview,url='',messa
     if(needsContentUpgrade(resolved?.min_client_version,CURRENT_RELEASE.id))return <UnsupportedContentNotice minVersion={resolved?.min_client_version} title={resolved?.title||resolved?.site_name} url={currentUrl}/>;
     if(drop)return <DropDiaryCard url={drop}/>;
     if(monifa)return <MonifaOtpCard url={monifa}/>;
-    if(isSocialUrl(currentUrl))return <SocialLinkPreview preview={resolved} url={currentUrl} fitMedia={fitMedia} embeddedCover={presentation==='cover'}/>;
+    if(isSocialUrl(currentUrl))return <SocialLinkPreview preview={resolved} url={currentUrl} fitMedia={fitMedia} embeddedCover={presentation==='cover'} {...chatMedia}/>;
     const data=resolved?.provider_data;
     if(resolved?.status==='ready'){
       if(presentation==='cover'&&isMusicData(data))return <SquareMusicCover music={data} uri={data.cover_url||resolved.image_url||null} source={musicSource}/>;
       if(isPockloSong(data))return <PockloSongCard reference={data} source={musicSource}/>;
       if(isMusicData(data))return <MusicPreview music={data} source={musicSource}/>;
-      if(isDouyinVideoData(data))return <DouyinVideoPreview previewId={resolved.preview_id} video={data} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
-      if(isSocialMediaData(data))return <SocialMediaPreview media={data} previewId={resolved.preview_id} imageUrl={resolved.image_url} fitMedia={fitMedia}/>;
+      if(isDouyinVideoData(data))return <DouyinVideoPreview previewId={resolved.preview_id} video={data} imageUrl={resolved.image_url} fitMedia={fitMedia} {...chatMedia}/>;
+      if(isSocialMediaData(data))return <SocialMediaPreview media={data} previewId={resolved.preview_id} imageUrl={resolved.image_url} fitMedia={fitMedia} {...chatMedia}/>;
       if(isStillfolioCollection(data))return <StillfolioPreview collection={data} previewId={resolved.preview_id}/>;
       if(isPockloShare(data))return <PockloShareCard share={data}/>;
     }

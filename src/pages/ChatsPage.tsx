@@ -14,6 +14,7 @@ import {
   lazy,
   Suspense,
   Fragment,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -1176,6 +1177,7 @@ function renderMessageContent(
   bubbleStyle?: ChatBubbleStyle,
   voiceDecoration?: { ornament: ReactNode; first: boolean },
   auditPreview = false,
+  onReplyMedia?: () => void,
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
@@ -1387,7 +1389,7 @@ function renderMessageContent(
           <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} prefix={prefix} />
         </span>
       ) : null}
-      <LinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} />
+      <LinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} onReplyMedia={onReplyMedia} />
     </div>
   );
 }
@@ -1457,7 +1459,7 @@ function useMessageActionGesture(onOpen?: (anchor: HTMLElement, pointerX?: numbe
   useEffect(() => cancelPress, []);
   return {
     onPointerDown: onOpen ? (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (!event.currentTarget.contains(event.target as Node) || event.pointerType === "mouse" && event.button !== 0) return;
       cancelPress();
       suppressClick.current = false;
       const anchor = event.currentTarget;
@@ -1476,18 +1478,20 @@ function useMessageActionGesture(onOpen?: (anchor: HTMLElement, pointerX?: numbe
     onPointerCancel: cancelPress,
     onPointerLeave: cancelPress,
     onContextMenu: onOpen ? (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.target as Node)) return;
       event.preventDefault();
       cancelPress();
       onOpen(event.currentTarget, event.clientX);
     } : undefined,
     onClickCapture: (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!onSelect && !suppressClick.current) return;
+      if (!event.currentTarget.contains(event.target as Node) || !onSelect && !suppressClick.current) return;
       suppressClick.current = false;
       event.preventDefault();
       event.stopPropagation();
       onSelect?.();
     },
     onKeyDown: onOpen && keyboard ? (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.target as Node)) return;
       if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey) ||
         (event.key === "Enter" && event.target === event.currentTarget)) {
         event.preventDefault();
@@ -1508,6 +1512,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onOpenImage,
   onOpenVideo,
   onOpenActions,
+  onReplyMedia,
   onRetry,
   onToggleSelection,
   selected,
@@ -1606,7 +1611,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             </button>
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, () => void onRetry(message), bubbleStyle,
-            singerVoice ? { ornament: ornamentInBubble ? null : singerDecoration, first: isFirst } : undefined, auditPreview)}
+            singerVoice ? { ornament: ornamentInBubble ? null : singerDecoration, first: isFirst } : undefined, auditPreview,
+            onReplyMedia && typeof message.id === 'number' && message.status === 'sent' ? () => onReplyMedia(message) : undefined)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {!message.recordShop&&isFirst ? <NikoBubbleRunner /> : null}
           {!message.recordShop&&isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
@@ -1696,6 +1702,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   onOpenImage,
   onOpenVideo,
   onOpenActions,
+  onReplyMedia,
   onOpenOfficialNotice,
   onMentionAuthor,
   onOpenAuthorProfile,
@@ -1886,6 +1893,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
                 onOpenImage={onOpenImage}
                 onOpenVideo={onOpenVideo}
                 onOpenActions={onOpenActions}
+                onReplyMedia={onReplyMedia}
                 onRetry={onRetry}
                 onToggleSelection={onToggleSelection}
                 selected={selectedClientIds.includes(row.message.clientId)}
@@ -1907,6 +1915,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   && prev.selfAvatarUri === next.selfAvatarUri
   && prev.selfIsPermanentVip === next.selfIsPermanentVip
   && prev.messageTitle === next.messageTitle
+  && prev.onReplyMedia === next.onReplyMedia
   && prev.selectionMode === next.selectionMode
   && prev.selectedClientIds.join("|") === next.selectedClientIds.join("|")
   && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds)
@@ -2043,6 +2052,7 @@ interface MessageBubbleRowProps {
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onReplyMedia?: (message: ChatMessage) => void;
   onRetry: (message: ChatMessage) => void;
   onToggleSelection: (message: ChatMessage) => void;
   selected: boolean;
@@ -2057,6 +2067,7 @@ interface MessageGroupBlockProps {
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onReplyMedia?: (message: ChatMessage) => void;
   onOpenOfficialNotice?: (message: ChatMessage) => void;
   onMentionAuthor?: (userId: number) => void;
   onOpenAuthorProfile?: (userId: number) => void;
@@ -2108,6 +2119,7 @@ interface VideoPreviewState {
   uri: string;
   metadata: VideoMetadataDTO | null;
   messageId: number | null;
+  chatId?: number;
   fromPinned?: boolean;
 }
 
@@ -2462,6 +2474,7 @@ function LiveChatsPage({
   const messageSearchPanelRef = useRef<HTMLDivElement | null>(null);
   const messageSearchLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [messageSearchPreviewIndex, setMessageSearchPreviewIndex] = useState<number | null>(null);
+  const searchPreviewChatId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!submissionCreateMenuOpen) return;
@@ -3031,18 +3044,23 @@ function LiveChatsPage({
     return reply;
   };
 
-  const startReply = (message: ChatMessage) => {
+  const startReply = (message: ChatMessage, origin: 'chat' | 'pinned' | 'search' = messageMenu?.origin ?? 'chat') => {
     const reply = quoteFromMessage(message);
     if (!reply) return;
-    const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setReplyTarget(reply);
     setMessageMenu(null);
-    if (fromPinnedDrawer) setPinnedDrawerOpen(false);
+    if (origin === 'pinned') setPinnedDrawerOpen(false);
+    if (origin === 'search') {
+      setMessageSearchOpen(false);
+      setDetailsSheetOpen(false);
+    }
     window.setTimeout(() => {
       recordChatLayout("action", { kind: 1 });
       mentionEditorRef.current?.focus();
-    }, fromPinnedDrawer ? 240 : 0);
+    }, origin === 'chat' ? 0 : 240);
   };
+  const startReplyRef = useRef(startReply);
+  startReplyRef.current = startReply;
 
   const revealPinnedMessage = (messageId: number) => {
     setMessageMenu(null);
@@ -3346,6 +3364,13 @@ function LiveChatsPage({
   );
   const canManageSubmissionMembers = canInviteSubmissionAuthors || canInviteSubmissionReviewers;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
+  const canReplyToMedia = Boolean(selectedChatId && submissionCanSend && !messageSelectionMode);
+  const quoteSharedMedia = useCallback((message: ChatMessage) => {
+    if (selectedChatIdRef.current === selectedChatId) startReplyRef.current(message, 'chat');
+  }, [selectedChatId]);
+  const quotePinnedMedia = useCallback((message: ChatMessage) => {
+    if (selectedChatIdRef.current === selectedChatId) startReplyRef.current(message, 'pinned');
+  }, [selectedChatId]);
   selectedChatIdRef.current = selectedChatId;
   useEffect(() => () => stopStillfolioPicker.current?.(), [selectedChatId, pockloScope]);
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
@@ -3826,6 +3851,12 @@ function LiveChatsPage({
   const messageSearchMediaResults = messageSearchResults.filter((message) => (
     message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO
   ));
+  const openMessageSearchMedia = (messageId: number) => {
+    const index = messageSearchMediaResults.findIndex((message) => message.message_id === messageId);
+    if (index < 0) return;
+    searchPreviewChatId.current = selectedChatId;
+    setMessageSearchPreviewIndex(index);
+  };
   const messageSearchMediaItems: MediaResourceGridItem[] = messageSearchMediaResults.map((message) => ({
     id: message.message_id,
     kind: message.type === MESSAGE_TYPE_VIDEO ? "video" : "image",
@@ -6803,6 +6834,10 @@ function LiveChatsPage({
   const forwardPreviewMedia = (message: ChatMessageDTO, close: () => void) => {
     if (!message.is_deleted && openSingleMessageForwardPicker(mapChatMessage(message, currentUserId), message)) close();
   };
+  const replyToPreviewMedia = (message: ChatMessageDTO, chatId: number, origin: 'chat' | 'pinned' | 'search') => {
+    if (selectedChatIdRef.current !== chatId || message.is_deleted) return;
+    startReply(mapChatMessage(message, currentUserId), origin);
+  };
 
   const submitForwardMessages = async () => {
     if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
@@ -7537,6 +7572,8 @@ function LiveChatsPage({
   };
   const videoPreviewMessage = videoPreview?.messageId ? selectedMessages.find(message => message.id === videoPreview.messageId) : undefined;
   const pinnedVideoSource = videoPreview?.fromPinned ? pinnedMessages.find(pin => pin.message.message_id === videoPreview.messageId)?.message : undefined;
+  const videoReplySource = videoPreview?.fromPinned ? pinnedVideoSource
+    : videoPreviewMessage?.status === 'sent' ? forwardPreviewMessage(videoPreviewMessage) : undefined;
   const searchForwardSource = messageSearchPreviewIndex === null ? undefined : messageSearchMediaResults[messageSearchPreviewIndex];
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat), call: canVoiceCall }) : [];
   const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
@@ -7778,9 +7815,10 @@ function LiveChatsPage({
                       onOpenVideo={(uri, metadata, messageId) => {
                         if (messageId && selectedMessages.some(message => message.id === messageId && message.payload?.uri)) {
                           openConversationMedia([uri], 0, [], [messageId]);
-                        } else setVideoPreview({uri, metadata, messageId});
+                        } else setVideoPreview({uri, metadata, messageId, chatId: selectedChatId ?? undefined});
                       }}
                       onOpenActions={openMessageMenu}
+                      onReplyMedia={canReplyToMedia ? quoteSharedMedia : undefined}
                       onOpenOfficialNotice={(message) => {
                         const targetChatId = Number(message.payload?.submission_chat_id);
                         if (Number.isInteger(targetChatId) && targetChatId > 0) navigate(`/app/submissions/${targetChatId}?view=author`);
@@ -8356,8 +8394,9 @@ function LiveChatsPage({
           initialScrollToEnd={pinnedDrawerOpen}
           messages={orderedPinnedMessages.map((pin) => pin.message)}
           onMessageAction={openPinnedMessageMenu}
-          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds, fromPinned: true })}
-          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId, fromPinned: true })}
+          onReplyMedia={canReplyToMedia ? quotePinnedMedia : undefined}
+          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds, chatId: selectedChatId ?? undefined, fromPinned: true })}
+          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId, chatId: selectedChatId ?? undefined, fromPinned: true })}
           messageTitle={(message) => {
             const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
             return pin?.pinned_by_users.length ? t("pin.by", { names: pin.pinned_by_users.map(user => user.name).join('、') }) : undefined;
@@ -8719,7 +8758,7 @@ function LiveChatsPage({
             {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? <MediaResourceGrid
               highlightedId={messageSearchHighlightId}
               items={messageSearchMediaItems}
-              onSelect={(item) => setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((message) => message.message_id === item.id))}
+              onSelect={(item) => openMessageSearchMedia(item.id)}
             /> : messageSearchType === MESSAGE_TYPE_AUDIO ? <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
               {(group) => <div className="message-search-audio-grid">{group.map((message) => message.payload?.uri ? <SearchAudioTile avatarUri={message.user.avatar_uri} durationSeconds={message.payload.duration_seconds} key={message.message_id} name={message.user.name} onJump={() => revealMessageFromSearch(message.message_id)} src={message.payload.uri} /> : null)}</div>}
             </RelativeDateSections> : <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
@@ -8742,7 +8781,7 @@ function LiveChatsPage({
               const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button>;
               const openResult = () => {
                 if (message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO) {
-                  setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((item) => item.message_id === message.message_id));
+                  openMessageSearchMedia(message.message_id);
                 } else if (message.type === MESSAGE_TYPE_LOCATION && message.payload?.latitude !== undefined && message.payload.longitude !== undefined) {
                   setLocationMessagePreview({ location: { latitude: message.payload.latitude, longitude: message.payload.longitude, address: message.payload.address }, owner: message.user });
                 } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
@@ -8785,6 +8824,7 @@ function LiveChatsPage({
         {historyManagerOpen && selectedChat ? <Suspense fallback={<div role="status">{t("common.loading")}</div>}><HistoryManagerPage chatId={selectedChat.id} onClose={() => setHistoryManagerOpen(false)} onChanged={() => setHistoryReloadVersion(value => value + 1)} /></Suspense> : null}
       </SideDrawer>
       {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox
+        chatPreview
         index={messageSearchPreviewIndex}
         items={messageSearchMediaResults.map((message) => ({
           uri: message.payload?.uri || "",
@@ -8803,6 +8843,8 @@ function LiveChatsPage({
         onIndexChange={setMessageSearchPreviewIndex}
         onForward={searchForwardSource && !searchForwardSource.is_deleted
           ? () => forwardPreviewMedia(searchForwardSource, () => setMessageSearchPreviewIndex(null)) : undefined}
+        onReply={canReplyToMedia && selectedChatId && searchPreviewChatId.current === selectedChatId && searchForwardSource && !searchForwardSource.is_deleted
+          ? () => replyToPreviewMedia(searchForwardSource, selectedChatId, 'search') : undefined}
         onJumpToMessage={() => {
           const message = messageSearchMediaResults[messageSearchPreviewIndex];
           if (message) revealMessageFromSearch(message.message_id);
@@ -9193,7 +9235,7 @@ function LiveChatsPage({
         type="file"
       />
       {imagePreview ? (
-        <ChatImagePreview key={`${imagePreview.chatId}:${imagePreview.uris[0]}`} chatId={imagePreview.chatId} initialIndex={imagePreview.index}
+        <ChatImagePreview key={`${imagePreview.chatId}:${imagePreview.uris[0]}`} chatId={imagePreview.fromPinned ? undefined : imagePreview.chatId} initialIndex={imagePreview.index}
           originalIds={imagePreview.uris.map((uri, index) => imagePreview.messageIds[index] ?? uri)}
           images={imagePreview.mixedMedia ?? imagePreview.uris.map((uri, index) => {
             const message = selectedMessages.find((item) => item.id === imagePreview.messageIds[index]);
@@ -9204,10 +9246,13 @@ function LiveChatsPage({
           })}
           onJumpToMessage={(messageId) => { setImagePreview(null); revealMessageFromSearch(messageId); }}
           onForwardMessage={(message) => forwardPreviewMedia(message, () => setImagePreview(null))}
+          onReplyMessage={canReplyToMedia && selectedChatId && imagePreview.chatId === selectedChatId
+            ? (message) => replyToPreviewMedia(message, selectedChatId, imagePreview.fromPinned ? 'pinned' : 'chat') : undefined}
           onClose={() => setImagePreview(null)} />
       ) : null}
       {videoPreview ? (
         <MediaLightbox
+          chatPreview
           key={videoPreview.uri}
           index={0}
           items={[{
@@ -9224,6 +9269,8 @@ function LiveChatsPage({
           onClose={() => setVideoPreview(null)}
           onForward={pinnedVideoSource && !pinnedVideoSource.is_deleted
             ? () => forwardPreviewMedia(pinnedVideoSource, () => setVideoPreview(null)) : undefined}
+          onReply={canReplyToMedia && selectedChatId && videoPreview.chatId === selectedChatId && videoReplySource && !videoReplySource.is_deleted
+            ? () => replyToPreviewMedia(videoReplySource, selectedChatId, videoPreview.fromPinned ? 'pinned' : 'chat') : undefined}
           onJumpToMessage={videoPreview.messageId ? () => { const id = videoPreview.messageId; setVideoPreview(null); if (id) revealMessageFromSearch(id); } : undefined}
           onIndexChange={() => undefined}
         />
@@ -9820,6 +9867,7 @@ export function ChatPreview({
   wheelScrollMode = "internal",
   messages,
   onMessageAction,
+  onReplyMedia,
   onOpenImage,
   onOpenVideo,
   showAuthors = true,
@@ -9838,6 +9886,7 @@ export function ChatPreview({
   wheelScrollMode?: "internal" | "parent";
   messages: ChatMessageDTO[];
   onMessageAction?: (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => void;
+  onReplyMedia?: (message: ChatMessage) => void;
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   showAuthors?: boolean;
@@ -9914,6 +9963,7 @@ export function ChatPreview({
           group={group}
           key={group.key}
           onOpenActions={onMessageAction ? openMessageAction : noop}
+          onReplyMedia={onReplyMedia}
           onOpenImage={onOpenImage ?? noop}
           onOpenVideo={onOpenVideo ?? noop}
           onRetry={noop}

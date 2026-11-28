@@ -80,6 +80,8 @@ export interface MediaLightboxProps {
   onApproachingEnd?: () => void;
   onJumpToMessage?: () => void;
   onForward?: () => void;
+  onReply?: () => void;
+  chatPreview?: boolean;
   forwardLink?: string;
   onApproachingStart?: () => void;
   onBoundary?: (direction: 'older' | 'newer') => void;
@@ -93,6 +95,7 @@ export interface MediaLightboxProps {
 const icon = (name: string) => <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
 const mediaKey = (item: MediaLightboxItem, index: number) => String(item.id ?? `${index}:${item.uri}`);
 const closedVideo = {current: 0, duration: 0, playing: false, muted: false};
+const heldPlaybackRate = 2;
 const timeCode = (time: number) => {
   const seconds = Number.isFinite(time) ? Math.max(0, Math.floor(time)) : 0;
   const hours = Math.floor(seconds / 3600);
@@ -108,7 +111,7 @@ export function MediaDrawer(props: MediaLightboxProps) {
 
 function MediaDrawerContent({
   item, index, items, altPrefix, editor, fixedFitImage, initialInfo, source: platform, sharedDetail,
-  onClose, onIndexChange, onApproachingEnd, onApproachingStart, onJumpToMessage, onForward, forwardLink, onBoundary,
+  onClose, onIndexChange, onApproachingEnd, onApproachingStart, onJumpToMessage, onForward, onReply, chatPreview, forwardLink, onBoundary,
   hasNext, hasPrevious, loading, totalCount, navigationLabel, fileNamePrefix = 'frienden', historyKey,
 }: MediaLightboxProps & {item: MediaLightboxItem}) {
   const {locale, t} = useI18n();
@@ -123,10 +126,12 @@ function MediaDrawerContent({
   const [waiting, setWaiting] = useState(false);
   const [sizes, setSizes] = useState<Record<string, MediaSize>>({});
   const [playback, setPlayback] = useState(closedVideo);
+  const [speedingUp, setSpeedingUp] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
   const image = useRef<HTMLImageElement>(null);
   const dismissTimer = useRef<number>();
   const closeRequestRef = useRef<(() => void) | null>(null);
+  const replyAfterClose = useRef<() => void>();
   const filePosition = useRef({time: 0, playing: false});
   const videoIdentity = useRef<string>();
   const attemptedVideo = useRef(false);
@@ -183,10 +188,28 @@ function MediaDrawerContent({
     setLeaving(true);
     dismissTimer.current = window.setTimeout(() => closeRequestRef.current?.(), 210);
   };
+  const speedUpVideo = (node: HTMLVideoElement) => {
+    if (node !== video.current || node.paused || node.ended) return;
+    const previousRate = node.playbackRate;
+    let restored = false;
+    node.playbackRate = heldPlaybackRate;
+    setSpeedingUp(true);
+    const restore = () => {
+      if (restored) return;
+      restored = true;
+      node.removeEventListener('pause', restore);
+      node.removeEventListener('ended', restore);
+      node.playbackRate = previousRate;
+      setSpeedingUp(false);
+    };
+    node.addEventListener('pause', restore);
+    node.addEventListener('ended', restore);
+    return restore;
+  };
   const gestures = useMediaDrawerGestures({
-    mediaKey: identity, size: sizeOf(item, index), mode, infoOpen,
+    mediaKey: videoItem ? JSON.stringify([identity, src]) : identity, size: sizeOf(item, index), mode, infoOpen,
     disabled: interactionDisabled || !infoOpen && !src && !item.posterUri,
-    canBrowse, desktopImageZoom: !videoItem, onBrowse: go,
+    canBrowse, desktopImageZoom: !videoItem, onVideoHold: speedUpVideo, onBrowse: go,
     onMode: changeMode, onSwipeStart: carousel.stop,
     onSwipeMove: offset => carousel.drag(Math.min(1, Math.max(-1, offset))),
     onSwipeEnd: (distance, speed, cancelled) => {
@@ -240,7 +263,12 @@ function MediaDrawerContent({
   const dismiss = () => {
     if (editor?.busy) return;
     if (adjusting) editor.onCancel();
-    else onClose();
+    else {
+      onClose();
+      const reply = replyAfterClose.current;
+      replyAfterClose.current = undefined;
+      reply?.();
+    }
   };
   const videoError = () => {
     if (!item.onPlaybackError) {media.fail(); return;}
@@ -305,7 +333,7 @@ function MediaDrawerContent({
   const infoPull = infoOpen ? 1 : canShowInfo && !leaving ? mediaInfoProgress(false, freeDrag?.y ?? 0, infoHeight) : 0;
   const closeInfo = () => setInfo(false);
   const canZoom = !videoItem && Boolean(src && gestures.fitted.width) && !interactionDisabled;
-  const canShare = Boolean(editor ? editor.createShareFile : src || platform?.url || forward);
+  const canShare = Boolean(editor ? editor.createShareFile : src || platform?.url || forward || onReply);
   const defaultControl = useCallback((node: HTMLElement | null) => {
     if (!node) return;
     if (immersive && node.contains(document.activeElement)) gestures.stage.current?.focus({preventScroll:true});
@@ -365,7 +393,10 @@ function MediaDrawerContent({
         onKeyDown={onKeyDown}>
         <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`}
           data-zoomable={canZoom && !infoOpen} data-zoomed={zoomed} tabIndex={interactionDisabled ? undefined : 0}
-          aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.bindStage} {...gestures.events}>
+          aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.bindStage} {...gestures.events}
+          onContextMenu={event => {
+            if ((event.target as Element).closest(chatPreview || fixedFitImage ? '.media-drawer-canvas' : 'video.media-drawer-canvas')) event.preventDefault();
+          }}>
           {adjusting ? editor.stage : items.slice(first, last + 1).map((entry, visibleIndex) => {
             const position = first + visibleIndex;
             const active = position === index;
@@ -408,7 +439,6 @@ function MediaDrawerContent({
                 onError={videoError} /> : null}
               {entryImage && imageSrc ? <img ref={active ? image : undefined} className="media-drawer-canvas" src={imageSrc}
                 alt={active ? title : ''} draggable={false} referrerPolicy={entry.referrerPolicy}
-                onContextMenu={active && fixedFitImage ? event => event.preventDefault() : undefined}
                 onLoad={event => {
                   rememberSize(entry, position, event.currentTarget.naturalWidth, event.currentTarget.naturalHeight);
                   if (active && !fixedFitImage && !editor) media.ready();
@@ -418,6 +448,9 @@ function MediaDrawerContent({
                 draggable={false} referrerPolicy={entry.referrerPolicy}
                 onLoad={entry.width && entry.height ? undefined : event => rememberSize(entry, position, event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)} /> : null}
               {active && <>
+                {videoItem && speedingUp && <div className="media-drawer-speed" role="status">
+                  {icon('fast_forward')}{t('mediaDrawer.holdSpeed', {rate: heldPlaybackRate})}
+                </div>}
                 {src && (!item.deferPlayback || attemptedVideo.current) && <MediaWaitFeedback phase={failed ? 'error' : waiting ? 'buffering' : loadingPhase}
                   onRetry={fixedFitImage || editor || item.onPlaybackError ? undefined : media.retry} />}
                 {fixedFitImage && !src && <MediaWaitFeedback phase="loading" />}
@@ -495,7 +528,8 @@ function MediaDrawerContent({
               <div className="media-drawer-fold-inner"><div className="media-drawer-footer-actions">
               {canShare && <div className="media-drawer-share-action media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
                 <MediaShareMenu key={identity} share={src || platform?.url ? () => void shareNative() : undefined} download={src ? download : undefined}
-                  forward={forward} downloadLabel={item.downloadLabel} disabled={sharing || interactionDisabled} suppressed={immersive} />
+                  forward={forward} reply={onReply ? () => {replyAfterClose.current = onReply; closeRequestRef.current?.();} : undefined}
+                  downloadLabel={item.downloadLabel} disabled={sharing || interactionDisabled} suppressed={immersive} />
               </div>}
               {(canZoom || editor) && <div className="media-drawer-center-actions">
                 {canZoom && <div className="media-drawer-zoom media-drawer-desktop" role="group" aria-label={t('mediaDrawer.zoom')}>

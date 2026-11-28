@@ -7,7 +7,7 @@ import { MediaLightbox } from "./ImageLightbox";
 import type { ChatMessageDTO, ImageMetadataDTO, VideoMetadataDTO } from "../types";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
 
-export function ChatImagePreview({ images, initialIndex, chatId, originalIds, onClose, onJumpToMessage, onForwardMessage }: {
+export function ChatImagePreview({ images, initialIndex, chatId, originalIds, onClose, onJumpToMessage, onForwardMessage, onReplyMessage }: {
   images: ChatPreviewImage[];
   initialIndex: number;
   chatId?: number;
@@ -15,6 +15,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
   onClose: () => void;
   onJumpToMessage?: (messageId: number) => void;
   onForwardMessage?: (message: ChatMessageDTO) => void;
+  onReplyMessage?: (message: ChatMessageDTO) => void;
 }) {
   const { t } = useI18n();
   const [gallery, setGallery] = useState({ items: images, index: initialIndex });
@@ -75,7 +76,7 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
   };
   useEffect(() => () => { Object.values(controllers.current).forEach((controller) => controller?.abort()); }, []);
   const active = gallery.items[gallery.index];
-  const forwardSource = active?.sourceMessage;
+  const source = active?.sourceMessage;
   useEffect(() => {
     const id = active?.messageId;
     if (!id || active.metadata?.status === 2 || active.metadata?.status === 1 && active.metadata.geocoding_status !== 0) return;
@@ -103,6 +104,8 @@ export function ChatImagePreview({ images, initialIndex, chatId, originalIds, on
     hasPrevious={more.older} hasNext={more.newer} loading={pending.older || pending.newer}
     onBoundary={(direction) => void load(direction, true)}
     onJumpToMessage={active?.messageId && onJumpToMessage ? () => onJumpToMessage(active.messageId!) : undefined}
-    onForward={forwardSource && !forwardSource.is_deleted && onForwardMessage ? () => onForwardMessage(forwardSource) : undefined}
+    chatPreview
+    onForward={source && !source.is_deleted && onForwardMessage ? () => onForwardMessage(source) : undefined}
+    onReply={source && !source.is_deleted && onReplyMessage ? () => onReplyMessage(source) : undefined}
     navigationLabel={`${collectionIndex >= 0 ? collectionIndex + 1 : gallery.index + 1} / ${collectionIndex >= 0 ? collection.length : gallery.items.length}`} />;
 }

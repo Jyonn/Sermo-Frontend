@@ -3450,6 +3450,7 @@
 ,"mediaDrawer.info": "資訊"
 ,"mediaDrawer.adjust": "調整"
 ,"mediaDrawer.seek": "跳至播放位置"
+,"mediaDrawer.holdSpeed": "{{rate}} 倍速"
 ,"mediaDrawer.mute": "靜音"
 ,"mediaDrawer.unmute": "取消靜音"
 ,"mediaDrawer.linkCopied": "已複製連結"

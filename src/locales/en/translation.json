@@ -5289,6 +5289,7 @@
 ,"mediaDrawer.info": "Info"
 ,"mediaDrawer.adjust": "Adjust"
 ,"mediaDrawer.seek": "Seek"
+,"mediaDrawer.holdSpeed": "{{rate}}× speed"
 ,"mediaDrawer.mute": "Mute"
 ,"mediaDrawer.unmute": "Unmute"
 ,"mediaDrawer.linkCopied": "Link copied"

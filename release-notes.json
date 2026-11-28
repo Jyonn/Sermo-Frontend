@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.28.10",
+  "id": "2026.11.28.11",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "外部分享和媒体预览更顺滑",
+      "title": "在媒体预览中引用消息和倍速播放",
       "items": [
-        "广场里的抖音和小红书分享封面与卡片边缘贴合，重复标题只显示一次。",
-        "媒体预览在默认和沉浸模式间切换时，背景和控件平滑过渡。"
+        "在聊天媒体预览的左下角菜单引用原消息，返回输入框继续编辑。",
+        "按住正在播放的视频可临时以两倍速播放，松手恢复。"
       ]
     },
     "en": {
-      "title": "Cleaner media shares and smoother previews",
+      "title": "Quote messages and speed up videos in previews",
       "items": [
-        "Douyin and Xiaohongshu covers fit their cards in Square, and repeated titles appear once.",
-        "The background and controls transition smoothly between default and immersive media viewing."
+        "Quote the original message from the chat media preview menu and continue writing in the composer.",
+        "Hold a playing video to watch at double speed, then release to resume your previous speed."
       ]
     }
   }

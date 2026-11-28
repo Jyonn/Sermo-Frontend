@@ -26,7 +26,7 @@ export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
   }
 }
 
-export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string;fitMedia?:boolean }) {
+export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false,chatPreview,onReply }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string;fitMedia?:boolean;chatPreview?:boolean;onReply?:()=>void }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(video);
@@ -79,6 +79,7 @@ export function DouyinVideoPreview({ previewId, video, imageUrl,fitMedia=false }
     {open && <MediaLightbox index={0} items={[{id: playbackKey, uri: currentVideo.video_url || '', kind: 'video', posterUri: currentImageUrl,
       width: currentVideo.width, height: currentVideo.height, loop: true, autoPlay: true, onPlaybackError: () => void handlePlaybackError()}]}
       onIndexChange={() => undefined} onClose={() => setOpen(false)} altPrefix={currentVideo.title || t('douyin.video')}
+      chatPreview={chatPreview} onReply={onReply}
       historyKey={`douyin-video-${currentVideo.video_id}`}
       source={{name: t('social.douyin'), url: currentVideo.canonical_url, logo: '/icons/douyin-logo.svg', author: currentVideo.author}}
       sharedDetail={<article className="media-drawer-article"><h2>{currentVideo.title || t('douyin.video')}</h2>{playbackFailed && <p role="status">{t('douyin.playbackUnavailable')}</p>}</article>} />}

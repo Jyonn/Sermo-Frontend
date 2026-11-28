@@ -8,19 +8,21 @@ type Point = {x: number; y: number};
 type Pinch = {center: Point; distance: number; transform: MediaTransform};
 type NativePinchEvent = Event & {scale: number; clientX?: number; clientY?: number};
 type WheelScroll = {action?: 'browse' | 'pan'; distance: number; browsed: boolean; timer?: number};
-type Drag = {point: Point; transform: MediaTransform; axis?: SwipeAxis; samples: SwipeSample[]; startOffset: number; desktopMouse: boolean};
+type Drag = {point: Point; transform: MediaTransform; axis?: SwipeAxis; samples: SwipeSample[]; time: number; startOffset: number; desktopMouse: boolean; held?: boolean};
+const holdDelay = 380;
 const midpoint = (a: Point, b: Point) => ({x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 const center = {x: 0, y: 0};
 export const isDesktopMediaPreview = () => window.matchMedia('(min-width: 720px)').matches;
 
 export function useMediaDrawerGestures({
-  size, mediaKey, mode, disabled, infoOpen, canBrowse, desktopImageZoom, onBrowse, onMode, onFreeRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
+  size, mediaKey, mode, disabled, infoOpen, canBrowse, desktopImageZoom, onVideoHold, onBrowse, onMode, onFreeRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
 }: {
   size: MediaSize; mediaKey: string; mode: 'default' | 'immersive'; disabled: boolean;
   infoOpen: boolean;
   canBrowse: boolean;
   desktopImageZoom: boolean;
+  onVideoHold: (video: HTMLVideoElement) => (() => void) | undefined;
   onBrowse: (direction: -1 | 1) => void;
   onMode: (mode: 'default' | 'immersive') => void;
   onFreeRelease: (offset: Point, velocity: number) => void;
@@ -44,6 +46,13 @@ export function useMediaDrawerGestures({
   const pointers = useRef(new Map<number, Point>());
   const origin = useRef<Drag>();
   const pinch = useRef<Pinch>();
+  const holdTimer = useRef<number>();
+  const restoreHold = useRef<() => void>();
+  const cancelHold = useCallback(() => {
+    window.clearTimeout(holdTimer.current);
+    restoreHold.current?.();
+    restoreHold.current = undefined;
+  }, []);
   const wheelTimer = useRef<number>();
   const wheelScroll = useRef<WheelScroll>({distance: 0, browsed: false});
   const nativePinch = useRef<{anchor: Point; transform: MediaTransform}>();
@@ -78,8 +87,18 @@ export function useMediaDrawerGestures({
     setDragging(false);
     setFreeDrag(undefined);
     reset();
-    return () => window.clearTimeout(wheelTimer.current);
-  }, [mediaKey, disabled, infoOpen, stageNode]);
+    return () => {window.clearTimeout(wheelTimer.current); cancelHold();};
+  }, [mediaKey, disabled, infoOpen, stageNode, cancelHold]);
+
+  useLayoutEffect(() => {
+    const hide = () => {if (document.hidden) cancelHold();};
+    window.addEventListener('blur', cancelHold);
+    document.addEventListener('visibilitychange', hide);
+    return () => {
+      window.removeEventListener('blur', cancelHold);
+      document.removeEventListener('visibilitychange', hide);
+    };
+  }, [cancelHold]);
 
   const zoom = (next: MediaTransform) => setCurrent(constrainMediaTransform(next, fitted, bounds));
   const position = (x: number, y: number) => {
@@ -114,9 +133,19 @@ export function useMediaDrawerGestures({
     pointers.current.set(event.pointerId, point);
     if (!infoOpen && !desktopMouse) event.currentTarget.setPointerCapture(event.pointerId);
     if (pointers.current.size === 1) {
-      origin.current = {point, transform: current.current, samples: [{...point, time: event.timeStamp}], startOffset: 0, desktopMouse};
+      const start = {point, transform: current.current, samples: [{...point, time: event.timeStamp}], time: event.timeStamp, startOffset: 0, desktopMouse} satisfies Drag;
+      origin.current = start;
+      const target = event.target;
+      if (!infoOpen && target instanceof HTMLVideoElement) {
+        holdTimer.current = window.setTimeout(() => {
+          if (origin.current !== start) return;
+          restoreHold.current = onVideoHold(target);
+          if (restoreHold.current) origin.current.held = true;
+        }, holdDelay);
+      }
       if (!infoOpen && !desktopMouse) setDragging(true);
     } else if (pointers.current.size === 2) {
+      cancelHold();
       if (origin.current?.axis === 'horizontal') onSwipeMove(0);
       setFreeDrag(undefined);
       const [a, b] = [...pointers.current.values()];
@@ -137,11 +166,12 @@ export function useMediaDrawerGestures({
       zoomAt(initial.transform, initial.center, midpoint(a, b), scale);
       return;
     }
-    if (!start) return;
+    if (!start || start.held) return;
     const dx = point.x - start.point.x;
     const dy = point.y - start.point.y;
     const axis = lockSwipeAxis(dx, dy, start.axis);
     if (!axis) return;
+    cancelHold();
     if (axis === 'free' && (infoOpen || start.desktopMouse && start.transform.scale <= 1.003)) {
       start.axis = axis;
       return;
@@ -165,13 +195,15 @@ export function useMediaDrawerGestures({
     }
   };
   const release = (event: PointerEvent<HTMLDivElement>) => {
-    if (!pointers.current.delete(event.pointerId) || pointers.current.size) return;
+    if (!pointers.current.delete(event.pointerId)) return;
+    cancelHold();
+    if (pointers.current.size) return;
     setDragging(false);
     const start = origin.current;
     origin.current = undefined;
     setFreeDrag(undefined);
     if (pinch.current) {pinch.current = undefined; settle(); return;}
-    if (!start) return;
+    if (!start || start.held) return;
     if (event.type !== 'pointerup') {
       if (start.axis === 'horizontal' && start.transform.scale <= 1.003) onSwipeEnd(0, 0, true);
       return;
@@ -182,7 +214,7 @@ export function useMediaDrawerGestures({
     const axis = lockSwipeAxis(dx, dy, start.axis);
     const end = {...point, time: event.timeStamp};
     if (!axis) {
-      if (start.desktopMouse) return;
+      if (start.desktopMouse || event.timeStamp - start.time >= holdDelay) return;
       if (infoOpen && !(event.target as HTMLElement).closest('.media-drawer-slide-photo')) return;
       reset();
       onMode(mode === 'default' ? 'immersive' : 'default');

@@ -25,7 +25,7 @@ export function isSocialMediaData(value: unknown): value is SocialMediaDataDTO {
   return Array.isArray(media.images) && media.images.length > 0 && media.images.every((url) => typeof url === "string" && trusted(url, domains));
 }
 
-export function SocialMediaPreview({ media: initialMedia, previewId, imageUrl,fitMedia=false }: { media: SocialMediaDataDTO; previewId?:number; imageUrl?: string;fitMedia?:boolean }) {
+export function SocialMediaPreview({ media: initialMedia, previewId, imageUrl,fitMedia=false,chatPreview,onReply }: { media: SocialMediaDataDTO; previewId?:number; imageUrl?: string;fitMedia?:boolean;chatPreview?:boolean;onReply?:()=>void }) {
   const { t } = useI18n();
   const [media,setMedia]=useState(initialMedia);
   const [opening,setOpening]=useState(false);
@@ -64,6 +64,7 @@ export function SocialMediaPreview({ media: initialMedia, previewId, imageUrl,fi
     <PlatformMediaCard fitMedia={fitMedia} author={media.author} cover={cover} kindLabel={isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`} logo={logo} opening={opening} onClick={() => void openMedia().catch(()=>setFailed(true))} playIcon={isVideo ? "play_arrow" : undefined} source={source} title={title} />
     {notice?<span role="status" className="message-link-preview-desc">{notice}</span>:null}
     {open && <MediaLightbox altPrefix={title} index={index} items={items} onClose={() => setOpen(false)} onIndexChange={setIndex}
+      chatPreview={chatPreview} onReply={onReply}
       source={{name: source, logo, url: media.canonical_url, author: media.author}} fileNamePrefix={media.provider}
       sharedDetail={<article className="media-drawer-article"><h2>{title}</h2>{failed && <p role="status">{t('social.playbackUnavailable')}</p>}</article>} />}
   </>;

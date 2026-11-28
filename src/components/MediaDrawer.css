@@ -123,6 +123,25 @@
   z-index: 2;
   translate: 0 var(--slide-control-offset, 0px);
 }
+.media-drawer-speed {
+  position: absolute;
+  z-index: 2;
+  inset: max(67px, calc(env(safe-area-inset-top) + 55px)) auto auto 50%;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1px solid var(--media-line);
+  border-radius: 999px;
+  background: var(--media-glass);
+  color: var(--media-ink);
+  backdrop-filter: blur(16px);
+  pointer-events: none;
+  font-size: .8125rem;
+  font-weight: 650;
+}
+.media-drawer-speed .material-symbols-outlined { font-size: 17px; }
 .media-drawer-top {
   position: absolute;
   inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) auto max(12px, env(safe-area-inset-left));

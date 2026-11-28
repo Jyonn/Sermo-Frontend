@@ -5287,6 +5287,7 @@
 ,"mediaDrawer.info": "信息"
 ,"mediaDrawer.adjust": "调整"
 ,"mediaDrawer.seek": "跳转到播放位置"
+,"mediaDrawer.holdSpeed": "{{rate}} 倍速"
 ,"mediaDrawer.mute": "静音"
 ,"mediaDrawer.unmute": "取消静音"
 ,"mediaDrawer.linkCopied": "链接已复制"
