@@ -33,7 +33,7 @@
 .game-seat-clock.is-urgent { background: #a13832; color: #fff1d8; box-shadow: 0 0 0 1px #f4b48d; }
 .duel-seat.is-peer .game-seat-clock { margin-inline: auto 0; }
 .game-table-tools { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; color: inherit; }
-.game-table-tools > button {
+.game-table-tools > button, .game-quick-voice > button {
   display: grid;
   place-items: center;
   flex: 0 0 32px;

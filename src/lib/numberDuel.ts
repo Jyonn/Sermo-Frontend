@@ -1,4 +1,7 @@
+import type {RoomVoiceSnapshot} from './gameQuickVoice';
+
 export interface DuelMatch {
+  quick_voice?: RoomVoiceSnapshot;
   id: string; code: string; status: "waiting" | "choosing" | "secrets" | "playing" | "finished";
   tiers: number[]; own_tier: number | null; opponent_tier: number | null;
   funded: boolean; practice_reason: string; balance: number; returned: number;

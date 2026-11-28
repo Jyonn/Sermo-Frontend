@@ -4,6 +4,7 @@ import { mergeSessionUser } from "./sessionUser";
 import {applySquareSync,rememberSquareResponse,squareSyncRevision,type SquareSyncResult} from './squareSync';
 import {buildTabCacheScope} from './tabCache';
 import type { DuelLobby, DuelMatch, DuelInvitation } from "./numberDuel";
+import type {RoomVoicePhrase, RoomVoiceSnapshot} from './gameQuickVoice';
 import type { LandlordAction, LandlordLobby, LandlordTableView } from "./landlord";
 import type { GameRanking, GameRankingMetric } from "./gameLeaderboard";
 import type { FourPlayerAction, FourPlayerLobby, FourPlayerTable } from "./tabletop";
@@ -1288,6 +1289,11 @@ export const api = {
 
   getNumberDuel(key: string, matchId?: string, signal?: AbortSignal, roomCode?: string) {
     return request<DuelLobby>(`/activities/${key}/duel`, { auth: true, signal, cache: "no-store", query: roomCode ? { room_code: roomCode } : matchId ? { match_id: matchId } : undefined });
+  },
+  sendGameQuickVoice(key: string, code: string, phrase: RoomVoicePhrase, signal: AbortSignal) {
+    return requestCore<RoomVoiceSnapshot>(`/activities/${key}/quick-voice`, {
+      method: 'POST', auth: true, body: {code, phrase}, signal,
+    });
   },
   getLandlordLobby(key: string, code?: string, signal?: AbortSignal) {
     return request<LandlordLobby>(`/activities/${key}/landlord`, { auth: true, query: { code }, signal, cache: "no-store" });

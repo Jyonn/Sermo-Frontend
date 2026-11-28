@@ -1,3 +1,4 @@
+import type {RoomVoiceSnapshot} from './gameQuickVoice';
 import type {LandlordMember} from './landlord';
 
 export type FourPlayerGame = 'shuangkou' | 'mahjong';
@@ -49,6 +50,7 @@ export interface MahjongBoard extends Board {
 }
 
 export interface FourPlayerTable {
+  quick_voice?: RoomVoiceSnapshot;
   code: string;
   status: 'waiting' | 'playing' | 'finished' | 'abandoned';
   mode: FourPlayerMode;

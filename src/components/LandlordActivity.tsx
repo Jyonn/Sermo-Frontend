@@ -12,6 +12,8 @@ import {ChatSharePicker} from './ChatSharePicker';
 import {GameLeaderboard} from './GameLeaderboard';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {CardRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
 import {TableModePicker} from './TableModePicker';
@@ -22,7 +24,9 @@ import './LandlordActivity.css';
 const icon = (name: string) => <span aria-hidden="true" className="material-symbols-outlined">{name}</span>;
 const MODES = [['classic','tabletop.classic'], ['no_shuffle','landlord.noShuffle']] as const;
 
-function Seat({table, position, self = false, seconds}: {table: LandlordTableView; position: number; self?: boolean; seconds: number}) {
+function Seat({table, position, self = false, seconds, quickVoice}: {
+  table: LandlordTableView; position: number; self?: boolean; seconds: number; quickVoice: ReturnType<typeof useGameQuickVoice>;
+}) {
   const {t} = useI18n();
   const seat = table.seats.find(item => item.position === position);
   if (!seat) return <div className="landlord-seat is-empty"><span className="landlord-seat-avatar">{icon('person_add')}</span><small>{t('landlord.openSeat')}</small></div>;
@@ -34,6 +38,7 @@ function Seat({table, position, self = false, seconds}: {table: LandlordTableVie
     : table.status === 'bidding' && typeof bid === 'number' ? t(bid ? 'landlord.bidPoints' : 'landlord.noBid', {points: bid}) : '';
   const active = position === table.turn || (table.status === 'doubling' && seat.doubled === null);
   return <div className={`landlord-seat game-seat${active ? ' is-turn' : ''}${isLandlord ? ' is-landlord' : ''}${seat.ready ? ' is-ready' : ''}`}>
+    <GameQuickVoiceCaption message={quickVoice.messageFor(seat.member.user_id)} />
     <div className="landlord-seat-portrait">
       <UserAvatar className="landlord-seat-avatar" name={seat.member.name} uri={seat.member.avatar_uri} />
       {isLandlord && <span className="landlord-role-seal">{icon('workspace_premium')}{t('landlord.landlord')}</span>}
@@ -182,6 +187,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
   const bidding = table?.status === 'bidding';
   const doubling = table?.status === 'doubling';
   const live = Boolean(playing || bidding || doubling);
+  const quickVoice = useGameQuickVoice(activity.key, table?.code, table?.quick_voice);
   const exit = useGameExit(Boolean(table && table.status !== 'abandoned'),live,exitHandler,
     async () => Boolean(table && await perform({action:'leave',code:table.code,round:table.round,version:table.version})));
   const lastPlay = table?.last_cards ?? (table?.last_player != null ? table.moves[table.last_player]?.cards ?? [] : []);
@@ -229,13 +235,13 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
           <GameTableTools game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
-            token={table.deadline ?? undefined}>
+            token={table.deadline ?? undefined} quickVoice={quickVoice}>
             <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
               title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
           </GameTableTools>
         </div>
         <div className="landlord-arena">
-          <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} />
+          <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} quickVoice={quickVoice} />
         <div className="landlord-center">
           {table.status === 'waiting' ? <>
             <img className="landlord-table-art" src={LANDLORD_ART} alt="" />
@@ -256,7 +262,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             </div>}
           </>}
         </div>
-          <Seat table={table} position={(table.your_seat + 1) % 3} seconds={remaining} />
+          <Seat table={table} position={(table.your_seat + 1) % 3} seconds={remaining} quickVoice={quickVoice} />
         </div>
       </div>
       <div className="landlord-play-controls">
@@ -285,7 +291,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
               onClick={() => void perform({action:'play', code:table.code, version:table.version, cards:selected})}>{t('landlord.play')}</button>
           </div>}
           <div className="landlord-controls landlord-table-actions">
-            <Seat table={table} position={table.your_seat} seconds={remaining} self />
+            <Seat table={table} position={table.your_seat} seconds={remaining} quickVoice={quickVoice} self />
             <button className="landlord-text-button" type="button" disabled={busy} aria-pressed={self?.trustee ?? false}
               onClick={() => void perform({action:'trustee', code:table.code, version:table.version, value:!self?.trustee})}>
               {icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}
@@ -293,6 +299,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>
         </> : table.status === 'waiting' ? <div className="landlord-controls">
+          <Seat table={table} position={table.your_seat} seconds={remaining} quickVoice={quickVoice} self />
           <button className="landlord-secondary" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           <button className="landlord-primary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>
         </div> : table.status === 'finished' ? <div className="landlord-rematch">
@@ -305,6 +312,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             {table.ready_count < 3 && <button className="landlord-secondary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>}
           </div>
           <div className="landlord-controls landlord-table-actions">
+            <Seat table={table} position={table.your_seat} seconds={remaining} quickVoice={quickVoice} self />
             <button className="landlord-text-button" type="button" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>
             <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>

@@ -1,3 +1,5 @@
+import type {RoomVoiceSnapshot} from './gameQuickVoice';
+
 export const LANDLORD_KEY = "landlord";
 export const LANDLORD_ART = "/activity/landlord/table.webp";
 export const LANDLORD_TITLE = "/activity/landlord/title.webp";
@@ -30,6 +32,7 @@ export interface LandlordTableView {
   last_player: number | null;
   deadline: number | null;
   server_now: number;
+  quick_voice?: RoomVoiceSnapshot;
   can_start: boolean;
   base: number;
   multiplier: number;

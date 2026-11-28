@@ -13,6 +13,8 @@ import {ChatSharePicker} from './ChatSharePicker';
 import {MahjongTile} from './MahjongTile';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {GameLeaderboard} from './GameLeaderboard';
 import {CardRuleGuide, MahjongRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
@@ -30,7 +32,9 @@ const CALLS = {chi:'tabletop.chi', pong:'tabletop.pong', kong:'tabletop.kong', h
 const WINDS = ['tabletop.east','tabletop.south','tabletop.west','tabletop.north'] as const;
 const icon = (name: string) => <span className="material-symbols-outlined" aria-hidden="true">{name}</span>;
 
-function TableSeat({table, position, game, side, seconds}: {table: FourPlayerTable; position: number; game: FourPlayerGame; side: string; seconds: number}) {
+function TableSeat({table, position, game, side, seconds, quickVoice}: {
+  table: FourPlayerTable; position: number; game: FourPlayerGame; side: string; seconds: number; quickVoice: ReturnType<typeof useGameQuickVoice>;
+}) {
   const {t} = useI18n();
   const seat = table.seats.find(item => item.position === position);
   if (!seat) return <div className={`four-player-seat is-${side} is-empty`}>{icon('person_add')}{t('landlord.openSeat')}</div>;
@@ -44,6 +48,7 @@ function TableSeat({table, position, game, side, seconds}: {table: FourPlayerTab
   const pending = board && 'pending' in board ? board.pending : null;
   const active = pending ? self && Boolean(pending.choices?.length) : position === board?.turn;
   return <div className={`four-player-seat game-seat is-${side}${active ? ' is-turn' : ''}${seat.ready ? ' is-ready' : ''}`}>
+    <GameQuickVoiceCaption message={quickVoice.messageFor(seat.member.user_id)} />
     <UserAvatar className="four-player-avatar" name={seat.member.name} uri={seat.member.avatar_uri} />
     <div><strong>{self ? t('common.you') : seat.member.name}{position === table.host && <small title={t('landlord.host')}>{icon('key')}</small>}</strong>
       <span>{role && `${role} · `}{status}</span></div>
@@ -88,6 +93,7 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
   const invitation = new URLSearchParams(search).get(TABLE_ROOM_PARAM);
   const canPlay = activity.active && activity.verified;
   const {lobby, table, failed, busy, seconds, closeExpired, move, perform, retry} = useFourPlayerRoom(activity.key, canPlay, invitation);
+  const quickVoice = useGameQuickVoice(activity.key, table?.code, table?.quick_voice);
   const [selected, setSelected] = useState<number[]>([]);
   const [panel, setPanel] = useState<'rules' | 'share' | 'ranking' | null>(null);
   const board = table?.board;
@@ -148,13 +154,13 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
         {!playing && <button className="landlord-text-button" type="button" onClick={() => setPanel('ranking')}
           aria-label={t('landlord.ranking')} title={t('landlord.ranking')}>{icon('emoji_events')}</button>}
         <GameTableTools game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
-          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined}>
+          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} quickVoice={quickVoice}>
           <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game,
             title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
         </GameTableTools>
       </header>
       <div className="four-player-arena">
-        {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} seconds={seconds}
+        {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} seconds={seconds} quickVoice={quickVoice}
           position={(table.your_seat + index) % 4} />)}
         <div className="four-player-center">
           {state === 'waiting' ? <div className="four-player-announcement"><strong>{t(table.seats.length < 4 ? 'landlord.waiting' : 'tabletop.waitingReady')}</strong><span>{t('tabletop.seated', {count:table.seats.length})}</span></div>

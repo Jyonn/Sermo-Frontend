@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.28.6",
+  "id": "2026.11.28.7",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "游戏浮窗可以拖动",
+      "title": "游戏房间可以发快捷语音",
       "items": [
-        "拖动最小化的游戏浮窗，松手后会贴到最近的一侧。房间顶部的背景音乐、语音提示和最小化按钮统一了尺寸和间距。"
+        "斗地主、双扣、麻将和数字交锋都支持快捷语音。点一句就能发给同房玩家，短句会显示在你的座位旁。"
       ]
     },
     "en": {
-      "title": "Move the floating game control",
+      "title": "Send quick voice messages in game rooms",
       "items": [
-        "Drag the floating game control to move it to either edge. The music, voice cues, and minimize buttons now share the same size and spacing."
+        "Send preset voice lines to players in your Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. Each line appears next to the sender’s seat."
       ]
     }
   }

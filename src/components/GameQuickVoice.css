@@ -1,0 +1,100 @@
+.game-quick-voice {
+  --voice-accent: var(--table-accent, var(--landlord-ivory, var(--duel-accent, #a6e3d5)));
+  position: relative;
+  flex: 0 0 32px;
+}
+
+.game-quick-voice > button[aria-expanded='true'] {
+  background: var(--voice-accent);
+  color: #192825;
+}
+
+.game-quick-voice-picker {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: -38px;
+  z-index: 12;
+  box-sizing: border-box;
+  width: min(274px, 64cqw);
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--voice-accent) 40%, transparent);
+  border-radius: 14px;
+  background: var(--table-shadow, #1b2d29);
+  box-shadow: 0 10px 24px #0b130f70;
+  color: #fbefda;
+  font-size: .8rem;
+  text-align: start;
+}
+
+.game-quick-voice-picker header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 4px 8px;
+  color: var(--voice-accent);
+}
+
+.game-quick-voice-picker button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 35px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #fbefda;
+  background: color-mix(in srgb, var(--voice-accent) 11%, transparent);
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+.game-quick-voice-picker button:enabled:is(:hover, :focus-visible) {
+  border-color: var(--voice-accent);
+  background: color-mix(in srgb, var(--voice-accent) 22%, transparent);
+}
+
+.game-quick-voice-picker button:disabled { opacity: .55; cursor: wait; }
+.game-quick-voice-picker button.game-quick-voice-close { justify-content: center; min-height: 28px; background: transparent; }
+.game-quick-voice-picker button .material-symbols-outlined { flex: 0 0 auto; color: var(--voice-accent); }
+.game-quick-voice-presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.game-quick-voice-presets button:last-child { grid-column: 1 / -1; }
+.game-quick-voice-feedback { margin: 7px 4px 2px; color: var(--voice-accent); font-size: .73rem; }
+
+.game-quick-voice-caption {
+  --voice-accent: var(--seat-accent, #efcb86);
+  position: absolute;
+  z-index: 3;
+  inset-block-end: calc(100% + 4px);
+  inset-inline-start: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 150px;
+  width: max-content;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--voice-accent) 63%, transparent);
+  border-radius: 8px 8px 8px 3px;
+  color: #fff4de;
+  background: var(--table-shadow, #182c28);
+  box-shadow: 0 2px 6px #0c100d44;
+  font-size: .75rem;
+  font-weight: 650;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.game-quick-voice-caption .material-symbols-outlined { color: var(--voice-accent); font-size: 14px; }
+:is(.landlord-arena > .landlord-seat:last-child, .four-player-seat.is-right, .duel-seat.is-peer) > .game-quick-voice-caption {
+  inset-inline: auto 0;
+  border-radius: 8px 8px 3px 8px;
+}
+.four-player-seat.is-north > .game-quick-voice-caption { inset-block: calc(100% + 4px) auto; border-radius: 3px 8px 8px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .game-quick-voice-caption, .game-quick-voice-picker { animation: quick-voice-appear 140ms ease-out; }
+  @keyframes quick-voice-appear {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

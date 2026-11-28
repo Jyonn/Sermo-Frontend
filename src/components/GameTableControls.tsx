@@ -2,7 +2,10 @@ import {useEffect, useRef, useState, type MutableRefObject, type ReactNode} from
 import {useLocation} from 'react-router-dom';
 import {GAME_NAVIGATION_EVENT, guardGameHistory} from '../lib/gameNavigation';
 import {useI18n} from '../lib/language';
+import type {useGameQuickVoice} from '../lib/useGameQuickVoice';
+import {useRoomVoicePlayback} from '../lib/useRoomVoicePlayback';
 import {ConfirmDialog} from './ConfirmDialog';
+import {GameQuickVoiceButton} from './GameQuickVoice';
 import './GameTableControls.css';
 
 export type GameExitHandler = MutableRefObject<((after?: () => void) => void) | undefined>;
@@ -99,8 +102,9 @@ type Cue = 'bid' | 'double' | 'play' | 'discard' | 'claim' | 'guess' | 'secret';
 const assetRoot = '/activity/game-audio';
 const enabled = (key: string) => {try {return localStorage.getItem(`frienden.games.${key}`) !== 'off';} catch {return true;}};
 
-export function GameTableTools({game, active, cue, token, children}: {
-  game: Game; active: boolean; cue: Cue | null; token?: string | number; children: ReactNode;
+export function GameTableTools({game, active, cue, token, quickVoice, children}: {
+  game: Game; active: boolean; cue: Cue | null; token?: string | number;
+  quickVoice: ReturnType<typeof useGameQuickVoice>; children: ReactNode;
 }) {
   const {t,language} = useI18n();
   const [music,setMusic] = useState(() => enabled('music'));
@@ -109,7 +113,12 @@ export function GameTableTools({game, active, cue, token, children}: {
   const prompt = useRef<HTMLAudioElement>();
   const last = useRef('');
   const cueKey = active && cue ? `${token}:${cue}` : '';
-  const src = cue ? `${assetRoot}/${language.startsWith('zh') ? 'zh' : 'en'}-${cue}.m4a` : null;
+  const voiceLanguage = language.startsWith('zh') ? 'zh' : 'en';
+  const src = cue ? `${assetRoot}/${voiceLanguage}-${cue}.m4a` : null;
+  const interruptQuickVoice = useRoomVoicePlayback(quickVoice.room, voice && quickVoice.enabled, voiceLanguage,
+    quickVoice.messages, prompt);
+  const interrupt = useRef(interruptQuickVoice);
+  interrupt.current = interruptQuickVoice;
 
   useEffect(() => {
     if (!active || !music) return;
@@ -147,7 +156,11 @@ export function GameTableTools({game, active, cue, token, children}: {
       if (document.hidden) {audio.pause(); return;}
       if (starting || last.current === cueKey) return;
       starting = true;
-      void audio.play().then(() => {if (alive) last.current = cueKey;})
+      void audio.play().then(() => {
+        if (!alive) return;
+        interrupt.current();
+        last.current = cueKey;
+      })
         .catch(() => undefined).finally(() => {starting = false;});
     };
     play();
@@ -183,6 +196,7 @@ export function GameTableTools({game, active, cue, token, children}: {
     <button type="button" aria-label={t('game.voice')} title={t('game.voice')} aria-pressed={voice} onClick={() => toggle('voice',!voice)}>
       <span className="material-symbols-outlined" aria-hidden="true">{voice ? 'volume_up' : 'volume_off'}</span>
     </button>
+    {quickVoice.enabled && <GameQuickVoiceButton game={game} voice={quickVoice} />}
     {children}
   </span>;
 }

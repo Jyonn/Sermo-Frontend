@@ -15,6 +15,8 @@ import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "..
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import { GameLeaderboard } from "./GameLeaderboard";
 import { DuelRuleGuide } from "./GameRules";
 import { ChatTargetPicker } from "./ChatTargetPicker";
@@ -113,6 +115,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
   const mutation = useRef(false);
   const reads = useRef(0);
   const match = lobby?.match ?? null;
+  const quickVoice = useGameQuickVoice(activity.key, roomCode && match ? match.code : undefined, match?.quick_voice);
 
   function failure(cause: unknown) {
     const name = cause instanceof ApiError ? cause.identifier.split(/[@.]/).pop()?.toLowerCase() : "";
@@ -254,7 +257,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         <button type="button" onClick={() => setSheet('history')}>{t('duel.historyShort')}</button>
         <button type="button" onClick={() => setSheet('leaders')} aria-label={t('landlord.ranking')}>{t('duel.leadersShort')}</button>
         {roomCode && match && <GameTableTools game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
-          token={`${match.id}:${match.round}`}>
+          token={`${match.id}:${match.round}`} quickVoice={quickVoice}>
           <GameRoomMinimizeButton room={{activityKey:activity.key, code:match.code, game:'duel',
             title:activity.title, titleEn:activity.title_en, status:duelRoomStatus(match)}} disabled={busy} onMinimize={onMinimize} />
         </GameTableTools>}
@@ -294,6 +297,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
       <div className="duel-table-board">
         <div className="duel-versus">
           <div className={`duel-seat game-seat${myTurn ? ' is-turn' : ''}`}>
+            <GameQuickVoiceCaption message={quickVoice.messageFor(session?.user.user_id)} />
             <UserAvatar className="duel-player-avatar" name={session?.user.name ?? t('duel.you')} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} />
             <div><strong>{t('duel.you')}</strong><small>{yourSummary}</small></div>
             <GameSeatClock seconds={myTurn || match.status === 'waiting' ? seconds : null} />
@@ -304,6 +308,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
             {done && match.reason === 'forfeit' && match.outcome !== 'draw' && <small>{t('game.finishedByForfeit')}</small>}
           </header>
           <div className={`duel-seat game-seat is-peer${peerTurn ? ' is-turn' : ''}`}>
+            <GameQuickVoiceCaption message={quickVoice.messageFor(match.opponent?.user_id)} />
             <UserAvatar className="duel-player-avatar" name={match.opponent?.name ?? '?'} uri={match.opponent?.avatar_uri} cacheKey={match.opponent?.avatar_cache_key} />
             <div><strong>{match.opponent?.name ?? t('duel.waitingPeer')}</strong><small>{peerSummary}</small></div>
             <GameSeatClock seconds={peerTurn ? seconds : null} />
