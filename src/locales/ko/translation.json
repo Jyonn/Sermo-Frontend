@@ -1,5 +1,9 @@
 {
   "game.quickVoice.title": "빠른 음성",
+  "game.leaveRoom": "방 나가기",
+  "game.leaveAction": "나가기",
+  "game.minimizeAction": "최소화",
+  "game.stay": "남기",
   "game.quickVoice.your_turn": "낼 차례예요!",
   "game.quickVoice.your_guess": "맞혀 보세요!",
   "game.mustPass": "이길 수 있는 패가 없어요",

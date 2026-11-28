@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.28.8",
+  "id": "2026.11.28.9",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "游戏房间可以发快捷语音",
+      "title": "游戏房间的离开操作更顺手",
       "items": [
-        "游戏房间右下角增加快捷语音，第一条可以提醒牌友出牌。",
-        "斗地主和双扣会在要不起时提示，5 秒后自动过牌。"
+        "点游戏房间右上角的离开图标，就近选择留桌、离开或最小化。自己的座位头像显示在底部。"
       ]
     },
     "en": {
-      "title": "Send quick voice messages in game rooms",
+      "title": "Room actions are together in the upper-right corner",
       "items": [
-        "Open quick voice in the bottom right of your game room to send a turn reminder or another preset line.",
-        "Dou Dizhu and Shuangkou now tell you when you have no legal response and pass after five seconds."
+        "Tap the exit icon in a game room to stay, leave, or minimize. Your seat and avatar appear along the bottom."
       ]
     }
   }

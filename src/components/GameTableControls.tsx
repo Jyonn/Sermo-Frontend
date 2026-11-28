@@ -1,10 +1,9 @@
-import {useEffect, useRef, useState, type MutableRefObject, type ReactNode} from 'react';
+import {useCallback, useEffect, useRef, useState, type MutableRefObject} from 'react';
 import {useLocation} from 'react-router-dom';
 import {GAME_NAVIGATION_EVENT, guardGameHistory} from '../lib/gameNavigation';
 import {useI18n} from '../lib/language';
 import type {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {useRoomVoicePlayback} from '../lib/useRoomVoicePlayback';
-import {ConfirmDialog} from './ConfirmDialog';
 import './GameTableControls.css';
 
 export type GameExitHandler = MutableRefObject<((after?: () => void) => void) | undefined>;
@@ -14,13 +13,18 @@ export function useGameExit(inRoom: boolean, live: boolean, handler: GameExitHan
   const next = useRef<() => void>();
   const beforeLeave = useRef(onLeave);
   const allowBack = useRef(false);
+  const confirming = useRef(false);
   const location = useLocation();
   beforeLeave.current = onLeave;
+  const request = useCallback((after?: () => void) => {
+    if (confirming.current) return;
+    next.current = after;
+    setOpen(true);
+  }, []);
   useEffect(() => {
-    if (!inRoom) return;
-    function request(after?: () => void) {
-      next.current = after;
-      setOpen(true);
+    if (!inRoom) {
+      setOpen(false);
+      return;
     }
     if (handler) handler.current = request;
     const redirect = (event: Event) => {
@@ -64,29 +68,32 @@ export function useGameExit(inRoom: boolean, live: boolean, handler: GameExitHan
       window.removeEventListener('beforeunload',leavePage);
       releaseHistory();
     };
-  }, [inRoom,live,location.key,handler]);
+  }, [inRoom,live,location.key,handler,request]);
 
   return {
-    open,
-    request: () => {next.current = undefined; setOpen(true);},
-    close: () => setOpen(false),
-    confirm: async () => {
-      if (!await beforeLeave.current()) return;
-      setOpen(false);
-      if (!next.current) return;
-      allowBack.current = true;
-      next.current();
+    open: inRoom && open,
+    request,
+    close: () => {
+      if (confirming.current) return;
       next.current = undefined;
+      setOpen(false);
+    },
+    confirm: async () => {
+      if (confirming.current) return;
+      confirming.current = true;
+      try {
+        if (!await beforeLeave.current()) return;
+        setOpen(false);
+        const after = next.current;
+        next.current = undefined;
+        if (!after) return;
+        allowBack.current = true;
+        after();
+      } finally {
+        confirming.current = false;
+      }
     },
   };
-}
-
-export function GameExitDialog({exit, live, busy}: {exit: ReturnType<typeof useGameExit>; live: boolean; busy: boolean}) {
-  const {t} = useI18n();
-  return <ConfirmDialog open={exit.open} className="game-table-panel" title={t(live ? 'game.forfeit' : 'landlord.leave')}
-    description={t(live ? 'game.forfeitConfirm' : 'game.leaveRoomConfirm')} cancelLabel={t('game.stay')}
-    confirmLabel={t(live ? 'game.forfeit' : 'landlord.leave')} danger={live} busy={busy} onClose={exit.close}
-    onConfirm={() => void exit.confirm()} />;
 }
 
 export function GameSeatClock({seconds}: {seconds: number | null}) {
@@ -101,9 +108,9 @@ type Cue = 'bid' | 'double' | 'play' | 'discard' | 'claim' | 'guess' | 'secret';
 const assetRoot = '/activity/game-audio';
 const enabled = (key: string) => {try {return localStorage.getItem(`frienden.games.${key}`) !== 'off';} catch {return true;}};
 
-export function GameTableTools({game, active, cue, token, quickVoice, children}: {
+export function GameTableTools({game, active, cue, token, quickVoice}: {
   game: Game; active: boolean; cue: Cue | null; token?: string | number;
-  quickVoice: ReturnType<typeof useGameQuickVoice>; children: ReactNode;
+  quickVoice: ReturnType<typeof useGameQuickVoice>;
 }) {
   const {t,language} = useI18n();
   const [music,setMusic] = useState(() => enabled('music'));
@@ -195,6 +202,5 @@ export function GameTableTools({game, active, cue, token, quickVoice, children}:
     <button type="button" aria-label={t('game.voice')} title={t('game.voice')} aria-pressed={voice} onClick={() => toggle('voice',!voice)}>
       <span className="material-symbols-outlined" aria-hidden="true">{voice ? 'volume_up' : 'volume_off'}</span>
     </button>
-    {children}
   </span>;
 }

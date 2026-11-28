@@ -1,0 +1,88 @@
+.game-room-header-slot { display: contents; }
+
+.game-room-header-controls {
+  --room-popover-fill: #162f2a;
+  --room-popover-ink: #fff1db;
+  --room-popover-accent: #ecd09b;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--drawer-control-gap, 8px);
+}
+
+.game-room-header-controls[data-game='shuangkou'] {
+  --room-popover-fill: #342025;
+  --room-popover-accent: #efc49c;
+}
+
+.game-room-header-controls[data-game='duel'] {
+  --room-popover-fill: #173138;
+  --room-popover-accent: #cde6b3;
+}
+
+.game-table-drawer:has(.game-room-header-controls) :is(.drawer-surface-dismiss,.game-activity-share),
+.duel-room-header:has(.game-room-header-controls) :is(.duel-room-back,.duel-room-share) {
+  display: none;
+}
+
+.game-room-exit-trigger[aria-expanded='true'] {
+  --overlay-control-fill: var(--room-popover-fill);
+  --overlay-control-hover: var(--room-popover-fill);
+  --overlay-control-line: var(--room-popover-accent);
+  --overlay-control-ink: var(--room-popover-accent);
+}
+
+.game-room-exit-popover {
+  position: absolute;
+  inset-block-start: calc(100% + 9px);
+  inset-inline-end: 0;
+  box-sizing: border-box;
+  width: min(306px, calc(100vw - 34px));
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--room-popover-accent) 38%, transparent);
+  border-radius: 15px;
+  background: var(--room-popover-fill);
+  box-shadow: 0 12px 28px #080d0b65;
+  color: var(--room-popover-ink);
+}
+
+.game-room-exit-popover > strong { display: block; font-size: .94rem; }
+.game-room-exit-popover p {
+  margin: 5px 0 0;
+  color: color-mix(in srgb, var(--room-popover-ink) 78%, var(--room-popover-fill));
+  font-size: .79rem;
+  line-height: 1.45;
+}
+
+.game-room-exit-options {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 6px;
+  margin-block-start: 11px;
+}
+
+.game-room-exit-options button {
+  min-height: 36px;
+  padding: 4px 6px;
+  border: 1px solid color-mix(in srgb, var(--room-popover-accent) 22%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--room-popover-ink) 8%, var(--room-popover-fill));
+  color: var(--room-popover-ink);
+  font-size: .79rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-room-exit-options button:hover:enabled { border-color: var(--room-popover-accent); }
+.game-room-exit-options button:focus-visible { outline: 2px solid var(--room-popover-accent); outline-offset: 2px; }
+.game-room-exit-options button:disabled { opacity: .55; cursor: wait; }
+.game-room-exit-options .game-room-exit-confirm { background: #8a4039; border-color: #b66f60; color: #fff5e4; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .game-room-exit-popover { animation: game-room-exit-enter 140ms ease-out; }
+  @keyframes game-room-exit-enter {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

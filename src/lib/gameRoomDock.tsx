@@ -9,7 +9,7 @@ import '../components/GameRoomDock.css';
 
 type Game = 'landlord' | 'shuangkou' | 'mahjong' | 'duel';
 
-interface Room {
+export interface GameRoomDockEntry {
   activityKey: string;
   code: string;
   game: Game;
@@ -17,6 +17,7 @@ interface Room {
   titleEn?: string;
   status: GameRoomStatus;
 }
+type Room = GameRoomDockEntry;
 
 const phaseLabels: Record<GameRoomPhase, TranslationKey> = {
   waiting: 'game.roomWaiting', playing: 'game.roomPlaying', turn: 'game.roomTurn',
@@ -226,18 +227,16 @@ export function GameRoomDockProvider({children, openTable}: {children: ReactNode
   </DockContext.Provider>;
 }
 
-export function GameRoomMinimizeButton({room, disabled, onMinimize}: {room: Room; disabled: boolean; onMinimize?: () => void}) {
+export function useGameRoomMinimize(room: Room, onMinimize?: () => void) {
   const dock = useContext(DockContext);
-  const {t} = useI18n();
   const {activityKey, code} = room;
   const acknowledge = dock?.acknowledge;
   useEffect(() => {
     acknowledge?.(activityKey, code);
   }, [acknowledge, activityKey, code]);
-  if (!dock || !onMinimize || room.status.phase === 'closed' || (room.game === 'duel' && room.status.phase === 'finished')) return null;
-  const label = t('game.minimizeRoom');
-  return <button className="game-room-minimize" type="button" disabled={disabled} title={label} aria-label={label}
-    onClick={() => {dock.minimize(room); onMinimize();}}>
-    <span className="material-symbols-outlined" aria-hidden="true">close_fullscreen</span>
-  </button>;
+  if (!dock || !onMinimize || room.status.phase === 'closed') return undefined;
+  return () => {
+    dock.minimize(room);
+    onMinimize();
+  };
 }

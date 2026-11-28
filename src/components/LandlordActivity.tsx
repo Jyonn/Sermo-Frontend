@@ -3,7 +3,6 @@ import {useLocation} from 'react-router-dom';
 import {api, ApiError} from '../lib/api';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {showToast} from '../lib/toast';
-import {GameRoomMinimizeButton} from '../lib/gameRoomDock';
 import {cardTableStatus} from '../lib/gameRoomStatus';
 import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordTableView} from '../lib/landlord';
 import type {ActivityCampaignDTO} from '../types';
@@ -11,7 +10,8 @@ import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
 import {GameLeaderboard} from './GameLeaderboard';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
-import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameTableTools, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameRoomHeader, type GameRoomHeaderTarget} from './GameRoomHeader';
 import {GameQuickVoiceButton, GameQuickVoiceCaption} from './GameQuickVoice';
 import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {CardRuleGuide} from './GameRules';
@@ -58,7 +58,9 @@ const actionErrors: Record<string, TranslationKey> = {
   BUSY: 'landlord.alreadySeated', TURN: 'landlord.waitTurn', CARDS: 'landlord.invalidPlay', INVALID: 'landlord.actionFailed',
 };
 
-export function LandlordActivity({activity, exitHandler, onMinimize}: {activity: ActivityCampaignDTO; exitHandler: GameExitHandler; onMinimize: () => void}) {
+export function LandlordActivity({activity, exitHandler, onMinimize, headerTarget, onExitRoom}: GameRoomHeaderTarget & {
+  activity: ActivityCampaignDTO; exitHandler: GameExitHandler; onMinimize: () => void;
+}) {
   const {t, language} = useI18n();
   const location = useLocation();
   const invitation = new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM);
@@ -235,10 +237,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
           <GameTableTools game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn && !table.must_pass ? 'play' : null : null}
-            token={table.deadline ?? undefined} quickVoice={quickVoice}>
-            <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
-              title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
-          </GameTableTools>
+            token={table.deadline ?? undefined} quickVoice={quickVoice} />
         </div>
         <div className="landlord-arena">
           <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} quickVoice={quickVoice} />
@@ -296,12 +295,9 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
               onClick={() => void perform({action:'trustee', code:table.code, version:table.version, value:!self?.trustee})}>
               {icon('smart_toy')}{t(self?.trustee ? 'landlord.stopTrustee' : 'landlord.trustee')}
             </button>
-            <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>
         </> : table.status === 'waiting' ? <div className="landlord-controls">
           <Seat table={table} position={table.your_seat} seconds={remaining} quickVoice={quickVoice} self />
-          <button className="landlord-secondary" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
-          <button className="landlord-primary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>
         </div> : table.status === 'finished' ? <div className="landlord-rematch">
           <span className="landlord-choice">{t('landlord.readyCount', {count:table.seats.filter(seat => seat.ready).length})}</span>
           <div className="landlord-controls">
@@ -309,12 +305,10 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
               onClick={() => void perform({action:'ready', code:table.code, version:table.version, round:table.round, mode:table.mode, value:!self?.ready})}>{t(self?.ready ? 'landlord.cancelReady' : 'landlord.readyUp')}</button>
             {table.your_seat === table.host && <button className="landlord-primary" type="button" disabled={busy || !table.can_start}
               onClick={() => void perform({action:'start', code:table.code, version:table.version, round:table.round})}>{t('landlord.startNext')}</button>}
-            {table.ready_count < 3 && <button className="landlord-secondary" type="button" onClick={() => setShareOpen(true)}>{icon('share')}{t('landlord.invite')}</button>}
           </div>
           <div className="landlord-controls landlord-table-actions">
             <Seat table={table} position={table.your_seat} seconds={remaining} quickVoice={quickVoice} self />
             <button className="landlord-text-button" type="button" onClick={openRanking}>{icon('emoji_events')}{t('landlord.ranking')}</button>
-            <button className="landlord-text-button" type="button" disabled={busy} onClick={exit.request}>{t('landlord.leave')}</button>
           </div>
         </div> : <div className="landlord-controls">
           <button className="landlord-secondary" type="button" onClick={returnToLobby}>{t('landlord.backLobby')}</button>
@@ -329,7 +323,10 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
       <ol className="landlord-rules">{(['ruleBid','ruleDouble','rulePlay','ruleResult','ruleNoShuffle'] as const).map(key => <li key={key}>{t(`landlord.${key}`)}</li>)}</ol>
     </SettingsDialog>
     <GameLeaderboard activityKey={activity.key} open={dialog === 'ranking'} onClose={() => setDialog(null)} />
-    <GameExitDialog exit={exit} live={live} busy={busy} />
+    {table && table.status !== 'abandoned' && <GameRoomHeader target={headerTarget} exit={exit} live={live} busy={busy}
+      onExitRoom={onExitRoom} onMinimize={onMinimize} onShare={canShareRoom ? () => setShareOpen(true) : undefined}
+      room={{activityKey:activity.key, code:table.code, game:'landlord', title:activity.title,
+        titleEn:activity.title_en, status:cardTableStatus(table)}} />}
     {table && canShareRoom && <ChatSharePicker open={shareOpen} title={t('landlord.chooseChat')} onClose={() => setShareOpen(false)}
       sendToChat={(chatId, clientId) => api.sendMessage(chatId, 11, JSON.stringify({kind:'landlord_room', activity_key:activity.key,
         room_code:table.code, title}), undefined, clientId)} />}

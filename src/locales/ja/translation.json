@@ -1,5 +1,9 @@
 {
   "game.quickVoice.title": "クイックボイス",
+  "game.leaveRoom": "部屋から退出",
+  "game.leaveAction": "退出",
+  "game.minimizeAction": "最小化",
+  "game.stay": "残る",
   "game.quickVoice.your_turn": "出番だよ！",
   "game.quickVoice.your_guess": "当ててみて！",
   "game.mustPass": "出せるカードがありません",

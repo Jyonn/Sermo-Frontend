@@ -1,5 +1,9 @@
 {
   "game.quickVoice.title": "Voz rápida",
+  "game.leaveRoom": "Salir de la sala",
+  "game.leaveAction": "Salir",
+  "game.minimizeAction": "Minimizar",
+  "game.stay": "Quedarse",
   "game.quickVoice.your_turn": "¡Te toca!",
   "game.quickVoice.your_guess": "¡Haz tu intento!",
   "game.mustPass": "No puedes superar esta jugada",

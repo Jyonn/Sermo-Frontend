@@ -98,6 +98,7 @@ export function ActivityExperience({activityKey,onClose,onMinimize}:{activityKey
   const features=useSpaceFeatures();
   const navigate=useNavigate();
   const gameExit=useRef<((after?: () => void) => void)>();
+  const [gameHeader,setGameHeader]=useState<HTMLDivElement|null>(null);
   const [activeActivity,setActiveActivity]=useState<ActivityCampaignDTO|null>(null);
   const theme=activeActivity?.theme||activityThemeForKey(activityKey);
   const [vipCampaign,setVipCampaign]=useState<PermanentVipCampaignDTO|null>(null);
@@ -269,7 +270,10 @@ export function ActivityExperience({activityKey,onClose,onMinimize}:{activityKey
         className={activityDrawerClassName(activityKey,theme)}
         contentUnderToolbar
         trapFocus
-        headerAction={activeActivity ? <OverlayIconButton icon="share" aria-label={t(isTabletopGame(activeActivity.theme) ? 'landlord.shareActivity' : 'square.share')} title={isTabletopGame(activeActivity.theme) ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} /> : null}
+        headerAction={activeActivity ? <>
+          <OverlayIconButton icon="share" className="game-activity-share" aria-label={t(isTabletopGame(activeActivity.theme) ? 'landlord.shareActivity' : 'square.share')} title={isTabletopGame(activeActivity.theme) ? t('landlord.shareActivity') : undefined} onClick={() => openActivityShare(activeActivity)} />
+          {isTabletopGame(theme) && <div ref={setGameHeader} className="game-room-header-slot" />}
+        </> : null}
         historyMode="route"
         onClose={() => gameExit.current ? gameExit.current(onClose) : onClose()}
         open={Boolean(activityKey) && activityKey !== 'permanent-vip-founding-100'}
@@ -281,8 +285,10 @@ export function ActivityExperience({activityKey,onClose,onMinimize}:{activityKey
           <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : undefined}
       >
-        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} exitHandler={gameExit} onMinimize={onMinimize} />
-          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} exitHandler={gameExit} onMinimize={onMinimize} /> : activeActivity?.record_shop ? (
+        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} exitHandler={gameExit}
+          headerTarget={gameHeader} onExitRoom={onClose} onMinimize={onMinimize} />
+          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} exitHandler={gameExit}
+            headerTarget={gameHeader} onExitRoom={onClose} onMinimize={onMinimize} /> : activeActivity?.record_shop ? (
           <RecordShopActivity
             activity={activeActivity}
             dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}

@@ -63,8 +63,8 @@
 .four-player-arena {
   display: grid;
   grid-template-columns: minmax(0, .8fr) minmax(0, 2.9fr) minmax(0, .8fr);
-  grid-template-rows: auto minmax(0,1fr) auto;
-  grid-template-areas: '. north .' 'left center right' '. south .';
+  grid-template-rows: auto minmax(0,1fr);
+  grid-template-areas: '. north .' 'left center right';
   gap: 7px 9px;
   align-items: center;
   padding: clamp(8px, 2cqw, 20px);
@@ -74,7 +74,6 @@
   box-shadow: inset 0 0 0 4px #22191532;
 }
 .four-player-seat.is-north { grid-area: north; justify-self: center; }
-.four-player-seat.is-south { grid-area: south; justify-self: center; }
 .four-player-seat.is-left { grid-area: left; }
 .four-player-seat.is-right { grid-area: right; }
 .four-player-center { grid-area: center; display: grid; align-content: center; gap: 6px; min-width: 0; text-align: center; }
@@ -97,6 +96,9 @@
 .four-player-turn time { padding: 2px 6px; border: 1px solid var(--table-edge); border-radius: 6px; color: var(--table-accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .four-player-last { display: grid; gap: 3px; container-type: inline-size; }
 .four-player-controls { position: relative; display: grid; justify-items: center; gap: 4px; min-width: 0; padding-inline: clamp(0px,3cqw,24px); }
+.four-player-controls:has(> .is-south) { min-height: 38px; }
+.four-player-controls > .is-south { position: absolute; inset: auto auto 0 0; max-width: 115px; }
+.four-player-controls:has(> .is-south) .four-player-actions { margin-inline: 112px 44px; }
 .four-player-controls .selectable-hand { width: 100%; container-type: inline-size; --playing-card-width: clamp(35px, 8cqw, 60px); }
 .four-player-management { display: grid; gap: 6px; justify-items: center; }
 .four-player .table-mode-picker { color: var(--table-ink); }
@@ -108,9 +110,7 @@
 .four-player .landlord-text-button { color: var(--table-muted); }
 .four-player .landlord-text-button[aria-pressed='true'] { color: var(--table-accent); }
 .four-player .landlord-text-button .material-symbols-outlined { margin-inline-end: 3px; font-size: 1.1em; vertical-align: -.13em; }
-.four-player-leave { position: absolute; inset: auto 0 0 auto; }
 .four-player-controls > .game-quick-voice { inset: auto 0 0 auto; }
-.game-quick-voice + .four-player-leave { inset-inline-end: 46px; }
 .mahjong-board { display: grid; min-width: 0; gap: 4px; }
 .mahjong-wall { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--table-muted); font-size: .71rem; }
 .mahjong-latest { display: inline-flex; align-items: center; gap: 4px; color: var(--table-accent); }
@@ -193,5 +193,4 @@
 @container (width < 530px) {
   .four-player-seat { padding-inline: 4px; }
   .four-player-avatar { width: 22px; height: 22px; }
-  .four-player .landlord-text-button.four-player-leave { position: static; min-height: 23px; }
 }

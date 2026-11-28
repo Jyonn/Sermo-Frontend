@@ -8,13 +8,13 @@ import { useI18n, type TranslationKey } from "../lib/language";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import { GameRoomMinimizeButton } from "../lib/gameRoomDock";
 import { duelRoomStatus } from "../lib/gameRoomStatus";
 import { gameRoomReturnState } from "../lib/gameNavigation";
 import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "../lib/numberDuel";
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
-import { GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import { GameTableTools, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import {GameRoomHeader, type GameRoomHeaderTarget} from './GameRoomHeader';
 import {GameQuickVoiceButton, GameQuickVoiceCaption} from './GameQuickVoice';
 import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import { GameLeaderboard } from "./GameLeaderboard";
@@ -88,7 +88,7 @@ function DuelRoundHistory({match, t}: {match: DuelMatch; t: DuelTranslate}) {
   </section>;
 }
 
-export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitHandler, onMinimize }: {
+export function NumberDuelActivity({activity, roomCode, shareRequest = 0, exitHandler, onMinimize, headerTarget, onExitRoom}: GameRoomHeaderTarget & {
   activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number; exitHandler?: GameExitHandler; onMinimize?: () => void;
 }) {
   const navigate = useNavigate();
@@ -221,18 +221,14 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
   const seconds = match?.status === 'playing' && lobby ? Math.min(remaining, lobby.round_seconds) : remaining;
   const myGuess = match?.guesses.find((row) => row.mine && row.round === match.round);
   const done = match?.status === "finished";
-  const inRoom = Boolean(roomCode && match && !done);
-  const live = inRoom && match?.status !== 'waiting';
-  const exit = useGameExit(inRoom,live,exitHandler,() => act('leave'));
+  const inRoom = Boolean(roomCode && match);
+  const live = inRoom && !done && match?.status !== 'waiting';
+  const exit = useGameExit(inRoom,live,exitHandler,async () => done || await act('leave'));
   const date = (value: number) => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(value * 1000);
   const secretStage = match?.status === "secrets";
   const canEnter = Boolean(lobby?.eligible && lobby.active);
-  function showMatch(value: string | undefined) {
+  function showMatch(value: string) {
     setSheet(null);
-    if (!value) {
-      navigate(`/app/menu?panel=activities&activity=${activity.key}`);
-      return;
-    }
     const state = roomCode ? location.state : gameRoomReturnState(location);
     navigate(`/app/number-duel/${value}`, {state});
   }
@@ -257,10 +253,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         <button type="button" onClick={() => setSheet('history')}>{t('duel.historyShort')}</button>
         <button type="button" onClick={() => setSheet('leaders')} aria-label={t('landlord.ranking')}>{t('duel.leadersShort')}</button>
         {roomCode && match && <GameTableTools game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
-          token={`${match.id}:${match.round}`} quickVoice={quickVoice}>
-          <GameRoomMinimizeButton room={{activityKey:activity.key, code:match.code, game:'duel',
-            title:activity.title, titleEn:activity.title_en, status:duelRoomStatus(match)}} disabled={busy} onMinimize={onMinimize} />
-        </GameTableTools>}
+          token={`${match.id}:${match.round}`} quickVoice={quickVoice} />}
       </nav>
     </div>
     {offline && <p className="duel-notice" role="status">{t('duel.reconnecting')}<button type="button" onClick={() => void refresh()}>{t('duel.retry')}</button></p>}
@@ -296,12 +289,6 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
     </section> : <>
       <div className="duel-table-board">
         <div className="duel-versus">
-          <div className={`duel-seat game-seat${myTurn ? ' is-turn' : ''}`}>
-            <GameQuickVoiceCaption message={quickVoice.messageFor(session?.user.user_id)} />
-            <UserAvatar className="duel-player-avatar" name={session?.user.name ?? t('duel.you')} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} />
-            <div><strong>{t('duel.you')}</strong><small>{yourSummary}</small></div>
-            <GameSeatClock seconds={myTurn || match.status === 'waiting' ? seconds : null} />
-          </div>
           <header className="duel-match-heading">
             <h2>{stageTitle}</h2>
             {done && <strong className={`duel-result-points${match.points < 0 ? ' is-loss' : ''}`}>{signedGrowthPoints(match.points)}</strong>}
@@ -318,10 +305,6 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
       <div className={`duel-match-grid${match.status === 'playing' || (done && match.guesses.length) ? ' has-rounds' : ''}`}>
         {match.status === 'waiting' ? <section className="duel-waiting">
           <p>{t('duel.inviteHint')}</p>
-          <div className="duel-waiting-actions">
-            <button className="button" type="button" onClick={() => void openShare()}>{t('duel.invite')}</button>
-            <button className="ghost-button" type="button" onClick={() => void copyInvite()}>{t('duel.copyLink')}</button>
-          </div>
         </section> : match.status === 'choosing' ? <section className="duel-tier-agreement">
           <div className="duel-tiers">
             {[10, 20, 50].map((value, index) => <button key={value} type="button" aria-pressed={stake === value}
@@ -343,7 +326,6 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
             <span>{t('duel.yourSecret')}<strong>{match.own_secret ?? '—'}</strong></span>
             <span>{t('duel.theirSecret')}<strong>{match.opponent_secret ?? '—'}</strong></span>
           </div>
-          <button className="button" type="button" onClick={() => showMatch(undefined)}>{t('duel.backLobby')}</button>
         </section> : <section className="duel-play-area">
           {secretStage && match.own_secret ? <div className="duel-round-wait">
             <span className="material-symbols-outlined" aria-hidden="true">lock</span><strong>{match.own_secret}</strong><p>{t('duel.waitSecret')}</p>
@@ -357,12 +339,20 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         {(match.status === 'playing' || (done && match.guesses.length > 0)) && <DuelRoundHistory match={match} t={t} />}
       </div>
       <GameQuickVoiceButton game="duel" voice={quickVoice} />
-      {!done && <footer className="duel-table-footer">
+      <footer className="duel-table-footer">
+        <div className={`duel-seat game-seat${myTurn ? ' is-turn' : ''}`}>
+          <GameQuickVoiceCaption message={quickVoice.messageFor(session?.user.user_id)} />
+          <UserAvatar className="duel-player-avatar" name={session?.user.name ?? t('duel.you')} uri={session?.user.avatar_uri} cacheKey={session?.user.avatar_cache_key} />
+          <div><strong>{t('duel.you')}</strong><small>{yourSummary}</small></div>
+          <GameSeatClock seconds={myTurn || match.status === 'waiting' ? seconds : null} />
+        </div>
         {(match.funded || match.practice_reason) && <span>{t(match.funded ? 'duel.stake' : 'duel.practiceMatch', {points:match.stake})}</span>}
-        <button className="duel-leave" disabled={busy} onClick={exit.request} type="button">{t('duel.leave')}</button>
-      </footer>}
+      </footer>
     </>}
-    <GameExitDialog exit={exit} live={live} busy={busy} />
+    {inRoom && match && <GameRoomHeader target={headerTarget} exit={exit} live={live} busy={busy}
+      onExitRoom={onExitRoom} onMinimize={onMinimize} onShare={() => void openShare()}
+      room={{activityKey:activity.key, code:match.code, game:'duel', title:activity.title,
+        titleEn:activity.title_en, status:duelRoomStatus(match)}} />}
     <GameLeaderboard activityKey={activity.key} open={sheet === 'leaders'} onClose={() => setSheet(null)} scoredOnly />
     <BottomSheet open={sheet === "history"} className="game-table-panel" onClose={() => setSheet(null)} title={t('duel.history')}>
       <div className="duel-panel">

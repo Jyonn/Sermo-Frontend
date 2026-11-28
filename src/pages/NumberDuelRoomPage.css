@@ -7,12 +7,21 @@
   background: radial-gradient(ellipse at 50% 12%, #285648, transparent 74%), #0e2329;
 }
 .duel-room-header {
+  position: relative;
+  z-index: 3;
   display: flex;
   width: min(960px, 100%);
   min-height: 68px;
   align-items: center;
   gap: 12px;
   margin: auto;
+}
+.duel-room-header .game-room-header-controls {
+  --overlay-control-fill: #102b30;
+  --overlay-control-line: #c5daa66c;
+  --overlay-control-ink: #f4f8e6;
+  --overlay-control-hover: #284b4b;
+  margin-inline-start: auto;
 }
 .duel-room-back, .duel-room-share {
   display: grid;
