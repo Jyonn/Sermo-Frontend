@@ -1,14 +1,25 @@
-.game-room-dock {
+.game-room-dock-area {
   position: fixed;
   z-index: 120;
-  inset-inline-start: max(14px, env(safe-area-inset-left));
-  bottom: max(110px, calc(94px + env(safe-area-inset-bottom)));
-  display: grid;
-  gap: 8px;
-  max-width: min(210px, calc(100vw - 28px));
+  inset: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  pointer-events: none;
 }
 
-body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-room-dock {
+.game-room-dock {
+  position: absolute;
+  left: 0;
+  bottom: min(96px, 25%);
+  display: grid;
+  gap: 8px;
+  width: max-content;
+  max-width: min(210px, 100%);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-room-dock-area {
   display: none;
 }
 
@@ -25,8 +36,10 @@ body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-roo
   color: var(--text-primary);
   text-align: start;
   box-shadow: 0 5px 18px rgb(17 40 32 / 17%);
-  cursor: pointer;
+  cursor: grab;
 }
+
+.game-room-dock.is-dragging .game-room-chip { cursor: grabbing; }
 
 .game-room-chip:hover,
 .game-room-chip.is-urgent {
@@ -64,29 +77,12 @@ body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-roo
 .game-room-chip.is-urgent .game-room-chip-copy > small { color: var(--text-primary); font-weight: 750; }
 .game-room-chip .game-room-chip-open { color: var(--text-secondary); font-size: 16px; }
 
-.game-room-minimize,
-.duel-topline .game-room-minimize {
-  display: grid;
-  flex: 0 0 32px;
-  place-items: center;
-  width: 32px;
-  min-height: 30px;
-  padding: 0;
-  border: 1px solid currentColor;
-  border-radius: 9px;
-  background: rgb(23 31 34 / 38%);
-  color: inherit;
-  cursor: pointer;
-}
-
-.game-room-minimize .material-symbols-outlined { font-size: 17px; }
-.game-room-minimize:disabled { opacity: .6; cursor: wait; }
-
 @media (max-width: 760px) {
-  .game-room-dock { bottom: max(152px, calc(126px + env(safe-area-inset-bottom))); }
+  .game-room-dock { bottom: min(138px, 25%); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .game-room-dock:not(.is-dragging) { transition: left .2s ease-out; }
   .game-room-chip { animation: game-room-dock-enter .2s ease-out both; }
   .game-room-chip-icon > i { animation: game-room-update .28s ease-out both; }
   .game-room-chip.is-my-turn { animation: game-room-your-turn .42s ease-out; }

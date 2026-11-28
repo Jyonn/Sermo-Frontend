@@ -1,4 +1,4 @@
-import {createContext, useCallback, useContext, useEffect, useState, type ReactNode} from 'react';
+import {createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {api, ApiError} from './api';
 import {useAuth} from './auth';
@@ -109,6 +109,89 @@ function RoomChip({room, onOpen, onDismiss}: {room: Room; onOpen: () => void; on
   </button>;
 }
 
+type DockPosition = {left: number; top: number};
+const clamp = (value: number, limit: number) => Math.max(0, Math.min(value, limit));
+
+function GameRoomDock({visible, children}: {visible: boolean; children: ReactNode}) {
+  const area = useRef<HTMLDivElement>(null);
+  const dock = useRef<HTMLElement>(null);
+  const drag = useRef<{id: number; x: number; y: number; origin: DockPosition; moved: boolean} | null>(null);
+  const suppressClick = useRef(false);
+  const [bounds, setBounds] = useState({left: 0, top: 0});
+  const [anchor, setAnchor] = useState<{right: boolean; ratio: number} | null>(null);
+  const [moving, setMoving] = useState<DockPosition | null>(null);
+
+  useLayoutEffect(() => {
+    const boundary = area.current;
+    const panel = dock.current;
+    if (!visible || !boundary || !panel) return;
+    const measure = () => setBounds({
+      left: Math.max(0, boundary.clientWidth - panel.offsetWidth),
+      top: Math.max(0, boundary.clientHeight - panel.offsetHeight),
+    });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(boundary);
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, [visible]);
+
+  function startDrag(event: PointerEvent<HTMLElement>) {
+    if (!event.isPrimary || event.button !== 0 || drag.current || !area.current) return;
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!button) return;
+    const region = area.current.getBoundingClientRect();
+    const panel = event.currentTarget.getBoundingClientRect();
+    drag.current = {
+      id: event.pointerId, x: event.clientX, y: event.clientY, moved: false,
+      origin: {left: panel.left - region.left, top: panel.top - region.top},
+    };
+    suppressClick.current = false;
+    button.setPointerCapture(event.pointerId);
+  }
+
+  function moveDrag(event: PointerEvent<HTMLElement>) {
+    const start = drag.current;
+    if (!start || start.id !== event.pointerId) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (!start.moved && Math.hypot(dx, dy) <= 6) return;
+    start.moved = true;
+    setMoving({left: clamp(start.origin.left + dx, bounds.left), top: clamp(start.origin.top + dy, bounds.top)});
+  }
+
+  function finishDrag(event: PointerEvent<HTMLElement>) {
+    const start = drag.current;
+    if (!start || start.id !== event.pointerId) return;
+    drag.current = null;
+    suppressClick.current = start.moved;
+    if (start.moved && event.type === 'pointerup') {
+      const left = clamp(start.origin.left + event.clientX - start.x, bounds.left);
+      const top = clamp(start.origin.top + event.clientY - start.y, bounds.top);
+      setAnchor({right: left > bounds.left / 2, ratio: bounds.top ? top / bounds.top : 0});
+    }
+    setMoving(null);
+  }
+
+  const position = moving ?? (anchor && {left: anchor.right ? bounds.left : 0, top: anchor.ratio * bounds.top});
+  if (!visible) return null;
+  return <div className="game-room-dock-area" ref={area}>
+    <aside className={`game-room-dock${moving ? ' is-dragging' : ''}`} ref={dock}
+      style={position ? {left: position.left, top: position.top, bottom: 'auto'} : undefined}
+      onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={finishDrag}
+      onPointerCancel={finishDrag} onLostPointerCapture={finishDrag}
+      onContextMenu={event => event.preventDefault()}
+      onClickCapture={event => {
+        if (!suppressClick.current || event.detail === 0) return;
+        suppressClick.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }}>
+      {children}
+    </aside>
+  </div>;
+}
+
 export function GameRoomDockProvider({children, openTable}: {children: ReactNode; openTable: (key: string) => void}) {
   const {session} = useAuth();
   const location = useLocation();
@@ -133,13 +216,13 @@ export function GameRoomDockProvider({children, openTable}: {children: ReactNode
   const visible = Boolean(identity && rooms.owner === identity && location.pathname.startsWith('/app/'));
   return <DockContext.Provider value={{minimize, acknowledge}}>
     {children}
-    {visible && rooms.entries.length > 0 && <aside className="game-room-dock">
+    <GameRoomDock visible={visible && rooms.entries.length > 0}>
       {rooms.entries.map(room => <RoomChip key={`${room.activityKey}:${room.code}`} room={room}
         onDismiss={() => acknowledge(room.activityKey, room.code)}
         onOpen={() => room.game === 'duel'
           ? navigate(`/app/number-duel/${room.code}`, {state: gameRoomReturnState(location)})
           : openTable(room.activityKey)} />)}
-    </aside>}
+    </GameRoomDock>
   </DockContext.Provider>;
 }
 

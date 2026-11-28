@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.28.5",
+  "id": "2026.11.28.6",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "游戏房间可以最小化",
+      "title": "游戏浮窗可以拖动",
       "items": [
-        "斗地主、双扣、麻将和数字交锋的房间可以收起。浮窗会提醒房间动态，轮到你时轻摇一下。点浮窗即可回到房间。"
+        "拖动最小化的游戏浮窗，松手后会贴到最近的一侧。房间顶部的背景音乐、语音提示和最小化按钮统一了尺寸和间距。"
       ]
     },
     "en": {
-      "title": "Minimize game rooms",
+      "title": "Move the floating game control",
       "items": [
-        "Minimize a Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. The floating button shows updates, shakes briefly on your turn, and takes you back to the room."
+        "Drag the floating game control to move it to either edge. The music, voice cues, and minimize buttons now share the same size and spacing."
       ]
     }
   }

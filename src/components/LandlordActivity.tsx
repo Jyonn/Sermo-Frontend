@@ -11,7 +11,7 @@ import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
 import {GameLeaderboard} from './GameLeaderboard';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
-import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
 import {CardRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
 import {TableModePicker} from './TableModePicker';
@@ -228,10 +228,11 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
           <span>{t(table.mode === 'no_shuffle' ? 'landlord.noShuffle' : 'tabletop.classic')}
             {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
-          <GameAudio game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
-            token={table.deadline ?? undefined} />
-          <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
-            title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
+          <GameTableTools game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
+            token={table.deadline ?? undefined}>
+            <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
+              title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
+          </GameTableTools>
         </div>
         <div className="landlord-arena">
           <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} />

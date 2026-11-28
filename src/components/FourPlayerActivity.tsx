@@ -12,7 +12,7 @@ import {ActivityTitle} from './ActivityCampaignCard';
 import {ChatSharePicker} from './ChatSharePicker';
 import {MahjongTile} from './MahjongTile';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
-import {GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
+import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
 import {GameLeaderboard} from './GameLeaderboard';
 import {CardRuleGuide, MahjongRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
@@ -147,10 +147,11 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
         <button className="landlord-text-button" type="button" onClick={() => setPanel('rules')}>{t('landlord.rules')}</button>
         {!playing && <button className="landlord-text-button" type="button" onClick={() => setPanel('ranking')}
           aria-label={t('landlord.ranking')} title={t('landlord.ranking')}>{icon('emoji_events')}</button>}
-        <GameAudio game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
-          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} />
-        <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game,
-          title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
+        <GameTableTools game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
+          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined}>
+          <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game,
+            title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
+        </GameTableTools>
       </header>
       <div className="four-player-arena">
         {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} seconds={seconds}

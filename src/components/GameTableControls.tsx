@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, type MutableRefObject} from 'react';
+import {useEffect, useRef, useState, type MutableRefObject, type ReactNode} from 'react';
 import {useLocation} from 'react-router-dom';
 import {GAME_NAVIGATION_EVENT, guardGameHistory} from '../lib/gameNavigation';
 import {useI18n} from '../lib/language';
@@ -99,7 +99,9 @@ type Cue = 'bid' | 'double' | 'play' | 'discard' | 'claim' | 'guess' | 'secret';
 const assetRoot = '/activity/game-audio';
 const enabled = (key: string) => {try {return localStorage.getItem(`frienden.games.${key}`) !== 'off';} catch {return true;}};
 
-export function GameAudio({game, active, cue, token}: {game: Game; active: boolean; cue: Cue | null; token?: string | number}) {
+export function GameTableTools({game, active, cue, token, children}: {
+  game: Game; active: boolean; cue: Cue | null; token?: string | number; children: ReactNode;
+}) {
   const {t,language} = useI18n();
   const [music,setMusic] = useState(() => enabled('music'));
   const [voice,setVoice] = useState(() => enabled('voice'));
@@ -174,12 +176,13 @@ export function GameAudio({game, active, cue, token}: {game: Game; active: boole
       setVoice(value);
     }
   }
-  return <span className="game-audio">
+  return <span className="game-table-tools">
     <button type="button" aria-label={t('game.music')} title={t('game.music')} aria-pressed={music} onClick={() => toggle('music',!music)}>
       <span className="material-symbols-outlined" aria-hidden="true">{music ? 'music_note' : 'music_off'}</span>
     </button>
     <button type="button" aria-label={t('game.voice')} title={t('game.voice')} aria-pressed={voice} onClick={() => toggle('voice',!voice)}>
-      <span className="material-symbols-outlined" aria-hidden="true">{voice ? 'record_voice_over' : 'voice_over_off'}</span>
+      <span className="material-symbols-outlined" aria-hidden="true">{voice ? 'volume_up' : 'volume_off'}</span>
     </button>
+    {children}
   </span>;
 }

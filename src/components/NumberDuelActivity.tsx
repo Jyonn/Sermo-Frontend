@@ -14,7 +14,7 @@ import { gameRoomReturnState } from "../lib/gameNavigation";
 import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "../lib/numberDuel";
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
-import { GameAudio, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
+import { GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
 import { GameLeaderboard } from "./GameLeaderboard";
 import { DuelRuleGuide } from "./GameRules";
 import { ChatTargetPicker } from "./ChatTargetPicker";
@@ -253,10 +253,11 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         <button type="button" onClick={() => setSheet('rules')}>{t('duel.rulesShort')}</button>
         <button type="button" onClick={() => setSheet('history')}>{t('duel.historyShort')}</button>
         <button type="button" onClick={() => setSheet('leaders')} aria-label={t('landlord.ranking')}>{t('duel.leadersShort')}</button>
-        {roomCode && match && <GameAudio game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
-          token={`${match.id}:${match.round}`} />}
-        {roomCode && match && <GameRoomMinimizeButton room={{activityKey:activity.key, code:match.code, game:'duel',
-          title:activity.title, titleEn:activity.title_en, status:duelRoomStatus(match)}} disabled={busy} onMinimize={onMinimize} />}
+        {roomCode && match && <GameTableTools game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
+          token={`${match.id}:${match.round}`}>
+          <GameRoomMinimizeButton room={{activityKey:activity.key, code:match.code, game:'duel',
+            title:activity.title, titleEn:activity.title_en, status:duelRoomStatus(match)}} disabled={busy} onMinimize={onMinimize} />
+        </GameTableTools>}
       </nav>
     </div>
     {offline && <p className="duel-notice" role="status">{t('duel.reconnecting')}<button type="button" onClick={() => void refresh()}>{t('duel.retry')}</button></p>}
