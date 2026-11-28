@@ -1,5 +1,8 @@
 {
   "game.quickVoice.title": "Voz rápida",
+  "game.quickVoice.your_turn": "¡Te toca!",
+  "game.quickVoice.your_guess": "¡Haz tu intento!",
+  "game.mustPass": "No puedes superar esta jugada",
   "game.quickVoice.hello": "¡Hola a todos!",
   "game.quickVoice.wait": "Un segundo",
   "game.quickVoice.good_hand": "¡Buena mano!",

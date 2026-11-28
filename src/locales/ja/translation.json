@@ -1,5 +1,8 @@
 {
   "game.quickVoice.title": "クイックボイス",
+  "game.quickVoice.your_turn": "出番だよ！",
+  "game.quickVoice.your_guess": "当ててみて！",
+  "game.mustPass": "出せるカードがありません",
   "game.quickVoice.hello": "こんにちは！",
   "game.quickVoice.wait": "ちょっと待って！",
   "game.quickVoice.good_hand": "いい手だね！",

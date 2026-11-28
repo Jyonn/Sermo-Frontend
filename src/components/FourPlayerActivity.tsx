@@ -13,7 +13,7 @@ import {ChatSharePicker} from './ChatSharePicker';
 import {MahjongTile} from './MahjongTile';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
-import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {GameQuickVoiceButton, GameQuickVoiceCaption} from './GameQuickVoice';
 import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {GameLeaderboard} from './GameLeaderboard';
 import {CardRuleGuide, MahjongRuleGuide} from './GameRules';
@@ -154,7 +154,7 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
         {!playing && <button className="landlord-text-button" type="button" onClick={() => setPanel('ranking')}
           aria-label={t('landlord.ranking')} title={t('landlord.ranking')}>{icon('emoji_events')}</button>}
         <GameTableTools game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
-          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} quickVoice={quickVoice}>
+          : myTurn && !cards?.must_pass ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} quickVoice={quickVoice}>
           <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game,
             title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
         </GameTableTools>
@@ -166,7 +166,7 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
           {state === 'waiting' ? <div className="four-player-announcement"><strong>{t(table.seats.length < 4 ? 'landlord.waiting' : 'tabletop.waitingReady')}</strong><span>{t('tabletop.seated', {count:table.seats.length})}</span></div>
             : state === 'abandoned' ? <div className="four-player-announcement"><strong>{t('landlord.abandoned')}</strong></div>
             : state === 'finished' ? <div className="four-player-announcement"><strong>{outcome}</strong><span>{t('landlord.prepareNext')}</span></div>
-            : <><div className="four-player-turn"><strong role="status">{t(meld?.pending ? 'tabletop.waitingCall' : myTurn ? 'landlord.yourPlay' : 'landlord.otherPlay',
+            : <><div className="four-player-turn"><strong role="status">{t(cards?.must_pass ? 'game.mustPass' : meld?.pending ? 'tabletop.waitingCall' : myTurn ? 'landlord.yourPlay' : 'landlord.otherPlay',
                 {name:table.seats.find(seat => seat.position === board?.turn)?.member.name ?? ''})}</strong></div>
               {meld ? <MahjongCenter board={meld} yourSeat={table.your_seat} /> : cards && <ShuangkouCenter board={cards} table={table} />}
             </>}
@@ -211,6 +211,7 @@ export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {a
               {canShare && <button className="landlord-secondary" type="button" onClick={() => setPanel('share')}>{icon('share')}{t('landlord.invite')}</button>}
             </div>
           </div>}
+        <GameQuickVoiceButton game={game} voice={quickVoice} />
         {state !== 'abandoned' && <button className="landlord-text-button four-player-leave" type="button" disabled={busy}
           onClick={exit.request}>{t('landlord.leave')}</button>}
         {failed && <p className="four-player-placeholder" role="status">{t('landlord.reconnecting')}</p>}

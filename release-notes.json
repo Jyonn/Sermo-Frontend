@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.28.7",
+  "id": "2026.11.28.8",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
       "title": "游戏房间可以发快捷语音",
       "items": [
-        "斗地主、双扣、麻将和数字交锋都支持快捷语音。点一句就能发给同房玩家，短句会显示在你的座位旁。"
+        "游戏房间右下角增加快捷语音，第一条可以提醒牌友出牌。",
+        "斗地主和双扣会在要不起时提示，5 秒后自动过牌。"
       ]
     },
     "en": {
       "title": "Send quick voice messages in game rooms",
       "items": [
-        "Send preset voice lines to players in your Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. Each line appears next to the sender’s seat."
+        "Open quick voice in the bottom right of your game room to send a turn reminder or another preset line.",
+        "Dou Dizhu and Shuangkou now tell you when you have no legal response and pass after five seconds."
       ]
     }
   }

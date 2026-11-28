@@ -89,6 +89,7 @@
 .landlord-restricted { display: grid; justify-items: start; gap: 9px; }
 .landlord-restricted p { margin: 0; color: var(--text-secondary); }
 .landlord-room {
+  position: relative;
   display: grid;
   min-height: 100%;
   grid-template-rows: minmax(0, 1fr) auto;

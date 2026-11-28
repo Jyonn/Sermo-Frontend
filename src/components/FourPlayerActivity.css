@@ -109,6 +109,8 @@
 .four-player .landlord-text-button[aria-pressed='true'] { color: var(--table-accent); }
 .four-player .landlord-text-button .material-symbols-outlined { margin-inline-end: 3px; font-size: 1.1em; vertical-align: -.13em; }
 .four-player-leave { position: absolute; inset: auto 0 0 auto; }
+.four-player-controls > .game-quick-voice { inset: auto 0 0 auto; }
+.game-quick-voice + .four-player-leave { inset-inline-end: 46px; }
 .mahjong-board { display: grid; min-width: 0; gap: 4px; }
 .mahjong-wall { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--table-muted); font-size: .71rem; }
 .mahjong-latest { display: inline-flex; align-items: center; gap: 4px; color: var(--table-accent); }

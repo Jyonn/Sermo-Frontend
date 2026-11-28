@@ -1,5 +1,5 @@
 import {useEffect, useId, useRef, useState} from 'react';
-import {ROOM_VOICE_PHRASES, type RoomVoiceMessage, type RoomVoicePhrase} from '../lib/gameQuickVoice';
+import {ROOM_VOICE_COMMON, type RoomVoiceMessage, type RoomVoicePhrase} from '../lib/gameQuickVoice';
 import {useI18n} from '../lib/language';
 import {useModalFocus} from '../lib/modalFocus';
 import type {useGameQuickVoice} from '../lib/useGameQuickVoice';
@@ -8,6 +8,7 @@ import './GameQuickVoice.css';
 const presets = {
   hello: 'waving_hand', wait: 'hourglass_empty', good_play: 'thumb_up', close: 'bolt',
   thanks: 'favorite', next_round: 'replay', good_hand: 'style', your_call: 'psychology',
+  your_turn: 'schedule', your_guess: 'schedule',
 } as const;
 
 export function GameQuickVoiceButton({game, voice}: {
@@ -21,9 +22,8 @@ export function GameQuickVoiceButton({game, voice}: {
   const toggle = useRef<HTMLButtonElement>(null);
   const first = useRef<HTMLButtonElement>(null);
   const id = useId();
-  const special = game === 'duel' ? 'your_call' : 'good_hand';
-  // Keep the table-specific phrase on the first row.
-  const phrases = ['hello', 'wait', special, ...ROOM_VOICE_PHRASES.slice(2, 6)] as const;
+  const tablePhrases = game === 'duel' ? ['your_guess', 'your_call'] as const : ['your_turn', 'good_hand'] as const;
+  const phrases = [...tablePhrases, ...ROOM_VOICE_COMMON];
   useModalFocus(panel, open, close, {manageLayer:false, autoFocus:false, restoreFocus:false});
 
   useEffect(() => {setOpen(false); setFailed(false);}, [voice.room, voice.enabled]);
@@ -50,6 +50,7 @@ export function GameQuickVoiceButton({game, voice}: {
     }
   }
 
+  if (!voice.enabled) return null;
   return <div className="game-quick-voice" ref={anchor}>
     <button ref={toggle} type="button" aria-expanded={open} aria-controls={open ? id : undefined}
       aria-label={t('game.quickVoice.title')} title={t('game.quickVoice.title')}

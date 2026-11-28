@@ -1,4 +1,5 @@
 .number-duel {
+  position: relative;
   --duel-accent: #c8e69d;
   --duel-ink: #f4f8e6;
   --duel-dim: #c0cbb7;
@@ -160,6 +161,7 @@
 .duel-history-row small, .duel-feedback-legend { color: var(--duel-dim); font-size: 10px; }
 .duel-feedback-legend { margin: 8px 0 0; line-height: 1.5; }
 .duel-table-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; color: var(--duel-dim); font-size: 11px; }
+.game-quick-voice + .duel-table-footer { padding-inline-end: 45px; }
 .duel-result { display: grid; gap: 8px; }
 .duel-result-points { color: var(--duel-accent); font-size: 26px; line-height: 1; }
 .duel-result-points.is-loss { color: #ffd0aa; }

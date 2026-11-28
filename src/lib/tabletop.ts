@@ -26,6 +26,7 @@ export interface ShuangkouBoard extends Board {
   last_player: number | null;
   last_pattern: {kind: string; stars: number; ranks: number[]} | null;
   can_pass: boolean;
+  must_pass?: boolean;
   passed: number[];
   suggested: number[];
   placements: number[];

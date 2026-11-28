@@ -1,7 +1,27 @@
 .game-quick-voice {
   --voice-accent: var(--table-accent, var(--landlord-ivory, var(--duel-accent, #a6e3d5)));
-  position: relative;
-  flex: 0 0 32px;
+  position: absolute;
+  inset: auto max(12px, var(--game-safe-right, 0px)) max(9px, var(--game-safe-bottom, 0px)) auto;
+  z-index: 8;
+}
+
+.game-quick-voice > button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--voice-accent) 72%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--table-shadow, #172f2a) 80%, var(--voice-accent));
+  color: var(--voice-accent);
+  cursor: pointer;
+}
+
+.game-quick-voice > button .material-symbols-outlined { font-size: 20px; }
+.game-quick-voice > button:focus-visible {
+  outline: 2px solid var(--voice-accent);
+  outline-offset: 3px;
 }
 
 .game-quick-voice > button[aria-expanded='true'] {
@@ -11,8 +31,8 @@
 
 .game-quick-voice-picker {
   position: absolute;
-  inset-block-start: calc(100% + 8px);
-  inset-inline-end: -38px;
+  inset-block-end: calc(100% + 8px);
+  inset-inline-end: 0;
   z-index: 12;
   box-sizing: border-box;
   width: min(274px, 64cqw);
@@ -58,7 +78,10 @@
 .game-quick-voice-picker button.game-quick-voice-close { justify-content: center; min-height: 28px; background: transparent; }
 .game-quick-voice-picker button .material-symbols-outlined { flex: 0 0 auto; color: var(--voice-accent); }
 .game-quick-voice-presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
-.game-quick-voice-presets button:last-child { grid-column: 1 / -1; }
+.game-quick-voice-presets button:first-child {
+  border-color: color-mix(in srgb, var(--voice-accent) 46%, transparent);
+  color: var(--voice-accent);
+}
 .game-quick-voice-feedback { margin: 7px 4px 2px; color: var(--voice-accent); font-size: .73rem; }
 
 .game-quick-voice-caption {

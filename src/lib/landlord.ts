@@ -39,6 +39,7 @@ export interface LandlordTableView {
   spring: boolean;
   bid_options: number[];
   can_pass: boolean;
+  must_pass?: boolean;
   suggested_cards: number[];
 }
 

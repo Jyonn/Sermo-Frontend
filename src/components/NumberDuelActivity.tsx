@@ -15,7 +15,7 @@ import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "..
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler } from "./GameTableControls";
-import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {GameQuickVoiceButton, GameQuickVoiceCaption} from './GameQuickVoice';
 import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import { GameLeaderboard } from "./GameLeaderboard";
 import { DuelRuleGuide } from "./GameRules";
@@ -356,6 +356,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         </section>}
         {(match.status === 'playing' || (done && match.guesses.length > 0)) && <DuelRoundHistory match={match} t={t} />}
       </div>
+      <GameQuickVoiceButton game="duel" voice={quickVoice} />
       {!done && <footer className="duel-table-footer">
         {(match.funded || match.practice_reason) && <span>{t(match.funded ? 'duel.stake' : 'duel.practiceMatch', {points:match.stake})}</span>}
         <button className="duel-leave" disabled={busy} onClick={exit.request} type="button">{t('duel.leave')}</button>

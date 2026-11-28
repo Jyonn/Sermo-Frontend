@@ -12,7 +12,7 @@ import {ChatSharePicker} from './ChatSharePicker';
 import {GameLeaderboard} from './GameLeaderboard';
 import {PlayingCard, PlayingCardStack, SelectableHand, playingCardRank} from './PlayingCards';
 import {GameTableTools, GameExitDialog, GameSeatClock, useGameExit, type GameExitHandler} from './GameTableControls';
-import {GameQuickVoiceCaption} from './GameQuickVoice';
+import {GameQuickVoiceButton, GameQuickVoiceCaption} from './GameQuickVoice';
 import {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {CardRuleGuide} from './GameRules';
 import {isLegalPlay} from '../lib/cardPatterns';
@@ -234,7 +234,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
           <span>{t(table.mode === 'no_shuffle' ? 'landlord.noShuffle' : 'tabletop.classic')}
             {table.base ? ` · ${t('landlord.tableStakes', {base: table.base, multiplier: table.multiplier})}` : ''}</span>
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
-          <GameTableTools game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
+          <GameTableTools game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn && !table.must_pass ? 'play' : null : null}
             token={table.deadline ?? undefined} quickVoice={quickVoice}>
             <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
               title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
@@ -255,7 +255,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
             </>}
           </> : <>
             <PlayingCardStack count={3} label={t('landlord.bottomCards')} compact>{Array.from({length:3}, (_, index) => <PlayingCard id={table.bottom_cards[index]} key={index} />)}</PlayingCardStack>
-            <div className="landlord-turn-row"><strong className="landlord-turn" role="status">{t(doubling ? 'landlord.doubling' : bidding ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong></div>
+            <div className="landlord-turn-row"><strong className="landlord-turn" role="status">{t(table.must_pass ? 'game.mustPass' : doubling ? 'landlord.doubling' : bidding ? (turn ? 'landlord.yourBid' : 'landlord.otherBid') : (turn ? 'landlord.yourPlay' : 'landlord.otherPlay'), {name: table.seats.find(seat => seat.position === table.turn)?.member.name ?? ''})}</strong></div>
             {table.last_player !== null && <div className="landlord-last-play">
               <small>{t('landlord.lastPlay', {name: table.seats.find(seat => seat.position === table.last_player)?.member.name ?? ''})}</small>
               <PlayingCardStack count={lastPlay.length} compact>{lastPlay.map(id => <PlayingCard id={id} key={id} />)}</PlayingCardStack>
@@ -322,6 +322,7 @@ export function LandlordActivity({activity, exitHandler, onMinimize}: {activity:
         </div>}
         {failed && <p className="landlord-reconnecting" role="status">{t('landlord.reconnecting')}</p>}
       </div>
+      <GameQuickVoiceButton game="landlord" voice={quickVoice} />
     </div>}
     <SettingsDialog open={dialog === 'rules'} title={t('landlord.rules')} onClose={() => setDialog(null)}>
       <CardRuleGuide game="landlord" />

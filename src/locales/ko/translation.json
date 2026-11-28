@@ -1,5 +1,8 @@
 {
   "game.quickVoice.title": "빠른 음성",
+  "game.quickVoice.your_turn": "낼 차례예요!",
+  "game.quickVoice.your_guess": "맞혀 보세요!",
+  "game.mustPass": "이길 수 있는 패가 없어요",
   "game.quickVoice.hello": "안녕하세요!",
   "game.quickVoice.wait": "잠깐만요",
   "game.quickVoice.good_hand": "좋은 패네요!",

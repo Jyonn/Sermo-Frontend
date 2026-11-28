@@ -5,7 +5,6 @@ import {useI18n} from '../lib/language';
 import type {useGameQuickVoice} from '../lib/useGameQuickVoice';
 import {useRoomVoicePlayback} from '../lib/useRoomVoicePlayback';
 import {ConfirmDialog} from './ConfirmDialog';
-import {GameQuickVoiceButton} from './GameQuickVoice';
 import './GameTableControls.css';
 
 export type GameExitHandler = MutableRefObject<((after?: () => void) => void) | undefined>;
@@ -196,7 +195,6 @@ export function GameTableTools({game, active, cue, token, quickVoice, children}:
     <button type="button" aria-label={t('game.voice')} title={t('game.voice')} aria-pressed={voice} onClick={() => toggle('voice',!voice)}>
       <span className="material-symbols-outlined" aria-hidden="true">{voice ? 'volume_up' : 'volume_off'}</span>
     </button>
-    {quickVoice.enabled && <GameQuickVoiceButton game={game} voice={quickVoice} />}
     {children}
   </span>;
 }
