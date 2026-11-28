@@ -2473,8 +2473,7 @@ function LiveChatsPage({
   const [messageSearchShowScrollTop, setMessageSearchShowScrollTop] = useState(false);
   const messageSearchPanelRef = useRef<HTMLDivElement | null>(null);
   const messageSearchLoadMoreRef = useRef<HTMLDivElement | null>(null);
-  const [messageSearchPreviewIndex, setMessageSearchPreviewIndex] = useState<number | null>(null);
-  const searchPreviewChatId = useRef<number | null>(null);
+  const [messageSearchPreview, setMessageSearchPreview] = useState<{chatId: number; messageId: number} | null>(null);
 
   useEffect(() => {
     if (!submissionCreateMenuOpen) return;
@@ -3044,16 +3043,24 @@ function LiveChatsPage({
     return reply;
   };
 
+  const closeChatSearchDrawers = () => {
+    const drawerStack = window.history.state?.sermoDrawerStack;
+    const path = drawerPathFromSearch(window.location.search);
+    if (Array.isArray(drawerStack) && drawerStack.length >= 2 && path.slice(-2).join('/') === 'chat-details/message-search') {
+      window.history.go(-2);
+    } else {
+      setMessageSearchOpen(false);
+      setDetailsSheetOpen(false);
+    }
+  };
+
   const startReply = (message: ChatMessage, origin: 'chat' | 'pinned' | 'search' = messageMenu?.origin ?? 'chat') => {
     const reply = quoteFromMessage(message);
     if (!reply) return;
     setReplyTarget(reply);
     setMessageMenu(null);
     if (origin === 'pinned') setPinnedDrawerOpen(false);
-    if (origin === 'search') {
-      setMessageSearchOpen(false);
-      setDetailsSheetOpen(false);
-    }
+    if (origin === 'search') closeChatSearchDrawers();
     window.setTimeout(() => {
       recordChatLayout("action", { kind: 1 });
       mentionEditorRef.current?.focus();
@@ -3837,25 +3844,20 @@ function LiveChatsPage({
   }, [messageSearchCalendarOpen, messageSearchCalendarMonth, selectedChat?.id]);
 
   const revealMessageFromSearch = (messageId: number) => {
-    setMessageSearchPreviewIndex(null);
+    setMessageSearchPreview(null);
     setMessageSearchCalendarOpen(false);
-    const drawerStack = window.history.state?.sermoDrawerStack;
-    if (Array.isArray(drawerStack) && drawerStack.length >= 2) window.history.go(-2);
-    else {
-      setMessageSearchOpen(false);
-      setDetailsSheetOpen(false);
-    }
+    closeChatSearchDrawers();
     window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId } })), 240);
   };
 
   const messageSearchMediaResults = messageSearchResults.filter((message) => (
     message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO
   ));
+  const messageSearchPreviewIndex = messageSearchPreview && messageSearchPreview.chatId === selectedChatId
+    ? messageSearchMediaResults.findIndex((message) => message.message_id === messageSearchPreview.messageId) : -1;
+  const searchPreviewSource = messageSearchMediaResults[messageSearchPreviewIndex];
   const openMessageSearchMedia = (messageId: number) => {
-    const index = messageSearchMediaResults.findIndex((message) => message.message_id === messageId);
-    if (index < 0) return;
-    searchPreviewChatId.current = selectedChatId;
-    setMessageSearchPreviewIndex(index);
+    if (selectedChatId) setMessageSearchPreview({chatId: selectedChatId, messageId});
   };
   const messageSearchMediaItems: MediaResourceGridItem[] = messageSearchMediaResults.map((message) => ({
     id: message.message_id,
@@ -3868,8 +3870,8 @@ function LiveChatsPage({
   }));
 
   const closeMessageSearchPreview = () => {
-    const message = messageSearchPreviewIndex === null ? null : messageSearchMediaResults[messageSearchPreviewIndex];
-    setMessageSearchPreviewIndex(null);
+    const message = searchPreviewSource;
+    setMessageSearchPreview(null);
     if (!message) return;
     setMessageSearchHighlightId(message.message_id);
     window.setTimeout(() => {
@@ -7574,7 +7576,6 @@ function LiveChatsPage({
   const pinnedVideoSource = videoPreview?.fromPinned ? pinnedMessages.find(pin => pin.message.message_id === videoPreview.messageId)?.message : undefined;
   const videoReplySource = videoPreview?.fromPinned ? pinnedVideoSource
     : videoPreviewMessage?.status === 'sent' ? forwardPreviewMessage(videoPreviewMessage) : undefined;
-  const searchForwardSource = messageSearchPreviewIndex === null ? undefined : messageSearchMediaResults[messageSearchPreviewIndex];
   const effectiveQuickActions = displayedChat?.purpose !== "submission" ? availableChatActions(preferredQuickActions, { locked: orderedPinnedMessages.length > 0, calendar: Boolean(chatCalendar && (!chatCalendar.error || chatCalendar.events !== null)), copy: copySuggestions.items.length > 0, status: displayedChat?.type === "group", search: Boolean(displayedChat), call: canVoiceCall }) : [];
   const quickActionsLoading = Boolean(displayedChat && displayedChat.purpose !== "submission" && (
     preferredQuickActions.includes("locked") && pinnedLoadedScope !== `${currentUserId}:${displayedChat.id}` ||
@@ -8758,7 +8759,7 @@ function LiveChatsPage({
             {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? <MediaResourceGrid
               highlightedId={messageSearchHighlightId}
               items={messageSearchMediaItems}
-              onSelect={(item) => openMessageSearchMedia(item.id)}
+              onSelect={(item) => openMessageSearchMedia(Number(item.id))}
             /> : messageSearchType === MESSAGE_TYPE_AUDIO ? <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
               {(group) => <div className="message-search-audio-grid">{group.map((message) => message.payload?.uri ? <SearchAudioTile avatarUri={message.user.avatar_uri} durationSeconds={message.payload.duration_seconds} key={message.message_id} name={message.user.name} onJump={() => revealMessageFromSearch(message.message_id)} src={message.payload.uri} /> : null)}</div>}
             </RelativeDateSections> : <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
@@ -8823,10 +8824,11 @@ function LiveChatsPage({
       <SideDrawer open={historyManagerOpen} title={t("historyManager.title")} historyKey="history-manager" onRouteOpen={() => setHistoryManagerOpen(true)} onClose={() => setHistoryManagerOpen(false)} className="history-manager-drawer" fullscreen fullViewport headerless floatingBack={false} trapFocus>
         {historyManagerOpen && selectedChat ? <Suspense fallback={<div role="status">{t("common.loading")}</div>}><HistoryManagerPage chatId={selectedChat.id} onClose={() => setHistoryManagerOpen(false)} onChanged={() => setHistoryReloadVersion(value => value + 1)} /></Suspense> : null}
       </SideDrawer>
-      {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox
+      {searchPreviewSource ? <MediaLightbox
         chatPreview
         index={messageSearchPreviewIndex}
         items={messageSearchMediaResults.map((message) => ({
+          id: message.message_id,
           uri: message.payload?.uri || "",
           kind: message.type === MESSAGE_TYPE_VIDEO ? "video" : "image",
           posterUri: message.payload?.thumbnail_uri,
@@ -8840,15 +8842,15 @@ function LiveChatsPage({
         }))}
         onApproachingEnd={() => { if (messageSearchHasMore && messageSearchState !== "loading-more") void loadMoreMessageSearchResults(); }}
         onClose={closeMessageSearchPreview}
-        onIndexChange={setMessageSearchPreviewIndex}
-        onForward={searchForwardSource && !searchForwardSource.is_deleted
-          ? () => forwardPreviewMedia(searchForwardSource, () => setMessageSearchPreviewIndex(null)) : undefined}
-        onReply={canReplyToMedia && selectedChatId && searchPreviewChatId.current === selectedChatId && searchForwardSource && !searchForwardSource.is_deleted
-          ? () => replyToPreviewMedia(searchForwardSource, selectedChatId, 'search') : undefined}
-        onJumpToMessage={() => {
-          const message = messageSearchMediaResults[messageSearchPreviewIndex];
-          if (message) revealMessageFromSearch(message.message_id);
+        onIndexChange={(position) => {
+          const message = messageSearchMediaResults[position];
+          if (message) openMessageSearchMedia(message.message_id);
         }}
+        onForward={!searchPreviewSource.is_deleted
+          ? () => forwardPreviewMedia(searchPreviewSource, () => setMessageSearchPreview(null)) : undefined}
+        onReply={canReplyToMedia && selectedChatId && !searchPreviewSource.is_deleted
+          ? () => replyToPreviewMedia(searchPreviewSource, selectedChatId, 'search') : undefined}
+        onJumpToMessage={() => revealMessageFromSearch(searchPreviewSource.message_id)}
         totalCount={messageSearchType === MESSAGE_TYPE_IMAGE || messageSearchType === MESSAGE_TYPE_VIDEO ? messageSearchTotal : messageSearchMediaResults.length}
       /> : null}
       <BottomSheet className="message-search-calendar-sheet" onClose={() => { messageSearchCalendarInitialLoadRef.current = false; setMessageSearchCalendarOpen(false); }} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
