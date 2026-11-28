@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
 import {useAuth} from '../lib/auth';
 import {api} from '../lib/api';
@@ -216,7 +216,7 @@ function MediaDrawerContent({
       if (!cancelled && shouldCompleteSwipe(distance, gestures.bounds.width, speed)) go(distance < 0 ? 1 : -1);
       else carousel.settle(0);
     },
-    onFreeRelease: ({y}, speed) => {
+    onVerticalRelease: (y, speed) => {
       const threshold = Math.min(190, Math.max(92, gestures.bounds.height * .3));
       if (Math.abs(y) < 24 || !shouldCompleteSwipe(y, threshold, speed)) return;
       if (y > 0) swipeDismiss();
@@ -329,8 +329,13 @@ function MediaDrawerContent({
   const loadingPhase = fixedFitImage || editor
     ? (gestures.fitted.width || adjusting ? 'idle' : 'loading')
     : media.phase;
-  const {bounds, freeDrag, transform} = gestures;
-  const infoPull = infoOpen ? 1 : canShowInfo && !leaving ? mediaInfoProgress(false, freeDrag?.y ?? 0, infoHeight) : 0;
+  const {bounds, verticalDrag, transform} = gestures;
+  const dismissDrag = verticalDrag?.direction === 'down';
+  const dismissOffset = dismissDrag ? verticalDrag.offset : 0;
+  const dismissOpacity = leaving ? 0 : 1 - Math.min(1, dismissOffset / Math.max(1, bounds.height * .55));
+  const trackingDismissClass = dismissDrag && !leaving ? ' is-tracking-dismiss' : '';
+  const infoPull = infoOpen ? 1 : canShowInfo && verticalDrag?.direction === 'up'
+    ? mediaInfoProgress(false, verticalDrag.offset, infoHeight) : 0;
   const closeInfo = () => setInfo(false);
   const canZoom = !videoItem && Boolean(src && gestures.fitted.width) && !interactionDisabled;
   const canShare = Boolean(editor ? editor.createShareFile : src || platform?.url || forward || onReply);
@@ -387,11 +392,15 @@ function MediaDrawerContent({
 
   return <FloatingDrawerScope standalone>
     <SideDrawer open fullscreen headerless floatingBack={false} trapFocus historyMode={historyKey ? 'stack' : 'route'} historyKey={historyKey}
-      backdropClassName="media-drawer-backdrop" closeRequestRef={closeRequestRef}
-      className={`media-drawer${dimmed ? ' is-dark-media' : ''}`} title={title} onClose={dismiss}>
-      <section className={`media-drawer-layout${infoOpen ? ' has-media-info' : ''}${adjusting ? ' is-adjusting' : ''}${immersive ? ' is-immersive-media' : ''}${fixedFitImage ? ' is-flash-media' : ''}${leaving ? ' is-leaving-media' : ''}`}
+      backdropClassName={`media-drawer-backdrop${trackingDismissClass}`}
+      backdropStyle={{'--media-dismiss-opacity': dismissOpacity} as CSSProperties}
+      closeRequestRef={closeRequestRef}
+      className={`media-drawer${dimmed ? ' is-dark-media' : ''}${trackingDismissClass}`}
+      style={{'--media-dismiss-opacity': dismissOpacity, '--media-dismiss-offset': leaving ? '100dvh' : `${dismissOffset}px`} as CSSProperties}
+      title={title} onClose={dismiss}>
+      <section className={`media-drawer-layout${infoOpen ? ' has-media-info' : ''}${adjusting ? ' is-adjusting' : ''}${immersive ? ' is-immersive-media' : ''}${fixedFitImage ? ' is-flash-media' : ''}`}
         onKeyDown={onKeyDown}>
-        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${freeDrag || leaving ? ' is-free-drag' : ''}`}
+        <div className={`media-drawer-stage${gestures.dragging ? ' is-dragging' : ''}${verticalDrag || leaving ? ' is-vertical-drag' : ''}`}
           data-zoomable={canZoom && !infoOpen} data-zoomed={zoomed} tabIndex={interactionDisabled ? undefined : 0}
           aria-label={adjusting ? undefined : t('photo.canvas')} ref={gestures.bindStage} {...gestures.events}
           onContextMenu={event => {
@@ -413,7 +422,6 @@ function MediaDrawerContent({
             </>);
             return <MediaDrawerSlide key={mediaKey(entry, position)} active={active} offset={position - cursor}
               bounds={bounds} size={sizeOf(entry, position)} transform={active ? transform : undefined}
-              drag={active ? freeDrag : undefined} leaving={active && leaving}
               info={infoContent} infoOpen={infoOpen} infoProgress={infoPull}
               stage={gestures.stage} onInfoHeight={setInfoHeight} onCloseInfo={closeInfo}>
               {active && videoItem && src ? <video key={src} ref={video} className="media-drawer-canvas" src={src}
@@ -505,7 +513,7 @@ function MediaDrawerContent({
           </div>
         </header>
 
-        {!fixedFitImage && !infoOpen && <footer className="media-drawer-bottom" style={{opacity: leaving ? 0 : 1 - infoPull}}>
+        {!fixedFitImage && !infoOpen && <footer className="media-drawer-bottom" style={{opacity: 1 - infoPull}}>
           {adjusting ? editor.tools : <>
             {videoItem && src && <div className="media-drawer-transport">
               <OverlayIconButton icon={playback.playing ? 'pause' : 'play_arrow'} aria-label={t(playback.playing ? 'media.pause' : 'media.play')} onClick={play} />

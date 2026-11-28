@@ -11,8 +11,6 @@ interface MediaDrawerSlideProps {
   bounds: MediaSize;
   size: MediaSize;
   transform?: MediaTransform;
-  drag?: {x: number; y: number};
-  leaving?: boolean;
   info: ReactNode;
   infoOpen: boolean;
   infoProgress: number;
@@ -23,7 +21,7 @@ interface MediaDrawerSlideProps {
 }
 
 export function MediaDrawerSlide({
-  active, offset, bounds, size, transform = fittedMediaTransform, drag, leaving, info, infoOpen, infoProgress,
+  active, offset, bounds, size, transform = fittedMediaTransform, info, infoOpen, infoProgress,
   stage, onInfoHeight, onCloseInfo, children,
 }: MediaDrawerSlideProps) {
   const {t} = useI18n();
@@ -37,18 +35,17 @@ export function MediaDrawerSlide({
   const overflow = hasInfo && bounds.height > 0 && height > fit.panelHeight;
   const opened = active && infoOpen;
   const panelDrag = useMediaDrawerInfoDrag(viewport, opened, fit.panelHeight, onCloseInfo);
-  const tracking = panelDrag !== undefined || Boolean(drag);
+  const tracking = panelDrag !== undefined;
   const progress = panelDrag === undefined ? infoProgress : mediaInfoProgress(true, panelDrag, fit.panelHeight);
   const scale = transform.scale + (fit.scale - transform.scale) * progress;
-  const x = infoOpen ? 0 : (drag?.x ?? 0) + transform.x * (1 - progress);
-  const freeY = drag && (!info || drag.y > 0) ? drag.y : 0;
-  const y = leaving ? bounds.height : transform.y + (fit.y - transform.y) * progress + freeY;
+  const x = infoOpen ? 0 : transform.x * (1 - progress);
+  const y = transform.y + (fit.y - transform.y) * progress;
   const style = {
     transform: `translate3d(calc(${offset * 100}% + ${offset * mediaSlideGap}px), 0, 0)`,
     '--slide-media-width': fitted.width ? `${fitted.width}px` : '100%',
     '--slide-media-height': fitted.height ? `${fitted.height}px` : '100%',
     '--slide-media-transform': `translate3d(calc(-50% + ${x}px), calc(-50% + ${y}px), 0) scale(${scale})`,
-    '--slide-control-offset': `${freeY - fit.panelHeight * progress / 2}px`,
+    '--slide-control-offset': `${-fit.panelHeight * progress / 2}px`,
   } as CSSProperties;
 
   useLayoutEffect(() => {

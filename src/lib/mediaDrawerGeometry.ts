@@ -45,6 +45,25 @@ export function lockSwipeAxis(x: number, y: number, previous?: SwipeAxis): Swipe
   return Math.abs(x) >= Math.abs(y) ? 'horizontal' : 'free';
 }
 
+export type MediaSwipeDirection = 'left' | 'right' | 'up' | 'down';
+
+export function lockMediaSwipeDirection(x: number, y: number, previous?: MediaSwipeDirection): MediaSwipeDirection | undefined {
+  if (previous) return previous;
+  const axis = lockSwipeAxis(x, y);
+  if (!axis) return undefined;
+  if (axis === 'horizontal') return x < 0 ? 'left' : 'right';
+  return y < 0 ? 'up' : 'down';
+}
+
+export function mediaSwipeOffset(direction: MediaSwipeDirection, x: number, y: number) {
+  switch (direction) {
+    case 'left': return Math.min(0, x);
+    case 'right': return Math.max(0, x);
+    case 'up': return Math.min(0, y);
+    case 'down': return Math.max(0, y);
+  }
+}
+
 export function swipeVelocity(samples: SwipeSample[], end: SwipeSample, axis: 'x' | 'y') {
   const start = samples.find(sample => end.time - sample.time <= 100);
   return start ? (end[axis] - start[axis]) / Math.max(16, end.time - start.time) : 0;

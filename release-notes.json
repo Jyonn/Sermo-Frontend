@@ -1,19 +1,19 @@
 {
-  "id": "2026.11.28.11",
+  "id": "2026.11.28.12",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "在媒体预览中引用消息和倍速播放",
+      "title": "媒体预览手势更顺滑",
       "items": [
-        "在聊天媒体预览的左下角菜单引用原消息，返回输入框继续编辑。",
-        "按住正在播放的视频可临时以两倍速播放，松手恢复。"
+        "完整展示时，拖动会沿开始的方向切换媒体、查看详情或退出预览。",
+        "下滑时，画面和控件一起跟随并淡出。"
       ]
     },
     "en": {
-      "title": "Quote messages and speed up videos in previews",
+      "title": "Smoother media preview gestures",
       "items": [
-        "Quote the original message from the chat media preview menu and continue writing in the composer.",
-        "Hold a playing video to watch at double speed, then release to resume your previous speed."
+        "Fit-to-screen previews follow the initial swipe direction when browsing, opening details, or closing.",
+        "Swipe down to move and fade the entire preview together."
       ]
     }
   }

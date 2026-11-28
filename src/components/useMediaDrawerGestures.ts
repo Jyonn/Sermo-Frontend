@@ -1,22 +1,23 @@
 import {useCallback, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent} from 'react';
 import {
-  constrainMediaTransform, fitMedia, fittedMediaTransform, lockSwipeAxis, mediaSlideGap, mediaWheelInput, swipeVelocity,
-  type MediaSize, type MediaTransform, type SwipeAxis, type SwipeSample,
+  constrainMediaTransform, fitMedia, fittedMediaTransform, lockMediaSwipeDirection, mediaSlideGap, mediaSwipeOffset, mediaWheelInput, swipeVelocity,
+  type MediaSize, type MediaSwipeDirection, type MediaTransform, type SwipeSample,
 } from '../lib/mediaDrawerGeometry';
 
 type Point = {x: number; y: number};
 type Pinch = {center: Point; distance: number; transform: MediaTransform};
 type NativePinchEvent = Event & {scale: number; clientX?: number; clientY?: number};
 type WheelScroll = {action?: 'browse' | 'pan'; distance: number; browsed: boolean; timer?: number};
-type Drag = {point: Point; transform: MediaTransform; axis?: SwipeAxis; samples: SwipeSample[]; time: number; startOffset: number; desktopMouse: boolean; held?: boolean};
+type Drag = {point: Point; transform: MediaTransform; direction?: MediaSwipeDirection; samples: SwipeSample[]; time: number; startOffset: number; desktopMouse: boolean; held?: boolean};
 const holdDelay = 380;
 const midpoint = (a: Point, b: Point) => ({x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
+const isHorizontal = (direction?: MediaSwipeDirection) => direction === 'left' || direction === 'right';
 const center = {x: 0, y: 0};
 export const isDesktopMediaPreview = () => window.matchMedia('(min-width: 720px)').matches;
 
 export function useMediaDrawerGestures({
-  size, mediaKey, mode, disabled, infoOpen, canBrowse, desktopImageZoom, onVideoHold, onBrowse, onMode, onFreeRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
+  size, mediaKey, mode, disabled, infoOpen, canBrowse, desktopImageZoom, onVideoHold, onBrowse, onMode, onVerticalRelease, onSwipeStart, onSwipeMove, onSwipeEnd,
 }: {
   size: MediaSize; mediaKey: string; mode: 'default' | 'immersive'; disabled: boolean;
   infoOpen: boolean;
@@ -25,7 +26,7 @@ export function useMediaDrawerGestures({
   onVideoHold: (video: HTMLVideoElement) => (() => void) | undefined;
   onBrowse: (direction: -1 | 1) => void;
   onMode: (mode: 'default' | 'immersive') => void;
-  onFreeRelease: (offset: Point, velocity: number) => void;
+  onVerticalRelease: (offset: number, velocity: number) => void;
   onSwipeStart: () => number;
   onSwipeMove: (offset: number) => void;
   onSwipeEnd: (offset: number, velocity: number, cancelled?: boolean) => void;
@@ -39,7 +40,7 @@ export function useMediaDrawerGestures({
   const [bounds, setBounds] = useState<MediaSize>({width: 0, height: 0});
   const [transform, setTransform] = useState(fittedMediaTransform);
   const [dragging, setDragging] = useState(false);
-  const [freeDrag, setFreeDrag] = useState<Point>();
+  const [verticalDrag, setVerticalDrag] = useState<{direction: 'up' | 'down'; offset: number}>();
   const [wheelOffset, setWheelOffset] = useState(0);
   const [wheelPanning, setWheelPanning] = useState(false);
   const current = useRef(transform);
@@ -85,7 +86,7 @@ export function useMediaDrawerGestures({
     setWheelOffset(0);
     setWheelPanning(false);
     setDragging(false);
-    setFreeDrag(undefined);
+    setVerticalDrag(undefined);
     reset();
     return () => {window.clearTimeout(wheelTimer.current); cancelHold();};
   }, [mediaKey, disabled, infoOpen, stageNode, cancelHold]);
@@ -128,7 +129,7 @@ export function useMediaDrawerGestures({
     if (disabled || event.button !== 0 || infoOpen && pointers.current.size
       || (event.target as HTMLElement).closest('button,a,input,textarea,select')) return;
     if (wheelScroll.current.action === 'pan') finishWheelScroll();
-    const point = position(event.clientX, event.clientY);
+    const point = {x: event.clientX, y: event.clientY};
     const desktopMouse = event.pointerType === 'mouse' && isDesktopMediaPreview();
     pointers.current.set(event.pointerId, point);
     if (!infoOpen && !desktopMouse) event.currentTarget.setPointerCapture(event.pointerId);
@@ -146,15 +147,16 @@ export function useMediaDrawerGestures({
       if (!infoOpen && !desktopMouse) setDragging(true);
     } else if (pointers.current.size === 2) {
       cancelHold();
-      if (origin.current?.axis === 'horizontal') onSwipeMove(0);
-      setFreeDrag(undefined);
+      if (isHorizontal(origin.current?.direction)) onSwipeMove(0);
+      setVerticalDrag(undefined);
       const [a, b] = [...pointers.current.values()];
       pinch.current = {center: midpoint(a, b), distance: Math.max(12, distance(a, b)), transform: current.current};
     }
   };
   const move = (event: PointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(event.pointerId)) return;
-    const point = position(event.clientX, event.clientY);
+    // Keep drag coordinates in the viewport as the Drawer itself moves.
+    const point = {x: event.clientX, y: event.clientY};
     pointers.current.set(event.pointerId, point);
     const start = origin.current;
     if (pinch.current) {
@@ -163,35 +165,37 @@ export function useMediaDrawerGestures({
       const initial = pinch.current;
       const scale = initial.transform.scale * distance(a, b) / initial.distance;
       if (scale > 1.003 && mode === 'default') onMode('immersive');
-      zoomAt(initial.transform, initial.center, midpoint(a, b), scale);
+      const point = midpoint(a, b);
+      zoomAt(initial.transform, position(initial.center.x, initial.center.y), position(point.x, point.y), scale);
       return;
     }
     if (!start || start.held) return;
     const dx = point.x - start.point.x;
     const dy = point.y - start.point.y;
-    const axis = lockSwipeAxis(dx, dy, start.axis);
-    if (!axis) return;
+    const direction = lockMediaSwipeDirection(dx, dy, start.direction);
+    if (!direction) return;
     cancelHold();
-    if (axis === 'free' && (infoOpen || start.desktopMouse && start.transform.scale <= 1.003)) {
-      start.axis = axis;
+    const horizontal = isHorizontal(direction);
+    if (!horizontal && infoOpen) {
+      start.direction = direction;
       return;
     }
-    if (!start.axis && (infoOpen || start.desktopMouse)) {
+    if (!start.direction && (infoOpen || start.desktopMouse)) {
       event.currentTarget.setPointerCapture(event.pointerId);
       setDragging(true);
     }
-    if (!start.axis && start.transform.scale <= 1.003) {
+    if (!start.direction && start.transform.scale <= 1.003) {
       start.startOffset = onSwipeStart();
-      if (axis === 'free' && start.startOffset) onSwipeMove(0);
+      if (!horizontal && start.startOffset) onSwipeMove(0);
     }
-    start.axis = axis;
+    start.direction = direction;
     start.samples = [...start.samples.filter(sample => event.timeStamp - sample.time <= 100), {...point, time: event.timeStamp}];
     if (start.transform.scale > 1.003) {
       zoom({...start.transform, x: start.transform.x + dx, y: start.transform.y + dy});
-    } else if (axis === 'horizontal') {
-      onSwipeMove(start.startOffset - dx / (bounds.width + mediaSlideGap));
-    } else {
-      setFreeDrag({x: dx, y: dy});
+    } else if (horizontal) {
+      onSwipeMove(start.startOffset - mediaSwipeOffset(direction, dx, dy) / (bounds.width + mediaSlideGap));
+    } else if (direction === 'up' || direction === 'down') {
+      setVerticalDrag({direction, offset: mediaSwipeOffset(direction, dx, dy)});
     }
   };
   const release = (event: PointerEvent<HTMLDivElement>) => {
@@ -201,27 +205,27 @@ export function useMediaDrawerGestures({
     setDragging(false);
     const start = origin.current;
     origin.current = undefined;
-    setFreeDrag(undefined);
+    setVerticalDrag(undefined);
     if (pinch.current) {pinch.current = undefined; settle(); return;}
     if (!start || start.held) return;
     if (event.type !== 'pointerup') {
-      if (start.axis === 'horizontal' && start.transform.scale <= 1.003) onSwipeEnd(0, 0, true);
+      if (isHorizontal(start.direction) && start.transform.scale <= 1.003) onSwipeEnd(0, 0, true);
       return;
     }
-    const point = position(event.clientX, event.clientY);
+    const point = {x: event.clientX, y: event.clientY};
     const dx = point.x - start.point.x;
     const dy = point.y - start.point.y;
-    const axis = lockSwipeAxis(dx, dy, start.axis);
+    const direction = lockMediaSwipeDirection(dx, dy, start.direction);
     const end = {...point, time: event.timeStamp};
-    if (!axis) {
+    if (!direction) {
       if (start.desktopMouse || event.timeStamp - start.time >= holdDelay) return;
       if (infoOpen && !(event.target as HTMLElement).closest('.media-drawer-slide-photo')) return;
       reset();
       onMode(mode === 'default' ? 'immersive' : 'default');
-    } else if (start.transform.scale <= 1.003 && axis === 'horizontal') {
-      onSwipeEnd(dx - start.startOffset * (bounds.width + mediaSlideGap), swipeVelocity(start.samples, end, 'x'));
-    } else if (!infoOpen && !start.desktopMouse && start.transform.scale <= 1.003) {
-      onFreeRelease({x: dx, y: dy}, swipeVelocity(start.samples, end, 'y'));
+    } else if (start.transform.scale <= 1.003 && isHorizontal(direction)) {
+      onSwipeEnd(mediaSwipeOffset(direction, dx, dy) - start.startOffset * (bounds.width + mediaSlideGap), swipeVelocity(start.samples, end, 'x'));
+    } else if (!infoOpen && start.transform.scale <= 1.003) {
+      onVerticalRelease(mediaSwipeOffset(direction, dx, dy), swipeVelocity(start.samples, end, 'y'));
     }
   };
   const doubleClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -324,10 +328,11 @@ export function useMediaDrawerGestures({
 
   const displayed = constrainMediaTransform(transform, fitted, bounds);
   return {stage, stageNode, bindStage, bounds, fitted, transform: {...displayed, y: displayed.y + wheelOffset},
-    dragging: dragging || wheelPanning, freeDrag, fit, stepZoom,
+    dragging: dragging || wheelPanning, verticalDrag, fit, stepZoom,
     events: {onPointerDown: down, onPointerMove: move, onPointerUp: release, onPointerCancel: release,
       onPointerLeave: (event: PointerEvent<HTMLDivElement>) => {
-        if ((infoOpen || origin.current?.desktopMouse) && origin.current?.axis !== 'horizontal') release(event);
+        const start = origin.current;
+        if (infoOpen ? !isHorizontal(start?.direction) : start?.desktopMouse && !start.direction) release(event);
       },
       onLostPointerCapture: release, onDoubleClick: doubleClick}};
 }

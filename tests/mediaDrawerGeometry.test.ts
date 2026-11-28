@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {constrainMediaTransform, filmTiles, fitMedia, fitMediaForInfo, lockSwipeAxis, mediaInfoProgress, mediaWheelInput, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
+import {constrainMediaTransform, filmTiles, fitMedia, fitMediaForInfo, lockMediaSwipeDirection, lockSwipeAxis, mediaInfoProgress, mediaSwipeOffset, mediaWheelInput, shouldCompleteSwipe, swipeVelocity} from '../src/lib/mediaDrawerGeometry.ts';
 
 test('desktop wheel input separates vertical panning, horizontal paging, and pinch zoom', () => {
   const wheel = {ctrlKey: false, metaKey: false, shiftKey: false, deltaMode: 0, deltaX: 3, deltaY: 27};
@@ -42,6 +42,21 @@ test('vertical intent stays locked after later horizontal movement', () => {
   assert.equal(vertical, 'free');
   assert.equal(lockSwipeAxis(100, -18, vertical), 'free');
   assert.equal(lockSwipeAxis(18, 6), 'horizontal');
+});
+
+test('fitted media tracks one direction and can return to its origin without crossing it', () => {
+  assert.equal(lockMediaSwipeDirection(4, -5), undefined);
+  const down = lockMediaSwipeDirection(6, 20);
+  assert.equal(down, 'down');
+  assert.equal(lockMediaSwipeDirection(-220, -13, down), 'down');
+  assert.equal(mediaSwipeOffset('down', -220, 32), 32);
+  assert.equal(mediaSwipeOffset('down', 220, -32), 0);
+  assert.equal(lockMediaSwipeDirection(-18, 6), 'left');
+  assert.equal(mediaSwipeOffset('left', -36, 200), -36);
+  assert.equal(mediaSwipeOffset('left', 20, 200), 0);
+  assert.equal(lockMediaSwipeDirection(18, -6), 'right');
+  assert.equal(lockMediaSwipeDirection(6, -18), 'up');
+  assert.equal(mediaSwipeOffset('up', 240, -72), -72);
 });
 
 test('dragging the information panel down reverses the same progress used to open it', () => {

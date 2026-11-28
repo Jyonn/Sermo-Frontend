@@ -17,6 +17,7 @@ interface SideDrawerProps {
   title: string;
   className?: string;
   backdropClassName?: string;
+  backdropStyle?: CSSProperties;
   titleLeading?: ReactNode;
   titleAccessory?: ReactNode;
   headerAction?: ReactNode;
@@ -63,6 +64,7 @@ export function SideDrawer({
   title,
   className = "",
   backdropClassName = "",
+  backdropStyle,
   titleLeading,
   titleAccessory,
   headerAction,
@@ -281,11 +283,11 @@ export function SideDrawer({
 
   return <OverlayScope root={surfaceRef}>
     {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
-      <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}`} style={overlayLevel?{zIndex:overlayLevel-1}:undefined} onClick={requestClose} aria-hidden="true" />,
+      <div className={`desktop-panel-dismiss-mask${panels.detached ? " detached-drawer-mask" : ""}${backdropClassName ? ` ${backdropClassName}` : ""}`} style={{...backdropStyle, zIndex: overlayLevel ? overlayLevel - 1 : undefined}} onClick={requestClose} aria-hidden="true" />,
       document.body
     ) : null}
     {createPortal(
-    <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${fullscreen ? " is-fullscreen-backdrop" : ""}${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
+    <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${fullscreen ? " is-fullscreen-backdrop" : ""}${backdropClassName ? ` ${backdropClassName}` : ""}`} style={desktopPanel ? undefined : backdropStyle} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
       <aside
         ref={surfaceRef}
         tabIndex={trapFocus ? -1 : undefined}
