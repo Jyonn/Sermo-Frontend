@@ -7,8 +7,8 @@ import "./SingerAvatarFrame.css";
 let ornamentObserver: IntersectionObserver | undefined;
 
 const lettering = {
-  gem: { count: 5, interval: .48 },
-  "eason-chan": { count: 2, interval: .76 },
+  gem: { count: 5, interval: .48, asset: "lettering-v2.webp" },
+  "eason-chan": { count: 4, interval: .76, asset: "lettering-v3.webp" },
 } as const;
 
 export function SingerAvatarFrame({ style, animate }: { style: SingerAvatarFrameStyle; animate: boolean }) {
@@ -48,7 +48,7 @@ export function SingerAvatarFrame({ style, animate }: { style: SingerAvatarFrame
         <img alt="" src={animate ? frames : poster} loading="lazy" decoding="async" onLoad={() => setPortraitReady(true)} />
       </picture>
       {animate && verse && <span className="singer-avatar-verse" style={{
-        "--letter-art": `url("${appearanceAsset(`${path}/lettering-v2.webp`)}")`,
+        "--letter-art": `url("${appearanceAsset(`${path}/${verse.asset}`)}")`,
         "--letter-count": verse.count,
       } as CSSProperties}>
         {Array.from({ length: verse.count }, (_, index) => <i key={index} style={{

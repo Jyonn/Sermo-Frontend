@@ -1,19 +1,17 @@
 {
-  "id": "2026.11.28.3",
+  "id": "2026.11.28.4",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "歌手头像框焕新",
+      "title": "十年之前",
       "items": [
-        "四款歌手头像框加入专属场景与更流畅的人像动画，邓紫棋和陈奕迅的典藏头像框还有逐字演出。",
-        "头像框和个人名片按稀有度分组，每行展示两款。已解锁的新品会显示红点。"
+        "陈奕迅典藏头像框现在会依次亮起「十、年、之、前」四个金色手写字。"
       ]
     },
     "en": {
-      "title": "Singer avatar frames refreshed",
+      "title": "Ten years ago",
       "items": [
-        "Four singer avatar frames now have their own backdrops and smoother portrait animation. The G.E.M. and Eason Chan frames add animated lettering.",
-        "Avatar frames and profile cards appear two per row, grouped by rarity. A red dot marks new styles you have unlocked."
+        "Eason Chan’s collectible avatar frame now lights up all four characters of 十年之前 in sequence."
       ]
     }
   }
