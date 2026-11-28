@@ -3,7 +3,7 @@
 .square-masonry-column>.virtual-dynamic-list-row{display:block}
 .square-note{min-width:0;display:grid;gap:0;align-content:start;overflow:hidden;border:1px solid color-mix(in srgb,var(--line-soft) 65%,transparent);border-radius:6px;background:var(--bg-elevated)}
 .square-note-details{display:grid;gap:6px;min-width:0;padding:9px 10px 10px}
-.square-note button{font:inherit;cursor:pointer;color:inherit;border:0;padding:0;background:transparent;text-align:start}
+.square-note :is(.square-note-cover,.square-note-title,.square-note-author,.square-note-like){font:inherit;cursor:pointer;color:inherit;border:0;padding:0;background:transparent;text-align:start}
 .square-note button:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px}
 .square-note .square-note-cover{position:relative;display:grid;place-items:center;width:100%;min-width:0;overflow:hidden;border-radius:0;background:var(--bg-elevated);isolation:isolate}
 .square-note-cover>img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}

@@ -6,6 +6,7 @@ import {PlainAvatar} from './UserAvatar';
 import {VirtualDynamicList} from './VirtualDynamicList';
 import {SquareAudioCover} from './SquarePlayableCovers';
 import {LinkPreviewCard} from './LinkPreviewCard';
+import {hasSocialShareMetadata, socialShareCaption, socialShareTitle} from '../lib/socialSharePresentation';
 import stillfolioMark from '../assets/stillfolio-mark.svg';
 import './SquareMasonryFeed.css';
 
@@ -13,6 +14,8 @@ export function SquareNoteCard({item,canInteract,onOpen,onLike,onProfile,renderT
     const {t}=useI18n();
     const cover=squareCover(item),textStyle=textCoverStyle(item.statement_id,item.text);
     const author=item.is_anonymous?t('square.anonymousUser'):item.user.name;
+    const caption=socialShareCaption(item.text,item.external_media);
+    const sharedTitle=hasSocialShareMetadata(item.external_media)?socialShareTitle(item.external_media):'';
     const fallback=cover.title||(cover.kind==='music'?t('square.typeMusic'):cover.video?t('square.video'):cover.kind==='audio'?t('square.typeAudio'):item.chat_record?t('messageSearch.chatRecord'):t('square.statementDetail'));
     const mediaIcon=cover.kind==='music'?'music_note':cover.kind==='audio'?'graphic_eq':cover.video?'play_arrow':cover.kind==='collection'?'photo_library':cover.kind==='chat'?'forum':null;
     const duration=cover.duration?`${Math.floor(cover.duration/60)}:${String(Math.floor(cover.duration%60)).padStart(2,'0')}`:'';
@@ -26,7 +29,7 @@ export function SquareNoteCard({item,canInteract,onOpen,onLike,onProfile,renderT
         {!cover.uri&&item.text.length>100?<span className="square-note-continued" aria-hidden="true">···</span>:null}
       </button>}
       <div className="square-note-details">
-      <button className="square-note-title" onClick={()=>onOpen(item)} type="button">{item.text?(renderText?.(item)??item.text):fallback}</button>
+      <button className="square-note-title" onClick={()=>onOpen(item)} type="button">{caption?(renderText?.(item)??caption):sharedTitle||fallback}</button>
       <footer><button className="square-note-author" type="button" disabled={item.is_anonymous} onClick={()=>onProfile(item)}>{item.is_anonymous?<span className="square-note-anonymous material-symbols-outlined" aria-hidden="true">person</span>:<PlainAvatar className="square-note-avatar" name={author} uri={item.user.avatar_uri}/>}<span>{author}</span></button><button className={`square-note-like${item.liked?' is-liked':''}`} disabled={!canInteract} onClick={()=>onLike(item)} type="button" aria-label={`${t('square.like')} ${item.like_count}`} aria-pressed={item.liked}><span className="material-symbols-outlined" aria-hidden="true">favorite</span><span>{item.like_count||t('square.like')}</span></button></footer>
       </div>
     </article>;

@@ -16,6 +16,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import {LinkPreviewCard} from '../components/LinkPreviewCard';
+import {socialShareCaption} from '../lib/socialSharePresentation';
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { ExplorerBanner } from "../components/ExplorerActivity";
 import { BgmBanner } from "../components/BgmActivity";
@@ -328,6 +329,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   const video = statement.media.find((item) => item.kind === "video");
   const anonymousName = t("square.anonymousUser");
   const qqUser = isUnclaimedQqUser(statement.user);
+  const caption = socialShareCaption(statement.text, statement.external_media);
   useEffect(() => {
     if (!menuPosition) return;
     const close = (event: PointerEvent) => {
@@ -369,7 +371,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         </div>
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
-      {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
+      {caption ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={caption} /></p> : null}
       {statement.external_media ? (
         <div className="square-external-media" onClick={(event) => event.stopPropagation()}>
           <LinkPreviewCard preview={statement.external_media} statementId={statement.statement_id} />

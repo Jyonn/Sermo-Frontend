@@ -7,12 +7,13 @@ import {ConfirmDialog} from './ConfirmDialog';
 import {MediaLightbox, type MediaLightboxItem} from './ImageLightbox';
 import {isDouyinVideoData} from './DouyinVideoPreview';
 import {isSocialMediaData} from './SocialMediaPreview';
+import {hasSocialShareMetadata, isRepeatedShareText, socialShareTitle} from '../lib/socialSharePresentation';
 import './SocialLinkPreview.css';
 
-export function isSocialUrl(url:string){try{return ['douyin.com','www.douyin.com','v.douyin.com','iesdouyin.com','www.iesdouyin.com','xiaohongshu.com','www.xiaohongshu.com','xhslink.com','www.xhslink.com','xhslink.cn','www.xhslink.cn'].includes(new URL(url).hostname)}catch{return false}}
-
 /** Opening, playing cached media and paid resolution are three separate actions. */
-export function SocialLinkPreview({preview,url,fitMedia=false}:{preview:LinkPreviewDTO|null;url:string;fitMedia?:boolean}){
+export function SocialLinkPreview({preview,url,fitMedia=false,embeddedCover=false}:{
+  preview:LinkPreviewDTO|null;url:string;fitMedia?:boolean;embeddedCover?:boolean;
+}){
   const {t}=useI18n(),[current,setCurrent]=useState(preview),[open,setOpen]=useState(false),[confirm,setConfirm]=useState(false),[busy,setBusy]=useState(false),[failed,setFailed]=useState(false),[notice,setNotice]=useState(''),[index,setIndex]=useState(0);
   const mounted=useRef(true),generation=useRef(0);
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;generation.current++}},[]);
@@ -24,8 +25,9 @@ export function SocialLinkPreview({preview,url,fitMedia=false}:{preview:LinkPrev
   const historyKey=useRef(`social-detail-${preview?.preview_id || (dy ? 'douyin' : 'xiaohongshu')}`);
   const gallery=media&&'images' in media&&Array.isArray(media.images)?media.images:[];
   const video=media&&'video_url' in media&&typeof media.video_url==='string'?media.video_url:'';
-  const title=current?.title||t('link.preview'),author=media?.author||'',cover=current?.image_url||(media&&'cover_url' in media?media.cover_url:undefined),canonical=current?.url||url;
-  const hasMetadata=current?.status==='ready'&&Boolean(current.title||current.description||current.image_url);
+  const previewTitle=socialShareTitle(current),title=previewTitle || t('link.preview');
+  const author=media?.author||'',cover=current?.image_url||(media&&'cover_url' in media?media.cover_url:undefined),canonical=current?.url||url;
+  const hasMetadata=hasSocialShareMetadata(current);
   const ask=()=>{setNotice('');setConfirm(true)};
   const resolve=async()=>{
     if(busy)return;
@@ -49,7 +51,10 @@ export function SocialLinkPreview({preview,url,fitMedia=false}:{preview:LinkPrev
       : [{id: 'article', uri: '', kind: 'image'}];
   return <>
     <div className="social-link-row" onClick={event=>event.stopPropagation()}>
-      <div className="social-link-card">{hasMetadata?<PlatformMediaCard title={title} author={author} source={source} logo={logo} cover={cover} kindLabel={gallery.length?`${gallery.length} ${t('social.photos')}`:t('social.video')} playIcon={gallery.length?undefined:'play_arrow'} fitMedia={fitMedia} onClick={()=>{setIndex(0);setOpen(true)}}/>:<a className="message-link-preview-card no-image is-unavailable" href={url} target="_blank" rel="noreferrer"><div className="message-link-preview-text"><strong className="message-link-preview-title">{source}</strong><span className="message-link-preview-desc">{url}</span></div><span className="message-link-preview-placeholder" aria-hidden="true">↗</span></a>}</div>
+      <div className="social-link-card">{hasMetadata?<PlatformMediaCard title={title} author={author} source={source} logo={logo} cover={cover}
+        kindLabel={gallery.length?`${gallery.length} ${t('social.photos')}`:t('social.video')} playIcon={gallery.length?undefined:'play_arrow'}
+        fitMedia={fitMedia} embeddedCover={embeddedCover} hideTitle={embeddedCover && Boolean(socialShareTitle(preview))}
+        onClick={()=>{setIndex(0);setOpen(true)}}/>:<a className="message-link-preview-card no-image is-unavailable" href={url} target="_blank" rel="noreferrer"><div className="message-link-preview-text"><strong className="message-link-preview-title">{source}</strong><span className="message-link-preview-desc">{url}</span></div><span className="message-link-preview-placeholder" aria-hidden="true">↗</span></a>}</div>
       {!hasMetadata?<button type="button" className="social-link-parse" disabled={busy} onClick={ask}><span className="material-symbols-outlined" aria-hidden="true">link</span>{t('link.parse.action')}</button>:null}
     </div>
     {notice?<span className="social-link-notice" role="status">{notice}</span>:null}
@@ -57,7 +62,7 @@ export function SocialLinkPreview({preview,url,fitMedia=false}:{preview:LinkPrev
       altPrefix={title} source={{name: source, logo, url: canonical, author}} historyKey={historyKey.current}
       sharedDetail={<article className="media-drawer-article">
         <h2>{title}</h2>
-        {current?.description?<p>{current.description}</p>:null}
+        {current?.description && !isRepeatedShareText(current.description, previewTitle) ? <p>{current.description}</p> : null}
         {failed?<button className="ghost-button" type="button" onClick={ask}>{t('link.parse.action')}</button>:null}
         {notice?<p role="status">{notice}</p>:null}
       </article>} />}

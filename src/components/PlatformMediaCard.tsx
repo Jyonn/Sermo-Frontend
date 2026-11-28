@@ -13,25 +13,34 @@ interface PlatformMediaCardProps {
   logo: string;
   onClick: () => void;
   opening?: boolean;
+  embeddedCover?: boolean;
+  hideTitle?: boolean;
   playIcon?: "play_arrow" | "open_in_new";
   source: string;
   title: string;
 }
 
-export function PlatformMediaCard({ author, cover, kindLabel, logo, onClick, opening = false, playIcon, source, title,fitMedia=false,aspectRatio }: PlatformMediaCardProps) {
+export function PlatformMediaCard({author, cover, kindLabel, logo, onClick, opening = false, playIcon, source, title,
+  fitMedia = false, aspectRatio, embeddedCover = false, hideTitle = false}: PlatformMediaCardProps) {
   const { t } = useI18n();
   const [coverResult, setCoverResult] = useState<{ uri?: string; status: "ready" | "error" } | null>(null);
   const [coverRatio,setCoverRatio]=useState<{uri:string;ratio:number}|null>(null),imageRef=useRef<HTMLImageElement>(null);
   const rememberSize=(image:HTMLImageElement)=>{const ratio=naturalMediaRatio(image.naturalWidth,image.naturalHeight);if(fitMedia&&cover&&ratio)setCoverRatio({uri:cover,ratio})};
   useLayoutEffect(()=>{if(imageRef.current?.complete&&imageRef.current.naturalWidth){rememberSize(imageRef.current);setCoverResult({uri:cover,status:'ready'})}},[cover,fitMedia]);
   const coverState = coverResult && coverResult.uri === cover ? coverResult.status : cover ? "loading" : "error";
-  return <button aria-busy={opening} style={fitMedia?{aspectRatio:naturalMediaRatio(aspectRatio,1)??(coverRatio && coverRatio.uri===cover?coverRatio.ratio:null)??4/3}:undefined} className={`platform-media-card${fitMedia?' is-fit-media':''}${coverState === "loading" ? " is-cover-loading" : ""}`} disabled={opening} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
+  const creator = author?.trim() === source ? '' : author?.trim();
+  return <button aria-busy={opening} aria-label={hideTitle ? `${source} · ${title}` : undefined}
+    style={fitMedia?{aspectRatio:naturalMediaRatio(aspectRatio,1)??(coverRatio && coverRatio.uri===cover?coverRatio.ratio:null)??4/3}:undefined}
+    className={`platform-media-card${fitMedia?' is-fit-media':''}${embeddedCover ? ' is-embedded-cover' : ''}${coverState === "loading" ? " is-cover-loading" : ""}`}
+    data-caption={!hideTitle || Boolean(creator)} disabled={opening} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
     {cover && coverState !== "error" ? <img alt="" ref={imageRef} className="platform-media-cover" loading="lazy" onError={() => setCoverResult({ uri: cover, status: "error" })} onLoad={event=>{setCoverResult({ uri: cover, status: "ready" });rememberSize(event.currentTarget)}} referrerPolicy="no-referrer" src={cover} /> : <span className="platform-media-cover is-unavailable"><span aria-hidden="true" className="material-symbols-outlined">image_not_supported</span></span>}
     <span className="platform-media-card-top">
       <span className="platform-media-card-brand"><img alt="" src={logo} />{source}</span>
       <span className="platform-media-card-kind">{kindLabel}</span>
     </span>
-    <span className="platform-media-card-bottom"><strong>{title}</strong><small>{author || source}</small></span>
+    {(!hideTitle || creator) && <span className="platform-media-card-bottom">
+      {!hideTitle && <strong>{title}</strong>}{creator && <small>{creator}</small>}
+    </span>}
     {playIcon ? <span aria-hidden="true" className="platform-media-play">{opening ? <span className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playIcon}</span>}</span> : null}
     {opening ? <span className="platform-media-opening" role="status">{t("media.loadingVideo")}</span> : null}
   </button>;

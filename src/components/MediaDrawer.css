@@ -26,6 +26,8 @@
   background: var(--drawer-surface);
 }
 .media-drawer-layout {
+  --media-mode-time: 220ms;
+  --media-mode-ease: cubic-bezier(.22, 1, .36, 1);
   --text-primary: var(--media-ink);
   --text-secondary: var(--media-muted);
   --text-muted: var(--media-muted);
@@ -41,7 +43,29 @@
   isolation: isolate;
   background: var(--drawer-surface);
   color: var(--media-ink);
+  transition: background-color var(--media-mode-time) var(--media-mode-ease), color var(--media-mode-time) ease-out;
 }
+.media-drawer-mode-control {
+  --media-control-shift: -7px;
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition: opacity var(--media-mode-time) ease-out, translate var(--media-mode-time) var(--media-mode-ease), visibility 0s;
+}
+.is-immersive-media .media-drawer-mode-control {
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 var(--media-control-shift);
+  transition-delay: 0s, 0s, var(--media-mode-time);
+}
+.media-drawer-layout :is(.overlay-icon-button, .media-drawer-zoom) {
+  transition: background-color var(--media-mode-time) ease-out, border-color var(--media-mode-time) ease-out, color var(--media-mode-time) ease-out;
+}
+.media-drawer-layout .media-drawer-identity {
+  transition: opacity var(--media-mode-time) ease-out, translate var(--media-mode-time) var(--media-mode-ease), visibility 0s,
+    background-color var(--media-mode-time) ease-out, border-color var(--media-mode-time) ease-out, color var(--media-mode-time) ease-out;
+}
+.is-immersive-media .media-drawer-identity { transition-delay: 0s, 0s, var(--media-mode-time), 0s, 0s, 0s; }
 .media-drawer-stage {
   position: relative;
   display: grid;
@@ -147,6 +171,7 @@
 }
 .media-drawer-top .flash-view-timer { position: relative; inset: auto; }
 .media-drawer-bottom {
+  --media-control-shift: 7px;
   position: absolute;
   inset: auto max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   z-index: 6;
@@ -154,9 +179,21 @@
   justify-items: center;
   gap: 8px;
   pointer-events: none;
-  transition: opacity 180ms ease-out;
+  transition: opacity 180ms ease-out, row-gap var(--media-mode-time) var(--media-mode-ease);
 }
+.is-immersive-media .media-drawer-bottom { row-gap: 0; }
+.media-drawer-bottom .media-drawer-mode-control { --media-control-shift: 7px; }
 .media-drawer-layout:has(.media-drawer-stage.is-dragging) .media-drawer-bottom { transition: none; }
+.media-drawer-mode-fold {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--media-mode-time) var(--media-mode-ease);
+}
+.media-drawer-fold-inner { min-height: 0; }
+.media-drawer-film-fold > .media-drawer-fold-inner,
+.is-immersive-media .media-drawer-actions-fold > .media-drawer-fold-inner { overflow: clip; }
+.is-immersive-media .media-drawer-mode-fold { grid-template-rows: 0fr; }
 .media-drawer-footer-actions {
   width: 100%;
   display: grid;
@@ -165,7 +202,8 @@
   justify-items: start;
 }
 .media-drawer-footer-actions:empty { display: none; }
-.media-drawer-share { grid-column: 1; position: relative; }
+.media-drawer-share-action { grid-column: 1; }
+.media-drawer-share { position: relative; }
 .media-drawer-share-menu {
   position: absolute;
   z-index: 2;
@@ -212,8 +250,7 @@
   gap: 8px;
 }
 .media-drawer-info-action { grid-column: 3; justify-self: end; }
-.media-drawer-layout .media-drawer-desktop,
-.media-drawer-footer-actions[data-immersive="true"] { display: none; }
+.media-drawer-layout .media-drawer-desktop { display: none; }
 .media-drawer-film {
   position: relative;
   z-index: 1;
@@ -265,20 +302,22 @@
 .media-drawer-transport {
   width: min(100%, 560px);
   display: grid;
-  grid-template-columns: auto minmax(56px, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 7px;
   padding: 4px 8px;
   border: 1px solid var(--media-line);
   border-radius: 999px;
   background: var(--media-glass);
   color: var(--media-ink);
   backdrop-filter: blur(16px);
+  transition: width var(--media-mode-time) var(--media-mode-ease), background-color var(--media-mode-time) ease-out,
+    color var(--media-mode-time) ease-out, border-color var(--media-mode-time) ease-out;
 }
 .media-drawer-transport .overlay-icon-button { --overlay-control-size: 34px; --overlay-control-icon-size: 19px; border: 0; background: transparent; }
-.media-drawer-transport[data-immersive="true"] { width: auto; grid-template-columns: auto auto; }
-.media-drawer-transport input { width: 100%; height: 28px; min-height: 0; padding: 0; accent-color: var(--media-ink); }
-.media-drawer-transport > span { font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.is-immersive-media .media-drawer-transport { width: min(100%, 90px); }
+.media-drawer-transport-seek { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; }
+.media-drawer-transport-seek input { width: 100%; min-width: 0; height: 28px; padding: 0; margin-inline-start: 7px; accent-color: var(--media-ink); }
+.media-drawer-transport-seek > span { margin-inline-end: 7px; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .media-drawer-info {
   position: relative;
   z-index: 3;
@@ -329,8 +368,8 @@ body:has(.media-drawer) .app-toast-viewport { z-index: 5200; }
   }
   .media-drawer-dismiss { order: 3; }
   .media-drawer-top { inset-inline: 16px; }
-  .media-drawer-layout .media-drawer-desktop,
-  .media-drawer-footer-actions[data-immersive="true"] { display: grid; }
+  .media-drawer-layout .media-drawer-desktop { display: grid; }
+  .is-immersive-media .media-drawer-actions-fold[data-zoomable="true"] { grid-template-rows: 1fr; }
   .media-drawer-info-action { display: none; }
   .media-drawer-top-actions > .overlay-icon-button[aria-pressed="true"] {
     border-color: currentColor;
@@ -380,5 +419,6 @@ body:has(.media-drawer) .app-toast-viewport { z-index: 5200; }
   .media-drawer-stage[data-zoomable="true"][data-zoomed="true"].is-dragging :is(.media-drawer-slide-photo, img.media-drawer-canvas) { cursor: grabbing; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .media-drawer-layout { --media-mode-time: 0ms; }
   .media-drawer-canvas, .media-drawer-info, .media-drawer-bottom, .media-drawer-top { transition: none; }
 }

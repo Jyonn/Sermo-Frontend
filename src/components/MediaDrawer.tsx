@@ -1,4 +1,4 @@
-import {useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode} from 'react';
 import {useI18n} from '../lib/language';
 import {useAuth} from '../lib/auth';
 import {api} from '../lib/api';
@@ -305,6 +305,12 @@ function MediaDrawerContent({
   const infoPull = infoOpen ? 1 : canShowInfo && !leaving ? mediaInfoProgress(false, freeDrag?.y ?? 0, infoHeight) : 0;
   const closeInfo = () => setInfo(false);
   const canZoom = !videoItem && Boolean(src && gestures.fitted.width) && !interactionDisabled;
+  const canShare = Boolean(editor ? editor.createShareFile : src || platform?.url || forward);
+  const defaultControl = useCallback((node: HTMLElement | null) => {
+    if (!node) return;
+    if (immersive && node.contains(document.activeElement)) gestures.stage.current?.focus({preventScroll:true});
+    node.inert = immersive;
+  }, [immersive, gestures.stage]);
   const zoomed = transform.scale > 1.003;
   const zoomPercent = useMemo(() => new Intl.NumberFormat(locale, {style: 'percent', maximumFractionDigits: 0}), [locale]);
   const toggleInfo = () => {
@@ -432,7 +438,8 @@ function MediaDrawerContent({
         <header className="media-drawer-top" aria-label={adjusting ? t('photo.edit') : undefined}>
           <DrawerDismissButton className="media-drawer-dismiss" disabled={editor?.busy || leaving} onClick={() => closeRequestRef.current?.()} />
           {adjusting && <div className="media-drawer-editor-actions">{editor.headerActions}</div>}
-          {!immersive && !adjusting && <Identity className="media-drawer-identity" onClick={onJumpToMessage}
+          {!adjusting && <Identity className="media-drawer-identity media-drawer-mode-control" onClick={onJumpToMessage}
+            ref={defaultControl} aria-hidden={immersive || undefined}
             type={onJumpToMessage ? 'button' : undefined}
             title={onJumpToMessage ? t('messageSearch.jumpToMessage') : undefined}
             aria-label={onJumpToMessage ? `${identityLabel} · ${t('messageSearch.jumpToMessage')}` : undefined}>
@@ -458,29 +465,39 @@ function MediaDrawerContent({
               aria-keyshortcuts="F" disabled={interactionDisabled} onClick={toggleImmersive} />}
 
             {adjusting ? <button className="media-drawer-done" type="button" onClick={editor.onDone}>{t('common.done')}</button> : null}
-            {editor && !adjusting && !immersive && <OverlayIconButton icon={editor.busy ? 'progress_activity' : editor.submitLabel ? 'check' : 'send'} aria-label={editor.submitLabel || t('common.send')}
-              disabled={editor.busy || editor.sendDisabled} onClick={editor.onSend} />}
+            {editor && !adjusting && <span className="media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
+              <OverlayIconButton icon={editor.busy ? 'progress_activity' : editor.submitLabel ? 'check' : 'send'}
+                aria-label={editor.submitLabel || t('common.send')} disabled={editor.busy || editor.sendDisabled} onClick={editor.onSend} />
+            </span>}
           </div>
         </header>
 
         {!fixedFitImage && !infoOpen && <footer className="media-drawer-bottom" style={{opacity: leaving ? 0 : 1 - infoPull}}>
           {adjusting ? editor.tools : <>
-            {videoItem && src && <div className="media-drawer-transport" data-immersive={immersive}>
+            {videoItem && src && <div className="media-drawer-transport">
               <OverlayIconButton icon={playback.playing ? 'pause' : 'play_arrow'} aria-label={t(playback.playing ? 'media.pause' : 'media.play')} onClick={play} />
-              {!immersive && <><input type="range" min={0} max={playback.duration || 1} step={.01} value={Math.min(playback.current, playback.duration)}
-                disabled={!playback.duration} aria-label={t('mediaDrawer.seek')}
-                onChange={event => {if (video.current) {video.current.currentTime = event.currentTarget.valueAsNumber; updatePlayback(video.current);}}} />
-              <span>{timeCode(playback.current)} / {timeCode(playback.duration)}</span></>}
+              <div className="media-drawer-transport-seek media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
+                <input type="range" min={0} max={playback.duration || 1} step={.01} value={Math.min(playback.current, playback.duration)}
+                  disabled={!playback.duration} aria-label={t('mediaDrawer.seek')}
+                  onChange={event => {if (video.current) {video.current.currentTime = event.currentTarget.valueAsNumber; updatePlayback(video.current);}}} />
+                <span>{timeCode(playback.current)} / {timeCode(playback.duration)}</span>
+              </div>
               <OverlayIconButton icon={playback.muted ? 'volume_off' : 'volume_up'} aria-label={t(playback.muted ? 'mediaDrawer.unmute' : 'mediaDrawer.mute')}
                 onClick={() => {if (video.current) {video.current.muted = !video.current.muted; updatePlayback(video.current);}}} />
             </div>}
-            {!immersive && (items.length > 1 || hasPrevious || hasNext) && <MediaDrawerFilm items={items} index={index}
-              width={bounds.width} carousel={carousel} canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} disabled={interactionDisabled} go={go} />}
-            {(!immersive || canZoom) && <div className="media-drawer-footer-actions" data-immersive={immersive}>
-              {!immersive && (editor ? editor.createShareFile : src || platform?.url || forward) && <MediaShareMenu key={identity}
-                share={src || platform?.url ? () => void shareNative() : undefined} download={src ? download : undefined}
-                forward={forward} downloadLabel={item.downloadLabel} disabled={sharing || interactionDisabled} />}
-              {(canZoom || editor && !immersive) && <div className="media-drawer-center-actions">
+            {canBrowse && <div className="media-drawer-mode-fold media-drawer-film-fold" ref={defaultControl} aria-hidden={immersive || undefined}>
+              <div className="media-drawer-fold-inner media-drawer-mode-control">
+                <MediaDrawerFilm items={items} index={index} width={bounds.width} carousel={carousel}
+                  canLoadPrevious={hasPrevious} canLoadNext={hasNext} loading={loading} disabled={interactionDisabled} go={go} />
+              </div>
+            </div>}
+            {(canShare || canZoom || editor || hasInfo) && <div className="media-drawer-mode-fold media-drawer-actions-fold" data-zoomable={canZoom}>
+              <div className="media-drawer-fold-inner"><div className="media-drawer-footer-actions">
+              {canShare && <div className="media-drawer-share-action media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
+                <MediaShareMenu key={identity} share={src || platform?.url ? () => void shareNative() : undefined} download={src ? download : undefined}
+                  forward={forward} downloadLabel={item.downloadLabel} disabled={sharing || interactionDisabled} suppressed={immersive} />
+              </div>}
+              {(canZoom || editor) && <div className="media-drawer-center-actions">
                 {canZoom && <div className="media-drawer-zoom media-drawer-desktop" role="group" aria-label={t('mediaDrawer.zoom')}>
                   <OverlayIconButton icon="remove" aria-label={t('media.zoomOut')} title={t('media.zoomOut')}
                     aria-disabled={!zoomed} aria-keyshortcuts="-" onClick={() => {if (zoomed) gestures.stepZoom(-1);}} />
@@ -492,10 +509,15 @@ function MediaDrawerContent({
                     aria-disabled={transform.scale >= gestures.fitted.maximum} aria-keyshortcuts="+"
                     onClick={() => {if (transform.scale < gestures.fitted.maximum) gestures.stepZoom(1);}} />
                 </div>}
-                {editor && !immersive && <OverlayIconButton icon="tune" className="media-drawer-adjust" aria-label={t('mediaDrawer.adjust')}
-                  disabled={editor.busy || editor.adjustDisabled || !src} onClick={editor.onAdjust} />}
+                {editor && <span className="media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
+                  <OverlayIconButton icon="tune" className="media-drawer-adjust" aria-label={t('mediaDrawer.adjust')}
+                    disabled={editor.busy || editor.adjustDisabled || !src} onClick={editor.onAdjust} />
+                </span>}
               </div>}
-              {!immersive && hasInfo && <OverlayIconButton icon="info" className="media-drawer-info-action" aria-label={t('mediaDrawer.info')} onClick={toggleInfo} />}
+              {hasInfo && <span className="media-drawer-info-action media-drawer-mode-control" ref={defaultControl} aria-hidden={immersive || undefined}>
+                <OverlayIconButton icon="info" aria-label={t('mediaDrawer.info')} onClick={toggleInfo} />
+              </span>}
+              </div></div>
             </div>}
           </>}
         </footer>}

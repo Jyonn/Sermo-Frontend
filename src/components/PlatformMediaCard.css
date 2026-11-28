@@ -1,5 +1,7 @@
 .platform-media-card { position: relative; display: block; width: min(100%, 280px); height: 260px; overflow: hidden; padding: 0; border: 0; border-radius: 18px; color: #fff; background: #1a2422; text-align: left; cursor: pointer; isolation: isolate; }
 .platform-media-card.is-fit-media{width:100%;height:auto}
+.platform-media-card.is-embedded-cover { border-radius: 0; }
+.square-note .platform-media-card.is-embedded-cover:focus-visible { outline-offset: -3px; }
 .platform-media-card.is-fit-media>.platform-media-cover{position:absolute;inset:0;object-fit:contain}
 .platform-media-cover { display: block; width: 100%; height: 100%; object-fit: cover; background: #304341; }
 .platform-media-card.is-cover-loading .platform-media-cover { opacity: .35; }
@@ -7,6 +9,8 @@
 .platform-media-cover.is-unavailable .material-symbols-outlined { font-size: 36px; }
 .platform-media-card:disabled { cursor: progress; }
 .platform-media-card::after { position: absolute; inset: 0; z-index: 0; content: ""; background: linear-gradient(180deg, rgba(0,0,0,.52), transparent 30%, transparent 40%, rgba(0,0,0,.8)); }
+.platform-media-card.is-embedded-cover::after { background: linear-gradient(180deg, #0009, transparent 24%, transparent 78%, #0008); }
+.platform-media-card[data-caption="false"]::after { background: linear-gradient(180deg, #0009, transparent 28%); }
 .platform-media-card-top, .platform-media-card-bottom { position: absolute; z-index: 1; right: 16px; left: 16px; display: flex; color: #fff; }
 .platform-media-card-top { top: 15px; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 800; }
 .platform-media-card-brand { display: inline-flex; min-width: 0; align-items: center; gap: 7px; }

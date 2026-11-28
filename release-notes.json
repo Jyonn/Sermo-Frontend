@@ -1,17 +1,19 @@
 {
-  "id": "2026.11.28.9",
+  "id": "2026.11.28.10",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "游戏房间的离开操作更顺手",
+      "title": "外部分享和媒体预览更顺滑",
       "items": [
-        "点游戏房间右上角的离开图标，就近选择留桌、离开或最小化。自己的座位头像显示在底部。"
+        "广场里的抖音和小红书分享封面与卡片边缘贴合，重复标题只显示一次。",
+        "媒体预览在默认和沉浸模式间切换时，背景和控件平滑过渡。"
       ]
     },
     "en": {
-      "title": "Room actions are together in the upper-right corner",
+      "title": "Cleaner media shares and smoother previews",
       "items": [
-        "Tap the exit icon in a game room to stay, leave, or minimize. Your seat and avatar appear along the bottom."
+        "Douyin and Xiaohongshu covers fit their cards in Square, and repeated titles appear once.",
+        "The background and controls transition smoothly between default and immersive media viewing."
       ]
     }
   }
