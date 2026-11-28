@@ -5,13 +5,13 @@
     "zh-CN": {
       "title": "游戏房间可以最小化",
       "items": [
-        "斗地主、双扣、麻将和数字交锋的房间可以收起。浮窗会提醒房间动态，点一下就能回到房间。"
+        "斗地主、双扣、麻将和数字交锋的房间可以收起。浮窗会提醒房间动态，轮到你时轻摇一下。点浮窗即可回到房间。"
       ]
     },
     "en": {
       "title": "Minimize game rooms",
       "items": [
-        "Minimize a Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. The floating button shows updates and takes you back to the room."
+        "Minimize a Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. The floating button shows updates, shakes briefly on your turn, and takes you back to the room."
       ]
     }
   }

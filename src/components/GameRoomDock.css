@@ -89,6 +89,7 @@ body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-roo
 @media (prefers-reduced-motion: no-preference) {
   .game-room-chip { animation: game-room-dock-enter .2s ease-out both; }
   .game-room-chip-icon > i { animation: game-room-update .28s ease-out both; }
+  .game-room-chip.is-my-turn { animation: game-room-your-turn .42s ease-out; }
 }
 
 @keyframes game-room-dock-enter {
@@ -97,4 +98,10 @@ body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-roo
 
 @keyframes game-room-update {
   from { opacity: 0; transform: scale(.55); }
+}
+
+@keyframes game-room-your-turn {
+  25% { transform: translateX(4px); }
+  50% { transform: translateX(-3px); }
+  75% { transform: translateX(2px); }
 }

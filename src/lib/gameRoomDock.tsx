@@ -97,7 +97,7 @@ function RoomChip({room, onOpen, onDismiss}: {room: Room; onOpen: () => void; on
   const closed = status.phase === 'closed';
   const urgent = !offline && (status.phase === 'turn' || status.phase === 'start');
   const label = t(offline ? 'game.roomReconnecting' : phaseLabels[status.phase]);
-  return <button className={`game-room-chip${urgent ? ' is-urgent' : ''}`} type="button"
+  return <button className={`game-room-chip${urgent ? ' is-urgent' : ''}${status.phase === 'turn' ? ' is-my-turn' : ''}`} type="button"
     onClick={closed ? onDismiss : onOpen} title={t(closed ? 'common.close' : 'game.returnToRoom')}
     aria-label={`${t(closed ? 'common.close' : 'game.returnToRoom')} · ${title} · ${label}${updated ? ` · ${t('game.roomUpdate')}` : ''}`}>
     <span className="game-room-chip-icon" aria-hidden="true">
