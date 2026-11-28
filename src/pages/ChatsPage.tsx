@@ -1,5 +1,6 @@
 import { mergeMessages, preserveStableMediaUri, sortMessages } from "../lib/chatMessageReconciliation";
 import {useActivityOverlay} from '../lib/activityOverlay';
+import {gameRoomReturnState} from '../lib/gameNavigation';
 import {MessageLockAttribution} from '../components/MessageLockAttribution';
 import { HistoryPagingIntent } from "../lib/historyPagingIntent";
 import { CompactMessageContent } from "../components/CompactMessageContent";
@@ -8747,7 +8748,7 @@ function LiveChatsPage({
                 } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
                   navigate(`/app/square/statements/${message.payload.statement_id}`);
                 } else if (message.type === MESSAGE_TYPE_ACTIVITY && message.payload?.activity_key) {
-                  if(message.payload.room_code)navigate(`/app/number-duel/${message.payload.room_code}`);else openActivity(message.payload.activity_key,message.payload.table_room_code??message.payload.landlord_room_code);
+                  if(message.payload.room_code)navigate(`/app/number-duel/${message.payload.room_code}`,{state:gameRoomReturnState(location)});else openActivity(message.payload.activity_key,message.payload.table_room_code??message.payload.landlord_room_code);
                 } else {
                   revealMessageFromSearch(message.message_id);
                 }

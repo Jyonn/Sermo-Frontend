@@ -3,6 +3,8 @@ import {useLocation} from 'react-router-dom';
 import {api, ApiError} from '../lib/api';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {showToast} from '../lib/toast';
+import {GameRoomMinimizeButton} from '../lib/gameRoomDock';
+import {cardTableStatus} from '../lib/gameRoomStatus';
 import {LANDLORD_ART, LANDLORD_ROOM_CODE, LANDLORD_ROOM_PARAM, type LandlordAction, type LandlordLobby, type LandlordTableView} from '../lib/landlord';
 import type {ActivityCampaignDTO} from '../types';
 import {ActivityTitle} from './ActivityCampaignCard';
@@ -51,7 +53,7 @@ const actionErrors: Record<string, TranslationKey> = {
   BUSY: 'landlord.alreadySeated', TURN: 'landlord.waitTurn', CARDS: 'landlord.invalidPlay', INVALID: 'landlord.actionFailed',
 };
 
-export function LandlordActivity({activity, exitHandler}: {activity: ActivityCampaignDTO; exitHandler: GameExitHandler}) {
+export function LandlordActivity({activity, exitHandler, onMinimize}: {activity: ActivityCampaignDTO; exitHandler: GameExitHandler; onMinimize: () => void}) {
   const {t, language} = useI18n();
   const location = useLocation();
   const invitation = new URLSearchParams(location.search).get(LANDLORD_ROOM_PARAM);
@@ -228,6 +230,8 @@ export function LandlordActivity({activity, exitHandler}: {activity: ActivityCam
           <button className="landlord-text-button" type="button" onClick={() => setDialog('rules')}>{t('landlord.rules')}</button>
           <GameAudio game="landlord" active={live} cue={remaining && !self?.trustee ? bidding && turn ? 'bid' : doubling && self?.doubled === null ? 'double' : playing && turn ? 'play' : null : null}
             token={table.deadline ?? undefined} />
+          <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game:'landlord',
+            title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
         </div>
         <div className="landlord-arena">
           <Seat table={table} position={(table.your_seat + 2) % 3} seconds={remaining} />

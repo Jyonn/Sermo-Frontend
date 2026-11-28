@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "Minimizar sala",
+  "game.returnToRoom": "Volver a la sala",
+  "game.roomUpdate": "Hay novedades en la sala",
+  "game.roomWaiting": "Esperando a más jugadores",
+  "game.roomPlaying": "Partida en curso",
+  "game.roomTurn": "Tu turno",
+  "game.roomStart": "Todo listo para empezar",
+  "game.roomReconnecting": "Reconectando",
   "chronelle.friendSharing.chatEntry": "Compartir calendario",
   "chronelle.friendSharing.editorTitle": "Acceso al calendario del contacto",
   "chronelle.friendSharing.editorHint": "Elige qué puede ver este contacto en tu calendario de Chronelle.",

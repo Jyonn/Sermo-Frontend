@@ -1,4 +1,10 @@
+import {activityOverlaySearch} from './activityOverlayRoute';
+
 export const GAME_NAVIGATION_EVENT = 'frienden:game-navigation';
+
+export function gameRoomReturnState({pathname, search, hash}: {pathname: string; search: string; hash: string}) {
+  return {gameRoomReturn: pathname + activityOverlaySearch(search, null) + hash};
+}
 
 let activeGameGuard: ((event: PopStateEvent) => void) | undefined;
 

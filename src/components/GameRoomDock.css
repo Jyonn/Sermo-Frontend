@@ -1,0 +1,100 @@
+.game-room-dock {
+  position: fixed;
+  z-index: 120;
+  inset-inline-start: max(14px, env(safe-area-inset-left));
+  bottom: max(110px, calc(94px + env(safe-area-inset-bottom)));
+  display: grid;
+  gap: 8px;
+  max-width: min(210px, calc(100vw - 28px));
+}
+
+body:has(.game-table-drawer, .game-table-screen, .gesture-lock-screen) .game-room-dock {
+  display: none;
+}
+
+.game-room-chip {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 47px;
+  padding: 5px 10px 5px 5px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  text-align: start;
+  box-shadow: 0 5px 18px rgb(17 40 32 / 17%);
+  cursor: pointer;
+}
+
+.game-room-chip:hover,
+.game-room-chip.is-urgent {
+  border-color: color-mix(in srgb, var(--brand-primary) 62%, var(--line-soft));
+}
+
+.game-room-chip-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand-primary) 17%, var(--bg-surface));
+}
+
+.game-room-chip-icon .material-symbols-outlined { font-size: 19px; }
+
+.game-room-chip-icon > i {
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline-end: 0;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--bg-surface);
+  border-radius: 50%;
+  background: var(--danger, #dc4d52);
+}
+
+.game-room-chip-copy { display: grid; min-width: 0; gap: 2px; }
+.game-room-chip-copy > strong,
+.game-room-chip-copy > small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-room-chip-copy > strong { font-size: .79rem; line-height: 1.18; }
+.game-room-chip-copy > small { color: var(--text-secondary); font-size: .68rem; line-height: 1.18; }
+.game-room-chip.is-urgent .game-room-chip-copy > small { color: var(--text-primary); font-weight: 750; }
+.game-room-chip .game-room-chip-open { color: var(--text-secondary); font-size: 16px; }
+
+.game-room-minimize,
+.duel-topline .game-room-minimize {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  background: rgb(23 31 34 / 38%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.game-room-minimize .material-symbols-outlined { font-size: 17px; }
+.game-room-minimize:disabled { opacity: .6; cursor: wait; }
+
+@media (max-width: 760px) {
+  .game-room-dock { bottom: max(152px, calc(126px + env(safe-area-inset-bottom))); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .game-room-chip { animation: game-room-dock-enter .2s ease-out both; }
+  .game-room-chip-icon > i { animation: game-room-update .28s ease-out both; }
+}
+
+@keyframes game-room-dock-enter {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+@keyframes game-room-update {
+  from { opacity: 0; transform: scale(.55); }
+}

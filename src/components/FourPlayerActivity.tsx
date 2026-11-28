@@ -3,6 +3,8 @@ import {useLocation} from 'react-router-dom';
 import {api} from '../lib/api';
 import {useI18n, type TranslationKey} from '../lib/language';
 import {useFourPlayerRoom} from '../lib/useFourPlayerRoom';
+import {GameRoomMinimizeButton} from '../lib/gameRoomDock';
+import {cardTableStatus} from '../lib/gameRoomStatus';
 import {TABLE_ROOM_PARAM, type FourPlayerGame, type FourPlayerMode, type FourPlayerTable, type GameMove,
   type MahjongBoard, type MahjongChoice, type ShuangkouBoard} from '../lib/tabletop';
 import type {ActivityCampaignDTO} from '../types';
@@ -80,7 +82,7 @@ function MahjongChoiceButton({choice, disabled, onClick}: {choice: MahjongChoice
   </button>;
 }
 
-export function FourPlayerActivity({activity, game, exitHandler}: {activity: ActivityCampaignDTO; game: FourPlayerGame; exitHandler: GameExitHandler}) {
+export function FourPlayerActivity({activity, game, exitHandler, onMinimize}: {activity: ActivityCampaignDTO; game: FourPlayerGame; exitHandler: GameExitHandler; onMinimize: () => void}) {
   const {t, language} = useI18n();
   const {search} = useLocation();
   const invitation = new URLSearchParams(search).get(TABLE_ROOM_PARAM);
@@ -146,7 +148,10 @@ export function FourPlayerActivity({activity, game, exitHandler}: {activity: Act
         {!playing && <button className="landlord-text-button" type="button" onClick={() => setPanel('ranking')}
           aria-label={t('landlord.ranking')} title={t('landlord.ranking')}>{icon('emoji_events')}</button>}
         <GameAudio game={game} active={playing} cue={!seconds || self?.trustee ? null : meld?.pending ? meld.pending.choices?.length ? 'claim' : null
-          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} /></header>
+          : myTurn ? meld ? 'discard' : 'play' : null} token={table.deadline ?? undefined} />
+        <GameRoomMinimizeButton room={{activityKey:activity.key, code:table.code, game,
+          title:activity.title, titleEn:activity.title_en, status:cardTableStatus(table)}} disabled={busy} onMinimize={onMinimize} />
+      </header>
       <div className="four-player-arena">
         {(['south','right','north','left'] as const).map((side,index) => <TableSeat key={side} table={table} game={game} side={side} seconds={seconds}
           position={(table.your_seat + index) % 4} />)}

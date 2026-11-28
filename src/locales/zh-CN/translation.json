@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "最小化房间",
+  "game.returnToRoom": "返回房间",
+  "game.roomUpdate": "房间有新动态",
+  "game.roomWaiting": "等待玩家",
+  "game.roomPlaying": "对局进行中",
+  "game.roomTurn": "轮到你了",
+  "game.roomStart": "可以开局",
+  "game.roomReconnecting": "正在重连",
   "management.activities": "返场审批",
   "activity.edition": "第 {{count}} 期",
   "activity.rerun.adminHint": "空间在本期结束满三个月后可申请返场，满六个月即可自行开启下一期。",

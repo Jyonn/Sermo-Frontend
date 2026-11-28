@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "ルームを最小化",
+  "game.returnToRoom": "ルームに戻る",
+  "game.roomUpdate": "ルームに新着情報",
+  "game.roomWaiting": "プレイヤーを待機中",
+  "game.roomPlaying": "対戦中",
+  "game.roomTurn": "あなたの番です",
+  "game.roomStart": "対戦を開始できます",
+  "game.roomReconnecting": "再接続中",
   "chronelle.friendSharing.chatEntry": "予定の共有",
   "chronelle.friendSharing.editorTitle": "友だちの予定閲覧権限",
   "chronelle.friendSharing.editorHint": "この友だちに見せる Chronelle の予定を選びます。",

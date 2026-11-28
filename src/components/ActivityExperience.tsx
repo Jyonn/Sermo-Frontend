@@ -92,7 +92,7 @@ function formatActivityDateRange(startsAt: number, endsAt: number | null, langua
   return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
 }
 
-export function ActivityExperience({activityKey,onClose}:{activityKey:string;onClose:()=>void}) {
+export function ActivityExperience({activityKey,onClose,onMinimize}:{activityKey:string;onClose:()=>void;onMinimize:()=>void}) {
   const {t,language}=useI18n();
   const {session,patchSessionUser}=useAuth();
   const features=useSpaceFeatures();
@@ -281,8 +281,8 @@ export function ActivityExperience({activityKey,onClose}:{activityKey:string;onC
           <span className="record-shop-drawer-title" aria-hidden="true"><ActivityTitle activity={activeActivity} title={drawerTitle} /></span>
         ) : undefined}
       >
-        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} exitHandler={gameExit} />
-          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} exitHandler={gameExit} /> : activeActivity?.record_shop ? (
+        {activeActivity?.theme === 'landlord' ? <LandlordActivity activity={activeActivity} exitHandler={gameExit} onMinimize={onMinimize} />
+          : activeActivity && isFourPlayerGame(activeActivity.theme) ? <FourPlayerActivity key={activeActivity.key} activity={activeActivity} game={activeActivity.theme} exitHandler={gameExit} onMinimize={onMinimize} /> : activeActivity?.record_shop ? (
           <RecordShopActivity
             activity={activeActivity}
             dateLabel={formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}

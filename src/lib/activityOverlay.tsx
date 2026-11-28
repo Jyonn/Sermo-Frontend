@@ -7,6 +7,7 @@ import {SideDrawer} from '../components/SideDrawer';
 import {FloatingDrawerScope} from '../components/DesktopPanelWorkspace';
 import {ActivityLoadingState} from '../components/ActivityLoadingState';
 import {activityDrawerClassName} from './activityTheme';
+import {GameRoomDockProvider} from './gameRoomDock';
 import '../components/GameTableLayout.css';
 const Experience=lazy(()=>import('../components/ActivityExperience').then(module=>({default:module.ActivityExperience})));
 const ActivityOverlayContext=createContext<(key:string,room?:string)=>void>(()=>undefined);
@@ -28,16 +29,20 @@ export function ActivityOverlayProvider({children}:{children:ReactNode}) {
     // current path so opening an activity preserves the complete parent stack.
     navigate({pathname:location.pathname,search:activityOverlaySearch(window.location.search,activityKey,room),hash:window.location.hash},{state:{...location.state,activityOverlay:true}});
   };
-  const close=()=>{
-    if(location.state?.activityOverlay)navigate(-1);
+  const close=(minimize=false)=>{
+    if(!minimize && location.state?.activityOverlay)navigate(-1);
     else navigate({pathname:location.pathname,search:activityOverlaySearch(location.search,null),hash:location.hash},{replace:true});
   };
-  return <ActivityOverlayContext.Provider value={open}><ActivityPageReadyContext.Provider value={setReadyPath}>
+  const openTable=(activityKey:string)=>{
+    if(readyPath===location.pathname) open(activityKey);
+    else navigate(`/app/menu?panel=activities&activity=${encodeURIComponent(activityKey)}`);
+  };
+  return <ActivityOverlayContext.Provider value={open}><ActivityPageReadyContext.Provider value={setReadyPath}><GameRoomDockProvider openTable={openTable}>
     {children}
     {session && key && readyPath === location.pathname ? <FloatingDrawerScope standalone>
-      <Suspense fallback={<SideDrawer open trapFocus className={activityDrawerClassName(key)} contentUnderToolbar historyMode="route" onClose={close} title={t('activity.title')}><ActivityLoadingState /></SideDrawer>}>
-        <Experience key={`${session.user.user_id}:${key}`} activityKey={key} onClose={close} />
+      <Suspense fallback={<SideDrawer open trapFocus className={activityDrawerClassName(key)} contentUnderToolbar historyMode="route" onClose={()=>close()} title={t('activity.title')}><ActivityLoadingState /></SideDrawer>}>
+        <Experience key={`${session.user.user_id}:${key}`} activityKey={key} onClose={()=>close()} onMinimize={()=>close(true)} />
       </Suspense>
     </FloatingDrawerScope> : null}
-  </ActivityPageReadyContext.Provider></ActivityOverlayContext.Provider>;
+  </GameRoomDockProvider></ActivityPageReadyContext.Provider></ActivityOverlayContext.Provider>;
 }

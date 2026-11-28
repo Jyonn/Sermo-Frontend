@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "방 최소화",
+  "game.returnToRoom": "방으로 돌아가기",
+  "game.roomUpdate": "방에 새 소식이 있어요",
+  "game.roomWaiting": "플레이어 대기 중",
+  "game.roomPlaying": "게임 진행 중",
+  "game.roomTurn": "내 차례",
+  "game.roomStart": "게임을 시작할 수 있어요",
+  "game.roomReconnecting": "다시 연결하는 중",
   "chronelle.friendSharing.chatEntry": "일정 공유",
   "chronelle.friendSharing.editorTitle": "친구의 일정 열람 권한",
   "chronelle.friendSharing.editorHint": "이 친구에게 공개할 Chronelle 일정을 선택하세요.",

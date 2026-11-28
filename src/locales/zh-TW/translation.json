@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "最小化房間",
+  "game.returnToRoom": "返回房間",
+  "game.roomUpdate": "房間有新動態",
+  "game.roomWaiting": "等待玩家",
+  "game.roomPlaying": "對局進行中",
+  "game.roomTurn": "輪到你了",
+  "game.roomStart": "可以開局",
+  "game.roomReconnecting": "正在重新連線",
   "game.exampleTriple": "三帶一",
   "game.exampleChain": "連炸 · 三組相鄰四張",
   "game.music": "背景音樂",

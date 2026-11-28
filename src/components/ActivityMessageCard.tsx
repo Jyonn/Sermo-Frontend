@@ -1,5 +1,6 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {useActivityOverlay} from '../lib/activityOverlay';
+import {gameRoomReturnState} from '../lib/gameNavigation';
 const baxianActivityBanner = "/assets/activity/baxian-banner-clean.webp";
 import { getActiveLocale, useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
@@ -20,6 +21,7 @@ interface ActivityMessageCardProps {
 
 export function ActivityMessageCard({ activity, activityKey, className, title, roomCode, tableRoom, room }: ActivityMessageCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const openActivity=useActivityOverlay();
   const { t } = useI18n();
   const key = activity?.key || activityKey || "";
@@ -28,7 +30,8 @@ export function ActivityMessageCard({ activity, activityKey, className, title, r
     : title || t("message.activityUnavailable");
 
   if (key === "number-duel-2026") {
-    return <NumberDuelCard room={room} className={className} onClick={() => roomCode ? navigate(`/app/number-duel/${roomCode}`) : openActivity(key)} />;
+    return <NumberDuelCard room={room} className={className} onClick={() => roomCode
+      ? navigate(`/app/number-duel/${roomCode}`, {state:gameRoomReturnState(location)}) : openActivity(key)} />;
   }
   if (activity?.theme !== "baxian" || activity?.presentation) {
     const eyebrow = tableRoom ? key === 'landlord' ? 'landlord.roomInvite' : 'tabletop.invitation' : isTabletopGame(key) ? 'landlord.permanent' : 'message.activityEyebrow';

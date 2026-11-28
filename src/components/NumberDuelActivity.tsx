@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {ActivityLoadingState} from './ActivityLoadingState';
 import {ActivityTitle} from './ActivityCampaignCard';
 import { api, ApiError } from "../lib/api";
@@ -8,6 +8,9 @@ import { useI18n, type TranslationKey } from "../lib/language";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
+import { GameRoomMinimizeButton } from "../lib/gameRoomDock";
+import { duelRoomStatus } from "../lib/gameRoomStatus";
+import { gameRoomReturnState } from "../lib/gameNavigation";
 import { duelSeconds, validDuelDigits, type DuelLobby, type DuelMatch } from "../lib/numberDuel";
 import type { ActivityCampaignDTO, ChatDTO, UserGrowthDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
@@ -83,8 +86,11 @@ function DuelRoundHistory({match, t}: {match: DuelMatch; t: DuelTranslate}) {
   </section>;
 }
 
-export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitHandler }: { activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number; exitHandler?: GameExitHandler }) {
+export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitHandler, onMinimize }: {
+  activity: ActivityCampaignDTO; roomCode?: string; shareRequest?: number; exitHandler?: GameExitHandler; onMinimize?: () => void;
+}) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t: translate, locale } = useI18n();
   const t: DuelTranslate = (key, values) => translate(key as TranslationKey, values);
   const { session, patchSessionUser } = useAuth();
@@ -140,7 +146,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
     window.addEventListener("online", resume);
     return () => { alive.current = false; generation.current++; controller.abort(); clearInterval(poll); clearInterval(tick); document.removeEventListener("visibilitychange", resume); window.removeEventListener("online", resume); };
   }, [activity.key, roomCode]);
-  useEffect(() => { const legacy = new URLSearchParams(location.search).get("room"); if (!roomCode && legacy && /^[A-Z2-9]{8}$/.test(legacy)) navigate(`/app/number-duel/${legacy}`, { replace: true }); }, [roomCode, navigate]);
+  useEffect(() => { const legacy = new URLSearchParams(location.search).get("room"); if (!roomCode && legacy && /^[A-Z2-9]{8}$/.test(legacy)) navigate(`/app/number-duel/${legacy}`, { replace: true }); }, [location.search, roomCode, navigate]);
   useEffect(() => { if (shareRequest) void openShare(); }, [shareRequest]);
   useEffect(() => { setDigits(""); }, [match?.id, match?.status, match?.round]);
   useEffect(() => { setStake(match?.own_tier ?? 10); }, [match?.id, match?.own_tier]);
@@ -169,7 +175,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
       setNow(Date.now() / 1000 + clockOffset.current);
       setLobby((current) => current ? { ...current, match: data } : current);
       setSheet(null);
-      if (action === "create") { navigate(`/app/number-duel/${data.code}`); return true; }
+      if (action === "create") { showMatch(data.code); return true; }
       await refresh();
       return true;
     } catch (cause) { if (alive.current) setError(failure(cause)); return false; }
@@ -179,7 +185,7 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
     const path = roomCode ? `/app/number-duel/${roomCode}` : `/app/square/activities/${activity.key}`;
     const search = "";
     const slug = getDetectedSpaceSlug();
-    return slug ? buildSpaceHrefForCurrentHost(slug, path, search) : new URL(path + search, location.origin).href;
+    return slug ? buildSpaceHrefForCurrentHost(slug, path, search) : new URL(path + search, window.location.origin).href;
   }
   async function copyInvite() {
     try {
@@ -219,7 +225,13 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
   const secretStage = match?.status === "secrets";
   const canEnter = Boolean(lobby?.eligible && lobby.active);
   function showMatch(value: string | undefined) {
-    setSheet(null); navigate(value ? `/app/number-duel/${value}` : `/app/menu?panel=activities&activity=${activity.key}`);
+    setSheet(null);
+    if (!value) {
+      navigate(`/app/menu?panel=activities&activity=${activity.key}`);
+      return;
+    }
+    const state = roomCode ? location.state : gameRoomReturnState(location);
+    navigate(`/app/number-duel/${value}`, {state});
   }
   const opponentSubmitted = match?.guesses.some(row => !row.mine && row.round === match.round);
   const stageTitle = match && (done ? t(match.reason === 'normal' || (match.reason === 'forfeit' && match.outcome !== 'draw') ? `duel.outcome.${match.outcome}` : 'duel.cancelled')
@@ -243,6 +255,8 @@ export function NumberDuelActivity({ activity, roomCode, shareRequest = 0, exitH
         <button type="button" onClick={() => setSheet('leaders')} aria-label={t('landlord.ranking')}>{t('duel.leadersShort')}</button>
         {roomCode && match && <GameAudio game="duel" active={live} cue={myTurn && seconds > 0 ? secretStage ? 'secret' : match.status === 'playing' ? 'guess' : null : null}
           token={`${match.id}:${match.round}`} />}
+        {roomCode && match && <GameRoomMinimizeButton room={{activityKey:activity.key, code:match.code, game:'duel',
+          title:activity.title, titleEn:activity.title_en, status:duelRoomStatus(match)}} disabled={busy} onMinimize={onMinimize} />}
       </nav>
     </div>
     {offline && <p className="duel-notice" role="status">{t('duel.reconnecting')}<button type="button" onClick={() => void refresh()}>{t('duel.retry')}</button></p>}

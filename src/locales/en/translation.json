@@ -1,4 +1,12 @@
 {
+  "game.minimizeRoom": "Minimize room",
+  "game.returnToRoom": "Return to room",
+  "game.roomUpdate": "Room has updates",
+  "game.roomWaiting": "Waiting for players",
+  "game.roomPlaying": "Game in progress",
+  "game.roomTurn": "Your turn",
+  "game.roomStart": "Ready to start",
+  "game.roomReconnecting": "Reconnecting",
   "management.activities": "Rerun approvals",
   "activity.edition": "Edition {{count}}",
   "activity.rerun.adminHint": "Spaces can request a rerun three months after their edition ends and activate the next one themselves after six months.",

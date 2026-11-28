@@ -1,17 +1,17 @@
 {
-  "id": "2026.11.28.4",
+  "id": "2026.11.28.5",
   "publishedAt": "2026-11-28",
   "locales": {
     "zh-CN": {
-      "title": "十年之前",
+      "title": "游戏房间可以最小化",
       "items": [
-        "陈奕迅典藏头像框现在会依次亮起「十、年、之、前」四个金色手写字。"
+        "斗地主、双扣、麻将和数字交锋的房间可以收起。浮窗会提醒房间动态，点一下就能回到房间。"
       ]
     },
     "en": {
-      "title": "Ten years ago",
+      "title": "Minimize game rooms",
       "items": [
-        "Eason Chan’s collectible avatar frame now lights up all four characters of 十年之前 in sequence."
+        "Minimize a Dou Dizhu, Shuangkou, Mahjong, or Code Duel room. The floating button shows updates and takes you back to the room."
       ]
     }
   }
